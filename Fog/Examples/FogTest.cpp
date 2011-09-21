@@ -17,7 +17,7 @@ static void drawText(Painter* p, const PointI& pt, const Font& font, const char*
   va_end(ap);
 
   PathF path;
-  font.getTextOutline(path, PointF(pt), str);
+  font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(pt), str);
   p->fillPath(path);
 }
 

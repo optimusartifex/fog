@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -31,198 +32,361 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::PatternDataF]
+// [Fog::PatternData]
 // ============================================================================
 
-//! @brief Pattern data (float).
-struct FOG_NO_EXPORT PatternDataF
+struct FOG_NO_EXPORT PatternData
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PatternDataF* addRef() const
+  FOG_INLINE PatternData* addRef() const
   {
-    reference.inc();
-    return const_cast<PatternDataF*>(this);
+    if (vType != VAR_TYPE_NULL)
+      reference.inc();
+
+    return const_cast<PatternData*>(this);
   }
 
   FOG_INLINE void release()
   {
-    if (reference.deref())
-    {
-      destroy();
-      MemMgr::free(this);
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // [Destroy]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void destroy()
-  {
-    if (type == PATTERN_TYPE_TEXTURE)
-      texture.destroy();
-    else if (type == PATTERN_TYPE_GRADIENT)
-      gradient.destroy();
+    if (vType != VAR_TYPE_NULL && reference.deref())
+      _api.pattern.dFree(this);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
+  // ${VAR:BEGIN}
+  //
+  // This data-object is binary compatible to the VarData header in the first
+  // form called - "implicitly shared class". The members must be binary
+  // compatible to the header below:
+  //
+  // +==============+============+============================================+
+  // | Size         | Name       | Description / Purpose                      |
+  // +==============+============+============================================+
+  // | size_t       | reference  | Atomic reference count, can be managed by  |
+  // |              |            | VarData without calling container specific |
+  // |              |            | methods.                                   |
+  // +--------------+------------+--------------------------------------------+
+  // | uint32_t     | vType      | Variable type and flags.                   |
+  // +==============+============+============================================+
+  //
+  // ${VAR:END}
+
   //! @brief Reference count.
   mutable Atomic<size_t> reference;
 
-  //! @brief Pattern type.
-  uint32_t type;
+  //! @brief Variable type and flags.
+  uint32_t vType;
 
-  union
-  {
-    //! @brief Color data.
-    Static<Color> color;
-    //! @brief Texture data.
-    Static<Texture> texture;
-    //! @brief Gradient data.
-    Static<GradientF> gradient;
-  };
-
-  //! @brief Transformation matrix.
-  TransformF transform;
+  //! @brief Pattern type, see @ref PATTERN_TYPE.
+  uint32_t patternType;
 };
 
 // ============================================================================
-// [Fog::PatternDataD]
+// [Fog::PatternColorData]
 // ============================================================================
 
-//! @brief Pattern data (double).
-struct FOG_NO_EXPORT PatternDataD
+struct FOG_NO_EXPORT PatternColorData : public PatternData
 {
-  // --------------------------------------------------------------------------
-  // [AddRef / Release]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PatternDataD* addRef() const
-  {
-    reference.inc();
-    return const_cast<PatternDataD*>(this);
-  }
-
-  FOG_INLINE void release()
-  {
-    if (reference.deref())
-    {
-      destroy();
-      MemMgr::free(this);
-    }
-  }
-
-  // --------------------------------------------------------------------------
-  // [Destroy]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void destroy()
-  {
-    if (type == PATTERN_TYPE_TEXTURE)
-      texture.destroy();
-    else if (type == PATTERN_TYPE_GRADIENT)
-      gradient.destroy();
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! @brief Reference count.
-  mutable Atomic<size_t> reference;
-
-  //! @brief Pattern type.
-  uint32_t type;
-
-  union
-  {
-    //! @brief Color data.
-    Static<Color> color;
-    //! @brief Texture data.
-    Static<Texture> texture;
-    //! @brief Gradient data.
-    Static<GradientD> gradient;
-  };
-
-  //! @brief Transformation matrix.
-  TransformD transform;
+  Static<Color> color;
 };
 
 // ============================================================================
-// [Fog::PatternF]
+// [Fog::PatternTextureDataF]
 // ============================================================================
 
-struct FOG_API PatternF
+struct FOG_NO_EXPORT PatternTextureDataF : public PatternData
+{
+  Static<Texture> texture;
+  Static<TransformF> transform;
+};
+
+// ============================================================================
+// [Fog::PatternTextureDataD]
+// ============================================================================
+
+struct FOG_NO_EXPORT PatternTextureDataD : public PatternData
+{
+  Static<Texture> texture;
+  Static<TransformD> transform;
+};
+
+// ============================================================================
+// [Fog::PatternGradientDataF]
+// ============================================================================
+
+struct FOG_NO_EXPORT PatternGradientDataF : public PatternData
+{
+  Static<GradientF> gradient;
+  Static<TransformF> transform;
+};
+
+// ============================================================================
+// [Fog::PatternGradientDataD]
+// ============================================================================
+
+struct FOG_NO_EXPORT PatternGradientDataD : public PatternData
+{
+  Static<GradientD> gradient;
+  Static<TransformD> transform;
+};
+
+// ============================================================================
+// [Fog::Pattern]
+// ============================================================================
+
+struct FOG_NO_EXPORT Pattern
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  PatternF();
-  PatternF(const PatternF& other);
+  FOG_INLINE Pattern()
+  {
+    _api.pattern.ctor(this);
+  }
 
-  explicit PatternF(const ArgbBase32& argb32);
-  explicit PatternF(const Color& color);
-  explicit PatternF(const Texture& texture);
-  explicit PatternF(const GradientF& gradient);
-  explicit PatternF(const GradientD& gradient);
-  explicit PatternF(const PatternD& other);
+  FOG_INLINE Pattern(const Pattern& other)
+  {
+    _api.pattern.ctorCopy(this, &other);
+  }
 
-  explicit FOG_INLINE PatternF(PatternDataF* d) : _d(d) {}
-  ~PatternF();
+  explicit FOG_INLINE Pattern(const ArgbBase32& argb32)
+  {
+    _api.pattern.ctorArgb32(this, &argb32);
+  }
+
+  explicit FOG_INLINE Pattern(const Color& color)
+  {
+    _api.pattern.ctorColor(this, &color);
+  }
+
+  explicit FOG_INLINE Pattern(const Texture& texture)
+  {
+    _api.pattern.ctorTextureF(this, &texture, NULL);
+  }
+
+  explicit FOG_INLINE Pattern(const GradientF& gradient)
+  {
+    _api.pattern.ctorGradientF(this, &gradient, NULL);
+  }
+
+  explicit FOG_INLINE Pattern(const GradientD& gradient)
+  {
+    _api.pattern.ctorGradientD(this, &gradient, NULL);
+  }
+
+  FOG_INLINE Pattern(const Texture& texture, const TransformF& transform)
+  {
+    _api.pattern.ctorTextureF(this, &texture, &transform);
+  }
+
+  FOG_INLINE Pattern(const Texture& texture, const TransformD& transform)
+  {
+    _api.pattern.ctorTextureD(this, &texture, &transform);
+  }
+
+  FOG_INLINE Pattern(const GradientF& gradient, const TransformF& transform)
+  {
+    _api.pattern.ctorGradientF(this, &gradient, &transform);
+  }
+
+  FOG_INLINE Pattern(const GradientD& gradient, const TransformD& transform)
+  {
+    _api.pattern.ctorGradientD(this, &gradient, &transform);
+  }
+
+  explicit FOG_INLINE Pattern(PatternData* d) :
+    _d(d)
+  {
+  }
+
+  FOG_INLINE ~Pattern()
+  {
+    _api.pattern.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
-  // [Data]
+  // [Sharing]
   // --------------------------------------------------------------------------
 
   FOG_INLINE size_t getReference() const { return _d->reference.get(); }
-
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
-  FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
 
-  err_t _detach();
+  FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
+  FOG_INLINE err_t _detach() { return _api.pattern.detach(this); }
 
   // --------------------------------------------------------------------------
   // [Type]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getType() const { return _d->type; }
+  FOG_INLINE uint32_t getVarType() const { return _d->vType; }
+  FOG_INLINE uint32_t getPatternType() const { return _d->patternType; }
 
-  FOG_INLINE bool isNone() const { return (_d->type == PATTERN_TYPE_NONE); }
-  FOG_INLINE bool isColor() const { return (_d->type == PATTERN_TYPE_COLOR); }
-  FOG_INLINE bool isGradient() const { return (_d->type == PATTERN_TYPE_GRADIENT); }
-  FOG_INLINE bool isTexture() const { return (_d->type == PATTERN_TYPE_TEXTURE); }
+  FOG_INLINE bool isNull() const { return getPatternType() == PATTERN_TYPE_NULL; }
+  FOG_INLINE bool isColor() const { return getPatternType() == PATTERN_TYPE_COLOR; }
+  FOG_INLINE bool isTexture() const { return getPatternType() == PATTERN_TYPE_TEXTURE; }
+  FOG_INLINE bool isGradient() const { return getPatternType() == PATTERN_TYPE_GRADIENT; }
 
+  // TODO:
   //! @overload
-  FOG_INLINE bool isGradient(uint32_t gradientType) const
-  { return (_d->type == PATTERN_TYPE_GRADIENT) && _d->gradient->getGradientType() == gradientType; }
+  //FOG_INLINE bool isGradient(uint32_t gradientType) const
+  //{
+  //  return (_d->type == PATTERN_TYPE_GRADIENT) && _d->gradient->getGradientType() == gradientType;
+  //}
 
   // --------------------------------------------------------------------------
-  // [Clear / Reset]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
-  void clear();
-  void reset();
+  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
+  FOG_INLINE err_t getColor(ArgbBase32& argb32) const
+  {
+    return _api.pattern.getArgb32(this, &argb32);
+  }
+
+  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR)
+  FOG_INLINE err_t getColor(Color& color) const
+  {
+    return _api.pattern.getColor(this, &color);
+  }
+
+  //! @brief Get texture.
+  FOG_INLINE err_t getTexture(Texture& texture) const
+  {
+    return _api.pattern.getTexture(this, &texture);
+  }
+
+  FOG_INLINE err_t _getGradientF(uint32_t targetType, GradientF& gradient) const
+  {
+    return _api.pattern.getGradientF(this, targetType, &gradient);
+  }
+
+  FOG_INLINE err_t _getGradientD(uint32_t targetType, GradientD& gradient) const
+  {
+    return _api.pattern.getGradientD(this, targetType, &gradient);
+  }
+
+  FOG_INLINE err_t getGradient(GradientF& gr) const { return _getGradientF(0xFFFFFFFF, gr); }
+  FOG_INLINE err_t getGradient(GradientD& gr) const { return _getGradientD(0xFFFFFFFF, gr); }
+
+  FOG_INLINE err_t getGradient(LinearGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_LINEAR, gr); }
+  FOG_INLINE err_t getGradient(LinearGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_LINEAR, gr); }
+
+  FOG_INLINE err_t getGradient(RadialGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RADIAL, gr); }
+  FOG_INLINE err_t getGradient(RadialGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RADIAL, gr); }
+
+  FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
+  FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
+
+  FOG_INLINE err_t getGradient(RectangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RECTANGULAR, gr); }
+  FOG_INLINE err_t getGradient(RectangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RECTANGULAR, gr); }
+
+  FOG_INLINE err_t setPattern(const Pattern& other)
+  {
+    return _api.pattern.copy(this, &other);
+  }
+
+  FOG_INLINE err_t getTransform(TransformF& tr) const
+  {
+    return _api.pattern.getTransformF(this, &tr);
+  }
+
+  FOG_INLINE err_t getTransform(TransformD& tr) const
+  {
+    return _api.pattern.getTransformD(this, &tr);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Create]
+  // --------------------------------------------------------------------------
+
+  //! @brief Create a color pattern and set color to @a argb32.
+  FOG_INLINE err_t createColor(const ArgbBase32& argb32)
+  {
+    return _api.pattern.createArgb32(this, &argb32);
+  }
+
+  //! @brief Create a color pattern and set color to @a color.
+  FOG_INLINE err_t createColor(const Color& color)
+  {
+    return _api.pattern.createColor(this, &color);
+  }
+
+  //! @brief Create a texture pattern and set texture to @a texture.
+  FOG_INLINE err_t createTexture(const Texture& texture)
+  {
+    return _api.pattern.createTextureF(this, &texture, NULL);
+  }
+
+  //! @brief Create a texture pattern and set texture to @a texture and transform
+  //! to @a tr.
+  FOG_INLINE err_t createTexture(const Texture& texture, const TransformF& tr)
+  {
+    return _api.pattern.createTextureF(this, &texture, &tr);
+  }
+
+  //! @brief Create a texture pattern and set texture to @a texture and transform
+  //! to @a tr.
+  FOG_INLINE err_t createTexture(const Texture& texture, const TransformD& tr)
+  {
+    return _api.pattern.createTextureD(this, &texture, &tr);
+  }
+
+  //! @brief Create a gradient pattern and set gradient to @a gradient.
+  FOG_INLINE err_t createGradient(const GradientF& gradient)
+  {
+    return _api.pattern.createGradientF(this, &gradient, NULL);
+  }
+
+  //! @brief Create a gradient pattern and set gradient to @a gradient and transform
+  //! to @a tr.
+  FOG_INLINE err_t createGradient(const GradientF& gradient, const TransformF& tr)
+  {
+    return _api.pattern.createGradientF(this, &gradient, &tr);
+  }
+
+  //! @brief Create a gradient pattern and set gradient to @a gradient.
+  FOG_INLINE err_t createGradient(const GradientD& gradient)
+  {
+    return _api.pattern.createGradientD(this, &gradient, NULL);
+  }
+
+  //! @brief Create a gradient pattern and set gradient to @a gradient and transform
+  //! to @a tr.
+  FOG_INLINE err_t createGradient(const GradientD& gradient, const TransformD& tr)
+  {
+    return _api.pattern.createGradientD(this, &gradient, &tr);
+  }
 
   // --------------------------------------------------------------------------
   // [Transform]
   // --------------------------------------------------------------------------
 
-  err_t getTransform(TransformF& tr) const;
-  err_t getTransform(TransformD& tr) const;
+  FOG_INLINE err_t setTransform(const TransformF& tr)
+  {
+    return _api.pattern.setTransformF(this, &tr);
+  }
 
-  err_t setTransform(const TransformF& tr);
-  err_t setTransform(const TransformD& tr);
+  FOG_INLINE err_t setTransform(const TransformD& tr)
+  {
+    return _api.pattern.setTransformD(this, &tr);
+  }
 
-  err_t resetTransform();
+  FOG_INLINE err_t _transform(uint32_t transformOp, const void* params)
+  {
+    return _api.pattern.applyTransform(this, transformOp, params);
+  }
 
-  err_t _transform(uint32_t transformOp, const void* params);
+  FOG_INLINE err_t resetTransform()
+  {
+    return _api.pattern.resetTransform(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Transform - Translate]
@@ -230,7 +394,12 @@ struct FOG_API PatternF
 
   FOG_INLINE err_t translate(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _transform(TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _transform(TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
+  }
+
+  FOG_INLINE err_t translate(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    return _transform(TRANSFORM_OP_TRANSLATED | (order << 4), &p);
   }
 
   // --------------------------------------------------------------------------
@@ -239,7 +408,12 @@ struct FOG_API PatternF
 
   FOG_INLINE err_t scale(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _transform(TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _transform(TRANSFORM_OP_SCALEF | (order << 4), &p);
+  }
+
+  FOG_INLINE err_t scale(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    return _transform(TRANSFORM_OP_SCALED | (order << 4), &p);
   }
 
   // --------------------------------------------------------------------------
@@ -248,7 +422,12 @@ struct FOG_API PatternF
 
   FOG_INLINE err_t skew(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _transform(TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _transform(TRANSFORM_OP_SKEWF | (order << 4), &p);
+  }
+
+  FOG_INLINE err_t skew(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    return _transform(TRANSFORM_OP_SKEWD | (order << 4), &p);
   }
 
   // --------------------------------------------------------------------------
@@ -257,13 +436,24 @@ struct FOG_API PatternF
 
   FOG_INLINE err_t rotate(float angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _transform(TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _transform(TRANSFORM_OP_ROTATEF | (order << 4), &angle);
+  }
+
+  FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    return _transform(TRANSFORM_OP_ROTATED | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     float params[3] = { angle, p.x, p.y };
-    return _transform(TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _transform(TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
+  }
+
+  FOG_INLINE err_t rotate(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    double params[3] = { angle, p.x, p.y };
+    return _transform(TRANSFORM_OP_ROTATE_POINTD | (order << 4), params);
   }
 
   // --------------------------------------------------------------------------
@@ -272,301 +462,70 @@ struct FOG_API PatternF
 
   FOG_INLINE err_t transform(const TransformF& tr, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _transform(TRANSFORM_OP_MULTIPLY | (order << 4), &tr);
+    return _transform(TRANSFORM_OP_MULTIPLYF | (order << 4), &tr);
   }
-
-  // --------------------------------------------------------------------------
-  // [Color]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
-  err_t getArgb32(ArgbBase32& argb32) const;
-  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
-  err_t getColor(Color& color) const;
-
-  //! @brief Set pattern to @a argb32.
-  err_t setArgb32(const ArgbBase32& argb32);
-  //! @brief Set pattern to @a color.
-  err_t setColor(const Color& color);
-
-  // --------------------------------------------------------------------------
-  // [Texture]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get texture.
-  err_t getTexture(Texture& texture) const;
-
-  //! @brief Set texture.
-  err_t setTexture(const Texture& texture);
-
-  // --------------------------------------------------------------------------
-  // [Gradient]
-  // --------------------------------------------------------------------------
-
-  err_t _getGradientF(uint32_t gradientType, GradientF& gr) const;
-  err_t _getGradientD(uint32_t gradientType, GradientD& gr) const;
-
-  FOG_INLINE err_t getGradient(GradientF& gr) const { return _getGradientF(0xFFFFFFFF, gr); }
-  FOG_INLINE err_t getGradient(GradientD& gr) const { return _getGradientD(0xFFFFFFFF, gr); }
-
-  FOG_INLINE err_t getGradient(LinearGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_LINEAR, gr); }
-  FOG_INLINE err_t getGradient(LinearGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_LINEAR, gr); }
-
-  FOG_INLINE err_t getGradient(RadialGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RADIAL, gr); }
-  FOG_INLINE err_t getGradient(RadialGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RADIAL, gr); }
-
-  FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
-  FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
-
-  FOG_INLINE err_t getGradient(RectangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RECTANGULAR, gr); }
-  FOG_INLINE err_t getGradient(RectangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RECTANGULAR, gr); }
-
-  err_t setGradient(const GradientF& gr);
-  err_t setGradient(const GradientD& gr);
-
-  // --------------------------------------------------------------------------
-  // [Pattern]
-  // --------------------------------------------------------------------------
-
-  err_t setPattern(const PatternF& other);
-  err_t setPattern(const PatternD& other);
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE PatternF& operator=(const Color& color) { setColor(color); return *this; }
-  FOG_INLINE PatternF& operator=(const Texture& tex) { setTexture(tex); return *this; }
-
-  FOG_INLINE PatternF& operator=(const GradientF& gr) { setGradient(gr); return *this; }
-  FOG_INLINE PatternF& operator=(const GradientD& gr) { setGradient(gr); return *this; }
-
-  FOG_INLINE PatternF& operator=(const PatternF& other) { setPattern(other); return *this; }
-  FOG_INLINE PatternF& operator=(const PatternD& other) { setPattern(other); return *this; }
-
-  // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
-
-  static Static<PatternDataF> _dnull;
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  _FOG_CLASS_D(PatternDataF)
-};
-
-// ============================================================================
-// [Fog::PatternD]
-// ============================================================================
-
-struct FOG_API PatternD
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  PatternD();
-  PatternD(const PatternD& other);
-
-  explicit PatternD(const ArgbBase32& argb32);
-  explicit PatternD(const Color& color);
-  explicit PatternD(const Texture& texture);
-  explicit PatternD(const GradientF& gradient);
-  explicit PatternD(const GradientD& gradient);
-  explicit PatternD(const PatternF& other);
-
-  explicit FOG_INLINE PatternD(PatternDataD* d) : _d(d) {}
-  ~PatternD();
-
-  // --------------------------------------------------------------------------
-  // [Data]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
-
-  FOG_INLINE bool isDetached() const { return getReference() == 1; }
-  FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
-
-  err_t _detach();
-
-  // --------------------------------------------------------------------------
-  // [Type]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE uint32_t getType() const { return _d->type; }
-
-  FOG_INLINE bool isNone() const { return (_d->type == PATTERN_TYPE_NONE); }
-  FOG_INLINE bool isColor() const { return (_d->type == PATTERN_TYPE_COLOR); }
-  FOG_INLINE bool isGradient() const { return (_d->type == PATTERN_TYPE_GRADIENT); }
-  FOG_INLINE bool isTexture() const { return (_d->type == PATTERN_TYPE_TEXTURE); }
-
-  //! @overload
-  FOG_INLINE bool isGradient(uint32_t gradientType) const
-  { return (_d->type == PATTERN_TYPE_GRADIENT) && _d->gradient->getGradientType() == gradientType; }
-
-  // --------------------------------------------------------------------------
-  // [Clear / Reset]
-  // --------------------------------------------------------------------------
-
-  void clear();
-  void reset();
-
-  // --------------------------------------------------------------------------
-  // [Transform]
-  // --------------------------------------------------------------------------
-
-  err_t getTransform(TransformF& tr) const;
-  err_t getTransform(TransformD& tr) const;
-
-  err_t setTransform(const TransformF& tr);
-  err_t setTransform(const TransformD& tr);
-
-  err_t resetTransform();
-
-  err_t _transform(uint32_t transformOp, const void* params);
-
-  // --------------------------------------------------------------------------
-  // [Transform - Translate]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t translate(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
-  {
-    return _transform(TRANSFORM_OP_TRANSLATE | (order << 4), &p);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Transform - Scale]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t scale(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
-  {
-    return _transform(TRANSFORM_OP_SCALE | (order << 4), &p);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Transform - Skew]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t skew(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
-  {
-    return _transform(TRANSFORM_OP_SKEW | (order << 4), &p);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Transform - Rotate]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_ORDER_PREPEND)
-  {
-    return _transform(TRANSFORM_OP_ROTATE | (order << 4), &angle);
-  }
-
-  FOG_INLINE err_t rotate(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
-  {
-    double params[3] = { angle, p.x, p.y };
-    return _transform(TRANSFORM_OP_ROTATE_PT | (order << 4), params);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Transform - Multiply]
-  // --------------------------------------------------------------------------
 
   FOG_INLINE err_t transform(const TransformD& tr, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _transform(TRANSFORM_OP_MULTIPLY | (order << 4), &tr);
+    return _transform(TRANSFORM_OP_MULTIPLYD | (order << 4), &tr);
   }
 
   // --------------------------------------------------------------------------
-  // [Color]
+  // [Reset]
   // --------------------------------------------------------------------------
 
-  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
-  err_t getArgb32(ArgbBase32& argb32) const;
-  //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
-  err_t getColor(Color& color) const;
-
-  //! @brief Set pattern to @a argb32.
-  err_t setArgb32(const ArgbBase32& argb32);
-  //! @brief Set pattern to @a color.
-  err_t setColor(const Color& color);
+  FOG_INLINE void reset()
+  {
+    _api.pattern.reset(this);
+  }
 
   // --------------------------------------------------------------------------
-  // [Texture]
+  // [Equality]
   // --------------------------------------------------------------------------
 
-  //! @brief Get texture.
-  err_t getTexture(Texture& texture) const;
-
-  //! @brief Set texture.
-  err_t setTexture(const Texture& texture);
-
-  // --------------------------------------------------------------------------
-  // [Gradient]
-  // --------------------------------------------------------------------------
-
-  err_t _getGradientF(uint32_t gradientType, GradientF& gr) const;
-  err_t _getGradientD(uint32_t gradientType, GradientD& gr) const;
-
-  FOG_INLINE err_t getGradient(GradientF& gr) const { return _getGradientF(0xFFFFFFFF, gr); }
-  FOG_INLINE err_t getGradient(GradientD& gr) const { return _getGradientD(0xFFFFFFFF, gr); }
-
-  FOG_INLINE err_t getGradient(LinearGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_LINEAR, gr); }
-  FOG_INLINE err_t getGradient(LinearGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_LINEAR, gr); }
-
-  FOG_INLINE err_t getGradient(RadialGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RADIAL, gr); }
-  FOG_INLINE err_t getGradient(RadialGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RADIAL, gr); }
-
-  FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
-  FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
-
-  FOG_INLINE err_t getGradient(RectangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RECTANGULAR, gr); }
-  FOG_INLINE err_t getGradient(RectangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RECTANGULAR, gr); }
-
-  err_t setGradient(const GradientF& gr);
-  err_t setGradient(const GradientD& gr);
-
-  // --------------------------------------------------------------------------
-  // [Pattern]
-  // --------------------------------------------------------------------------
-
-  err_t setPattern(const PatternF& other);
-  err_t setPattern(const PatternD& other);
+  FOG_INLINE bool eq(const Pattern& other) const
+  {
+    return _api.pattern.eq(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PatternD& operator=(const Color& color) { setColor(color); return *this; }
-  FOG_INLINE PatternD& operator=(const Texture& tex) { setTexture(tex); return *this; }
+  FOG_INLINE Pattern& operator=(const Pattern& other)
+  {
+    _api.pattern.copy(this, &other); return *this;
+  }
 
-  FOG_INLINE PatternD& operator=(const GradientF& gr) { setGradient(gr); return *this; }
-  FOG_INLINE PatternD& operator=(const GradientD& gr) { setGradient(gr); return *this; }
-
-  FOG_INLINE PatternD& operator=(const PatternF& other) { setPattern(other); return *this; }
-  FOG_INLINE PatternD& operator=(const PatternD& other) { setPattern(other); return *this; }
+  FOG_INLINE bool operator==(const Pattern& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Pattern& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static Static<PatternDataD> _dnull;
+  static FOG_INLINE const Pattern& null() { return *_api.pattern.oNull; }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const Pattern* a, const Pattern* b)
+  {
+    return _api.pattern.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.pattern.eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(PatternDataD)
+  _FOG_CLASS_D(PatternData)
 };
-
-// ============================================================================
-// [Fog::PatternT<>]
-// ============================================================================
-
-_FOG_NUM_T(Pattern)
-_FOG_NUM_F(Pattern)
-_FOG_NUM_D(Pattern)
 
 //! @}
 

@@ -285,7 +285,16 @@ struct FOG_NO_EXPORT ColorStopList
   FOG_INLINE bool operator!=(const ColorStopList& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const ColorStopList& empty()
+  {
+    return *_api.colorstoplist.oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const ColorStopList* a, const ColorStopList* b)

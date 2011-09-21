@@ -271,7 +271,7 @@ struct FOG_NO_EXPORT Date
   }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const Date* a, const Date* b)

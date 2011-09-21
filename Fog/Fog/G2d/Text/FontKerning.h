@@ -24,7 +24,7 @@ namespace Fog {
 //! and @c FontKerningPairF.
 //!
 //! Use @c comparable member to get value which can be used by bsearch or qsort.
-union FontKerningChars
+union FOG_NO_EXPORT FontKerningChars
 {
   // [00] - First
   // [11] - Second
@@ -58,7 +58,7 @@ union FontKerningChars
 
 //! @brief Kerning pair (integer).
 #include <Fog/Core/C++/PackByte.h>
-struct FontKerningPairI
+struct FOG_NO_EXPORT FontKerningPairI
 {
   //! @brief Kerning characters.
   FontKerningChars chars;
@@ -73,7 +73,7 @@ struct FontKerningPairI
 
 //! @brief Kerning pair (float).
 #include <Fog/Core/C++/PackByte.h>
-struct FontKerningPairF
+struct FOG_NO_EXPORT FontKerningPairF
 {
   //! @brief Kerning characters.
   FontKerningChars chars;

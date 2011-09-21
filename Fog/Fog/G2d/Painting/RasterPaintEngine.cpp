@@ -1675,7 +1675,7 @@ static err_t FOG_CDECL RasterPaintEngine_getSourceType(const Painter* self, uint
 
   switch (engine->sourceType)
   {
-    case RASTER_SOURCE_NONE    : patternType = PATTERN_TYPE_NONE    ; break;
+    case RASTER_SOURCE_NONE    : patternType = PATTERN_TYPE_NULL    ; break;
     case RASTER_SOURCE_ARGB32  : patternType = PATTERN_TYPE_COLOR   ; break;
     case RASTER_SOURCE_COLOR   : patternType = PATTERN_TYPE_COLOR   ; break;
     case RASTER_SOURCE_TEXTURE : patternType = PATTERN_TYPE_TEXTURE ; break;
@@ -1709,7 +1709,7 @@ static err_t FOG_CDECL RasterPaintEngine_getSourceColor(const Painter* self, Col
   }
 }
 
-static err_t FOG_CDECL RasterPaintEngine_getSourcePatternF(const Painter* self, PatternF& pattern)
+static err_t FOG_CDECL RasterPaintEngine_getSourcePattern(const Painter* self, Pattern& pattern)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
 
@@ -1720,51 +1720,16 @@ static err_t FOG_CDECL RasterPaintEngine_getSourcePatternF(const Painter* self, 
       return ERR_OK;
 
     case RASTER_SOURCE_ARGB32:
-      return pattern.setArgb32(engine->source.color->_argb32);
+      return pattern.createColor(engine->source.color->_argb32);
 
     case RASTER_SOURCE_COLOR:
-      return pattern.setColor(engine->source.color);
+      return pattern.createColor(engine->source.color);
 
     case RASTER_SOURCE_TEXTURE:
-      FOG_RETURN_ON_ERROR(pattern.setTexture(engine->source.texture));
-      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform));
-      return ERR_OK;
+      return pattern.createTexture(engine->source.texture, engine->source.transform);
 
     case RASTER_SOURCE_GRADIENT:
-      FOG_RETURN_ON_ERROR(pattern.setGradient(engine->source.gradient));
-      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform));
-      return ERR_OK;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-}
-
-static err_t FOG_CDECL RasterPaintEngine_getSourcePatternD(const Painter* self, PatternD& pattern)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  switch (engine->sourceType)
-  {
-    case RASTER_SOURCE_NONE:
-      pattern.reset();
-      return ERR_OK;
-
-    case RASTER_SOURCE_ARGB32:
-      return pattern.setArgb32(engine->source.color->_argb32);
-
-    case RASTER_SOURCE_COLOR:
-      return pattern.setColor(engine->source.color);
-
-    case RASTER_SOURCE_TEXTURE:
-      FOG_RETURN_ON_ERROR(pattern.setTexture(engine->source.texture));
-      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform));
-      return ERR_OK;
-
-    case RASTER_SOURCE_GRADIENT:
-      FOG_RETURN_ON_ERROR(pattern.setGradient(engine->source.gradient));
-      FOG_RETURN_ON_ERROR(pattern.setTransform(engine->source.transform));
-      return ERR_OK;
+      return pattern.createGradient(engine->source.gradient, engine->source.transform);
 
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -1916,48 +1881,45 @@ _Invalid:
   return ERR_OK;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_setSourcePatternF(Painter* self, const PatternF& pattern)
+static err_t FOG_CDECL RasterPaintEngine_setSourcePattern(Painter* self, const Pattern& pattern)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  PatternData* d = pattern._d;
 
-  switch (pattern.getType())
+  switch (d->vType & VAR_TYPE_MASK)
   {
-    case PATTERN_TYPE_NONE:
+    case VAR_TYPE_NULL:
       return self->_vtable->setSourceNone(self);
 
-    case PATTERN_TYPE_COLOR:
-      return self->_vtable->setSourceColor(self, pattern._d->color());
+    case VAR_TYPE_COLOR:
+      return self->_vtable->setSourceColor(self,
+        reinterpret_cast<PatternColorData*>(d)->color());
 
-    case PATTERN_TYPE_TEXTURE:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_F, &pattern._d->texture, &pattern._d->transform);
+    case VAR_TYPE_TEXTUREF:
+      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_F,
+        &reinterpret_cast<PatternTextureDataF*>(d)->texture,
+        &reinterpret_cast<PatternTextureDataF*>(d)->transform);
 
-    case PATTERN_TYPE_GRADIENT:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_F, &pattern._d->texture, &pattern._d->transform);
+    case VAR_TYPE_TEXTURED:
+      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_D,
+        &reinterpret_cast<PatternTextureDataD*>(d)->texture,
+        &reinterpret_cast<PatternTextureDataD*>(d)->transform);
 
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_F,
+        &reinterpret_cast<PatternGradientDataF*>(d)->gradient,
+        &reinterpret_cast<PatternGradientDataF*>(d)->transform);
 
-  return ERR_RT_INVALID_STATE;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_setSourcePatternD(Painter* self, const PatternD& pattern)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  switch (pattern.getType())
-  {
-    case PATTERN_TYPE_NONE:
-      return self->_vtable->setSourceNone(self);
-
-    case PATTERN_TYPE_COLOR:
-      return self->_vtable->setSourceColor(self, pattern._d->color());
-
-    case PATTERN_TYPE_TEXTURE:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_D, &pattern._d->texture, &pattern._d->transform);
-
-    case PATTERN_TYPE_GRADIENT:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_D, &pattern._d->texture, &pattern._d->transform);
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_D,
+        &reinterpret_cast<PatternGradientDataD*>(d)->gradient,
+        &reinterpret_cast<PatternGradientDataD*>(d)->transform);
 
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -2106,64 +2068,18 @@ static err_t FOG_CDECL RasterPaintEngine_setTransformD(Painter* self, const Tran
   return ERR_OK;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_applyTransformF(Painter* self, uint32_t transformOp, const void* params)
+static err_t FOG_CDECL RasterPaintEngine_applyTransform(Painter* self, uint32_t transformOp, const void* params)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   err_t err = ERR_OK;
 
-  if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
+  if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0)
+    engine->saveTransform();
 
-  // Need to convert parameters from 'Float' precision into 'Double'
-  // precision. This is quite low-level.
-  //
-  // Please see
-  //
-  //   Fog/G2d/Geometry/Transform.h
-  //
-  // to get basic understanding how this works. It's simply a converter
-  // from the 'float' into the 'double' and from the 'TransformF' instance
-  // into the 'TransformD' instance.
-  double d[3];
-  Static<TransformD> tr;
-
-  switch (transformOp & 0xF)
-  {
-    case TRANSFORM_OP_ROTATE_PT:
-      d[2] = reinterpret_cast<const float*>(params)[2];
-    case TRANSFORM_OP_TRANSLATE:
-    case TRANSFORM_OP_SCALE:
-    case TRANSFORM_OP_SKEW:
-      d[1] = reinterpret_cast<const float*>(params)[1];
-    case TRANSFORM_OP_ROTATE:
-      d[0] = reinterpret_cast<const float*>(params)[0];
-      err = _api.transformd.transform(engine->userTransformD, transformOp, d);
-      break;
-
-    case TRANSFORM_OP_FLIP:
-      err = _api.transformd.transform(engine->userTransformD, transformOp, params);
-      break;
-
-    case TRANSFORM_OP_MULTIPLY:
-    case TRANSFORM_OP_MULTIPLY_INV:
-      tr.initCustom1(*reinterpret_cast<const TransformF*>(params));
-      err = _api.transformd.transform(engine->userTransformD, transformOp, &tr);
-      break;
-  }
-
-  if (FOG_IS_ERROR(err)) engine->userTransformD.reset();
-
-  engine->changedUserTransform();
-  return err;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_applyTransformD(Painter* self, uint32_t transformOp, const void* params)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  err_t err = ERR_OK;
-
-  if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
   err = _api.transformd.transform(engine->userTransformD, transformOp, params);
-  if (FOG_IS_ERROR(err)) engine->userTransformD.reset();
+
+  if (FOG_IS_ERROR(err))
+    engine->userTransformD.reset();
 
   engine->changedUserTransform();
   return err;
@@ -2173,9 +2089,10 @@ static err_t FOG_CDECL RasterPaintEngine_resetTransform(Painter* self)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
 
-  if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0) engine->saveTransform();
-  engine->userTransformD.reset();
+  if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0)
+    engine->saveTransform();
 
+  engine->userTransformD.reset();
   engine->changedUserTransform();
   return ERR_OK;
 }
@@ -5627,15 +5544,13 @@ static void RasterPaintEngine_init_vtable()
 
   v->getSourceType = RasterPaintEngine_getSourceType;
   v->getSourceColor = RasterPaintEngine_getSourceColor;
-  v->getSourcePatternF = RasterPaintEngine_getSourcePatternF;
-  v->getSourcePatternD = RasterPaintEngine_getSourcePatternD;
+  v->getSourcePattern = RasterPaintEngine_getSourcePattern;
 
   v->setSourceNone = RasterPaintEngine_setSourceNone;
   v->setSourceArgb32 = RasterPaintEngine_setSourceArgb32<_PRECISION>;
   v->setSourceArgb64 = RasterPaintEngine_setSourceArgb64<_PRECISION>;
   v->setSourceColor = RasterPaintEngine_setSourceColor<_PRECISION>;
-  v->setSourcePatternF = RasterPaintEngine_setSourcePatternF;
-  v->setSourcePatternD = RasterPaintEngine_setSourcePatternD;
+  v->setSourcePattern = RasterPaintEngine_setSourcePattern;
   v->setSourceAbstract = RasterPaintEngine_setSourceAbstract;
 
   // --------------------------------------------------------------------------
@@ -5648,9 +5563,7 @@ static void RasterPaintEngine_init_vtable()
   v->setTransformF = RasterPaintEngine_setTransformF;
   v->setTransformD = RasterPaintEngine_setTransformD;
 
-  v->applyTransformF = RasterPaintEngine_applyTransformF;
-  v->applyTransformD = RasterPaintEngine_applyTransformD;
-
+  v->applyTransform = RasterPaintEngine_applyTransform;
   v->resetTransform = RasterPaintEngine_resetTransform;
 
   // --------------------------------------------------------------------------

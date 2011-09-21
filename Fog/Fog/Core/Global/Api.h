@@ -78,17 +78,17 @@ struct FOG_NO_EXPORT Api
   // [Core/Math - Math]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL* MathF_Integrate)(float* dst, const FunctionF* func, const IntervalF* interval, uint32_t steps);
-  typedef err_t (FOG_CDECL* MathD_Integrate)(double* dst, const FunctionD* func, const IntervalD* interval, uint32_t steps);
+  typedef err_t (FOG_CDECL *MathF_Integrate)(float* dst, const FunctionF* func, const IntervalF* interval, uint32_t steps);
+  typedef err_t (FOG_CDECL *MathD_Integrate)(double* dst, const FunctionD* func, const IntervalD* interval, uint32_t steps);
 
-  typedef int (FOG_CDECL* MathF_Solve)(float* dst, const float* func);
-  typedef int (FOG_CDECL* MathD_Solve)(double* dst, const double* func);
+  typedef int (FOG_CDECL *MathF_Solve)(float* dst, const float* func);
+  typedef int (FOG_CDECL *MathD_Solve)(double* dst, const double* func);
 
-  typedef int (FOG_CDECL* MathF_SolveAt)(float* dst, const float* func, const IntervalF* interval);
-  typedef int (FOG_CDECL* MathD_SolveAt)(double* dst, const double* func, const IntervalD* interval);
+  typedef int (FOG_CDECL *MathF_SolveAt)(float* dst, const float* func, const IntervalF* interval);
+  typedef int (FOG_CDECL *MathD_SolveAt)(double* dst, const double* func, const IntervalD* interval);
 
-  typedef void (FOG_CDECL* MathF_VecFloatFromDouble)(float* dst, const double* src, size_t length);
-  typedef void (FOG_CDECL* MathD_VecDoubleFromFloat)(double* dst, const float* src, size_t length);
+  typedef void (FOG_CDECL *MathF_VecFloatFromDouble)(float* dst, const double* src, size_t length);
+  typedef void (FOG_CDECL *MathD_VecDoubleFromFloat)(double* dst, const float* src, size_t length);
 
   struct FOG_NO_EXPORT _Api_MathF
   {
@@ -119,7 +119,7 @@ struct FOG_NO_EXPORT Api
   typedef void* (FOG_CDECL *MemMgr_Realloc)(void* ptr, size_t size);
   typedef void (FOG_CDECL *MemMgr_Free)(void* ptr);
 
-  typedef void (FOG_CDECL *MemMgr_Cleanup)(void);
+  typedef void (FOG_CDECL *MemMgr_Cleanup)(uint32_t reason);
   typedef err_t (FOG_CDECL *MemMgr_RegisterCleanupFunc)(MemCleanupFunc func, void* closure);
   typedef err_t (FOG_CDECL *MemMgr_UnregisterCleanupFunc)(MemCleanupFunc func, void* closure);
 
@@ -202,29 +202,29 @@ struct FOG_NO_EXPORT Api
   // [Core/OS - Library]
   // --------------------------------------------------------------------------
 
-  typedef void (FOG_CDECL* Library_Ctor)(Library* self);
-  typedef void (FOG_CDECL* Library_CtorCopy)(Library* self, const Library* other);
-  typedef void (FOG_CDECL* Library_Dtor)(Library* self);
+  typedef void (FOG_CDECL *Library_Ctor)(Library* self);
+  typedef void (FOG_CDECL *Library_CtorCopy)(Library* self, const Library* other);
+  typedef void (FOG_CDECL *Library_Dtor)(Library* self);
 
-  typedef void (FOG_CDECL* Library_SetLibrary)(Library* self, const Library* other);
-  typedef err_t (FOG_CDECL* Library_OpenLibrary)(Library* self, const StringW* fileName, uint32_t flags);
-  typedef err_t (FOG_CDECL* Library_OpenPlugin)(Library* self, const StringW* category, const StringW* name);
-  typedef void (FOG_CDECL* Library_Close)(Library* self);
+  typedef void (FOG_CDECL *Library_SetLibrary)(Library* self, const Library* other);
+  typedef err_t (FOG_CDECL *Library_OpenLibrary)(Library* self, const StringW* fileName, uint32_t flags);
+  typedef err_t (FOG_CDECL *Library_OpenPlugin)(Library* self, const StringW* category, const StringW* name);
+  typedef void (FOG_CDECL *Library_Close)(Library* self);
 
-  typedef void* (FOG_CDECL* Library_GetSymbolStubA)(const Library* self, const StubA* sym);
-  typedef void* (FOG_CDECL* Library_GetSymbolStringW)(const Library* self, const StringW* sym);
-  typedef size_t (FOG_CDECL* Library_GetSymbols)(const Library* self, void** target, const char* symbolsData, size_t symbolsLength, size_t symbolsCount, char** fail);
+  typedef void* (FOG_CDECL *Library_GetSymbolStubA)(const Library* self, const StubA* sym);
+  typedef void* (FOG_CDECL *Library_GetSymbolStringW)(const Library* self, const StringW* sym);
+  typedef size_t (FOG_CDECL *Library_GetSymbols)(const Library* self, void** target, const char* symbolsData, size_t symbolsLength, size_t symbolsCount, char** fail);
 
-  typedef LibraryData* (FOG_CDECL* Library_DCreate)(void* handle);
-  typedef void (FOG_CDECL* Library_DFree)(LibraryData* d);
+  typedef LibraryData* (FOG_CDECL *Library_DCreate)(void* handle);
+  typedef void (FOG_CDECL *Library_DFree)(LibraryData* d);
 
-  typedef err_t (FOG_CDECL* Library_GetSystemPrefix)(StringW* dst);
-  typedef err_t (FOG_CDECL* Library_GetSystemExtensions)(List<StringW>* dst);
+  typedef err_t (FOG_CDECL *Library_GetSystemPrefix)(StringW* dst);
+  typedef err_t (FOG_CDECL *Library_GetSystemExtensions)(List<StringW>* dst);
 
-  typedef err_t (FOG_CDECL* Library_GetLibraryPaths)(List<StringW>* dst);
-  typedef err_t (FOG_CDECL* Library_AddLibraryPath)(const StringW* path, uint32_t mode);
-  typedef err_t (FOG_CDECL* Library_RemoveLibraryPath)(const StringW* path);
-  typedef bool (FOG_CDECL* Library_HasLibraryPath)(const StringW* path);
+  typedef err_t (FOG_CDECL *Library_GetLibraryPaths)(List<StringW>* dst);
+  typedef err_t (FOG_CDECL *Library_AddLibraryPath)(const StringW* path, uint32_t mode);
+  typedef err_t (FOG_CDECL *Library_RemoveLibraryPath)(const StringW* path);
+  typedef bool (FOG_CDECL *Library_HasLibraryPath)(const StringW* path);
 
   struct FOG_NO_EXPORT _Api_Library
   {
@@ -267,11 +267,11 @@ struct FOG_NO_EXPORT Api
   typedef uint64_t (FOG_CDECL *System_GetAmountOfPhysicalMemory)(void);
   typedef uint32_t (FOG_CDECL *System_GetAmountOfPhysicalMemoryMB)(void);
 
-  typedef err_t (FOG_CDECL* System_GetEnvironmentStubA)(const StubA* key, StringW* value);
-  typedef err_t (FOG_CDECL* System_GetEnvironmentStringW)(const StringW* key, StringW* value);
+  typedef err_t (FOG_CDECL *System_GetEnvironmentStubA)(const StubA* key, StringW* value);
+  typedef err_t (FOG_CDECL *System_GetEnvironmentStringW)(const StringW* key, StringW* value);
 
-  typedef err_t (FOG_CDECL* System_SetEnvironmentStubA)(const StubA* key, const StringW* value);
-  typedef err_t (FOG_CDECL* System_SetEnvironmentStringW)(const StringW* key, const StringW* value);
+  typedef err_t (FOG_CDECL *System_SetEnvironmentStubA)(const StubA* key, const StringW* value);
+  typedef err_t (FOG_CDECL *System_SetEnvironmentStringW)(const StringW* key, const StringW* value);
 
   typedef err_t (FOG_CDECL *System_ErrorFromOSErrorCode)(int code);
   typedef err_t (FOG_CDECL *System_ErrorFromOSLastError)(void);
@@ -313,10 +313,10 @@ struct FOG_NO_EXPORT Api
   // [Core/Threading - ThreadLocal]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL* ThreadLocal_Create)(uint32_t* slot, void* dtor);
-  typedef err_t (FOG_CDECL* ThreadLocal_Destroy)(uint32_t slot);
-  typedef void* (FOG_CDECL* ThreadLocal_Get)(uint32_t slot);
-  typedef err_t (FOG_CDECL* ThreadLocal_Set)(uint32_t slot, void* val);
+  typedef err_t (FOG_CDECL *ThreadLocal_Create)(uint32_t* slot, void* dtor);
+  typedef err_t (FOG_CDECL *ThreadLocal_Destroy)(uint32_t slot);
+  typedef void* (FOG_CDECL *ThreadLocal_Get)(uint32_t slot);
+  typedef err_t (FOG_CDECL *ThreadLocal_Set)(uint32_t slot, void* val);
 
   struct FOG_NO_EXPORT _Api_ThreadLocal
   {
@@ -339,22 +339,22 @@ struct FOG_NO_EXPORT Api
   // [Core/Tools - Date]
   // --------------------------------------------------------------------------
 
-  typedef int   (FOG_CDECL* Date_GetValue)(const Date* self, uint32_t key);
-  typedef err_t (FOG_CDECL* Date_SetValue)(Date* self, uint32_t key, int value);
-  typedef err_t (FOG_CDECL* Date_AddValue)(Date* self, uint32_t key, int64_t value);
+  typedef int   (FOG_CDECL *Date_GetValue)(const Date* self, uint32_t key);
+  typedef err_t (FOG_CDECL *Date_SetValue)(Date* self, uint32_t key, int value);
+  typedef err_t (FOG_CDECL *Date_AddValue)(Date* self, uint32_t key, int64_t value);
 
-  typedef err_t (FOG_CDECL* Date_SetYMD)(Date* self, int year, int month, int day);
-  typedef err_t (FOG_CDECL* Date_SetHMS)(Date* self, int hour, int minute, int second, int us);
-  typedef err_t (FOG_CDECL* Date_FromTime)(Date* self, const Time* time);
+  typedef err_t (FOG_CDECL *Date_SetYMD)(Date* self, int year, int month, int day);
+  typedef err_t (FOG_CDECL *Date_SetHMS)(Date* self, int hour, int minute, int second, int us);
+  typedef err_t (FOG_CDECL *Date_FromTime)(Date* self, const Time* time);
 
-  typedef bool (FOG_CDECL* Date_IsLeapYear)(const Date* self, int year);
-  typedef int (FOG_CDECL* Date_GetNumberOfDaysInYear)(const Date* self, int year);
-  typedef int (FOG_CDECL* Date_GetNumberOfDaysInMonth)(const Date* self, int year, int month);
+  typedef bool (FOG_CDECL *Date_IsLeapYear)(const Date* self, int year);
+  typedef int (FOG_CDECL *Date_GetNumberOfDaysInYear)(const Date* self, int year);
+  typedef int (FOG_CDECL *Date_GetNumberOfDaysInMonth)(const Date* self, int year, int month);
 
-  typedef err_t (FOG_CDECL* Date_Convert)(Date* dst, const Date* src, uint32_t zone);
+  typedef err_t (FOG_CDECL *Date_Convert)(Date* dst, const Date* src, uint32_t zone);
 
-  typedef bool (FOG_CDECL* Date_Eq)(const Date* a, const Date* b);
-  typedef int (FOG_CDECL* Date_Compare)(const Date* a, const Date* b);
+  typedef bool (FOG_CDECL *Date_Eq)(const Date* a, const Date* b);
+  typedef int (FOG_CDECL *Date_Compare)(const Date* a, const Date* b);
 
   struct FOG_NO_EXPORT _Api_Date
   {
@@ -2173,38 +2173,38 @@ struct FOG_NO_EXPORT Api
   typedef void (FOG_CDECL *StringUtil_FillA)(char* dst, char ch, size_t length);
   typedef void (FOG_CDECL *StringUtil_FillW)(CharW* dst, uint16_t ch, size_t length);
 
-  typedef size_t (FOG_CDECL* StringUtil_LenA)(const char* src);
-  typedef size_t (FOG_CDECL* StringUtil_LenW)(const CharW* src);
+  typedef size_t (FOG_CDECL *StringUtil_LenA)(const char* src);
+  typedef size_t (FOG_CDECL *StringUtil_LenW)(const CharW* src);
 
-  typedef size_t (FOG_CDECL* StringUtil_NLenA)(const char* src, size_t max);
-  typedef size_t (FOG_CDECL* StringUtil_NLenW)(const CharW* src, size_t max);
+  typedef size_t (FOG_CDECL *StringUtil_NLenA)(const char* src, size_t max);
+  typedef size_t (FOG_CDECL *StringUtil_NLenW)(const CharW* src, size_t max);
 
-  typedef bool (FOG_CDECL* StringUtil_EqA)(const char* a, const char* b, size_t length);
-  typedef bool (FOG_CDECL* StringUtil_EqW)(const CharW* a, const CharW* b, size_t length);
-  typedef bool (FOG_CDECL* StringUtil_EqMixed)(const CharW* a, const char* b, size_t length);
+  typedef bool (FOG_CDECL *StringUtil_EqA)(const char* a, const char* b, size_t length);
+  typedef bool (FOG_CDECL *StringUtil_EqW)(const CharW* a, const CharW* b, size_t length);
+  typedef bool (FOG_CDECL *StringUtil_EqMixed)(const CharW* a, const char* b, size_t length);
 
-  typedef size_t (FOG_CDECL* StringUtil_CountOfA)(const char* str, size_t length, char ch);
-  typedef size_t (FOG_CDECL* StringUtil_CountOfW)(const CharW* str, size_t length, uint16_t ch);
+  typedef size_t (FOG_CDECL *StringUtil_CountOfA)(const char* str, size_t length, char ch);
+  typedef size_t (FOG_CDECL *StringUtil_CountOfW)(const CharW* str, size_t length, uint16_t ch);
 
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfCharA)(const char* str, size_t length, char ch);
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfCharW)(const CharW* str, size_t length, uint16_t ch);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfCharA)(const char* str, size_t length, char ch);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfCharW)(const CharW* str, size_t length, uint16_t ch);
 
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfStringA)(const char* aStr, size_t aLength, const char* bStr, size_t bLength);
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfStringWA)(const CharW* aStr, size_t aLength, const char* bStr, size_t bLength);
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfStringW)(const CharW* aStr, size_t aLength, const CharW* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfStringA)(const char* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfStringWA)(const CharW* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfStringW)(const CharW* aStr, size_t aLength, const CharW* bStr, size_t bLength);
 
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfAnyA)(const char* str, size_t length, const char* charArray, size_t charLength);
-  typedef size_t (FOG_CDECL* StringUtil_IndexOfAnyW)(const CharW* str, size_t length, const CharW* charArray, size_t charLength);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfAnyA)(const char* str, size_t length, const char* charArray, size_t charLength);
+  typedef size_t (FOG_CDECL *StringUtil_IndexOfAnyW)(const CharW* str, size_t length, const CharW* charArray, size_t charLength);
 
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfCharA)(const char* str, size_t length, char ch);
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfCharW)(const CharW* str, size_t length, uint16_t ch);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfCharA)(const char* str, size_t length, char ch);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfCharW)(const CharW* str, size_t length, uint16_t ch);
 
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfStringA)(const char* aStr, size_t aLength, const char* bStr, size_t bLength);
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfStringWA)(const CharW* aStr, size_t aLength, const char* bStr, size_t bLength);
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfStringW)(const CharW* aStr, size_t aLength, const CharW* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfStringA)(const char* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfStringWA)(const CharW* aStr, size_t aLength, const char* bStr, size_t bLength);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfStringW)(const CharW* aStr, size_t aLength, const CharW* bStr, size_t bLength);
 
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfAnyA)(const char* str, size_t length, const char* charArray, size_t charLength);
-  typedef size_t (FOG_CDECL* StringUtil_LastIndexOfAnyW)(const CharW* str, size_t length, const CharW* charArray, size_t charLength);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfAnyA)(const char* str, size_t length, const char* charArray, size_t charLength);
+  typedef size_t (FOG_CDECL *StringUtil_LastIndexOfAnyW)(const CharW* str, size_t length, const CharW* charArray, size_t charLength);
 
   typedef err_t (FOG_CDECL *StringUtil_ValidateUtf8)(const char* data, size_t length, size_t* invalid);
   typedef err_t (FOG_CDECL *StringUtil_ValidateUtf16)(const CharW* data, size_t length, size_t* invalid);
@@ -2389,9 +2389,9 @@ struct FOG_NO_EXPORT Api
   // [Core/Tools - Time]
   // --------------------------------------------------------------------------
 
-  typedef int64_t (FOG_CDECL* Time_Now)(void);
-  typedef time_t (FOG_CDECL* Time_ToTimeT)(int64_t us);
-  typedef int64_t (FOG_CDECL* Time_FromTimeT)(time_t t);
+  typedef int64_t (FOG_CDECL *Time_Now)(void);
+  typedef time_t (FOG_CDECL *Time_ToTimeT)(int64_t us);
+  typedef int64_t (FOG_CDECL *Time_FromTimeT)(time_t t);
 
   struct FOG_NO_EXPORT _Api_Time
   {
@@ -2404,7 +2404,7 @@ struct FOG_NO_EXPORT Api
   // [Core/Tools - TimeTicks]
   // --------------------------------------------------------------------------
 
-  typedef int64_t (FOG_CDECL* TimeTicks_Now)(uint32_t ticksPrecision);
+  typedef int64_t (FOG_CDECL *TimeTicks_Now)(uint32_t ticksPrecision);
 
   struct FOG_NO_EXPORT _Api_TimeTicks
   {
@@ -2421,7 +2421,7 @@ struct FOG_NO_EXPORT Api
   typedef void (FOG_CDECL *Var_Dtor)(Var* self);
 
   typedef size_t (FOG_CDECL *Var_GetReference)(const Var* self);
-  typedef uint32_t (FOG_CDECL *Var_GetTypeId)(const Var* self);
+  typedef uint32_t (FOG_CDECL *Var_GetVarType)(const Var* self);
 
   typedef void (FOG_CDECL *Var_Reset)(Var* self);
   typedef void (FOG_CDECL *Var_Copy)(Var* self, const Var* other);
@@ -2462,7 +2462,7 @@ struct FOG_NO_EXPORT Api
     Var_Dtor dtor;
 
     Var_GetReference getReference;
-    Var_GetTypeId getTypeId;
+    Var_GetVarType getVarType;
 
     Var_Reset reset;
     Var_Copy copy;
@@ -2640,8 +2640,8 @@ struct FOG_NO_EXPORT Api
   typedef uint32_t (FOG_CDECL *LineF_Intersect)(PointF* dst, const PointF* lineA, const PointF* lineB);
   typedef uint32_t (FOG_CDECL *LineD_Intersect)(PointD* dst, const PointD* lineA, const PointD* lineB);
 
-  typedef float (FOG_CDECL* LineF_PolyAngle)(const PointF* pts);
-  typedef double (FOG_CDECL* LineD_PolyAngle)(const PointD* pts);
+  typedef float (FOG_CDECL *LineF_PolyAngle)(const PointF* pts);
+  typedef double (FOG_CDECL *LineD_PolyAngle)(const PointD* pts);
 
   struct FOG_NO_EXPORT _Api_LineF
   {
@@ -3279,6 +3279,8 @@ struct FOG_NO_EXPORT Api
     TransformF_GetScaling getScaling;
     TransformF_GetRotation getRotation;
     TransformF_GetAverageScaling getAverageScaling;
+
+    TransformF* oIdentity;
   } transformf;
 
   struct FOG_NO_EXPORT _Api_TransformD
@@ -3301,6 +3303,8 @@ struct FOG_NO_EXPORT Api
     TransformD_GetScaling getScaling;
     TransformD_GetRotation getRotation;
     TransformD_GetAverageScaling getAverageScaling;
+
+    TransformD* oIdentity;
   } transformd;
 
   // --------------------------------------------------------------------------
@@ -3342,6 +3346,132 @@ struct FOG_NO_EXPORT Api
     ImageFormatDescription_GetCompatibleFormat getCompatibleFormat;
     ImageFormatDescription_CreateArgb createArgb;
   } imageformatdescription;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging - Image]
+  // --------------------------------------------------------------------------
+
+  // TODO:
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging - ImagePalette]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *ImagePalette_Ctor)(ImagePalette* self);
+  typedef void (FOG_CDECL *ImagePalette_CtorCopy)(ImagePalette* self, const ImagePalette* other);
+  typedef void (FOG_CDECL *ImagePalette_Dtor)(ImagePalette* self);
+
+  typedef err_t (FOG_CDECL *ImagePalette_Detach)(ImagePalette* self);
+
+  typedef err_t (FOG_CDECL *ImagePalette_SetData)(ImagePalette* self, const Range* range, const Argb32* data);
+  typedef err_t (FOG_CDECL *ImagePalette_SetDeep)(ImagePalette* self, const ImagePalette* other);
+  typedef err_t (FOG_CDECL *ImagePalette_SetLength)(ImagePalette* self, size_t length);
+
+  typedef void (FOG_CDECL *ImagePalette_Clear)(ImagePalette* self);
+  typedef void (FOG_CDECL *ImagePalette_Reset)(ImagePalette* self);
+  typedef err_t (FOG_CDECL *ImagePalette_Copy)(ImagePalette* self, const ImagePalette* other);
+  typedef bool (FOG_CDECL *ImagePalette_Eq)(const ImagePalette* a, const ImagePalette* b);
+
+  typedef ImagePaletteData* (FOG_CDECL *ImagePalette_DCreate)(void);
+  typedef ImagePaletteData* (FOG_CDECL *ImagePalette_DCreateGreyscale)(uint32_t length);
+  typedef ImagePaletteData* (FOG_CDECL *ImagePalette_DCreateColorCube)(uint32_t r, uint32_t g, uint32_t b);
+  typedef void (FOG_CDECL *ImagePalette_DFree)(ImagePaletteData* d);
+
+  typedef bool (FOG_CDECL *ImagePalette_IsGreyscale)(const Argb32* data, size_t length);
+
+  struct FOG_NO_EXPORT _Api_ImagePalette
+  {
+    ImagePalette_Ctor ctor;
+    ImagePalette_CtorCopy ctorCopy;
+    ImagePalette_Dtor dtor;
+    ImagePalette_Detach detach;
+    ImagePalette_SetData setData;
+    ImagePalette_SetDeep setDeep;
+    ImagePalette_SetLength setLength;
+    ImagePalette_Clear clear;
+    ImagePalette_Reset reset;
+    ImagePalette_Copy copy;
+    ImagePalette_Eq eq;
+
+    ImagePalette_DCreate dCreate;
+    ImagePalette_DCreateGreyscale dCreateGreyscale;
+    ImagePalette_DCreateColorCube dCreateColorCube;
+    ImagePalette_DFree dFree;
+
+    ImagePalette_IsGreyscale isGreyscale;
+
+    ImagePalette* oEmpty;
+  } imagepalette;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging/Effects - ColorMatrix]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *ColorMatrix_Ctor)(ColorMatrix* self);
+  typedef uint32_t (FOG_CDECL *ColorMatrix_GetType)(const ColorMatrix* self);
+
+  typedef err_t (FOG_CDECL *ColorMatrix_AddMatrix)(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b);
+  typedef err_t (FOG_CDECL *ColorMatrix_AddScalar)(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s);
+
+  typedef err_t (FOG_CDECL *ColorMatrix_SubtractMatrix)(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b);
+  typedef err_t (FOG_CDECL *ColorMatrix_SubtractScalar)(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s);
+
+  typedef err_t (FOG_CDECL *ColorMatrix_MultiplyOther)(ColorMatrix* dst, const ColorMatrix* other, uint32_t order);
+  typedef err_t (FOG_CDECL *ColorMatrix_MultiplyMatrix)(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b);
+  typedef err_t (FOG_CDECL *ColorMatrix_MultiplyScalar)(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s);
+
+  typedef err_t (FOG_CDECL *ColorMatrix_SimplifiedPremultiply)(ColorMatrix* self, const ColorMatrix* other);
+
+  typedef err_t (FOG_CDECL *ColorMatrix_TranslateArgb)(ColorMatrix* self, float a, float r, float g, float b, uint32_t order);
+  typedef err_t (FOG_CDECL *ColorMatrix_ScaleArgb)(ColorMatrix* self, float a, float r, float g, float b, uint32_t order);
+  typedef err_t (FOG_CDECL *ColorMatrix_ScaleTint)(ColorMatrix* self, float phi, float amount);
+  typedef err_t (FOG_CDECL *ColorMatrix_Saturate)(ColorMatrix* self, float s, uint32_t order);
+  typedef err_t (FOG_CDECL *ColorMatrix_RotateColor)(ColorMatrix* self, int x, int y, float phi, uint32_t order);
+  typedef err_t (FOG_CDECL *ColorMatrix_RotateHue)(ColorMatrix* self, float phi);
+  typedef err_t (FOG_CDECL *ColorMatrix_ShearColor)(ColorMatrix* self, int x, int y0, float c0, int y1, float c1, uint32_t order);
+
+  typedef void (FOG_CDECL *ColorMatrix_MapArgb32)(const ColorMatrix* self, Argb32* dst, const Argb32* src);
+  typedef void (FOG_CDECL *ColorMatrix_MapArgb64)(const ColorMatrix* self, Argb64* dst, const Argb64* src);
+  typedef void (FOG_CDECL *ColorMatrix_MapArgbF)(const ColorMatrix* self, ArgbF* dst, const ArgbF* src);
+
+  typedef void (FOG_CDECL *ColorMatrix_Copy)(float* dst, const float* src);
+  typedef bool (FOG_CDECL *ColorMatrix_Eq)(const ColorMatrix* a, const ColorMatrix* b);
+
+  struct FOG_NO_EXPORT _Api_ColorMatrix
+  {
+    ColorMatrix_Ctor ctor;
+    ColorMatrix_GetType getType;
+
+    ColorMatrix_AddMatrix addMatrix;
+    ColorMatrix_AddScalar addScalar;
+    ColorMatrix_SubtractMatrix subtractMatrix;
+    ColorMatrix_SubtractScalar subtractScalar;
+    ColorMatrix_MultiplyOther multiplyOther;
+    ColorMatrix_MultiplyMatrix multiplyMatrix;
+    ColorMatrix_MultiplyScalar multiplyScalar;
+    ColorMatrix_SimplifiedPremultiply simplifiedPremultiply;
+
+    ColorMatrix_TranslateArgb translateArgb;
+    ColorMatrix_ScaleArgb scaleArgb;
+    ColorMatrix_ScaleTint scaleTint;
+    ColorMatrix_Saturate saturate;
+    ColorMatrix_RotateHue rotateHue;
+    ColorMatrix_RotateColor rotateColor;
+    ColorMatrix_ShearColor shearColor;
+
+    ColorMatrix_MapArgb32 mapArgb32;
+    ColorMatrix_MapArgb64 mapArgb64;
+    ColorMatrix_MapArgbF mapArgbF;
+
+    ColorMatrix_Copy copy;
+    ColorMatrix_Eq eq;
+
+    const ColorMatrix* oIdentity;
+    const ColorMatrix* oZero;
+    const ColorMatrix* oGreyscale;
+    const ColorMatrix* oPreHue;
+    const ColorMatrix* oPostHue;
+  } colormatrix;
 
   // --------------------------------------------------------------------------
   // [G2d/Painting - Painter]
@@ -3451,6 +3581,245 @@ struct FOG_NO_EXPORT Api
 
     ColorStopList* oEmpty;
   } colorstoplist;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Source - Gradient]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *GradientF_Ctor)(GradientF* self, uint32_t gradientType);
+  typedef void (FOG_CDECL *GradientD_Ctor)(GradientD* self, uint32_t gradientType);
+
+  typedef void (FOG_CDECL *GradientF_CtorCopyF)(GradientF* self, const GradientF* other);
+  typedef void (FOG_CDECL *GradientD_CtorCopyF)(GradientD* self, const GradientF* other);
+
+  typedef void (FOG_CDECL *GradientF_CtorCopyD)(GradientF* self, const GradientD* other);
+  typedef void (FOG_CDECL *GradientD_CtorCopyD)(GradientD* self, const GradientD* other);
+
+  typedef void (FOG_CDECL *GradientF_Dtor)(GradientF* self);
+  typedef void (FOG_CDECL *GradientD_Dtor)(GradientD* self);
+
+  typedef err_t (FOG_CDECL *GradientF_CopyF)(GradientF* self, const GradientF* other);
+  typedef err_t (FOG_CDECL *GradientD_CopyF)(GradientD* self, const GradientF* other);
+
+  typedef err_t (FOG_CDECL *GradientF_CopyD)(GradientF* self, const GradientD* other);
+  typedef err_t (FOG_CDECL *GradientD_CopyD)(GradientD* self, const GradientD* other);
+
+  typedef void (FOG_CDECL *GradientF_Reset)(GradientF* self);
+  typedef void (FOG_CDECL *GradientD_Reset)(GradientD* self);
+
+  typedef bool (FOG_CDECL *GradientF_Eq)(const GradientF* a, const GradientF* b);
+  typedef bool (FOG_CDECL *GradientD_Eq)(const GradientD* a, const GradientD* b);
+
+  struct FOG_NO_EXPORT _Api_GradientF
+  {
+    GradientF_Ctor ctor;
+    GradientF_CtorCopyF ctorCopyF;
+    GradientF_CtorCopyD ctorCopyD;
+    GradientF_Dtor dtor;
+    GradientF_CopyF copyF;
+    GradientF_CopyD copyD;
+    GradientF_Reset reset;
+    GradientF_Eq eq;
+  } gradientf;
+
+  struct FOG_NO_EXPORT _Api_GradientD
+  {
+    GradientD_Ctor ctor;
+    GradientD_CtorCopyF ctorCopyF;
+    GradientD_CtorCopyD ctorCopyD;
+    GradientD_Dtor dtor;
+    GradientD_CopyF copyF;
+    GradientD_CopyD copyD;
+    GradientD_Reset reset;
+    GradientD_Eq eq;
+  } gradientd;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Source - Pattern]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Pattern_Ctor)(Pattern* self);
+  typedef void (FOG_CDECL *Pattern_CtorCopy)(Pattern* self, const Pattern* other);
+  typedef void (FOG_CDECL *Pattern_CtorArgb32)(Pattern* self, const ArgbBase32* argb32);
+  typedef void (FOG_CDECL *Pattern_CtorColor)(Pattern* self, const Color* color);
+  typedef void (FOG_CDECL *Pattern_CtorTextureF)(Pattern* self, const Texture* texture, const TransformF* tr);
+  typedef void (FOG_CDECL *Pattern_CtorTextureD)(Pattern* self, const Texture* texture, const TransformD* tr);
+  typedef void (FOG_CDECL *Pattern_CtorGradientF)(Pattern* self, const GradientF* gradient, const TransformF* tr);
+  typedef void (FOG_CDECL *Pattern_CtorGradientD)(Pattern* self, const GradientD* gradient, const TransformD* tr);
+  typedef void (FOG_CDECL *Pattern_Dtor)(Pattern* self);
+
+  typedef err_t (FOG_CDECL *Pattern_Detach)(Pattern* self);
+
+  typedef err_t (FOG_CDECL *Pattern_GetArgb32)(const Pattern* self, ArgbBase32* argb32);
+  typedef err_t (FOG_CDECL *Pattern_GetColor)(const Pattern* self, Color* color);
+  typedef err_t (FOG_CDECL *Pattern_GetTexture)(const Pattern* self, Texture* texture);
+  typedef err_t (FOG_CDECL *Pattern_GetGradientF)(const Pattern* self, uint32_t targetType, GradientF* gradient);
+  typedef err_t (FOG_CDECL *Pattern_GetGradientD)(const Pattern* self, uint32_t targetType, GradientD* gradient);
+  typedef err_t (FOG_CDECL *Pattern_GetTransformF)(const Pattern* self, TransformF* tr);
+  typedef err_t (FOG_CDECL *Pattern_GetTransformD)(const Pattern* self, TransformD* tr);
+
+  typedef err_t (FOG_CDECL *Pattern_CreateArgb32)(Pattern* self, const ArgbBase32* argb32);
+  typedef err_t (FOG_CDECL *Pattern_CreateColor)(Pattern* self, const Color* color);
+  typedef err_t (FOG_CDECL *Pattern_CreateTextureF)(Pattern* self, const Texture* texture, const TransformF* tr);
+  typedef err_t (FOG_CDECL *Pattern_CreateTextureD)(Pattern* self, const Texture* texture, const TransformD* tr);
+  typedef err_t (FOG_CDECL *Pattern_CreateGradientF)(Pattern* self, const GradientF* gradient, const TransformF* tr);
+  typedef err_t (FOG_CDECL *Pattern_CreateGradientD)(Pattern* self, const GradientD* gradient, const TransformD* tr);
+
+  typedef err_t (FOG_CDECL *Pattern_SetTransformF)(Pattern* self, const TransformF* tr);
+  typedef err_t (FOG_CDECL *Pattern_SetTransformD)(Pattern* self, const TransformD* tr);
+  typedef err_t (FOG_CDECL *Pattern_ApplyTransform)(Pattern* self, uint32_t transformOp, const void* params);
+  typedef err_t (FOG_CDECL *Pattern_ResetTransform)(Pattern* self);
+
+  typedef void (FOG_CDECL *Pattern_Reset)(Pattern* self);
+  typedef err_t (FOG_CDECL *Pattern_Copy)(Pattern* self, const Pattern* other);
+  typedef bool (FOG_CDECL *Pattern_Eq)(const Pattern* a, const Pattern* b);
+
+  typedef PatternData* (FOG_CDECL *Pattern_DCreate)(size_t size);
+  typedef void (FOG_CDECL *Pattern_DFree)(PatternData* d);
+
+  struct FOG_NO_EXPORT _Api_Pattern
+  {
+    Pattern_Ctor ctor;
+    Pattern_CtorCopy ctorCopy;
+    Pattern_CtorArgb32 ctorArgb32;
+    Pattern_CtorColor ctorColor;
+    Pattern_CtorTextureF ctorTextureF;
+    Pattern_CtorTextureD ctorTextureD;
+    Pattern_CtorGradientF ctorGradientF;
+    Pattern_CtorGradientD ctorGradientD;
+    Pattern_Dtor dtor;
+
+    Pattern_Detach detach;
+
+    Pattern_GetArgb32 getArgb32;
+    Pattern_GetColor getColor;
+    Pattern_GetTexture getTexture;
+    Pattern_GetGradientF getGradientF;
+    Pattern_GetGradientD getGradientD;
+    Pattern_GetTransformF getTransformF;
+    Pattern_GetTransformD getTransformD;
+
+    Pattern_CreateArgb32 createArgb32;
+    Pattern_CreateColor createColor;
+    Pattern_CreateTextureF createTextureF;
+    Pattern_CreateTextureD createTextureD;
+    Pattern_CreateGradientF createGradientF;
+    Pattern_CreateGradientD createGradientD;
+
+    Pattern_SetTransformF setTransformF;
+    Pattern_SetTransformD setTransformD;
+    Pattern_ApplyTransform applyTransform;
+    Pattern_ResetTransform resetTransform;
+
+    Pattern_Reset reset;
+    Pattern_Copy copy;
+    Pattern_Eq eq;
+
+    Pattern_DCreate dCreate;
+    Pattern_DFree dFree;
+
+    Pattern* oNull;
+  } pattern;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Text - Font]
+  // --------------------------------------------------------------------------
+
+  typedef void (FOG_CDECL *Font_Ctor)(Font* self);
+  typedef void (FOG_CDECL *Font_CtorCopy)(Font* self, const Font* other);
+  typedef void (FOG_CDECL *Font_Dtor)(Font* self);
+
+  typedef err_t (FOG_CDECL *Font_Detach)(Font* self);
+  typedef err_t (FOG_CDECL *Font_SetHeight)(Font* self, float height, uint32_t unit);
+
+  typedef err_t (FOG_CDECL *Font_SetLetterSpacing)(Font* self, float spacing, uint32_t spacingMode);
+  typedef err_t (FOG_CDECL *Font_SetWordSpacing)(Font* self, float spacing, uint32_t spacingMode);
+
+  typedef err_t (FOG_CDECL *Font_SetHints)(Font* self, const FontHints* hints);
+
+  typedef err_t (FOG_CDECL *Font_SetStyle)(Font* self, uint32_t style);
+  typedef err_t (FOG_CDECL *Font_SetWeight)(Font* self, uint32_t weight);
+  typedef err_t (FOG_CDECL *Font_SetVariant)(Font* self, uint32_t variant);
+  typedef err_t (FOG_CDECL *Font_SetDecoration)(Font* self, uint32_t decoration);
+  typedef err_t (FOG_CDECL *Font_SetKerning)(Font* self, uint32_t kerning);
+  typedef err_t (FOG_CDECL *Font_SetHinting)(Font* self, uint32_t hinting);
+  typedef err_t (FOG_CDECL *Font_SetAlignMode)(Font* self, uint32_t alignMode);
+
+  typedef err_t (FOG_CDECL *Font_SetTransform)(Font* self, const TransformF* transform);
+  typedef err_t (FOG_CDECL *Font_SetForceCaching)(Font* self, bool val);
+
+  typedef void (FOG_CDECL *Font_Reset)(Font* self);
+
+  typedef err_t (FOG_CDECL *Font_Create)(Font* self, const StringW* family, float height, uint32_t unit);
+  typedef err_t (FOG_CDECL *Font_CreateEx)(Font* self, const StringW* family, float height, uint32_t unit,
+    const FontHints* hints, const TransformF* transform);
+
+  typedef err_t (FOG_CDECL *Font_FromFace)(Font* self, FontFace* face, float height, uint32_t unit);
+
+  typedef err_t (FOG_CDECL *Font_GetTextOutlineFStubW)(const Font* self, PathF* dst, uint32_t cntOp, const PointF* pt, const StubW* str);
+  typedef err_t (FOG_CDECL *Font_GetTextOutlineFStringW)(const Font* self, PathF* dst, uint32_t cntOp, const PointF* pt, const StringW* str);
+  typedef err_t (FOG_CDECL *Font_GetTextOutlineDStubW)(const Font* self, PathD* dst, uint32_t cntOp, const PointD* pt, const StubW* str);
+  typedef err_t (FOG_CDECL *Font_GetTextOutlineDStringW)(const Font* self, PathD* dst, uint32_t cntOp, const PointD* pt, const StringW* str);
+
+  typedef err_t (FOG_CDECL *Font_GetTextExtentsFStubW)(const Font* self, TextExtentsF* extents, const StubW* str);
+  typedef err_t (FOG_CDECL *Font_GetTextExtentsFStringW)(const Font* self, TextExtentsF* extents, const StringW* str);
+  typedef err_t (FOG_CDECL *Font_GetTextExtentsDStubW)(const Font* self, TextExtentsD* extents, const StubW* str);
+  typedef err_t (FOG_CDECL *Font_GetTextExtentsDStringW)(const Font* self, TextExtentsD* extents, const StringW* str);
+
+  typedef err_t (FOG_CDECL *Font_Copy)(Font* self, const Font* other);
+  typedef bool (FOG_CDECL *Font_Eq)(const Font* a, const Font* b);
+
+  typedef FontData* (FOG_CDECL *Font_DCreate)(void);
+  typedef void (FOG_CDECL *Font_DFree)(FontData* d);
+
+  struct FOG_NO_EXPORT _Api_Font
+  {
+    Font_Ctor ctor;
+    Font_CtorCopy ctorCopy;
+    Font_Dtor dtor;
+
+    Font_Detach detach;
+    Font_SetHeight setHeight;
+
+    Font_SetLetterSpacing setLetterSpacing;
+    Font_SetWordSpacing setWordSpacing;
+
+    Font_SetHints setHints;
+
+    Font_SetStyle setStyle;
+    Font_SetWeight setWeight;
+    Font_SetVariant setVariant;
+    Font_SetDecoration setDecoration;
+    Font_SetKerning setKerning;
+    Font_SetHinting setHinting;
+    Font_SetAlignMode setAlignMode;
+
+    Font_SetTransform setTransform;
+    Font_SetForceCaching setForceCaching;
+
+    Font_Reset reset;
+
+    Font_Create create;
+    Font_CreateEx createEx;
+
+    Font_FromFace fromFace;
+
+    Font_GetTextOutlineFStubW getTextOutlineFStubW;
+    Font_GetTextOutlineFStringW getTextOutlineFStringW;
+    Font_GetTextOutlineDStubW getTextOutlineDStubW;
+    Font_GetTextOutlineDStringW getTextOutlineDStringW;
+
+    Font_GetTextExtentsFStubW getTextExtentsFStubW;
+    Font_GetTextExtentsFStringW getTextExtentsFStringW;
+    Font_GetTextExtentsDStubW getTextExtentsDStubW;
+    Font_GetTextExtentsDStringW getTextExtentsDStringW;
+
+    Font_Copy copy;
+    Font_Eq eq;
+
+    Font_DCreate dCreate;
+    Font_DFree dFree;
+  } font;
 
   // --------------------------------------------------------------------------
   // [G2d/Tools - Dpi]

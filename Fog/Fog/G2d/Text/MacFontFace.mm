@@ -65,7 +65,13 @@ err_t MacFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& p
   return _getTextOutline(dst, &outlineCache, d, pt, str, &ctx);
 }
 
-err_t MacFontFace::getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str)
+err_t MacFontFace::getTextExtents(TextExtentsF& extents, const FontData* d, const Utf16& str)
+{
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t MacFontFace::getTextExtents(TextExtentsD& extents, const FontData* d, const Utf16& str)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;

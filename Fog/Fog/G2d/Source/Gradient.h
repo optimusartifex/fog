@@ -26,28 +26,48 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Gradient (float).
-struct FOG_API GradientF
+struct FOG_NO_EXPORT GradientF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  GradientF(uint32_t gradientType = GRADIENT_TYPE_INVALID);
-  GradientF(const GradientF& other);
-  explicit GradientF(const GradientD& other);
-  ~GradientF();
+  FOG_INLINE GradientF(uint32_t gradientType = GRADIENT_TYPE_INVALID)
+  {
+    _api.gradientf.ctor(this, gradientType);
+  }
+
+  FOG_INLINE GradientF(const GradientF& other)
+  {
+    _api.gradientf.ctorCopyF(this, &other);
+  }
+
+  explicit FOG_INLINE GradientF(const GradientD& other)
+  {
+    _api.gradientf.ctorCopyD(this, &other);
+  }
+  
+  FOG_INLINE ~GradientF()
+  {
+    _api.gradientf.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Type]
   // --------------------------------------------------------------------------
 
   //! @brief Get the gradient type.
-  FOG_INLINE uint32_t getGradientType() const { return _gradientType; }
+  FOG_INLINE uint32_t getGradientType() const
+  {
+    return _gradientType;
+  }
 
   //! @brief Set the gradient type.
   FOG_INLINE void setGradientType(uint32_t gradientType)
   {
-    FOG_ASSERT(gradientType < GRADIENT_TYPE_COUNT);
+    FOG_ASSERT_X(gradientType < GRADIENT_TYPE_COUNT,
+      "Fog::GradientF::setGradientType() - Invalid type.");
+
     _gradientType = gradientType;
   }
 
@@ -56,12 +76,17 @@ struct FOG_API GradientF
   // --------------------------------------------------------------------------
 
   //! @brief Get the gradient spread.
-  FOG_INLINE uint32_t getGradientSpread() const { return _gradientSpread; }
+  FOG_INLINE uint32_t getGradientSpread() const
+  {
+    return _gradientSpread;
+  }
 
   //! @brief Set the gradient spread.
   FOG_INLINE void setGradientSpread(uint32_t gradientSpread)
   {
-    FOG_ASSERT(gradientSpread < GRADIENT_SPREAD_COUNT);
+    FOG_ASSERT_X(gradientSpread < GRADIENT_SPREAD_COUNT,
+      "Fog::GradientF::setGradientType() - Invalid spread.");
+
     _gradientSpread = gradientSpread;
   }
 
@@ -70,19 +95,19 @@ struct FOG_API GradientF
   // --------------------------------------------------------------------------
 
   FOG_INLINE const ColorStopList& getStops() const { return _stops; }
-  FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops.setList(list); }
-  FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops.setList(stops); }
-  FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops.setList(stops, length); }
-  FOG_INLINE void resetStops() { _stops.clear(); }
+  FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops->setList(list); }
+  FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops->setList(stops); }
+  FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops->setList(stops, length); }
+  FOG_INLINE void resetStops() { _stops->clear(); }
 
-  FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops.add(stop); }
+  FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops->add(stop); }
 
-  FOG_INLINE err_t removeStop(float offset) { return _stops.remove(offset); }
-  FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops.remove(stop); }
+  FOG_INLINE err_t removeStop(float offset) { return _stops->remove(offset); }
+  FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops->remove(stop); }
 
-  FOG_INLINE err_t removeStopAt(size_t index) { return _stops.removeAt(index); }
-  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeRange(range); }
-  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeRange(interval); }
+  FOG_INLINE err_t removeStopAt(size_t index) { return _stops->removeAt(index); }
+  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops->removeRange(range); }
+  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops->removeRange(interval); }
 
   // --------------------------------------------------------------------------
   // [Abstract]
@@ -95,14 +120,33 @@ struct FOG_API GradientF
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  err_t setGradient(const GradientF& other);
-  err_t setGradient(const GradientD& other);
+  FOG_INLINE err_t setGradient(const GradientF& other)
+  {
+    return _api.gradientf.copyF(this, &other);
+  }
+
+  FOG_INLINE err_t setGradient(const GradientD& other)
+  {
+    return _api.gradientf.copyD(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  void reset();
+  FOG_INLINE void reset()
+  {
+    return _api.gradientf.reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const GradientF& other) const
+  {
+    return _api.gradientf.eq(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -110,6 +154,23 @@ struct FOG_API GradientF
 
   FOG_INLINE GradientF& operator=(const GradientF& other) { setGradient(other); return *this; }
   FOG_INLINE GradientF& operator=(const GradientD& other) { setGradient(other); return *this; }
+
+  FOG_INLINE bool operator==(const GradientF& other) { return  eq(other); }
+  FOG_INLINE bool operator!=(const GradientF& other) { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const GradientF* a, const GradientF* b)
+  {
+    return _api.gradientf.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.gradientf.eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -119,8 +180,9 @@ struct FOG_API GradientF
   uint32_t _gradientType;
   //! @brief The gradient spread.
   uint32_t _gradientSpread;
+
   //! @brief Color stops.
-  ColorStopList _stops;
+  Static<ColorStopList> _stops;
 
   //! @brief Points data (meaning depends on the gradient type).
   //!
@@ -141,7 +203,7 @@ struct FOG_API GradientF
   //! - pts[0] - First point.
   //! - pts[1] - Second point.
   //! - pts[2] - Focal point.
-  PointF _pts[4];
+  PointF _pts[3];
 };
 
 // ============================================================================
@@ -149,28 +211,48 @@ struct FOG_API GradientF
 // ============================================================================
 
 //! @brief Gradient (double).
-struct FOG_API GradientD
+struct FOG_NO_EXPORT GradientD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  GradientD(uint32_t gradientType = PATTERN_TYPE_NONE);
-  explicit GradientD(const GradientF& other);
-  GradientD(const GradientD& other);
-  ~GradientD();
+  FOG_INLINE GradientD(uint32_t gradientType = GRADIENT_TYPE_INVALID)
+  {
+    _api.gradientd.ctor(this, gradientType);
+  }
+
+  FOG_INLINE GradientD(const GradientD& other)
+  {
+    _api.gradientd.ctorCopyD(this, &other);
+  }
+
+  explicit FOG_INLINE GradientD(const GradientF& other)
+  {
+    _api.gradientd.ctorCopyF(this, &other);
+  }
+  
+  FOG_INLINE ~GradientD()
+  {
+    _api.gradientd.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Type / Spread]
   // --------------------------------------------------------------------------
 
   //! @brief Get the pattern type.
-  FOG_INLINE uint32_t getGradientType() const { return _gradientType; }
+  FOG_INLINE uint32_t getGradientType() const
+  {
+    return _gradientType;
+  }
 
   //! @brief Set the pattern type.
   FOG_INLINE void setGradientType(uint32_t gradientType)
   {
-    FOG_ASSERT(gradientType < GRADIENT_TYPE_COUNT);
+    FOG_ASSERT_X(gradientType < GRADIENT_TYPE_COUNT,
+      "Fog::GradientD::setGradientType() - Invalid type.");
+
     _gradientType = gradientType;
   }
 
@@ -179,12 +261,17 @@ struct FOG_API GradientD
   // --------------------------------------------------------------------------
 
   //! @brief Get the spread type.
-  FOG_INLINE uint32_t getGradientSpread() const { return _gradientSpread; }
+  FOG_INLINE uint32_t getGradientSpread() const
+  {
+    return _gradientSpread;
+  }
 
   //! @brief Set the gradient spread.
   FOG_INLINE void setGradientSpread(uint32_t gradientSpread)
   {
-    FOG_ASSERT(gradientSpread < GRADIENT_SPREAD_COUNT);
+    FOG_ASSERT_X(gradientSpread < GRADIENT_SPREAD_COUNT,
+      "Fog::GradientD::setGradientType() - Invalid spread.");
+
     _gradientSpread = gradientSpread;
   }
 
@@ -193,19 +280,19 @@ struct FOG_API GradientD
   // --------------------------------------------------------------------------
 
   FOG_INLINE const ColorStopList& getStops() const { return _stops; }
-  FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops.setList(list); }
-  FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops.setList(stops); }
-  FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops.setList(stops, length); }
-  FOG_INLINE void resetStops() { _stops.clear(); }
+  FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops->setList(list); }
+  FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops->setList(stops); }
+  FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops->setList(stops, length); }
+  FOG_INLINE void resetStops() { _stops->clear(); }
 
-  FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops.add(stop); }
+  FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops->add(stop); }
 
-  FOG_INLINE err_t removeStop(float offset) { return _stops.remove(offset); }
-  FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops.remove(stop); }
+  FOG_INLINE err_t removeStop(float offset) { return _stops->remove(offset); }
+  FOG_INLINE err_t removeStop(const ColorStop& stop) { return _stops->remove(stop); }
 
-  FOG_INLINE err_t removeStopAt(size_t index) { return _stops.removeAt(index); }
-  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops.removeRange(range); }
-  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops.removeRange(interval); }
+  FOG_INLINE err_t removeStopAt(size_t index) { return _stops->removeAt(index); }
+  FOG_INLINE err_t removeStopAt(const Range& range) { return _stops->removeRange(range); }
+  FOG_INLINE err_t removeStopAt(const IntervalF& interval) { return _stops->removeRange(interval); }
 
   // --------------------------------------------------------------------------
   // [Abstract]
@@ -218,14 +305,33 @@ struct FOG_API GradientD
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  err_t setGradient(const GradientF& other);
-  err_t setGradient(const GradientD& other);
+  FOG_INLINE err_t setGradient(const GradientF& other)
+  {
+    return _api.gradientd.copyF(this, &other);
+  }
+
+  FOG_INLINE err_t setGradient(const GradientD& other)
+  {
+    return _api.gradientd.copyD(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  void reset();
+  FOG_INLINE void reset()
+  {
+    return _api.gradientd.reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const GradientD& other) const
+  {
+    return _api.gradientd.eq(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -233,6 +339,23 @@ struct FOG_API GradientD
 
   FOG_INLINE GradientD& operator=(const GradientF& other) { setGradient(other); return *this; }
   FOG_INLINE GradientD& operator=(const GradientD& other) { setGradient(other); return *this; }
+
+  FOG_INLINE bool operator==(const GradientD& other) { return  eq(other); }
+  FOG_INLINE bool operator!=(const GradientD& other) { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const GradientD* a, const GradientD* b)
+  {
+    return _api.gradientd.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.gradientd.eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -242,8 +365,9 @@ struct FOG_API GradientD
   uint32_t _gradientType;
   //! @brief The gradient spread.
   uint32_t _gradientSpread;
+
   //! @brief Color stops.
-  ColorStopList _stops;
+  Static<ColorStopList> _stops;
 
   //! @brief Points data (meaning depends on the gradient type).
   //!
@@ -264,7 +388,7 @@ struct FOG_API GradientD
   //! - pts[0] - First point.
   //! - pts[1] - Second point.
   //! - pts[2] - Focal point.
-  PointD _pts[4];
+  PointD _pts[3];
 };
 
 // ============================================================================

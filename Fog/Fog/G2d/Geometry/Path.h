@@ -1110,6 +1110,29 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE bool operator!=(const PathF& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const PathF& empty()
+  {
+    return *_api.pathf.oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const PathF* a, const PathF* b)
+  {
+    return _api.pathf.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.pathf.eq;
+  }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -1996,6 +2019,29 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE bool operator==(const PathD& other) const { return  eq(other); }
   FOG_INLINE bool operator!=(const PathD& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const PathD& empty()
+  {
+    return *_api.pathd.oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const PathD* a, const PathD* b)
+  {
+    return _api.pathd.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.pathd.eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]

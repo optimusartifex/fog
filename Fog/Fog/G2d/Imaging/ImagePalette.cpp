@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
@@ -20,112 +21,139 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::ImagePalette - Helpers]
+// [Fog::ImagePalette - Global]
 // ============================================================================
 
-static ImagePaletteData* ImagePalette_dalloc(void)
-{
-  ImagePaletteData* d = reinterpret_cast<ImagePaletteData*>(MemMgr::alloc(sizeof(ImagePaletteData)));
-  if (FOG_IS_NULL(d)) return NULL;
+static Static<ImagePaletteData> ImagePalette_dEmpty;
+static Static<ImagePaletteData> ImagePalette_dGreyscale;
 
-  d->reference.init(1);
-  d->length = 256;
-
-  return d;
-}
+static Static<ImagePalette> ImagePalette_oEmpty;
 
 // ============================================================================
 // [Fog::ImagePalette - Construction / Destruction]
 // ============================================================================
 
-ImagePalette::ImagePalette() : _d(_dnull->addRef()) {}
-ImagePalette::ImagePalette(const ImagePalette& other) : _d(other._d->addRef()) {}
-ImagePalette::~ImagePalette() { _d->release(); }
-
-// ============================================================================
-// [Fog::ImagePalette - Data]
-// ============================================================================
-
-err_t ImagePalette::_detach()
+static void FOG_CDECL ImagePalette_ctor(ImagePalette* self)
 {
-  if (isDetached()) return ERR_OK;
+  self->_d = ImagePalette_dEmpty->addRef();
+}
 
-  ImagePaletteData* newd = ImagePalette_dalloc();
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+static void FOG_CDECL ImagePalette_ctorCopy(ImagePalette* self, const ImagePalette* other)
+{
+  self->_d = other->_d->addRef();
+}
 
-  newd->length = _d->length;
-  MemOps::copy(newd->data, _d->data, sizeof(Argb32) * 256);
+static void FOG_CDECL ImagePalette_dtor(ImagePalette* self)
+{
+  self->_d->release();
+}
 
-  atomicPtrXchg(&_d, newd)->release();
+// ============================================================================
+// [Fog::ImagePalette - Sharing]
+// ============================================================================
+
+static err_t FOG_CDECL ImagePalette_detach(ImagePalette* self)
+{
+  ImagePaletteData* d = self->_d;
+
+  if (d->reference.get() == 1)
+    return ERR_OK;
+
+  ImagePaletteData* newd = _api.imagepalette.dCreate();
+
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  newd->length = d->length;
+  MemOps::copy(newd->data, d->data, 256 * sizeof(Argb32));
+
+  atomicPtrXchg(&self->_d, newd)->release();
   return ERR_OK;
 }
 
-err_t ImagePalette::setData(const ImagePalette& other)
-{
-  atomicPtrXchg(&_d, other._d->addRef())->release();
-  return ERR_OK;
-}
+// ============================================================================
+// [Fog::ImagePalette - Accessors]
+// ============================================================================
 
-err_t ImagePalette::setDeep(const ImagePalette& other)
+static err_t FOG_CDECL ImagePalette_setDeep(ImagePalette* self, const ImagePalette* other)
 {
-  if (!isDetached())
+  ImagePaletteData* d = self->_d;
+
+  if (d->reference.get() > 1)
   {
-    ImagePaletteData* newd = ImagePalette_dalloc();
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    ImagePaletteData* newd = _api.imagepalette.dCreate();
 
-    newd->length = other._d->length;
-    MemOps::copy(newd->data, other._d->data, sizeof(Argb32) * 256);
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
 
-    atomicPtrXchg(&_d, newd)->release();
+    newd->length = other->_d->length;
+    MemOps::copy(newd->data, other->_d->data, 256 * sizeof(Argb32));
+
+    atomicPtrXchg(&self->_d, newd)->release();
+    return ERR_OK;
   }
   else
   {
-    _d->length = other._d->length;
-    MemOps::copy(_d->data, other._d->data, sizeof(Argb32) * 256);
+    d->length = other->_d->length;
+    MemOps::copy(d->data, other->_d->data, 256 * sizeof(Argb32));
+    return ERR_OK;
   }
-
-  return ERR_OK;
 }
 
-err_t ImagePalette::setData(const Range& range, const Argb32* entries)
+static err_t FOG_CDECL ImagePalette_setData(ImagePalette* self, const Range* range, const Argb32* data)
 {
-  size_t rstart = range.getStart();
-  if (FOG_UNLIKELY(rstart >= 256)) return ERR_RT_INVALID_ARGUMENT;
+  size_t rStart = range->getStart();
 
-  size_t rend = Math::min<size_t>(256, range.getEnd());
-  size_t rlen = rend - rstart;
-  if (FOG_UNLIKELY(rlen == 0)) return ERR_OK;
+  if (rStart >= 256)
+    return ERR_RT_INVALID_ARGUMENT;
 
-  if (!isDetached())
+  size_t rEnd = Math::min<size_t>(256, range->getEnd());
+  size_t rLen = rEnd - rStart;
+
+  if (rLen == 0)
+    return ERR_OK;
+
+  ImagePaletteData* d = self->_d;
+  if (d->reference.get() > 1)
   {
-    ImagePaletteData* newd = ImagePalette_dalloc();
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
+    ImagePaletteData* newd = _api.imagepalette.dCreate();
 
-    MemOps::copy(newd->data, _d->data, sizeof(Argb32) * 256);
-    atomicPtrXchg(&_d, newd)->release();
+    if (FOG_IS_NULL(newd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    MemOps::copy(newd->data, d->data, sizeof(Argb32) * 256);
+    atomicPtrXchg(&self->_d, newd)->release();
+
+    d = newd;
   }
 
-  _d->length = Math::max<uint32_t>(_d->length, (uint32_t)rend);
+  d->length = Math::max<uint32_t>(d->length, (uint32_t)rEnd);
+
   _g2d_render.get_FuncsCompositeCore(IMAGE_FORMAT_XRGB32, COMPOSITE_SRC)->vblit_line[IMAGE_FORMAT_PRGB32](
-    reinterpret_cast<uint8_t*>(_d->data + rstart),
-    reinterpret_cast<const uint8_t*>(entries), (int)(uint)rlen, NULL);
+    reinterpret_cast<uint8_t*>(d->data + rStart),
+    reinterpret_cast<const uint8_t*>(data), (uint)rLen, NULL);
 
   return ERR_OK;
 }
 
-err_t ImagePalette::setLength(size_t length)
+static err_t FOG_CDECL ImagePalette_setLength(ImagePalette* self, size_t length)
 {
+  ImagePaletteData* d = self->_d;
+
   if (FOG_UNLIKELY(length > 256))
     return ERR_RT_INVALID_ARGUMENT;
 
   uint32_t len32 = (uint32_t)length;
-
-  if (FOG_UNLIKELY(_d->length == len32))
+  if (d->length == len32)
     return ERR_OK;
 
-  FOG_RETURN_ON_ERROR(detach());
-  _d->length = len32;
+  if (d->reference.get() > 1)
+  {
+    FOG_RETURN_ON_ERROR(_api.imagepalette.detach(self));
+    d = self->_d;
+  }
 
+  d->length = len32;
   return ERR_OK;
 }
 
@@ -133,28 +161,74 @@ err_t ImagePalette::setLength(size_t length)
 // [Fog::ImagePalette - Clear / Reset]
 // ============================================================================
 
-void ImagePalette::clear()
+static void FOG_CDECL ImagePalette_clear(ImagePalette* self)
 {
-  if (!isDetached()) { reset(); return; }
+  ImagePaletteData* d = self->_d;
 
-  for (uint32_t i = 0; i < 256; i++) _d->data[i] = 0xFF000000;
-  _d->length = 256;
+  if (d->reference.get() > 1)
+  {
+    self->reset();
+    return;
+  }
+
+  Argb32* data = d->data;
+  for (uint32_t i = 0; i < 256; i++) data[i] = 0xFF000000;
+  d->length = 256;
 }
 
-void ImagePalette::reset()
+static void FOG_CDECL ImagePalette_reset(ImagePalette* self)
 {
-  atomicPtrXchg(&_d, _dnull->addRef())->release();
+  atomicPtrXchg(&self->_d, ImagePalette_dEmpty->addRef())->release();
+}
+
+// ============================================================================
+// [Fog::ImagePalette - Copy]
+// ============================================================================
+
+static err_t FOG_CDECL ImagePalette_copy(ImagePalette* self, const ImagePalette* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::ImagePalette - Equality]
+// ============================================================================
+
+static bool FOG_CDECL ImagePalette_eq(const ImagePalette* a, const ImagePalette* b)
+{
+  const ImagePaletteData* a_d = a->_d;
+  const ImagePaletteData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  size_t length = a_d->length;
+
+  if (length != b_d->length)
+    return false;
+
+  const Argb32* aData = a_d->data;
+  const Argb32* bData = b_d->data;
+
+  for (size_t i = 0; i < length; i++)
+  {
+    if (aData[i] != bData[i])
+      return false;
+  }
+
+  return true;
 }
 
 // ============================================================================
 // [Fog::ImagePalette - Find]
 // ============================================================================
 
-uint8_t ImagePalette::findColor(uint8_t r, uint8_t g, uint8_t b) const
+static uint8_t FOG_FASTCALL ImagePalette_findRgb_Default(const ImagePaletteData* d, uint32_t r, uint32_t g, uint32_t b)
 {
   uint32_t i, best = 0;
 
-  const Argb32* data = _d->data;
+  const Argb32* data = d->data;
   int smallest = INT_MAX;
 
   for (i = 0; i < 256; i++, data++)
@@ -176,93 +250,116 @@ uint8_t ImagePalette::findColor(uint8_t r, uint8_t g, uint8_t b) const
 }
 
 // ============================================================================
-// [Fog::ImagePalette - Statics]
+// [Fog::ImagePalette - Data]
 // ============================================================================
 
-Static<ImagePaletteData> ImagePalette::_dnull;
-static Static<ImagePaletteData> ImagePalette_dgrey;
-
-ImagePalette ImagePalette::fromGreyscale(uint count)
+static ImagePaletteData* FOG_CDECL ImagePalette_dCreate(void)
 {
-  ImagePaletteData* d = NULL;
+  ImagePaletteData* d = reinterpret_cast<ImagePaletteData*>(MemMgr::alloc(sizeof(ImagePaletteData)));
+  if (FOG_IS_NULL(d)) return NULL;
 
-  if (count <= 1 || count > 256) { goto _End; }
-  if (count == 256) { d = ImagePalette_dgrey->addRef(); goto _Ret; }
+  d->reference.init(1);
+  d->length = 256;
+  d->findRgbFunc = ImagePalette_findRgb_Default;
 
-  d = ImagePalette_dalloc();
-  if (FOG_LIKELY(d != NULL))
-  {
-    uint32_t i = 0;
-    uint32_t cval = 0;
-    uint32_t cinc = 0xFF000000 / (count - 1);
-
-    for (; i < count; i++, cval += cinc);
-      d->data[i] = 0xFF000000 | ((cval >> 24) * 0x00010101);
-
-    for (; i < 256; i++)
-      d->data[i] = 0xFF000000;
-  }
-
-_End:
-  if (FOG_IS_NULL(d)) d = _dnull->addRef();
-
-_Ret:
-  return ImagePalette(d);
+  return d;
 }
 
-ImagePalette ImagePalette::fromCube(uint32_t nr, uint32_t ng, uint32_t nb)
+static ImagePaletteData* FOG_CDECL ImagePalette_dCreateGreyscale(uint32_t length)
 {
-  ImagePaletteData* d = NULL;
+  if (length <= 1 || length > 256)
+    return ImagePalette_dEmpty->addRef();
 
-  if (nr <= 1 || ng <= 1 || nb <= 1)
-    goto _End;
+  if (length == 256)
+    return ImagePalette_dGreyscale->addRef();
 
-  d = ImagePalette_dalloc();
-  if (FOG_LIKELY(d != NULL))
+  ImagePaletteData* d = _api.imagepalette.dCreate();
+  if (FOG_IS_NULL(d))
+    return ImagePalette_dEmpty->addRef();
+
+  uint32_t i = 0;
+  uint32_t c0;
+  uint32_t inc = 0xFF000000 / (length - 1);
+
+  c0 = 0x00000000;
+  while (i < length)
   {
-    nr--;
-    ng--;
-    nb--;
+    d->data[i] = 0xFF000000 | ((c0 >> 24) * 0x00010101);
+    i++;
+    c0 += inc;
+  }
 
-    Argb32* colors = d->data;
+  c0 = 0xFF000000;
+  while (i < 256)
+  {
+    d->data[i] = c0;
+    i++;
+  }
 
-    uint32_t i = 0;
-    uint32_t rpos, rval, rinc = 0xFF000000 / nr;
-    uint32_t gpos, gval, ginc = 0xFF000000 / ng;
-    uint32_t bpos, bval, binc = 0xFF000000 / nb;
+  return d;
+}
 
-    for (rpos = 0, rval = 0; rpos <= nr; rpos++, rval += rinc)
+static ImagePaletteData* FOG_CDECL ImagePalette_dCreateColorCube(uint32_t r, uint32_t g, uint32_t b)
+{
+  if (r <= 1 || g <= 1 || b <= 1)
+    return ImagePalette_dEmpty->addRef();
+
+  ImagePaletteData* d = _api.imagepalette.dCreate();
+  if (FOG_IS_NULL(d))
+    return ImagePalette_dEmpty->addRef();
+
+  r--;
+  g--;
+  b--;
+
+  Argb32* data = d->data;
+
+  uint32_t i = 0;
+
+  uint32_t rPos, rVal, rInc = 0xFF000000 / r;
+  uint32_t gPos, gVal, gInc = 0xFF000000 / g;
+  uint32_t bPos, bVal, bInc = 0xFF000000 / b;
+
+  for (rPos = 0, rVal = 0; rPos <= r; rPos++, rVal += rInc)
+  {
+    for (gPos = 0, gVal = 0; gPos <= g; gPos++, gVal += gInc)
     {
-      for (gpos = 0, gval = 0; gpos <= ng; gpos++, gval += ginc)
+      for (bPos = 0, bVal = 0; bPos <= b; bPos++, bVal += bInc)
       {
-        for (bpos = 0, bval = 0; bpos <= nb; bpos++, bval += binc)
-        {
-          colors[i] = Argb32(0xFF, rval >> 24, gval >> 24, bval >> 24);
-          if (++i == 256) goto _End;
-        }
+        data[i] = Argb32(0xFF, rVal >> 24, gVal >> 24, bVal >> 24);
+        if (++i == 256) goto _End;
       }
     }
   }
 
 _End:
-  if (FOG_IS_NULL(d)) d = _dnull->addRef();
-  return ImagePalette(d);
+  return d;
 }
 
-bool ImagePalette::isGreyscale(const Argb32* data, size_t count)
+static void FOG_CDECL ImagePalette_dFree(ImagePaletteData* d)
+{
+  if ((d->vType & VAR_FLAG_STATIC) == 0)
+    MemMgr::free(d);
+}
+
+// ============================================================================
+// [Fog::ImagePalette - Helpers]
+// ============================================================================
+
+static bool FOG_CDECL ImagePalette_isGreyscale(const Argb32* data, size_t length)
 {
   size_t i;
 
-  for (i = 0; i < count; i++)
+  for (i = 0; i < length; i++)
   {
     if (data[i].getRed  () != data[i].getGreen() ||
         data[i].getGreen() != data[i].getBlue () )
     {
-      break;
+      return false;
     }
   }
 
-  return i == count;
+  return true;
 }
 
 // ============================================================================
@@ -271,29 +368,50 @@ bool ImagePalette::isGreyscale(const Argb32* data, size_t count)
 
 FOG_NO_EXPORT void ImagePalette_init(void)
 {
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  _api.imagepalette.ctor = ImagePalette_ctor;
+  _api.imagepalette.ctorCopy = ImagePalette_ctorCopy;
+  _api.imagepalette.dtor = ImagePalette_dtor;
+  _api.imagepalette.detach = ImagePalette_detach;
+  _api.imagepalette.setData = ImagePalette_setData;
+  _api.imagepalette.setDeep = ImagePalette_setDeep;
+  _api.imagepalette.setLength = ImagePalette_setLength;
+  _api.imagepalette.clear = ImagePalette_clear;
+  _api.imagepalette.reset = ImagePalette_reset;
+  _api.imagepalette.copy = ImagePalette_copy;
+  _api.imagepalette.eq = ImagePalette_eq;
+
+  _api.imagepalette.dCreate = ImagePalette_dCreate;
+  _api.imagepalette.dCreateGreyscale = ImagePalette_dCreateGreyscale;
+  _api.imagepalette.dCreateColorCube = ImagePalette_dCreateColorCube;
+  _api.imagepalette.dFree = ImagePalette_dFree;
+
+  _api.imagepalette.isGreyscale = ImagePalette_isGreyscale;
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
   ImagePaletteData* d;
+  uint32_t i, c0;
 
-  uint32_t i;
-  uint32_t c0;
-
-  // --------------------------------------------------------------------------
-  // Setup 'Null' palette.
-  // --------------------------------------------------------------------------
-
-  d = &ImagePalette::_dnull;
+  d = &ImagePalette_dEmpty;
   d->reference.init(1);
+  d->vType = VAR_TYPE_IMAGE_PALETTE | VAR_FLAG_NONE;
   d->length = 256;
+  d->findRgbFunc = ImagePalette_findRgb_Default;
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++)
     d->data[i] = c0;
 
-  // --------------------------------------------------------------------------
-  // Setup 'Greyscale' palette
-  // --------------------------------------------------------------------------
-
-  d = &ImagePalette_dgrey;
+  d = &ImagePalette_dGreyscale;
   d->reference.init(1);
+  d->vType = VAR_TYPE_IMAGE_PALETTE | VAR_FLAG_NONE;
   d->length = 256;
+  d->findRgbFunc = ImagePalette_findRgb_Default;
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++, c0 += 0x00010101)
     d->data[i] = c0;

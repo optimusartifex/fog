@@ -839,16 +839,10 @@ struct FOG_NO_EXPORT Painter
     return _vtable->getSourceColor(this, val);
   }
 
-  //! @brief Get the source pattern into @a val (see @c PatternF).
-  FOG_INLINE err_t getSource(PatternF& val) const
+  //! @brief Get the source pattern into @a val (see @c Pattern).
+  FOG_INLINE err_t getSource(Pattern& val) const
   {
-    return _vtable->getSourcePatternF(this, val);
-  }
-
-  //! @brief Get the source pattern into @a val (see @c PatternD).
-  FOG_INLINE err_t getSource(PatternD& val) const
-  {
-    return _vtable->getSourcePatternD(this, val);
+    return _vtable->getSourcePattern(this, val);
   }
 
   // --------------------------------------------------------------------------
@@ -920,16 +914,10 @@ struct FOG_NO_EXPORT Painter
     return _vtable->setSourceAbstract(this, PAINTER_SOURCE_GRADIENT_D, &val, &tr);
   }
 
-  //! @brief Set the painter source to a PatternF @a val.
-  FOG_INLINE err_t setSource(const PatternF& val)
+  //! @brief Set the painter source to a Pattern @a val.
+  FOG_INLINE err_t setSource(const Pattern& val)
   {
-    return _vtable->setSourcePatternF(this, val);
-  }
-
-  //! @brief Set the painter source to a PatternD @a val.
-  FOG_INLINE err_t setSource(const PatternD& val)
-  {
-    return _vtable->setSourcePatternD(this, val);
+    return _vtable->setSourcePattern(this, val);
   }
 
   // --------------------------------------------------------------------------
@@ -966,12 +954,12 @@ struct FOG_NO_EXPORT Painter
 
   FOG_INLINE err_t translate(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformF(this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _vtable->applyTransform(this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
   }
 
   FOG_INLINE err_t translate(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformD(this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _vtable->applyTransform(this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
   }
 
   // --------------------------------------------------------------------------
@@ -980,12 +968,12 @@ struct FOG_NO_EXPORT Painter
 
   FOG_INLINE err_t scale(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformF(this, TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _vtable->applyTransform(this, TRANSFORM_OP_SCALEF | (order << 4), &p);
   }
 
   FOG_INLINE err_t scale(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformD(this, TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _vtable->applyTransform(this, TRANSFORM_OP_SCALED | (order << 4), &p);
   }
 
   // --------------------------------------------------------------------------
@@ -994,12 +982,12 @@ struct FOG_NO_EXPORT Painter
 
   FOG_INLINE err_t skew(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformF(this, TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _vtable->applyTransform(this, TRANSFORM_OP_SKEWF | (order << 4), &p);
   }
 
   FOG_INLINE err_t skew(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformD(this, TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _vtable->applyTransform(this, TRANSFORM_OP_SKEWD | (order << 4), &p);
   }
 
   // --------------------------------------------------------------------------
@@ -1008,24 +996,24 @@ struct FOG_NO_EXPORT Painter
 
   FOG_INLINE err_t rotate(float angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformF(this, TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _vtable->applyTransform(this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformD(this, TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _vtable->applyTransform(this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     float params[3] = { angle, p.x, p.y };
-    return _vtable->applyTransformF(this, TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _vtable->applyTransform(this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE err_t rotate(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     double params[3] = { angle, p.x, p.y };
-    return _vtable->applyTransformD(this, TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _vtable->applyTransform(this, TRANSFORM_OP_ROTATE_POINTD | (order << 4), params);
   }
 
   // --------------------------------------------------------------------------
@@ -1034,12 +1022,12 @@ struct FOG_NO_EXPORT Painter
 
   FOG_INLINE err_t transform(const TransformF& tr, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformF(this, TRANSFORM_OP_MULTIPLY | (order << 4), &tr);
+    return _vtable->applyTransform(this, TRANSFORM_OP_MULTIPLYF | (order << 4), &tr);
   }
 
   FOG_INLINE err_t transform(const TransformD& tr, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _vtable->applyTransformD(this, TRANSFORM_OP_MULTIPLY | (order << 4), &tr);
+    return _vtable->applyTransform(this, TRANSFORM_OP_MULTIPLYD | (order << 4), &tr);
   }
 
   // --------------------------------------------------------------------------

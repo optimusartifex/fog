@@ -308,7 +308,7 @@ enum ERR_ENUM
   //! caused by degenerate transform use @c TransformF::isDegenerate() and
   //! @c TransformD::isDegenerate().
   //!
-  //! @note This error is always related to trasnform.
+  //! @note This error is always related to transform.
   ERR_GEOMETRY_DEGENERATE,
 
   //! @brief Can't stroke the path or shape.

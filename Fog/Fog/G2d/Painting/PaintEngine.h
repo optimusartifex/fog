@@ -72,15 +72,13 @@ struct FOG_NO_EXPORT PaintEngineVTable
 
   typedef err_t (FOG_CDECL *GetSourceType)(const Painter* self, uint32_t& val);
   typedef err_t (FOG_CDECL *GetSourceColor)(const Painter* self, Color& color);
-  typedef err_t (FOG_CDECL *GetSourcePatternF)(const Painter* self, PatternF& pattern);
-  typedef err_t (FOG_CDECL *GetSourcePatternD)(const Painter* self, PatternD& pattern);
+  typedef err_t (FOG_CDECL *GetSourcePattern)(const Painter* self, Pattern& pattern);
 
   typedef err_t (FOG_CDECL *SetSourceNone)(Painter* self);
   typedef err_t (FOG_CDECL *SetSourceArgb32)(Painter* self, uint32_t argb32);
   typedef err_t (FOG_CDECL *SetSourceArgb64)(Painter* self, const Argb64& argb64);
   typedef err_t (FOG_CDECL *SetSourceColor)(Painter* self, const Color& color);
-  typedef err_t (FOG_CDECL *SetSourcePatternF)(Painter* self, const PatternF& pattern);
-  typedef err_t (FOG_CDECL *SetSourcePatternD)(Painter* self, const PatternD& pattern);
+  typedef err_t (FOG_CDECL *SetSourcePattern)(Painter* self, const Pattern& pattern);
   typedef err_t (FOG_CDECL *SetSourceAbstract)(Painter* self, uint32_t sourceId, const void* value, const void* tr);
 
   // --------------------------------------------------------------------------
@@ -89,15 +87,13 @@ struct FOG_NO_EXPORT PaintEngineVTable
 
   GetSourceType getSourceType;
   GetSourceColor getSourceColor;
-  GetSourcePatternF getSourcePatternF;
-  GetSourcePatternD getSourcePatternD;
+  GetSourcePattern getSourcePattern;
 
   SetSourceNone setSourceNone;
   SetSourceArgb32 setSourceArgb32;
   SetSourceArgb64 setSourceArgb64;
   SetSourceColor setSourceColor;
-  SetSourcePatternF setSourcePatternF;
-  SetSourcePatternD setSourcePatternD;
+  SetSourcePattern setSourcePattern;
   SetSourceAbstract setSourceAbstract;
 
   // --------------------------------------------------------------------------
@@ -110,9 +106,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *SetTransformF)(Painter* self, const TransformF& tr);
   typedef err_t (FOG_CDECL *SetTransformD)(Painter* self, const TransformD& tr);
 
-  typedef err_t (FOG_CDECL *ApplyTransformF)(Painter* self, uint32_t transformOp, const void* params);
-  typedef err_t (FOG_CDECL *ApplyTransformD)(Painter* self, uint32_t transformOp, const void* params);
-
+  typedef err_t (FOG_CDECL *ApplyTransform)(Painter* self, uint32_t transformOp, const void* params);
   typedef err_t (FOG_CDECL *ResetTransform)(Painter* self);
 
   // --------------------------------------------------------------------------
@@ -125,9 +119,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   SetTransformF setTransformF;
   SetTransformD setTransformD;
 
-  ApplyTransformF applyTransformF;
-  ApplyTransformD applyTransformD;
-
+  ApplyTransform applyTransform;
   ResetTransform resetTransform;
 
   // --------------------------------------------------------------------------

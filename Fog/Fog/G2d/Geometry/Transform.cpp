@@ -26,6 +26,13 @@ namespace Fog {
 #endif // FOG_HARDCODE_SSE2
 
 // ============================================================================
+// [Fog::Transform - Global]
+// ============================================================================
+
+static Static<TransformF> TransformF_identity;
+static Static<TransformD> TransformD_identity;
+
+// ============================================================================
 // [Fog::Transform - Helpers]
 // ============================================================================
 
@@ -451,66 +458,88 @@ static uint32_t FOG_CDECL TransformT_update(const NumT_(Transform)& self)
 
 #define ENCODE_OP(_Op_, _Order_) ((uint32_t)(_Op_) | ((uint32_t)(_Order_) << 4))
 
-template<typename NumT>
-static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opType, const void* params)
+struct TransformParams
 {
-  const NumT* paramsT = reinterpret_cast<const NumT*>(params);
-  uint32_t selfType = self.getType();
+  struct RotationF
+  {
+    float angle;
+    PointF point;
+  };
 
-  NumT_(Transform) tm(UNINITIALIZED);
+  struct RotationD
+  {
+    double angle;
+    PointD point;
+  };
+  
+  union
+  {
+    Static<PointF> pointf;
+    Static<PointD> pointd;
+
+    Static<RotationF> rotationf;
+    Static<RotationD> rotationd;
+
+    Static<TransformF> transformf;
+    Static<TransformD> transformd;
+  };
+};
+
+static err_t FOG_CDECL TransformF_transform(TransformF& self, uint32_t opType, const void* _params)
+{
+  uint32_t selfType = self.getType();
+  const TransformParams* params = reinterpret_cast<const TransformParams*>(_params);
+  
+  // Initialize to NULL so invalid access (our bug) can be detected easily.
+  const TransformF* srcf = NULL;
+  const TransformD* srcd = NULL;
+  
+  TransformF srcfTmp(UNINITIALIZED);
+  TransformD srcdTmp(UNINITIALIZED);
 
   switch (opType)
   {
     // ------------------------------------------------------------------------
     // [Translate]
-    //
-    // [1 0 0]
-    // [0 1 0]
-    // [X Y 1]
     // ------------------------------------------------------------------------
 
-    case ENCODE_OP(TRANSFORM_OP_TRANSLATE, MATRIX_ORDER_PREPEND):
+    //     |1 0 0|
+    // M = |0 1 0| * M
+    //     |X Y 1|
+
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATEF, MATRIX_ORDER_PREPEND):
     {
-      NumT x = paramsT[0];
-      NumT y = paramsT[1];
+      float x = params->pointf().x;
+      float y = params->pointf().y;
 
       switch (selfType)
       {
         case TRANSFORM_TYPE_IDENTITY:
-        {
           self._type = TRANSFORM_TYPE_TRANSLATION;
           // ... Fall through ...
-        }
+
         case TRANSFORM_TYPE_TRANSLATION:
-        {
           self._20 += x;
           self._21 += y;
           self._type |= TRANSFORM_TYPE_DIRTY;
           break;
-        }
 
         case TRANSFORM_TYPE_SCALING:
-        {
           self._20 += x * self._00;
           self._21 += y * self._11;
           break;
-        }
 
         case TRANSFORM_TYPE_DEGENERATE:
         case TRANSFORM_TYPE_PROJECTION:
-        {
           self._22 += x * self._02 + y * self._12;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_SWAP:
         case TRANSFORM_TYPE_ROTATION:
         case TRANSFORM_TYPE_AFFINE:
-        {
           self._20 += x * self._00 + y * self._10;
           self._21 += x * self._01 + y * self._11;
           break;
-        }
 
         default:
           FOG_ASSERT_NOT_REACHED();
@@ -518,10 +547,54 @@ static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opT
       break;
     }
 
-    case ENCODE_OP(TRANSFORM_OP_TRANSLATE, MATRIX_ORDER_APPEND):
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATED, MATRIX_ORDER_PREPEND):
     {
-      NumT x = paramsT[0];
-      NumT y = paramsT[1];
+      double x = params->pointd().x;
+      double y = params->pointd().y;
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          self._type = TRANSFORM_TYPE_TRANSLATION;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 = float(x + double(self._20));
+          self._21 = float(y + double(self._21));
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+          self._20 = float(x * double(self._00) + double(self._20));
+          self._21 = float(y * double(self._11) + double(self._21));
+          break;
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+          self._22 = float(x * double(self._02) + y * double(self._12) + double(self._22));
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+          self._20 = float(x * double(self._00) + y * double(self._10) + double(self._20));
+          self._21 = float(x * double(self._01) + y * double(self._11) + double(self._21));
+          break;
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         |1 0 0|
+    // M = M * |0 1 0|
+    //         |X Y 1|
+
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATEF, MATRIX_ORDER_APPEND):
+    {
+      float x = params->pointf().x;
+      float y = params->pointf().y;
 
       self._20 += x;
       self._21 += y;
@@ -532,49 +605,56 @@ static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opT
       break;
     }
 
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATED, MATRIX_ORDER_APPEND):
+    {
+      double x = params->pointd().x;
+      double y = params->pointd().y;
+
+      self._20 = float(x + double(self._20));
+      self._21 = float(y + double(self._21));
+
+      self._type = Math::max<uint32_t>(
+        self._type                 | TRANSFORM_TYPE_DIRTY,
+        TRANSFORM_TYPE_TRANSLATION | TRANSFORM_TYPE_DIRTY);
+      break;
+    }
+
     // ------------------------------------------------------------------------
     // [Scale]
-    //
-    // [X 0 0]
-    // [0 Y 0]
-    // [0 0 1]
     // ------------------------------------------------------------------------
 
-    case ENCODE_OP(TRANSFORM_OP_SCALE, MATRIX_ORDER_PREPEND):
+    //     [X 0 0]
+    // M = [0 Y 0] * M
+    //     [0 0 1]
+
+    case ENCODE_OP(TRANSFORM_OP_SCALEF, MATRIX_ORDER_PREPEND):
     {
-      NumT x = paramsT[0];
-      NumT y = paramsT[1];
+      float x = params->pointf().x;
+      float y = params->pointf().y;
 
       switch (selfType)
       {
         case TRANSFORM_TYPE_IDENTITY:
         case TRANSFORM_TYPE_TRANSLATION:
-        {
           self._00 = x;
           self._11 = y;
           self._type = TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY;
           break;
-        }
 
         case TRANSFORM_TYPE_DEGENERATE:
         case TRANSFORM_TYPE_PROJECTION:
-        {
           self._02 *= x;
           self._12 *= y;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_SWAP:
         case TRANSFORM_TYPE_ROTATION:
         case TRANSFORM_TYPE_AFFINE:
-        {
           self._01 *= x;
           self._10 *= y;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_SCALING:
-        {
           self._00 *= x;
           self._11 *= y;
 
@@ -582,7 +662,6 @@ static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opT
             self._type             | TRANSFORM_TYPE_DIRTY,
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
-        }
 
         default:
           FOG_ASSERT_NOT_REACHED();
@@ -590,56 +669,41 @@ static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opT
       break;
     }
 
-    case ENCODE_OP(TRANSFORM_OP_SCALE, MATRIX_ORDER_APPEND):
+    case ENCODE_OP(TRANSFORM_OP_SCALED, MATRIX_ORDER_PREPEND):
     {
-      NumT x = paramsT[0];
-      NumT y = paramsT[1];
-
+      double x = params->pointd().x;
+      double y = params->pointd().y;
+      
       switch (selfType)
       {
-        case TRANSFORM_TYPE_TRANSLATION:
-        {
-          self._20 *= x;
-          self._21 *= y;
-          // ... Fall through ...
-        }
-
         case TRANSFORM_TYPE_IDENTITY:
-        {
-          self._00 = x;
-          self._11 = y;
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._00 = float(x);
+          self._11 = float(y);
           self._type = TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY;
           break;
-        }
 
         case TRANSFORM_TYPE_DEGENERATE:
         case TRANSFORM_TYPE_PROJECTION:
-        {
-          self._02 *= x;
-          self._12 *= y;
+          self._02 = float(x * double(self._02));
+          self._12 = float(y * double(self._12));
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_SWAP:
         case TRANSFORM_TYPE_ROTATION:
         case TRANSFORM_TYPE_AFFINE:
-        {
-          self._01 *= x;
-          self._10 *= y;
+          self._01 = float(x * double(self._01));
+          self._10 = float(y * double(self._10));
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_SCALING:
-        {
-          self._00 *= x;
-          self._11 *= y;
-          self._20 *= x;
-          self._21 *= y;
+          self._00 = float(x * double(self._00));
+          self._11 = float(y * double(self._11));
+
           self._type = Math::max<uint32_t>(
             self._type             | TRANSFORM_TYPE_DIRTY,
             TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
-        }
 
         default:
           FOG_ASSERT_NOT_REACHED();
@@ -647,161 +711,99 @@ static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opT
       break;
     }
 
-    // ------------------------------------------------------------------------
-    // [Rotate]
-    //
-    // [ CosA SinA 0]
-    // [-SinA CosA 0]
-    // [ 0    0    1]
-    // ------------------------------------------------------------------------
+    //         [X 0 0]
+    // M = M * [0 Y 0]
+    //         [0 0 1]
 
-    case ENCODE_OP(TRANSFORM_OP_ROTATE, MATRIX_ORDER_PREPEND):
+    case ENCODE_OP(TRANSFORM_OP_SCALEF, MATRIX_ORDER_APPEND):
     {
-      NumT angle = paramsT[0];
-
-      NumT as;
-      NumT ac;
-      Math::sincos(angle, &as, &ac);
-
-      switch (selfType)
-      {
-        case TRANSFORM_TYPE_IDENTITY:
-        case TRANSFORM_TYPE_TRANSLATION:
-        {
-          self._00 = ac;
-          self._01 = as;
-          self._10 =-as;
-          self._11 = ac;
-
-          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
-          break;
-        }
-
-        case TRANSFORM_TYPE_SCALING:
-        {
-          NumT m00 = self._00;
-          NumT m11 = self._11;
-
-          self._00 = m00 * ac;
-          self._01 = m11 * as;
-          self._10 = m00 *-as;
-          self._11 = m11 * ac;
-
-          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
-          break;
-        }
-
-        case TRANSFORM_TYPE_SWAP:
-        case TRANSFORM_TYPE_ROTATION:
-        case TRANSFORM_TYPE_AFFINE:
-        {
-          NumT m00 = self._00;
-          NumT m01 = self._01;
-          NumT m10 = self._10;
-          NumT m11 = self._11;
-
-          self._00 = m00 * ac + m10 * as;
-          self._01 = m01 * ac + m11 * as;
-          self._10 = m00 *-as + m10 * ac;
-          self._11 = m01 *-as + m11 * ac;
-
-          self._type |= TRANSFORM_TYPE_DIRTY;
-          break;
-        }
-
-        case TRANSFORM_TYPE_DEGENERATE:
-        case TRANSFORM_TYPE_PROJECTION:
-        {
-          NumT t00 = ac * self._00 + as * self._10;
-          NumT t01 = ac * self._01 + as * self._11;
-          NumT t02 = ac * self._02 + as * self._12;
-
-          self._10 = -as * self._00 + ac * self._10;
-          self._11 = -as * self._01 + ac * self._11;
-          self._12 = -as * self._02 + ac * self._12;
-
-          self._00 = t00;
-          self._01 = t01;
-          self._02 = t02;
-
-          self._type |= TRANSFORM_TYPE_DIRTY;
-          break;
-        }
-
-        default:
-          FOG_ASSERT_NOT_REACHED();
-      }
-      break;
-    }
-
-    case ENCODE_OP(TRANSFORM_OP_ROTATE, MATRIX_ORDER_APPEND):
-    {
-      NumT angle = paramsT[0];
-
-      NumT as;
-      NumT ac;
-      Math::sincos(angle, &as, &ac);
+      float x = params->pointf().x;
+      float y = params->pointf().y;
 
       switch (selfType)
       {
         case TRANSFORM_TYPE_TRANSLATION:
-        {
-          NumT t20 = self._20 * ac - self._21 * as;
-          NumT t21 = self._20 * as + self._21 * ac;
-
-          self._20 = t20;
-          self._21 = t21;
+          self._20 *= x;
+          self._21 *= y;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_IDENTITY:
-        {
-          self._00 = ac;
-          self._01 = as;
-          self._10 =-as;
-          self._11 = ac;
-
-          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          self._00 = x;
+          self._11 = y;
+          self._type = TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY;
           break;
-        }
 
-        case TRANSFORM_TYPE_SCALING:
-        {
-          NumT t00 = self._00 * ac;
-          NumT t10 = self._11 *-as;
-          NumT t20 = self._20 * ac + self._21 *-as;
-
-          self._01 = self._00 * as;
-          self._11 = self._11 * ac;
-          self._21 = self._20 * as + self._21 * ac;
-
-          self._00 = t00;
-          self._10 = t10;
-          self._20 = t20;
-
-          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
-          break;
-        }
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+          self._02 *= x;
+          self._12 *= y;
+          // ... Fall through ...
 
         case TRANSFORM_TYPE_SWAP:
         case TRANSFORM_TYPE_ROTATION:
         case TRANSFORM_TYPE_AFFINE:
-        case TRANSFORM_TYPE_PROJECTION:
-        case TRANSFORM_TYPE_DEGENERATE:
-        {
-          NumT t00 = self._00 * ac - self._01 * as;
-          NumT t10 = self._10 * ac - self._11 * as;
-          NumT t20 = self._20 * ac - self._21 * as;
+          self._01 *= x;
+          self._10 *= y;
+          // ... Fall through ...
 
-          self._01 = self._00 * as + self._01 * ac;
-          self._11 = self._10 * as + self._11 * ac;
-          self._21 = self._20 * as + self._21 * ac;
+        case TRANSFORM_TYPE_SCALING:
+          self._00 *= x;
+          self._11 *= y;
+          self._20 *= x;
+          self._21 *= y;
 
-          self._00 = t00;
-          self._10 = t10;
-          self._20 = t20;
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY,
+            TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
           break;
-        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    case ENCODE_OP(TRANSFORM_OP_SCALED, MATRIX_ORDER_APPEND):
+    {
+      double x = params->pointd().x;
+      double y = params->pointd().y;
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 = float(x * double(self._20));
+          self._21 = float(y * double(self._21));
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_IDENTITY:
+          self._00 = float(x);
+          self._11 = float(y);
+          self._type = TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+          self._02 = float(x * double(self._02));
+          self._12 = float(y * double(self._12));
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+          self._01 = float(x * double(self._01));
+          self._10 = float(y * double(self._10));
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SCALING:
+          self._00 = float(x * double(self._00));
+          self._11 = float(y * double(self._11));
+          self._20 = float(x * double(self._20));
+          self._21 = float(y * double(self._21));
+
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY,
+            TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
+          break;
 
         default:
           FOG_ASSERT_NOT_REACHED();
@@ -811,45 +813,44 @@ static err_t FOG_CDECL TransformT_transform(NumT_(Transform)& self, uint32_t opT
 
     // ------------------------------------------------------------------------
     // [Skew]
-    //
-    // [ 1   TanY 0]
-    // [TanX 1    0]
-    // [ 0   0    1]
     // ------------------------------------------------------------------------
 
-    case ENCODE_OP(TRANSFORM_OP_SKEW, MATRIX_ORDER_PREPEND):
-    {
-      NumT xTan = Math::tan(paramsT[0]);
-      NumT yTan = xTan;
+    //     [  1    tan(y) 0]
+    // M = [tan(x)   1    0] * M
+    //     [  0      0    1]
 
-      if (paramsT[0] != paramsT[1])
-        yTan = Math::tan(paramsT[1]);
+    case ENCODE_OP(TRANSFORM_OP_SKEWF, MATRIX_ORDER_PREPEND):
+    {
+      float x = params->pointf().x;
+      float y = params->pointf().y;
+
+      float xTan = Math::tan(x);
+      float yTan = xTan;
+
+      if (x != y)
+        yTan = Math::tan(y);
 
       switch (selfType)
       {
         case TRANSFORM_TYPE_IDENTITY:
         case TRANSFORM_TYPE_TRANSLATION:
         case TRANSFORM_TYPE_SCALING:
-        {
           self._01 = yTan * self._11;
           self._10 = xTan * self._00;
 
           self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
           break;
-        }
 
         case TRANSFORM_TYPE_SWAP:
         case TRANSFORM_TYPE_ROTATION:
-        {
           self._type = TRANSFORM_TYPE_AFFINE;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_AFFINE:
-skewPrependAffine:
         {
-          NumT t00 = yTan * self._10;
-          NumT t01 = yTan * self._11;
+_SkewPrependAffineF:
+          float t00 = yTan * self._10;
+          float t01 = yTan * self._11;
 
           self._10 += xTan * self._00;
           self._11 += xTan * self._01;
@@ -864,12 +865,12 @@ skewPrependAffine:
         case TRANSFORM_TYPE_PROJECTION:
         case TRANSFORM_TYPE_DEGENERATE:
         {
-          NumT t02 = yTan * self._12;
+          float t02 = yTan * self._12;
 
           self._12 += xTan * self._02;
           self._02 += t02;
 
-          goto skewPrependAffine;
+          goto _SkewPrependAffineF;
         }
 
         default:
@@ -878,27 +879,92 @@ skewPrependAffine:
       break;
     }
 
-    case ENCODE_OP(TRANSFORM_OP_SKEW, MATRIX_ORDER_APPEND):
+    case ENCODE_OP(TRANSFORM_OP_SKEWD, MATRIX_ORDER_PREPEND):
     {
-      NumT xTan = Math::tan(paramsT[0]);
-      NumT yTan = xTan;
+      double x = params->pointd().x;
+      double y = params->pointd().y;
 
-      if (paramsT[0] != paramsT[1])
-        yTan = Math::tan(paramsT[1]);
+      double xTan = Math::tan(x);
+      double yTan = xTan;
+
+      if (x != y)
+        yTan = Math::tan(y);
 
       switch (selfType)
       {
         case TRANSFORM_TYPE_IDENTITY:
+        case TRANSFORM_TYPE_TRANSLATION:
+        case TRANSFORM_TYPE_SCALING:
+          self._01 = float(yTan * double(self._11));
+          self._10 = float(xTan * double(self._00));
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+          self._type = TRANSFORM_TYPE_AFFINE;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_AFFINE:
         {
+_SkewPrependAffineD:
+          double t00 = yTan * double(self._10);
+          double t01 = yTan * double(self._11);
+
+          self._10 = float(xTan * double(self._00) + double(self._10));
+          self._11 = float(xTan * double(self._01) + double(self._11));
+
+          self._00 = float(t00 + double(self._00));
+          self._01 = float(t01 + double(self._01));
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          double t02 = yTan * double(self._12);
+
+          self._12 = float(xTan * double(self._02) + double(self._12));
+          self._02 = float(t02 + double(self._02));
+
+          goto _SkewPrependAffineD;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         [  1    tan(y) 0]
+    // M = M * [tan(x)   1    0]
+    //         [  0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_SKEWF, MATRIX_ORDER_APPEND):
+    {
+      float x = params->pointf().x;
+      float y = params->pointf().y;
+
+      float xTan = Math::tan(x);
+      float yTan = xTan;
+
+      if (x != y)
+        yTan = Math::tan(y);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
           self._01 = yTan;
           self._10 = xTan;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_TRANSLATION:
         {
-          NumT t20 = self._21 * xTan;
-          NumT t21 = self._20 * yTan;
+          float t20 = self._21 * xTan;
+          float t21 = self._20 * yTan;
 
           self._20 += t20;
           self._21 += t21;
@@ -909,8 +975,8 @@ skewPrependAffine:
 
         case TRANSFORM_TYPE_SCALING:
         {
-          NumT t10 = self._11 * xTan;
-          NumT t20 = self._21 * xTan;
+          float t10 = self._11 * xTan;
+          float t20 = self._21 * xTan;
 
           self._01 += self._00 * yTan;
           self._21 += self._20 * yTan;
@@ -924,18 +990,16 @@ skewPrependAffine:
 
         case TRANSFORM_TYPE_SWAP:
         case TRANSFORM_TYPE_ROTATION:
-        {
           self._type = TRANSFORM_TYPE_AFFINE;
           // ... Fall through ...
-        }
 
         case TRANSFORM_TYPE_AFFINE:
         case TRANSFORM_TYPE_PROJECTION:
         case TRANSFORM_TYPE_DEGENERATE:
         {
-          NumT t00 = self._01 * xTan;
-          NumT t10 = self._11 * xTan;
-          NumT t20 = self._21 * xTan;
+          float t00 = self._01 * xTan;
+          float t10 = self._11 * xTan;
+          float t20 = self._21 * xTan;
 
           self._01 += self._00 * yTan;
           self._11 += self._10 * yTan;
@@ -955,60 +1019,422 @@ skewPrependAffine:
       break;
     }
 
-    // ------------------------------------------------------------------------
-    // [Flip]
-    // ------------------------------------------------------------------------
-
-    case ENCODE_OP(TRANSFORM_OP_FLIP, MATRIX_ORDER_PREPEND):
-    case ENCODE_OP(TRANSFORM_OP_FLIP, MATRIX_ORDER_APPEND):
+    case ENCODE_OP(TRANSFORM_OP_SKEWD, MATRIX_ORDER_APPEND):
     {
-      uint32_t axis = reinterpret_cast<const uint32_t*>(params)[0];
+      double x = params->pointd().x;
+      double y = params->pointd().y;
+    
+      double xTan = Math::tan(x);
+      double yTan = xTan;
 
-      if (axis & AXIS_X) { self._00 = -self._00; self._01 = -self._01; self._02 = -self._02; }
-      if (axis & AXIS_Y) { self._10 = -self._10; self._11 = -self._11; self._12 = -self._12; }
-      if (axis & AXIS_Z) { self._20 = -self._20; self._21 = -self._21; self._22 = -self._22; }
+      if (x != y)
+        yTan = Math::tan(y);
 
-      self._type = Math::max<uint32_t>(selfType, TRANSFORM_TYPE_SCALING) | TRANSFORM_TYPE_DIRTY;
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          self._01 = float(yTan);
+          self._10 = float(xTan);
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_TRANSLATION:
+        {
+          double t20 = double(self._21) * xTan;
+          double t21 = double(self._20) * yTan;
+
+          self._20 = float(t20 + double(self._20));
+          self._21 = float(t21 + double(self._21));
+
+          self._type = TRANSFORM_TYPE_AFFINE;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t10 = double(self._11) * xTan;
+          double t20 = double(self._21) * xTan;
+
+          self._01 = float(double(self._00) * yTan + double(self._01));
+          self._21 = float(double(self._20) * yTan + double(self._21));
+
+          self._10 = float(t10 + double(self._10));
+          self._20 = float(t20 + double(self._20));
+
+          self._type = TRANSFORM_TYPE_AFFINE;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+          self._type = TRANSFORM_TYPE_AFFINE;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_AFFINE:
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          double t00 = double(self._01) * xTan;
+          double t10 = double(self._11) * xTan;
+          double t20 = double(self._21) * xTan;
+
+          self._01 = float(double(self._00) * yTan + double(self._01));
+          self._11 = float(double(self._10) * yTan + double(self._11));
+          self._21 = float(double(self._20) * yTan + double(self._21));
+
+          self._00 = float(t00 + double(self._00));
+          self._10 = float(t10 + double(self._10));
+          self._20 = float(t20 + double(self._20));
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
       break;
     }
 
     // ------------------------------------------------------------------------
-    // [Multiply]
-    //
-    // [S00 S01 S02]
-    // [S10 S11 S12]
-    // [S20 S21 S22]
+    // [Rotate]
     // ------------------------------------------------------------------------
 
-    case ENCODE_OP(TRANSFORM_OP_MULTIPLY, MATRIX_ORDER_PREPEND):
-_MultiplyPrepend:
+    //     [ cos(a) sin(a) 0]
+    // M = [-sin(a) cos(a) 0] * M
+    //     [   0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATEF, MATRIX_ORDER_PREPEND):
     {
-      const NumT_(Transform)& s = *reinterpret_cast<const NumT_(Transform)*>(params);
-      uint32_t sType = s.getType();
+      float angle = params->rotationf().angle;
+
+      float as, ac;
+      Math::sincos(angle, &as, &ac);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._00 = ac;
+          self._01 = as;
+          self._10 =-as;
+          self._11 = ac;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          float m00 = self._00;
+          float m11 = self._11;
+
+          self._00 = m00 * ac;
+          self._01 = m11 * as;
+          self._10 = m00 *-as;
+          self._11 = m11 * ac;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          float m00 = self._00;
+          float m01 = self._01;
+          float m10 = self._10;
+          float m11 = self._11;
+
+          self._00 = m00 * ac + m10 * as;
+          self._01 = m01 * ac + m11 * as;
+          self._10 = m00 *-as + m10 * ac;
+          self._11 = m01 *-as + m11 * ac;
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          float t00 = ac * self._00 + as * self._10;
+          float t01 = ac * self._01 + as * self._11;
+          float t02 = ac * self._02 + as * self._12;
+
+          self._10 = -as * self._00 + ac * self._10;
+          self._11 = -as * self._01 + ac * self._11;
+          self._12 = -as * self._02 + ac * self._12;
+
+          self._00 = t00;
+          self._01 = t01;
+          self._02 = t02;
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATED, MATRIX_ORDER_PREPEND):
+    {
+      double angle = params->rotationd().angle;
+    
+      double as, ac;
+      Math::sincos(angle, &as, &ac);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._00 = float(ac);
+          self._01 = float(as);
+          self._10 =-float(as);
+          self._11 = float(ac);
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double m00 = double(self._00);
+          double m11 = double(self._11);
+
+          self._00 = float(m00 * ac);
+          self._01 = float(m11 * as);
+          self._10 = float(m00 *-as);
+          self._11 = float(m11 * ac);
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          double m00 = double(self._00);
+          double m01 = double(self._01);
+          double m10 = double(self._10);
+          double m11 = double(self._11);
+
+          self._00 = float(m00 * ac + m10 * as);
+          self._01 = float(m01 * ac + m11 * as);
+          self._10 = float(m00 *-as + m10 * ac);
+          self._11 = float(m01 *-as + m11 * ac);
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          double t00 = ac * double(self._00) + as * double(self._10);
+          double t01 = ac * double(self._01) + as * double(self._11);
+          double t02 = ac * double(self._02) + as * double(self._12);
+
+          self._10 = float(-as * double(self._00) + ac * double(self._10));
+          self._11 = float(-as * double(self._01) + ac * double(self._11));
+          self._12 = float(-as * double(self._02) + ac * double(self._12));
+
+          self._00 = float(t00);
+          self._01 = float(t01);
+          self._02 = float(t02);
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         [ cos(a) sin(a) 0]
+    // M = M * [-sin(a) cos(a) 0]
+    //         [   0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATEF, MATRIX_ORDER_APPEND):
+    {
+      float angle = params->rotationf().angle;
+
+      float as, ac;
+      Math::sincos(angle, &as, &ac);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_TRANSLATION:
+        {
+          float t20 = self._20 * ac - self._21 * as;
+          float t21 = self._20 * as + self._21 * ac;
+
+          self._20 = t20;
+          self._21 = t21;
+          // ... Fall through ...
+        }
+
+        case TRANSFORM_TYPE_IDENTITY:
+          self._00 = ac;
+          self._01 = as;
+          self._10 =-as;
+          self._11 = ac;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          float t00 = self._00 * ac;
+          float t10 = self._11 *-as;
+          float t20 = self._20 * ac + self._21 *-as;
+
+          self._01 = self._00 * as;
+          self._11 = self._11 * ac;
+          self._21 = self._20 * as + self._21 * ac;
+
+          self._00 = t00;
+          self._10 = t10;
+          self._20 = t20;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          float t00 = self._00 * ac - self._01 * as;
+          float t10 = self._10 * ac - self._11 * as;
+          float t20 = self._20 * ac - self._21 * as;
+
+          self._01 = self._00 * as + self._01 * ac;
+          self._11 = self._10 * as + self._11 * ac;
+          self._21 = self._20 * as + self._21 * ac;
+
+          self._00 = t00;
+          self._10 = t10;
+          self._20 = t20;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATED, MATRIX_ORDER_APPEND):
+    {
+      double angle = float(params->rotationd().angle);
+
+      double as, ac;
+      Math::sincos(angle, &as, &ac);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_TRANSLATION:
+        {
+          double t20 = double(self._20) * ac - double(self._21) * as;
+          double t21 = double(self._20) * as + double(self._21) * ac;
+
+          self._20 = float(t20);
+          self._21 = float(t21);
+          // ... Fall through ...
+        }
+
+        case TRANSFORM_TYPE_IDENTITY:
+          self._00 = float(ac);
+          self._01 = float(as);
+          self._10 =-float(as);
+          self._11 = float(ac);
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t00 = double(self._00) * ac;
+          double t10 = double(self._11) *-as;
+          double t20 = double(self._20) * ac + double(self._21) *-as;
+
+          self._01 = float(double(self._00) * as);
+          self._11 = float(double(self._11) * ac);
+          self._21 = float(double(self._20) * as + double(self._21) * ac);
+
+          self._00 = float(t00);
+          self._10 = float(t10);
+          self._20 = float(t20);
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          double t00 = double(self._00) * ac - double(self._01) * as;
+          double t10 = double(self._10) * ac - double(self._11) * as;
+          double t20 = double(self._20) * ac - double(self._21) * as;
+
+          self._01 = float(self._00 * as + double(self._01) * ac);
+          self._11 = float(self._10 * as + double(self._11) * ac);
+          self._21 = float(self._20 * as + double(self._21) * ac);
+
+          self._00 = float(t00);
+          self._10 = float(t10);
+          self._20 = float(t20);
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // [Multiply]
+    // ------------------------------------------------------------------------
+
+    //     [S00 S01 S02]
+    // M = [S10 S11 S12] * M
+    //     [S20 S21 S22]
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYF, MATRIX_ORDER_PREPEND):
+    {
+      srcf = &params->transformf();
+
+      uint32_t sType = srcf->getType();
       uint32_t dType = Math::max(selfType, sType);
 
       self._type = dType | TRANSFORM_TYPE_DIRTY;
       switch (dType)
       {
         case TRANSFORM_TYPE_IDENTITY:
-        {
           break;
-        }
 
         case TRANSFORM_TYPE_TRANSLATION:
-        {
-          self._20 += s._20;
-          self._21 += s._21;
+          self._20 += srcf->_20;
+          self._21 += srcf->_21;
           break;
-        }
 
         case TRANSFORM_TYPE_SCALING:
         {
-          NumT t20 = s._20 * self._00;
-          NumT t21 = s._21 * self._11;
+          float t20 = srcf->_20 * self._00;
+          float t21 = srcf->_21 * self._11;
 
-          self._00 *= s._00;
-          self._11 *= s._11;
+          self._00 *= srcf->_00;
+          self._11 *= srcf->_11;
 
           self._20 += t20;
           self._21 += t21;
@@ -1019,14 +1445,14 @@ _MultiplyPrepend:
         case TRANSFORM_TYPE_ROTATION:
         case TRANSFORM_TYPE_AFFINE:
         {
-          NumT t00 = s._00 * self._00 + s._01 * self._10;
-          NumT t01 = s._00 * self._01 + s._01 * self._11;
+          float t00 = srcf->_00 * self._00 + srcf->_01 * self._10;
+          float t01 = srcf->_00 * self._01 + srcf->_01 * self._11;
 
-          NumT t10 = s._10 * self._00 + s._11 * self._10;
-          NumT t11 = s._10 * self._01 + s._11 * self._11;
+          float t10 = srcf->_10 * self._00 + srcf->_11 * self._10;
+          float t11 = srcf->_10 * self._01 + srcf->_11 * self._11;
 
-          NumT t20 = s._20 * self._00 + s._21 * self._10;
-          NumT t21 = s._20 * self._01 + s._21 * self._11;
+          float t20 = srcf->_20 * self._00 + srcf->_21 * self._10;
+          float t21 = srcf->_20 * self._01 + srcf->_21 * self._11;
 
           self._00 = t00;
           self._01 = t01;
@@ -1041,17 +1467,17 @@ _MultiplyPrepend:
         case TRANSFORM_TYPE_DEGENERATE:
         case TRANSFORM_TYPE_PROJECTION:
         {
-          NumT t00 = s._00 * self._00 + s._01 * self._10 + s._02 * self._20;
-          NumT t01 = s._00 * self._01 + s._01 * self._11 + s._02 * self._21;
-          NumT t02 = s._00 * self._02 + s._01 * self._12 + s._02 * self._22;
+          float t00 = srcf->_00 * self._00 + srcf->_01 * self._10 + srcf->_02 * self._20;
+          float t01 = srcf->_00 * self._01 + srcf->_01 * self._11 + srcf->_02 * self._21;
+          float t02 = srcf->_00 * self._02 + srcf->_01 * self._12 + srcf->_02 * self._22;
 
-          NumT t10 = s._10 * self._00 + s._11 * self._10 + s._12 * self._20;
-          NumT t11 = s._10 * self._01 + s._11 * self._11 + s._12 * self._21;
-          NumT t12 = s._10 * self._02 + s._11 * self._12 + s._12 * self._22;
+          float t10 = srcf->_10 * self._00 + srcf->_11 * self._10 + srcf->_12 * self._20;
+          float t11 = srcf->_10 * self._01 + srcf->_11 * self._11 + srcf->_12 * self._21;
+          float t12 = srcf->_10 * self._02 + srcf->_11 * self._12 + srcf->_12 * self._22;
 
-          NumT t20 = s._20 * self._00 + s._21 * self._10 + s._22 * self._20;
-          NumT t21 = s._20 * self._01 + s._21 * self._11 + s._22 * self._21;
-          NumT t22 = s._20 * self._02 + s._21 * self._12 + s._22 * self._22;
+          float t20 = srcf->_20 * self._00 + srcf->_21 * self._10 + srcf->_22 * self._20;
+          float t21 = srcf->_20 * self._01 + srcf->_21 * self._11 + srcf->_22 * self._21;
+          float t22 = srcf->_20 * self._02 + srcf->_21 * self._12 + srcf->_22 * self._22;
 
           self._00 = t00;
           self._01 = t01;
@@ -1073,35 +1499,125 @@ _MultiplyPrepend:
       break;
     }
 
-    case ENCODE_OP(TRANSFORM_OP_MULTIPLY, MATRIX_ORDER_APPEND):
-_MultiplyAppend:
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYD, MATRIX_ORDER_PREPEND):
     {
-      const NumT_(Transform)& s = *reinterpret_cast<const NumT_(Transform)*>(params);
-      uint32_t sType = s.getType();
+      srcd = &params->transformd();
+
+_MultiplyPrependD:
+      uint32_t sType = srcd->getType();
       uint32_t dType = Math::max(selfType, sType);
 
       self._type = dType | TRANSFORM_TYPE_DIRTY;
       switch (dType)
       {
         case TRANSFORM_TYPE_IDENTITY:
-        {
           break;
-        }
 
         case TRANSFORM_TYPE_TRANSLATION:
-        {
-          self._20 += s._20;
-          self._21 += s._21;
+          self._20 = float(srcd->_20 + double(self._20));
+          self._21 = float(srcd->_21 + double(self._21));
           break;
-        }
 
         case TRANSFORM_TYPE_SCALING:
         {
-          NumT t00 = self._00 * s._00;
-          NumT t11 = self._11 * s._11;
+          double t20 = srcd->_20 * double(self._00);
+          double t21 = srcd->_21 * double(self._11);
 
-          NumT t20 = self._20 * s._00 + s._20;
-          NumT t21 = self._21 * s._11 + s._21;
+          self._00 = float(srcd->_00 * double(self._00));
+          self._11 = float(srcd->_11 * double(self._11));
+
+          self._20 = float(t20 + double(self._20));
+          self._21 = float(t21 + double(self._20));
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          double t00 = srcd->_00 * double(self._00) + srcd->_01 * double(self._10);
+          double t01 = srcd->_00 * double(self._01) + srcd->_01 * double(self._11);
+
+          double t10 = srcd->_10 * double(self._00) + srcd->_11 * double(self._10);
+          double t11 = srcd->_10 * double(self._01) + srcd->_11 * double(self._11);
+
+          double t20 = srcd->_20 * double(self._00) + srcd->_21 * double(self._10);
+          double t21 = srcd->_20 * double(self._01) + srcd->_21 * double(self._11);
+
+          self._00 = float(t00);
+          self._01 = float(t01);
+          self._10 = float(t10);
+          self._11 = float(t11);
+
+          self._20 = float(t20 + double(self._20));
+          self._21 = float(t21 + double(self._20));
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          double t00 = srcd->_00 * double(self._00) + srcd->_01 * double(self._10) + srcd->_02 * double(self._20);
+          double t01 = srcd->_00 * double(self._01) + srcd->_01 * double(self._11) + srcd->_02 * double(self._21);
+          double t02 = srcd->_00 * double(self._02) + srcd->_01 * double(self._12) + srcd->_02 * double(self._22);
+
+          double t10 = srcd->_10 * double(self._00) + srcd->_11 * double(self._10) + srcd->_12 * double(self._20);
+          double t11 = srcd->_10 * double(self._01) + srcd->_11 * double(self._11) + srcd->_12 * double(self._21);
+          double t12 = srcd->_10 * double(self._02) + srcd->_11 * double(self._12) + srcd->_12 * double(self._22);
+
+          double t20 = srcd->_20 * double(self._00) + srcd->_21 * double(self._10) + srcd->_22 * double(self._20);
+          double t21 = srcd->_20 * double(self._01) + srcd->_21 * double(self._11) + srcd->_22 * double(self._21);
+          double t22 = srcd->_20 * double(self._02) + srcd->_21 * double(self._12) + srcd->_22 * double(self._22);
+
+          self._00 = float(t00);
+          self._01 = float(t01);
+          self._02 = float(t02);
+
+          self._10 = float(t10);
+          self._11 = float(t11);
+          self._12 = float(t12);
+
+          self._20 = float(t20);
+          self._21 = float(t21);
+          self._22 = float(t22);
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         |S00 S01 S02|
+    // M = M * |S10 S11 S12|
+    //         |S20 S21 S22|
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYF, MATRIX_ORDER_APPEND):
+    {
+      srcf = &params->transformf();
+
+      uint32_t sType = srcf->getType();
+      uint32_t dType = Math::max(selfType, sType);
+
+      self._type = dType | TRANSFORM_TYPE_DIRTY;
+      switch (dType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          break;
+
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 += srcf->_20;
+          self._21 += srcf->_21;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          float t00 = self._00 * srcf->_00;
+          float t11 = self._11 * srcf->_11;
+
+          float t20 = self._20 * srcf->_00 + srcf->_20;
+          float t21 = self._21 * srcf->_11 + srcf->_21;
 
           self._00 = t00;
           self._11 = t11;
@@ -1115,14 +1631,14 @@ _MultiplyAppend:
         case TRANSFORM_TYPE_ROTATION:
         case TRANSFORM_TYPE_AFFINE:
         {
-          NumT t00 = self._00 * s._00 + self._01 * s._10;
-          NumT t01 = self._00 * s._01 + self._01 * s._11;
+          float t00 = self._00 * srcf->_00 + self._01 * srcf->_10;
+          float t01 = self._00 * srcf->_01 + self._01 * srcf->_11;
 
-          NumT t10 = self._10 * s._00 + self._11 * s._10;
-          NumT t11 = self._10 * s._01 + self._11 * s._11;
+          float t10 = self._10 * srcf->_00 + self._11 * srcf->_10;
+          float t11 = self._10 * srcf->_01 + self._11 * srcf->_11;
 
-          NumT t20 = self._20 * s._00 + self._21 * s._10 + s._20;
-          NumT t21 = self._20 * s._01 + self._21 * s._11 + s._21;
+          float t20 = self._20 * srcf->_00 + self._21 * srcf->_10 + srcf->_20;
+          float t21 = self._20 * srcf->_01 + self._21 * srcf->_11 + srcf->_21;
 
           self._00 = t00;
           self._01 = t01;
@@ -1138,17 +1654,913 @@ _MultiplyAppend:
         case TRANSFORM_TYPE_DEGENERATE:
         case TRANSFORM_TYPE_PROJECTION:
         {
-          NumT t00 = self._00 * s._00 + self._01 * s._10 + self._02 * s._20;
-          NumT t01 = self._00 * s._01 + self._01 * s._11 + self._02 * s._21;
-          NumT t02 = self._00 * s._02 + self._01 * s._12 + self._02 * s._22;
+          float t00 = self._00 * srcf->_00 + self._01 * srcf->_10 + self._02 * srcf->_20;
+          float t01 = self._00 * srcf->_01 + self._01 * srcf->_11 + self._02 * srcf->_21;
+          float t02 = self._00 * srcf->_02 + self._01 * srcf->_12 + self._02 * srcf->_22;
 
-          NumT t10 = self._10 * s._00 + self._11 * s._10 + self._12 * s._20;
-          NumT t11 = self._10 * s._01 + self._11 * s._11 + self._12 * s._21;
-          NumT t12 = self._10 * s._02 + self._11 * s._12 + self._12 * s._22;
+          float t10 = self._10 * srcf->_00 + self._11 * srcf->_10 + self._12 * srcf->_20;
+          float t11 = self._10 * srcf->_01 + self._11 * srcf->_11 + self._12 * srcf->_21;
+          float t12 = self._10 * srcf->_02 + self._11 * srcf->_12 + self._12 * srcf->_22;
 
-          NumT t20 = self._20 * s._00 + self._21 * s._10 + self._22 * s._20;
-          NumT t21 = self._20 * s._01 + self._21 * s._11 + self._22 * s._21;
-          NumT t22 = self._20 * s._02 + self._21 * s._12 + self._22 * s._22;
+          float t20 = self._20 * srcf->_00 + self._21 * srcf->_10 + self._22 * srcf->_20;
+          float t21 = self._20 * srcf->_01 + self._21 * srcf->_11 + self._22 * srcf->_21;
+          float t22 = self._20 * srcf->_02 + self._21 * srcf->_12 + self._22 * srcf->_22;
+
+          self._00 = t00;
+          self._01 = t01;
+          self._02 = t02;
+
+          self._10 = t10;
+          self._11 = t11;
+          self._12 = t12;
+
+          self._20 = t20;
+          self._21 = t21;
+          self._22 = t22;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYD, MATRIX_ORDER_APPEND):
+    {
+      srcd = &params->transformd();
+
+_MultiplyAppendD:
+      uint32_t sType = srcd->getType();
+      uint32_t dType = Math::max(selfType, sType);
+
+      self._type = dType | TRANSFORM_TYPE_DIRTY;
+      switch (dType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          break;
+
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 = float(srcd->_20 + double(self._20));
+          self._21 = float(srcd->_21 + double(self._21));
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t00 = double(self._00) * srcd->_00;
+          double t11 = double(self._11) * srcd->_11;
+
+          double t20 = double(self._20) * srcd->_00 + srcd->_20;
+          double t21 = double(self._21) * srcd->_11 + srcd->_21;
+
+          self._00 = float(t00);
+          self._11 = float(t11);
+
+          self._20 = float(t20);
+          self._21 = float(t21);
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          double t00 = double(self._00) * srcd->_00 + double(self._01) * srcd->_10;
+          double t01 = double(self._00) * srcd->_01 + double(self._01) * srcd->_11;
+
+          double t10 = double(self._10) * srcd->_00 + double(self._11) * srcd->_10;
+          double t11 = double(self._10) * srcd->_01 + double(self._11) * srcd->_11;
+
+          double t20 = double(self._20) * srcd->_00 + double(self._21) * srcd->_10 + srcd->_20;
+          double t21 = double(self._20) * srcd->_01 + double(self._21) * srcd->_11 + srcd->_21;
+
+          self._00 = float(t00);
+          self._01 = float(t01);
+
+          self._10 = float(t10);
+          self._11 = float(t11);
+
+          self._20 = float(t20);
+          self._21 = float(t21);
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          double t00 = double(self._00) * srcd->_00 + double(self._01) * srcd->_10 + double(self._02) * srcd->_20;
+          double t01 = double(self._00) * srcd->_01 + double(self._01) * srcd->_11 + double(self._02) * srcd->_21;
+          double t02 = double(self._00) * srcd->_02 + double(self._01) * srcd->_12 + double(self._02) * srcd->_22;
+
+          double t10 = double(self._10) * srcd->_00 + double(self._11) * srcd->_10 + double(self._12) * srcd->_20;
+          double t11 = double(self._10) * srcd->_01 + double(self._11) * srcd->_11 + double(self._12) * srcd->_21;
+          double t12 = double(self._10) * srcd->_02 + double(self._11) * srcd->_12 + double(self._12) * srcd->_22;
+
+          double t20 = double(self._20) * srcd->_00 + double(self._21) * srcd->_10 + double(self._22) * srcd->_20;
+          double t21 = double(self._20) * srcd->_01 + double(self._21) * srcd->_11 + double(self._22) * srcd->_21;
+          double t22 = double(self._20) * srcd->_02 + double(self._21) * srcd->_12 + double(self._22) * srcd->_22;
+
+          self._00 = float(t00);
+          self._01 = float(t01);
+          self._02 = float(t02);
+
+          self._10 = float(t10);
+          self._11 = float(t11);
+          self._12 = float(t12);
+
+          self._20 = float(t20);
+          self._21 = float(t21);
+          self._22 = float(t22);
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // [Multiply Inverted]
+    // ------------------------------------------------------------------------
+
+    //        |S00 S01 S02|
+    // M = Inv|S10 S11 S12| * M
+    //        |S20 S21 S22|
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVF, MATRIX_ORDER_PREPEND):
+      srcdTmp = params->transformf();
+      if (!srcdTmp.invert())
+        return ERR_GEOMETRY_DEGENERATE;
+
+      srcd = &srcdTmp;
+      goto _MultiplyPrependD;
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVD, MATRIX_ORDER_PREPEND):
+      if (!TransformD::invert(srcdTmp, params->transformd()))
+        return ERR_GEOMETRY_DEGENERATE;
+
+      srcd = &srcdTmp;
+      goto _MultiplyPrependD;
+
+    //            |S00 S01 S02|
+    // M = M * Inv|S10 S11 S12|
+    //            |S20 S21 S22|
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVF, MATRIX_ORDER_APPEND):
+      srcdTmp = params->transformf();
+      if (!srcdTmp.invert())
+        return ERR_GEOMETRY_DEGENERATE;
+
+      srcd = &srcdTmp;
+      goto _MultiplyAppendD;
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVD, MATRIX_ORDER_APPEND):
+      if (!TransformD::invert(srcdTmp, params->transformd()))
+        return ERR_GEOMETRY_DEGENERATE;
+
+      srcd = &srcdTmp;
+      goto _MultiplyAppendD;
+
+    // ------------------------------------------------------------------------
+    // [Flip]
+    // ------------------------------------------------------------------------
+
+    case ENCODE_OP(TRANSFORM_OP_FLIP, MATRIX_ORDER_PREPEND):
+    case ENCODE_OP(TRANSFORM_OP_FLIP, MATRIX_ORDER_APPEND):
+    {
+      uint32_t axis = reinterpret_cast<const uint32_t*>(_params)[0];
+
+      if (axis & AXIS_X) { self._00 = -self._00; self._01 = -self._01; self._02 = -self._02; }
+      if (axis & AXIS_Y) { self._10 = -self._10; self._11 = -self._11; self._12 = -self._12; }
+      if (axis & AXIS_Z) { self._20 = -self._20; self._21 = -self._21; self._22 = -self._22; }
+
+      self._type = Math::max<uint32_t>(selfType, TRANSFORM_TYPE_SCALING) | TRANSFORM_TYPE_DIRTY;
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // [End]
+    // ------------------------------------------------------------------------
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL TransformD_transform(TransformD& self, uint32_t opType, const void* _params)
+{
+  uint32_t selfType = self.getType();
+
+  const TransformParams* params = reinterpret_cast<const TransformParams*>(_params);
+  const TransformD* src;
+  TransformD srcTmp(UNINITIALIZED);
+
+  // Helper variables used across the transform operators inside switch().
+  double angle;
+  double x, y;
+
+  switch (opType)
+  {
+    // ------------------------------------------------------------------------
+    // [Translate]
+    // ------------------------------------------------------------------------
+
+    //     |1 0 0|
+    // M = |0 1 0| * M
+    //     |X Y 1|
+
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATEF, MATRIX_ORDER_PREPEND):
+      x = double(params->pointf().x);
+      y = double(params->pointf().y);
+      goto _TranslatePrepend;
+
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATED, MATRIX_ORDER_PREPEND):
+      x = params->pointd().x;
+      y = params->pointd().y;
+
+_TranslatePrepend:
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          self._type = TRANSFORM_TYPE_TRANSLATION;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 += x;
+          self._21 += y;
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+          self._20 += x * self._00;
+          self._21 += y * self._11;
+          break;
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+          self._22 += x * self._02 + y * self._12;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+          self._20 += x * self._00 + y * self._10;
+          self._21 += x * self._01 + y * self._11;
+          break;
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+
+    //         |1 0 0|
+    // M = M * |0 1 0|
+    //         |X Y 1|
+
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATEF, MATRIX_ORDER_APPEND):
+      x = double(params->pointf().x);
+      y = double(params->pointf().y);
+
+    case ENCODE_OP(TRANSFORM_OP_TRANSLATED, MATRIX_ORDER_APPEND):
+      x = params->pointd().x;
+      y = params->pointd().y;
+
+_TranslateAppend:
+      self._20 += x;
+      self._21 += y;
+
+      self._type = Math::max<uint32_t>(
+        self._type                 | TRANSFORM_TYPE_DIRTY,
+        TRANSFORM_TYPE_TRANSLATION | TRANSFORM_TYPE_DIRTY);
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Scale]
+    // ------------------------------------------------------------------------
+
+    //     [X 0 0]
+    // M = [0 Y 0] * M
+    //     [0 0 1]
+
+    case ENCODE_OP(TRANSFORM_OP_SCALEF, MATRIX_ORDER_PREPEND):
+      x = double(params->pointf().x);
+      y = double(params->pointf().y);
+      goto _ScalePrepend;
+
+    case ENCODE_OP(TRANSFORM_OP_SCALED, MATRIX_ORDER_PREPEND):
+      x = params->pointd().x;
+      y = params->pointd().y;
+
+_ScalePrepend:
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._00 = x;
+          self._11 = y;
+          self._type = TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+          self._02 *= x;
+          self._12 *= y;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+          self._01 *= x;
+          self._10 *= y;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SCALING:
+          self._00 *= x;
+          self._11 *= y;
+
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY,
+            TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
+          break;
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+
+    //         [X 0 0]
+    // M = M * [0 Y 0]
+    //         [0 0 1]
+
+    case ENCODE_OP(TRANSFORM_OP_SCALEF, MATRIX_ORDER_APPEND):
+      x = double(params->pointf().x);
+      y = double(params->pointf().y);
+      goto _ScaleAppend;
+
+    case ENCODE_OP(TRANSFORM_OP_SCALED, MATRIX_ORDER_APPEND):
+      x = params->pointd().x;
+      y = params->pointd().y;
+
+_ScaleAppend:
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 *= x;
+          self._21 *= y;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_IDENTITY:
+          self._00 = x;
+          self._11 = y;
+          self._type = TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+          self._02 *= x;
+          self._12 *= y;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+          self._01 *= x;
+          self._10 *= y;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_SCALING:
+          self._00 *= x;
+          self._11 *= y;
+          self._20 *= x;
+          self._21 *= y;
+          self._type = Math::max<uint32_t>(
+            self._type             | TRANSFORM_TYPE_DIRTY,
+            TRANSFORM_TYPE_SCALING | TRANSFORM_TYPE_DIRTY);
+          break;
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Skew]
+    // ------------------------------------------------------------------------
+
+    //     [  1    tan(y) 0]
+    // M = [tan(x)   1    0] * M
+    //     [  0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_SKEWF, MATRIX_ORDER_PREPEND):
+      x = double(params->pointf().x);
+      y = double(params->pointf().y);
+      goto _SkewPrepend;
+
+    case ENCODE_OP(TRANSFORM_OP_SKEWD, MATRIX_ORDER_PREPEND):
+    {
+      x = params->pointd().x;
+      y = params->pointd().y;
+
+_SkewPrepend:  
+      double xTan = Math::tan(x);
+      double yTan = xTan;
+
+      if (x != y)
+        yTan = Math::tan(y);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+        case TRANSFORM_TYPE_TRANSLATION:
+        case TRANSFORM_TYPE_SCALING:
+          self._01 = yTan * self._11;
+          self._10 = xTan * self._00;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+          self._type = TRANSFORM_TYPE_AFFINE;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_AFFINE:
+        {
+_SkewPrependAffine:
+          double t00 = yTan * self._10;
+          double t01 = yTan * self._11;
+
+          self._10 += xTan * self._00;
+          self._11 += xTan * self._01;
+
+          self._00 += t00;
+          self._01 += t01;
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          double t02 = yTan * self._12;
+
+          self._12 += xTan * self._02;
+          self._02 += t02;
+
+          goto _SkewPrependAffine;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         [  1    tan(y) 0]
+    // M = M * [tan(x)   1    0]
+    //         [  0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_SKEWF, MATRIX_ORDER_APPEND):
+      x = double(params->pointf().x);
+      y = double(params->pointf().y);
+      goto _SkewAppend;
+
+    case ENCODE_OP(TRANSFORM_OP_SKEWD, MATRIX_ORDER_APPEND):
+    {
+      x = params->pointd().x;
+      y = params->pointd().y;
+
+_SkewAppend:  
+      double xTan = Math::tan(x);
+      double yTan = xTan;
+
+      if (x != y)
+        yTan = Math::tan(y);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          self._01 = yTan;
+          self._10 = xTan;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_TRANSLATION:
+        {
+          double t20 = self._21 * xTan;
+          double t21 = self._20 * yTan;
+
+          self._20 += t20;
+          self._21 += t21;
+
+          self._type = TRANSFORM_TYPE_AFFINE;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t10 = self._11 * xTan;
+          double t20 = self._21 * xTan;
+
+          self._01 += self._00 * yTan;
+          self._21 += self._20 * yTan;
+
+          self._10 += t10;
+          self._20 += t20;
+
+          self._type = TRANSFORM_TYPE_AFFINE;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+          self._type = TRANSFORM_TYPE_AFFINE;
+          // ... Fall through ...
+
+        case TRANSFORM_TYPE_AFFINE:
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          double t00 = self._01 * xTan;
+          double t10 = self._11 * xTan;
+          double t20 = self._21 * xTan;
+
+          self._01 += self._00 * yTan;
+          self._11 += self._10 * yTan;
+          self._21 += self._20 * yTan;
+
+          self._00 += t00;
+          self._10 += t10;
+          self._20 += t20;
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // [Rotate]
+    // ------------------------------------------------------------------------
+
+    //     [ cos(a) sin(a) 0]
+    // M = [-sin(a) cos(a) 0] * M
+    //     [   0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATEF, MATRIX_ORDER_PREPEND):
+      angle = double(params->rotationf().angle);
+      goto _RotatePrepend;
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATED, MATRIX_ORDER_PREPEND):
+    {
+      angle = params->rotationd().angle;
+
+_RotatePrepend:  
+      double as, ac;
+      Math::sincos(angle, &as, &ac);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._00 = ac;
+          self._01 = as;
+          self._10 =-as;
+          self._11 = ac;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double m00 = self._00;
+          double m11 = self._11;
+
+          self._00 = m00 * ac;
+          self._01 = m11 * as;
+          self._10 = m00 *-as;
+          self._11 = m11 * ac;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          double m00 = self._00;
+          double m01 = self._01;
+          double m10 = self._10;
+          double m11 = self._11;
+
+          self._00 = m00 * ac + m10 * as;
+          self._01 = m01 * ac + m11 * as;
+          self._10 = m00 *-as + m10 * ac;
+          self._11 = m01 *-as + m11 * ac;
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          double t00 = ac * self._00 + as * self._10;
+          double t01 = ac * self._01 + as * self._11;
+          double t02 = ac * self._02 + as * self._12;
+
+          self._10 = -as * self._00 + ac * self._10;
+          self._11 = -as * self._01 + ac * self._11;
+          self._12 = -as * self._02 + ac * self._12;
+
+          self._00 = t00;
+          self._01 = t01;
+          self._02 = t02;
+
+          self._type |= TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         [ cos(a) sin(a) 0]
+    // M = M * [-sin(a) cos(a) 0]
+    //         [   0      0    1]
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATEF, MATRIX_ORDER_APPEND):
+      angle = double(params->rotationf().angle);
+      goto _RotateAppend;
+
+    case ENCODE_OP(TRANSFORM_OP_ROTATED, MATRIX_ORDER_APPEND):
+    {
+      angle = params->rotationd().angle;
+
+_RotateAppend:
+      double as, ac;
+      Math::sincos(angle, &as, &ac);
+
+      switch (selfType)
+      {
+        case TRANSFORM_TYPE_TRANSLATION:
+        {
+          double t20 = self._20 * ac - self._21 * as;
+          double t21 = self._20 * as + self._21 * ac;
+
+          self._20 = t20;
+          self._21 = t21;
+          // ... Fall through ...
+        }
+
+        case TRANSFORM_TYPE_IDENTITY:
+          self._00 = ac;
+          self._01 = as;
+          self._10 =-as;
+          self._11 = ac;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t00 = self._00 * ac;
+          double t10 = self._11 *-as;
+          double t20 = self._20 * ac + self._21 *-as;
+
+          self._01 = self._00 * as;
+          self._11 = self._11 * ac;
+          self._21 = self._20 * as + self._21 * ac;
+
+          self._00 = t00;
+          self._10 = t10;
+          self._20 = t20;
+
+          self._type = TRANSFORM_TYPE_AFFINE | TRANSFORM_TYPE_DIRTY;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        case TRANSFORM_TYPE_PROJECTION:
+        case TRANSFORM_TYPE_DEGENERATE:
+        {
+          double t00 = self._00 * ac - self._01 * as;
+          double t10 = self._10 * ac - self._11 * as;
+          double t20 = self._20 * ac - self._21 * as;
+
+          self._01 = self._00 * as + self._01 * ac;
+          self._11 = self._10 * as + self._11 * ac;
+          self._21 = self._20 * as + self._21 * ac;
+
+          self._00 = t00;
+          self._10 = t10;
+          self._20 = t20;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // [Multiply]
+    // ------------------------------------------------------------------------
+
+    //     [S00 S01 S02]
+    // M = [S10 S11 S12] * M
+    //     [S20 S21 S22]
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYF, MATRIX_ORDER_PREPEND):
+      srcTmp = params->transformf();
+      src = &srcTmp;
+      goto _MultiplyPrepend;
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYD, MATRIX_ORDER_PREPEND):
+    {
+      src = &params->transformd();
+
+_MultiplyPrepend:
+      uint32_t sType = src->getType();
+      uint32_t dType = Math::max(selfType, sType);
+
+      self._type = dType | TRANSFORM_TYPE_DIRTY;
+      switch (dType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          break;
+
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 += src->_20;
+          self._21 += src->_21;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t20 = src->_20 * self._00;
+          double t21 = src->_21 * self._11;
+
+          self._00 *= src->_00;
+          self._11 *= src->_11;
+
+          self._20 += t20;
+          self._21 += t21;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          double t00 = src->_00 * self._00 + src->_01 * self._10;
+          double t01 = src->_00 * self._01 + src->_01 * self._11;
+
+          double t10 = src->_10 * self._00 + src->_11 * self._10;
+          double t11 = src->_10 * self._01 + src->_11 * self._11;
+
+          double t20 = src->_20 * self._00 + src->_21 * self._10;
+          double t21 = src->_20 * self._01 + src->_21 * self._11;
+
+          self._00 = t00;
+          self._01 = t01;
+          self._10 = t10;
+          self._11 = t11;
+
+          self._20 += t20;
+          self._21 += t21;
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          double t00 = src->_00 * self._00 + src->_01 * self._10 + src->_02 * self._20;
+          double t01 = src->_00 * self._01 + src->_01 * self._11 + src->_02 * self._21;
+          double t02 = src->_00 * self._02 + src->_01 * self._12 + src->_02 * self._22;
+
+          double t10 = src->_10 * self._00 + src->_11 * self._10 + src->_12 * self._20;
+          double t11 = src->_10 * self._01 + src->_11 * self._11 + src->_12 * self._21;
+          double t12 = src->_10 * self._02 + src->_11 * self._12 + src->_12 * self._22;
+
+          double t20 = src->_20 * self._00 + src->_21 * self._10 + src->_22 * self._20;
+          double t21 = src->_20 * self._01 + src->_21 * self._11 + src->_22 * self._21;
+          double t22 = src->_20 * self._02 + src->_21 * self._12 + src->_22 * self._22;
+
+          self._00 = t00;
+          self._01 = t01;
+          self._02 = t02;
+
+          self._10 = t10;
+          self._11 = t11;
+          self._12 = t12;
+
+          self._20 = t20;
+          self._21 = t21;
+          self._22 = t22;
+          break;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+    }
+
+    //         |S00 S01 S02|
+    // M = M * |S10 S11 S12|
+    //         |S20 S21 S22|
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYF, MATRIX_ORDER_APPEND):
+      srcTmp = params->transformf();
+      src = &srcTmp;
+      goto _MultiplyAppend;
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLYD, MATRIX_ORDER_APPEND):
+    {
+      src = &params->transformd();
+
+_MultiplyAppend:
+      uint32_t sType = src->getType();
+      uint32_t dType = Math::max(selfType, sType);
+
+      self._type = dType | TRANSFORM_TYPE_DIRTY;
+      switch (dType)
+      {
+        case TRANSFORM_TYPE_IDENTITY:
+          break;
+
+        case TRANSFORM_TYPE_TRANSLATION:
+          self._20 += src->_20;
+          self._21 += src->_21;
+          break;
+
+        case TRANSFORM_TYPE_SCALING:
+        {
+          double t00 = self._00 * src->_00;
+          double t11 = self._11 * src->_11;
+
+          double t20 = self._20 * src->_00 + src->_20;
+          double t21 = self._21 * src->_11 + src->_21;
+
+          self._00 = t00;
+          self._11 = t11;
+
+          self._20 = t20;
+          self._21 = t21;
+          break;
+        }
+
+        case TRANSFORM_TYPE_SWAP:
+        case TRANSFORM_TYPE_ROTATION:
+        case TRANSFORM_TYPE_AFFINE:
+        {
+          double t00 = self._00 * src->_00 + self._01 * src->_10;
+          double t01 = self._00 * src->_01 + self._01 * src->_11;
+
+          double t10 = self._10 * src->_00 + self._11 * src->_10;
+          double t11 = self._10 * src->_01 + self._11 * src->_11;
+
+          double t20 = self._20 * src->_00 + self._21 * src->_10 + src->_20;
+          double t21 = self._20 * src->_01 + self._21 * src->_11 + src->_21;
+
+          self._00 = t00;
+          self._01 = t01;
+
+          self._10 = t10;
+          self._11 = t11;
+
+          self._20 = t20;
+          self._21 = t21;
+          break;
+        }
+
+        case TRANSFORM_TYPE_DEGENERATE:
+        case TRANSFORM_TYPE_PROJECTION:
+        {
+          double t00 = self._00 * src->_00 + self._01 * src->_10 + self._02 * src->_20;
+          double t01 = self._00 * src->_01 + self._01 * src->_11 + self._02 * src->_21;
+          double t02 = self._00 * src->_02 + self._01 * src->_12 + self._02 * src->_22;
+
+          double t10 = self._10 * src->_00 + self._11 * src->_10 + self._12 * src->_20;
+          double t11 = self._10 * src->_01 + self._11 * src->_11 + self._12 * src->_21;
+          double t12 = self._10 * src->_02 + self._11 * src->_12 + self._12 * src->_22;
+
+          double t20 = self._20 * src->_00 + self._21 * src->_10 + self._22 * src->_20;
+          double t21 = self._20 * src->_01 + self._21 * src->_11 + self._22 * src->_21;
+          double t22 = self._20 * src->_02 + self._21 * src->_12 + self._22 * src->_22;
 
           self._00 = t00;
           self._01 = t01;
@@ -1172,23 +2584,61 @@ _MultiplyAppend:
 
     // ------------------------------------------------------------------------
     // [Multiply Inverted]
-    //
-    // [S00 S01 S02]
-    // [S10 S11 S12]
-    // [S20 S21 S22]
     // ------------------------------------------------------------------------
 
-    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INV, MATRIX_ORDER_PREPEND):
-    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INV, MATRIX_ORDER_APPEND):
-    {
-      if (!NumI_(Transform)::invert(tm, *reinterpret_cast<const NumT_(Transform)*>(params)))
+    //        |S00 S01 S02|
+    // M = Inv|S10 S11 S12| * M
+    //        |S20 S21 S22|
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVF, MATRIX_ORDER_PREPEND):
+      srcTmp = params->transformf();
+      if (!srcTmp.invert())
         return ERR_GEOMETRY_DEGENERATE;
 
-      params = &tm;
-      if (opType == ENCODE_OP(TRANSFORM_OP_MULTIPLY_INV, MATRIX_ORDER_PREPEND))
-        goto _MultiplyPrepend;
-      else
-        goto _MultiplyAppend;
+      src = &srcTmp;
+      goto _MultiplyPrepend;
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVD, MATRIX_ORDER_PREPEND):
+      if (!TransformD::invert(srcTmp, params->transformd()))
+        return ERR_GEOMETRY_DEGENERATE;
+
+      src = &srcTmp;
+      goto _MultiplyPrepend;
+
+    //            |S00 S01 S02|
+    // M = M * Inv|S10 S11 S12|
+    //            |S20 S21 S22|
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVF, MATRIX_ORDER_APPEND):
+      srcTmp = params->transformf();
+      if (!srcTmp.invert())
+        return ERR_GEOMETRY_DEGENERATE;
+
+      src = &srcTmp;
+      goto _MultiplyAppend;
+
+    case ENCODE_OP(TRANSFORM_OP_MULTIPLY_INVD, MATRIX_ORDER_APPEND):
+      if (!TransformD::invert(srcTmp, params->transformd()))
+        return ERR_GEOMETRY_DEGENERATE;
+
+      src = &srcTmp;
+      goto _MultiplyAppend;
+
+    // ------------------------------------------------------------------------
+    // [Flip]
+    // ------------------------------------------------------------------------
+
+    case ENCODE_OP(TRANSFORM_OP_FLIP, MATRIX_ORDER_PREPEND):
+    case ENCODE_OP(TRANSFORM_OP_FLIP, MATRIX_ORDER_APPEND):
+    {
+      uint32_t axis = reinterpret_cast<const uint32_t*>(_params)[0];
+
+      if (axis & AXIS_X) { self._00 = -self._00; self._01 = -self._01; self._02 = -self._02; }
+      if (axis & AXIS_Y) { self._10 = -self._10; self._11 = -self._11; self._12 = -self._12; }
+      if (axis & AXIS_Z) { self._20 = -self._20; self._21 = -self._21; self._22 = -self._22; }
+
+      self._type = Math::max<uint32_t>(selfType, TRANSFORM_TYPE_SCALING) | TRANSFORM_TYPE_DIRTY;
+      break;
     }
 
     // ------------------------------------------------------------------------
@@ -2202,7 +3652,7 @@ FOG_NO_EXPORT void Transform_init(void)
 
   _api.transformf.create = TransformT_create<float>;
   _api.transformf.update = TransformT_update<float>;
-  _api.transformf.transform = TransformT_transform<float>;
+  _api.transformf.transform = TransformF_transform;
   _api.transformf.transformed = TransformT_transformed<float>;
   _api.transformf.multiply = TransformT_multiply<float, float>;
   _api.transformf.invert = TransformT_invert<float>;
@@ -2218,7 +3668,7 @@ FOG_NO_EXPORT void Transform_init(void)
 
   _api.transformd.create = TransformT_create<double>;
   _api.transformd.update = TransformT_update<double>;
-  _api.transformd.transform = TransformT_transform<double>;
+  _api.transformd.transform = TransformD_transform;
   _api.transformd.transformed = TransformT_transformed<double>;
   _api.transformd.multiply = TransformT_multiply<double, double>;
   _api.transformd.invert = TransformT_invert<double>;
@@ -2263,6 +3713,21 @@ FOG_NO_EXPORT void Transform_init(void)
   _api.transformd.mapPointsD[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, double>;
   _api.transformd.mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, double>;
 #endif // FOG_TRANSFORM_INIT_C
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  TransformF_identity->setData(1.0f, 0.0f, 0.0f, 
+                               0.0f, 1.0f, 0.0f,
+                               0.0f, 0.0f, 1.0f);
+  
+  TransformD_identity->setData(1.0f, 0.0f, 0.0f, 
+                               0.0f, 1.0f, 0.0f,
+                               0.0f, 0.0f, 1.0f);
+
+  _api.transformf.oIdentity = &TransformF_identity;
+  _api.transformd.oIdentity = &TransformD_identity;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

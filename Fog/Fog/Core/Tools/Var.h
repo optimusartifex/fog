@@ -176,6 +176,11 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE bool isHashA() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRINGA_STRINGA, VAR_TYPE_HASH_STRINGA_VAR); }
   FOG_INLINE bool isHashW() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRINGW_STRINGW, VAR_TYPE_HASH_STRINGW_VAR); }
 
+  FOG_INLINE bool isRegExp() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_REGEXPA, VAR_TYPE_REGEXPW); }
+  FOG_INLINE bool isLocale() const { return getVarType() == VAR_TYPE_LOCALE; }
+  FOG_INLINE bool isDate() const { return getVarType() == VAR_TYPE_DATE; }
+  FOG_INLINE bool isTime() const { return getVarType() == VAR_TYPE_TIME; }
+
   FOG_INLINE bool isGeometry() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_GEOMETRY_START, _VAR_TYPE_GEOMETRY_END); }
   FOG_INLINE bool isPoint() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POINTI, VAR_TYPE_POINTD); }
   FOG_INLINE bool isSize() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_SIZEI, VAR_TYPE_SIZED); }
@@ -196,6 +201,20 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE bool isRegion() const { return getVarType() == VAR_TYPE_REGION; }
 
   FOG_INLINE bool isTransform() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRANSFORMF, VAR_TYPE_TRANSFORMD); }
+  FOG_INLINE bool isMatrix() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_MATRIXF, VAR_TYPE_MATRIXD); }
+
+  FOG_INLINE bool isColor() const { return getVarType() == VAR_TYPE_COLOR; }
+  FOG_INLINE bool isPattern() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_PATTERN_START, _VAR_TYPE_PATTERN_END); }
+
+  FOG_INLINE bool isColorStop() const { return getVarType() == VAR_TYPE_COLOR_STOP; }
+  FOG_INLINE bool isColorStopList() const { return getVarType() == VAR_TYPE_COLOR_STOP_LIST; }
+
+  FOG_INLINE bool isImage() const { return getVarType() == VAR_TYPE_IMAGE; }
+  FOG_INLINE bool isImagePalette() const { return getVarType() == VAR_TYPE_IMAGE_PALETTE; }
+
+  FOG_INLINE bool isFont() const { return getVarType() == VAR_TYPE_FONT; }
+
+  FOG_INLINE bool isObjectRef() const { return getVarType() == VAR_TYPE_OBJECT_REF; }
 
   // --------------------------------------------------------------------------
   // [Accessors - Int]
@@ -532,7 +551,7 @@ struct FOG_NO_EXPORT Var
   static FOG_INLINE Var fromStringW(const StringW& val) { return Var(VAR_TYPE_STRINGW, &val); }
 
   // --------------------------------------------------------------------------
-  // [Eq]
+  // [Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const Var* a, const Var* b)

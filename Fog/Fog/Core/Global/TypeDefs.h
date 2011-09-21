@@ -220,8 +220,13 @@ struct GradientF;
 struct GradientD;
 struct LinearGradientF;
 struct LinearGradientD;
-struct PatternF;
-struct PatternD;
+struct Pattern;
+struct PatternData;
+struct PatternColorData;
+struct PatternGradientDataF;
+struct PatternGradientDataD;
+struct PatternTextureDataF;
+struct PatternTextureDataD;
 struct RadialGradientF;
 struct RadialGradientD;
 struct RectangularGradientF;
@@ -232,6 +237,7 @@ struct Texture;
 struct Font;
 struct FontData;
 struct FontFace;
+struct FontHints;
 union  FontKerningChars;
 struct FontKerningPairI;
 struct FontKerningPairF;
@@ -288,7 +294,7 @@ template<typename ItemT> struct Hash<StringW, ItemT>;
 // [TypeDefs - Functions]
 // ============================================================================
 
-typedef void (FOG_CDECL *MemCleanupFunc)(void* closure);
+typedef void (FOG_CDECL *MemCleanupFunc)(void* closure, uint32_t reason);
 
 typedef uint32_t (FOG_CDECL *HashFunc)(const void* key);
 typedef bool (FOG_CDECL *EqFunc)(const void* a, const void* b);

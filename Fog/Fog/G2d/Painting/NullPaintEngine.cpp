@@ -94,17 +94,12 @@ static err_t FOG_CDECL MyPaintEngine_getSourceColor(const Painter* self, Color& 
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_getSourcePatternF(const Painter* self, PatternF& pattern)
+static err_t FOG_CDECL MyPaintEngine_getSourcePattern(const Painter* self, Pattern& pattern)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_getSourcePatternD(const Painter* self, PatternD& pattern)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
 
 static err_t FOG_CDECL MyPaintEngine_setSourceNone(Painter* self)
 {
@@ -130,13 +125,7 @@ static err_t FOG_CDECL MyPaintEngine_setSourceColor(Painter* self, const Color& 
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_setSourcePatternF(Painter* self, const PatternF& pattern)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_setSourcePatternD(Painter* self, const PatternD& pattern)
+static err_t FOG_CDECL MyPaintEngine_setSourcePattern(Painter* self, const Pattern& pattern)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -176,13 +165,7 @@ static err_t FOG_CDECL MyPaintEngine_setTransformD(Painter* self, const Transfor
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_applyTransformF(Painter* self, uint32_t transformOp, const void* params)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_applyTransformD(Painter* self, uint32_t transformOp, const void* params)
+static err_t FOG_CDECL MyPaintEngine_applyTransform(Painter* self, uint32_t transformOp, const void* params)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -785,15 +768,13 @@ static void MyPaintEngine_init()
   v.getSourceType = MyPaintEngine_getSourceType;
 
   v.getSourceColor = MyPaintEngine_getSourceColor;
-  v.getSourcePatternF = MyPaintEngine_getSourcePatternF;
-  v.getSourcePatternD = MyPaintEngine_getSourcePatternD;
+  v.getSourcePattern = MyPaintEngine_getSourcePattern;
 
   v.setSourceNone = MyPaintEngine_setSourceNone;
   v.setSourceArgb32 = MyPaintEngine_setSourceArgb32;
   v.setSourceArgb64 = MyPaintEngine_setSourceArgb64;
   v.setSourceColor = MyPaintEngine_setSourceColor;
-  v.setSourcePatternF = MyPaintEngine_setSourcePatternF;
-  v.setSourcePatternD = MyPaintEngine_setSourcePatternD;
+  v.setSourcePattern = MyPaintEngine_setSourcePattern;
   v.setSourceAbstract = MyPaintEngine_setSourceAbstract;
 
   // --------------------------------------------------------------------------
@@ -806,8 +787,7 @@ static void MyPaintEngine_init()
   v.setTransformF = MyPaintEngine_setTransformF;
   v.setTransformD = MyPaintEngine_setTransformD;
 
-  v.applyTransformF = MyPaintEngine_applyTransformF;
-  v.applyTransformD = MyPaintEngine_applyTransformD;
+  v.applyTransform = MyPaintEngine_applyTransform;
 
   v.resetTransform = MyPaintEngine_resetTransform;
 
@@ -1087,12 +1067,7 @@ static err_t FOG_CDECL NullPaintEngine_getSourceColor(const Painter* self, Color
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_getSourcePatternF(const Painter* self, PatternF& pattern)
-{
-  return ERR_RT_INVALID_STATE;
-}
-
-static err_t FOG_CDECL NullPaintEngine_getSourcePatternD(const Painter* self, PatternD& pattern)
+static err_t FOG_CDECL NullPaintEngine_getSourcePattern(const Painter* self, Pattern& pattern)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1351,15 +1326,13 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.getSourceType = NullPaintEngine_getSourceType;
 
   v.getSourceColor = NullPaintEngine_getSourceColor;
-  v.getSourcePatternF = NullPaintEngine_getSourcePatternF;
-  v.getSourcePatternD = NullPaintEngine_getSourcePatternD;
+  v.getSourcePattern = NullPaintEngine_getSourcePattern;
 
   v.setSourceNone = NullPaintEngine_setSourceNone;
   v.setSourceArgb32 = NullPaintEngine_setSourceArgb32;
   v.setSourceArgb64 = (PaintEngineVTable::SetSourceArgb64)NullPaintEngine_setSourceAny;
   v.setSourceColor = (PaintEngineVTable::SetSourceColor)NullPaintEngine_setSourceAny;
-  v.setSourcePatternF = (PaintEngineVTable::SetSourcePatternF)NullPaintEngine_setSourceAny;
-  v.setSourcePatternD = (PaintEngineVTable::SetSourcePatternD)NullPaintEngine_setSourceAny;
+  v.setSourcePattern = (PaintEngineVTable::SetSourcePattern)NullPaintEngine_setSourceAny;
   v.setSourceAbstract = NullPaintEngine_setSourceAbstract;
 
   // --------------------------------------------------------------------------
@@ -1372,9 +1345,7 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.setTransformF = (PaintEngineVTable::SetTransformF)NullPaintEngine_setTransform;
   v.setTransformD = (PaintEngineVTable::SetTransformD)NullPaintEngine_setTransform;
 
-  v.applyTransformF = (PaintEngineVTable::ApplyTransformF)NullPaintEngine_applyTransform;
-  v.applyTransformD = (PaintEngineVTable::ApplyTransformD)NullPaintEngine_applyTransform;
-
+  v.applyTransform = (PaintEngineVTable::ApplyTransform)NullPaintEngine_applyTransform;
   v.resetTransform = (PaintEngineVTable::ResetTransform)NullPaintEngine_resetTransform;
 
   // --------------------------------------------------------------------------

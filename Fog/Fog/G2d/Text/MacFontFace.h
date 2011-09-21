@@ -44,7 +44,9 @@ struct FOG_API MacFontFace : public FontFace
 
   virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str);
   virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str);
-  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const Utf16& str);
+
+  virtual err_t getTextExtents(TextExtentsF& extents, const FontData* d, const Utf16& str);
+  virtual err_t getTextExtents(TextExtentsD& extents, const FontData* d, const Utf16& str);
 
   virtual FontKerningTableF* getKerningTable(const FontData* d);
 

@@ -120,6 +120,8 @@ FOG_NO_EXPORT void ImageFormatDescription_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_fini(void);
 
+FOG_NO_EXPORT void ColorMatrix_init(void);
+
 // [Fog/G2d/Painting]
 FOG_NO_EXPORT void PaintDeviceInfo_init(void);
 FOG_NO_EXPORT void NullPaintEngine_init(void);
@@ -132,6 +134,7 @@ FOG_NO_EXPORT void Render_init(void);
 // [Fog/G2d/Source]
 FOG_NO_EXPORT void Color_init(void);
 FOG_NO_EXPORT void ColorStopList_init(void);
+FOG_NO_EXPORT void Gradient_init(void);
 FOG_NO_EXPORT void Pattern_init(void);
 
 // [Fog/G2d/Tools]
@@ -146,6 +149,8 @@ FOG_NO_EXPORT void GlyphBitmap_fini(void);
 
 FOG_NO_EXPORT void GlyphOutline_init(void);
 FOG_NO_EXPORT void GlyphOutline_fini(void);
+
+FOG_NO_EXPORT void Font_init(void);
 
 FOG_NO_EXPORT void FontManager_init(void);
 FOG_NO_EXPORT void FontManager_fini(void);

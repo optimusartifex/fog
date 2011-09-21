@@ -462,8 +462,13 @@ struct FOG_NO_EXPORT Region
   static FOG_INLINE const Region& infinite() { return *_api.region.oInfinite; }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const Region* a, const Region* b)
+  {
+    return _api.region.eq(a, b);
+  }
 
   static FOG_INLINE EqFunc getEqFunc()
   {

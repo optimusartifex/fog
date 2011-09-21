@@ -25,10 +25,9 @@ FOG_CAPI_DECLARE void _fog_init(void)
   if (++_fog_init_counter != 1)
     return;
 
-  // [Core/Tools]
+  // These two must be initialized first, because some other initializers might
+  // depend on CPU features or need to create Lock to protect global data.
   Cpu_init();
-
-  // [Core/Threading]
   Lock_init(),
 
   // [Core/Memory]
@@ -118,15 +117,19 @@ FOG_CAPI_DECLARE void _fog_init(void)
   // [G2d/Source]
   Color_init();
   ColorStopList_init();
+  Gradient_init();
   Pattern_init();
 
   // [G2d/Imaging]
-  ImagePalette_init();
   ImageFormatDescription_init();
+  ImagePalette_init();
   Image_init();
+
   ImageConverter_init();
   ImageCodecProvider_init();
   ImageEffect_init();
+
+  ColorMatrix_init();
 
   // [G2d/Painting]
   PaintDeviceInfo_init();
@@ -136,6 +139,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   // [G2d/Text]
   GlyphBitmap_init();
   GlyphOutline_init();
+  Font_init();
   FontManager_init();
 }
 

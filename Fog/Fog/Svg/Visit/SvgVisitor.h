@@ -93,7 +93,7 @@ struct FOG_NO_EXPORT SvgStyle
   uint32_t type;
   float opacity;
   Color color;
-  PatternF pattern;
+  Pattern pattern;
 };
 
 // ============================================================================
@@ -189,7 +189,7 @@ struct FOG_API SvgVisitor
     _fillStyle.color = color;
   }
 
-  FOG_INLINE void setFillPattern(const PatternF& pattern)
+  FOG_INLINE void setFillPattern(const Pattern& pattern)
   {
     _fillStyle.type = SVG_SOURCE_URI;
     _fillStyle.pattern = pattern;
@@ -230,7 +230,7 @@ struct FOG_API SvgVisitor
     _strokeStyle.color = color;
   }
 
-  FOG_INLINE void setStrokePattern(const PatternF& pattern)
+  FOG_INLINE void setStrokePattern(const Pattern& pattern)
   {
     _strokeStyle.type = SVG_SOURCE_URI;
     _strokeStyle.pattern = pattern;

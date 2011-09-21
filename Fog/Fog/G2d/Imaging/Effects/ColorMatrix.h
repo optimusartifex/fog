@@ -23,13 +23,9 @@ namespace Fog {
 
 //! @brief Color matrix.
 //!
-//! The color matrix is a 5x5 matrix that can be used to do a color based
-//! transformations.
-//!
-//! The ColorMatrix class was based on AggOO by Dratek Software. The original
-//! code was relicensed to the MIT license used by the Fog-Framework. The
-//! original author Chad M. Draper agreed with relicensing.
-struct FOG_API ColorMatrix
+//! The color matrix is a 5x5 matrix that can be used to do a linear color
+//! transformation.
+struct FOG_NO_EXPORT ColorMatrix
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -37,17 +33,17 @@ struct FOG_API ColorMatrix
 
   FOG_INLINE ColorMatrix()
   {
-    _copyData(getData(), IDENTITY.getData());
+    _api.colormatrix.ctor(this);
   }
 
-  FOG_INLINE ColorMatrix(const float src[25])
+  FOG_INLINE ColorMatrix(const float data[25])
   {
-    _copyData(getData(), src);
+    _api.colormatrix.copy(m, data);
   }
 
   FOG_INLINE ColorMatrix(const ColorMatrix& other)
   {
-    _copyData(getData(), other.getData());
+    _api.colormatrix.copy(m, other.m);
   }
 
   FOG_INLINE ColorMatrix(
@@ -57,269 +53,323 @@ struct FOG_API ColorMatrix
     float m30, float m31, float m32, float m33, float m34,
     float m40, float m41, float m42, float m43, float m44)
   {
-    m[0][0] = m00; m[0][1] = m01; m[0][2] = m02; m[0][3] = m03; m[0][4] = m04;
-    m[1][0] = m10; m[1][1] = m11; m[1][2] = m12; m[1][3] = m13; m[1][4] = m14;
-    m[2][0] = m20; m[2][1] = m21; m[2][2] = m22; m[2][3] = m23; m[2][4] = m24;
-    m[3][0] = m30; m[3][1] = m31; m[3][2] = m32; m[3][3] = m33; m[3][4] = m34;
-    m[4][0] = m40; m[4][1] = m41; m[4][2] = m42; m[4][3] = m43; m[4][4] = m44;
+    m[ 0] = m00; m[ 1] = m01; m[ 2] = m02; m[ 3] = m03; m[ 4] = m04;
+    m[ 5] = m10; m[ 6] = m11; m[ 7] = m12; m[ 8] = m13; m[ 9] = m14;
+    m[10] = m20; m[11] = m21; m[12] = m22; m[13] = m23; m[14] = m24;
+    m[15] = m30; m[16] = m31; m[17] = m32; m[18] = m33; m[19] = m34;
+    m[20] = m40; m[21] = m41; m[22] = m42; m[23] = m43; m[24] = m44;
   }
 
   explicit FOG_INLINE ColorMatrix(_Uninitialized) {}
 
   // --------------------------------------------------------------------------
-  // [Type]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
-  //! @brief Characteristics of color matrix.
-  //!
-  //! Characteristics is bit mask.
-  enum TYPE
+  FOG_INLINE float* getData()
   {
-    //! @brief Matrix contains RGB shear part.
-    //!
-    //! RGB shear part is illustrated here:
-    //!   [n X X n n]
-    //!   [X n X n n]
-    //!   [X X n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    TYPE_SHEAR_RGB = 0x01,
+    return reinterpret_cast<float*>(m);
+  }
 
-    //! @brief Matrix contains alpha shear part.
-    //!
-    //! Alpha shear part is illustrated here:
-    //!   [n n n X n]
-    //!   [n n n X n]
-    //!   [n n n X n]
-    //!   [X X X n n]
-    //!   [n n n n n]
-    TYPE_SHEAR_ALPHA = 0x02,
-
-    //! @brief Matrix contains ARGB shear part.
-    //!
-    //! ARGB shear part is illustrated here:
-    //!   [n X X X n]
-    //!   [X n X X n]
-    //!   [X X n X n]
-    //!   [X X X n n]
-    //!   [n n n n n]
-    //!
-    //! @note ARGB shear is combination of RGB and Alpha shear parts.
-    TYPE_SHEAR_ARGB = 0x03,
-
-    //! @brief Matrix contains RGB lut part.
-    //!
-    //! RGB lut part is illustrated here:
-    //!   [X n n n n]
-    //!   [n X n n n]
-    //!   [n n X n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    TYPE_LUT_RGB = 0x04,
-
-    //! @brief Matrix contains RGB lut part.
-    //!
-    //! Alpha lut part is illustrated here:
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n X n]
-    //!   [n n n n n]
-    TYPE_LUT_ALPHA = 0x08,
-
-    //! @brief Matrix contains ARGB lut part.
-    //!
-    //! ARGB lut part is illustrated here:
-    //!   [X n n n n]
-    //!   [n X n n n]
-    //!   [n n X n n]
-    //!   [n n n X n]
-    //!   [n n n n n]
-    //!
-    //! @note ARGB lut is combination of RGB and Alpha lut parts.
-    TYPE_LUT_ARGB = 0x0C,
-
-    //! @brief Matrix contains const RGB lut part (all cells are set to 1.0).
-    //!
-    //! Const RGB lut part is illustrated here:
-    //!   [1 n n n n]
-    //!   [n 1 n n n]
-    //!   [n n 1 n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    TYPE_CONST_RGB = 0x10,
-
-    //! @brief Matrix contains const alpha lut part (cell set to 1.0).
-    //!
-    //! Const alpha lut part is illustrated here:
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n 1 n]
-    //!   [n n n n n]
-    TYPE_CONST_ALPHA = 0x20,
-
-    //! @brief Matrix contains const ARGB lut part (all cells are set to 1.0).
-    //!
-    //! Const ARGB lut part is illustrated here:
-    //!   [1 n n n n]
-    //!   [n 1 n n n]
-    //!   [n n 1 n n]
-    //!   [n n n 1 n]
-    //!   [n n n n n]
-    //!
-    //! @note ARGB const lut is combination of RGB a Alpha const lut.
-    TYPE_CONST_ARGB = 0x30,
-
-    //! @brief Matrix contains RGB translation part
-    //!
-    //! RGB translation part is illustrated here:
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [X X X n n]
-    TYPE_TRANSLATE_RGB  = 0x40,
-
-    //! @brief Matrix contains alpha translation part
-    //!
-    //! Alpha translation part is illustrated here:
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n X n]
-    TYPE_TRANSLATE_ALPHA = 0x80,
-
-    //! @brief Matrix contains ARGB translation part
-    //!
-    //! ARGB translation part is illustrated here:
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [n n n n n]
-    //!   [X X X X n]
-    //!
-    //! @note ARGB translation is combination of RGB and Alpha translation parts.
-    TYPE_TRANSLATE_ARGB = 0xC0
-  };
+  FOG_INLINE const float* getData() const
+  {
+    return reinterpret_cast<const float*>(m);
+  }
 
   //! @brief Get the type of the color matrix.
   //!
   //! Type of color matrix is important part of optimization that can be done
-  //! in blitters. The main advantage of color matrix class is that many color
-  //! operations can be defined by it. But these operations usually not uses
-  //! all matrix cells, so the getType() method checks for zero/one values and
+  //! by blitters. The main advantage of color matrix class is that many color
+  //! operations can be defined by it. But these operations usually do not use
+  //! all matrix cells, so the getType() method checks for common values and
   //! returns type which can be optimized by image-filter.
   //!
   //! @see @c Type for type possibilities and its descriptions.
-  int getType() const;
-
-  FOG_INLINE float* getData() { return reinterpret_cast<float*>(m); }
-  FOG_INLINE const float* getData() const { return reinterpret_cast<const float*>(m); }
-
-  // --------------------------------------------------------------------------
-  // [Operations]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ColorMatrix& set(const float src[25])
+  FOG_INLINE uint32_t getType() const
   {
-    _copyData(getData(), src);
+    return _api.colormatrix.getType(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ColorMatrix& setMatrix(const float data[25])
+  {
+    _api.colormatrix.copy(m, data);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& set(const ColorMatrix& other)
+  FOG_INLINE ColorMatrix& setMatrix(const ColorMatrix& other)
   {
-    _copyData(getData(), other.getData());
+    _api.colormatrix.copy(m, other.m);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& set(
+  FOG_INLINE ColorMatrix& setMatrix(
     float m00, float m01, float m02, float m03, float m04,
     float m10, float m11, float m12, float m13, float m14,
     float m20, float m21, float m22, float m23, float m24,
     float m30, float m31, float m32, float m33, float m34,
     float m40, float m41, float m42, float m43, float m44)
   {
-    m[0][0] = m00; m[0][1] = m01; m[0][2] = m02; m[0][3] = m03; m[0][4] = m04;
-    m[1][0] = m10; m[1][1] = m11; m[1][2] = m12; m[1][3] = m13; m[1][4] = m14;
-    m[2][0] = m20; m[2][1] = m21; m[2][2] = m22; m[2][3] = m23; m[2][4] = m24;
-    m[3][0] = m30; m[3][1] = m31; m[3][2] = m32; m[3][3] = m33; m[3][4] = m34;
-    m[4][0] = m40; m[4][1] = m41; m[4][2] = m42; m[4][3] = m43; m[4][4] = m44;
+    m[ 0] = m00; m[ 1] = m01; m[ 2] = m02; m[ 3] = m03; m[ 4] = m04;
+    m[ 5] = m10; m[ 6] = m11; m[ 7] = m12; m[ 8] = m13; m[ 9] = m14;
+    m[10] = m20; m[11] = m21; m[12] = m22; m[13] = m23; m[14] = m24;
+    m[15] = m30; m[16] = m31; m[17] = m32; m[18] = m33; m[19] = m34;
+    m[20] = m40; m[21] = m41; m[22] = m42; m[23] = m43; m[24] = m44;
+
     return *this;
   }
 
+  // --------------------------------------------------------------------------
+  // [Add]
+  // --------------------------------------------------------------------------
+
   //! @brief Add other matrix into this matrix.
-  ColorMatrix& add(const ColorMatrix& other);
+  FOG_INLINE ColorMatrix& add(const ColorMatrix& other)
+  {
+    _api.colormatrix.addMatrix(this, this, &other);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& add(float scalar)
+  {
+    _api.colormatrix.addScalar(this, this, NULL, scalar);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& add(const RectI& rect, float scalar)
+  {
+    _api.colormatrix.addScalar(this, this, &rect, scalar);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Subtract]
+  // --------------------------------------------------------------------------
+
   //! @brief Subtract other matrix from this matrix.
-  ColorMatrix& subtract(const ColorMatrix& other);
-  //! @brief Multiply this matrix with other matrix.
-  ColorMatrix& multiply(const ColorMatrix& other, uint32_t order = MATRIX_ORDER_PREPEND);
-  //! @brief Multiply this matrix with scalar.
-  ColorMatrix& multiply(float scalar);
+  FOG_INLINE ColorMatrix& subtract(const ColorMatrix& other)
+  {
+    _api.colormatrix.subtractMatrix(this, this, &other);
+    return *this;
+  }
+  
+  FOG_INLINE ColorMatrix& subtract(float scalar)
+  {
+    _api.colormatrix.subtractScalar(this, this, NULL, scalar);
+    return *this;
+  }
 
-  //! @brief Transform a 1x4 vector by the matrix.
-  void transformVector(float* v) const;
+  FOG_INLINE ColorMatrix& subtract(const RectI& rect, float scalar)
+  {
+    _api.colormatrix.subtractScalar(this, this, &rect, scalar);
+    return *this;
+  }
 
-  //! @brief Transform a @a rgb color.
-  void transformRgb(Argb32* rgb) const;
+  // --------------------------------------------------------------------------
+  // [Multiply]
+  // --------------------------------------------------------------------------
 
-  //! @brief Transform a @a rgba color.
-  void transformArgb(Argb32* rgba) const;
+  //! @brief Multiply this matrix with @a other matrix.
+  FOG_INLINE ColorMatrix& multiply(const ColorMatrix& other)
+  {
+    _api.colormatrix.multiplyMatrix(this, &other, this);
+    return *this;
+  }
 
-  //! @brief Transform alpha value @a a.
-  void transformAlpha(uint8_t* a) const;
+  //! @brief Multiply this matrix with @a other matrix.
+  FOG_INLINE ColorMatrix& multiply(const ColorMatrix& other, uint32_t order)
+  {
+    _api.colormatrix.multiplyOther(this, &other, order);
+    return *this;
+  }
 
-  //! @brief Scale the color components of the matrix.
-  ColorMatrix& scale(float sa, float sr, float sg, float sb, uint32_t order = MATRIX_ORDER_PREPEND);
+  //! @brief Multiply this matrix with scalar value.
+  FOG_INLINE ColorMatrix& multiply(float scalar)
+  {
+    _api.colormatrix.multiplyScalar(this, this, NULL, scalar);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& scaleColors(float scalar, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return scale(scalar, scalar, scalar, 1.0f, order );}
+  //! @overload
+  FOG_INLINE ColorMatrix& multiply(const RectI& rect, float scalar)
+  {
+    _api.colormatrix.multiplyScalar(this, this, &rect, scalar);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& scaleOpacity(float scalar, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return scale(1.0f, 1.0f, 1.0f, scalar, order ); }
+  // --------------------------------------------------------------------------
+  // [Translate]
+  // --------------------------------------------------------------------------
 
   //! @brief Translate the color components of the matrix.
-  ColorMatrix& translate(float ta, float tr, float tg, float tb, uint32_t order = MATRIX_ORDER_PREPEND);
+  FOG_INLINE ColorMatrix& translateArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.translateArgb(this, a, r, g, b, order);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& translateColors(float transVal, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return translate(0.0, transVal, transVal, transVal, order); }
+  FOG_INLINE ColorMatrix& translateRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.translateArgb(this, 1.0f, c, c, c, order);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& translateOpacity(float transVal, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return translate(transVal, 1.0f, 1.0f, 1.0f, order); }
+  FOG_INLINE ColorMatrix& translateAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.translateArgb(this, a, 1.0f, 1.0f, 1.0f, order);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& rotateRed(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return _rotateColor(phi, 2, 1, order); }
+  // --------------------------------------------------------------------------
+  // [Scale]
+  // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorMatrix& rotateGreen(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return _rotateColor(phi, 0, 2, order); }
+  //! @brief Scale the color components of the matrix.
+  FOG_INLINE ColorMatrix& scaleArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.scaleArgb(this, a, r, g, b, order);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& rotateBlue(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return _rotateColor(phi, 1, 0, order); }
+  FOG_INLINE ColorMatrix& scaleRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.scaleArgb(this, 1.0f, c, c, c, order);
+    return *this;
+  }
 
-  FOG_INLINE ColorMatrix& shearRed(float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return _shearColor(0, 1, g, 2, b, order); }
-
-  FOG_INLINE ColorMatrix& shearGreen( float r, float b, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return _shearColor(1, 0, r, 2, b, order); }
-
-  FOG_INLINE ColorMatrix& shearBlue(float r, float g, uint32_t order = MATRIX_ORDER_PREPEND)
-  { return _shearColor(2, 0, r, 1, g, order); }
-
-  //! @brief Set the saturation of the matrix
-  //! @remark Saturation of 0.0 yields black & white, 1.0 is neutral.
-  ColorMatrix& setSaturation(float sat, uint32_t order = MATRIX_ORDER_PREPEND);
+  FOG_INLINE ColorMatrix& scaleAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.scaleArgb(this, a, 1.0f, 1.0f, 1.0f, order);
+    return *this;
+  }
 
   //! @brief Scale the tint.
+  //!
   //! @param phi [-PI to PI, 0 = blue]
   //! @param amount [-1.0 to 1.0, 0 = neutral]
-  ColorMatrix& setTint(float phi, float amount);
+  FOG_INLINE ColorMatrix& scaleTint(float phi, float amount)
+  {
+    _api.colormatrix.scaleTint(this, phi, amount);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Rotate]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ColorMatrix& rotateRed(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.rotateColor(this, 2, 1, phi, order);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& rotateGreen(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.rotateColor(this, 0, 2, phi, order);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& rotateBlue(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.rotateColor(this, 1, 0, phi, order);
+    return *this;
+  }
 
   //! @brief Rotate the hue about the gray axis.
-  //! @remark Luminance is fixed, other colors are rotated.
-  ColorMatrix& rotateHue(float phi);
+  //!
+  //! Luminance is fixed, other colors are rotated.
+  FOG_INLINE ColorMatrix& rotateHue(float phi)
+  {
+    _api.colormatrix.rotateHue(this, phi);
+    return *this;
+  }
 
-  bool eq(const ColorMatrix& other, float epsilon = MATH_EPSILON_D) const;
+  // --------------------------------------------------------------------------
+  // [Shear]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ColorMatrix& shearRed(float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.shearColor(this, 0, 1, g, 2, b, order);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& shearGreen( float r, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.shearColor(this, 1, 0, r, 2, b, order);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& shearBlue(float r, float g, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.shearColor(this, 2, 0, r, 1, g, order);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Saturate]
+  // --------------------------------------------------------------------------
+
+  //! @brief Saturate.
+  //!
+  //! Saturation of 0.0 yields black & white, 1.0 is neutral.
+  FOG_INLINE ColorMatrix& saturate(float s, uint32_t order = MATRIX_ORDER_PREPEND)
+  {
+    _api.colormatrix.saturate(this, s, order);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const ColorMatrix& other) const
+  {
+    return _api.colormatrix.eq(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Map]
+  // --------------------------------------------------------------------------
+
+  //! @brief Map @a argb color.
+  FOG_INLINE void mapArgb(Argb32& argb) const
+  {
+    return _api.colormatrix.mapArgb32(this, &argb, &argb);
+  }
+
+  //! @overload.
+  FOG_INLINE void mapArgb(Argb32& dst, const Argb32& src) const
+  {
+    return _api.colormatrix.mapArgb32(this, &dst, &src);
+  }
+
+  //! @brief Map @a argb color.
+  FOG_INLINE void mapArgb(Argb64& argb) const
+  {
+    return _api.colormatrix.mapArgb64(this, &argb, &argb);
+  }
+
+  //! @overload.
+  FOG_INLINE void mapArgb(Argb64& dst, const Argb64& src) const
+  {
+    return _api.colormatrix.mapArgb64(this, &dst, &src);
+  }
+
+  //! @brief Map @a argb color.
+  FOG_INLINE void mapArgb(ArgbF& argb) const
+  {
+    return _api.colormatrix.mapArgbF(this, &argb, &argb);
+  }
+
+  //! @overload.
+  FOG_INLINE void mapArgb(ArgbF& dst, const ArgbF& src) const
+  {
+    return _api.colormatrix.mapArgbF(this, &dst, &src);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -328,77 +378,119 @@ struct FOG_API ColorMatrix
   //! @brief Assignment operator.
   FOG_INLINE ColorMatrix& operator=(const ColorMatrix& other)
   {
-    _copyData(getData(), other.getData());
+    _api.colormatrix.copy(m, other.m);
     return *this;
   }
 
-  //! @brief Equality operator.
+  FOG_INLINE ColorMatrix& operator+=(const ColorMatrix& other)
+  {
+    _api.colormatrix.addMatrix(this, this, &other);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& operator+=(float scalar)
+  {
+    _api.colormatrix.addScalar(this, this, NULL, scalar);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& operator-=(const ColorMatrix& other)
+  {
+    _api.colormatrix.subtractMatrix(this, this, &other);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& operator-=(float scalar)
+  {
+    _api.colormatrix.subtractScalar(this, this, NULL, scalar);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& operator*=(const ColorMatrix& other)
+  {
+    _api.colormatrix.multiplyMatrix(this, this, &other);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix& operator*=(float scalar)
+  {
+    _api.colormatrix.multiplyScalar(this, this, NULL, scalar);
+    return *this;
+  }
+
+  FOG_INLINE ColorMatrix operator+(const ColorMatrix& other) const
+  {
+    ColorMatrix t(UNINITIALIZED);
+    _api.colormatrix.addMatrix(&t, this, &other);
+    return t;
+  }
+
+  FOG_INLINE ColorMatrix operator-(const ColorMatrix& other) const
+  {
+    ColorMatrix t(UNINITIALIZED);
+    _api.colormatrix.subtractMatrix(&t, this, &other);
+    return t;
+  }
+  
+  FOG_INLINE ColorMatrix operator*(const ColorMatrix& other) const
+  {
+    ColorMatrix t(UNINITIALIZED);
+    _api.colormatrix.multiplyMatrix(&t, this, &other);
+    return t;
+  }
+
   FOG_INLINE bool operator==(const ColorMatrix& other) { return eq(other); }
-
-  //! @brief Inequality operator.
   FOG_INLINE bool operator!=(const ColorMatrix& other) { return !eq(other); }
-
-  FOG_INLINE ColorMatrix& operator+=(const ColorMatrix& other) { return add(other); }
-  FOG_INLINE ColorMatrix& operator-=(const ColorMatrix& other) { return subtract(other); }
-  FOG_INLINE ColorMatrix& operator*=(const ColorMatrix& other) { return multiply(other); }
-
-  FOG_INLINE ColorMatrix operator+(const ColorMatrix& other) { ColorMatrix t(*this); t.add(other); return t; }
-  FOG_INLINE ColorMatrix operator-(const ColorMatrix& other) { ColorMatrix t(*this); t.subtract(other); return t; }
-  FOG_INLINE ColorMatrix operator*(const ColorMatrix& other) { ColorMatrix t(*this); t.multiply(other); return t; }
 
   //! @brief Overload the [] operator for access to a row. This will enable
   //! access to the elements by using [y][x].
   FOG_INLINE float* operator[](size_t y)
   {
     FOG_ASSERT_X(y < 5, "Fog::ColorMatrix::operator[] - Index out of bounds.");
-    return m[y];
+    return &m[y * 5];
   }
 
   //! @overload.
   FOG_INLINE const float* const operator[](size_t y) const
   {
     FOG_ASSERT_X(y < 5, "Fog::ColorMatrix::operator[] - Index out of bounds.");
-    return m[y];
+    return &m[y * 5];
   }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  //! @brief Grayscale color matrix is modified from the GDI+ FAQ (submitted
-  //! by Gilles Khouzam) to use the NTSC color values. The version in the FAQ
-  //! used 0.3, 0.59, and 0.11, so it was close.
-  static const ColorMatrix GREYSCALE;
+  //! @brief Get global identity matrix.
+  static FOG_INLINE const ColorMatrix& identity() { return *_api.colormatrix.oIdentity; }
+  //! @brief Get global zero matrix.
+  static FOG_INLINE const ColorMatrix& zero() { return *_api.colormatrix.oZero; }
+  //! @brief Get global grayscale matrix.
+  static FOG_INLINE const ColorMatrix& greyscale() { return *_api.colormatrix.oGreyscale; }
+  //! @brief Get global pre-hue matrix (used by rotate-hue).
+  static FOG_INLINE const ColorMatrix& preHue() { return *_api.colormatrix.oPreHue; }
+  //! @brief Get global post-hue matrix (used by rotate-hue).
+  static FOG_INLINE const ColorMatrix& postHue() { return *_api.colormatrix.oPostHue; }
 
-  //! @brief Identity matrix.
-  static const ColorMatrix IDENTITY;
-  static const ColorMatrix WHITE;
-  static const ColorMatrix ZERO;
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
 
-  static const ColorMatrix PRE_HUE;
-  static const ColorMatrix POST_HUE;
+  static FOG_INLINE bool eq(const ColorMatrix* a, const ColorMatrix* b)
+  {
+    return _api.colormatrix.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.colormatrix.eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  float m[5][5];
-
-  // --------------------------------------------------------------------------
-  // [Private]
-  // --------------------------------------------------------------------------
-
-private:
-  //! @brief Rotate the matrix about a color axis.
-  //! @note The color of the axis is unchanged, while the others are rotated
-  //! in color space.
-  ColorMatrix& _rotateColor(float phi, int x, int y, uint32_t order = MATRIX_ORDER_PREPEND);
-
-  //! @brief Shear the matrix in one of the color planes
-  ColorMatrix& _shearColor(int x, int y1, float col1, int y2, float col2, uint32_t order = MATRIX_ORDER_PREPEND);
-
-  //! @brief Copy matrix data from @a srt to @a dst.
-  static void _copyData(float* dst, const float* src);
+  float m[25];
 };
 
 //! @}

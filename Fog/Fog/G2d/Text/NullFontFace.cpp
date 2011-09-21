@@ -41,7 +41,12 @@ err_t NullFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& 
   return ERR_FONT_INVALID_FACE;
 }
 
-err_t NullFontFace::getTextExtents(TextExtents& extents, const FontData* d, const StubW& str)
+err_t NullFontFace::getTextExtents(TextExtentsF& extents, const FontData* d, const StubW& str)
+{
+  return ERR_FONT_INVALID_FACE;
+}
+
+err_t NullFontFace::getTextExtents(TextExtentsD& extents, const FontData* d, const StubW& str)
 {
   return ERR_FONT_INVALID_FACE;
 }

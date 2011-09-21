@@ -279,7 +279,7 @@ static void FOG_CDECL MatrixT_copy(NumT_(Matrix)* self, const NumT_(Matrix)* oth
 }
 
 // ============================================================================
-// [Fog::Matrix - Eq]
+// [Fog::Matrix - Equality]
 // ============================================================================
 
 template<typename NumT>

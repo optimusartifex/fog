@@ -26,6 +26,12 @@ namespace Fog {
 struct FOG_NO_EXPORT ImagePaletteData
 {
   // --------------------------------------------------------------------------
+  // [Typedefs]
+  // --------------------------------------------------------------------------
+
+  typedef uint8_t (FOG_FASTCALL *FindRgbFunc)(const ImagePaletteData* d, uint32_t r, uint32_t g, uint32_t b);
+
+  // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
@@ -45,6 +51,24 @@ struct FOG_NO_EXPORT ImagePaletteData
   // [Members]
   // --------------------------------------------------------------------------
 
+  // ${VAR:BEGIN}
+  //
+  // This data-object is binary compatible to the VarData header in the first
+  // form called - "implicitly shared class". The members must be binary
+  // compatible to the header below:
+  //
+  // +==============+============+============================================+
+  // | Size         | Name       | Description / Purpose                      |
+  // +==============+============+============================================+
+  // | size_t       | reference  | Atomic reference count, can be managed by  |
+  // |              |            | VarData without calling container specific |
+  // |              |            | methods.                                   |
+  // +--------------+------------+--------------------------------------------+
+  // | uint32_t     | vType      | Variable type and flags.                   |
+  // +==============+============+============================================+
+  //
+  // ${VAR:END}
+
   //! @brief Reference count.
   mutable Atomic<size_t> reference;
 
@@ -54,6 +78,10 @@ struct FOG_NO_EXPORT ImagePaletteData
   //! @brief Count of palette entries used.
   uint32_t length;
 
+  //! @brief Specialized function to find palette entry which is closest to
+  //! a given RGB.
+  FindRgbFunc findRgbFunc;
+
   //! @brief Palette data.
   Argb32 data[256];
 };
@@ -62,27 +90,33 @@ struct FOG_NO_EXPORT ImagePaletteData
 // [Fog::ImagePalette]
 // ============================================================================
 
-//! @brief The ImagePalette is array of 256 ARGB32 color elements used to represent
-//! colors in 8-bit indexed image (the pixel value is index in the palette).
-//!
-//! @note Using alpha-channel is non-portable, because there is no API on
-//! target operating system which is possible to handle it. However, Fog API
-//! can handle transparency like @c IMAGE_FORMAT_ARGB32 or @c IMAGE_FORMAT_PRGB32
-//! formats.
-struct FOG_API ImagePalette
+//! @brief The ImagePalette is array of 256 RGB32 color elements which 
+//! represents colors in 8-bit indexed image (the pixel value is index to the
+//! palette array).
+struct FOG_NO_EXPORT ImagePalette
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ImagePalette();
-  ImagePalette(const ImagePalette& other);
+  FOG_INLINE ImagePalette()
+  {
+    _api.imagepalette.ctor(this);
+  }
+
+  FOG_INLINE ImagePalette(const ImagePalette& other)
+  {
+    _api.imagepalette.ctorCopy(this, &other);
+  }
 
   explicit FOG_INLINE ImagePalette(ImagePaletteData* d) : _d(d)
   {
   }
 
-  ~ImagePalette();
+  FOG_INLINE ~ImagePalette()
+  {
+    _api.imagepalette.dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Sharing]
@@ -92,20 +126,23 @@ struct FOG_API ImagePalette
   FOG_INLINE size_t getReference() const { return _d->reference.get(); }
   //! @copydoc Doxygen::Implicit::isDetached().
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
+
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
-  err_t _detach();
+  FOG_INLINE err_t _detach() { return _api.imagepalette.detach(this); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  //! @brief Returns a const pointer to the palette data in PRGB32 format.
-  FOG_INLINE const Argb32* getData() const { return _d->data; }
+  //! @brief Get palette data.
+  FOG_INLINE const Argb32* getData() const
+  {
+    return _d->data;
+  }
 
-  //! @brief Returns a mutable pointer to the palette data in PRGB32 format
-  //! without calling detach().
+  //! @brief Get mutable data without calling detach().
   FOG_INLINE Argb32* getDataX()
   {
     FOG_ASSERT_X(isDetached(),
@@ -114,18 +151,35 @@ struct FOG_API ImagePalette
     return reinterpret_cast<Argb32*>(_d->data);
   }
 
-  //! @brief Set palette data to @a other, making their implicit copy.
-  err_t setData(const ImagePalette& other);
-  //! @brief Set palette data to @a other, making their deep copy.
-  err_t setDeep(const ImagePalette& other);
+  //! @brief Set palette data to @a other, making weak-copy.
+  FOG_INLINE err_t setData(const ImagePalette& other)
+  {
+    return _api.imagepalette.copy(this, &other);
+  }
 
-  //! @brief Replace palette entries at @a range by @a entities.
-  err_t setData(const Range& range, const Argb32* entries);
+  //! @brief Set palette data to @a other, making deep-copy.
+  FOG_INLINE err_t setDeep(const ImagePalette& other)
+  {
+    return _api.imagepalette.setDeep(this, &other);
+  }
 
-  //! @brief Get the palette length.
-  FOG_INLINE size_t getLength() const { return _d->length; }
-  //! @brief Set the palette length.
-  err_t setLength(size_t length);
+  //! @brief Replace palette data at @a range by @a data.
+  FOG_INLINE err_t setData(const Range& range, const Argb32* data)
+  {
+    return _api.imagepalette.setData(this, &range, data);
+  }
+
+  //! @brief Get palette length.
+  FOG_INLINE size_t getLength() const
+  {
+    return _d->length;
+  }
+
+  //! @brief Set palette length.
+  FOG_INLINE err_t setLength(size_t length)
+  {
+    return _api.imagepalette.setLength(this, length);
+  }
 
   // --------------------------------------------------------------------------
   // [At]
@@ -143,14 +197,33 @@ struct FOG_API ImagePalette
   // [Clear / Reset]
   // --------------------------------------------------------------------------
 
-  void clear();
-  void reset();
+  FOG_INLINE void clear()
+  {
+    _api.imagepalette.clear(this);
+  }
+
+  FOG_INLINE void reset()
+  {
+    _api.imagepalette.reset(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Find]
   // --------------------------------------------------------------------------
 
-  uint8_t findColor(uint8_t r, uint8_t g, uint8_t b) const;
+  FOG_INLINE uint8_t findRgb(uint32_t r, uint32_t g, uint32_t b) const
+  {
+    return _d->findRgbFunc(_d, r, g, b);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const ImagePalette& other) const
+  {
+    return _api.imagepalette.eq(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -158,20 +231,58 @@ struct FOG_API ImagePalette
 
   FOG_INLINE const ImagePalette& operator=(const ImagePalette& other)
   {
-    setData(other);
+    _api.imagepalette.copy(this, &other);
     return *this;
   }
 
+  FOG_INLINE bool operator==(const ImagePalette& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const ImagePalette& other) const { return !eq(other); }
+
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static Static<ImagePaletteData> _dnull;
+  static FOG_INLINE const ImagePalette& empty()
+  {
+    return *_api.imagepalette.oEmpty;
+  }
 
-  static ImagePalette fromGreyscale(uint32_t count);
-  static ImagePalette fromCube(uint32_t r, uint32_t g, uint32_t b);
+  // --------------------------------------------------------------------------
+  // [Statics - Construction]
+  // --------------------------------------------------------------------------
 
-  static bool isGreyscale(const Argb32* data, size_t count);
+  static FOG_INLINE ImagePalette fromGreyscale(uint32_t length)
+  {
+    return ImagePalette(_api.imagepalette.dCreateGreyscale(length));
+  }
+
+  static FOG_INLINE ImagePalette fromColorCube(uint32_t r, uint32_t g, uint32_t b)
+  {
+    return ImagePalette(_api.imagepalette.dCreateColorCube(r, g, b));
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const ImagePalette* a, const ImagePalette* b)
+  {
+    return _api.imagepalette.eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.imagepalette.eq;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Helpers]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool isGreyscale(const Argb32* data, size_t length)
+  {
+    return _api.imagepalette.isGreyscale(data, length);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]

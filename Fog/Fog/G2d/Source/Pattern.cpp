@@ -10,858 +10,957 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Source/Pattern.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::PatternF - Helpers]
+// [Fog::Pattern - Helpers]
 // ============================================================================
 
-static FOG_INLINE PatternDataF* PatternF_dalloc()
+// ${GRADIENT_TYPE:BEGIN}
+static const uint32_t Pattern_vTypeFromGradientTableF[GRADIENT_TYPE_COUNT] = 
 {
-  PatternDataF* newd = reinterpret_cast<PatternDataF*>(MemMgr::alloc(sizeof(PatternDataF)));
-  if (FOG_UNLIKELY(newd == NULL)) return NULL;
+  /* 00: GRADIENT_TYPE_LINEAR      */ VAR_TYPE_LINEAR_GRADIENTF,
+  /* 01: GRADIENT_TYPE_RADIAL      */ VAR_TYPE_RADIAL_GRADIENTF,
+  /* 02: GRADIENT_TYPE_CONICAL     */ VAR_TYPE_CONICAL_GRADIENTF,
+  /* 03: GRADIENT_TYPE_RECTANGULAR */ VAR_TYPE_RECTANGULAR_GRADIENTF
+};
+// ${GRADIENT_TYPE:END}
 
-  newd->reference.init(1);
-  newd->transform.reset();
+// ${GRADIENT_TYPE:BEGIN}
+static const uint32_t Pattern_vTypeFromGradientTableD[GRADIENT_TYPE_COUNT] = 
+{
+  /* 00: GRADIENT_TYPE_LINEAR      */ VAR_TYPE_LINEAR_GRADIENTF,
+  /* 01: GRADIENT_TYPE_RADIAL      */ VAR_TYPE_RADIAL_GRADIENTF,
+  /* 02: GRADIENT_TYPE_CONICAL     */ VAR_TYPE_CONICAL_GRADIENTF,
+  /* 03: GRADIENT_TYPE_RECTANGULAR */ VAR_TYPE_RECTANGULAR_GRADIENTF
+};
+// ${GRADIENT_TYPE:END}
 
-  return newd;
+static FOG_INLINE uint32_t Pattern_getVarTypeFromGradientF(uint32_t gradientType)
+{
+  FOG_ASSERT(gradientType < GRADIENT_TYPE_COUNT);
+  return Pattern_vTypeFromGradientTableF[gradientType];
 }
 
-static FOG_INLINE PatternDataF* PatternF_dalloc(const TransformF& tr)
+static FOG_INLINE uint32_t Pattern_getVarTypeFromGradientD(uint32_t gradientType)
 {
-  PatternDataF* newd = reinterpret_cast<PatternDataF*>(MemMgr::alloc(sizeof(PatternDataF)));
-  if (FOG_UNLIKELY(newd == NULL)) return NULL;
-
-  newd->reference.init(1);
-  newd->transform = tr;
-
-  return newd;
+  FOG_ASSERT(gradientType < GRADIENT_TYPE_COUNT);
+  return Pattern_vTypeFromGradientTableD[gradientType];
 }
 
-static FOG_INLINE void PatternF_dinitColor(PatternDataF* d, const Color& color)
+static FOG_INLINE uint32_t Pattern_getGradientType(PatternData* d)
 {
-  d->type = PATTERN_TYPE_COLOR;
-  d->color.init(color);
+  // GradientF and GradientD share common values (gradientType and stops), but
+  // there is no single structure which these two are based on. So instead of
+  // doing this magic across the Pattern implementation it's only here. There is
+  // no difference between PatternGradientDataF and PatternGradientDataD from
+  // the gradientType perspective.
+  return reinterpret_cast<PatternGradientDataF*>(d)->gradient().getGradientType();
 }
 
-static FOG_INLINE void PatternF_dinitColor(PatternDataF* d, const ArgbBase32& argb32)
+// ============================================================================
+// [Fog::Pattern - Construction / Destruction]
+// ============================================================================
+
+static void FOG_CDECL Pattern_ctor(Pattern* self)
 {
-  d->type = PATTERN_TYPE_COLOR;
-  d->color.initCustom1(argb32);
+  self->_d = _api.pattern.oNull->_d;
 }
 
-static FOG_INLINE void PatternF_dinitTexture(PatternDataF* d, const Texture& tex)
+static void FOG_CDECL Pattern_ctorCopy(Pattern* self, const Pattern* other)
 {
-  d->type = PATTERN_TYPE_TEXTURE;
-  d->texture.init(tex);
+  self->_d = other->_d->addRef();
 }
 
-static FOG_INLINE void PatternF_dinitGradient(PatternDataF* d, const GradientF& gr)
+static void FOG_CDECL Pattern_ctorArgb32(Pattern* self, const ArgbBase32* argb32)
 {
-  d->type = PATTERN_TYPE_GRADIENT;
-  d->gradient.init(gr);
-}
+  PatternColorData* d = reinterpret_cast<PatternColorData*>(
+    _api.pattern.dCreate(sizeof(PatternColorData)));
 
-static FOG_INLINE void PatternF_dinitGradient(PatternDataF* d, const GradientD& gr)
-{
-  d->type = PATTERN_TYPE_GRADIENT;
-  d->gradient.initCustom1(gr);
-}
-
-#define PATTERNF_CHANGE() \
-  if (!isDetached()) \
-  { \
-    PatternDataF* newd = PatternF_dalloc(_d->transform); \
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY; \
-    atomicPtrXchg(&_d, newd)->release(); \
-  } \
-  else \
-  { \
-    _d->destroy(); \
+  if (FOG_IS_NULL(d))
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
   }
 
-// ============================================================================
-// [Fog::PatternF - Construction / Destruction]
-// ============================================================================
+  d->vType = VAR_TYPE_COLOR;
+  d->patternType = PATTERN_TYPE_COLOR;
+  d->color.initCustom1(*argb32);
 
-PatternF::PatternF()
-{
-  _d = _dnull->addRef();
+  self->_d = d;
 }
 
-PatternF::PatternF(const PatternF& other)
+static void FOG_CDECL Pattern_ctorColor(Pattern* self, const Color* color)
 {
-  _d = other._d->addRef();
-}
+  PatternColorData* d = reinterpret_cast<PatternColorData*>(
+    _api.pattern.dCreate(sizeof(PatternColorData)));
 
-PatternF::PatternF(const ArgbBase32& argb32)
-{
-  _d = PatternF_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternF_dinitColor(_d, argb32);
-}
-
-PatternF::PatternF(const Color& color)
-{
-  _d = PatternF_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternF_dinitColor(_d, color);
-}
-
-PatternF::PatternF(const Texture& texture)
-{
-  _d = PatternF_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternF_dinitTexture(_d, texture);
-}
-
-PatternF::PatternF(const GradientF& gradient)
-{
-  _d = PatternF_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternF_dinitGradient(_d, gradient);
-}
-
-PatternF::PatternF(const GradientD& gradient)
-{
-  _d = PatternF_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternF_dinitGradient(_d, gradient);
-}
-
-PatternF::PatternF(const PatternD& other)
-{
-  _d = PatternF_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  setPattern(other);
-}
-
-PatternF::~PatternF()
-{
-  _d->release();
-}
-
-// ============================================================================
-// [Fog::PatternF - Data]
-// ============================================================================
-
-err_t PatternF::_detach()
-{
-  if (isDetached()) return ERR_OK;
-
-  PatternDataF* newd = PatternF_dalloc(_d->transform);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-  switch (_d->type)
+  if (FOG_IS_NULL(d))
   {
-    case PATTERN_TYPE_NONE:
-      newd->type = PATTERN_TYPE_NONE;
-      break;
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
 
-    case PATTERN_TYPE_COLOR:
-      newd->type = PATTERN_TYPE_COLOR;
-      newd->color.init(_d->color);
-      break;
+  d->vType = VAR_TYPE_COLOR;
+  d->patternType = PATTERN_TYPE_COLOR;
+  d->color.initCustom1(*color);
 
-    case PATTERN_TYPE_GRADIENT:
-      newd->gradient.init(_d->gradient);
-      break;
+  self->_d = d;
+}
 
-    case PATTERN_TYPE_TEXTURE:
-      newd->texture.init(_d->texture);
-      break;
+static void FOG_CDECL Pattern_ctorTextureF(Pattern* self, const Texture* texture, const TransformF* tr)
+{
+  PatternTextureDataF* d = reinterpret_cast<PatternTextureDataF*>(
+    _api.pattern.dCreate(sizeof(PatternTextureDataF)));
+
+  if (FOG_IS_NULL(d))
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  d->vType = VAR_TYPE_TEXTUREF;
+  d->patternType = PATTERN_TYPE_TEXTURE;
+  d->texture.initCustom1(*texture);
+  d->transform.initCustom1(tr != NULL ? *tr : TransformF::identity());
+
+  self->_d = d;
+}
+
+static void FOG_CDECL Pattern_ctorTextureD(Pattern* self, const Texture* texture, const TransformD* tr)
+{
+  if (texture->getImage().isEmpty())
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  PatternTextureDataD* d = reinterpret_cast<PatternTextureDataD*>(
+    _api.pattern.dCreate(sizeof(PatternTextureDataD)));
+
+  if (FOG_IS_NULL(d))
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  d->vType = VAR_TYPE_TEXTURED;
+  d->patternType = PATTERN_TYPE_TEXTURE;
+  d->texture.initCustom1(*texture);
+  d->transform.initCustom1(tr != NULL ? *tr : TransformD::identity());
+
+  self->_d = d;
+}
+
+static void FOG_CDECL Pattern_ctorGradientF(Pattern* self, const GradientF* gradient, const TransformF* tr)
+{
+  uint32_t gradientType = gradient->getGradientType();
+
+  // Pattern disallows to use invalid (uninitialized) gradient.
+  if (gradientType >= GRADIENT_TYPE_COUNT)
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  PatternGradientDataF* d = reinterpret_cast<PatternGradientDataF*>(
+    _api.pattern.dCreate(sizeof(PatternGradientDataF)));
+
+  if (FOG_IS_NULL(d))
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  d->vType = Pattern_getVarTypeFromGradientF(gradientType);
+  d->patternType = PATTERN_TYPE_GRADIENT;
+  d->gradient.initCustom1(*gradient);
+  d->transform.initCustom1(tr != NULL ? *tr : TransformF::identity());
+
+  self->_d = d;
+}
+
+static void FOG_CDECL Pattern_ctorGradientD(Pattern* self, const GradientD* gradient, const TransformD* tr)
+{
+  uint32_t gradientType = gradient->getGradientType();
+
+  // Pattern disallows to use invalid (uninitialized) gradient.
+  if (gradientType >= GRADIENT_TYPE_COUNT)
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  PatternGradientDataD* d = reinterpret_cast<PatternGradientDataD*>(
+    _api.pattern.dCreate(sizeof(PatternGradientDataD)));
+
+  if (FOG_IS_NULL(d))
+  {
+    self->_d = _api.pattern.oNull->_d;
+    return;
+  }
+
+  d->vType = Pattern_getVarTypeFromGradientD(gradientType);
+  d->patternType = PATTERN_TYPE_GRADIENT;
+  d->gradient.initCustom1(*gradient);
+  d->transform.initCustom1(tr != NULL ? *tr : TransformD::identity());
+
+  self->_d = d;
+}
+
+static void FOG_CDECL Pattern_dtor(Pattern* self)
+{
+  self->_d->release();
+}
+
+// ============================================================================
+// [Fog::Pattern - Sharing]
+// ============================================================================
+
+static err_t FOG_CDECL Pattern_detach(Pattern* self)
+{
+  PatternData* d = self->_d;
+  if (d->reference.get() == 1)
+    return ERR_OK;
+
+  uint32_t vType = d->vType & VAR_TYPE_MASK;
+  switch (vType)
+  {
+    case VAR_TYPE_NULL:
+    {
+      return ERR_OK;
+    }
+
+    case VAR_TYPE_COLOR:
+    {
+      PatternColorData* newd = reinterpret_cast<PatternColorData*>(
+        _api.pattern.dCreate(sizeof(PatternColorData)));
+
+      if (FOG_IS_NULL(newd))
+        return ERR_RT_OUT_OF_MEMORY;
+
+      newd->vType = vType;
+      newd->patternType = d->patternType;
+      newd->color.initCustom1(reinterpret_cast<PatternColorData*>(d)->color());
+
+      atomicPtrXchg(&self->_d, reinterpret_cast<PatternData*>(newd))->release();
+      return ERR_OK;
+    }
+
+    case VAR_TYPE_TEXTUREF:
+    {
+      PatternTextureDataF* newd = reinterpret_cast<PatternTextureDataF*>(
+        _api.pattern.dCreate(sizeof(PatternTextureDataF)));
+
+      if (FOG_IS_NULL(newd))
+        return ERR_RT_OUT_OF_MEMORY;
+
+      newd->vType = vType;
+      newd->patternType = d->patternType;
+      newd->texture.initCustom1(reinterpret_cast<PatternTextureDataF*>(d)->texture());
+      newd->transform.initCustom1(reinterpret_cast<PatternTextureDataF*>(d)->transform());
+
+      atomicPtrXchg(&self->_d, reinterpret_cast<PatternData*>(newd))->release();
+      return ERR_OK;
+    }
+
+    case VAR_TYPE_TEXTURED:
+    {
+      PatternTextureDataD* newd = reinterpret_cast<PatternTextureDataD*>(
+        _api.pattern.dCreate(sizeof(PatternTextureDataD)));
+
+      if (FOG_IS_NULL(newd))
+        return ERR_RT_OUT_OF_MEMORY;
+
+      newd->vType = vType;
+      newd->patternType = d->patternType;
+      newd->texture.initCustom1(reinterpret_cast<PatternTextureDataD*>(d)->texture());
+      newd->transform.initCustom1(reinterpret_cast<PatternTextureDataD*>(d)->transform());
+
+      atomicPtrXchg(&self->_d, reinterpret_cast<PatternData*>(newd))->release();
+      return ERR_OK;
+    }
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+    {
+      PatternGradientDataF* newd = reinterpret_cast<PatternGradientDataF*>(
+        _api.pattern.dCreate(sizeof(PatternGradientDataF)));
+
+      if (FOG_IS_NULL(newd))
+        return ERR_RT_OUT_OF_MEMORY;
+
+      newd->vType = vType;
+      newd->patternType = d->patternType;
+      newd->gradient.initCustom1(reinterpret_cast<PatternGradientDataF*>(d)->gradient());
+      newd->transform.initCustom1(reinterpret_cast<PatternGradientDataF*>(d)->transform());
+
+      atomicPtrXchg(&self->_d, reinterpret_cast<PatternData*>(newd))->release();
+      return ERR_OK;
+    }
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+    {
+      PatternGradientDataD* newd = reinterpret_cast<PatternGradientDataD*>(
+        _api.pattern.dCreate(sizeof(PatternGradientDataD)));
+
+      if (FOG_IS_NULL(newd))
+        return ERR_RT_OUT_OF_MEMORY;
+
+      newd->vType = vType;
+      newd->patternType = d->patternType;
+      newd->gradient.initCustom1(reinterpret_cast<PatternGradientDataD*>(d)->gradient());
+      newd->transform.initCustom1(reinterpret_cast<PatternGradientDataD*>(d)->transform());
+
+      atomicPtrXchg(&self->_d, reinterpret_cast<PatternData*>(newd))->release();
+      return ERR_OK;
+    }
 
     default:
-      MemMgr::free(newd);
+      // Shouldn't be reached.
       return ERR_RT_INVALID_STATE;
   }
-
-  atomicPtrXchg(&_d, newd)->release();
-  return ERR_OK;
-}
-
-void PatternF::clear()
-{
-  if (isDetached())
-  {
-    _d->destroy();
-    _d->type = PATTERN_TYPE_NONE;
-  }
-  else
-  {
-    atomicPtrXchg(&_d, _dnull->addRef())->release();
-  }
-}
-
-void PatternF::reset()
-{
-  atomicPtrXchg(&_d, _dnull->addRef())->release();
 }
 
 // ============================================================================
-// [Fog::PatternF - Transform]
+// [Fog::Pattern - Accessors]
 // ============================================================================
 
-err_t PatternF::getTransform(TransformF& tr) const
+static err_t FOG_CDECL Pattern_getArgb32(const Pattern* self, ArgbBase32* argb32)
 {
-  return tr.setTransform(_d->transform);
-}
+  PatternColorData* d = reinterpret_cast<PatternColorData*>(self->_d);
 
-err_t PatternF::getTransform(TransformD& tr) const
-{
-  return tr.setTransform(_d->transform);
-}
-
-err_t PatternF::setTransform(const TransformF& tr)
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  return _d->transform.setTransform(tr);
-}
-
-err_t PatternF::setTransform(const TransformD& tr)
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  return _d->transform.setTransform(tr);
-}
-
-err_t PatternF::resetTransform()
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  _d->transform.reset();
-  return ERR_OK;
-}
-
-err_t PatternF::_transform(uint32_t transformOp, const void* params)
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  return _api.transformf.transform(_d->transform, transformOp, params);
-}
-
-// ============================================================================
-// [Fog::PatternF - Color]
-// ============================================================================
-
-err_t PatternF::getArgb32(ArgbBase32& argb32) const
-{
-  if (_d->type != PATTERN_TYPE_COLOR)
-  {
-    argb32.u32 = 0;
+  if (d->patternType != PATTERN_TYPE_COLOR)
     return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    argb32 = _d->color->_argb32;
-    return ERR_OK;
-  }
+
+  *argb32 = d->color->getArgb32();
+  return ERR_OK;
 }
 
-err_t PatternF::getColor(Color& color) const
+static err_t FOG_CDECL Pattern_getColor(const Pattern* self, Color* color)
 {
-  if (_d->type != PATTERN_TYPE_COLOR)
-  {
-    color.reset();
+  PatternColorData* d = reinterpret_cast<PatternColorData*>(self->_d);
+
+  if (d->patternType != PATTERN_TYPE_COLOR)
     return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    color = _d->color;
-    return ERR_OK;
-  }
-}
 
-err_t PatternF::setArgb32(const ArgbBase32& argb32)
-{
-  PATTERNF_CHANGE()
-
-  _d->type = PATTERN_TYPE_COLOR;
-  _d->color.initCustom1(argb32);
+  *color = d->color();
   return ERR_OK;
 }
 
-err_t PatternF::setColor(const Color& color)
+static err_t FOG_CDECL Pattern_getTexture(const Pattern* self, Texture* texture)
 {
-  PATTERNF_CHANGE()
+  PatternTextureDataF* d = reinterpret_cast<PatternTextureDataF*>(self->_d);
 
-  _d->type = PATTERN_TYPE_COLOR;
-  _d->color.init(color);
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::PatternF - Texture]
-// ============================================================================
-
-err_t PatternF::getTexture(Texture& texture) const
-{
-  if (_d->type != PATTERN_TYPE_COLOR)
-  {
-    texture.reset();
+  if (d->patternType != PATTERN_TYPE_COLOR)
     return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    texture = _d->texture;
-    return ERR_OK;
-  }
-}
 
-err_t PatternF::setTexture(const Texture& texture)
-{
-  PATTERNF_CHANGE()
-
-  PatternF_dinitTexture(_d, texture);
+  texture->setTexture(d->texture());
   return ERR_OK;
 }
 
-// ============================================================================
-// [Fog::PatternF - Gradient]
-// ============================================================================
-
-err_t PatternF::_getGradientF(uint32_t gradientType, GradientF& gr) const
+static err_t FOG_CDECL Pattern_getGradientF(const Pattern* self, uint32_t targetType, GradientF* gradient)
 {
-  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
-      (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
-  {
-    gr.reset();
+  PatternData* d = self->_d;
+
+  if (d->patternType != PATTERN_TYPE_GRADIENT)
     return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    return gr.setGradient(_d->gradient);
-  }
-}
 
-err_t PatternF::_getGradientD(uint32_t gradientType, GradientD& gr) const
-{
-  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
-      (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
-  {
-    gr.reset();
+  if (targetType != 0xFFFFFFFF && Pattern_getGradientType(d) != targetType)
     return ERR_RT_INVALID_STATE;
-  }
-  else
+
+  switch (d->vType & VAR_TYPE_MASK)
   {
-    return gr.setGradient(_d->gradient);
-  }
-}
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      return gradient->setGradient(reinterpret_cast<PatternGradientDataF*>(d)->gradient());
 
-err_t PatternF::setGradient(const GradientF& gr)
-{
-  PATTERNF_CHANGE()
-
-  PatternF_dinitGradient(_d, gr);
-  return ERR_OK;
-}
-
-err_t PatternF::setGradient(const GradientD& gr)
-{
-  PATTERNF_CHANGE()
-
-  PatternF_dinitGradient(_d, gr);
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::PatternF - Pattern]
-// ============================================================================
-
-err_t PatternF::setPattern(const PatternF& other)
-{
-  atomicPtrXchg(&_d, other._d->addRef())->release();
-  return ERR_OK;
-}
-
-err_t PatternF::setPattern(const PatternD& other)
-{
-  PATTERNF_CHANGE()
-
-  switch (other.getType())
-  {
-    case PATTERN_TYPE_NONE:
-      _d->type = PATTERN_TYPE_NONE;
-      break;
-
-    case PATTERN_TYPE_COLOR:
-      _d->type = PATTERN_TYPE_COLOR;
-      _d->color.init(other._d->color);
-      break;
-
-    case PATTERN_TYPE_GRADIENT:
-      _d->type = PATTERN_TYPE_GRADIENT;
-      _d->gradient.initCustom1(other._d->gradient);
-      break;
-
-    case PATTERN_TYPE_TEXTURE:
-      _d->type = PATTERN_TYPE_TEXTURE;
-      _d->texture.init(other._d->texture);
-      break;
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      return gradient->setGradient(reinterpret_cast<PatternGradientDataD*>(d)->gradient());
 
     default:
       FOG_ASSERT_NOT_REACHED();
   }
-
-  return ERR_OK;
 }
 
-// ============================================================================
-// [Fog::PatternF - Statics]
-// ============================================================================
-
-Static<PatternDataF> PatternF::_dnull;
-
-// ============================================================================
-// [Fog::PatternD - Helpers]
-// ============================================================================
-
-static FOG_INLINE PatternDataD* PatternD_dalloc()
+static err_t FOG_CDECL Pattern_getGradientD(const Pattern* self, uint32_t targetType, GradientD* gradient)
 {
-  PatternDataD* newd = reinterpret_cast<PatternDataD*>(MemMgr::alloc(sizeof(PatternDataD)));
-  if (FOG_UNLIKELY(newd == NULL)) return NULL;
+  PatternData* d = self->_d;
 
-  newd->reference.init(1);
-  newd->transform.reset();
+  if (d->patternType != PATTERN_TYPE_GRADIENT)
+    return ERR_RT_INVALID_STATE;
 
-  return newd;
-}
+  if (targetType != 0xFFFFFFFF && Pattern_getGradientType(d) != targetType)
+    return ERR_RT_INVALID_STATE;
 
-static FOG_INLINE PatternDataD* PatternD_dalloc(const TransformD& tr)
-{
-  PatternDataD* newd = reinterpret_cast<PatternDataD*>(MemMgr::alloc(sizeof(PatternDataD)));
-  if (FOG_UNLIKELY(newd == NULL)) return NULL;
-
-  newd->reference.init(1);
-  newd->transform = tr;
-
-  return newd;
-}
-
-static FOG_INLINE void PatternD_dinitColor(PatternDataD* d, const Color& color)
-{
-  d->type = PATTERN_TYPE_COLOR;
-  d->color.init(color);
-}
-
-static FOG_INLINE void PatternD_dinitColor(PatternDataD* d, const ArgbBase32& argb32)
-{
-  d->type = PATTERN_TYPE_COLOR;
-  d->color.initCustom1(argb32);
-}
-
-static FOG_INLINE void PatternD_dinitTexture(PatternDataD* d, const Texture& tex)
-{
-  d->type = PATTERN_TYPE_TEXTURE;
-  d->texture.init(tex);
-}
-
-static FOG_INLINE void PatternD_dinitGradient(PatternDataD* d, const GradientF& gr)
-{
-  d->type = PATTERN_TYPE_GRADIENT;
-  d->gradient.initCustom1(gr);
-}
-
-static FOG_INLINE void PatternD_dinitGradient(PatternDataD* d, const GradientD& gr)
-{
-  d->type = PATTERN_TYPE_GRADIENT;
-  d->gradient.init(gr);
-}
-
-#define PATTERND_CHANGE() \
-  if (!isDetached()) \
-  { \
-    PatternDataD* newd = PatternD_dalloc(_d->transform); \
-    if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY; \
-    atomicPtrXchg(&_d, newd)->release(); \
-  } \
-  else \
-  { \
-    _d->destroy(); \
-  }
-
-// ============================================================================
-// [Fog::PatternD - Construction / Destruction]
-// ============================================================================
-
-PatternD::PatternD()
-{
-  _d = _dnull->addRef();
-}
-
-PatternD::PatternD(const PatternD& other)
-{
-  _d = other._d->addRef();
-}
-
-PatternD::PatternD(const ArgbBase32& argb32)
-{
-  _d = PatternD_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternD_dinitColor(_d, argb32);
-}
-
-PatternD::PatternD(const Color& color)
-{
-  _d = PatternD_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternD_dinitColor(_d, color);
-}
-
-PatternD::PatternD(const Texture& texture)
-{
-  _d = PatternD_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternD_dinitTexture(_d, texture);
-}
-
-PatternD::PatternD(const GradientF& gradient)
-{
-  _d = PatternD_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternD_dinitGradient(_d, gradient);
-}
-
-PatternD::PatternD(const GradientD& gradient)
-{
-  _d = PatternD_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  PatternD_dinitGradient(_d, gradient);
-}
-
-PatternD::PatternD(const PatternF& other)
-{
-  _d = PatternD_dalloc();
-  if (FOG_UNLIKELY(_d == NULL)) { _d = _dnull->addRef(); return; }
-
-  setPattern(other);
-}
-
-PatternD::~PatternD()
-{
-  _d->release();
-}
-
-// ============================================================================
-// [Fog::PatternD - Data]
-// ============================================================================
-
-err_t PatternD::_detach()
-{
-  if (isDetached()) return ERR_OK;
-
-  PatternDataD* newd = PatternD_dalloc(_d->transform);
-  if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
-
-  switch (_d->type)
+  switch (d->vType & VAR_TYPE_MASK)
   {
-    case PATTERN_TYPE_NONE:
-      newd->type = PATTERN_TYPE_NONE;
-      break;
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      return gradient->setGradient(reinterpret_cast<PatternGradientDataF*>(d)->gradient());
 
-    case PATTERN_TYPE_COLOR:
-      newd->type = PATTERN_TYPE_COLOR;
-      newd->color.init(_d->color);
-      break;
-
-    case PATTERN_TYPE_GRADIENT:
-      newd->gradient.init(_d->gradient);
-      break;
-
-    case PATTERN_TYPE_TEXTURE:
-      newd->texture.init(_d->texture);
-      break;
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      return gradient->setGradient(reinterpret_cast<PatternGradientDataD*>(d)->gradient());
 
     default:
-      MemMgr::free(newd);
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+static err_t FOG_CDECL Pattern_getTransformF(const Pattern* self, TransformF* tr)
+{
+  PatternData* d = self->_d;
+
+  switch (d->vType & VAR_TYPE_MASK)
+  {
+    // Null and color pattern has no transform, but it's special kind of pattern
+    // so we return ERR_OK instead of reporting an invalid state.
+    case VAR_TYPE_NULL:
+    case VAR_TYPE_COLOR:
+      tr->reset();
+      return ERR_OK;
+
+    case VAR_TYPE_TEXTUREF:
+      *tr = reinterpret_cast<PatternTextureDataF*>(d)->transform();
+      return ERR_OK;
+
+    case VAR_TYPE_TEXTURED:
+      *tr = reinterpret_cast<PatternTextureDataD*>(d)->transform();
+      return ERR_OK;
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      *tr = reinterpret_cast<PatternGradientDataF*>(d)->transform();
+      return ERR_OK;
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      *tr = reinterpret_cast<PatternGradientDataD*>(d)->transform();
+      return ERR_OK;
+
+    default:
       return ERR_RT_INVALID_STATE;
   }
-
-  atomicPtrXchg(&_d, newd)->release();
-  return ERR_OK;
 }
 
-void PatternD::clear()
+static err_t FOG_CDECL Pattern_getTransformD(const Pattern* self, TransformD* tr)
 {
-  if (isDetached())
+  PatternData* d = self->_d;
+
+  switch (d->vType & VAR_TYPE_MASK)
   {
-    _d->destroy();
-    _d->type = PATTERN_TYPE_NONE;
-  }
-  else
-  {
-    atomicPtrXchg(&_d, _dnull->addRef())->release();
-  }
-}
+    // Null and color pattern has no transform, but it's special kind of pattern
+    // so we return ERR_OK instead of reporting an invalid state.
+    case VAR_TYPE_NULL:
+    case VAR_TYPE_COLOR:
+      tr->reset();
+      return ERR_OK;
 
-void PatternD::reset()
-{
-  atomicPtrXchg(&_d, _dnull->addRef())->release();
-}
+    case VAR_TYPE_TEXTUREF:
+      *tr = reinterpret_cast<PatternTextureDataF*>(d)->transform();
+      return ERR_OK;
 
-// ============================================================================
-// [Fog::PatternD - Transform]
-// ============================================================================
+    case VAR_TYPE_TEXTURED:
+      *tr = reinterpret_cast<PatternTextureDataD*>(d)->transform();
+      return ERR_OK;
 
-err_t PatternD::getTransform(TransformF& tr) const
-{
-  return tr.setTransform(_d->transform);
-}
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      *tr = reinterpret_cast<PatternGradientDataF*>(d)->transform();
+      return ERR_OK;
 
-err_t PatternD::getTransform(TransformD& tr) const
-{
-  return tr.setTransform(_d->transform);
-}
-
-err_t PatternD::setTransform(const TransformF& tr)
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  return _d->transform.setTransform(tr);
-}
-
-err_t PatternD::setTransform(const TransformD& tr)
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  return _d->transform.setTransform(tr);
-}
-
-err_t PatternD::resetTransform()
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  _d->transform.reset();
-  return ERR_OK;
-}
-
-err_t PatternD::_transform(uint32_t transformOp, const void* params)
-{
-  FOG_RETURN_ON_ERROR(detach());
-
-  return _api.transformd.transform(_d->transform, transformOp, params);
-}
-
-// ============================================================================
-// [Fog::PatternD - Color]
-// ============================================================================
-
-err_t PatternD::getArgb32(ArgbBase32& argb32) const
-{
-  if (_d->type != PATTERN_TYPE_COLOR)
-  {
-    argb32.u32 = 0;
-    return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    argb32 = _d->color->_argb32;
-    return ERR_OK;
-  }
-}
-
-err_t PatternD::getColor(Color& color) const
-{
-  if (_d->type != PATTERN_TYPE_COLOR)
-  {
-    color.reset();
-    return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    color = _d->color;
-    return ERR_OK;
-  }
-}
-
-err_t PatternD::setArgb32(const ArgbBase32& argb32)
-{
-  PATTERND_CHANGE()
-
-  _d->type = PATTERN_TYPE_COLOR;
-  _d->color.initCustom1(argb32);
-  return ERR_OK;
-}
-
-err_t PatternD::setColor(const Color& color)
-{
-  PATTERND_CHANGE()
-
-  _d->type = PATTERN_TYPE_COLOR;
-  _d->color.init(color);
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::PatternF - Texture]
-// ============================================================================
-
-err_t PatternD::getTexture(Texture& texture) const
-{
-  if (_d->type != PATTERN_TYPE_COLOR)
-  {
-    texture.reset();
-    return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    texture = _d->texture;
-    return ERR_OK;
-  }
-}
-
-err_t PatternD::setTexture(const Texture& texture)
-{
-  PATTERND_CHANGE()
-
-  _d->texture.init(texture);
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::PatternD - Gradient]
-// ============================================================================
-
-err_t PatternD::_getGradientF(uint32_t gradientType, GradientF& gr) const
-{
-  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
-      (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
-  {
-    gr.reset();
-    return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    return gr.setGradient(_d->gradient);
-  }
-}
-
-err_t PatternD::_getGradientD(uint32_t gradientType, GradientD& gr) const
-{
-  if ((_d->type != PATTERN_TYPE_GRADIENT) ||
-      (_d->gradient->getGradientType() != gradientType && gradientType != 0xFFFFFFFF))
-  {
-    gr.reset();
-    return ERR_RT_INVALID_STATE;
-  }
-  else
-  {
-    return gr.setGradient(_d->gradient);
-  }
-}
-
-err_t PatternD::setGradient(const GradientF& gr)
-{
-  PATTERND_CHANGE()
-
-  _d->gradient.initCustom1(gr);
-  return ERR_OK;
-}
-
-err_t PatternD::setGradient(const GradientD& gr)
-{
-  PATTERND_CHANGE()
-
-  _d->gradient.init(gr);
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::PatternF - Pattern]
-// ============================================================================
-
-err_t PatternD::setPattern(const PatternF& other)
-{
-  PATTERND_CHANGE()
-
-  switch (other.getType())
-  {
-    case PATTERN_TYPE_NONE:
-      _d->type = PATTERN_TYPE_NONE;
-      break;
-
-    case PATTERN_TYPE_COLOR:
-      _d->type = PATTERN_TYPE_COLOR;
-      _d->color.init(other._d->color);
-      break;
-
-    case PATTERN_TYPE_GRADIENT:
-      _d->type = PATTERN_TYPE_GRADIENT;
-      _d->gradient.initCustom1(other._d->gradient);
-      _d->transform = other._d->transform;
-      break;
-
-    case PATTERN_TYPE_TEXTURE:
-      _d->type = PATTERN_TYPE_TEXTURE;
-      _d->texture.init(other._d->texture);
-      _d->transform = other._d->transform;
-      break;
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      *tr = reinterpret_cast<PatternGradientDataD*>(d)->transform();
+      return ERR_OK;
 
     default:
-      FOG_ASSERT_NOT_REACHED();
+      return ERR_RT_INVALID_STATE;
   }
-
-  return ERR_OK;
 }
 
-err_t PatternD::setPattern(const PatternD& other)
+// ============================================================================
+// [Fog::Pattern - Create]
+// ============================================================================
+
+static err_t FOG_CDECL Pattern_createArgb32(Pattern* self, const ArgbBase32* argb32)
 {
-  atomicPtrXchg(&_d, other._d->addRef())->release();
-  return ERR_OK;
-/*
-  if (_d == other._d) return ERR_OK;
-  PATTERND_CHANGE()
+  PatternColorData* d = reinterpret_cast<PatternColorData*>(self->_d);
 
-  switch (other.getType())
+  if (d->patternType != PATTERN_TYPE_COLOR || d->reference.get() != 1)
   {
-    case PATTERN_TYPE_NONE:
-      _d->type = PATTERN_TYPE_NONE;
-      break;
+    d = reinterpret_cast<PatternColorData*>(
+      _api.pattern.dCreate(sizeof(PatternColorData)));
 
-    case PATTERN_TYPE_COLOR:
-      _d->type = PATTERN_TYPE_COLOR;
-      _d->color.init(other._d->color);
-      break;
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
 
-    case PATTERN_TYPE_GRADIENT:
-      _d->type = PATTERN_TYPE_GRADIENT;
-      _d->gradient.init(other._d->gradient);
-      _d->transform = other._d->transform;
-      break;
+    d->vType = VAR_TYPE_COLOR;
+    d->patternType = PATTERN_TYPE_COLOR;
 
-    case PATTERN_TYPE_TEXTURE:
-      _d->type = PATTERN_TYPE_TEXTURE;
-      _d->texture.init(other._d->texture);
-      _d->transform = other._d->transform;
-      break;
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
+    self->_d->release();
+    self->_d = d;
   }
 
+  d->color.initCustom1(*argb32);
   return ERR_OK;
-*/
+}
+
+static err_t FOG_CDECL Pattern_createColor(Pattern* self, const Color* color)
+{
+  PatternColorData* d = reinterpret_cast<PatternColorData*>(self->_d);
+
+  if (d->patternType != PATTERN_TYPE_COLOR || d->reference.get() != 1)
+  {
+    d = reinterpret_cast<PatternColorData*>(
+      _api.pattern.dCreate(sizeof(PatternColorData)));
+
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    d->vType = VAR_TYPE_COLOR;
+    d->patternType = PATTERN_TYPE_COLOR;
+
+    self->_d->release();
+    self->_d = d;
+  }
+
+  d->color.initCustom1(*color);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Pattern_createTextureF(Pattern* self, const Texture* texture, const TransformF* tr)
+{
+  PatternTextureDataF* d = reinterpret_cast<PatternTextureDataF*>(self->_d);
+
+  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  {
+    d = reinterpret_cast<PatternTextureDataF*>(
+      _api.pattern.dCreate(sizeof(PatternTextureDataF)));
+
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    d->vType = VAR_TYPE_TEXTUREF;
+    d->patternType = PATTERN_TYPE_TEXTURE;
+    d->texture.initCustom1(*texture);
+    d->transform.initCustom1(tr != NULL ? *tr : TransformF::identity());
+
+    self->_d->release();
+    self->_d = d;
+    return ERR_OK;
+  }
+  else
+  {
+    d->texture() = *texture;
+    d->transform() = tr != NULL ? *tr : TransformF::identity();
+    return ERR_OK;
+  }
+}
+
+static err_t FOG_CDECL Pattern_createTextureD(Pattern* self, const Texture* texture, const TransformD* tr)
+{
+  PatternTextureDataD* d = reinterpret_cast<PatternTextureDataD*>(self->_d);
+
+  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  {
+    d = reinterpret_cast<PatternTextureDataD*>(
+      _api.pattern.dCreate(sizeof(PatternTextureDataD)));
+
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    d->vType = VAR_TYPE_TEXTUREF;
+    d->patternType = PATTERN_TYPE_TEXTURE;
+    d->texture.initCustom1(*texture);
+    d->transform.initCustom1(tr != NULL ? *tr : TransformD::identity());
+
+    self->_d->release();
+    self->_d = d;
+    return ERR_OK;
+  }
+  else
+  {
+    d->texture() = *texture;
+    d->transform() = tr != NULL ? *tr : TransformD::identity();
+    return ERR_OK;
+  }
+}
+
+static err_t FOG_CDECL Pattern_createGradientF(Pattern* self, const GradientF* gradient, const TransformF* tr)
+{
+  // Pattern disallows to use invalid (uninitialized) gradient.
+  if (gradient->getGradientType() >= GRADIENT_TYPE_COUNT)
+  {
+    _api.pattern.reset(self);
+    return ERR_OK;
+  }
+
+  PatternGradientDataF* d = reinterpret_cast<PatternGradientDataF*>(self->_d);
+
+  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  {
+    d = reinterpret_cast<PatternGradientDataF*>(
+      _api.pattern.dCreate(sizeof(PatternGradientDataF)));
+
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    d->vType = VAR_TYPE_TEXTUREF;
+    d->patternType = PATTERN_TYPE_TEXTURE;
+    d->gradient.initCustom1(*gradient);
+    d->transform.initCustom1(tr != NULL ? *tr : TransformF::identity());
+
+    self->_d->release();
+    self->_d = d;
+    return ERR_OK;
+  }
+  else
+  {
+    d->gradient().setGradient(*gradient);
+    d->transform() = tr != NULL ? *tr : TransformF::identity();
+    return ERR_OK;
+  }
+}
+
+static err_t FOG_CDECL Pattern_createGradientD(Pattern* self, const GradientD* gradient, const TransformD* tr)
+{
+  // Pattern disallows to use invalid (uninitialized) gradient.
+  if (gradient->getGradientType() >= GRADIENT_TYPE_COUNT)
+  {
+    _api.pattern.reset(self);
+    return ERR_OK;
+  }
+
+  PatternGradientDataD* d = reinterpret_cast<PatternGradientDataD*>(self->_d);
+
+  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  {
+    d = reinterpret_cast<PatternGradientDataD*>(
+      _api.pattern.dCreate(sizeof(PatternGradientDataD)));
+
+    if (FOG_IS_NULL(d))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    d->vType = VAR_TYPE_TEXTUREF;
+    d->patternType = PATTERN_TYPE_TEXTURE;
+    d->gradient.initCustom1(*gradient);
+    d->transform.initCustom1(tr != NULL ? *tr : TransformD::identity());
+
+    self->_d->release();
+    self->_d = d;
+    return ERR_OK;
+  }
+  else
+  {
+    d->gradient().setGradient(*gradient);
+    d->transform() = tr != NULL ? *tr : TransformD::identity();
+    return ERR_OK;
+  }
 }
 
 // ============================================================================
-// [Fog::PatternD - Statics]
+// [Fog::Pattern - Trasnform]
 // ============================================================================
 
-Static<PatternDataD> PatternD::_dnull;
+static err_t FOG_CDECL Pattern_setTransformF(Pattern* self, const TransformF* tr)
+{
+  PatternData* d = self->_d;
+
+  if (!Math::isBounded<uint32_t>(d->patternType, PATTERN_TYPE_TEXTURE, PATTERN_TYPE_GRADIENT))
+    return ERR_RT_INVALID_STATE;
+
+  if (d->reference.get() != 1)
+  {
+    FOG_RETURN_ON_ERROR(self->detach());
+    d = self->_d;
+  }
+
+  TransformF* dstf = NULL;
+  TransformD* dstd = NULL;
+
+  switch (d->vType & VAR_TYPE_MASK)
+  {
+    case VAR_TYPE_TEXTUREF:
+      dstf = &reinterpret_cast<PatternTextureDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_TEXTURED:
+      dstd = &reinterpret_cast<PatternTextureDataD*>(d)->transform;
+      goto _DoTransformD;
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      dstf = &reinterpret_cast<PatternGradientDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      dstd = &reinterpret_cast<PatternGradientDataD*>(d)->transform;
+      goto _DoTransformD;
+  }
+
+  return ERR_RT_INVALID_STATE;
+
+_DoTransformF:
+  *dstf = *tr;
+  return ERR_OK;
+
+_DoTransformD:
+  *dstd = *tr;
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Pattern_setTransformD(Pattern* self, const TransformD* tr)
+{
+  PatternData* d = self->_d;
+
+  if (!Math::isBounded<uint32_t>(d->patternType, PATTERN_TYPE_TEXTURE, PATTERN_TYPE_GRADIENT))
+    return ERR_RT_INVALID_STATE;
+
+  if (d->reference.get() != 1)
+  {
+    FOG_RETURN_ON_ERROR(self->detach());
+    d = self->_d;
+  }
+
+  TransformF* dstf = NULL;
+  TransformD* dstd = NULL;
+
+  switch (d->vType & VAR_TYPE_MASK)
+  {
+    case VAR_TYPE_TEXTUREF:
+      dstf = &reinterpret_cast<PatternTextureDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_TEXTURED:
+      dstd = &reinterpret_cast<PatternTextureDataD*>(d)->transform;
+      goto _DoTransformD;
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      dstf = &reinterpret_cast<PatternGradientDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      dstd = &reinterpret_cast<PatternGradientDataD*>(d)->transform;
+      goto _DoTransformD;
+  }
+
+  return ERR_RT_INVALID_STATE;
+
+_DoTransformF:
+  *dstf = *tr;
+  return ERR_OK;
+
+_DoTransformD:
+  *dstd = *tr;
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Pattern_applyTransform(Pattern* self, uint32_t transformOp, const void* params)
+{
+  PatternData* d = self->_d;
+
+  if (!Math::isBounded<uint32_t>(d->patternType, PATTERN_TYPE_TEXTURE, PATTERN_TYPE_GRADIENT))
+    return ERR_RT_INVALID_STATE;
+
+  if (d->reference.get() != 1)
+  {
+    FOG_RETURN_ON_ERROR(self->detach());
+    d = self->_d;
+  }
+
+  TransformF* dstf = NULL;
+  TransformD* dstd = NULL;
+
+  switch (d->vType & VAR_TYPE_MASK)
+  {
+    case VAR_TYPE_TEXTUREF:
+      dstf = &reinterpret_cast<PatternTextureDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_TEXTURED:
+      dstd = &reinterpret_cast<PatternTextureDataD*>(d)->transform;
+      goto _DoTransformD;
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      dstf = &reinterpret_cast<PatternGradientDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      dstd = &reinterpret_cast<PatternGradientDataD*>(d)->transform;
+      goto _DoTransformD;
+  }
+
+  return ERR_RT_INVALID_STATE;
+
+_DoTransformF:
+  return dstf->_transform(transformOp, params);
+
+_DoTransformD:
+  return dstd->_transform(transformOp, params);
+}
+
+static err_t FOG_CDECL Pattern_resetTransform(Pattern* self)
+{
+  PatternData* d = self->_d;
+
+  if (!Math::isBounded<uint32_t>(d->patternType, PATTERN_TYPE_TEXTURE, PATTERN_TYPE_GRADIENT))
+    return ERR_RT_INVALID_STATE;
+
+  if (d->reference.get() != 1)
+  {
+    FOG_RETURN_ON_ERROR(self->detach());
+    d = self->_d;
+  }
+
+  TransformF* dstf = NULL;
+  TransformD* dstd = NULL;
+
+  switch (d->vType & VAR_TYPE_MASK)
+  {
+    case VAR_TYPE_TEXTUREF:
+      dstf = &reinterpret_cast<PatternTextureDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_TEXTURED:
+      dstd = &reinterpret_cast<PatternTextureDataD*>(d)->transform;
+      goto _DoTransformD;
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      dstf = &reinterpret_cast<PatternGradientDataF*>(d)->transform;
+      goto _DoTransformF;
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      dstd = &reinterpret_cast<PatternGradientDataD*>(d)->transform;
+      goto _DoTransformD;
+  }
+
+  return ERR_RT_INVALID_STATE;
+
+_DoTransformF:
+  dstf->reset();
+  return ERR_OK;
+
+_DoTransformD:
+  dstd->reset();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::Pattern - Reset]
+// ============================================================================
+
+static void FOG_CDECL Pattern_reset(Pattern* self)
+{
+  atomicPtrXchg(&self->_d, _api.pattern.oNull->_d)->release();
+}
+
+// ============================================================================
+// [Fog::Pattern - Copy]
+// ============================================================================
+
+static err_t FOG_CDECL Pattern_copy(Pattern* self, const Pattern* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::Pattern - Equality]
+// ============================================================================
+
+static bool FOG_CDECL Pattern_eq(const Pattern* a, const Pattern* b)
+{
+  const PatternData* a_d = a->_d;
+  const PatternData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  uint32_t patternType = a_d->patternType;
+  if (patternType != b_d->patternType)
+    return false;
+
+  // TODO: Pattern comparison.
+  return false;
+}
+
+// ============================================================================
+// [Fog::Pattern - PatternData]
+// ============================================================================
+
+static PatternData* FOG_CDECL Pattern_dCreate(size_t size)
+{
+  PatternData* newd = reinterpret_cast<PatternData*>(MemMgr::alloc(size));
+
+  if (FOG_IS_NULL(newd))
+    return NULL;
+
+  newd->reference.init(1);
+  return newd;
+}
+
+static void FOG_CDECL Pattern_dFree(PatternData* d)
+{
+  uint32_t patternType = d->patternType;
+
+  if (patternType == PATTERN_TYPE_TEXTURE)
+    reinterpret_cast<PatternTextureDataF*>(d)->texture.destroy();
+  else if (patternType == PATTERN_TYPE_GRADIENT)
+    reinterpret_cast<PatternGradientDataF*>(d)->gradient->_stops.destroy();
+
+  if ((d->vType & VAR_FLAG_STATIC) == 0)
+    MemMgr::free(d);
+}
 
 // ============================================================================
 // [Init / Fini]
@@ -869,13 +968,46 @@ Static<PatternDataD> PatternD::_dnull;
 
 FOG_NO_EXPORT void Pattern_init(void)
 {
-  PatternF::_dnull->reference.init(1);
-  PatternF::_dnull->type = PATTERN_TYPE_NONE;
-  PatternF::_dnull->transform.reset();
+  _api.pattern.ctor = Pattern_ctor;
+  _api.pattern.ctorCopy = Pattern_ctorCopy;
+  _api.pattern.ctorArgb32 = Pattern_ctorArgb32;
+  _api.pattern.ctorColor = Pattern_ctorColor;
+  _api.pattern.ctorTextureF = Pattern_ctorTextureF;
+  _api.pattern.ctorTextureD = Pattern_ctorTextureD;
+  _api.pattern.ctorGradientF = Pattern_ctorGradientF;
+  _api.pattern.ctorGradientD = Pattern_ctorGradientD;
+  _api.pattern.dtor = Pattern_dtor;
 
-  PatternD::_dnull->reference.init(1);
-  PatternD::_dnull->type = PATTERN_TYPE_NONE;
-  PatternD::_dnull->transform.reset();
+  _api.pattern.detach = Pattern_detach;
+
+  _api.pattern.getArgb32 = Pattern_getArgb32;
+  _api.pattern.getColor = Pattern_getColor;
+  _api.pattern.getTexture = Pattern_getTexture;
+  _api.pattern.getGradientF = Pattern_getGradientF;
+  _api.pattern.getGradientD = Pattern_getGradientD;
+  _api.pattern.getTransformF = Pattern_getTransformF;
+  _api.pattern.getTransformD = Pattern_getTransformD;
+
+  _api.pattern.createArgb32 = Pattern_createArgb32;
+  _api.pattern.createColor = Pattern_createColor;
+  _api.pattern.createTextureF = Pattern_createTextureF;
+  _api.pattern.createTextureD = Pattern_createTextureD;
+  _api.pattern.createGradientF = Pattern_createGradientF;
+  _api.pattern.createGradientD = Pattern_createGradientD;
+
+  _api.pattern.setTransformF = Pattern_setTransformF;
+  _api.pattern.setTransformD = Pattern_setTransformD;
+  _api.pattern.applyTransform = Pattern_applyTransform;
+  _api.pattern.resetTransform = Pattern_resetTransform;
+
+  _api.pattern.reset = Pattern_reset;
+  _api.pattern.copy = Pattern_copy;
+  _api.pattern.eq = Pattern_eq;
+
+  _api.pattern.dCreate = Pattern_dCreate;
+  _api.pattern.dFree = Pattern_dFree;
+
+  _api.pattern.oNull = reinterpret_cast<Pattern*>(_api.var.oNull);
 }
 
 } // Fog namespace

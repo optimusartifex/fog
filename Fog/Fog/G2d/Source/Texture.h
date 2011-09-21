@@ -168,6 +168,18 @@ struct FOG_NO_EXPORT Texture
   }
 
   // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Texture& other) const
+  {
+    return _image == other._image &&
+           _fragment == other._fragment &&
+           _tileType == other._tileType &&
+           _clampColor == other._clampColor;
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -176,6 +188,9 @@ struct FOG_NO_EXPORT Texture
     setTexture(other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const Texture& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Texture& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Members]

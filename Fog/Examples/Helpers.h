@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT Logger
 
     for (size_t i = 0; i < l.getLength(); i++)
     {
-      font.getTextOutline(path, PointF(x, y), l.getAt(i), CONTAINER_OP_APPEND);
+      font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), l.getAt(i));
       y += h;
     }
 
@@ -80,7 +80,7 @@ static void drawText(Painter* p, const PointI& pt, const Font& font, const char*
   va_end(ap);
 
   PathF path;
-  font.getTextOutline(path, PointF(pt), string);
+  font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(pt), string);
   p->fillPath(path);
 }
 

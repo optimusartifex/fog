@@ -428,7 +428,13 @@ err_t WinFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& p
   return _getTextOutline(dst, &outlineCache, d, pt, str, &ctx);
 }
 
-err_t WinFontFace::getTextExtents(TextExtents& extents, const FontData* d, const StubW& str)
+err_t WinFontFace::getTextExtents(TextExtentsF& extents, const FontData* d, const StubW& str)
+{
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+err_t WinFontFace::getTextExtents(TextExtentsD& extents, const FontData* d, const StubW& str)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;

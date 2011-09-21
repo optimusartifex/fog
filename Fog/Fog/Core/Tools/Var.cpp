@@ -47,17 +47,30 @@
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
 #include <Fog/G2d/Source/Gradient.h>
+#include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Source/Texture.h>
+#include <Fog/G2d/Text/Font.h>
 #include <Fog/G2d/Tools/Matrix.h>
 #include <Fog/G2d/Tools/Region.h>
 
 namespace Fog {
 
 // ============================================================================
+// [Fog::VarNullData]
+// ============================================================================
+
+//! @brief Null variable data, which adds some zeros after the VarData to 
+//! support NULLs in other classes, for example @ref Pattern.
+struct FOG_NO_EXPORT VarNullData : public VarData
+{
+  uint32_t zero[8];
+};
+
+// ============================================================================
 // [Fog::Var - Global]
 // ============================================================================
 
-static Static<VarData> Var_dNull;
+static Static<VarNullData> Var_dNull;
 static Static<Var> Var_oNull;
 
 // ============================================================================
@@ -66,6 +79,9 @@ static Static<Var> Var_oNull;
 
 #define VAR_SIMPLE_C(_D_, _Type_) \
   ((VarSimpleData*)(_D_))->getInstanceT< _Type_ >()
+
+#define VAR_OBJECT_C(_D_, _Type_) \
+  ((_Type_*)_D_)
 
 // ============================================================================
 // [Fog::Var - DataSize]
@@ -162,12 +178,21 @@ static const uint8_t Var_dataSize[] =
   /* 0072: VAR_TYPE_MATRIXF              */ 0,
   /* 0073: VAR_TYPE_MATRIXD              */ 0,
   /* 0074: VAR_TYPE_COLOR                */ sizeof(Color),
-  /* 0075: VAR_TYPE_COLOR_STOP           */ sizeof(ColorStop),
-  /* 0076: VAR_TYPE_COLOR_STOP_LIST      */ 0,
-
-  /* 0077: VAR_TYPE_                     */ 0,
-  /* 0078: VAR_TYPE_                     */ 0,
-  /* 0079: VAR_TYPE_                     */ 0
+  /* 0075: VAR_TYPE_TEXTUREF             */ 0,
+  /* 0076: VAR_TYPE_TEXTURED             */ 0,
+  /* 0077: VAR_TYPE_LINEAR_GRADIENTF     */ 0,
+  /* 0078: VAR_TYPE_LINEAR_GRADIENTD     */ 0,
+  /* 0079: VAR_TYPE_RADIAL_GRADIENTF     */ 0,
+  /* 0080: VAR_TYPE_RADIAL_GRADIENTD     */ 0,
+  /* 0081: VAR_TYPE_CONICAL_GRADIENTF    */ 0,
+  /* 0082: VAR_TYPE_CONICAL_GRADIENTD    */ 0,
+  /* 0083: VAR_TYPE_RECTANGULAR_GRADIENTF*/ 0,
+  /* 0084: VAR_TYPE_RECTANGULAR_GRADIENTD*/ 0,
+  /* 0085: VAR_TYPE_COLOR_STOP           */ sizeof(ColorStop),
+  /* 0086: VAR_TYPE_COLOR_STOP_LIST      */ 0,
+  /* 0087: VAR_TYPE_IMAGE                */ 0,
+  /* 0088: VAR_TYPE_IMAGE_PALETTE        */ 0,
+  /* 0089: VAR_TYPE_FONT                 */ 0
 };
 // ${VAR_TYPE:END}
 
@@ -284,6 +309,31 @@ _CreateNull:
       return;
 
     case VAR_TYPE_COLOR:
+      _api.pattern.ctorColor(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Color*>(vData));
+      return;
+
+    case VAR_TYPE_TEXTUREF:
+      _api.pattern.ctorTextureF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
+      return;
+
+    case VAR_TYPE_TEXTURED:
+      _api.pattern.ctorTextureD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
+      return;
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+      _api.pattern.ctorGradientF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientF*>(vData), NULL);
+      return;
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      _api.pattern.ctorGradientD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientD*>(vData), NULL);
+      return;
+
     case VAR_TYPE_COLOR_STOP:
       goto _CreateSimple;
 
@@ -291,17 +341,16 @@ _CreateNull:
       self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
       return;
 
-    case VAR_TYPE_TEXTURE:
-    case VAR_TYPE_GRADIENTF:
-    case VAR_TYPE_GRADIENTD:
-    case VAR_TYPE_PATTERN:
+    case VAR_TYPE_IMAGE:
       // TODO: Var
       return;
 
-    case VAR_TYPE_IMAGE:
     case VAR_TYPE_IMAGE_PALETTE:
+      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
+      return;
+
     case VAR_TYPE_FONT:
-      // TODO: Var
+      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
       return;
 
     default:
@@ -355,7 +404,7 @@ static size_t FOG_CDECL Var_getReference(const Var* self)
 // [Fog::Var - Type]
 // ============================================================================
 
-static uint32_t FOG_CDECL Var_getTypeId(const Var* self)
+static uint32_t FOG_CDECL Var_getVarType(const Var* self)
 {
   return self->_d->vType & VAR_TYPE_MASK;
 }
@@ -366,7 +415,7 @@ static uint32_t FOG_CDECL Var_getTypeId(const Var* self)
 
 static void FOG_CDECL Var_reset(Var* self)
 {
-  _api.var.dRelease(atomicPtrXchg(&self->_d, &Var_dNull));
+  _api.var.dRelease(atomicPtrXchg(&self->_d, reinterpret_cast<VarData*>(&Var_dNull)));
 }
 
 // ============================================================================
@@ -1185,7 +1234,7 @@ static err_t FOG_CDECL Var_setType(Var* self, uint32_t vType, const void* vData)
 }
 
 // ============================================================================
-// [Fog::Var - Eq]
+// [Fog::Var - Equality]
 // ============================================================================
 
 static FOG_INLINE int _sign(int32_t value)
@@ -1238,7 +1287,7 @@ static FOG_INLINE int _sign(double value)
   return 0;
 }
 
-static FOG_INLINE int Var_getSign(const VarData* d, uint32_t vType)
+static int Var_getSign(const VarData* d, uint32_t vType)
 {
   FOG_ASSERT(vType <= _VAR_TYPE_NUMBER_END);
 
@@ -1461,18 +1510,35 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
         return *reinterpret_cast<const MatrixD*>(a) == *reinterpret_cast<const MatrixD*>(b);
 
       case VAR_TYPE_COLOR:
-        return *reinterpret_cast<const Color*>(a) == *reinterpret_cast<const Color*>(b);
+        return VAR_OBJECT_C(a, PatternColorData)->color() == VAR_OBJECT_C(b, PatternColorData)->color();
+
+      case VAR_TYPE_TEXTUREF:
+        return VAR_OBJECT_C(a, PatternTextureDataF)->texture()   == VAR_OBJECT_C(b, PatternTextureDataF)->texture() &&
+               VAR_OBJECT_C(a, PatternTextureDataF)->transform() == VAR_OBJECT_C(b, PatternTextureDataF)->transform();
+
+      case VAR_TYPE_TEXTURED:
+        return VAR_OBJECT_C(a, PatternTextureDataD)->texture()   == VAR_OBJECT_C(b, PatternTextureDataD)->texture() &&
+               VAR_OBJECT_C(a, PatternTextureDataD)->transform() == VAR_OBJECT_C(b, PatternTextureDataD)->transform();
+
+      case VAR_TYPE_LINEAR_GRADIENTF:
+      case VAR_TYPE_RADIAL_GRADIENTF:
+      case VAR_TYPE_CONICAL_GRADIENTF:
+      case VAR_TYPE_RECTANGULAR_GRADIENTF:
+        return VAR_OBJECT_C(a, PatternGradientDataF)->gradient()  == VAR_OBJECT_C(b, PatternGradientDataF)->gradient() &&
+               VAR_OBJECT_C(a, PatternGradientDataF)->transform() == VAR_OBJECT_C(b, PatternGradientDataF)->transform();
+
+      case VAR_TYPE_LINEAR_GRADIENTD:
+      case VAR_TYPE_RADIAL_GRADIENTD:
+      case VAR_TYPE_CONICAL_GRADIENTD:
+      case VAR_TYPE_RECTANGULAR_GRADIENTD:
+        return VAR_OBJECT_C(a, PatternGradientDataD)->gradient()  == VAR_OBJECT_C(b, PatternGradientDataD)->gradient() &&
+               VAR_OBJECT_C(a, PatternGradientDataD)->transform() == VAR_OBJECT_C(b, PatternGradientDataD)->transform();
+
       case VAR_TYPE_COLOR_STOP:
-        return *reinterpret_cast<const ColorStop*>(a) == *reinterpret_cast<const ColorStop*>(b);
+        return VAR_SIMPLE_C(a_d, ColorStop) == VAR_SIMPLE_C(b_d, ColorStop);
+
       case VAR_TYPE_COLOR_STOP_LIST:
         return *reinterpret_cast<const ColorStopList*>(a) == *reinterpret_cast<const ColorStopList*>(b);
-
-      case VAR_TYPE_TEXTURE:
-      case VAR_TYPE_GRADIENTF:
-      case VAR_TYPE_GRADIENTD:
-      case VAR_TYPE_PATTERN:
-        // TODO: Var
-        return false;
 
       case VAR_TYPE_IMAGE:
         //return *reinterpret_cast<const Image*>(a) == *reinterpret_cast<const Image*>(b);
@@ -1480,12 +1546,10 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
         return false;
 
       case VAR_TYPE_IMAGE_PALETTE:
-        // TODO: Var
-        return false;
+        return *reinterpret_cast<const ImagePalette*>(a) == *reinterpret_cast<const ImagePalette*>(b);
 
       case VAR_TYPE_FONT:
-        // TODO: Var
-        return false;
+        return *reinterpret_cast<const Font*>(a) == *reinterpret_cast<const Font*>(b);
 
       default:
         FOG_ASSERT_NOT_REACHED();
@@ -1726,6 +1790,19 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       return;
 
     case VAR_TYPE_COLOR:
+    case VAR_TYPE_TEXTUREF:
+    case VAR_TYPE_TEXTURED:
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      reinterpret_cast<PatternData*>(d)->release();
+      return;
+
     case VAR_TYPE_COLOR_STOP:
       goto _ReleaseSimple;
 
@@ -1733,23 +1810,16 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       reinterpret_cast<ColorStopListData*>(d)->release();
       return;
 
-    case VAR_TYPE_TEXTURE:
-    case VAR_TYPE_GRADIENTF:
-    case VAR_TYPE_GRADIENTD:
-    case VAR_TYPE_PATTERN:
-      // TODO: Var
-      return;
-
     case VAR_TYPE_IMAGE:
       // TODO: Var
       return;
 
     case VAR_TYPE_IMAGE_PALETTE:
-      // TODO: Var
+      reinterpret_cast<ImagePaletteData*>(d)->release();
       return;
 
     case VAR_TYPE_FONT:
-      // TODO: Var
+      reinterpret_cast<FontData*>(d)->release();
       return;
 
     default:
@@ -1781,7 +1851,7 @@ FOG_NO_EXPORT void Var_init(void)
   _api.var.dtor = Var_dtor;
 
   _api.var.getReference = Var_getReference;
-  _api.var.getTypeId = Var_getTypeId;
+  _api.var.getVarType = Var_getVarType;
 
   _api.var.reset = Var_reset;
   _api.var.copy = Var_copy;

@@ -96,9 +96,8 @@ err_t SvgLinearGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
   if (a_gradientTransform.isAssigned())
     tr.transform(a_gradientTransform.getTransform(), MATRIX_ORDER_APPEND);
 
-  // Create PatternF instance and set transform.
-  PatternF pattern(gradient);
-  pattern.setTransform(tr);
+  // Create Pattern instance.
+  Pattern pattern(gradient, tr);
 
   if (paintType == SVG_PAINT_FILL)
     visitor->setFillPattern(pattern);

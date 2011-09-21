@@ -31,7 +31,6 @@ struct GlyphMetricsF;
 struct GlyphOutlineCache;
 struct FontData;
 struct FontProvider;
-struct TextExtents;
 
 // ============================================================================
 // [Fog::FontFace]
@@ -69,7 +68,8 @@ struct FOG_API FontFace
   virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str) = 0;
   virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str) = 0;
 
-  virtual err_t getTextExtents(TextExtents& extents, const FontData* d, const StubW& str) = 0;
+  virtual err_t getTextExtents(TextExtentsF& extents, const FontData* d, const StubW& str) = 0;
+  virtual err_t getTextExtents(TextExtentsD& extents, const FontData* d, const StubW& str) = 0;
 
   // virtual GlyphOutlineCache* getOutlineCache() = 0;
   virtual FontKerningTableF* getKerningTable(const FontData* d) = 0;

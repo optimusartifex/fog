@@ -70,7 +70,7 @@ err_t SvgPatternElement::onProcess(SvgVisitor* visitor) const
 
 err_t SvgPatternElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
 {
-  PatternF pattern;
+  Pattern pattern;
   FOG_RETURN_ON_ERROR(_createPattern(pattern, obj));
 
   if (paintType == SVG_PAINT_FILL)
@@ -80,7 +80,7 @@ err_t SvgPatternElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_
   return ERR_OK;
 }
 
-err_t SvgPatternElement::_createPattern(PatternF& pattern, SvgElement* obj) const
+err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
 {
   StringW link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
 
@@ -129,10 +129,10 @@ err_t SvgPatternElement::_createPattern(PatternF& pattern, SvgElement* obj) cons
     _visitContainer(&render);
     painter.end();
 
-    pattern.setTexture(Texture(image, TEXTURE_TILE_REPEAT));
-
     float tx = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
     float ty = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
+
+    pattern.createTexture(Texture(image, TEXTURE_TILE_REPEAT));
     pattern.translate(PointF(tx, ty));
   }
 

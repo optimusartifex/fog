@@ -383,7 +383,6 @@ Set(FOG_CORE_CPP_HEADERS
 
 # [Fog/Core/Collection]
 Set(FOG_CORE_COLLECTION_SOURCES
-  Fog/Core/Collection/StackP.cpp
   Fog/Core/Collection/Util.cpp
 )
 

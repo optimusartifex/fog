@@ -469,15 +469,14 @@ _FOG_TYPE_DECLARE(Fog::GradientF             , C(MOVABLE)               | F(NO_C
 _FOG_TYPE_DECLARE(Fog::GradientD             , C(MOVABLE)               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::LinearGradientF       , C(MOVABLE)               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::LinearGradientD       , C(MOVABLE)               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::PatternF              , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::PatternD              , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Pattern               , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::RadialGradientF       , C(MOVABLE)               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::RadialGradientD       , C(MOVABLE)               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::RectangularGradientF  , C(MOVABLE)               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::RectangularGradientD  , C(MOVABLE)               | F(NO_CMP )            )
 
 // [Fog/G2d/Text]
-_FOG_TYPE_DECLARE(Fog::Font                  , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Font                  , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FontKerningChars      , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FontKerningPairI      , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::FontKerningPairF      , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))

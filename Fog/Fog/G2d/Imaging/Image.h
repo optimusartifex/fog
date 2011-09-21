@@ -529,7 +529,17 @@ struct FOG_API Image
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Image& operator=(const Image& other) { set(other); return *this; }
+  FOG_INLINE Image& operator=(const Image& other)
+  {
+    set(other);
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const Image& other) const
+  {
+    // TODO: Implement me after Image is moved to Fog C-API.
+    return false;
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]

@@ -608,7 +608,7 @@ err_t Image::convertTo8BitDepth()
   }
   else
   {
-    ImagePalette pallette = ImagePalette::fromCube(6, 6, 6);
+    ImagePalette pallette = ImagePalette::fromColorCube(6, 6, 6);
     FOG_RETURN_ON_ERROR(i.setPalette(pallette));
 
     ImageDither8Params params;
@@ -660,9 +660,9 @@ err_t Image::convertTo8BitDepth(const ImagePalette& pal)
           Face::p32 pix0p;
           Face::p32Load4aNative(pix0p, srcCur);
 
-          dstCur[0] = pal.findColor(Face::p32PBB2AsU32(pix0p),
-                                    Face::p32PBB1AsU32(pix0p),
-                                    Face::p32PBB0AsU32(pix0p));
+          dstCur[0] = pal.findRgb(Face::p32PBB2AsU32(pix0p),
+                                  Face::p32PBB1AsU32(pix0p),
+                                  Face::p32PBB0AsU32(pix0p));
         }
       }
       break;
@@ -674,9 +674,9 @@ err_t Image::convertTo8BitDepth(const ImagePalette& pal)
       {
         for (x = 0; x < w; x++, dstCur += 1, srcCur += 3)
         {
-          dstCur[0] = pal.findColor(srcCur[PIXEL_RGB24_POS_R],
-                                    srcCur[PIXEL_RGB24_POS_G],
-                                    srcCur[PIXEL_RGB24_POS_B]);
+          dstCur[0] = pal.findRgb(srcCur[PIXEL_RGB24_POS_R],
+                                  srcCur[PIXEL_RGB24_POS_G],
+                                  srcCur[PIXEL_RGB24_POS_B]);
         }
       }
       break;
@@ -693,7 +693,7 @@ err_t Image::convertTo8BitDepth(const ImagePalette& pal)
       for (y = 0; y < (int)srcPalLength; y++)
       {
         Argb32 c0 = srcPalData[y];
-        table[y] = pal.findColor(c0.getRed(), c0.getGreen(), c0.getBlue());
+        table[y] = pal.findRgb(c0.getRed(), c0.getGreen(), c0.getBlue());
       }
       for (; y < 256; y++) table[y] = (uint8_t)(uint)y;
 

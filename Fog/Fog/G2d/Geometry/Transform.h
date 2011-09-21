@@ -914,34 +914,34 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE err_t translate(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _api.transformf.transform(*this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
   }
 
   FOG_INLINE err_t scale(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _api.transformf.transform(*this, TRANSFORM_OP_SCALEF | (order << 4), &p);
   }
 
   FOG_INLINE err_t skew(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _api.transformf.transform(*this, TRANSFORM_OP_SKEWF | (order << 4), &p);
   }
 
   FOG_INLINE err_t rotate(float angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(float angle, float x, float y, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     float params[3] = { angle, x, y };
-    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE err_t rotate(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     float params[3] = { angle, p.x, p.y };
-    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE err_t flip(uint32_t axis)
@@ -951,33 +951,33 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE err_t transform(const TransformF& other, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY | (order << 4), &other);
+    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
   }
 
   FOG_INLINE TransformF translated(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
   }
 
   FOG_INLINE TransformF scaled(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_SCALEF | (order << 4), &p);
   }
 
   FOG_INLINE TransformF skewed(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_SKEWF | (order << 4), &p);
   }
 
   FOG_INLINE TransformF rotated(float angle, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
   }
 
   FOG_INLINE TransformF rotated(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
     float params[3] = { angle, p.x, p.y };
-    return _api.transformf.transformed(*this, TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE TransformF fliped(uint32_t axis)
@@ -987,7 +987,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE TransformF transformed(const TransformF& other, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY | (order << 4), &other);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
   }
 
   // --------------------------------------------------------------------------
@@ -996,22 +996,22 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE err_t multiply(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLYF | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t multiplyInv(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiply(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLYF | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiplyInv(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE TransformF multiplied(const TransformF& m) const
@@ -1023,7 +1023,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE TransformF multipliedInv(const TransformF& m) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE TransformF premultiplied(const TransformF& m) const
@@ -1035,7 +1035,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE TransformF premultipliedInv(const TransformF& m) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   // --------------------------------------------------------------------------
@@ -1264,13 +1264,26 @@ struct FOG_NO_EXPORT TransformF
   }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instances]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const TransformF& identity()
+  {
+    return *_api.transformf.oIdentity;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Multiply]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE void multiply(TransformF& dst, const TransformF& a, const TransformF& b)
   {
     _api.transformf.multiply(dst, a, b);
   }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Invert]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE bool invert(TransformF& dst, const TransformF& a)
   {
@@ -2097,28 +2110,28 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE err_t translate(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _api.transformd.transform(*this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
   }
 
   FOG_INLINE err_t scale(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _api.transformd.transform(*this, TRANSFORM_OP_SCALED | (order << 4), &p);
   }
 
   FOG_INLINE err_t skew(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _api.transformd.transform(*this, TRANSFORM_OP_SKEWD | (order << 4), &p);
   }
 
   FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _api.transformd.transform(*this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     double params[3] = { angle, p.x, p.y };
-    return _api.transformd.transform(*this, TRANSFORM_OP_ROTATE_PT | (order << 4), params);
+    return _api.transformd.transform(*this, TRANSFORM_OP_ROTATE_POINTD | (order << 4), params);
   }
 
   FOG_INLINE err_t flip(uint32_t axis)
@@ -2128,33 +2141,33 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE err_t transform(const TransformD& other, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY | (order << 4), &other);
+    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
   }
 
   FOG_INLINE TransformD translated(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_TRANSLATE | (order << 4), &p);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
   }
 
   FOG_INLINE TransformD scaled(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_SCALE | (order << 4), &p);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_SCALED | (order << 4), &p);
   }
 
   FOG_INLINE TransformD skewed(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_SKEW | (order << 4), &p);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_SKEWD | (order << 4), &p);
   }
 
   FOG_INLINE TransformD rotated(double angle, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_ROTATE | (order << 4), &angle);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
   }
 
   FOG_INLINE TransformD rotated(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
     double params[3] = { angle, p.x, p.y };
-    return _api.transformd.transformed(*this, TRANSFORM_OP_ROTATE | (order << 4), params);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_ROTATED | (order << 4), params);
   }
 
   FOG_INLINE TransformD fliped(uint32_t axis)
@@ -2164,7 +2177,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE TransformD transformed(const TransformD& other, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY | (order << 4), &other);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
   }
 
   // --------------------------------------------------------------------------
@@ -2173,22 +2186,22 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE err_t multiply(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLYD | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t multiplyInv(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiply(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLYD | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiplyInv(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE TransformD multiplied(const TransformD& m) const
@@ -2200,7 +2213,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE TransformD multipliedInv(const TransformD& m) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE TransformD premultiplied(const TransformD& m) const
@@ -2212,7 +2225,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE TransformD premultipliedInv(const TransformD& m) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY_INV | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   // --------------------------------------------------------------------------
@@ -2462,13 +2475,26 @@ struct FOG_NO_EXPORT TransformD
   }
 
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Instances]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const TransformD& identity()
+  {
+    return *_api.transformd.oIdentity;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Multiply]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE void multiply(TransformD& dst, const TransformD& a, const TransformD& b)
   {
     _api.transformd.multiply(dst, a, b);
   }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Invert]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE bool invert(TransformD& dst, const TransformD& a)
   {

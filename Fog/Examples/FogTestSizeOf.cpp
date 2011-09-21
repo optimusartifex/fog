@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
   PRINT_TYPE(ImageEncoder);
   PRINT_TYPE(ImageFormatDescription);
   PRINT_TYPE(ImagePalette);
+  PRINT_TYPE(ColorMatrix);
 
   // [G2d/Painting]
   PRINT_PART("G2d/Painting");
@@ -150,20 +151,37 @@ int main(int argc, char* argv[])
   PRINT_TYPE(ColorStop);
   PRINT_TYPE(ColorStopCache);
   PRINT_TYPE(ColorStopList);
+  PRINT_TYPE(ColorStopListData);
   PRINT_TYPE(ConicalGradientF);
   PRINT_TYPE(ConicalGradientD);
   PRINT_TYPE(GradientF);
   PRINT_TYPE(GradientD);
   PRINT_TYPE(LinearGradientF);
   PRINT_TYPE(LinearGradientD);
+  PRINT_TYPE(Pattern);
+  PRINT_TYPE(PatternData);
+  PRINT_TYPE(PatternColorData);
+  PRINT_TYPE(PatternGradientDataF);
+  PRINT_TYPE(PatternGradientDataD);
+  PRINT_TYPE(PatternTextureDataF);
+  PRINT_TYPE(PatternTextureDataD);
   PRINT_TYPE(RadialGradientF);
   PRINT_TYPE(RadialGradientD);
   PRINT_TYPE(RectangularGradientF);
   PRINT_TYPE(RectangularGradientD);
   PRINT_TYPE(Texture);
 
+  // [G2d/Text]
+  PRINT_PART("G2d/Font");
+  PRINT_TYPE(Font);
+  PRINT_TYPE(FontData);
+
   // [G2d/Tools]
   PRINT_PART("G2d/Tools");
+  PRINT_TYPE(MatrixF);
+  PRINT_TYPE(MatrixD);
+  PRINT_TYPE(MatrixDataF);
+  PRINT_TYPE(MatrixDataD);
   PRINT_TYPE(Region);
   PRINT_TYPE(RegionData);
 

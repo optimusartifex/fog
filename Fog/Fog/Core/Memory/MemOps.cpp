@@ -24,7 +24,7 @@ static void* FOG_CDECL MemOps_zero(void* dst, size_t size)
 }
 
 // ============================================================================
-// [Fog::MemOps - Eq]
+// [Fog::MemOps - Equality]
 // ============================================================================
 
 static bool FOG_CDECL MemOps_eq(const uint8_t* a, const uint8_t* b, size_t size)

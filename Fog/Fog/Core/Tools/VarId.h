@@ -131,9 +131,18 @@ _FOG_VAR_DECLARE_ID(Fog::Image                 , Fog::VAR_TYPE_IMAGE)
 _FOG_VAR_DECLARE_ID(Fog::ImagePalette          , Fog::VAR_TYPE_IMAGE_PALETTE)
 
 _FOG_VAR_DECLARE_ID(Fog::Color                 , Fog::VAR_TYPE_COLOR)
+_FOG_VAR_DECLARE_ID(Fog::Texture               , Fog::VAR_TYPE_TEXTUREF)
+_FOG_VAR_DECLARE_ID(Fog::LinearGradientF       , Fog::VAR_TYPE_LINEAR_GRADIENTF)
+_FOG_VAR_DECLARE_ID(Fog::LinearGradientD       , Fog::VAR_TYPE_LINEAR_GRADIENTD)
+_FOG_VAR_DECLARE_ID(Fog::RadialGradientF       , Fog::VAR_TYPE_RADIAL_GRADIENTF)
+_FOG_VAR_DECLARE_ID(Fog::RadialGradientD       , Fog::VAR_TYPE_RADIAL_GRADIENTD)
+_FOG_VAR_DECLARE_ID(Fog::ConicalGradientF      , Fog::VAR_TYPE_CONICAL_GRADIENTF)
+_FOG_VAR_DECLARE_ID(Fog::ConicalGradientD      , Fog::VAR_TYPE_CONICAL_GRADIENTD)
+_FOG_VAR_DECLARE_ID(Fog::RectangularGradientF  , Fog::VAR_TYPE_RECTANGULAR_GRADIENTF)
+_FOG_VAR_DECLARE_ID(Fog::RectangularGradientD  , Fog::VAR_TYPE_RECTANGULAR_GRADIENTD)
+
 _FOG_VAR_DECLARE_ID(Fog::ColorStop             , Fog::VAR_TYPE_COLOR_STOP)
-_FOG_VAR_DECLARE_ID(Fog::GradientF             , Fog::VAR_TYPE_GRADIENTF)
-_FOG_VAR_DECLARE_ID(Fog::GradientD             , Fog::VAR_TYPE_GRADIENTD)
+_FOG_VAR_DECLARE_ID(Fog::ColorStopList         , Fog::VAR_TYPE_COLOR_STOP_LIST)
 
 // TODO: Var
 

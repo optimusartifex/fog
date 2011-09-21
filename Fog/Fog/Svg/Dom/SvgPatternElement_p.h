@@ -49,7 +49,7 @@ struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
   virtual err_t onProcess(SvgVisitor* visitor) const;
   virtual err_t onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const;
 
-  err_t _createPattern(PatternF& pattern, SvgElement* obj) const;
+  err_t _createPattern(Pattern& pattern, SvgElement* obj) const;
 
   // --------------------------------------------------------------------------
   // [SVG Embedded Attributes]

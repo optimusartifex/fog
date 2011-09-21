@@ -87,7 +87,7 @@ err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
   // TODO: Not optimal, just initial support for text rendering.
   PathF path;
 
-  err = visitor->_font.getTextOutline(path, PointF(x, y), text);
+  err = visitor->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
   if (FOG_IS_ERROR(err)) return err;
 
   err = visitor->onPath((SvgElement*)this, path);

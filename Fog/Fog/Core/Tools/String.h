@@ -1880,7 +1880,7 @@ struct FOG_NO_EXPORT StringA
   }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const StringA* a, const StringA* b)
@@ -4055,7 +4055,7 @@ struct FOG_NO_EXPORT StringW
   }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const StringW* a, const StringW* b)

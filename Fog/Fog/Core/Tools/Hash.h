@@ -273,7 +273,7 @@ template<typename KeyT, typename ItemT>
 struct HashImpl<KeyT, ItemT, 1> : public HashImpl<KeyT, ItemT, 0>
 {
   // --------------------------------------------------------------------------
-  // [Eq]
+  // [Equality]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool eq(const Hash<KeyT, ItemT>& other) const

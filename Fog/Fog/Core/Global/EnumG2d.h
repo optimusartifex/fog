@@ -144,6 +144,142 @@ enum COLOR_CHANNEL
 };
 
 // ============================================================================
+// [Fog::COLOR_MATRIX]
+// ============================================================================
+
+//! @brief Color matrix characteristics.
+enum COLOR_MATRIX
+{
+  //! @brief Matrix contains RGB shear part.
+  //!
+  //! RGB shear part is illustrated here:
+  //!   [n X X n n]
+  //!   [X n X n n]
+  //!   [X X n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  COLOR_MATRIX_SHEAR_RGB = 0x01,
+
+  //! @brief Matrix contains alpha shear part.
+  //!
+  //! Alpha shear part is illustrated here:
+  //!   [n n n X n]
+  //!   [n n n X n]
+  //!   [n n n X n]
+  //!   [X X X n n]
+  //!   [n n n n n]
+  COLOR_MATRIX_SHEAR_ALPHA = 0x02,
+
+  //! @brief Matrix contains ARGB shear part.
+  //!
+  //! ARGB shear part is illustrated here:
+  //!   [n X X X n]
+  //!   [X n X X n]
+  //!   [X X n X n]
+  //!   [X X X n n]
+  //!   [n n n n n]
+  //!
+  //! @note ARGB shear is combination of RGB and Alpha shear parts.
+  COLOR_MATRIX_SHEAR_ARGB = 0x03,
+
+  //! @brief Matrix contains RGB lut part.
+  //!
+  //! RGB lut part is illustrated here:
+  //!   [X n n n n]
+  //!   [n X n n n]
+  //!   [n n X n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  COLOR_MATRIX_LUT_RGB = 0x04,
+
+  //! @brief Matrix contains RGB lut part.
+  //!
+  //! Alpha lut part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n X n]
+  //!   [n n n n n]
+  COLOR_MATRIX_LUT_ALPHA = 0x08,
+
+  //! @brief Matrix contains ARGB lut part.
+  //!
+  //! ARGB lut part is illustrated here:
+  //!   [X n n n n]
+  //!   [n X n n n]
+  //!   [n n X n n]
+  //!   [n n n X n]
+  //!   [n n n n n]
+  //!
+  //! @note ARGB lut is combination of RGB and Alpha lut parts.
+  COLOR_MATRIX_LUT_ARGB = 0x0C,
+
+  //! @brief Matrix contains const RGB lut part (all cells are set to 1.0).
+  //!
+  //! Const RGB lut part is illustrated here:
+  //!   [1 n n n n]
+  //!   [n 1 n n n]
+  //!   [n n 1 n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  COLOR_MATRIX_CONST_RGB = 0x10,
+
+  //! @brief Matrix contains const alpha lut part (cell set to 1.0).
+  //!
+  //! Const alpha lut part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n 1 n]
+  //!   [n n n n n]
+  COLOR_MATRIX_CONST_ALPHA = 0x20,
+
+  //! @brief Matrix contains const ARGB lut part (all cells are set to 1.0).
+  //!
+  //! Const ARGB lut part is illustrated here:
+  //!   [1 n n n n]
+  //!   [n 1 n n n]
+  //!   [n n 1 n n]
+  //!   [n n n 1 n]
+  //!   [n n n n n]
+  //!
+  //! @note ARGB const lut is combination of RGB a Alpha const lut.
+  COLOR_MATRIX_CONST_ARGB = 0x30,
+
+  //! @brief Matrix contains RGB translation part
+  //!
+  //! RGB translation part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [X X X n n]
+  COLOR_MATRIX_TRANSLATE_RGB  = 0x40,
+
+  //! @brief Matrix contains alpha translation part
+  //!
+  //! Alpha translation part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n X n]
+  COLOR_MATRIX_TRANSLATE_ALPHA = 0x80,
+
+  //! @brief Matrix contains ARGB translation part
+  //!
+  //! ARGB translation part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [X X X X n]
+  //!
+  //! @note ARGB translation is combination of RGB and Alpha translation parts.
+  COLOR_MATRIX_TRANSLATE_ARGB = 0xC0
+};
+
+// ============================================================================
 // [Fog::COLOR_MODEL]
 // ============================================================================
 
@@ -1930,11 +2066,11 @@ enum PATH_FLATTEN
 // [Fog::PATTERN_TYPE]
 // ============================================================================
 
-//! @brief Type of pattern in the @c PatternF or @c PatternD instance.
+//! @brief Type of @c Pattern.
 enum PATTERN_TYPE
 {
   //! @brief Null pattern (nothing will be paint using this pattern).
-  PATTERN_TYPE_NONE = 0,
+  PATTERN_TYPE_NULL = 0,
   //! @brief Solid color pattern.
   PATTERN_TYPE_COLOR = 1,
   //! @brief Texture pattern (@c Texture).
@@ -2291,25 +2427,41 @@ enum TRANSFORM_CREATE
 //! @brief Type of transform operation.
 enum TRANSFORM_OP
 {
-  //! @brief Translate matrix.
-  TRANSFORM_OP_TRANSLATE = 0,
-  //! @brief Scale matrix.
-  TRANSFORM_OP_SCALE = 1,
-  //! @brief Rotate matrix.
-  TRANSFORM_OP_ROTATE = 2,
-  //! @brief Rotate matrix (about a point).
-  TRANSFORM_OP_ROTATE_PT = 3,
-  //! @brief Skew matrix.
-  TRANSFORM_OP_SKEW = 4,
+  //! @brief Translate matrix using @ref PointF.
+  TRANSFORM_OP_TRANSLATEF = 0,
+  //! @brief Translate matrix using @ref PointD.
+  TRANSFORM_OP_TRANSLATED = 1,
+  //! @brief Scale matrix using @ref PointF.
+  TRANSFORM_OP_SCALEF = 2,
+  //! @brief Scale matrix using @ref PointD.
+  TRANSFORM_OP_SCALED = 3,
+  //! @brief Skew matrix using @ref PointF.
+  TRANSFORM_OP_SKEWF = 4,
+  //! @brief Skew matrix using @ref PointD.
+  TRANSFORM_OP_SKEWD = 5,
+  //! @brief Rotate matrix using SP-FP angle.
+  TRANSFORM_OP_ROTATEF = 6,
+  //! @brief Rotate matrix using DP-FP angle.
+  TRANSFORM_OP_ROTATED = 7,
+  //! @brief Rotate matrix (about a @ref PointF).
+  TRANSFORM_OP_ROTATE_POINTF = 8,
+  //! @brief Rotate matrix (about a @ref PointD).
+  TRANSFORM_OP_ROTATE_POINTD = 9,
+  //! @brief Multiply with @ref TransformF.
+  TRANSFORM_OP_MULTIPLYF = 10,
+  //! @brief Multiply with @ref TransformD.
+  TRANSFORM_OP_MULTIPLYD = 11,
+  //! @brief Multiply with inverted @ref TransformF.
+  TRANSFORM_OP_MULTIPLY_INVF = 12,
+  //! @brief Multiply with inverted @ref TransformD.
+  TRANSFORM_OP_MULTIPLY_INVD = 13,
   //! @brief Flip matrix.
-  TRANSFORM_OP_FLIP = 5,
-  //! @brief Multiply with other matrix.
-  TRANSFORM_OP_MULTIPLY = 6,
-  //! @brief Multiply with other matrix, but invert it before multiplication.
-  TRANSFORM_OP_MULTIPLY_INV = 7,
+  TRANSFORM_OP_FLIP = 14,
+  //! @brief Reserved, currently implemented as NOP.
+  TRANSFORM_OP_RESERVED = 15,
 
   //! @brief Count of matrix transform operations.
-  TRANSFORM_OP_COUNT = 8
+  TRANSFORM_OP_COUNT = 16
 };
 
 // ============================================================================
@@ -2319,7 +2471,7 @@ enum TRANSFORM_OP
 //! @brief Type of transform.
 enum TRANSFORM_TYPE
 {
-  //! @brief Transform type is identity (all zeros, 1 at diagonals).
+  //! @brief Transform type is identity.
   TRANSFORM_TYPE_IDENTITY = 0,
   //! @brief Transform type is translation (_20, _21 elements are used).
   TRANSFORM_TYPE_TRANSLATION = 1,

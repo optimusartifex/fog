@@ -466,7 +466,7 @@ struct Hash<StringA, StringA> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
-  // [Eq]
+  // [Equality]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool eq(const Hash<StringA, StringA>& other) const
@@ -687,7 +687,7 @@ struct Hash<StringA, Var> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
-  // [Eq]
+  // [Equality]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool eq(const Hash<StringA, Var>& other) const
@@ -1282,7 +1282,7 @@ struct Hash<StringW, StringW> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
-  // [Eq]
+  // [Equality]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool eq(const Hash<StringW, StringW>& other) const
@@ -1562,7 +1562,7 @@ struct Hash<StringW, Var> : public HashUntyped
   }
 
   // --------------------------------------------------------------------------
-  // [Eq]
+  // [Equality]
   // --------------------------------------------------------------------------
 
   FOG_INLINE bool eq(const Hash<StringW, Var>& other) const

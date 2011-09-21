@@ -146,7 +146,7 @@ protected:
   //! @brief Progress, 0 to 100 [percent]
   float _progress;
 
-  //! @brief ImagePalette if reading / writing 8 bit or less images.
+  //! @brief ImagePalette if reading / writing 8 bit or less depth.
   //!
   //! This is image palette that can be contained in loaded image, but it's
   //! not needed if it's supported to load image into the different image

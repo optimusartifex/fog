@@ -42,14 +42,9 @@ struct SwapHelper<Type, 1>
   {
     char buf[sizeof(Type)];
 
-    memcpy(buf, &a, sizeof(Type));
-    memcpy(&a, &b, sizeof(Type));
-    memcpy(&b, buf, sizeof(Type));
-
-    // TODO: Move swap to Tools/Swap.h and use Memory/MemOps.h
-    //MemOps::copy_t<Type>(reinterpret_cast<Type*>(buf), &a);
-    //MemOps::copy_t<Type>(&a, &b);
-    //MemOps::copy_t<Type>(&b, reinterpret_cast<Type*>(buf));
+    MemOps::copy_t<Type>(reinterpret_cast<Type*>(buf), &a);
+    MemOps::copy_t<Type>(&a, &b);
+    MemOps::copy_t<Type>(&b, reinterpret_cast<Type*>(buf));
   }
 };
 

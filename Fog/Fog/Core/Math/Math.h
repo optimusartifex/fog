@@ -149,7 +149,7 @@ FOG_STATIC_INLINE_T T bound(const T& val, const T& min, const T& max)
 }
 
 // ============================================================================
-// [Fog::Math - BoundToByte]
+// [Fog::Math - BoundToByte / BoundToWord]
 // ============================================================================
 
 static FOG_INLINE uint8_t boundToByte(int val)
@@ -158,6 +158,14 @@ static FOG_INLINE uint8_t boundToByte(int val)
     return (uint8_t)(uint)val;
   else
     return (val < 0) ? 0 : 0xFF;
+}
+
+static FOG_INLINE uint16_t boundToWord(int val)
+{
+  if (FOG_LIKELY((uint)val <= 0xFFFF))
+    return (uint8_t)(uint)val;
+  else
+    return (val < 0) ? 0 : 0xFFFF;
 }
 
 // ============================================================================

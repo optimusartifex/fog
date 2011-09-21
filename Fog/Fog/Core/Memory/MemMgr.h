@@ -44,9 +44,9 @@ static FOG_INLINE void free(void* addr)
 // [Fog::MemMgr - Cleanup]
 // ============================================================================
 
-static FOG_INLINE void cleanup()
+static FOG_INLINE void cleanup(uint32_t reason)
 {
-  _api.memmgr.cleanup();
+  _api.memmgr.cleanup(reason);
 }
 
 static FOG_INLINE err_t registerCleanupFunc(MemCleanupFunc func, void* closure)

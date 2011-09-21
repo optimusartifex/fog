@@ -276,7 +276,16 @@ struct FOG_NO_EXPORT MatrixF
   FOG_INLINE bool operator!=(const MatrixF& other) const { return !_api.matrixf.eq(this, &other); }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const MatrixF& empty()
+  {
+    return *_api.matrixf.oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const MatrixF* a, const MatrixF* b)
@@ -448,7 +457,16 @@ struct FOG_NO_EXPORT MatrixD
   FOG_INLINE bool operator!=(const MatrixD& other) const { return !_api.matrixd.eq(this, &other); }
 
   // --------------------------------------------------------------------------
-  // [Statics - Eq]
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const MatrixD& empty()
+  {
+    return *_api.matrixd.oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE bool eq(const MatrixD* a, const MatrixD* b)

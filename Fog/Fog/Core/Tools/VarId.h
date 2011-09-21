@@ -127,8 +127,8 @@ _FOG_VAR_DECLARE_ID(Fog::Region                , Fog::VAR_TYPE_REGION)
 _FOG_VAR_DECLARE_ID(Fog::TransformF            , Fog::VAR_TYPE_TRANSFORMF)
 _FOG_VAR_DECLARE_ID(Fog::TransformD            , Fog::VAR_TYPE_TRANSFORMD)
 
-_FOG_VAR_DECLARE_ID(Fog::Image                 , Fog::VAR_TYPE_IMAGE)
-_FOG_VAR_DECLARE_ID(Fog::ImagePalette          , Fog::VAR_TYPE_IMAGE_PALETTE)
+_FOG_VAR_DECLARE_ID(Fog::MatrixF               , Fog::VAR_TYPE_MATRIXF)
+_FOG_VAR_DECLARE_ID(Fog::MatrixD               , Fog::VAR_TYPE_MATRIXD)
 
 _FOG_VAR_DECLARE_ID(Fog::Color                 , Fog::VAR_TYPE_COLOR)
 _FOG_VAR_DECLARE_ID(Fog::Texture               , Fog::VAR_TYPE_TEXTUREF)
@@ -144,7 +144,10 @@ _FOG_VAR_DECLARE_ID(Fog::RectangularGradientD  , Fog::VAR_TYPE_RECTANGULAR_GRADI
 _FOG_VAR_DECLARE_ID(Fog::ColorStop             , Fog::VAR_TYPE_COLOR_STOP)
 _FOG_VAR_DECLARE_ID(Fog::ColorStopList         , Fog::VAR_TYPE_COLOR_STOP_LIST)
 
-// TODO: Var
+_FOG_VAR_DECLARE_ID(Fog::Image                 , Fog::VAR_TYPE_IMAGE)
+_FOG_VAR_DECLARE_ID(Fog::ImagePalette          , Fog::VAR_TYPE_IMAGE_PALETTE)
+
+_FOG_VAR_DECLARE_ID(Fog::Font                  , Fog::VAR_TYPE_FONT)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_VARID_H

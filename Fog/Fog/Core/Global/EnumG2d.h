@@ -1978,13 +1978,13 @@ enum PATH_CLIPPER_MEASURE
 //! @brief Path commands.
 enum PATH_CMD
 {
-  //! @brief Move-to command.
+  //! @brief Move-to command (one vertex).
   PATH_CMD_MOVE_TO = 0,
-  //! @brief Line-to command.
+  //! @brief Line-to command (one vertex).
   PATH_CMD_LINE_TO = 1,
-  //! @brief Quad-to command.
+  //! @brief Quad-to command (two vertices).
   PATH_CMD_QUAD_TO = 2,
-  //! @brief Cubic-to command.
+  //! @brief Cubic-to command (three vertices).
   PATH_CMD_CUBIC_TO = 3,
   // TODO: Not implemented yet!
   //

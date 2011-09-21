@@ -13,6 +13,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/Core/Tools/Time.h>
@@ -71,10 +72,10 @@ bool ThreadEvent::timedWait(const TimeDelta& maxTime)
 {
   FOG_ASSERT(maxTime >= TimeDelta::fromMicroseconds(0));
 
-  // Be careful here.  TimeDelta has a precision of microseconds, but this API
-  // is in milliseconds.  If there are 5.5ms left, should the delay be 5 or 6?
+  // Be careful here. TimeDelta has a precision of microseconds, but this API
+  // is in milliseconds. If there are 5.5ms left, should the delay be 5 or 6?
   // It should be 6 to avoid returning too early.
-  double timeout = ceil(maxTime.getMillisecondsD());
+  double timeout = Math::ceil(maxTime.getMillisecondsD());
   DWORD result = ::WaitForSingleObject(_event, static_cast<DWORD>(timeout));
   switch (result)
   {

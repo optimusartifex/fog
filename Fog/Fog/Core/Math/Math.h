@@ -461,6 +461,16 @@ static FOG_INLINE bool isNaN(double x)
 #undef _FOG_MATH_DECLARE_VARIANT_TEMPLATE
 
 // ============================================================================
+// [Fog::Math - Ceil / Floor]
+// ============================================================================
+
+static FOG_INLINE float ceil(float x) { return ::ceilf(x); }
+static FOG_INLINE double ceil(double x) { return ::ceil(x); }
+
+static FOG_INLINE float floor(float x) { return ::floorf(x); }
+static FOG_INLINE double floor(double x) { return ::floor(x); }
+
+// ============================================================================
 // [Fog::Math - Mod]
 // ============================================================================
 

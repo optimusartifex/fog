@@ -773,7 +773,7 @@ int WinEventLoop::_getCurrentDelay() const
   // Be careful here.  TimeDelta has a precision of microseconds, but we want a
   // value in milliseconds.  If there are 5.5ms left, should the delay be 5 or
   // 6?  It should be 6 to avoid executing delayed work too early.
-  double timeout = ceil((_delayedWorkTime - Time::now()).getMillisecondsD());
+  double timeout = Math::ceil((_delayedWorkTime - Time::now()).getMillisecondsD());
 
   // If this value is negative, then we need to run delayed work soon.
   int delay = static_cast<int>(timeout);

@@ -75,7 +75,7 @@ static FOG_INLINE void calculateFlexOffsetsT(T* head, int avail, int& used)
       {
         breakfrom = false;
         // Compute offset for this step.
-        int currentOffset = Math::min<int>(remaining, child->_potential, (int)::ceil(flexStep * child->_flex));
+        int currentOffset = Math::min<int>(remaining, child->_potential, (int)Math::ceil(flexStep * child->_flex));
         // Update child status.
         child->_potential -= currentOffset;
 

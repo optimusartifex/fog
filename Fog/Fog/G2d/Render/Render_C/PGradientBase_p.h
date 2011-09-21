@@ -169,7 +169,7 @@ struct FOG_NO_EXPORT PGradientBase
       case IMAGE_FORMAT_RGB24:
       {
         // Get whether the gradient is opaque or not.
-        bool isOpaque = stops.isOpaque_ARGB32();
+        bool isOpaque = stops.isOpaqueARGB32();
         // Decide which pixel format to use.
         uint32_t srcFormat = isOpaque ? IMAGE_FORMAT_XRGB32 : IMAGE_FORMAT_PRGB32;
 

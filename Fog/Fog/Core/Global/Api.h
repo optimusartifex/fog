@@ -3534,7 +3534,7 @@ struct FOG_NO_EXPORT Api
   typedef void (FOG_CDECL *ColorStopList_Squeeze)(ColorStopList* self);
   typedef err_t (FOG_CDECL *ColorStopList_SetData)(ColorStopList* self, const ColorStop* stops, size_t length);
   typedef bool (FOG_CDECL *ColorStopList_IsOpaque)(const ColorStopList* self);
-  typedef bool (FOG_CDECL *ColorStopList_IsOpaque_ARGB32)(const ColorStopList* self);
+  typedef bool (FOG_CDECL *ColorStopList_IsOpaqueARGB32)(const ColorStopList* self);
   typedef void (FOG_CDECL *ColorStopList_Clear)(ColorStopList* self);
   typedef void (FOG_CDECL *ColorStopList_Reset)(ColorStopList* self);
 
@@ -3561,7 +3561,7 @@ struct FOG_NO_EXPORT Api
     ColorStopList_Squeeze squeeze;
     ColorStopList_SetData setData;
     ColorStopList_IsOpaque isOpaque;
-    ColorStopList_IsOpaque_ARGB32 isOpaque_ARGB32;
+    ColorStopList_IsOpaqueARGB32 isOpaqueARGB32;
     ColorStopList_Clear clear;
     ColorStopList_Reset reset;
 

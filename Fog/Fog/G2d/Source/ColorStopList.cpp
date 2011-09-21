@@ -215,7 +215,7 @@ static bool FOG_CDECL ColorStopList_isOpaqueARGB32(const ColorStopList* self)
 
   for (i = 0; i < length; i++)
   {
-    if (!stops[i].getColor().isOpaque_ARGB32())
+    if (!stops[i].getColor().isOpaqueARGB32())
       return false;
   }
 
@@ -532,6 +532,8 @@ FOG_NO_EXPORT void ColorStopList_init(void)
   _api.colorstoplist.reserve = ColorStopList_reserve;
   _api.colorstoplist.squeeze = ColorStopList_squeeze;
   _api.colorstoplist.setData = ColorStopList_setData;
+  _api.colorstoplist.isOpaque = ColorStopList_isOpaque;
+  _api.colorstoplist.isOpaqueARGB32 = ColorStopList_isOpaqueARGB32;
   _api.colorstoplist.clear = ColorStopList_clear;
   _api.colorstoplist.reset = ColorStopList_reset;
   _api.colorstoplist.addStop = ColorStopList_addStop;

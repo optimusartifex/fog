@@ -79,7 +79,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
     return _data[0] == 1.0f;
   }
 
-  FOG_INLINE bool isOpaque_ARGB32() const
+  FOG_INLINE bool isOpaqueARGB32() const
   {
     return Face::p32ARGB32IsAlphaFF(_argb32.p32);
   }

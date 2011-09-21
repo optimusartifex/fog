@@ -207,9 +207,9 @@ struct FOG_NO_EXPORT ColorStopList
     return _api.colorstoplist.isOpaque(this);
   }
 
-  FOG_INLINE bool isOpaque_ARGB32() const
+  FOG_INLINE bool isOpaqueARGB32() const
   {
-    return _api.colorstoplist.isOpaque_ARGB32(this);
+    return _api.colorstoplist.isOpaqueARGB32(this);
   }
 
   // --------------------------------------------------------------------------

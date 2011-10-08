@@ -30,11 +30,11 @@ namespace Fog {
 //! @brief A ThreadEvent can be a useful thread synchronization tool when you
 //! want to allow one thread to wait for another thread to finish some work.
 //!
-//! Use a ThreadEvent when you would otherwise use a Lock+ThreadCondition to
-//! protect a simple boolean value.  However, if you find yourself using a
+//! Use a @c ThreadEvent when you would otherwise use a @c Lock + @c ThreadCondition
+//! to protect a simple boolean value. However, if you find yourself using a
 //! ThreadEvent in conjunction with a Lock to wait for a more complex state
 //! change (e.g., for an item to be added to a queue), then you should probably
-//! be using a ThreadCondition instead of a ThreadEvent.
+//! be using a @c ThreadCondition instead of a @c ThreadEvent.
 //!
 //! NOTE: On Windows, this class provides a subset of the functionality afforded
 //! by a Windows event object.  This is intentional.  If you are writing Windows
@@ -42,7 +42,6 @@ namespace Fog {
 //! be better off just using an Windows event directly.
 struct FOG_API ThreadEvent
 {
-public:
   //! If manual_reset is true, then to set the event state to non-signaled,
   //! a consumer must call the @c reset() method.  If this parameter is false,
   //! then the system automatically resets the event state to non-signaled after
@@ -73,7 +72,10 @@ public:
   //! does not necessarily mean that max_time was exceeded.
   bool timedWait(const TimeDelta& maxTime);
 
-private:
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
 #if defined(FOG_OS_WINDOWS)
   HANDLE _event;
 #endif // FOG_OS_WINDOWS
@@ -86,6 +88,7 @@ private:
   bool _manualReset;
 #endif // FOG_OS_POSIX
 
+private:
   _FOG_NO_COPY(ThreadEvent)
 };
 

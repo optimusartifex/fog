@@ -337,7 +337,7 @@ struct FOG_NO_EXPORT RasterSpan8 : public RasterSpan
 
   static FOG_INLINE uint8_t* getPointerFromConstMask(uint32_t mask)
   {
-    return (uint8_t*)(void*)mask;
+    return (uint8_t*)(void*)(uintptr_t)mask;
   }
 };
 #include <Fog/Core/C++/PackRestore.h>

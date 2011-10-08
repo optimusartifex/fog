@@ -22,19 +22,26 @@ struct FOG_NO_EXPORT Convert
 
   static err_t FOG_FASTCALL init(ImageConverterData* d)
   {
+    // Data must be detached before initialization.
+    FOG_ASSERT(d->reference.get() == 1);
+
     const ImageFormatDescription& df = d->dstFormatDescription;
     const ImageFormatDescription& sf = d->srcFormatDescription;
 
-    uint32_t dfMaxBpc = Math::max<int>(df.getASize(), df.getRSize(), df.getGSize(), df.getBSize());
-    uint32_t sfMaxBpc = Math::max<int>(sf.getASize(), sf.getRSize(), sf.getGSize(), sf.getBSize());
+    // Maximum bytes per component.
+    uint32_t dfMaxBpc = Math::max<uint32_t>(df.getASize(), df.getRSize(), df.getGSize(), df.getBSize());
+    uint32_t sfMaxBpc = Math::max<uint32_t>(sf.getASize(), sf.getRSize(), sf.getGSize(), sf.getBSize());
+
+    if (df.isIndexed()) dfMaxBpc = 8;
+    if (sf.isIndexed()) sfMaxBpc = 8;
+
+    uint32_t maxBpc = Math::max<uint32_t>(dfMaxBpc, sfMaxBpc);
 
     uint32_t keepColorSpace = ( (df.isPremultiplied() == sf.isPremultiplied()) ||
                                 (df.isPremultiplied() && sf.getASize() == 0  ) ||
                                 (sf.isPremultiplied() && df.getASize() == 0  ) );
-    uint32_t premultiply    = ( !keepColorSpace && df.isPremultiplied() );
 
-    if (df.isIndexed()) dfMaxBpc = 8;
-    if (sf.isIndexed()) sfMaxBpc = 8;
+    uint32_t premultiply    = ( !keepColorSpace && df.isPremultiplied() );
 
     // ------------------------------------------------------------------------
     // [Special Case - Built-In]
@@ -44,7 +51,13 @@ struct FOG_NO_EXPORT Convert
     {
       d->blitFn = (ImageConverterBlitLineFunc)_api_raster.getCopyFullFunc(df.getFormat(), sf.getFormat());
 
+      // We are blitting from Fog supported format into another Fog supported
+      // format. This blit is realized using COMPOSITE_SRC operator  which must
+      // be always implemented. This assert is here mainly for the future to
+      // support the case that the image formats was extended but the 
+      // implementation is missing.
       FOG_ASSERT(d->blitFn);
+
       return ERR_OK;
     }
 
@@ -54,6 +67,8 @@ struct FOG_NO_EXPORT Convert
 
     if (d->isCopy)
     {
+      // ImageConverterData::isCopy means that there is no conversion between 
+      // target and source pixels, thus pixel format depth must be equal as well.
       FOG_ASSERT(df.getDepth() == sf.getDepth());
 
       switch (df.getDepth())
@@ -93,8 +108,8 @@ struct FOG_NO_EXPORT Convert
     // [One or Two-Pass Conversion - Max 8-BPC]
     // ------------------------------------------------------------------------
 
-    // Max 8-bit per component (integer).
-    if (dfMaxBpc <= 8 && sfMaxBpc <= 8)
+    // Max 8-bit per component.
+    if (maxBpc <= 8)
     {
       if (!keepColorSpace)
       {
@@ -181,8 +196,8 @@ struct FOG_NO_EXPORT Convert
     // [One or Two-Pass Conversion - Max 16-BPC]
     // ------------------------------------------------------------------------
 
-    // Max 16-bit per component (integer).
-    if (dfMaxBpc <= 16 && sfMaxBpc <= 16)
+    // Max 16-bit per component.
+    if (maxBpc <= 16)
     {
       if (!keepColorSpace)
       {

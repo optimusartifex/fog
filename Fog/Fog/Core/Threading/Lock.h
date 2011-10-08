@@ -128,13 +128,13 @@ private:
 
 //! @brief Auto @c Lock locker.
 //!
-//! Locker is simple template class that locks a critical section or mutex
-//! and unlocks it when instance of class is destroyed. It's designed to
-//! simplify code where we need to lock mutex on begin of function and
-//! unlock it on end. So, if we create a static instance of @c Fog::AutoLock,
-//! C++ compiler will call destructor (unlock) for us at end of scope.
+//! @c AutoLock is simple class that locks a @c Lock and unlocks it when the
+//! instance of class is being destroyed. It's designed to simplify the code 
+//! where it's needed to lock a @c Lock on begin of a function and unlock it at
+//! the end.
 //!
-//! This very simple code shows how @c Fog::AutoLock works:
+//! This very simple code shows how @c AutoLock works:
+//!
 //! @verbatim
 //! static Fog::Lock lock;
 //!
@@ -150,7 +150,7 @@ private:
 //! }
 //! @endverbatim
 //!
-//! @sa @c AutoUnlock, @c Lock
+//! @sa @c Lock, @c AutoUnlock
 struct FOG_NO_EXPORT AutoLock
 {
   // --------------------------------------------------------------------------
@@ -193,9 +193,9 @@ private:
 // [Fog::AutoUnlock]
 // ============================================================================
 
-//! @brief Auto @c Lock unlocker.
+//! @brief Opposite to @c AutoLock.
 //!
-//! @sa @c AutoLock, @c Lock
+//! @sa @c Lock, @c AutoLock
 struct FOG_NO_EXPORT AutoUnlock
 {
   // --------------------------------------------------------------------------

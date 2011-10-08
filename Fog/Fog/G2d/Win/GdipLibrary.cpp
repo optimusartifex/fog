@@ -20,7 +20,7 @@ namespace Fog {
 // ===========================================================================
 
 GdipLibrary::GdipLibrary() :
-  _gdipToken(NULL)
+  _gdipToken((ULONG_PTR)NULL)
 {
   static const char symbolNames[] =
     "GdiplusStartup\0"
@@ -79,7 +79,7 @@ GdipLibrary::GdipLibrary() :
 
 GdipLibrary::~GdipLibrary()
 {
-  if (_gdipToken != NULL)
+  if (_gdipToken != (ULONG_PTR)NULL)
     _GdiplusShutdown(_gdipToken);
 }
 

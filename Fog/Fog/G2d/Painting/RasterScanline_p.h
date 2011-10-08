@@ -251,7 +251,7 @@ struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
     FOG_ASSERT(m <= 0x100);
 
     // Try to join with the current span.
-    if (getCurrent()->getGenericMask() == (uint8_t*)m && getCurrent()->getX1() == x0)
+    if (getCurrent()->getGenericMask() == (uint8_t*)(uintptr_t)m && getCurrent()->getX1() == x0)
       goto _Link;
 
     newSpan(x0, RASTER_SPAN_C);

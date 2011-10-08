@@ -81,6 +81,26 @@ struct FOG_NO_EXPORT ImageDither8Params
 //! @brief Image converter data.
 struct FOG_NO_EXPORT ImageConverterData
 {
+  // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ImageConverterData* addRef() const
+  {
+    reference.inc();
+    return const_cast<ImageConverterData*>(this);
+  }
+
+  FOG_INLINE void release()
+  {
+    if (reference.deref())
+      _api.imageconverter_dFree(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   //! @brief Reference count.
   mutable Atomic<size_t> reference;
   //! @brief Converter function.
@@ -114,54 +134,98 @@ struct FOG_NO_EXPORT ImageConverterData
 // ============================================================================
 
 //! @brief Image converter.
-struct FOG_API ImageConverter
+struct FOG_NO_EXPORT ImageConverter
 {
   // --------------------------------------------------------------------------
   // [Construction & Destruction]
   // --------------------------------------------------------------------------
 
-  ImageConverter();
-  ImageConverter(const ImageConverter& other);
+  FOG_INLINE ImageConverter()
+  {
+    _api.imageconverter_ctor(this);
+  }
 
-  ImageConverter(
+  FOG_INLINE ImageConverter(const ImageConverter& other)
+  {
+    _api.imageconverter_ctorCopy(this, &other);
+  }
+
+  FOG_INLINE ImageConverter(
     const ImageFormatDescription& dstFormatDescription,
     const ImageFormatDescription& srcFormatDescription,
     uint32_t dither = false,
     const ImagePalette* dstPalette = NULL,
-    const ImagePalette* srcPalette = NULL);
+    const ImagePalette* srcPalette = NULL)
+  {
+    _api.imageconverter_ctorCreate(this,
+      &dstFormatDescription,
+      &srcFormatDescription,
+      dither,
+      dstPalette,
+      srcPalette);
+  }
 
-  ~ImageConverter();
+  explicit FOG_INLINE ImageConverter(ImageConverterData* d) :
+    _d(d)
+  {
+  }
+
+  FOG_INLINE ~ImageConverter()
+  {
+    _api.imageconverter_dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Validity]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isValid() const { return _d != &_dnull; }
+  FOG_INLINE bool isValid() const
+  {
+    return _d != _api.imageconverter_oNull->_d;
+  }
 
   // --------------------------------------------------------------------------
   // [Create]
   // --------------------------------------------------------------------------
 
-  err_t create(
+  FOG_INLINE err_t create(
     const ImageFormatDescription& dstFormatDescription,
     const ImageFormatDescription& srcFormatDescription,
     uint32_t dither = false,
     const ImagePalette* dstPalette = NULL,
-    const ImagePalette* srcPalette = NULL);
+    const ImagePalette* srcPalette = NULL)
+  {
+    return _api.imageconverter_create(this,
+      &dstFormatDescription,
+      &srcFormatDescription,
+      dither,
+      dstPalette,
+      srcPalette);
+  }
 
   //! @brief Create a converter which is able to target 8-bit indexed image
   //! as a destination.
-  err_t createDithered8(
+  FOG_INLINE err_t createDithered8(
     const ImageDither8Params& dstParams,
     const ImageFormatDescription& srcFormatDescription,
     const ImagePalette* dstPalette = NULL,
-    const ImagePalette* srcPalette = NULL);
+    const ImagePalette* srcPalette = NULL)
+  {
+    return _api.imageconverter_createDithered8(this,
+      &dstParams,
+      &srcFormatDescription,
+      dstPalette,
+      srcPalette);
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  void reset();
+  FOG_INLINE void reset()
+  {
+    _api.imageconverter_reset(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Blit - Setup]
@@ -187,15 +251,29 @@ struct FOG_API ImageConverter
   // [Blit - Span]
   // --------------------------------------------------------------------------
 
-  void blitSpan(void* dst, const void* src, int w);
-  void blitSpan(void* dst, const void* src, int w, const PointI& ditherOrigin);
+  FOG_INLINE void blitLine(void* dst, const void* src, int w) const
+  {
+    return _api.imageconverter_blitLine(this, dst, src, w, NULL);
+  }
+
+  FOG_INLINE void blitSpan(void* dst, const void* src, int w, const PointI& ditherOrigin) const
+  {
+    return _api.imageconverter_blitLine(this, dst, src, w, &ditherOrigin);
+  }
 
   // --------------------------------------------------------------------------
   // [Blit - Rect]
   // --------------------------------------------------------------------------
 
-  void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h);
-  void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h, const PointI& ditherOrigin);
+  FOG_INLINE void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h) const
+  {
+    return _api.imageconverter_blitRect(this, dst, dstStride, src, srcStride, w, h, NULL);
+  }
+
+  FOG_INLINE void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h, const PointI& ditherOrigin) const
+  {
+    return _api.imageconverter_blitRect(this, dst, dstStride, src, srcStride, w, h, &ditherOrigin);
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -223,12 +301,6 @@ struct FOG_API ImageConverter
   FOG_INLINE bool isDithered() const { return (bool)_d->isDithered; }
   //! @brief Get whether the conversion is plain-copy.
   FOG_INLINE bool isCopy() const { return (bool)_d->isCopy; }
-
-  // --------------------------------------------------------------------------
-  // [Static]
-  // --------------------------------------------------------------------------
-
-  static Static<ImageConverterData> _dnull;
 
   // --------------------------------------------------------------------------
   // [Members]

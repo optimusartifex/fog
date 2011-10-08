@@ -1823,8 +1823,7 @@ static err_t FOG_CDECL Image_toWinBitmap(const Image* self, HBITMAP* dst)
   }
 
   HBITMAP hBitmap;
-  err_t err = Image_WinDib_createDibSection(&hBitmap, &dstBits, &dstStride, &d->size, dstFormat);
-  if (FOG_IS_ERROR(err)) return NULL;
+  FOG_RETURN_ON_ERROR(Image_WinDib_createDibSection(&hBitmap, &dstBits, &dstStride, &d->size, dstFormat));
 
   RasterVBlitLineFunc blitLine = _api_raster.getCompositeCore(dstFormat, COMPOSITE_SRC)->vblit_line[d->format];
 

@@ -16,7 +16,9 @@
 
 // We need Win2000/XP+
 #if defined(FOG_OS_WINDOWS)
-# define _WIN32_WINNT 0x500
+# ifndef _WIN32_WINNT
+#  define _WIN32_WINNT 0x500
+# endif
 # include <windows.h>
 #endif
 

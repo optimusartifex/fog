@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 #if defined(FOG_OS_WINDOWS)
-#include <Fog/Core/OS/WinUtil.h>
+# include <Fog/Core/OS/WinUtil.h>
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
@@ -35,25 +35,15 @@
 # include <unistd.h>
 #endif // FOG_OS_POSIX
 
-#if !defined(FOG_OS_WINDOWS)
-# define _fseeki64 fseeko
-# define _ftelli64 ftello
-#elif defined(__MINGW32__)
-# warning "MinGW or Borland portability issue: large files support for FILE* stream is turned off"
-# define _fseeki64 fseek
-# define _ftelli64 ftell
-#elif defined(FOG_CC_BORLAND)
-# define _fseeki64 fseek
-# define _ftelli64 ftell
-#endif
-
 // Under BSD anc MAC the functions with "64" suffix are not defined. Standard
 // functions are using 64-bit offset by default.
 #if defined(FOG_OS_BSD) || defined(FOG_OS_MAC)
-#define open64 open
-#define lseek64 lseek
-#define ftruncate64 ftruncate
-#define O_LARGEFILE 0
+# define open64 open
+# define lseek64 lseek
+# define ftruncate64 ftruncate
+# if !defined(O_LARGEFILE)
+#  define O_LARGEFILE 0
+# endif // !defined(O_LARGEFILE)
 #endif
 
 namespace Fog {

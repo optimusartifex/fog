@@ -302,6 +302,12 @@ struct FOG_NO_EXPORT Api
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
+  // [Core/Threading - ThreadEvent]
+  // --------------------------------------------------------------------------
+
+  // TODO:
+
+  // --------------------------------------------------------------------------
   // [Core/Threading - ThreadLocal]
   // --------------------------------------------------------------------------
 
@@ -1839,6 +1845,41 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
   // [G2d/Imaging - ImageConverter]
   // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(imageconverter_ctor)(ImageConverter* self);
+  FOG_CAPI_CTOR(imageconverter_ctorCopy)(ImageConverter* self, const ImageConverter* other);
+  FOG_CAPI_CTOR(imageconverter_ctorCreate)(ImageConverter* self,
+    const ImageFormatDescription* dstFormatDescription,
+    const ImageFormatDescription* srcFormatDescription,
+    uint32_t dither,
+    const ImagePalette* dstPalette,
+    const ImagePalette* srcPalette);
+  FOG_CAPI_DTOR(imageconverter_dtor)(ImageConverter* self);
+
+  FOG_CAPI_METHOD(err_t, imageconverter_create)(ImageConverter* self,
+    const ImageFormatDescription* dstFormatDescription,
+    const ImageFormatDescription* srcFormatDescription,
+    uint32_t dither,
+    const ImagePalette* dstPalette,
+    const ImagePalette* srcPalette);
+
+  FOG_CAPI_METHOD(err_t, imageconverter_createDithered8)(ImageConverter* self,
+    const ImageDither8Params* dstParams,
+    const ImageFormatDescription* srcFormatDescription,
+    const ImagePalette* dstPalette,
+    const ImagePalette* srcPalette);
+
+  FOG_CAPI_METHOD(void, imageconverter_reset)(ImageConverter* self);
+
+  FOG_CAPI_METHOD(void, imageconverter_blitLine)(const ImageConverter* self,
+    void* dst, const void* src, int w, const PointI* ditherOrigin);
+  FOG_CAPI_METHOD(void, imageconverter_blitRect)(const ImageConverter* self,
+    void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h, const PointI* ditherOrigin);
+
+  FOG_CAPI_STATIC(ImageConverterData*, imageconverter_dCreate)(void);
+  FOG_CAPI_STATIC(void, imageconverter_dFree)(ImageConverterData* d);
+
+  ImageConverter* imageconverter_oNull;
 
   // --------------------------------------------------------------------------
   // [G2d/Imaging - ImageFormatDescription]

@@ -864,7 +864,7 @@ void WinGuiWindow::setTransparency(float val)
       SetWindowLong((HWND)getHandle(), GWL_EXSTYLE, flag | WS_EX_LAYERED);
     }
 
-    bool ret = UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL, NULL, &blend, ULW_ALPHA);
+    bool ret = UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL, (COLORREF)NULL, &blend, ULW_ALPHA);
     if (!ret)
     {
       int e = GetLastError();
@@ -1078,7 +1078,7 @@ err_t WinGuiWindow::create(uint32_t flags)
 
   int x;
   int y;
-  WCHAR* wndClass;
+  const WCHAR* wndClass;
 
 // I don't think that we need differen window classes!
 //   if (flags & WINDOW_POPUP)
@@ -1382,7 +1382,12 @@ void WinGuiWindow::setOwner(GuiWindow* w)
   _owner = w;
 
   // Always set owner to toplevel window.
-  SetWindowLong((HWND)getHandle(), GWLP_HWNDPARENT, (LONG)_owner->getHandle());
+  SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)_owner->getHandle());
+  /* NOTE: To write code that is compatible with both 32-bit and 64-bit versions
+     of Windows, use SetWindowLongPtr. When compiling for 32-bit Windows,
+	 SetWindowLongPtr is defined as a call to the SetWindowLong function. - MSDN
+	 http://msdn.microsoft.com/en-us/library/windows/desktop/ms644898%28v=vs.85%29.aspx
+   */
 }
 
 void WinGuiWindow::releaseOwner()

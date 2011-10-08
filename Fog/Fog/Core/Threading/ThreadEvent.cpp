@@ -20,8 +20,8 @@
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
-#include <errno.h>
-#include <sys/time.h>
+# include <errno.h>
+# include <sys/time.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
@@ -56,38 +56,38 @@ void ThreadEvent::signal()
 
 bool ThreadEvent::isSignaled()
 {
-  return timedWait(TimeDelta());
+  return ::WaitForSingleObject(_event, 0) == WAIT_OBJECT_0;
 }
 
 bool ThreadEvent::wait()
 {
-  DWORD result = WaitForSingleObject(_event, INFINITE);
-  // It is most unexpected that this should ever fail.  Help consumers learn
-  // about it if it should ever fail.
-  FOG_ASSERT(result == WAIT_OBJECT_0);
-  return result == WAIT_OBJECT_0;
+  return ::WaitForSingleObject(_event, INFINITE) == WAIT_OBJECT_0;
 }
 
 bool ThreadEvent::timedWait(const TimeDelta& maxTime)
 {
-  FOG_ASSERT(maxTime >= TimeDelta::fromMicroseconds(0));
+  if (maxTime < TimeDelta::fromMicroseconds(0))
+    return false;
 
   // Be careful here. TimeDelta has a precision of microseconds, but this API
   // is in milliseconds. If there are 5.5ms left, should the delay be 5 or 6?
   // It should be 6 to avoid returning too early.
-  double timeout = Math::ceil(maxTime.getMillisecondsD());
-  DWORD result = ::WaitForSingleObject(_event, static_cast<DWORD>(timeout));
+  DWORD timeout = (DWORD)maxTime.getMilliseconds();
+  if ((maxTime.getDelta() % 1000) > 0)
+    timeout++;
+
+  DWORD result = ::WaitForSingleObject(_event, timeout);
   switch (result)
   {
     case WAIT_OBJECT_0:
       return true;
+
     case WAIT_TIMEOUT:
       return false;
-  }
 
-  // It is most unexpected that this should ever fail.  Help consumers learn
-  // about it if it should ever fail.
-  return false;
+    default:
+      return false;
+  }
 }
 #endif
 
@@ -152,13 +152,18 @@ bool ThreadEvent::timedWait(const TimeDelta& maxTime)
   {
     TimeTicks start = TimeTicks::now();
     _cvar.timedWait(maxTime - totalTime);
-    if (_signaled) break;
+    
+    if (_signaled)
+      break;
+
     totalTime += TimeTicks::now() - start;
-    if (totalTime >= maxTime) break;
+    if (totalTime >= maxTime)
+      break;
   }
 
   bool result = _signaled;
-  if (!_manualReset) _signaled = false;
+  if (!_manualReset)
+    _signaled = false;
   return result;
 }
 #endif // FOG_OS_POSIX

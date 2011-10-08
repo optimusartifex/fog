@@ -22,7 +22,7 @@ namespace Fog {
 
 //! @brief Memory buffer.
 //!
-//! Memory buffer is a helper class which holds pointer to allocated memory 
+//! Memory buffer is a helper class which holds pointer to allocated memory
 //! which is freed at destruction time.
 struct FOG_NO_EXPORT MemBuffer
 {

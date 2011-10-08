@@ -75,7 +75,7 @@ struct StringTmpA : public StringA
     if (_storage.d.reference.get() == 0)
       _d = StringA::_dAdopt((void*)&_storage, N);
     else
-      _d = _api.stringa.oEmpty->_d->addRef();
+      _d = _api.stringa_oEmpty->_d->addRef();
   }
 
   // --------------------------------------------------------------------------
@@ -167,7 +167,7 @@ struct StringTmpW : public StringW
     if (_storage.d.reference.get() == 0)
       _d = StringW::_dAdopt((void*)&_storage, N);
     else
-      _d = _api.stringw.oEmpty->_d->addRef();
+      _d = _api.stringw_oEmpty->_d->addRef();
   }
 
   // --------------------------------------------------------------------------

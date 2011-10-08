@@ -10,12 +10,12 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
@@ -443,7 +443,7 @@ err_t BmpDecoder::readImage(Image& image)
   if (readHeader() != ERR_OK) return _headerResult;
 
   // Don't read the image more than once.
-  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_MORE_FRAMES);
+  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_FRAMES);
 
   // Error code (default is success).
   uint32_t err = ERR_OK;
@@ -538,7 +538,7 @@ err_t BmpDecoder::readImage(Image& image)
     rleBuffer = reinterpret_cast<uint8_t*>(rleBufferStorage.alloc(bmpImageSize));
     if (FOG_IS_NULL(rleBuffer))
       goto _OutOfMemory;
-    
+
     if (_stream.read(rleBuffer, bmpImageSize) != bmpImageSize)
       goto _Truncated;
 
@@ -936,7 +936,7 @@ err_t BmpEncoder::writeImage(const Image& image)
 
     default:
     {
-      err = ERR_IMAGE_UNSUPPORTED_FORMAT;
+      err = ERR_IMAGE_INVALID_FORMAT;
       break;
     }
   }
@@ -959,7 +959,7 @@ err_t BmpEncoder::writeImage(const Image& image)
   if (paletteEntries)
   {
     uint32_t* buffer = reinterpret_cast<uint32_t*>(bufferLocal.getMem());
-    const uint32_t* pal = reinterpret_cast<const uint32_t*>(d->palette.getData());
+    const uint32_t* pal = reinterpret_cast<const uint32_t*>(d->palette->getData());
 
     FOG_ASSERT(buffer != NULL);
 

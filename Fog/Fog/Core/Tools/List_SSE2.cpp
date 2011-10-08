@@ -10,7 +10,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Collection/Util.h>
-#include <Fog/Core/Face/Face_SSE2.h>
+#include <Fog/Core/Face/FaceSSE2.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
@@ -285,11 +285,11 @@ FOG_NO_EXPORT void List_init_SSE2(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.list.untyped.indexOf_4B = List_indexOf_4B_SSE2<1>;
-  _api.list.untyped.indexOf_16B = List_indexOf_16B_SSE2<1>;
+  _api.list_untyped_indexOf_4B = List_indexOf_4B_SSE2<1>;
+  _api.list_untyped_indexOf_16B = List_indexOf_16B_SSE2<1>;
 
-  _api.list.untyped.lastIndexOf_4B = List_indexOf_4B_SSE2<-1>;
-  _api.list.untyped.lastIndexOf_16B = List_indexOf_16B_SSE2<-1>;
+  _api.list_untyped_lastIndexOf_4B = List_indexOf_4B_SSE2<-1>;
+  _api.list_untyped_lastIndexOf_16B = List_indexOf_16B_SSE2<-1>;
 }
 
 } // Fog namespace

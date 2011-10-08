@@ -76,7 +76,7 @@ static void FOG_CDECL MemPool_ctor(MemPool* self)
 
 static void FOG_CDECL MemPool_dtor(MemPool* self)
 {
-  _api.mempool.reset(self);
+  _api.mempool_reset(self);
 }
 
 // ===========================================================================
@@ -106,7 +106,7 @@ static void FOG_CDECL MemPool_reset(MemPool* self)
   if (self->chunk == NULL)
     return;
 
-  _api.mempool.freeSaved(self->chunk);
+  _api.mempool_freeSaved(self->chunk);
 
   self->unused = NULL;
   self->chunk = NULL;
@@ -202,14 +202,14 @@ static void FOG_CDECL MemPool_freeSaved(void* p)
 
 FOG_NO_EXPORT void MemPool_init(void)
 {
-  _api.mempool.ctor = MemPool_ctor;
-  _api.mempool.dtor = MemPool_dtor;
-  _api.mempool.getCapacity = MemPool_getCapacity;
-  _api.mempool.reset = MemPool_reset;
-  _api.mempool.save = MemPool_save;
-  _api.mempool.prealloc = MemPool_prealloc;
-  _api.mempool.alloc = MemPool_alloc;
-  _api.mempool.freeSaved = MemPool_freeSaved;
+  _api.mempool_ctor = MemPool_ctor;
+  _api.mempool_dtor = MemPool_dtor;
+  _api.mempool_getCapacity = MemPool_getCapacity;
+  _api.mempool_reset = MemPool_reset;
+  _api.mempool_save = MemPool_save;
+  _api.mempool_prealloc = MemPool_prealloc;
+  _api.mempool_alloc = MemPool_alloc;
+  _api.mempool_freeSaved = MemPool_freeSaved;
 }
 
 } // Fog namespace

@@ -65,19 +65,27 @@ static void MemOps_xchg(uint8_t* a, uint8_t* b, size_t count)
 // [Init / Fini]
 // ============================================================================
 
+typedef void* (FOG_CDECL *MemOps_Copy)(void* dst, const void* src, size_t size);
+typedef void* (FOG_CDECL *MemOps_Move)(void* dst, const void* src, size_t size);
+typedef void* (FOG_CDECL *MemOps_Zero)(void* dst, size_t size);
+typedef void* (FOG_CDECL *MemOps_Set)(void* dst, uint val, size_t size);
+
+typedef void (FOG_CDECL *MemOps_Xchg)(void* a, void* b, size_t size);
+typedef void* (FOG_CDECL *MemOps_Eq)(const void* a, const void* b, size_t size);
+
 FOG_NO_EXPORT void MemOps_init(void)
 {
-  _api.memops.copy = (Api::MemOps_Copy)::memcpy;
-  _api.memops.move = (Api::MemOps_Move)::memmove;
-  _api.memops.zero = (Api::MemOps_Zero)MemOps_zero;
-  _api.memops.set = (Api::MemOps_Set)::memset;
+  _api.memops_copy = (MemOps_Copy)::memcpy;
+  _api.memops_move = (MemOps_Move)::memmove;
+  _api.memops_zero = (MemOps_Zero)MemOps_zero;
+  _api.memops_set = (MemOps_Set)::memset;
 
-  _api.memops.copy_nt = _api.memops.copy;
-  _api.memops.zero_nt = _api.memops.zero;
-  _api.memops.set_nt = _api.memops.set;
+  _api.memops_copynt = _api.memops_copy;
+  _api.memops_zeront = _api.memops_zero;
+  _api.memops_setnt = _api.memops_set;
 
-  _api.memops.xchg = (Api::MemOps_Xchg)MemOps_xchg;
-  _api.memops.eq = (Api::MemOps_Eq)MemOps_eq;
+  _api.memops_xchg = (MemOps_Xchg)MemOps_xchg;
+  _api.memops_eq = (MemOps_Eq)MemOps_eq;
 }
 
 } // Fog namespace

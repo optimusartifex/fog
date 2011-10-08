@@ -808,26 +808,26 @@ FOG_NO_EXPORT void RegExp_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.regexpa.ctor = RegExpT_ctor<char>;
-  _api.regexpa.ctorCopy = RegExpT_ctorCopy<char>;
-  _api.regexpa.dtor = RegExpT_dtor<char>;
-  _api.regexpa.reset = RegExpT_reset<char>;
-  _api.regexpa.copy = RegExpT_copy<char>;
-  _api.regexpa.createStubA = RegExpT_createStub<char, char>;
-  _api.regexpa.createStringA = RegExpT_createString<char, char>;
-  _api.regexpa.indexIn = RegExpT_indexIn<char>;
-  _api.regexpa.lastIndexIn = RegExpT_lastIndexIn<char>;
+  _api.regexpa_ctor = RegExpT_ctor<char>;
+  _api.regexpa_ctorCopy = RegExpT_ctorCopy<char>;
+  _api.regexpa_dtor = RegExpT_dtor<char>;
+  _api.regexpa_reset = RegExpT_reset<char>;
+  _api.regexpa_copy = RegExpT_copy<char>;
+  _api.regexpa_createStubA = RegExpT_createStub<char, char>;
+  _api.regexpa_createStringA = RegExpT_createString<char, char>;
+  _api.regexpa_indexIn = RegExpT_indexIn<char>;
+  _api.regexpa_lastIndexIn = RegExpT_lastIndexIn<char>;
 
-  _api.regexpw.ctor = RegExpT_ctor<CharW>;
-  _api.regexpw.ctorCopy = RegExpT_ctorCopy<CharW>;
-  _api.regexpw.dtor = RegExpT_dtor<CharW>;
-  _api.regexpw.reset = RegExpT_reset<CharW>;
-  _api.regexpw.copy = RegExpT_copy<CharW>;
-  _api.regexpw.createStubA = RegExpT_createStub<CharW, char>;
-  _api.regexpw.createStubW = RegExpT_createStub<CharW, CharW>;
-  _api.regexpw.createStringW = RegExpT_createString<CharW, CharW>;
-  _api.regexpw.indexIn = RegExpT_indexIn<CharW>;
-  _api.regexpw.lastIndexIn = RegExpT_lastIndexIn<CharW>;
+  _api.regexpw_ctor = RegExpT_ctor<CharW>;
+  _api.regexpw_ctorCopy = RegExpT_ctorCopy<CharW>;
+  _api.regexpw_dtor = RegExpT_dtor<CharW>;
+  _api.regexpw_reset = RegExpT_reset<CharW>;
+  _api.regexpw_copy = RegExpT_copy<CharW>;
+  _api.regexpw_createStubA = RegExpT_createStub<CharW, char>;
+  _api.regexpw_createStubW = RegExpT_createStub<CharW, CharW>;
+  _api.regexpw_createStringW = RegExpT_createString<CharW, CharW>;
+  _api.regexpw_indexIn = RegExpT_indexIn<CharW>;
+  _api.regexpw_lastIndexIn = RegExpT_lastIndexIn<CharW>;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -846,7 +846,7 @@ FOG_NO_EXPORT void RegExp_init(void)
   da->destroy = NULL;
   da->match = RegExpCommonT_match<char>;
 
-  da->pattern->_d = _api.stringa.oEmpty->_d;
+  da->pattern->_d = _api.stringa_oEmpty->_d;
   da->fixedLength = INVALID_INDEX;
 
   dw->reference.init(1);
@@ -859,11 +859,11 @@ FOG_NO_EXPORT void RegExp_init(void)
   dw->destroy = NULL;
   dw->match = RegExpCommonT_match<CharW>;
 
-  dw->pattern->_d = _api.stringw.oEmpty->_d;
+  dw->pattern->_d = _api.stringw_oEmpty->_d;
   dw->fixedLength = INVALID_INDEX;
 
-  _api.regexpa.oEmpty = RegExpA_oEmpty.initCustom1(da);
-  _api.regexpw.oEmpty = RegExpW_oEmpty.initCustom1(dw);
+  _api.regexpa_oEmpty = RegExpA_oEmpty.initCustom1(da);
+  _api.regexpw_oEmpty = RegExpW_oEmpty.initCustom1(dw);
 }
 
 } // Fog namespace

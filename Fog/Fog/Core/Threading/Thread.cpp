@@ -13,7 +13,7 @@
 #include <Fog/Core/Kernel/Application.h>
 #include <Fog/Core/Kernel/Event.h>
 #include <Fog/Core/Kernel/Object.h>
-#include <Fog/Core/OS/System.h>
+#include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadLocal.h>
 #include <Fog/Core/Tools/Cpu.h>
@@ -22,6 +22,7 @@
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
+# include <Fog/Core/OS/WinUtil.h>
 # include <process.h>
 # if !defined(STACK_SIZE_PARAM_IS_A_RESERVATION)
 #  define STACK_SIZE_PARAM_IS_A_RESERVATION 0x00010000
@@ -112,7 +113,7 @@ static bool _Thread_create(size_t stackSize, Thread* thread)
 {
   uint flags = 0;
 
-  if (stackSize > 0 && System::getWindowsVersion() >= OS_WIN_VERSION_XP)
+  if (stackSize > 0 && WinUtil::getWinVersion() >= WIN_VERSION_XP)
     flags = STACK_SIZE_PARAM_IS_A_RESERVATION;
   else
     stackSize = 0;

@@ -36,8 +36,8 @@ static void FOG_CDECL MathD_vecDoubleFromFloat(double* dst, const float* src, si
 
 FOG_NO_EXPORT void Math_init_vec(void)
 {
-  _api.mathf.vecFloatFromDouble = MathF_vecFloatFromDouble;
-  _api.mathd.vecDoubleFromFloat = MathD_vecDoubleFromFloat;
+  _api.mathf_vecFloatFromDouble = MathF_vecFloatFromDouble;
+  _api.mathd_vecDoubleFromFloat = MathD_vecDoubleFromFloat;
 }
 
 } // Fog namespace

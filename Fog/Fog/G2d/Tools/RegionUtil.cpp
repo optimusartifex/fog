@@ -172,9 +172,9 @@ static bool FOG_CDECL RegionUtil_isRectListSorted(const RectI* data, size_t leng
 
 FOG_NO_EXPORT void RegionUtil_init(void)
 {
-  _api.regionutil.getClosestBox = RegionUtil_getClosestBox;
-  _api.regionutil.isBoxListSorted = RegionUtil_isBoxListSorted;
-  _api.regionutil.isRectListSorted = RegionUtil_isRectListSorted;
+  _api.regionutil_getClosestBox = RegionUtil_getClosestBox;
+  _api.regionutil_isBoxListSorted = RegionUtil_isBoxListSorted;
+  _api.regionutil_isRectListSorted = RegionUtil_isRectListSorted;
 }
 
 } // Fog namespace

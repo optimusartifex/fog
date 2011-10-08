@@ -42,7 +42,7 @@ static FOG_INLINE void Dpi_setup(float* data, float dpi, float em, float ex)
 
 static void FOG_CDECL Dpi_reset(Dpi* self)
 {
-  _api.dpi.setDpiEmEx(self, 72.0f, 12.0f, 6.0f);
+  _api.dpi_setDpiEmEx(self, 72.0f, 12.0f, 6.0f);
 }
 
 // ============================================================================
@@ -53,7 +53,7 @@ static err_t FOG_CDECL Dpi_setDpi(Dpi* self, float dpi)
 {
   if (dpi <= 0.0f)
   {
-    _api.dpi.reset(self);
+    _api.dpi_reset(self);
     return ERR_RT_INVALID_ARGUMENT;
   }
 
@@ -66,7 +66,7 @@ static err_t FOG_CDECL Dpi_setDpiEmEx(Dpi* self, float dpi, float em, float ex)
 {
   if (dpi <= 0.0f)
   {
-    _api.dpi.reset(self);
+    _api.dpi_reset(self);
     return ERR_RT_INVALID_ARGUMENT;
   }
 
@@ -96,10 +96,10 @@ FOG_NO_EXPORT void Dpi_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.dpi.reset = Dpi_reset;
-  _api.dpi.setDpi = Dpi_setDpi;
-  _api.dpi.setDpiEmEx = Dpi_setDpiEmEx;
-  _api.dpi.copy = Dpi_copy;
+  _api.dpi_reset = Dpi_reset;
+  _api.dpi_setDpi = Dpi_setDpi;
+  _api.dpi_setDpiEmEx = Dpi_setDpiEmEx;
+  _api.dpi_copy = Dpi_copy;
 }
 
 } // Fog namespace

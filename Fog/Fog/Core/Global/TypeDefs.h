@@ -19,12 +19,6 @@ namespace Fog {
 // [TypeDefs - Classes]
 // ============================================================================
 
-// Core/IO.
-struct DirEntry;
-struct DirIterator;
-struct MapFile;
-struct Stream;
-
 // Core/Kernel.
 struct Application;
 struct Event;
@@ -42,12 +36,26 @@ struct IntervalF;
 struct IntervalD;
 
 // Core/Memory.
+struct MemBlockAllocator;
+struct MemBlockNode;
 struct MemBuffer;
 struct MemPool;
+struct MemZoneAllocator;
+struct MemZoneNode;
+struct MemZoneRecord;
 
 // Core/OS.
+struct DirIterator;
+struct FileInfo;
+struct FileInfoData;
+struct FileMapping;
+struct FileMappingData;
 struct Library;
 struct LibraryData;
+
+#if defined(FOG_OS_WINDOWS)
+struct WinVersion;
+#endif // FOG_OS_WINDOWS
 
 // Core/Threading.
 template<typename T> struct Atomic;
@@ -91,6 +99,7 @@ struct RegExpA;
 struct RegExpW;
 struct RegExpDataA;
 struct RegExpDataW;
+struct Stream;
 struct StringA;
 struct StringW;
 struct StringDataA;
@@ -169,6 +178,7 @@ struct TriangleF;
 struct TriangleD;
 
 // G2d/Imaging.
+struct BorderFilter;
 struct Image;
 struct ImageBits;
 struct ImageCodec;
@@ -180,12 +190,27 @@ struct ImageData;
 struct ImageDecoder;
 struct ImageDither8Params;
 struct ImageEncoder;
+struct ImageFilter;
+struct ImageFilterData;
+struct ImageFilterTag;
 struct ImageFormatDescription;
 struct ImagePalette;
 struct ImagePaletteData;
+struct ImageVTable;
 
-// G2d/Imaging/Effects.
+// G2d/Imaging/Filters.
+struct Blur;
+struct ColorLut;
+struct ColorLutArray;
+struct ColorLutArrayData;
 struct ColorMatrix;
+struct ComponentTransfer;
+struct ComponentTransferFunction;
+struct ComponentTransferFunctionData;
+struct ComponentTransferFunctionGamma;
+struct ComponentTransferFunctionLinear;
+struct ConvolutionMatrix;
+struct ConvolutionSeparable;
 
 // G2d/Painting.
 struct Painter;
@@ -271,7 +296,7 @@ struct RegionData;
 // [TypeDefs - Template-Specialization]
 // ============================================================================
 
-// Template specialization must be specified here, because if we use for 
+// Template specialization must be specified here, because if we use for
 // example List<StringW> in the Fog C-API (Core/Global/Api.h) then the template
 // is instantiated within the compiler and the compile error is show when our
 // instantiation is defined.

@@ -47,35 +47,6 @@ Contact: mcseem@antigrain.com
 
 -------------------------------------------------------------------------------
 
-AggOO
-Copyright (C) 2006 Dratek Software, granted MIT license by it's author.
-
-This file is part of the AggOO library. AggOO provides a way to emulate GDI+
-using Anti-Grain Geometry (http://www.antigrain.com) as the rendering backend.
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
--------------------------------------------------------------------------------
-
 Chromium
 Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
 
@@ -134,8 +105,3 @@ Documentation is found at http://www.codeproject.com/cpp/Delegate.asp
 - Don Clugston, Mar 2004.
 
 (Public Domain)
-
--------------------------------------------------------------------------------
-
-If you found something else in Fog-Framework not mentioned here, please let me
-know so I can include it here.

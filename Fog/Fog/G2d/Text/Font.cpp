@@ -10,7 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Threading/Lock.h>
@@ -112,7 +111,7 @@ static void FOG_CDECL Font_ctorCopy(Font* self, const Font* other)
 static void FOG_CDECL Font_dtor(Font* self)
 {
   FontData* d = self->_d;
- 
+
   if (d != NULL)
     d->release();
 }
@@ -128,7 +127,7 @@ static err_t FOG_CDECL Font_detach(Font* self)
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  FontData* newd = _api.font.dCreate();
+  FontData* newd = _api.font_dCreate();
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -171,7 +170,7 @@ static err_t FOG_CDECL Font_setHeight(Font* self, float height, uint32_t unit)
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -192,7 +191,7 @@ static err_t FOG_CDECL Font_setLetterSpacing(Font* self, float spacing, uint32_t
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -216,7 +215,7 @@ static err_t FOG_CDECL Font_setWordSpacing(Font* self, float spacing, uint32_t s
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -240,7 +239,7 @@ static err_t FOG_CDECL Font_setHints(Font* self, const FontHints* hints)
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -383,7 +382,7 @@ static err_t FOG_CDECL Font_setForceCaching(Font* self, bool val)
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -429,7 +428,7 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float heig
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -464,7 +463,7 @@ static err_t FOG_CDECL Font_createEx(Font* self, const StringW* family, float he
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -501,7 +500,7 @@ static err_t FOG_CDECL Font_fromFace(Font* self, FontFace* face, float height, u
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.font.detach(self));
+    FOG_RETURN_ON_ERROR(_api.font_detach(self));
     d = self->_d;
   }
 
@@ -628,7 +627,7 @@ static bool FOG_CDECL Font_eq(const Font* a, const Font* b)
 
   if (a_d->wordSpacingMode != b_d->wordSpacingMode)
     return false;
-    
+
   if (a_d->dataFlags != b_d->dataFlags)
     return false;
 
@@ -672,7 +671,7 @@ static void Font_dFree(FontData* d)
 {
   if (d->face)
     d->face->deref();
-  
+
   if ((d->vType & VAR_FLAG_STATIC) == 0)
     MemMgr::free(d);
 }
@@ -687,48 +686,48 @@ FOG_NO_EXPORT void Font_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.font.ctor = Font_ctor;
-  _api.font.ctorCopy = Font_ctorCopy;
-  _api.font.dtor = Font_dtor;
+  _api.font_ctor = Font_ctor;
+  _api.font_ctorCopy = Font_ctorCopy;
+  _api.font_dtor = Font_dtor;
 
-  _api.font.detach = Font_detach;
-  _api.font.setHeight = Font_setHeight;
-  _api.font.setLetterSpacing = Font_setLetterSpacing;
-  _api.font.setWordSpacing = Font_setWordSpacing;
-  _api.font.setHints = Font_setHints;
-  _api.font.setStyle = Font_setStyle;
-  _api.font.setWeight = Font_setWeight;
-  _api.font.setVariant = Font_setVariant;
-  _api.font.setDecoration = Font_setDecoration;
-  _api.font.setKerning = Font_setKerning;
-  _api.font.setHinting = Font_setHinting;
-  _api.font.setAlignMode = Font_setAlignMode;
+  _api.font_detach = Font_detach;
+  _api.font_setHeight = Font_setHeight;
+  _api.font_setLetterSpacing = Font_setLetterSpacing;
+  _api.font_setWordSpacing = Font_setWordSpacing;
+  _api.font_setHints = Font_setHints;
+  _api.font_setStyle = Font_setStyle;
+  _api.font_setWeight = Font_setWeight;
+  _api.font_setVariant = Font_setVariant;
+  _api.font_setDecoration = Font_setDecoration;
+  _api.font_setKerning = Font_setKerning;
+  _api.font_setHinting = Font_setHinting;
+  _api.font_setAlignMode = Font_setAlignMode;
 
-  _api.font.setTransform = Font_setTransform;
-  _api.font.setForceCaching = Font_setForceCaching;
+  _api.font_setTransform = Font_setTransform;
+  _api.font_setForceCaching = Font_setForceCaching;
 
-  _api.font.reset = Font_reset;
+  _api.font_reset = Font_reset;
 
-  _api.font.create = Font_create;
-  _api.font.createEx = Font_createEx;
+  _api.font_create = Font_create;
+  _api.font_createEx = Font_createEx;
 
-  _api.font.fromFace = Font_fromFace;
+  _api.font_fromFace = Font_fromFace;
 
-  _api.font.getTextOutlineFStubW = Font_getTextOutlineFStubW;
-  _api.font.getTextOutlineFStringW = Font_getTextOutlineFStringW;
-  _api.font.getTextOutlineDStubW = Font_getTextOutlineDStubW;
-  _api.font.getTextOutlineDStringW = Font_getTextOutlineDStringW;
+  _api.font_getTextOutlineFStubW = Font_getTextOutlineFStubW;
+  _api.font_getTextOutlineFStringW = Font_getTextOutlineFStringW;
+  _api.font_getTextOutlineDStubW = Font_getTextOutlineDStubW;
+  _api.font_getTextOutlineDStringW = Font_getTextOutlineDStringW;
 
-  _api.font.getTextExtentsFStubW = Font_getTextExtentsFStubW;
-  _api.font.getTextExtentsFStringW = Font_getTextExtentsFStringW;
-  _api.font.getTextExtentsDStubW = Font_getTextExtentsDStubW;
-  _api.font.getTextExtentsDStringW = Font_getTextExtentsDStringW;
+  _api.font_getTextExtentsFStubW = Font_getTextExtentsFStubW;
+  _api.font_getTextExtentsFStringW = Font_getTextExtentsFStringW;
+  _api.font_getTextExtentsDStubW = Font_getTextExtentsDStubW;
+  _api.font_getTextExtentsDStringW = Font_getTextExtentsDStringW;
 
-  _api.font.copy = Font_copy;
-  _api.font.eq = Font_eq;
+  _api.font_copy = Font_copy;
+  _api.font_eq = Font_eq;
 
-  _api.font.dCreate = Font_dCreate;
-  _api.font.dFree = Font_dFree;
+  _api.font_dCreate = Font_dCreate;
+  _api.font_dFree = Font_dFree;
 }
 
 } // Fog namespace

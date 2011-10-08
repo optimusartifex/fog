@@ -138,12 +138,10 @@ err_t XmlElement::prependChild(XmlElement* ch)
 {
   if (ch->contains(this, true)) return ERR_XML_CYCLIC;
 
-  err_t err = ERR_OK;
   if (_document == ch->_document)
-    err = ch->_unlinkUnmanaged();
+    FOG_RETURN_ON_ERROR(ch->_unlinkUnmanaged());
   else if (ch->_parent)
-    err = ch->unlink();
-  if (FOG_IS_ERROR(err)) return err;
+    FOG_RETURN_ON_ERROR(ch->unlink());
 
   ch->_parent = this;
   ch->_nextSibling = _firstChild;

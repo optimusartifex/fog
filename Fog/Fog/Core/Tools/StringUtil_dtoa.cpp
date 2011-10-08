@@ -171,18 +171,8 @@ namespace Fog {
 # define DBL_MAX 1.7014118346046923e+38
 #endif // !FOG_HAVE_FLOAT_H && DTOA_VAX
 
-// TODO: Fix
-
-// The following definition of Storeinc is appropriate for MIPS processors.
-// An alternative that may be better on some machines is
-// #define Storeinc(a,b,c) (*a++ = b << 16 | c & 0xffff)
-#if defined(DTOA_IEEE) || defined(DTOA_VAX)
-# define Storeinc(a, b, c) \
-   (((unsigned short *)a)[1] = (unsigned short)b, ((unsigned short *)a)[0] = (unsigned short)c, a++)
-#else
-# define Storeinc(a, b, c) \
-  (((unsigned short *)a)[0] = (unsigned short)b, ((unsigned short *)a)[1] = (unsigned short)c, a++)
-#endif
+#define DTOA_COMBINE(_Hi_, _Lo_) \
+  ( ((uint32_t)(_Hi_) << 16) | ((uint32_t)(_Lo_) & 0xFFFF) )
 
 // #define P DBL_MANT_DIG
 // Ten_pmax = floor(P*log(2)/log(5))
@@ -626,7 +616,7 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
         carry = z >> 16;
         z2 = (*x++ >> 16) * y + (*xc >> 16) + carry;
         carry = z2 >> 16;
-        Storeinc(xc, z2, z);
+        *xc++ = DTOA_COMBINE(z2, z);
       } while (x < xae);
       *xc = (uint32_t)carry;
     }
@@ -639,7 +629,7 @@ static BInt* BContext_mult(BContext* context, BInt* a, BInt* b)
       do {
         z = (*x & 0xffff) * y + (*xc >> 16) + carry;
         carry = z >> 16;
-        Storeinc(xc, z, z2);
+        *xc++ = DTOA_COMBINE(z, z2);
         z2 = (*x++ >> 16) * y + (*xc & 0xffff) + carry;
         carry = z2 >> 16;
       } while (x < xae);
@@ -807,7 +797,7 @@ static BInt* BContext_diff(BContext* context, BInt* a, BInt* b)
     borrow = (y & 0x10000) >> 16;
     z = (*xa++ >> 16) - (*xb++ >> 16) - borrow;
     borrow = (z & 0x10000) >> 16;
-    Storeinc(xc, z, y);
+    *xc++ = DTOA_COMBINE(z, y);
   } while (xb < xbe);
 
   while (xa < xae)
@@ -816,7 +806,7 @@ static BInt* BContext_diff(BContext* context, BInt* a, BInt* b)
     borrow = (y & 0x10000) >> 16;
     z = (*xa++ >> 16) - borrow;
     borrow = (z & 0x10000) >> 16;
-    Storeinc(xc, z, y);
+    *xc++ = DTOA_COMBINE(z, y);
   }
 #endif
   while (!*--xc) wa--;
@@ -1137,7 +1127,7 @@ static int quorem(BInt* b, BInt* S)
       borrow = (y & 0x10000) >> 16;
       z = (*bx >> 16) - (zs & 0xffff) - borrow;
       borrow = (z & 0x10000) >> 16;
-      Storeinc(bx, z, y);
+      *bx++ = DTOA_COMBINE(z, y);
 #endif
     } while (sx <= sxe);
     if (!*bxe)
@@ -1171,7 +1161,7 @@ static int quorem(BInt* b, BInt* S)
       borrow = (y & 0x10000) >> 16;
       z = (*bx >> 16) - (zs & 0xffff) - borrow;
       borrow = (z & 0x10000) >> 16;
-      Storeinc(bx, z, y);
+      *bx++ = DTOA_COMBINE(z, y);
 #endif
     } while (sx <= sxe);
 
@@ -3106,13 +3096,13 @@ _Ret:
 
 FOG_NO_EXPORT void StringUtil_init_dtoa(void)
 {
-  _api.stringutil.dtoa = StringUtil_dtoa;
+  _api.stringutil_dtoa = StringUtil_dtoa;
 
-  _api.stringutil.parseFloatA = StringUtil_parseFloat<char>;
-  _api.stringutil.parseFloatW = StringUtil_parseFloat<CharW>;
+  _api.stringutil_parseFloatA = StringUtil_parseFloat<char>;
+  _api.stringutil_parseFloatW = StringUtil_parseFloat<CharW>;
 
-  _api.stringutil.parseDoubleA = StringUtil_parseDouble<char>;
-  _api.stringutil.parseDoubleW = StringUtil_parseDouble<CharW>;
+  _api.stringutil_parseDoubleA = StringUtil_parseDouble<char>;
+  _api.stringutil_parseDoubleW = StringUtil_parseDouble<CharW>;
 }
 
 } // Fog namespace

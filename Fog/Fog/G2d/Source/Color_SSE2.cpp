@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_SSE.h>
-#include <Fog/Core/Face/Face_SSE2.h>
+#include <Fog/Core/Face/FaceSSE.h>
+#include <Fog/Core/Face/FaceSSE2.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
@@ -23,7 +23,7 @@ namespace Fog {
 // [Fog::Color - SetData]
 // ============================================================================
 
-static err_t FOG_CDECL Color_setData_SSE2(Color& self, uint32_t modelExtended, const void* modelData)
+static err_t FOG_CDECL Color_setData_SSE2(Color* self, uint32_t modelExtended, const void* modelData)
 {
   Face::m128f xmm0;
   Face::m128f xmm1;
@@ -37,10 +37,10 @@ static err_t FOG_CDECL Color_setData_SSE2(Color& self, uint32_t modelExtended, c
   {
     case COLOR_MODEL_NONE:
     {
-      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(&self) +  0, xmm0);
-      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(&self) +  8, xmm0);
-      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(&self) + 16, xmm1);
-      Face::m128fStore4  (reinterpret_cast<uint8_t*>(&self) + 24, xmm1);
+      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) +  0, xmm0);
+      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) +  8, xmm0);
+      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) + 16, xmm1);
+      Face::m128fStore4  (reinterpret_cast<uint8_t*>(self) + 24, xmm1);
       return ERR_OK;
     }
 
@@ -52,19 +52,19 @@ static err_t FOG_CDECL Color_setData_SSE2(Color& self, uint32_t modelExtended, c
     case COLOR_MODEL_AHSL:
       Face::m128fLoad16uLoHi(xmm0, modelData);
 
-      Face::m128fStore16uLoHi(&self._data[0], xmm0);
-      Face::m128fStore4(&self._data[4], xmm1);
+      Face::m128fStore16uLoHi(&self->_data[0], xmm0);
+      Face::m128fStore4(&self->_data[4], xmm1);
 
-      self._model = modelExtended;
-      self._hints = NO_FLAGS;
+      self->_model = modelExtended;
+      self->_hints = NO_FLAGS;
 
-      _api.color.convert[_COLOR_MODEL_ARGB32][modelExtended](&self._argb32, self._data);
+      _api.color_convert[_COLOR_MODEL_ARGB32][modelExtended](&self->_argb32, self->_data);
       return ERR_OK;
 
     case COLOR_MODEL_ARGB:
       Face::m128fLoad16uLoHi(xmm0, modelData);
-      Face::m128fStore4(&self._data[4], xmm1);
-      Face::m128fStore16uLoHi(&self._data[0], xmm0);
+      Face::m128fStore4(&self->_data[4], xmm1);
+      Face::m128fStore16uLoHi(&self->_data[0], xmm0);
 
       Face::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_255));
       Face::m128iCvtPI32FromPS(xmmI, xmm0);
@@ -72,9 +72,9 @@ static err_t FOG_CDECL Color_setData_SSE2(Color& self, uint32_t modelExtended, c
       Face::m128iSwapPI32(xmmI, xmmI);
       Face::m128iPackPU8FromPI32(xmmI, xmmI);
 
-      self._model = COLOR_MODEL_ARGB;
-      self._hints = NO_FLAGS;
-      Face::m128iStore4(&self._argb32, xmmI);
+      self->_model = COLOR_MODEL_ARGB;
+      self->_hints = NO_FLAGS;
+      Face::m128iStore4(&self->_argb32, xmmI);
       return ERR_OK;
 
     case _COLOR_MODEL_ARGB32:
@@ -93,11 +93,11 @@ static err_t FOG_CDECL Color_setData_SSE2(Color& self, uint32_t modelExtended, c
       Face::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_65535));
 _SetARGB:
       Face::m128fShuffle<0, 1, 2, 3>(xmm0, xmm0);
-      Face::m128fStore16uLoHi(&self._data[0], xmm0);
-      Face::m128fStore4(&self._data[4], xmm1);
-      self._model = COLOR_MODEL_ARGB;
-      self._hints = NO_FLAGS;
-      Face::m128iStore4(&self._argb32, xmmI);
+      Face::m128fStore16uLoHi(&self->_data[0], xmm0);
+      Face::m128fStore4(&self->_data[4], xmm1);
+      self->_model = COLOR_MODEL_ARGB;
+      self->_hints = NO_FLAGS;
+      Face::m128iStore4(&self->_argb32, xmmI);
       return ERR_OK;
 
     default:
@@ -111,7 +111,7 @@ _SetARGB:
 
 FOG_NO_EXPORT void Color_init_SSE2(void)
 {
-  _api.color.setData = Color_setData_SSE2;
+  _api.color_setData = Color_setData_SSE2;
 }
 
 } // Fog namespace

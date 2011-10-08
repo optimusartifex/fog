@@ -75,9 +75,9 @@ struct FOG_NO_EXPORT ListUntypedData
 
   // ${VAR:BEGIN}
   //
-  // This data-object is binary compatible to the VarData header in the second
+  // This data-object is binary compatible with the VarData header in the second
   // form called - "implicitly shared container". The members must be binary
-  // compatible to the header below:
+  // compatible with the header below:
   //
   // +==============+============+============================================+
   // | Size         | Name       | Description / Purpose                      |
@@ -106,13 +106,13 @@ struct FOG_NO_EXPORT ListUntypedData
   // |                           | supported by Var. Instance of this list    |
   // |                           | can't be casted to the Var or List<Var>.   |
   // +---------------------------+--------------------------------------------+
-  // | LIST_STRINGA              | List<StringA>, typed list compatible to    |
+  // | LIST_STRINGA              | List<StringA>, typed list compatible with  |
   // |                           | Var and List<Var>.                         |
   // +---------------------------+--------------------------------------------+
-  // | LIST_STRINGW              | List<StringW>, typed list compatible to    |
+  // | LIST_STRINGW              | List<StringW>, typed list compatible with  |
   // |                           | Var and List<Var>.                         |
   // +---------------------------+--------------------------------------------+
-  // | LIST_VAR                  | List<Var>, typed list compatible to Var.   |
+  // | LIST_VAR                  | List<Var>, typed list compatible with Var. |
   // +===========================+============================================+
   //
   // ${VAR:END}

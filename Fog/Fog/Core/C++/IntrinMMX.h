@@ -23,7 +23,7 @@ namespace Fog {
 // #define MMX_SHUFFLE(z, y, x, w) (((z) << 6) | ((y) << 4) | ((x) << 2) | (w))
 
 // Fix for stupid msvc debugger feature that will assert you if you want to fill
-// xmm register by ones using _mm_cmpeq_pi8() on currently uninitialized variable.
+// mmx register by ones using _mm_cmpeq_pi8() on currently uninitialized variable.
 //
 // In release mode it's ok so we add setzero() call only in debug builds.
 #if defined(_MSC_VER) && (defined(DEBUG) || defined(_DEBUG) || defined(FOG_DEBUG))

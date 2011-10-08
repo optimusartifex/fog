@@ -93,11 +93,11 @@ static bool FOG_CDECL RoundT_hitTest(const NumT_(Round)* self,
 
 FOG_NO_EXPORT void Round_init(void)
 {
-  _api.roundf.getBoundingBox = RoundT_getBoundingBox<float>;
-  _api.roundd.getBoundingBox = RoundT_getBoundingBox<double>;
+  _api.roundf_getBoundingBox = RoundT_getBoundingBox<float>;
+  _api.roundd_getBoundingBox = RoundT_getBoundingBox<double>;
 
-  _api.roundf.hitTest = RoundT_hitTest<float>;
-  _api.roundd.hitTest = RoundT_hitTest<double>;
+  _api.roundf_hitTest = RoundT_hitTest<float>;
+  _api.roundd_hitTest = RoundT_hitTest<double>;
 }
 
 } // Fog namespace

@@ -208,14 +208,14 @@ static uint FOG_CDECL EllipseT_toCSpline(const NumT_(Ellipse)* self, NumT_(Point
 
 FOG_NO_EXPORT void Ellipse_init(void)
 {
-  _api.ellipsef.getBoundingBox = EllipseT_getBoundingBox<float>;
-  _api.ellipsed.getBoundingBox = EllipseT_getBoundingBox<double>;
+  _api.ellipsef_getBoundingBox = EllipseT_getBoundingBox<float>;
+  _api.ellipsed_getBoundingBox = EllipseT_getBoundingBox<double>;
 
-  _api.ellipsef.hitTest = EllipseT_hitTest<float>;
-  _api.ellipsed.hitTest = EllipseT_hitTest<double>;
+  _api.ellipsef_hitTest = EllipseT_hitTest<float>;
+  _api.ellipsed_hitTest = EllipseT_hitTest<double>;
 
-  _api.ellipsef.toCSpline = EllipseT_toCSpline<float>;
-  _api.ellipsed.toCSpline = EllipseT_toCSpline<double>;
+  _api.ellipsef_toCSpline = EllipseT_toCSpline<float>;
+  _api.ellipsed_toCSpline = EllipseT_toCSpline<double>;
 }
 
 } // Fog namespace

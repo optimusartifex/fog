@@ -9,9 +9,10 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/IO/MapFile.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
-#include <Fog/Core/OS/System.h>
+#include <Fog/Core/OS/Environment.h>
+#include <Fog/Core/OS/FileMapping.h>
+#include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
@@ -129,7 +130,7 @@ static err_t getXdgDirectory(StringW& dst, int id)
 
   if ((err = UserInfo::getDirectory(home, USER_DIRECTORY_HOME))) return err;
 
-  if ((err = System::getEnvironment(Ascii8("XDG_CONFIG_HOME"), configFile)) || configFile.isEmpty())
+  if ((err = Environment::getValue(Ascii8("XDG_CONFIG_HOME"), configFile)) || configFile.isEmpty())
   {
     // XDG_CONFIG_HOME variable is not set, so guess...
     configFile = home;
@@ -146,12 +147,12 @@ static err_t getXdgDirectory(StringW& dst, int id)
   size_t remain;
   int relative;
 
-  MapFile file;
-  if ((err = file.map(configFile, true))) goto _Fail;
+  FileMapping fileMapping;
+  if ((err = fileMapping.open(configFile, true))) goto _Fail;
 
   // Tokenize lines and parse them.
-  p = reinterpret_cast<const char*>(file.getData());
-  end = p + file.getLength();
+  p = reinterpret_cast<const char*>(fileMapping.getData());
+  end = p + fileMapping.getLength();
   for (;;)
   {
     // Skip spaces and empty lines.
@@ -226,7 +227,7 @@ _Fail:
 static err_t getHomeDirectory(StringW& dst)
 {
 #if defined(FOG_OS_WINDOWS)
-  return System::getEnvironment(fog_strings->getString(STR_PLATFORM_USERPROFILE), dst);
+  return Environment::getValue(fog_strings->getString(STR_PLATFORM_USERPROFILE), dst);
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)

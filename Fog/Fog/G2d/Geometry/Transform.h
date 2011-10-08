@@ -167,7 +167,7 @@ struct FOG_NO_EXPORT TransformF
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! @brief Create an identity matrix.
+  //! @brief Create an identity transform.
   FOG_INLINE TransformF()
   {
     _setData(TRANSFORM_TYPE_IDENTITY,
@@ -176,13 +176,13 @@ struct FOG_NO_EXPORT TransformF
       0.0f, 0.0f, 1.0f);
   }
 
-  //! @brief Create a copy of @a other matrix.
+  //! @brief Create a copy of @a other transform.
   FOG_INLINE TransformF(const TransformF& other)
   {
     setTransform(other);
   }
 
-  //! @brief Create an affine matrix.
+  //! @brief Create an affine transform.
   FOG_INLINE TransformF(
     float m00, float m01,
     float m10, float m11,
@@ -194,7 +194,7 @@ struct FOG_NO_EXPORT TransformF
       m20, m21, 1.0f);
   }
 
-  //! @brief Create a projection matrix.
+  //! @brief Create a projection transform.
   FOG_INLINE TransformF(
     float m00, float m01, float m02,
     float m10, float m11, float m12,
@@ -213,7 +213,7 @@ struct FOG_NO_EXPORT TransformF
     setTransform(other);
   }
 
-  //! @brief Create custom matrix from @a data[9].
+  //! @brief Create custom transform from @a data[9].
   explicit FOG_INLINE TransformF(const float* data)
   {
     _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
@@ -226,112 +226,112 @@ struct FOG_NO_EXPORT TransformF
   // [Construction - Static]
   // --------------------------------------------------------------------------
 
-  //! @brief Create translation matrix.
+  //! @brief Create translation transform.
   static FOG_INLINE TransformF fromTranslation(float x, float y)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[2] = { x, y };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_TRANSLATION, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_TRANSLATION, params);
+    return result;
   }
 
-  //! @brief Create translation matrix.
+  //! @brief Create translation transform.
   static FOG_INLINE TransformF fromTranslation(const PointF& p)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_TRANSLATION, reinterpret_cast<const float*>(&p));
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_TRANSLATION, reinterpret_cast<const float*>(&p));
+    return result;
   }
 
-  //! @brief Create scaling matrix.
+  //! @brief Create scaling transform.
   static FOG_INLINE TransformF fromScaling(float x, float y)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[2] = { x, y };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_SCALING, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_SCALING, params);
+    return result;
   }
 
-  //! @brief Create scaling matrix.
+  //! @brief Create scaling transform.
   static FOG_INLINE TransformF fromScaling(const PointF& p)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_SCALING, reinterpret_cast<const float*>(&p));
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_SCALING, reinterpret_cast<const float*>(&p));
+    return result;
   }
 
-  //! @brief Create scaling matrix.
+  //! @brief Create scaling transform.
   static FOG_INLINE TransformF scaling(float scale)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[2] = { scale, scale };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_SCALING, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_SCALING, params);
+    return result;
   }
 
-  //! @brief Create rotation matrix.
+  //! @brief Create rotation transform.
   static FOG_INLINE TransformF fromRotation(float angle)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_ROTATION, &angle);
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_ROTATION, &angle);
+    return result;
   }
 
-  //! @brief Create skewing matrix.
+  //! @brief Create skewing transform.
   static FOG_INLINE TransformF fromSkewing(float x, float y)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[2] = { x, y };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_SKEWING, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_SKEWING, params);
+    return result;
   }
 
-  //! @brief Create skewing (shear) matrix.
+  //! @brief Create skewing (shear) transform.
   static FOG_INLINE TransformF fromSkewing(const PointF& p)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_SKEWING, reinterpret_cast<const float*>(&p));
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_SKEWING, reinterpret_cast<const float*>(&p));
+    return result;
   }
 
-  //! @brief Create line segment matrix.
+  //! @brief Create line segment transform.
   //!
   //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   static FOG_INLINE TransformF fromLineSegment(float x0, float y0, float x1, float y1, float dist)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[5] = { x0, y0, x1, y1, dist };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_LINE_SEGMENT, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_LINE_SEGMENT, params);
+    return result;
   }
 
-  //! @brief Create reflection matrix.
+  //! @brief Create reflection transform.
   static FOG_INLINE TransformF fromReflection(float u)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_REFLECTION_U, &u);
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_REFLECTION_U, &u);
+    return result;
   }
 
-  //! @brief Create reflection matrix.
+  //! @brief Create reflection transform.
   static FOG_INLINE TransformF fromReflection(float x, float y)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[2] = { x, y };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_REFLECTION_XY, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_REFLECTION_XY, params);
+    return result;
   }
 
-  //! @brief Create reflection matrix.
+  //! @brief Create reflection transform.
   static FOG_INLINE TransformF fromReflection(const PointF& p)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_REFLECTION_XY, reinterpret_cast<const float*>(&p));
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_REFLECTION_XY, reinterpret_cast<const float*>(&p));
+    return result;
   }
 
-  //! @brief Create reflection-unit matrix.
+  //! @brief Create reflection-unit transform.
   //!
   //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
@@ -339,25 +339,25 @@ struct FOG_NO_EXPORT TransformF
   //! Contributed by John Horigan
   static FOG_INLINE TransformF fromReflectionUnit(float ux, float uy)
   {
-    TransformF matrix(UNINITIALIZED);
+    TransformF result(UNINITIALIZED);
     float params[2] = { ux, uy };
-    _api.transformf.create(matrix, TRANSFORM_CREATE_REFLECTION_UNIT, params);
-    return matrix;
+    _api.transformf_create(&result, TRANSFORM_CREATE_REFLECTION_UNIT, params);
+    return result;
   }
 
-  //! @brief Create reflection-unit matrix.
+  //! @brief Create reflection-unit transform.
   static FOG_INLINE TransformF fromReflectionUnit(const PointF& u)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_REFLECTION_UNIT, reinterpret_cast<const float*>(&u));
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_REFLECTION_UNIT, reinterpret_cast<const float*>(&u));
+    return result;
   }
 
   static FOG_INLINE TransformF fromParallelogram(const ParallelogramParamsF& params)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_PARALLELOGRAM, &params);
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_PARALLELOGRAM, &params);
+    return result;
   }
 
   static FOG_INLINE TransformF fromParallelogram(
@@ -433,9 +433,9 @@ struct FOG_NO_EXPORT TransformF
 
   static FOG_INLINE TransformF fromQuadToQuad(const QuadToQuadParamsF& params)
   {
-    TransformF matrix(UNINITIALIZED);
-    _api.transformf.create(matrix, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
-    return matrix;
+    TransformF result(UNINITIALIZED);
+    _api.transformf_create(&result, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
+    return result;
   }
 
   static FOG_INLINE TransformF fromQuadToQuad(
@@ -582,12 +582,12 @@ struct FOG_NO_EXPORT TransformF
 
   //! @brief Get the type of the transform, updating it when needed.
   //!
-  //! Type of matrix allows to optimize computation of matrix special cases.
+  //! Type of transform allows to use specialized method for mapping vertices.
   FOG_INLINE uint32_t getType() const
   {
     if (FOG_LIKELY(_type < TRANSFORM_TYPE_COUNT)) return _type;
 
-    uint32_t type = _api.transformf.update(*this);
+    uint32_t type = _api.transformf_update(this);
     FOG_ASSUME(_type == type);
     return type;
   }
@@ -601,14 +601,14 @@ struct FOG_NO_EXPORT TransformF
   //! @brief Update the type of the transform and get it.
   FOG_INLINE uint32_t updateType() const
   {
-    uint32_t type = _api.transformf.update(*this);
+    uint32_t type = _api.transformf_update(this);
     FOG_ASSUME(_type == type);
     return type;
   }
 
   //! @brief Invalidate the type of the transform.
   //!
-  //! Invalidate must be called after you modified matrix members.
+  //! Invalidate must be called after you modified transform members.
   FOG_INLINE void invalidate(uint32_t toType = TRANSFORM_TYPE_DEGENERATE)
   {
     _type = toType | TRANSFORM_TYPE_DIRTY;
@@ -618,7 +618,7 @@ struct FOG_NO_EXPORT TransformF
   // [Reset]
   // --------------------------------------------------------------------------
 
-  //! @brief Reset matrix to identity.
+  //! @brief Reset transform to identity.
   FOG_INLINE void reset()
   {
     _setData(TRANSFORM_TYPE_IDENTITY,
@@ -634,88 +634,88 @@ struct FOG_NO_EXPORT TransformF
   FOG_INLINE err_t setTransform(const TransformF& other);
   FOG_INLINE err_t setTransform(const TransformD& other);
 
-  //! @brief Create translation matrix.
+  //! @brief Create translation transform.
   FOG_INLINE err_t setTranslation(float x, float y)
   {
     float params[2] = { x, y };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_TRANSLATION, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_TRANSLATION, params);
   }
 
-  //! @brief Create translation *this.
+  //! @brief Create translation transform.
   FOG_INLINE err_t setTranslation(const PointF& p)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_TRANSLATION, &p);
+    return _api.transformf_create(this, TRANSFORM_CREATE_TRANSLATION, &p);
   }
 
-  //! @brief Create scaling *this.
+  //! @brief Create scaling transform.
   FOG_INLINE err_t setScaling(float x, float y)
   {
     float params[2] = { x, y };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_SCALING, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_SCALING, params);
   }
 
-  //! @brief Create scaling *this.
+  //! @brief Create scaling transform.
   FOG_INLINE err_t setScaling(const PointF& p)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_SCALING, &p);
+    return _api.transformf_create(this, TRANSFORM_CREATE_SCALING, &p);
   }
 
-  //! @brief Create scaling *this.
+  //! @brief Create scaling transform.
   FOG_INLINE err_t setScaling(float scale)
   {
     float params[2] = { scale, scale };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_SCALING, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_SCALING, params);
   }
 
-  //! @brief Create rotation *this.
+  //! @brief Create rotation transform.
   FOG_INLINE err_t setRotation(float angle)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_ROTATION, &angle);
+    return _api.transformf_create(this, TRANSFORM_CREATE_ROTATION, &angle);
   }
 
-  //! @brief Create skewing (shear) *this.
+  //! @brief Create skewing (shear) transform.
   FOG_INLINE err_t setSkewing(float x, float y)
   {
     float params[2] = { x, y };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_SKEWING, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_SKEWING, params);
   }
 
-  //! @brief Create skewing (shear) *this.
+  //! @brief Create skewing (shear) transform.
   FOG_INLINE err_t setSkewing(const PointF& p)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_SKEWING, &p);
+    return _api.transformf_create(this, TRANSFORM_CREATE_SKEWING, &p);
   }
 
-  //! @brief Create line segment *this.
+  //! @brief Create line segment transform.
   //!
   //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   FOG_INLINE err_t setLineSegment(float x0, float y0, float x1, float y1, float dist)
   {
     float params[5] = { x0, y0, x1, y1, dist };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_LINE_SEGMENT, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_LINE_SEGMENT, params);
   }
 
-  //! @brief Create reflection *this.
+  //! @brief Create reflection transform.
   FOG_INLINE err_t setReflection(float u)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_U, &u);
+    return _api.transformf_create(this, TRANSFORM_CREATE_REFLECTION_U, &u);
   }
 
-  //! @brief Create reflection *this.
+  //! @brief Create reflection transform.
   FOG_INLINE err_t setReflection(float x, float y)
   {
     float params[2] = { x, y };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_XY, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_REFLECTION_XY, params);
   }
 
-  //! @brief Create reflection *this.
+  //! @brief Create reflection transform.
   FOG_INLINE err_t setReflection(const PointF& p)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_XY, &p);
+    return _api.transformf_create(this, TRANSFORM_CREATE_REFLECTION_XY, &p);
   }
 
-  //! @brief Create reflection-unit *this.
+  //! @brief Create reflection-unit transform.
   //!
   //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
@@ -724,18 +724,18 @@ struct FOG_NO_EXPORT TransformF
   FOG_INLINE err_t setReflectionUnit(float ux, float uy)
   {
     float params[2] = { ux, uy };
-    return _api.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_REFLECTION_UNIT, params);
   }
 
-  //! @brief Create reflection-unit *this.
+  //! @brief Create reflection-unit transform.
   FOG_INLINE err_t setReflectionUnit(const PointF& u)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, &u);
+    return _api.transformf_create(this, TRANSFORM_CREATE_REFLECTION_UNIT, &u);
   }
 
   FOG_INLINE err_t setParallelogram(const ParallelogramParamsF& params)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_PARALLELOGRAM, &params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_PARALLELOGRAM, &params);
   }
 
   FOG_INLINE err_t setParallelogram(
@@ -811,7 +811,7 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE err_t setQuadToQuad(const QuadToQuadParamsF& params)
   {
-    return _api.transformf.create(*this, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
+    return _api.transformf_create(this, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
   }
 
   FOG_INLINE err_t setQuadToQuad(
@@ -909,85 +909,85 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE err_t _transform(uint32_t transformOp, const void* params)
   {
-    return _api.transformf.transform(*this, transformOp, params);
+    return _api.transformf_transform(this, transformOp, params);
   }
 
   FOG_INLINE err_t translate(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
+    return _api.transformf_transform(this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
   }
 
   FOG_INLINE err_t scale(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_SCALEF | (order << 4), &p);
+    return _api.transformf_transform(this, TRANSFORM_OP_SCALEF | (order << 4), &p);
   }
 
   FOG_INLINE err_t skew(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_SKEWF | (order << 4), &p);
+    return _api.transformf_transform(this, TRANSFORM_OP_SKEWF | (order << 4), &p);
   }
 
   FOG_INLINE err_t rotate(float angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
+    return _api.transformf_transform(this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(float angle, float x, float y, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     float params[3] = { angle, x, y };
-    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
+    return _api.transformf_transform(this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE err_t rotate(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     float params[3] = { angle, p.x, p.y };
-    return _api.transformf.transform(*this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
+    return _api.transformf_transform(this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE err_t flip(uint32_t axis)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_FLIP, &axis);
+    return _api.transformf_transform(this, TRANSFORM_OP_FLIP, &axis);
   }
 
   FOG_INLINE err_t transform(const TransformF& other, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
+    return _api.transformf_transform(this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
   }
 
   FOG_INLINE TransformF translated(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
+    return _api.transformf_transformed(this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
   }
 
   FOG_INLINE TransformF scaled(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_SCALEF | (order << 4), &p);
+    return _api.transformf_transformed(this, TRANSFORM_OP_SCALEF | (order << 4), &p);
   }
 
   FOG_INLINE TransformF skewed(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_SKEWF | (order << 4), &p);
+    return _api.transformf_transformed(this, TRANSFORM_OP_SKEWF | (order << 4), &p);
   }
 
   FOG_INLINE TransformF rotated(float angle, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
+    return _api.transformf_transformed(this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
   }
 
   FOG_INLINE TransformF rotated(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
     float params[3] = { angle, p.x, p.y };
-    return _api.transformf.transformed(*this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
+    return _api.transformf_transformed(this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
   }
 
   FOG_INLINE TransformF fliped(uint32_t axis)
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_FLIP, &axis);
+    return _api.transformf_transformed(this, TRANSFORM_OP_FLIP, &axis);
   }
 
   FOG_INLINE TransformF transformed(const TransformF& other, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
+    return _api.transformf_transformed(this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
   }
 
   // --------------------------------------------------------------------------
@@ -996,67 +996,67 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE err_t multiply(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLYF | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformf_transform(this, TRANSFORM_OP_MULTIPLYF | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t multiplyInv(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformf_transform(this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiply(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLYF | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformf_transform(this, TRANSFORM_OP_MULTIPLYF | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiplyInv(const TransformF& m)
   {
-    return _api.transformf.transform(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformf_transform(this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE TransformF multiplied(const TransformF& m) const
   {
     TransformF result(UNINITIALIZED);
-    _api.transformf.multiply(result, *this, m);
+    _api.transformf_multiply(&result, this, &m);
     return result;
   }
 
   FOG_INLINE TransformF multipliedInv(const TransformF& m) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformf_transformed(this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE TransformF premultiplied(const TransformF& m) const
   {
     TransformF result(UNINITIALIZED);
-    _api.transformf.multiply(result, m, *this);
+    _api.transformf_multiply(&result, &m, this);
     return result;
   }
 
   FOG_INLINE TransformF premultipliedInv(const TransformF& m) const
   {
-    return _api.transformf.transformed(*this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformf_transformed(this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   // --------------------------------------------------------------------------
   // [Invert]
   // --------------------------------------------------------------------------
 
-  //! @brief Invert matrix.
+  //! @brief Invert transform.
   //!
   //! Do not try to invert degenerate matrices, there's no check for validity.
-  //! If you set scale to 0 and then try to invert matrix, the result is
+  //! If you set scale to 0 and then try to invert transform, the result is
   //! undefined.
   FOG_INLINE bool invert()
   {
-    return _api.transformf.invert(*this, *this);
+    return _api.transformf_invert(this, this);
   }
 
-  //! @brief Get inverted matrix.
+  //! @brief Get inverted transform.
   FOG_INLINE TransformF inverted() const
   {
     TransformF result(UNINITIALIZED);
-    _api.transformf.invert(result, *this);
+    _api.transformf_invert(&result, this);
     return result;
   }
 
@@ -1066,59 +1066,59 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE void mapPoint(PointF& pt) const
   {
-    _api.transformf.mapPointF(*this, pt, pt);
+    _api.transformf_mapPointF(this, &pt, &pt);
   }
 
   FOG_INLINE void mapPoint(PointF& dst, const PointF& src) const
   {
-    _api.transformf.mapPointF(*this, dst, src);
+    _api.transformf_mapPointF(this, &dst, &src);
   }
 
   FOG_INLINE void mapPoints(PointF* pts, size_t count) const
   {
-    _api.transformf.mapPointsF[getType()](*this, pts, pts, count);
+    _api.transformf_mapPointsF[getType()](this, pts, pts, count);
   }
 
   FOG_INLINE void mapPoints(PointF* dst, const PointF* src, size_t count) const
   {
-    _api.transformf.mapPointsF[getType()](*this, dst, src, count);
+    _api.transformf_mapPointsF[getType()](this, dst, src, count);
   }
 
   FOG_INLINE void _mapPoints(PointF* pts, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
-    _api.transformf.mapPointsF[_type](*this, pts, pts, count);
+    _api.transformf_mapPointsF[_type](this, pts, pts, count);
   }
 
   FOG_INLINE void _mapPoints(PointF* dst, const PointF* src, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
-    _api.transformf.mapPointsF[_type](*this, dst, src, count);
+    _api.transformf_mapPointsF[_type](this, dst, src, count);
   }
 
   FOG_INLINE void mapBox(BoxF& dst, const BoxF& src) const
   {
-    _api.transformf.mapBoxF(*this, dst, src);
+    _api.transformf_mapBoxF(this, &dst, &src);
   }
 
   FOG_INLINE void mapVector(PointF& pt) const
   {
-    _api.transformf.mapVectorF(*this, pt, pt);
+    _api.transformf_mapVectorF(this, &pt, &pt);
   }
 
   FOG_INLINE void mapVector(PointF& dst, const PointF& src) const
   {
-    _api.transformf.mapVectorF(*this, dst, src);
+    _api.transformf_mapVectorF(this, &dst, &src);
   }
 
   FOG_INLINE err_t mapPath(PathF& dst, const PathF& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.transformf.mapPathF(*this, dst, src, cntOp);
+    return _api.transformf_mapPathF(this, &dst, &src, cntOp);
   }
 
   FOG_INLINE err_t mapPathData(PathF& dst, const uint8_t* srcCmd, const PointF* srcPts, size_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.transformf.mapPathDataF(*this, dst, srcCmd, srcPts, srcLength, cntOp);
+    return _api.transformf_mapPathDataF(this, &dst, srcCmd, srcPts, srcLength, cntOp);
   }
 
   // --------------------------------------------------------------------------
@@ -1147,16 +1147,16 @@ struct FOG_NO_EXPORT TransformF
     }
   }
 
-  //! @brief Get translation part of matrix.
+  //! @brief Get translation part of transform.
   FOG_INLINE PointF getTranslation() const { return PointF(_20, _21); }
-  FOG_INLINE PointF getScaling(bool absolute) const { return _api.transformf.getScaling(*this, absolute); }
-  FOG_INLINE float getRotation() const { return _api.transformf.getRotation(*this); }
+  FOG_INLINE PointF getScaling(bool absolute) const { return _api.transformf_getScaling(this, absolute); }
+  FOG_INLINE float getRotation() const { return _api.transformf_getRotation(this); }
 
   //! @brief Get the average scale (by X and Y).
   //!
   //! Basically used to calculate the approximation scale when decomposinting
   //! curves into line segments.
-  FOG_INLINE float getAverageScaling() const { return _api.transformf.getAverageScaling(*this); }
+  FOG_INLINE float getAverageScaling() const { return _api.transformf_getAverageScaling(this); }
 
   // --------------------------------------------------------------------------
   // [HashCode]
@@ -1183,35 +1183,35 @@ struct FOG_NO_EXPORT TransformF
     return *this;
   }
 
-  //! @brief Multiply the matrix by another one.
+  //! @brief Multiply the transform by another one.
   FOG_INLINE TransformF& operator*=(const TransformF& m)
   {
     multiply(m);
     return *this;
   }
 
-  //! @brief Multiply the matrix by inverse of another one.
+  //! @brief Multiply the transform by inverse of another one.
   FOG_INLINE TransformF& operator/=(const TransformF& m)
   {
     multiplyInv(m);
     return *this;
   }
 
-  //! @brief Multiply the matrix by another one and return
-  //! the result in a separete matrix.
+  //! @brief Multiply the transform by another one and return
+  //! the result in a separete transform.
   FOG_INLINE TransformF operator*(const TransformF& m) const
   {
     return multiplied(m);
   }
 
-  //! @brief Multiply the matrix by inverse of another one
-  //! and return the result in a separete matrix.
+  //! @brief Multiply the transform by inverse of another one
+  //! and return the result in a separete transform.
   FOG_INLINE TransformF operator/(const TransformF& m) const
   {
     return multipliedInv(m);
   }
 
-  //! @brief Calculate and return the inverse matrix.
+  //! @brief Calculate and return the inverse transform.
   FOG_INLINE TransformF operator~() const
   {
     return inverted();
@@ -1262,6 +1262,9 @@ struct FOG_NO_EXPORT TransformF
       return *this;
     }
   }
+  
+  FOG_INLINE const float& operator[](size_t i) const { return _data[i]; }
+  FOG_INLINE float& operator[](size_t i) { return _data[i]; }
 
   // --------------------------------------------------------------------------
   // [Statics - Instances]
@@ -1269,7 +1272,7 @@ struct FOG_NO_EXPORT TransformF
 
   static FOG_INLINE const TransformF& identity()
   {
-    return *_api.transformf.oIdentity;
+    return *_api.transformf_oIdentity;
   }
 
   // --------------------------------------------------------------------------
@@ -1278,7 +1281,7 @@ struct FOG_NO_EXPORT TransformF
 
   static FOG_INLINE void multiply(TransformF& dst, const TransformF& a, const TransformF& b)
   {
-    _api.transformf.multiply(dst, a, b);
+    _api.transformf_multiply(&dst, &a, &b);
   }
 
   // --------------------------------------------------------------------------
@@ -1287,7 +1290,7 @@ struct FOG_NO_EXPORT TransformF
 
   static FOG_INLINE bool invert(TransformF& dst, const TransformF& a)
   {
-    return _api.transformf.invert(dst, a);
+    return _api.transformf_invert(&dst, &a);
   }
 
   // --------------------------------------------------------------------------
@@ -1330,7 +1333,7 @@ struct FOG_NO_EXPORT TransformD
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  //! @brief Create an identity matrix.
+  //! @brief Create an identity transform.
   FOG_INLINE TransformD()
   {
     _setData(TRANSFORM_TYPE_IDENTITY,
@@ -1339,13 +1342,13 @@ struct FOG_NO_EXPORT TransformD
       0.0, 0.0, 1.0);
   }
 
-  //! @brief Create a copy of @a other matrix.
+  //! @brief Create a copy of @a other transform.
   FOG_INLINE TransformD(const TransformD& other)
   {
     setTransform(other);
   }
 
-  //! @brief Create an affine matrix.
+  //! @brief Create an affine transform.
   FOG_INLINE TransformD(
     double m00, double m01,
     double m10, double m11,
@@ -1357,7 +1360,7 @@ struct FOG_NO_EXPORT TransformD
       m20, m21, 1.0);
   }
 
-  //! @brief Create a projection matrix.
+  //! @brief Create a projection transform.
   FOG_INLINE TransformD(
     double m00, double m01, double m02,
     double m10, double m11, double m12,
@@ -1371,13 +1374,13 @@ struct FOG_NO_EXPORT TransformD
 
   explicit FOG_INLINE TransformD(_Uninitialized) {}
 
-  //! @brief Create a copy of @a other matrix.
+  //! @brief Create a copy of @a other transform.
   explicit FOG_INLINE TransformD(const TransformF& other)
   {
     setTransform(other);
   }
 
-  //! @brief Create custom matrix from @a data[9].
+  //! @brief Create custom transform from @a data[9].
   explicit FOG_INLINE TransformD(const float* data)
   {
     _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
@@ -1386,7 +1389,7 @@ struct FOG_NO_EXPORT TransformD
       data[6], data[7], data[8]);
   }
 
-  //! @brief Create custom matrix from @a data[9].
+  //! @brief Create custom transform from @a data[9].
   explicit FOG_INLINE TransformD(const double* data)
   {
     _setData(TRANSFORM_TYPE_DEGENERATE | TRANSFORM_TYPE_DIRTY,
@@ -1399,112 +1402,112 @@ struct FOG_NO_EXPORT TransformD
   // [Construction - Static]
   // --------------------------------------------------------------------------
 
-  //! @brief Create translation matrix.
+  //! @brief Create translation transform.
   static FOG_INLINE TransformD fromTranslation(double x, double y)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[2] = { x, y };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_TRANSLATION, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_TRANSLATION, params);
+    return result;
   }
 
-  //! @brief Create translation matrix.
+  //! @brief Create translation transform.
   static FOG_INLINE TransformD fromTranslation(const PointD& p)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_TRANSLATION, reinterpret_cast<const double*>(&p));
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_TRANSLATION, reinterpret_cast<const double*>(&p));
+    return result;
   }
 
-  //! @brief Create scaling matrix.
+  //! @brief Create scaling transform.
   static FOG_INLINE TransformD fromScaling(double x, double y)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[2] = { x, y };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_SCALING, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_SCALING, params);
+    return result;
   }
 
-  //! @brief Create scaling matrix.
+  //! @brief Create scaling transform.
   static FOG_INLINE TransformD fromScaling(const PointD& p)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_SCALING, reinterpret_cast<const double*>(&p));
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_SCALING, reinterpret_cast<const double*>(&p));
+    return result;
   }
 
-  //! @brief Create scaling matrix.
+  //! @brief Create scaling transform.
   static FOG_INLINE TransformD scaling(double scale)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[2] = { scale, scale };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_SCALING, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_SCALING, params);
+    return result;
   }
 
-  //! @brief Create rotation matrix.
+  //! @brief Create rotation transform.
   static FOG_INLINE TransformD fromRotation(double angle)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_ROTATION, &angle);
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_ROTATION, &angle);
+    return result;
   }
 
-  //! @brief Create skewing matrix.
+  //! @brief Create skewing transform.
   static FOG_INLINE TransformD fromSkewing(double x, double y)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[2] = { x, y };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_SKEWING, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_SKEWING, params);
+    return result;
   }
 
-  //! @brief Create skewing (shear) matrix.
+  //! @brief Create skewing (shear) transform.
   static FOG_INLINE TransformD fromSkewing(const PointD& p)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_SKEWING, reinterpret_cast<const double*>(&p));
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_SKEWING, reinterpret_cast<const double*>(&p));
+    return result;
   }
 
-  //! @brief Create line segment matrix.
+  //! @brief Create line segment transform.
   //!
   //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   static FOG_INLINE TransformD fromLineSegment(double x0, double y0, double x1, double y1, double dist)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[5] = { x0, y0, x1, y1, dist };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_LINE_SEGMENT, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_LINE_SEGMENT, params);
+    return result;
   }
 
-  //! @brief Create reflection matrix.
+  //! @brief Create reflection transform.
   static FOG_INLINE TransformD fromReflection(double u)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_REFLECTION_U, &u);
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_REFLECTION_U, &u);
+    return result;
   }
 
-  //! @brief Create reflection matrix.
+  //! @brief Create reflection transform.
   static FOG_INLINE TransformD fromReflection(double x, double y)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[2] = { x, y };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_REFLECTION_XY, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_REFLECTION_XY, params);
+    return result;
   }
 
-  //! @brief Create reflection matrix.
+  //! @brief Create reflection transform.
   static FOG_INLINE TransformD fromReflection(const PointD& p)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_REFLECTION_XY, reinterpret_cast<const double*>(&p));
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_REFLECTION_XY, reinterpret_cast<const double*>(&p));
+    return result;
   }
 
-  //! @brief Create reflection-unit matrix.
+  //! @brief Create reflection-unit transform.
   //!
   //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
@@ -1512,25 +1515,25 @@ struct FOG_NO_EXPORT TransformD
   //! Contributed by John Horigan
   static FOG_INLINE TransformD fromReflectionUnit(double ux, double uy)
   {
-    TransformD matrix(UNINITIALIZED);
+    TransformD result(UNINITIALIZED);
     double params[2] = { ux, uy };
-    _api.transformd.create(matrix, TRANSFORM_CREATE_REFLECTION_UNIT, params);
-    return matrix;
+    _api.transformd_create(&result, TRANSFORM_CREATE_REFLECTION_UNIT, params);
+    return result;
   }
 
-  //! @brief Create reflection-unit matrix.
+  //! @brief Create reflection-unit transform.
   static FOG_INLINE TransformD fromReflectionUnit(const PointD& u)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_REFLECTION_UNIT, reinterpret_cast<const double*>(&u));
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_REFLECTION_UNIT, reinterpret_cast<const double*>(&u));
+    return result;
   }
 
   static FOG_INLINE TransformD fromParallelogram(const ParallelogramParamsD& params)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_PARALLELOGRAM, &params);
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_PARALLELOGRAM, &params);
+    return result;
   }
 
   static FOG_INLINE TransformD fromParallelogram(
@@ -1606,9 +1609,9 @@ struct FOG_NO_EXPORT TransformD
 
   static FOG_INLINE TransformD fromQuadToQuad(const QuadToQuadParamsD& params)
   {
-    TransformD matrix(UNINITIALIZED);
-    _api.transformd.create(matrix, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
-    return matrix;
+    TransformD result(UNINITIALIZED);
+    _api.transformd_create(&result, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
+    return result;
   }
 
   static FOG_INLINE TransformD fromQuadToQuad(
@@ -1763,12 +1766,12 @@ struct FOG_NO_EXPORT TransformD
 
   //! @brief Get the type of the transform, updating it when needed.
   //!
-  //! Type of matrix allows to optimize computation of matrix special cases.
+  //! Type of transform allows to use specialized method for mapping vertices.
   FOG_INLINE uint32_t getType() const
   {
     if (FOG_LIKELY(_type < TRANSFORM_TYPE_COUNT)) return _type;
 
-    uint32_t type = _api.transformd.update(*this);
+    uint32_t type = _api.transformd_update(this);
     FOG_ASSUME(_type == type);
     return type;
   }
@@ -1782,14 +1785,14 @@ struct FOG_NO_EXPORT TransformD
   //! @brief Update the type of the transform and get it.
   FOG_INLINE uint32_t updateType() const
   {
-    uint32_t type = _api.transformd.update(*this);
+    uint32_t type = _api.transformd_update(this);
     FOG_ASSUME(_type == type);
     return type;
   }
 
   //! @brief Invalidate the type of the transform.
   //!
-  //! Invalidate must be called after you modified matrix members.
+  //! Invalidate must be called after you modified transform members.
   FOG_INLINE void invalidate(uint32_t toType = TRANSFORM_TYPE_PROJECTION)
   {
     _type = toType | TRANSFORM_TYPE_DIRTY;
@@ -1799,7 +1802,7 @@ struct FOG_NO_EXPORT TransformD
   // [Reset]
   // --------------------------------------------------------------------------
 
-  //! @brief Reset matrix to identity.
+  //! @brief Reset transform to identity.
   FOG_INLINE void reset()
   {
     _setData(TRANSFORM_TYPE_IDENTITY,
@@ -1830,88 +1833,88 @@ struct FOG_NO_EXPORT TransformD
     return ERR_OK;
   }
 
-  //! @brief Create translation matrix.
+  //! @brief Create translation transform.
   FOG_INLINE err_t setTranslation(double x, double y)
   {
     double params[2] = { x, y };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_TRANSLATION, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_TRANSLATION, params);
   }
 
-  //! @brief Create translation *this.
+  //! @brief Create translation transform.
   FOG_INLINE err_t setTranslation(const PointD& p)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_TRANSLATION, &p);
+    return _api.transformd_create(this, TRANSFORM_CREATE_TRANSLATION, &p);
   }
 
-  //! @brief Create scaling *this.
+  //! @brief Create scaling transform.
   FOG_INLINE err_t setScaling(double x, double y)
   {
     double params[2] = { x, y };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_SCALING, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_SCALING, params);
   }
 
-  //! @brief Create scaling *this.
+  //! @brief Create scaling transform.
   FOG_INLINE err_t setScaling(const PointD& p)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_SCALING, &p);
+    return _api.transformd_create(this, TRANSFORM_CREATE_SCALING, &p);
   }
 
-  //! @brief Create scaling *this.
+  //! @brief Create scaling transform.
   FOG_INLINE err_t setScaling(double scale)
   {
     double params[2] = { scale, scale };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_SCALING, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_SCALING, params);
   }
 
-  //! @brief Create rotation *this.
+  //! @brief Create rotation transform.
   FOG_INLINE err_t setRotation(double angle)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_ROTATION, &angle);
+    return _api.transformd_create(this, TRANSFORM_CREATE_ROTATION, &angle);
   }
 
-  //! @brief Create skewing (shear) *this.
+  //! @brief Create skewing (shear) transform.
   FOG_INLINE err_t setSkewing(double x, double y)
   {
     double params[2] = { x, y };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_SKEWING, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_SKEWING, params);
   }
 
-  //! @brief Create skewing (shear) *this.
+  //! @brief Create skewing (shear) transform.
   FOG_INLINE err_t setSkewing(const PointD& p)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_SKEWING, &p);
+    return _api.transformd_create(this, TRANSFORM_CREATE_SKEWING, &p);
   }
 
-  //! @brief Create line segment *this.
+  //! @brief Create line segment transform.
   //!
   //! Rotate, scale and translate, associating 0 to @a dist with line segment
   //! @a x0, @a y0, @a x1 and @a y1.
   FOG_INLINE err_t setLineSegment(double x0, double y0, double x1, double y1, double dist)
   {
     double params[5] = { x0, y0, x1, y1, dist };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_LINE_SEGMENT, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_LINE_SEGMENT, params);
   }
 
-  //! @brief Create reflection *this.
+  //! @brief Create reflection transform.
   FOG_INLINE err_t setReflection(double u)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_U, &u);
+    return _api.transformd_create(this, TRANSFORM_CREATE_REFLECTION_U, &u);
   }
 
-  //! @brief Create reflection *this.
+  //! @brief Create reflection transform.
   FOG_INLINE err_t setReflection(double x, double y)
   {
     double params[2] = { x, y };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_XY, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_REFLECTION_XY, params);
   }
 
-  //! @brief Create reflection *this.
+  //! @brief Create reflection transform.
   FOG_INLINE err_t setReflection(const PointD& p)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_XY, &p);
+    return _api.transformd_create(this, TRANSFORM_CREATE_REFLECTION_XY, &p);
   }
 
-  //! @brief Create reflection-unit *this.
+  //! @brief Create reflection-unit transform.
   //!
   //! Reflect coordinates across the line through the origin containing
   //! the unit vector (ux, uy).
@@ -1920,18 +1923,18 @@ struct FOG_NO_EXPORT TransformD
   FOG_INLINE err_t setReflectionUnit(double ux, double uy)
   {
     double params[2] = { ux, uy };
-    return _api.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_REFLECTION_UNIT, params);
   }
 
-  //! @brief Create reflection-unit *this.
+  //! @brief Create reflection-unit transform.
   FOG_INLINE err_t setReflectionUnit(const PointD& u)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_REFLECTION_UNIT, &u);
+    return _api.transformd_create(this, TRANSFORM_CREATE_REFLECTION_UNIT, &u);
   }
 
   FOG_INLINE err_t setParallelogram(const ParallelogramParamsD& params)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_PARALLELOGRAM, &params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_PARALLELOGRAM, &params);
   }
 
   FOG_INLINE err_t setParallelogram(
@@ -2007,7 +2010,7 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE err_t setQuadToQuad(const QuadToQuadParamsD& params)
   {
-    return _api.transformd.create(*this, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
+    return _api.transformd_create(this, TRANSFORM_CREATE_QUAD_TO_QUAD, &params);
   }
 
   FOG_INLINE err_t setQuadToQuad(
@@ -2105,79 +2108,79 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE err_t _transform(uint32_t transformOp, const void* params)
   {
-    return _api.transformd.transform(*this, transformOp, params);
+    return _api.transformd_transform(this, transformOp, params);
   }
 
   FOG_INLINE err_t translate(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
+    return _api.transformd_transform(this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
   }
 
   FOG_INLINE err_t scale(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_SCALED | (order << 4), &p);
+    return _api.transformd_transform(this, TRANSFORM_OP_SCALED | (order << 4), &p);
   }
 
   FOG_INLINE err_t skew(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_SKEWD | (order << 4), &p);
+    return _api.transformd_transform(this, TRANSFORM_OP_SKEWD | (order << 4), &p);
   }
 
   FOG_INLINE err_t rotate(double angle, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
+    return _api.transformd_transform(this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
   }
 
   FOG_INLINE err_t rotate(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND)
   {
     double params[3] = { angle, p.x, p.y };
-    return _api.transformd.transform(*this, TRANSFORM_OP_ROTATE_POINTD | (order << 4), params);
+    return _api.transformd_transform(this, TRANSFORM_OP_ROTATE_POINTD | (order << 4), params);
   }
 
   FOG_INLINE err_t flip(uint32_t axis)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_FLIP, &axis);
+    return _api.transformd_transform(this, TRANSFORM_OP_FLIP, &axis);
   }
 
   FOG_INLINE err_t transform(const TransformD& other, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
+    return _api.transformd_transform(this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
   }
 
   FOG_INLINE TransformD translated(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
+    return _api.transformd_transformed(this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
   }
 
   FOG_INLINE TransformD scaled(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_SCALED | (order << 4), &p);
+    return _api.transformd_transformed(this, TRANSFORM_OP_SCALED | (order << 4), &p);
   }
 
   FOG_INLINE TransformD skewed(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_SKEWD | (order << 4), &p);
+    return _api.transformd_transformed(this, TRANSFORM_OP_SKEWD | (order << 4), &p);
   }
 
   FOG_INLINE TransformD rotated(double angle, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
+    return _api.transformd_transformed(this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
   }
 
   FOG_INLINE TransformD rotated(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
     double params[3] = { angle, p.x, p.y };
-    return _api.transformd.transformed(*this, TRANSFORM_OP_ROTATED | (order << 4), params);
+    return _api.transformd_transformed(this, TRANSFORM_OP_ROTATED | (order << 4), params);
   }
 
   FOG_INLINE TransformD fliped(uint32_t axis)
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_FLIP, &axis);
+    return _api.transformd_transformed(this, TRANSFORM_OP_FLIP, &axis);
   }
 
   FOG_INLINE TransformD transformed(const TransformD& other, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
+    return _api.transformd_transformed(this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
   }
 
   // --------------------------------------------------------------------------
@@ -2186,67 +2189,67 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE err_t multiply(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLYD | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformd_transform(this, TRANSFORM_OP_MULTIPLYD | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t multiplyInv(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformd_transform(this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiply(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLYD | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformd_transform(this, TRANSFORM_OP_MULTIPLYD | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE err_t premultiplyInv(const TransformD& m)
   {
-    return _api.transformd.transform(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformd_transform(this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   FOG_INLINE TransformD multiplied(const TransformD& m) const
   {
     TransformD result(UNINITIALIZED);
-    _api.transformd.multiply(result, *this, m);
+    _api.transformd_multiply(&result, this, &m);
     return result;
   }
 
   FOG_INLINE TransformD multipliedInv(const TransformD& m) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
+    return _api.transformd_transformed(this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
   }
 
   FOG_INLINE TransformD premultiplied(const TransformD& m) const
   {
     TransformD result(UNINITIALIZED);
-    _api.transformd.multiply(result, m, *this);
+    _api.transformd_multiply(&result, &m, this);
     return result;
   }
 
   FOG_INLINE TransformD premultipliedInv(const TransformD& m) const
   {
-    return _api.transformd.transformed(*this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
+    return _api.transformd_transformed(this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
   }
 
   // --------------------------------------------------------------------------
   // [Invert]
   // --------------------------------------------------------------------------
 
-  //! @brief Invert matrix.
+  //! @brief Invert transform.
   //!
   //! Do not try to invert degenerate matrices, there's no check for validity.
-  //! If you set scale to 0 and then try to invert matrix, the result is
+  //! If you set scale to 0 and then try to invert transform, the result is
   //! undefined.
   FOG_INLINE bool invert()
   {
-    return _api.transformd.invert(*this, *this);
+    return _api.transformd_invert(this, this);
   }
 
-  //! @brief Get inverted matrix.
+  //! @brief Get inverted transform.
   FOG_INLINE TransformD inverted() const
   {
     TransformD result(UNINITIALIZED);
-    _api.transformd.invert(result, *this);
+    _api.transformd_invert(&result, this);
     return result;
   }
 
@@ -2256,80 +2259,80 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE void mapPoint(PointD& pt) const
   {
-    _api.transformd.mapPointD(*this, pt, pt);
+    _api.transformd_mapPointD(this, &pt, &pt);
   }
 
   FOG_INLINE void mapPoint(PointD& dst, const PointD& src) const
   {
-    _api.transformd.mapPointD(*this, dst, src);
+    _api.transformd_mapPointD(this, &dst, &src);
   }
 
   FOG_INLINE void mapPoints(PointD* pts, size_t count) const
   {
-    _api.transformd.mapPointsD[getType()](*this, pts, pts, count);
+    _api.transformd_mapPointsD[getType()](this, pts, pts, count);
   }
 
   FOG_INLINE void mapPoints(PointD* dst, const PointF* src, size_t count) const
   {
-    _api.transformd.mapPointsF[getType()](*this, dst, src, count);
+    _api.transformd_mapPointsF[getType()](this, dst, src, count);
   }
 
   FOG_INLINE void mapPoints(PointD* dst, const PointD* src, size_t count) const
   {
-    _api.transformd.mapPointsD[getType()](*this, dst, src, count);
+    _api.transformd_mapPointsD[getType()](this, dst, src, count);
   }
 
   FOG_INLINE void _mapPoints(PointD* pts, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
-    _api.transformd.mapPointsD[_type](*this, pts, pts, count);
+    _api.transformd_mapPointsD[_type](this, pts, pts, count);
   }
 
   FOG_INLINE void _mapPoints(PointD* dst, const PointF* src, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
-    _api.transformd.mapPointsF[_type](*this, dst, src, count);
+    _api.transformd_mapPointsF[_type](this, dst, src, count);
   }
 
   FOG_INLINE void _mapPoints(PointD* dst, const PointD* src, size_t count) const
   {
     FOG_ASSERT(_type < TRANSFORM_TYPE_COUNT);
-    _api.transformd.mapPointsD[_type](*this, dst, src, count);
+    _api.transformd_mapPointsD[_type](this, dst, src, count);
   }
 
   FOG_INLINE err_t mapPath(PathD& dst, const PathF& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.transformd.mapPathF(*this, dst, src, cntOp);
+    return _api.transformd_mapPathF(this, &dst, &src, cntOp);
   }
 
   FOG_INLINE err_t mapPath(PathD& dst, const PathD& src, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.transformd.mapPathD(*this, dst, src, cntOp);
+    return _api.transformd_mapPathD(this, &dst, &src, cntOp);
   }
 
   FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointF* srcPts, size_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.transformd.mapPathDataF(*this, dst, srcCmd, srcPts, srcLength, cntOp);
+    return _api.transformd_mapPathDataF(this, &dst, srcCmd, srcPts, srcLength, cntOp);
   }
 
   FOG_INLINE err_t mapPathData(PathD& dst, const uint8_t* srcCmd, const PointD* srcPts, size_t srcLength, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.transformd.mapPathDataD(*this, dst, srcCmd, srcPts, srcLength, cntOp);
+    return _api.transformd_mapPathDataD(this, &dst, srcCmd, srcPts, srcLength, cntOp);
   }
 
   FOG_INLINE void mapBox(BoxD& dst, const BoxD& src) const
   {
-    _api.transformd.mapBoxD(*this, dst, src);
+    _api.transformd_mapBoxD(this, &dst, &src);
   }
 
   FOG_INLINE void mapVector(PointD& pt) const
   {
-    _api.transformd.mapVectorD(*this, pt, pt);
+    _api.transformd_mapVectorD(this, &pt, &pt);
   }
 
   FOG_INLINE void mapVector(PointD& dst, const PointD& src) const
   {
-    _api.transformd.mapVectorD(*this, dst, src);
+    _api.transformd_mapVectorD(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -2358,16 +2361,16 @@ struct FOG_NO_EXPORT TransformD
     }
   }
 
-  //! @brief Get translation part of matrix.
+  //! @brief Get translation part of transform.
   FOG_INLINE PointD getTranslation() const { return PointD(_20, _21); }
-  FOG_INLINE PointD getScaling(bool absolute) const { return _api.transformd.getScaling(*this, absolute); }
-  FOG_INLINE double getRotation() const { return _api.transformd.getRotation(*this); }
+  FOG_INLINE PointD getScaling(bool absolute) const { return _api.transformd_getScaling(this, absolute); }
+  FOG_INLINE double getRotation() const { return _api.transformd_getRotation(this); }
 
   //! @brief Get the average scale (by X and Y).
   //!
   //! Basically used to calculate the approximation scale when decomposinting
   //! curves into line segments.
-  FOG_INLINE double getAverageScaling() const { return _api.transformd.getAverageScaling(*this); }
+  FOG_INLINE double getAverageScaling() const { return _api.transformd_getAverageScaling(this); }
 
   // --------------------------------------------------------------------------
   // [HashCode]
@@ -2394,35 +2397,35 @@ struct FOG_NO_EXPORT TransformD
     return *this;
   }
 
-  //! @brief Multiply the matrix by another one.
+  //! @brief Multiply the transform by another one.
   FOG_INLINE TransformD& operator*=(const TransformD& m)
   {
     multiply(m);
     return *this;
   }
 
-  //! @brief Multiply the matrix by inverse of another one.
+  //! @brief Multiply the transform by inverse of another one.
   FOG_INLINE TransformD& operator/=(const TransformD& m)
   {
     multiplyInv(m);
     return *this;
   }
 
-  //! @brief Multiply the matrix by another one and return
-  //! the result in a separete matrix.
+  //! @brief Multiply the transform by another one and return
+  //! the result in a separete transform.
   FOG_INLINE TransformD operator*(const TransformD& m) const
   {
     return multiplied(m);
   }
 
-  //! @brief Multiply the matrix by inverse of another one
-  //! and return the result in a separete matrix.
+  //! @brief Multiply the transform by inverse of another one
+  //! and return the result in a separete transform.
   FOG_INLINE TransformD operator/(const TransformD& m) const
   {
     return multipliedInv(m);
   }
 
-  //! @brief Calculate and return the inverse matrix.
+  //! @brief Calculate and return the inverse transform.
   FOG_INLINE TransformD operator~() const
   {
     return inverted();
@@ -2474,13 +2477,16 @@ struct FOG_NO_EXPORT TransformD
     }
   }
 
+  FOG_INLINE const double& operator[](size_t i) const { return _data[i]; }
+  FOG_INLINE double& operator[](size_t i) { return _data[i]; }
+
   // --------------------------------------------------------------------------
   // [Statics - Instances]
   // --------------------------------------------------------------------------
 
   static FOG_INLINE const TransformD& identity()
   {
-    return *_api.transformd.oIdentity;
+    return *_api.transformd_oIdentity;
   }
 
   // --------------------------------------------------------------------------
@@ -2489,7 +2495,7 @@ struct FOG_NO_EXPORT TransformD
 
   static FOG_INLINE void multiply(TransformD& dst, const TransformD& a, const TransformD& b)
   {
-    _api.transformd.multiply(dst, a, b);
+    _api.transformd_multiply(&dst, &a, &b);
   }
 
   // --------------------------------------------------------------------------
@@ -2498,7 +2504,7 @@ struct FOG_NO_EXPORT TransformD
 
   static FOG_INLINE bool invert(TransformD& dst, const TransformD& a)
   {
-    return _api.transformd.invert(dst, a);
+    return _api.transformd_invert(&dst, &a);
   }
 
   // --------------------------------------------------------------------------

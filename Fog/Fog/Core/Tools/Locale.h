@@ -37,7 +37,7 @@ struct FOG_NO_EXPORT LocaleData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.locale.dFree(this);
+      _api.locale_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -46,9 +46,9 @@ struct FOG_NO_EXPORT LocaleData
 
   // ${VAR:BEGIN}
   //
-  // This data-object is binary compatible to the VarData header in the first
+  // This data-object is binary compatible with the VarData header in the first
   // form called - "implicitly shared class". The members must be binary
-  // compatible to the header below:
+  // compatible with the header below:
   //
   // +==============+============+============================================+
   // | Size         | Name       | Description / Purpose                      |
@@ -96,17 +96,17 @@ struct FOG_NO_EXPORT Locale
 
   FOG_INLINE Locale()
   {
-    _api.locale.ctor(this);
+    _api.locale_ctor(this);
   }
 
   FOG_INLINE Locale(const Locale& other)
   {
-    _api.locale.ctorCopy(this, &other);
+    _api.locale_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE Locale(const StringW& localeName)
   {
-    _api.locale.ctorString(this, &localeName);
+    _api.locale_ctorString(this, &localeName);
   }
 
   explicit FOG_INLINE Locale(LocaleData* d) : _d(d)
@@ -115,7 +115,7 @@ struct FOG_NO_EXPORT Locale
 
   FOG_INLINE ~Locale()
   {
-    _api.locale.dtor(this);
+    _api.locale_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -143,7 +143,7 @@ struct FOG_NO_EXPORT Locale
   //! @copydoc Doxygen::Implicit::_detach().
   FOG_INLINE err_t _detach()
   {
-    return _api.locale.detach(this);
+    return _api.locale_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -165,7 +165,7 @@ struct FOG_NO_EXPORT Locale
 
   FOG_INLINE err_t setChar(uint32_t id, CharW ch)
   {
-    return _api.locale.setChar(this, id, ch);
+    return _api.locale_setChar(this, id, ch);
   }
 
   // --------------------------------------------------------------------------
@@ -175,7 +175,7 @@ struct FOG_NO_EXPORT Locale
   //! @copydoc Doxygen::Implicit::reset().
   FOG_INLINE void reset()
   {
-    _api.locale.reset(this);
+    _api.locale_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -184,40 +184,40 @@ struct FOG_NO_EXPORT Locale
 
   FOG_INLINE err_t create(const StringW& name)
   {
-    return _api.locale.create(this, &name);
+    return _api.locale_create(this, &name);
   }
 
   // --------------------------------------------------------------------------
   // [ConvertInt]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t convertInt(StringW& dst, int8_t   n) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint8_t  n) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, int16_t  n) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint16_t n) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, int32_t  n) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint32_t n) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, int64_t  n) const { return _api.stringw.opI64Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint64_t n) const { return _api.stringw.opU64Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int8_t   n) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint8_t  n) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int16_t  n) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint16_t n) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int32_t  n) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint32_t n) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int64_t  n) const { return _api.stringw_opI64Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint64_t n) const { return _api.stringw_opU64Ex(&dst, CONTAINER_OP_REPLACE, n, NULL, this); }
 
-  FOG_INLINE err_t convertInt(StringW& dst, int8_t   n, const FormatInt& fmt) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint8_t  n, const FormatInt& fmt) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, int16_t  n, const FormatInt& fmt) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint16_t n, const FormatInt& fmt) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, int32_t  n, const FormatInt& fmt) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint32_t n, const FormatInt& fmt) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, int64_t  n, const FormatInt& fmt) const { return _api.stringw.opI64Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
-  FOG_INLINE err_t convertInt(StringW& dst, uint64_t n, const FormatInt& fmt) const { return _api.stringw.opU64Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int8_t   n, const FormatInt& fmt) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint8_t  n, const FormatInt& fmt) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int16_t  n, const FormatInt& fmt) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint16_t n, const FormatInt& fmt) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int32_t  n, const FormatInt& fmt) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint32_t n, const FormatInt& fmt) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, int64_t  n, const FormatInt& fmt) const { return _api.stringw_opI64Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
+  FOG_INLINE err_t convertInt(StringW& dst, uint64_t n, const FormatInt& fmt) const { return _api.stringw_opU64Ex(&dst, CONTAINER_OP_REPLACE, n, &fmt, this); }
 
   // --------------------------------------------------------------------------
   // [ConvertReal]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t convertReal(StringW& dst, float d) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, NULL, this); }
-  FOG_INLINE err_t convertReal(StringW& dst, double d) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, NULL, this); }
+  FOG_INLINE err_t convertReal(StringW& dst, float d) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, NULL, this); }
+  FOG_INLINE err_t convertReal(StringW& dst, double d) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, NULL, this); }
 
-  FOG_INLINE err_t convertReal(StringW& dst, float d, const FormatReal& fmt) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, &fmt, this); }
-  FOG_INLINE err_t convertReal(StringW& dst, double d, const FormatReal& fmt) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, &fmt, this); }
+  FOG_INLINE err_t convertReal(StringW& dst, float d, const FormatReal& fmt) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, &fmt, this); }
+  FOG_INLINE err_t convertReal(StringW& dst, double d, const FormatReal& fmt) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_REPLACE, d, &fmt, this); }
 
   // --------------------------------------------------------------------------
   // [format]
@@ -229,7 +229,7 @@ struct FOG_NO_EXPORT Locale
 
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtStub, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtStub, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -241,7 +241,7 @@ struct FOG_NO_EXPORT Locale
 
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtStub, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtStub, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -251,7 +251,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -261,7 +261,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -271,7 +271,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStubW(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStubW(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -281,7 +281,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStubW(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStubW(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -291,7 +291,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -301,7 +301,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -314,66 +314,66 @@ struct FOG_NO_EXPORT Locale
   FOG_INLINE err_t vFormat(StringW& dst, const char* fmt, va_list ap)
   {
     StubA fmtA(fmt, DETECT_LENGTH);
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtA, NULL, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtA, NULL, this, ap);
   }
 
   FOG_INLINE err_t vFormat_c(StringW& dst, const char* fmt, const TextCodec& tc, va_list ap)
   {
     StubA fmtA(fmt, DETECT_LENGTH);
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtA, &tc, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmtA, &tc, this, ap);
   }
 
   FOG_INLINE err_t vFormat(StringW& dst, const Ascii8& fmt, va_list ap)
   {
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
   }
 
   FOG_INLINE err_t vFormat_c(StringW& dst, const StubA& fmt, const TextCodec& tc, va_list ap)
   {
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
   }
 
   FOG_INLINE err_t vFormat(StringW& dst, const StringW& fmt, va_list ap)
   {
-    return _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
+    return _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, NULL, this, ap);
   }
 
   FOG_INLINE err_t vFormat_c(StringW& dst, const StringW& fmt, const TextCodec& tc, va_list ap)
   {
-    return _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
+    return _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_REPLACE, &fmt, &tc, this, ap);
   }
 
   // --------------------------------------------------------------------------
   // [AppendInt]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t appendInt(StringW& dst, int8_t   n) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint8_t  n) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, int16_t  n) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint16_t n) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, int32_t  n) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint32_t n) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, int64_t  n) const { return _api.stringw.opI64Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint64_t n) const { return _api.stringw.opU64Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int8_t   n) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint8_t  n) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int16_t  n) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint16_t n) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int32_t  n) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint32_t n) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int64_t  n) const { return _api.stringw_opI64Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint64_t n) const { return _api.stringw_opU64Ex(&dst, CONTAINER_OP_APPEND, n, NULL, this); }
 
-  FOG_INLINE err_t appendInt(StringW& dst, int8_t   n, const FormatInt& fmt) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint8_t  n, const FormatInt& fmt) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, int16_t  n, const FormatInt& fmt) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint16_t n, const FormatInt& fmt) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, int32_t  n, const FormatInt& fmt) const { return _api.stringw.opI32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint32_t n, const FormatInt& fmt) const { return _api.stringw.opU32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, int64_t  n, const FormatInt& fmt) const { return _api.stringw.opI64Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
-  FOG_INLINE err_t appendInt(StringW& dst, uint64_t n, const FormatInt& fmt) const { return _api.stringw.opU64Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int8_t   n, const FormatInt& fmt) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint8_t  n, const FormatInt& fmt) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int16_t  n, const FormatInt& fmt) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint16_t n, const FormatInt& fmt) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int32_t  n, const FormatInt& fmt) const { return _api.stringw_opI32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint32_t n, const FormatInt& fmt) const { return _api.stringw_opU32Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, int64_t  n, const FormatInt& fmt) const { return _api.stringw_opI64Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
+  FOG_INLINE err_t appendInt(StringW& dst, uint64_t n, const FormatInt& fmt) const { return _api.stringw_opU64Ex(&dst, CONTAINER_OP_APPEND, n, &fmt, this); }
 
   // --------------------------------------------------------------------------
   // [AppendReal]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t appendReal(StringW& dst, float d) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_APPEND, d, NULL, this); }
-  FOG_INLINE err_t appendReal(StringW& dst, double d) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_APPEND, d, NULL, this); }
+  FOG_INLINE err_t appendReal(StringW& dst, float d) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_APPEND, d, NULL, this); }
+  FOG_INLINE err_t appendReal(StringW& dst, double d) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_APPEND, d, NULL, this); }
 
-  FOG_INLINE err_t appendReal(StringW& dst, float d, const FormatReal& fmt) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_APPEND, d, &fmt, this); }
-  FOG_INLINE err_t appendReal(StringW& dst, double d, const FormatReal& fmt) { return _api.stringw.opDoubleEx(&dst, CONTAINER_OP_APPEND, d, &fmt, this); }
+  FOG_INLINE err_t appendReal(StringW& dst, float d, const FormatReal& fmt) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_APPEND, d, &fmt, this); }
+  FOG_INLINE err_t appendReal(StringW& dst, double d, const FormatReal& fmt) { return _api.stringw_opDoubleEx(&dst, CONTAINER_OP_APPEND, d, &fmt, this); }
 
   // --------------------------------------------------------------------------
   // [AppendFormat]
@@ -385,7 +385,7 @@ struct FOG_NO_EXPORT Locale
 
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtStub, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtStub, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -397,7 +397,7 @@ struct FOG_NO_EXPORT Locale
 
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtStub, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtStub, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -407,7 +407,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -417,7 +417,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -427,7 +427,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStubW(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStubW(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -437,7 +437,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStubW(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStubW(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -447,7 +447,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, fmt);
-    err_t err = _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
+    err_t err = _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
     va_end(ap);
 
     return err;
@@ -457,7 +457,7 @@ struct FOG_NO_EXPORT Locale
   {
     va_list ap;
     va_start(ap, tc);
-    err_t err = _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
+    err_t err = _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
     va_end(ap);
 
     return err;
@@ -470,33 +470,33 @@ struct FOG_NO_EXPORT Locale
   FOG_INLINE err_t appendVFormat(StringW& dst, const char* fmt, va_list ap)
   {
     StubA fmtA(fmt, DETECT_LENGTH);
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtA, NULL, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtA, NULL, this, ap);
   }
 
   FOG_INLINE err_t appendVFormat_c(StringW& dst, const char* fmt, const TextCodec& tc, va_list ap)
   {
     StubA fmtA(fmt, DETECT_LENGTH);
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtA, &tc, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmtA, &tc, this, ap);
   }
 
   FOG_INLINE err_t appendVFormat(StringW& dst, const Ascii8& fmt, va_list ap)
   {
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
   }
 
   FOG_INLINE err_t appendVFormat_c(StringW& dst, const StubA& fmt, const TextCodec& tc, va_list ap)
   {
-    return _api.stringw.opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
+    return _api.stringw_opVFormatStubA(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
   }
 
   FOG_INLINE err_t appendVFormat(StringW& dst, const StringW& fmt, va_list ap)
   {
-    return _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
+    return _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, NULL, this, ap);
   }
 
   FOG_INLINE err_t appendVFormat_c(StringW& dst, const StringW& fmt, const TextCodec& tc, va_list ap)
   {
-    return _api.stringw.opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
+    return _api.stringw_opVFormatStringW(&dst, CONTAINER_OP_APPEND, &fmt, &tc, this, ap);
   }
 
   // --------------------------------------------------------------------------
@@ -508,21 +508,47 @@ struct FOG_NO_EXPORT Locale
   // --------------------------------------------------------------------------
 
   // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Locale& other) const
+  {
+    return _api.locale_eq(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
   FOG_INLINE Locale& operator=(const Locale& other)
   {
-    _api.locale.setLocale(this, &other);
+    _api.locale_copy(this, &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const Locale& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const Locale& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Locale& posix() { return *_api.locale.oPosix; }
-  static FOG_INLINE const Locale& user() { return *_api.locale.oUser; }
+  static FOG_INLINE const Locale& posix() { return *_api.locale_oPosix; }
+  static FOG_INLINE const Locale& user() { return *_api.locale_oUser; }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const Locale* a, const Locale* b)
+  {
+    return _api.locale_eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.locale_eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]

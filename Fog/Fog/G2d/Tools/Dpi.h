@@ -28,17 +28,17 @@ struct FOG_NO_EXPORT Dpi
 
   FOG_INLINE Dpi()
   {
-    _api.dpi.reset(this);
+    _api.dpi_reset(this);
   }
 
   FOG_INLINE Dpi(const Dpi& other)
   {
-    _api.dpi.copy(this, &other);
+    _api.dpi_copy(this, &other);
   }
 
   FOG_INLINE explicit Dpi(float dpi)
   {
-    _api.dpi.setDpi(this, dpi);
+    _api.dpi_setDpi(this, dpi);
   }
 
   // --------------------------------------------------------------------------
@@ -58,12 +58,12 @@ struct FOG_NO_EXPORT Dpi
 
   FOG_INLINE err_t setDpi(float dpi)
   {
-    return _api.dpi.setDpi(this, dpi);
+    return _api.dpi_setDpi(this, dpi);
   }
 
   FOG_INLINE err_t setDpi(float dpi, float em, float ex)
   {
-    return _api.dpi.setDpiEmEx(this, dpi, em, ex);
+    return _api.dpi_setDpiEmEx(this, dpi, em, ex);
   }
 
   FOG_INLINE void setEmEx(float em, float ex)
@@ -84,7 +84,7 @@ struct FOG_NO_EXPORT Dpi
 
   FOG_INLINE void reset()
   {
-    _api.dpi.reset(this);
+    _api.dpi_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -109,7 +109,7 @@ struct FOG_NO_EXPORT Dpi
 
   FOG_INLINE Dpi& operator=(const Dpi& other)
   {
-    _api.dpi.copy(this, &other);
+    _api.dpi_copy(this, &other);
     return *this;
   }
 

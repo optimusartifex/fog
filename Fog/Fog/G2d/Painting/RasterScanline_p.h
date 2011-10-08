@@ -8,9 +8,9 @@
 #define _FOG_G2D_PAINTING_RASTERSCANLINE_P_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Memory/ZoneAllocator_p.h>
+#include <Fog/Core/Memory/MemZoneAllocator.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 
 namespace Fog {
@@ -164,7 +164,7 @@ struct FOG_NO_EXPORT RasterScanline
   // --------------------------------------------------------------------------
 
   //! @brief Zone memory allocator used to alloc span instances.
-  ZoneAllocator _spanAllocator;
+  MemZoneAllocator _spanAllocator;
 
   //! @brief First span that is never part of returned spans (it's used
   //! internally). Returned span by @c getSpans() is always get using

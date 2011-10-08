@@ -141,7 +141,7 @@ struct TypeFunc_Cmp<Type, 0>
 {
   //! @brief Compare function wrapper.
   //!
-  //! The default compare method which should be compatible to any code which
+  //! The default compare method which should be compatible with any code which
   //! overloads the compare operator < and equality operator ==. Because this
   //! leads into two comparisons for any type, including POD type, there are
   //! some overloads which should perform better than this generic function.
@@ -328,10 +328,6 @@ _FOG_TYPE_DECLARE(double                     , C(SIMPLE) | F(POD) | F(DOUBLE ))
 // [Fog::TypeInfo - Fog]
 // ===========================================================================
 
-// [Fog/Core/IO]
-_FOG_TYPE_DECLARE(Fog::Stream                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::DirEntry              , C(MOVABLE)               | F(NO_CMP )            )
-
 // [Fog/Core/Math]
 _FOG_TYPE_DECLARE(Fog::FloatBits             , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::DoubleBits            , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
@@ -341,6 +337,11 @@ _FOG_TYPE_DECLARE(Fog::IntervalD             , C(SIMPLE )               | F(NO_C
 // [Fog/Core/Memory]
 _FOG_TYPE_DECLARE(Fog::MemBuffer             , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
 _FOG_TYPE_DECLARE(Fog::MemPool               , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
+
+// [Fog/Core/OS]
+_FOG_TYPE_DECLARE(Fog::FileInfo              , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Library               , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::Stream                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 
 // [Fog/Core/Threading]
 _FOG_TYPE_DECLARE_T1(
@@ -368,7 +369,6 @@ _FOG_TYPE_DECLARE(Fog::CharW                 , C(SIMPLE )                       
 _FOG_TYPE_DECLARE(Fog::Date                  , C(SIMPLE )               | F(OWN_CMP) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FormatInt             , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::FormatReal            , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::Library               , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::Locale                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ManagedString         , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::Range                 , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
@@ -438,8 +438,14 @@ _FOG_TYPE_DECLARE(Fog::ImageDither8Params    , C(SIMPLE )               | F(NO_C
 _FOG_TYPE_DECLARE(Fog::ImageFormatDescription, C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImagePalette          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 
-// [Fog/G2d/Imaging/Effects]
+// [Fog/G2d/Imaging/Filters]
 _FOG_TYPE_DECLARE(Fog::ColorMatrix           , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ColorLut              , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ColorLutArray         , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ComponentTransfer     , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ComponentTransferFunction      , C(MOVABLE)      | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ComponentTransferFunctionGamma , C(SIMPLE )      | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ComponentTransferFunctionLinear, C(SIMPLE )      | F(NO_CMP )            )
 
 // [Fog/G2d/Painting]
 _FOG_TYPE_DECLARE(Fog::PaintDeviceInfo       , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )

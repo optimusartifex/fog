@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
@@ -253,22 +253,22 @@ static void FOG_CDECL Color_ahsvf_from_ahslf(float* dst, const float* src)
 static void FOG_CDECL Color_ahsvf_from_acmykf(float* dst, const float* src)
 {
   float argb[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argb, src);
-  _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB ](dst, argb);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argb, src);
+  _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB ](dst, argb);
 }
 
 static void FOG_CDECL Color_ahsvf_from_argb32(float* dst, const ArgbBase32* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb32(argbf, *src);
-  _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](dst, argbf);
+  _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](dst, argbf);
 }
 
 static void FOG_CDECL Color_ahsvf_from_argb64(float* dst, const ArgbBase64* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb64(argbf, *src);
-  _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](dst, argbf);
+  _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](dst, argbf);
 }
 
 // ============================================================================
@@ -341,22 +341,22 @@ static void FOG_CDECL Color_ahslf_from_ahsvf(float* dst, const float* src)
 static void FOG_CDECL Color_ahslf_from_acmykf(float* dst, const float* src)
 {
   float argb[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argb, src);
-  _api.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB ](dst, argb);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argb, src);
+  _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB ](dst, argb);
 }
 
 static void FOG_CDECL Color_ahslf_from_argb32(float* dst, const ArgbBase32* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb32(argbf, *src);
-  _api.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](dst, argbf);
+  _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](dst, argbf);
 }
 
 static void FOG_CDECL Color_ahslf_from_argb64(float* dst, const ArgbBase64* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb64(argbf, *src);
-  _api.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](dst, argbf);
+  _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](dst, argbf);
 }
 
 // ============================================================================
@@ -371,7 +371,7 @@ static void FOG_CDECL Color_acmykf_from_argbf(float* dst, const float* src)
   float y = 1.0f - src[3];
   float k = Math::min(c, m, y);
 
-  if (Math::isFuzzyLowerEq(k, 1.0f))
+  if (Math::isFuzzyLe(k, 1.0f))
   {
     float recip = 1.0f / (1.0f - k);
 
@@ -390,29 +390,29 @@ static void FOG_CDECL Color_acmykf_from_argbf(float* dst, const float* src)
 static void FOG_CDECL Color_acmykf_from_ahsvf(float* dst, const float* src)
 {
   float argb[4];
-  _api.color.convert[COLOR_MODEL_ARGB ][COLOR_MODEL_AHSV](argb, src);
-  _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argb);
+  _api.color_convert[COLOR_MODEL_ARGB ][COLOR_MODEL_AHSV](argb, src);
+  _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argb);
 }
 
 static void FOG_CDECL Color_acmykf_from_ahslf(float* dst, const float* src)
 {
   float argb[4];
-  _api.color.convert[COLOR_MODEL_ARGB ][COLOR_MODEL_AHSL](argb, src);
-  _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argb);
+  _api.color_convert[COLOR_MODEL_ARGB ][COLOR_MODEL_AHSL](argb, src);
+  _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argb);
 }
 
 static void FOG_CDECL Color_acmykf_from_argb32(float* dst, const ArgbBase32* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb32(argbf, *src);
-  _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argbf);
+  _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argbf);
 }
 
 static void FOG_CDECL Color_acmykf_from_argb64(float* dst, const ArgbBase64* src)
 {
   float argbf[4];
   ColorUtil::argbfFromArgb64(argbf, *src);
-  _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argbf);
+  _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](dst, argbf);
 }
 
 // ============================================================================
@@ -433,14 +433,14 @@ static void FOG_CDECL Color_argb32_from_argbf(ArgbBase32* dst, const ArgbBaseF* 
 static void FOG_CDECL Color_argb32_from_ahsvf(ArgbBase32* dst, const float* src)
 {
   float argbf[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](argbf, src);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](argbf, src);
   ColorUtil::argb32FromF(*dst, argbf);
 }
 
 static void FOG_CDECL Color_argb32_from_ahslf(ArgbBase32* dst, const float* src)
 {
   float argbf[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](argbf, src);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](argbf, src);
   ColorUtil::argb32FromF(*dst, argbf);
 }
 
@@ -448,7 +448,7 @@ static void FOG_CDECL Color_argb32_from_ahslf(ArgbBase32* dst, const float* src)
 static void FOG_CDECL Color_argb32_from_acmykf(ArgbBase32* dst, const float* src)
 {
   float argbf[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argbf, src);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argbf, src);
   ColorUtil::argb32FromF(*dst, argbf);
 }
 
@@ -480,14 +480,14 @@ static void FOG_CDECL Color_argb64_from_argbf(ArgbBase64* dst, const ArgbBaseF* 
 static void FOG_CDECL Color_argb64_from_ahsvf(ArgbBase64* dst, const float* src)
 {
   float argbf[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](argbf, src);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](argbf, src);
   ColorUtil::argb64FromF(*dst, argbf);
 }
 
 static void FOG_CDECL Color_argb64_from_ahslf(ArgbBase64* dst, const float* src)
 {
   float argbf[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](argbf, src);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](argbf, src);
   ColorUtil::argb64FromF(*dst, argbf);
 }
 
@@ -495,7 +495,7 @@ static void FOG_CDECL Color_argb64_from_ahslf(ArgbBase64* dst, const float* src)
 static void FOG_CDECL Color_argb64_from_acmykf(ArgbBase64* dst, const float* src)
 {
   float argbf[4];
-  _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argbf, src);
+  _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](argbf, src);
   ColorUtil::argb64FromF(*dst, argbf);
 }
 
@@ -513,21 +513,21 @@ static void FOG_CDECL Color_argb64_from_argb64(ArgbBase64* dst, const ArgbBase64
 // [Fog::Color - SetModel]
 // ============================================================================
 
-static err_t FOG_CDECL Color_setModel(Color& self, uint32_t model)
+static err_t FOG_CDECL Color_setModel(Color* self, uint32_t model)
 {
-  uint32_t oldModel = self._model;
+  uint32_t oldModel = self->_model;
 
   if (model == oldModel) return ERR_OK;
   if (model == COLOR_MODEL_NONE) goto _None;
 
   if (FOG_UNLIKELY(model >= COLOR_MODEL_COUNT)) return ERR_RT_INVALID_ARGUMENT;
 
-  _api.color.convert[model][oldModel](self._data, self._data);
-  self._model = model;
+  _api.color_convert[model][oldModel](self->_data, self->_data);
+  self->_model = model;
   return ERR_OK;
 
 _None:
-  self.reset();
+  self->reset();
   return ERR_OK;
 }
 
@@ -535,43 +535,43 @@ _None:
 // [Fog::Color - SetData]
 // ============================================================================
 
-static err_t FOG_CDECL Color_setData(Color& self, uint32_t modelExtended, const void* modelData)
+static err_t FOG_CDECL Color_setData(Color* self, uint32_t modelExtended, const void* modelData)
 {
-  self._model = modelExtended;
-  self._hints = NO_FLAGS;
-  self._data[4] = 0.0f;
+  self->_model = modelExtended;
+  self->_hints = NO_FLAGS;
+  self->_data[4] = 0.0f;
 
   switch (modelExtended)
   {
     case COLOR_MODEL_NONE:
-      self.reset();
+      self->reset();
       return ERR_OK;
 
     case COLOR_MODEL_ACMYK:
-      self._data[4] = reinterpret_cast<const float*>(modelData)[4];
+      self->_data[4] = reinterpret_cast<const float*>(modelData)[4];
 
     case COLOR_MODEL_ARGB:
     case COLOR_MODEL_AHSV:
     case COLOR_MODEL_AHSL:
-      self._data[0] = reinterpret_cast<const float*>(modelData)[0];
-      self._data[1] = reinterpret_cast<const float*>(modelData)[1];
-      self._data[2] = reinterpret_cast<const float*>(modelData)[2];
-      self._data[3] = reinterpret_cast<const float*>(modelData)[3];
+      self->_data[0] = reinterpret_cast<const float*>(modelData)[0];
+      self->_data[1] = reinterpret_cast<const float*>(modelData)[1];
+      self->_data[2] = reinterpret_cast<const float*>(modelData)[2];
+      self->_data[3] = reinterpret_cast<const float*>(modelData)[3];
 
-      _api.color.convert[_COLOR_MODEL_ARGB32][modelExtended](&self._argb32, self._data);
+      _api.color_convert[_COLOR_MODEL_ARGB32][modelExtended](&self->_argb32, self->_data);
       return ERR_OK;
 
     case _COLOR_MODEL_ARGB32:
-      self._model = COLOR_MODEL_ARGB;
-      self._argb32 = *reinterpret_cast<const ArgbBase32*>(modelData);
+      self->_model = COLOR_MODEL_ARGB;
+      self->_argb32 = *reinterpret_cast<const ArgbBase32*>(modelData);
 
-      ColorUtil::argbfFromArgb32(self._data, *reinterpret_cast<const ArgbBase32*>(modelData));
+      ColorUtil::argbfFromArgb32(self->_data, *reinterpret_cast<const ArgbBase32*>(modelData));
       return ERR_OK;
 
     case _COLOR_MODEL_ARGB64:
-      self._model = COLOR_MODEL_ARGB;
-      ColorUtil::argbfFromArgb64(self._data, *reinterpret_cast<const ArgbBase64*>(modelData));
-      ColorUtil::argb32From64(self._argb32, *reinterpret_cast<const ArgbBase64*>(modelData));
+      self->_model = COLOR_MODEL_ARGB;
+      ColorUtil::argbfFromArgb64(self->_data, *reinterpret_cast<const ArgbBase64*>(modelData));
+      ColorUtil::argb32From64(self->_argb32, *reinterpret_cast<const ArgbBase64*>(modelData));
       return ERR_OK;
 
     default:
@@ -599,15 +599,15 @@ struct FOG_NO_EXPORT ColorMix_C
   static FOG_INLINE float difference(float S0, float S1, float M, float MI) { return MI * S0 + Math::abs(S0 - S1)*M; }
 };
 
-static err_t FOG_CDECL Color_mix(Color& self, uint32_t mixOp, uint32_t alphaOp, const Color& secondary, float mask)
+static err_t FOG_CDECL Color_mix(Color* self, uint32_t mixOp, uint32_t alphaOp, const Color* secondary, float mask)
 {
   // Source models.
-  uint32_t m0 = self._model;
-  uint32_t m1 = secondary._model;
+  uint32_t m0 = self->_model;
+  uint32_t m1 = secondary->_model;
 
   // Source colors.
-  const float* s0 = self._data;
-  const float* s1 = secondary._data;
+  const float* s0 = self->_data;
+  const float* s1 = secondary->_data;
 
   // Destination color.
   float d[4];
@@ -616,8 +616,8 @@ static err_t FOG_CDECL Color_mix(Color& self, uint32_t mixOp, uint32_t alphaOp, 
   float tmp[8];
 
   // Convert the primary/secondary colors into the ARGB color-space.
-  if (FOG_UNLIKELY(m0 != COLOR_MODEL_ARGB)) { _api.color.convert[COLOR_MODEL_ARGB][m0](tmp + 0, s0); s0 = tmp + 0; }
-  if (FOG_UNLIKELY(m1 != COLOR_MODEL_ARGB)) { _api.color.convert[COLOR_MODEL_ARGB][m1](tmp + 4, s1); s1 = tmp + 4; }
+  if (FOG_UNLIKELY(m0 != COLOR_MODEL_ARGB)) { _api.color_convert[COLOR_MODEL_ARGB][m0](tmp + 0, s0); s0 = tmp + 0; }
+  if (FOG_UNLIKELY(m1 != COLOR_MODEL_ARGB)) { _api.color_convert[COLOR_MODEL_ARGB][m1](tmp + 4, s1); s1 = tmp + 4; }
 
   float M = mask;
   float MI = 1.0f;
@@ -656,13 +656,13 @@ static err_t FOG_CDECL Color_mix(Color& self, uint32_t mixOp, uint32_t alphaOp, 
       return ERR_RT_INVALID_ARGUMENT;
   }
 
-  if (alphaOp == COLOR_MIX_ALPHA_COMPONENT) self._data[0] = d[0];
-  self._data[1] = d[1];
-  self._data[2] = d[2];
-  self._data[3] = d[3];
+  if (alphaOp == COLOR_MIX_ALPHA_COMPONENT) self->_data[0] = d[0];
+  self->_data[1] = d[1];
+  self->_data[2] = d[2];
+  self->_data[3] = d[3];
 
-  ColorUtil::argb32FromF(self._argb32, self._data);
-  if (FOG_UNLIKELY(m0 != COLOR_MODEL_ARGB)) { _api.color.convert[m0][COLOR_MODEL_ARGB](self._data, self._data); }
+  ColorUtil::argb32FromF(self->_argb32, self->_data);
+  if (FOG_UNLIKELY(m0 != COLOR_MODEL_ARGB)) { _api.color_convert[m0][COLOR_MODEL_ARGB](self->_data, self->_data); }
 
   return ERR_OK;
 }
@@ -671,14 +671,14 @@ static err_t FOG_CDECL Color_mix(Color& self, uint32_t mixOp, uint32_t alphaOp, 
 // [Fog::Color - Adjust]
 // ============================================================================
 
-static err_t FOG_CDECL Color_adjust(Color& self, uint32_t adjustOp, float param)
+static err_t FOG_CDECL Color_adjust(Color* self, uint32_t adjustOp, float param)
 {
-  const float* argb = NULL;      // ARGB components (if used).
-  uint32_t sModel = self._model; // Source color model.
-  uint32_t dModel;               // Working color model.
-  float d[4];                    // Working data.
+  const float* argb = NULL;       // ARGB components (if used).
+  uint32_t sModel = self->_model; // Source color model.
+  uint32_t dModel;                // Working color model.
+  float d[4];                     // Working data.
 
-  if (sModel == COLOR_MODEL_ARGB) argb = self._data;
+  if (sModel == COLOR_MODEL_ARGB) argb = self->_data;
 
   switch (adjustOp)
   {
@@ -690,7 +690,7 @@ static err_t FOG_CDECL Color_adjust(Color& self, uint32_t adjustOp, float param)
       if (param < 0.0f) return ERR_RT_INVALID_ARGUMENT;
 
       dModel = COLOR_MODEL_AHSV;
-      _api.color.convert[dModel][sModel](d, self._data);
+      _api.color_convert[dModel][sModel](d, self->_data);
 
       float s = d[2];
       float v = d[3] / param;
@@ -711,7 +711,7 @@ static err_t FOG_CDECL Color_adjust(Color& self, uint32_t adjustOp, float param)
       if (param < 0.0f) return ERR_RT_INVALID_ARGUMENT;
 
       dModel = COLOR_MODEL_AHSV;
-      _api.color.convert[dModel][sModel](d, self._data);
+      _api.color_convert[dModel][sModel](d, self->_data);
 
       if (Math::isFuzzyZero(param))
       {
@@ -737,7 +737,7 @@ static err_t FOG_CDECL Color_adjust(Color& self, uint32_t adjustOp, float param)
     case COLOR_ADJUST_OP_HUE:
     {
       dModel = COLOR_MODEL_AHSV;
-      _api.color.convert[dModel][sModel](d, self._data);
+      _api.color_convert[dModel][sModel](d, self->_data);
 
       param = Math::positiveFraction(d[1] + param);
       break;
@@ -748,13 +748,13 @@ static err_t FOG_CDECL Color_adjust(Color& self, uint32_t adjustOp, float param)
   }
 
   // Convert color from the working color model into the source color model.
-  _api.color.convert[sModel][dModel](self._data, d);
+  _api.color_convert[sModel][dModel](self->_data, d);
 
   // Update the ARGB32 color, using ARGB color model (the fastest way) if possible.
   if (argb)
-    ColorUtil::argb32FromF(self._argb32, argb);
+    ColorUtil::argb32FromF(self->_argb32, argb);
   else
-    _api.color.convert[sModel][dModel](&self._argb32, d);
+    _api.color_convert[sModel][dModel](&self->_argb32, d);
   return ERR_OK;
 }
 
@@ -1005,10 +1005,10 @@ static const ColorName* Color_find(const StubA& key)
 }
 
 template<typename CharT>
-static err_t FOG_CDECL Color_parse(Color& dst, const CharT_(Stub)& str, uint32_t flags)
+static err_t FOG_CDECL Color_parse(Color* dst, const CharT_(Stub)* str, uint32_t flags)
 {
-  const CharT_Value* cur = reinterpret_cast<const CharT_Value*>(str.getData());
-  const CharT_Value* end = cur + str.getComputedLength();
+  const CharT_Value* cur = reinterpret_cast<const CharT_Value*>(str->getData());
+  const CharT_Value* end = cur + str->getComputedLength();
 
   if (cur == end)
     return ERR_RT_INVALID_ARGUMENT;
@@ -1088,7 +1088,7 @@ _TryCssHex3:
         goto _Fail;
       }
 
-      dst.setArgb32(argb32);
+      dst->setArgb32(argb32);
       goto _Done;
     }
   }
@@ -1297,9 +1297,9 @@ _ParseRrbOrHsv:
 
         // Finalize.
         if (isHSL)
-          dst.setAhslF(*reinterpret_cast<AhslF*>(f));
+          dst->setAhslF(*reinterpret_cast<AhslF*>(f));
         else
-          dst.setArgbF(*reinterpret_cast<ArgbF*>(f));
+          dst->setArgbF(*reinterpret_cast<ArgbF*>(f));
         goto _Done;
       }
     }
@@ -1339,7 +1339,7 @@ _ParseRrbOrHsv:
     // CSS keywords (basic and extended color names).
     if ((flags & COLOR_NAME_CSS_KEYWORD) != 0 && (entity = Color_find(nameA)) != NULL)
     {
-      dst.setArgb32(Argb32(0xFF, entity->r, entity->g, entity->b));
+      dst->setArgb32(Argb32(0xFF, entity->r, entity->g, entity->b));
       goto _Done;
     }
 
@@ -1348,13 +1348,13 @@ _ParseRrbOrHsv:
     {
       cur += 11;
 
-      dst.setArgb32(Argb32(0x00000000));
+      dst->setArgb32(Argb32(0x00000000));
       goto _Done;
     }
   }
 
 _Fail:
-  dst.reset();
+  dst->reset();
   return ERR_RT_INVALID_ARGUMENT;
 
 _Done:
@@ -1376,62 +1376,62 @@ FOG_NO_EXPORT void Color_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_copy4f;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argbf_from_ahsvf;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argbf_from_ahslf;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argbf_from_acmykf;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argbf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argbf_from_argb64;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_copy4f;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argbf_from_ahsvf;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argbf_from_ahslf;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argbf_from_acmykf;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argbf_from_argb32;
+  _api.color_convert[ COLOR_MODEL_ARGB  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argbf_from_argb64;
 
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_ahsvf_from_argbf;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_copy4f;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_ahsvf_from_ahslf;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_ahsvf_from_acmykf;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_ahsvf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_ahsvf_from_argb64;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_ahsvf_from_argbf;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_copy4f;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_ahsvf_from_ahslf;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_ahsvf_from_acmykf;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_ahsvf_from_argb32;
+  _api.color_convert[ COLOR_MODEL_AHSV  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_ahsvf_from_argb64;
 
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_ahslf_from_argbf;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_ahslf_from_ahsvf;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_copy4f;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_ahslf_from_acmykf;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_ahslf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_ahslf_from_argb64;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero4f;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_ahslf_from_argbf;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_ahslf_from_ahsvf;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_copy4f;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_ahslf_from_acmykf;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_ahslf_from_argb32;
+  _api.color_convert[ COLOR_MODEL_AHSL  ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_ahslf_from_argb64;
 
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero5f;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_acmykf_from_argbf;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_acmykf_from_ahsvf;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_acmykf_from_ahslf;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_copy5f;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_acmykf_from_argb32;
-  _api.color.convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_acmykf_from_argb64;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_zero5f;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_acmykf_from_argbf;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_acmykf_from_ahsvf;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_acmykf_from_ahslf;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_copy5f;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_acmykf_from_argb32;
+  _api.color_convert[ COLOR_MODEL_ACMYK ][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_acmykf_from_argb64;
 
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_argb32_zero;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_argb32_from_argbf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argb32_from_ahsvf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argb32_from_ahslf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argb32_from_acmykf;
-  _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argb32_from_argb32;
-  _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argb32_from_argb64;
+  _api.color_convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_argb32_zero;
+  _api.color_convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_argb32_from_argbf;
+  _api.color_convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argb32_from_ahsvf;
+  _api.color_convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argb32_from_ahslf;
+  _api.color_convert[_COLOR_MODEL_ARGB32][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argb32_from_acmykf;
+  _api.color_convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argb32_from_argb32;
+  _api.color_convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argb32_from_argb64;
 
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_argb64_zero;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_argb64_from_argbf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argb64_from_ahsvf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argb64_from_ahslf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argb64_from_acmykf;
-  _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argb64_from_argb32;
-  _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argb64_from_argb64;
+  _api.color_convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_NONE  ] = (ConvFunc)Color_argb64_zero;
+  _api.color_convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ARGB  ] = (ConvFunc)Color_argb64_from_argbf;
+  _api.color_convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSV  ] = (ConvFunc)Color_argb64_from_ahsvf;
+  _api.color_convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_AHSL  ] = (ConvFunc)Color_argb64_from_ahslf;
+  _api.color_convert[_COLOR_MODEL_ARGB64][ COLOR_MODEL_ACMYK ] = (ConvFunc)Color_argb64_from_acmykf;
+  _api.color_convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32] = (ConvFunc)Color_argb64_from_argb32;
+  _api.color_convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB64] = (ConvFunc)Color_argb64_from_argb64;
 
-  _api.color.setModel = Color_setModel;
-  _api.color.setData = Color_setData;
+  _api.color_setModel = Color_setModel;
+  _api.color_setData = Color_setData;
 
-  _api.color.mix = Color_mix;
-  _api.color.adjust = Color_adjust;
+  _api.color_mix = Color_mix;
+  _api.color_adjust = Color_adjust;
 
-  _api.color.parseA = Color_parse<char>;
-  _api.color.parseU = Color_parse<CharW>;
+  _api.color_parseA = Color_parse<char>;
+  _api.color_parseU = Color_parse<CharW>;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

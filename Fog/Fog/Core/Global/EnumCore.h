@@ -1288,31 +1288,91 @@ enum DATE_VALUE
 //! @brief Double-format form.
 enum DF_FORM
 {
-  //! @brief Decimal double form (compatible to "%f").
+  //! @brief Decimal double form (compatible with "%f").
   DF_DECIMAL = 0,
 
-  //! @brief Exponent double form (compatible to "%e").
+  //! @brief Exponent double form (compatible with "%e").
   DF_EXPONENT = 1,
 
-  //! @brief Significant digits (compatible to "%g").
+  //! @brief Significant digits (compatible with "%g").
   DF_SIGNIFICANT_DIGITS = 2
 };
 
 // ============================================================================
-// [Fog::DIR_ENTRY]
+// [Fog::FILE_INFO]
 // ============================================================================
 
-//! @brief Directory-entry type.
-enum DIR_ENTRY
+enum FILE_INFO
 {
-  DIR_ENTRY_UNKNOWN = 0,
-  DIR_ENTRY_FILE = 0x0001,
-  DIR_ENTRY_DIRECTORY = 0x0002,
-  DIR_ENTRY_CHAR_DEVICE = 0x0004,
-  DIR_ENTRY_BLOCK_DEVICE = 0x0008,
-  DIR_ENTRY_FIFO = 0x0010,
-  DIR_ENTRY_LINK = 0x0020,
-  DIR_ENTRY_SOCKET = 0x0040
+  // --------------------------------------------------------------------------
+  // [General]
+  // --------------------------------------------------------------------------
+
+  //! @brief The file exists.
+  FILE_INFO_EXISTS = 0x00000001,
+
+  //! @brief File is a regular file.
+  FILE_INFO_REGULAR_FILE = 0x00000002,
+  //! @brief File is a directory.
+  FILE_INFO_DIRECTORY = 0x00000004,
+  //! @brief File is a symbolic link (to another file, directory, or symbolic link).
+  FILE_INFO_SYMLINK = 0x00000008,
+
+  FILE_INFO_CHAR = 0x00000010,
+  FILE_INFO_BLOCK = 0x00000020,
+  FILE_INFO_FIFO = 0x00000040,
+  FILE_INFO_SOCKET = 0x00000080,
+
+  // --------------------------------------------------------------------------
+  // [Attributes]
+  // --------------------------------------------------------------------------
+
+  //! @brief File is hidden.
+  FILE_INFO_HIDDEN = 0x00000100,
+  //! @brief File is executable.
+  FILE_INFO_EXECUTABLE = 0x00000200,
+
+  //! @brief File is an archive, has Windows attribute @c FILE_ATTRIBUTE_ARCHIVE.
+  FILE_INFO_ARCHIVE = 0x00000400,
+  //! @brief File is compressed, has Windows attribute @c FILE_ATTRIBUTE_COMPRESSED.
+  FILE_INFO_COMPRESSED = 0x00000800,
+  //! @brief File is sparse, has Windows attribute @c FILE_ATTRIBUTE_SPARSE_FILE.
+  FILE_INFO_SPARSE = 0x00001000,
+  //! @brief File is system, has Windows attribute @c FILE_ATTRIBUTE_SYSTEM.
+  FILE_INFO_SYSTEM = 0x00002000,
+
+  // --------------------------------------------------------------------------
+  // [Base Permissions]
+  // --------------------------------------------------------------------------
+
+  //! @brief Test if file can be readed.
+  FILE_INFO_CAN_READ = (1 << 10),
+  //! @brief Test if file can be writed.
+  FILE_INFO_CAN_WRITE = (1 << 11),
+  //! @brief Test if file can be executed.
+  FILE_INFO_CAN_EXECUTE = (1 << 12),
+
+  // --------------------------------------------------------------------------
+  // [Unix Permissions]
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // [All]
+  // --------------------------------------------------------------------------
+
+  //! @brief All flags mask.
+  FILE_INFO_ALL = 0xFFFFFFFF
+};
+
+
+
+// ============================================================================
+// [Fog::FILE_MAPPING_OPEN]
+// ============================================================================
+
+enum FILE_MAPPING_FLAG
+{
+  FILE_MAPPING_FLAG_LOAD_FALLBACK = 0x00000001
 };
 
 // ============================================================================
@@ -1444,38 +1504,38 @@ enum OBJECT_EVENT_HANDLER_BEHAVIOR
 };
 
 // ============================================================================
-// [Fog::OS_WIN_VERSION]
+// [Fog::WIN_VERSION]
 // ============================================================================
 
-enum OS_WIN_VERSION
+enum WIN_VERSION
 {
   //! @brief Unknown windows version (probably too old).
-  OS_WIN_VERSION_UNKNOWN = 0,
+  WIN_VERSION_UNKNOWN = 0,
 
   //! @brief Set if system is WinNT.
-  OS_WIN_VERSION_NT = 1,
+  WIN_VERSION_NT = 1,
   //! @brief Set if system is WinNT 3.x.
-  OS_WIN_VERSION_NT_3 = 2,
+  WIN_VERSION_NT_3 = 2,
   //! @brief Set if system is WinNT 4.x.
-  OS_WIN_VERSION_NT_4 = 3,
+  WIN_VERSION_NT_4 = 3,
   //! @brief Set if system is Windows 2000.
-  OS_WIN_VERSION_2000 = 4,
+  WIN_VERSION_2000 = 4,
   //! @brief Set if system is Windows XP.
-  OS_WIN_VERSION_XP = 5,
+  WIN_VERSION_XP = 5,
   //! @brief Set if system is Windows Server 2003.
-  OS_WIN_VERSION_2003 = 6,
+  WIN_VERSION_2003 = 6,
   //! @brief Set if system is Windows Server 2003-R2.
-  OS_WIN_VERSION_2003_R2 = 7,
+  WIN_VERSION_2003_R2 = 7,
   //! @brief Set if system is Windows Vista.
-  OS_WIN_VERSION_VISTA = 8,
+  WIN_VERSION_VISTA = 8,
   //! @brief Set if system is Windows Server 2008.
-  OS_WIN_VERSION_2008 = 9,
+  WIN_VERSION_2008 = 9,
   //! @brief Set if system is Windows Server 2008-R2.
-  OS_WIN_VERSION_2008_R2 = 10,
+  WIN_VERSION_2008_R2 = 10,
   //! @brief Set if system is Windows 7.
-  OS_WIN_VERSION_7 = 11,
+  WIN_VERSION_7 = 11,
 
-  OS_WIN_VERSION_FUTURE = 0xFF
+  WIN_VERSION_FUTURE = 0xFF
 };
 
 // ============================================================================
@@ -2248,7 +2308,7 @@ enum VAR_TYPE
 //! special cases which break this rule - containers which support read-only data
 //! (@c VAR_FLAG_READ_ONLY) contains adopt() member which is used to adopt the
 //! data. In this case it's not required that the instance is destroyed, it can
-//! be reused instead to adopt the data to prevent calling MemMgr::free() 
+//! be reused instead to adopt the data to prevent calling MemMgr::free()
 //! followed by MemMgr::alloc().
 enum VAR_FLAG
 {
@@ -2264,7 +2324,7 @@ enum VAR_FLAG
   //! on the heap are freed normally.
   //!
   //! Not all containers support this flag. It's mainly designed for strings
-  //! to prevent dynamic memory allocation for very short lived strings, 
+  //! to prevent dynamic memory allocation for very short lived strings,
   //! typically used as a buffer when converting ansi-string to wide-string
   //! or vica-versa to use a native operating system API.
   //!

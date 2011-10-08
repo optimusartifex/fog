@@ -10,15 +10,15 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/Memory/ZoneAllocator_p.h>
+#include <Fog/Core/Memory/MemZoneAllocator.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
-#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
+#include <Fog/G2d/Painting/RasterStructs_p.h>
 
 // ============================================================================
 // [Debugging]
@@ -397,9 +397,9 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //!      to do that.
 //!
 //!
-//! The rasterizer uses the analytic method for cover calculation of the output 
+//! The rasterizer uses the analytic method for cover calculation of the output
 //! pixels. It generates CELLs which represent the pixel covereage and area.
-//! Pixel position is stored in the chunk, which is simply a list of cells. 
+//! Pixel position is stored in the chunk, which is simply a list of cells.
 //! It's common that chunk contains only one cell. In case that rasterized
 //! shape overlaps (or the vertices are too close so they share cell(s)) then
 //! the new coverage and area is merged to the existing cell (that is, there
@@ -413,7 +413,7 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 //! Implementation disadvantages:
 //!
 //!   - The crossing lines are not handled correctly. The maximum error in
-//!     this case is 50%. The original rasterizer was created to render text 
+//!     this case is 50%. The original rasterizer was created to render text
 //!     which doesn't contain self-intersecting polygons/paths.
 //!
 //!   - The guys which created AmanithVG library say that the AGG rasterizer
@@ -587,10 +587,15 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   // [Add]
   // --------------------------------------------------------------------------
 
-  //! @brief Add path to the rasterizer.
+  //! @brief Add path to the rasterizer (float).
   void addPath(const PathF& path);
   //! @overload
+  void addPath(const PathF& path, const PointF& offset);
+
+  //! @brief Add path to the rasterizer (double).
   void addPath(const PathD& path);
+  //! @overload
+  void addPath(const PathD& path, const PointD& offset);
 
   //! @brief Add box to the rasterizer.
   void addBox(const BoxF& path);
@@ -616,7 +621,7 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   // --------------------------------------------------------------------------
 
   //! @brief Cell chunk allocator.
-  ZoneAllocator _allocator;
+  MemZoneAllocator _allocator;
 
   //! @brief bounding box of the rasterized shape.
   BoxI _boundingBox;

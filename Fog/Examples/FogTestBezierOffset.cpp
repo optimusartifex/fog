@@ -89,7 +89,7 @@ FOG_STATIC_T void QBezier_offset(NumT_(Path)* dst, const NumT_(Point)* src, NumT
     NumT_(Point) isect(UNINITIALIZED);
 
     NumT bezierAngle;
-    
+
     if (t < timeThreshold || t > NumT(1.0f - timeThreshold))
       goto _Split;
 
@@ -159,7 +159,7 @@ _Split:
     double nxd = xd + distance*Math.cos(angles[1] + PI/2.0);
     double nyd = yd + distance*Math.sin(angles[1] + PI/2.0);
 
-    
+
     // get the scale origin, if it's not known yet
     if(scale_origin==null) { scale_origin = getScaleOrigin(xa,ya,xb,yb,xc,yc,xd,yd); }
 
@@ -192,7 +192,7 @@ _Split:
     // finally, return offset curve
     Bezier3 newcurve = new Bezier3(nxa, nya, nxb, nyb, nxc, nyc, nxd, nyd);
     newcurve.scale_origin = scale_origin;
-    
+
     return newcurve;
   }
 

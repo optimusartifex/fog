@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
   PRINT_TYPE(ImageEncoder);
   PRINT_TYPE(ImageFormatDescription);
   PRINT_TYPE(ImagePalette);
+  PRINT_TYPE(ImagePaletteData);
   PRINT_TYPE(ColorMatrix);
 
   // [G2d/Painting]

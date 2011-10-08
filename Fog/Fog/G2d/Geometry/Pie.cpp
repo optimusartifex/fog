@@ -76,8 +76,8 @@ static bool FOG_CDECL PieT_hitTest(const NumT_(Pie)* self, const NumT_(Point)* p
 
 FOG_NO_EXPORT void Pie_init(void)
 {
-  _api.pief.hitTest = PieT_hitTest<float>;
-  _api.pied.hitTest = PieT_hitTest<double>;
+  _api.pief_hitTest = PieT_hitTest<float>;
+  _api.pied_hitTest = PieT_hitTest<double>;
 }
 
 } // Fog namespace

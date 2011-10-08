@@ -14,12 +14,7 @@
 #include <Fog/Core/Global/Assert.h>
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Debug.h>
-#include <Fog/Core/Global/EnumCore.h>
-#include <Fog/Core/Global/EnumEvent.h>
-#include <Fog/Core/Global/EnumError.h>
-#include <Fog/Core/Global/EnumG2d.h>
-#include <Fog/Core/Global/EnumSvg.h>
-#include <Fog/Core/Global/EnumUI.h>
+#include <Fog/Core/Global/Enum.h>
 #include <Fog/Core/Global/Init.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/TypeDefs.h>

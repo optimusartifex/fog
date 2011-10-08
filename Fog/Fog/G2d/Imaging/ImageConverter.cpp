@@ -12,8 +12,8 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
-#include <Fog/G2d/Render/RenderApi_p.h>
-#include <Fog/G2d/Render/RenderConstants_p.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
 
 namespace Fog {
 
@@ -180,13 +180,13 @@ err_t ImageConverter::create(
   if (df.getFormat() < IMAGE_FORMAT_COUNT && !df.isIndexed() &&
       sf.getFormat() < IMAGE_FORMAT_COUNT && !dither)
   {
-    _d->blitFn = (ImageConverterBlitLineFunc)_g2d_render.getCopyFullFunc(
+    _d->blitFn = (ImageConverterBlitLineFunc)_api_raster.getCopyFullFunc(
       df.getFormat(), sf.getFormat());
     if (_d->blitFn != NULL) return ERR_OK;
   }
 
-  // Use the Fog::Render to create the converter for us.
-  err = _g2d_render.initConverter(_d);
+  // Use the Fog::Raster to create the converter for us.
+  err = _api_raster.initConverter(_d);
   if (err == ERR_OK) return ERR_OK;
 
 _Fail:

@@ -27,14 +27,14 @@ namespace Math {
 static FOG_INLINE err_t integrate(float* dst, const FunctionF& f, const IntervalF& interval, uint32_t method, uint32_t steps)
 {
   FOG_ASSERT(method < MATH_INTEGRATION_METHOD_COUNT);
-  return _api.mathf.integrate[method](dst, &f, &interval, steps);
+  return _api.mathf_integrate[method](dst, &f, &interval, steps);
 }
 
 //! @overload
 static FOG_INLINE err_t integrate(double* dst, const FunctionD& f, const IntervalD& interval, uint32_t method, uint32_t steps)
 {
   FOG_ASSERT(method < MATH_INTEGRATION_METHOD_COUNT);
-  return _api.mathd.integrate[method](dst, &f, &interval, steps);
+  return _api.mathd_integrate[method](dst, &f, &interval, steps);
 }
 
 //! @}

@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT ColorStopListData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.colorstoplist.dFree(this);
+      _api.colorstoplist_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -72,9 +72,9 @@ struct FOG_NO_EXPORT ColorStopListData
 
   // ${VAR:BEGIN}
   //
-  // This data-object is binary compatible to the VarData header in the first
+  // This data-object is binary compatible with the VarData header in the first
   // form called - "implicitly shared class". The members must be binary
-  // compatible to the header below:
+  // compatible with the header below:
   //
   // +==============+============+============================================+
   // | Size         | Name       | Description / Purpose                      |
@@ -123,12 +123,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE ColorStopList()
   {
-    _api.colorstoplist.ctor(this);
+    _api.colorstoplist_ctor(this);
   }
 
   FOG_INLINE ColorStopList(const ColorStopList& other)
   {
-    _api.colorstoplist.ctorCopy(this, &other);
+    _api.colorstoplist_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE ColorStopList(ColorStopListData* d) :
@@ -138,7 +138,7 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE ~ColorStopList()
   {
-    _api.colorstoplist.dtor(this);
+    _api.colorstoplist_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -158,12 +158,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE err_t reserve(size_t n)
   {
-    return _api.colorstoplist.reserve(this, n);
+    return _api.colorstoplist_reserve(this, n);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.colorstoplist.squeeze(this);
+    _api.colorstoplist_squeeze(this);
   }
 
   // --------------------------------------------------------------------------
@@ -185,17 +185,17 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE err_t setList(const ColorStopList& other)
   {
-    return _api.colorstoplist.copy(this, &other);
+    return _api.colorstoplist_copy(this, &other);
   }
 
   FOG_INLINE err_t setList(const List<ColorStop>& stops)
   {
-    return _api.colorstoplist.setData(this, stops.getData(), stops.getLength());
+    return _api.colorstoplist_setData(this, stops.getData(), stops.getLength());
   }
 
   FOG_INLINE err_t setList(const ColorStop* stops, size_t length)
   {
-    return _api.colorstoplist.setData(this, stops, length);
+    return _api.colorstoplist_setData(this, stops, length);
   }
 
   // --------------------------------------------------------------------------
@@ -204,12 +204,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE bool isOpaque() const
   {
-    return _api.colorstoplist.isOpaque(this);
+    return _api.colorstoplist_isOpaque(this);
   }
 
   FOG_INLINE bool isOpaqueARGB32() const
   {
-    return _api.colorstoplist.isOpaqueARGB32(this);
+    return _api.colorstoplist_isOpaqueARGB32(this);
   }
 
   // --------------------------------------------------------------------------
@@ -218,12 +218,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE void clear()
   {
-    _api.colorstoplist.clear(this);
+    _api.colorstoplist_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.colorstoplist.reset(this);
+    _api.colorstoplist_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -232,37 +232,37 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE err_t add(const ColorStop& stop)
   {
-    return _api.colorstoplist.addStop(this, &stop);
+    return _api.colorstoplist_addStop(this, &stop);
   }
 
   FOG_INLINE err_t remove(float offset)
   {
-    return _api.colorstoplist.removeOffset(this, offset);
+    return _api.colorstoplist_removeOffset(this, offset);
   }
 
   FOG_INLINE err_t remove(const ColorStop& stop)
   {
-    return _api.colorstoplist.removeStop(this, &stop);
+    return _api.colorstoplist_removeStop(this, &stop);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
   {
-    return _api.colorstoplist.removeAt(this, index);
+    return _api.colorstoplist_removeAt(this, index);
   }
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.colorstoplist.removeRange(this, &range);
+    return _api.colorstoplist_removeRange(this, &range);
   }
 
   FOG_INLINE err_t removeRange(const IntervalF& interval)
   {
-    return _api.colorstoplist.removeInterval(this, &interval);
+    return _api.colorstoplist_removeInterval(this, &interval);
   }
 
   FOG_INLINE size_t indexOf(float offset) const
   {
-    return _api.colorstoplist.indexOfOffset(this, offset);
+    return _api.colorstoplist_indexOfOffset(this, offset);
   }
 
   // --------------------------------------------------------------------------
@@ -271,7 +271,7 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE bool eq(const ColorStopList& other) const
   {
-    return _api.colorstoplist.eq(this, &other);
+    return _api.colorstoplist_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -290,7 +290,7 @@ struct FOG_NO_EXPORT ColorStopList
 
   static FOG_INLINE const ColorStopList& empty()
   {
-    return *_api.colorstoplist.oEmpty;
+    return *_api.colorstoplist_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -299,12 +299,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   static FOG_INLINE bool eq(const ColorStopList* a, const ColorStopList* b)
   {
-    return _api.colorstoplist.eq(a, b);
+    return _api.colorstoplist_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.colorstoplist.eq;
+    return (EqFunc)_api.colorstoplist_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -313,12 +313,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   static FOG_INLINE ColorStopListData* _dCreate(size_t capacity)
   {
-    return _api.colorstoplist.dCreate(capacity);
+    return _api.colorstoplist_dCreate(capacity);
   }
 
   static FOG_INLINE void _dFree(ColorStopListData* d)
   {
-    return _api.colorstoplist.dFree(d);
+    return _api.colorstoplist_dFree(d);
   }
 
   // --------------------------------------------------------------------------

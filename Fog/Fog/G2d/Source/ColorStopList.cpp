@@ -108,7 +108,7 @@ static err_t FOG_CDECL ColorStopList_reserve(ColorStopList* self, size_t n)
   size_t length = d->length;
   if (n < length) n = length;
 
-  ColorStopListData* newd = _api.colorstoplist.dCreate(n);
+  ColorStopListData* newd = _api.colorstoplist_dCreate(n);
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -132,7 +132,7 @@ static void FOG_CDECL ColorStopList_squeeze(ColorStopList* self)
   size_t length = d->length;
   if (length == d->capacity) return;
 
-  ColorStopListData* newd = _api.colorstoplist.dCreate(length);
+  ColorStopListData* newd = _api.colorstoplist_dCreate(length);
   if (FOG_IS_NULL(newd))
     return;
 
@@ -168,7 +168,7 @@ static err_t FOG_CDECL ColorStopList_setData(ColorStopList* self, const ColorSto
   // Detach or resize.
   if (d->reference.get() > 1 || d->capacity < length)
   {
-    ColorStopListData* newd = _api.colorstoplist.dCreate(length);
+    ColorStopListData* newd = _api.colorstoplist_dCreate(length);
 
     if (FOG_IS_NULL(newd))
       return ERR_RT_OUT_OF_MEMORY;
@@ -272,7 +272,7 @@ static err_t FOG_CDECL ColorStopList_addStop(ColorStopList* self, const ColorSto
   // Detach or Resize.
   if (d->reference.get() > 1 || length == d->capacity)
   {
-    ColorStopListData* newd = _api.colorstoplist.dCreate(CollectionUtil::getGrowCapacity(
+    ColorStopListData* newd = _api.colorstoplist_dCreate(CollectionUtil::getGrowCapacity(
       sizeof(ColorStopListData) - sizeof(ColorStop), sizeof(ColorStop), length, length + 1));
 
     if (FOG_IS_NULL(newd))
@@ -361,7 +361,7 @@ static err_t FOG_CDECL ColorStopList_removeAt(ColorStopList* self, size_t index)
   }
   else
   {
-    ColorStopListData* newd = _api.colorstoplist.dCreate(length);
+    ColorStopListData* newd = _api.colorstoplist_dCreate(length);
 
     if (FOG_IS_NULL(newd))
       return ERR_RT_OUT_OF_MEMORY;
@@ -400,7 +400,7 @@ static err_t FOG_CDECL ColorStopList_removeRange(ColorStopList* self, const Rang
   }
   else
   {
-    ColorStopListData* newd = _api.colorstoplist.dCreate(length);
+    ColorStopListData* newd = _api.colorstoplist_dCreate(length);
 
     if (FOG_IS_NULL(newd))
       return ERR_RT_OUT_OF_MEMORY;
@@ -526,28 +526,28 @@ FOG_NO_EXPORT void ColorStopList_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.colorstoplist.ctor = ColorStopList_ctor;
-  _api.colorstoplist.ctorCopy = ColorStopList_ctorCopy;
-  _api.colorstoplist.dtor = ColorStopList_dtor;
-  _api.colorstoplist.reserve = ColorStopList_reserve;
-  _api.colorstoplist.squeeze = ColorStopList_squeeze;
-  _api.colorstoplist.setData = ColorStopList_setData;
-  _api.colorstoplist.isOpaque = ColorStopList_isOpaque;
-  _api.colorstoplist.isOpaqueARGB32 = ColorStopList_isOpaqueARGB32;
-  _api.colorstoplist.clear = ColorStopList_clear;
-  _api.colorstoplist.reset = ColorStopList_reset;
-  _api.colorstoplist.addStop = ColorStopList_addStop;
-  _api.colorstoplist.removeOffset = ColorStopList_removeOffset;
-  _api.colorstoplist.removeStop = ColorStopList_removeStop;
-  _api.colorstoplist.removeAt = ColorStopList_removeAt;
-  _api.colorstoplist.removeRange = ColorStopList_removeRange;
-  _api.colorstoplist.removeInterval = ColorStopList_removeInterval;
-  _api.colorstoplist.indexOfOffset = ColorStopList_indexOfOffset;
-  _api.colorstoplist.copy = ColorStopList_copy;
-  _api.colorstoplist.eq = ColorStopList_eq;
+  _api.colorstoplist_ctor = ColorStopList_ctor;
+  _api.colorstoplist_ctorCopy = ColorStopList_ctorCopy;
+  _api.colorstoplist_dtor = ColorStopList_dtor;
+  _api.colorstoplist_reserve = ColorStopList_reserve;
+  _api.colorstoplist_squeeze = ColorStopList_squeeze;
+  _api.colorstoplist_setData = ColorStopList_setData;
+  _api.colorstoplist_isOpaque = ColorStopList_isOpaque;
+  _api.colorstoplist_isOpaqueARGB32 = ColorStopList_isOpaqueARGB32;
+  _api.colorstoplist_clear = ColorStopList_clear;
+  _api.colorstoplist_reset = ColorStopList_reset;
+  _api.colorstoplist_addStop = ColorStopList_addStop;
+  _api.colorstoplist_removeOffset = ColorStopList_removeOffset;
+  _api.colorstoplist_removeStop = ColorStopList_removeStop;
+  _api.colorstoplist_removeAt = ColorStopList_removeAt;
+  _api.colorstoplist_removeRange = ColorStopList_removeRange;
+  _api.colorstoplist_removeInterval = ColorStopList_removeInterval;
+  _api.colorstoplist_indexOfOffset = ColorStopList_indexOfOffset;
+  _api.colorstoplist_copy = ColorStopList_copy;
+  _api.colorstoplist_eq = ColorStopList_eq;
 
-  _api.colorstoplist.dCreate = ColorStopList_dCreate;
-  _api.colorstoplist.dFree = ColorStopList_dFree;
+  _api.colorstoplist_dCreate = ColorStopList_dCreate;
+  _api.colorstoplist_dFree = ColorStopList_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -559,7 +559,7 @@ FOG_NO_EXPORT void ColorStopList_init(void)
   d->vType = VAR_TYPE_COLOR_STOP_LIST | VAR_FLAG_NONE;
   d->stopCachePrgb32 = NULL;
 
-  _api.colorstoplist.oEmpty = ColorStopList_oEmpty.initCustom1(d);
+  _api.colorstoplist_oEmpty = ColorStopList_oEmpty.initCustom1(d);
 }
 
 } // Fog namespace

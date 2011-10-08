@@ -36,17 +36,17 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE List()
   {
-    _api.list.stringa.ctor(this);
+    _api.list_stringa_ctor(this);
   }
 
   FOG_INLINE List(const List& other)
   {
-    _api.list.untyped.ctorCopy(this, &other);
+    _api.list_untyped_ctorCopy(this, &other);
   }
 
   FOG_INLINE List(const List& other, const Range& range)
   {
-    _api.list.stringa.ctorSlice(this, &other, &range);
+    _api.list_stringa_ctorSlice(this, &other, &range);
   }
 
   explicit FOG_INLINE List(ListUntypedData* d)
@@ -56,7 +56,7 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE ~List()
   {
-    _api.list.stringa.dtor(this);
+    _api.list_stringa_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -71,10 +71,10 @@ struct List<StringA> : public ListUntyped
   {
     return ListUntyped::isDetached() ? (err_t)ERR_OK : _detach();
   }
-  
+
   FOG_INLINE err_t _detach()
   {
-    return _api.list.stringa.detach(this);
+    return _api.list_stringa_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -87,22 +87,22 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.list.stringa.reserve(this, capacity);
+    return _api.list_stringa_reserve(this, capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.list.stringa.squeeze(this);
+    _api.list_stringa_squeeze(this);
   }
 
   FOG_INLINE err_t _growLeft(size_t length)
   {
-    return _api.list.stringa.growLeft(this, length);
+    return _api.list_stringa_growLeft(this, length);
   }
 
   FOG_INLINE err_t _growRight(size_t length)
   {
-    return _api.list.stringa.growRight(this, length);
+    return _api.list_stringa_growRight(this, length);
   }
 
   // --------------------------------------------------------------------------
@@ -135,7 +135,7 @@ struct List<StringA> : public ListUntyped
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringA>::setAt() - Index out of range.");
 
-    return _api.list.stringa.setAtStubA(this, index, &item);
+    return _api.list_stringa_setAtStubA(this, index, &item);
   }
 
   FOG_INLINE err_t setAt(size_t index, const StringA& item)
@@ -143,7 +143,7 @@ struct List<StringA> : public ListUntyped
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringA>::setAt() - Index out of range.");
 
-    return _api.list.stringa.setAtStringA(this, index, &item);
+    return _api.list_stringa_setAtStringA(this, index, &item);
   }
 
   FOG_INLINE err_t setAtX(size_t index, const StubA& item)
@@ -172,12 +172,12 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE void clear()
   {
-    _api.list.stringa.clear(this);
+    _api.list_stringa_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.list.stringa.reset(this);
+    _api.list_stringa_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -186,12 +186,12 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t setList(List<StringA>& other)
   {
-    return _api.list.stringa.opList(this, CONTAINER_OP_REPLACE, &other, NULL);
+    return _api.list_stringa_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
   FOG_INLINE err_t setList(List<StringA>& other, const Range& range)
   {
-    return _api.list.stringa.opList(this, CONTAINER_OP_REPLACE, &other, &range);
+    return _api.list_stringa_opList(this, CONTAINER_OP_REPLACE, &other, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -200,22 +200,22 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t append(const StubA& item)
   {
-    return _api.list.stringa.appendStubA(this, &item);
+    return _api.list_stringa_appendStubA(this, &item);
   }
 
   FOG_INLINE err_t append(const StringA& item)
   {
-    return _api.list.stringa.appendStringA(this, &item);
+    return _api.list_stringa_appendStringA(this, &item);
   }
 
   FOG_INLINE err_t concat(const List<StringA>& other)
   {
-    return _api.list.stringa.opList(this, CONTAINER_OP_APPEND, &other, NULL);
+    return _api.list_stringa_opList(this, CONTAINER_OP_APPEND, &other, NULL);
   }
 
   FOG_INLINE err_t concat(const List<StringA>& other, const Range& range)
   {
-    return _api.list.stringa.opList(this, CONTAINER_OP_APPEND, &other, &range);
+    return _api.list_stringa_opList(this, CONTAINER_OP_APPEND, &other, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -224,12 +224,12 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t prepend(const StubA& item)
   {
-    return _api.list.stringa.insertStubA(this, 0, &item);
+    return _api.list_stringa_insertStubA(this, 0, &item);
   }
 
   FOG_INLINE err_t prepend(const StringA& item)
   {
-    return _api.list.stringa.insertStringA(this, 0, &item);
+    return _api.list_stringa_insertStringA(this, 0, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -238,12 +238,12 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t insert(size_t index, const StubA& item)
   {
-    return _api.list.stringa.insertStubA(this, index, &item);
+    return _api.list_stringa_insertStubA(this, index, &item);
   }
 
   FOG_INLINE err_t insert(size_t index, const StringA& item)
   {
-    return _api.list.stringa.insertStringA(this, index, &item);
+    return _api.list_stringa_insertStringA(this, index, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -252,7 +252,7 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.list.stringa.remove(this, &range);
+    return _api.list_stringa_remove(this, &range);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
@@ -277,12 +277,12 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t replace(const Range& range, const List<StringA>& src)
   {
-    return _api.list.stringa.replace(this, &range, &src, NULL);
+    return _api.list_stringa_replace(this, &range, &src, NULL);
   }
 
   FOG_INLINE err_t replace(const Range& range, const List<StringA>& src, const Range& srcRange)
   {
-    return _api.list.stringa.replace(this, &range, &src, &srcRange);
+    return _api.list_stringa_replace(this, &range, &src, &srcRange);
   }
 
   // --------------------------------------------------------------------------
@@ -291,7 +291,7 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t slice(const Range& range)
   {
-    return _api.list.stringa.slice(this, &range);
+    return _api.list_stringa_slice(this, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -300,22 +300,22 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE bool contains(const StubA& item) const
   {
-    return _api.list.stringa.indexOfStubA(this, NULL, &item) != INVALID_INDEX;
+    return _api.list_stringa_indexOfStubA(this, NULL, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const StringA& item) const
   {
-    return _api.list.stringa.indexOfStringA(this, NULL, &item) != INVALID_INDEX;
+    return _api.list_stringa_indexOfStringA(this, NULL, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const Range& range, const StubA& item) const
   {
-    return _api.list.stringa.indexOfStubA(this, &range, &item) != INVALID_INDEX;
+    return _api.list_stringa_indexOfStubA(this, &range, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const Range& range, const StringA& item) const
   {
-    return _api.list.stringa.indexOfStringA(this, &range, &item) != INVALID_INDEX;
+    return _api.list_stringa_indexOfStringA(this, &range, &item) != INVALID_INDEX;
   }
 
   // --------------------------------------------------------------------------
@@ -324,22 +324,22 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE size_t indexOf(const StubA& item) const
   {
-    return _api.list.stringa.indexOfStubA(this, NULL, &item);
+    return _api.list_stringa_indexOfStubA(this, NULL, &item);
   }
 
   FOG_INLINE size_t indexOf(const StringA& item) const
   {
-    return _api.list.stringa.indexOfStringA(this, NULL, &item);
+    return _api.list_stringa_indexOfStringA(this, NULL, &item);
   }
 
   FOG_INLINE size_t indexOf(const Range& range, const StubA& item) const
   {
-    return _api.list.stringa.indexOfStubA(this, &range, &item);
+    return _api.list_stringa_indexOfStubA(this, &range, &item);
   }
 
   FOG_INLINE size_t indexOf(const Range& range, const StringA& item) const
   {
-    return _api.list.stringa.indexOfStringA(this, &range, &item);
+    return _api.list_stringa_indexOfStringA(this, &range, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -348,22 +348,22 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE size_t lastIndexOf(const StubA& item) const
   {
-    return _api.list.stringa.lastIndexOfStubA(this, NULL, &item);
+    return _api.list_stringa_lastIndexOfStubA(this, NULL, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const StringA& item) const
   {
-    return _api.list.stringa.lastIndexOfStringA(this, NULL, &item);
+    return _api.list_stringa_lastIndexOfStringA(this, NULL, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const Range& range, const StubA& item) const
   {
-    return _api.list.stringa.lastIndexOfStubA(this, &range, &item);
+    return _api.list_stringa_lastIndexOfStubA(this, &range, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const Range& range, const StringA& item) const
   {
-    return _api.list.stringa.lastIndexOfStringA(this, &range, &item);
+    return _api.list_stringa_lastIndexOfStringA(this, &range, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -372,17 +372,17 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE err_t sort(uint32_t sortOrder)
   {
-    return _api.list.stringa.sort(this, sortOrder, StringA::getCompareFunc());
+    return _api.list_stringa_sort(this, sortOrder, StringA::getCompareFunc());
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareFunc compareFunc)
   {
-    return _api.list.stringa.sort(this, sortOrder, compareFunc);
+    return _api.list_stringa_sort(this, sortOrder, compareFunc);
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
   {
-    return _api.list.stringa.sortEx(this, sortOrder, compareFunc, data);
+    return _api.list_stringa_sortEx(this, sortOrder, compareFunc, data);
   }
 
   // --------------------------------------------------------------------------
@@ -396,7 +396,7 @@ struct List<StringA> : public ListUntyped
     FOG_ASSERT_X(index2 < _d->length,
       "Fog::List<Fog::StringA>::swapItems() - Index2 out of range.");
 
-    return _api.list.stringa.swapItems(this, index1, index2);
+    return _api.list_stringa_swapItems(this, index1, index2);
   }
 
   // --------------------------------------------------------------------------
@@ -405,7 +405,7 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE bool eq(const List<StringA>& other) const
   {
-    return _api.list.untyped.customEq(this, &other, sizeof(StringA), StringA::getEqFunc());
+    return _api.list_untyped_customEq(this, &other, sizeof(StringA), StringA::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -414,19 +414,19 @@ struct List<StringA> : public ListUntyped
 
   FOG_INLINE List<StringA>& operator=(const List<StringA>& other)
   {
-    _api.list.stringa.opList(this, CONTAINER_OP_REPLACE, &other, NULL);
+    _api.list_stringa_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
     return *this;
   }
 
   FOG_INLINE List<StringA>& operator+=(const StubA& item)
   {
-    _api.list.stringa.appendStubA(this, &item);
+    _api.list_stringa_appendStubA(this, &item);
     return *this;
   }
 
   FOG_INLINE List<StringA>& operator+=(const StringA& item)
   {
-    _api.list.stringa.appendStringA(this, &item);
+    _api.list_stringa_appendStringA(this, &item);
     return *this;
   }
 
@@ -447,7 +447,7 @@ struct List<StringA> : public ListUntyped
 
   static FOG_INLINE bool eq(const List<StringA>* a, const List<StringA>* b)
   {
-    return _api.list.untyped.customEq(a, b, sizeof(StringA), StringA::getEqFunc());
+    return _api.list_untyped_customEq(a, b, sizeof(StringA), StringA::getEqFunc());
   }
 };
 
@@ -471,17 +471,17 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE List()
   {
-    _api.list.stringw.ctor(this);
+    _api.list_stringw_ctor(this);
   }
 
   FOG_INLINE List(const List<StringW>& other)
   {
-    _api.list.untyped.ctorCopy(this, &other);
+    _api.list_untyped_ctorCopy(this, &other);
   }
 
   FOG_INLINE List(const List<StringW>& other, const Range& range)
   {
-    _api.list.stringw.ctorSlice(this, &other, &range);
+    _api.list_stringw_ctorSlice(this, &other, &range);
   }
 
   explicit FOG_INLINE List(ListUntypedData* d)
@@ -491,7 +491,7 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE ~List()
   {
-    _api.list.stringw.dtor(this);
+    _api.list_stringw_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -506,10 +506,10 @@ struct List<StringW> : public ListUntyped
   {
     return ListUntyped::isDetached() ? (err_t)ERR_OK : _detach();
   }
-  
+
   FOG_INLINE err_t _detach()
   {
-    return _api.list.stringw.detach(this);
+    return _api.list_stringw_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -522,22 +522,22 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.list.stringw.reserve(this, capacity);
+    return _api.list_stringw_reserve(this, capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.list.stringw.squeeze(this);
+    _api.list_stringw_squeeze(this);
   }
 
   FOG_INLINE err_t _growLeft(size_t length)
   {
-    return _api.list.stringw.growLeft(this, length);
+    return _api.list_stringw_growLeft(this, length);
   }
 
   FOG_INLINE err_t _growRight(size_t length)
   {
-    return _api.list.stringw.growRight(this, length);
+    return _api.list_stringw_growRight(this, length);
   }
 
   // --------------------------------------------------------------------------
@@ -570,7 +570,7 @@ struct List<StringW> : public ListUntyped
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::setAt() - Index out of range.");
 
-    return _api.list.stringw.setAtStubA(this, index, &item);
+    return _api.list_stringw_setAtStubA(this, index, &item);
   }
 
   FOG_INLINE err_t setAt(size_t index, const StubW& item)
@@ -578,7 +578,7 @@ struct List<StringW> : public ListUntyped
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::setAt() - Index out of range.");
 
-    return _api.list.stringw.setAtStubW(this, index, &item);
+    return _api.list_stringw_setAtStubW(this, index, &item);
   }
 
   FOG_INLINE err_t setAt(size_t index, const StringW& item)
@@ -586,7 +586,7 @@ struct List<StringW> : public ListUntyped
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::StringW>::setAt() - Index out of range.");
 
-    return _api.list.stringw.setAtStringW(this, index, &item);
+    return _api.list_stringw_setAtStringW(this, index, &item);
   }
 
   FOG_INLINE err_t setAtX(size_t index, const Ascii8& item)
@@ -625,12 +625,12 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE void clear()
   {
-    _api.list.stringw.clear(this);
+    _api.list_stringw_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.list.stringw.reset(this);
+    _api.list_stringw_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -639,12 +639,12 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t setList(List<StringW>& other)
   {
-    return _api.list.stringw.opList(this, CONTAINER_OP_REPLACE, &other, NULL);
+    return _api.list_stringw_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
   FOG_INLINE err_t setList(List<StringW>& other, const Range& range)
   {
-    return _api.list.stringw.opList(this, CONTAINER_OP_REPLACE, &other, &range);
+    return _api.list_stringw_opList(this, CONTAINER_OP_REPLACE, &other, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -653,27 +653,27 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t append(const Ascii8& item)
   {
-    return _api.list.stringw.appendStubA(this, &item);
+    return _api.list_stringw_appendStubA(this, &item);
   }
 
   FOG_INLINE err_t append(const StubW& item)
   {
-    return _api.list.stringw.appendStubW(this, &item);
+    return _api.list_stringw_appendStubW(this, &item);
   }
 
   FOG_INLINE err_t append(const StringW& item)
   {
-    return _api.list.stringw.appendStringW(this, &item);
+    return _api.list_stringw_appendStringW(this, &item);
   }
 
   FOG_INLINE err_t concat(const List<StringW>& other)
   {
-    return _api.list.stringw.opList(this, CONTAINER_OP_APPEND, &other, NULL);
+    return _api.list_stringw_opList(this, CONTAINER_OP_APPEND, &other, NULL);
   }
 
   FOG_INLINE err_t concat(const List<StringW>& other, const Range& range)
   {
-    return _api.list.stringw.opList(this, CONTAINER_OP_APPEND, &other, &range);
+    return _api.list_stringw_opList(this, CONTAINER_OP_APPEND, &other, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -682,17 +682,17 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t prepend(const Ascii8& item)
   {
-    return _api.list.stringw.insertStubA(this, 0, &item);
+    return _api.list_stringw_insertStubA(this, 0, &item);
   }
 
   FOG_INLINE err_t prepend(const StubW& item)
   {
-    return _api.list.stringw.insertStubW(this, 0, &item);
+    return _api.list_stringw_insertStubW(this, 0, &item);
   }
 
   FOG_INLINE err_t prepend(const StringW& item)
   {
-    return _api.list.stringw.insertStringW(this, 0, &item);
+    return _api.list_stringw_insertStringW(this, 0, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -701,17 +701,17 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t insert(size_t index, const Ascii8& item)
   {
-    return _api.list.stringw.insertStubA(this, index, &item);
+    return _api.list_stringw_insertStubA(this, index, &item);
   }
 
   FOG_INLINE err_t insert(size_t index, const StubW& item)
   {
-    return _api.list.stringw.insertStubW(this, index, &item);
+    return _api.list_stringw_insertStubW(this, index, &item);
   }
 
   FOG_INLINE err_t insert(size_t index, const StringW& item)
   {
-    return _api.list.stringw.insertStringW(this, index, &item);
+    return _api.list_stringw_insertStringW(this, index, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -720,7 +720,7 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.list.stringw.remove(this, &range);
+    return _api.list_stringw_remove(this, &range);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
@@ -745,12 +745,12 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t replace(const Range& range, const List<StringW>& src)
   {
-    return _api.list.stringw.replace(this, &range, &src, NULL);
+    return _api.list_stringw_replace(this, &range, &src, NULL);
   }
 
   FOG_INLINE err_t replace(const Range& range, const List<StringW>& src, const Range& srcRange)
   {
-    return _api.list.stringw.replace(this, &range, &src, &srcRange);
+    return _api.list_stringw_replace(this, &range, &src, &srcRange);
   }
 
   // --------------------------------------------------------------------------
@@ -759,7 +759,7 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t slice(const Range& range)
   {
-    return _api.list.stringw.slice(this, &range);
+    return _api.list_stringw_slice(this, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -768,32 +768,32 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE bool contains(const Ascii8& item) const
   {
-    return _api.list.stringw.indexOfStubA(this, NULL, &item) != INVALID_INDEX;
+    return _api.list_stringw_indexOfStubA(this, NULL, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const StubW& item) const
   {
-    return _api.list.stringw.indexOfStubW(this, NULL, &item) != INVALID_INDEX;
+    return _api.list_stringw_indexOfStubW(this, NULL, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const StringW& item) const
   {
-    return _api.list.stringw.indexOfStringW(this, NULL, &item) != INVALID_INDEX;
+    return _api.list_stringw_indexOfStringW(this, NULL, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const Range& range, const Ascii8& item) const
   {
-    return _api.list.stringw.indexOfStubA(this, &range, &item) != INVALID_INDEX;
+    return _api.list_stringw_indexOfStubA(this, &range, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const Range& range, const StubW& item) const
   {
-    return _api.list.stringw.indexOfStubW(this, &range, &item) != INVALID_INDEX;
+    return _api.list_stringw_indexOfStubW(this, &range, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const Range& range, const StringW& item) const
   {
-    return _api.list.stringw.indexOfStringW(this, &range, &item) != INVALID_INDEX;
+    return _api.list_stringw_indexOfStringW(this, &range, &item) != INVALID_INDEX;
   }
 
   // --------------------------------------------------------------------------
@@ -802,32 +802,32 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE size_t indexOf(const Ascii8& item) const
   {
-    return _api.list.stringw.indexOfStubA(this, NULL, &item);
+    return _api.list_stringw_indexOfStubA(this, NULL, &item);
   }
 
   FOG_INLINE size_t indexOf(const StubW& item) const
   {
-    return _api.list.stringw.indexOfStubW(this, NULL, &item);
+    return _api.list_stringw_indexOfStubW(this, NULL, &item);
   }
 
   FOG_INLINE size_t indexOf(const StringW& item) const
   {
-    return _api.list.stringw.indexOfStringW(this, NULL, &item);
+    return _api.list_stringw_indexOfStringW(this, NULL, &item);
   }
 
   FOG_INLINE size_t indexOf(const Range& range, const Ascii8& item) const
   {
-    return _api.list.stringw.indexOfStubA(this, &range, &item);
+    return _api.list_stringw_indexOfStubA(this, &range, &item);
   }
 
   FOG_INLINE size_t indexOf(const Range& range, const StubW& item) const
   {
-    return _api.list.stringw.indexOfStubW(this, &range, &item);
+    return _api.list_stringw_indexOfStubW(this, &range, &item);
   }
 
   FOG_INLINE size_t indexOf(const Range& range, const StringW& item) const
   {
-    return _api.list.stringw.indexOfStringW(this, &range, &item);
+    return _api.list_stringw_indexOfStringW(this, &range, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -836,32 +836,32 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE size_t lastIndexOf(const Ascii8& item) const
   {
-    return _api.list.stringw.lastIndexOfStubA(this, NULL, &item);
+    return _api.list_stringw_lastIndexOfStubA(this, NULL, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const StubW& item) const
   {
-    return _api.list.stringw.lastIndexOfStubW(this, NULL, &item);
+    return _api.list_stringw_lastIndexOfStubW(this, NULL, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const StringW& item) const
   {
-    return _api.list.stringw.lastIndexOfStringW(this, NULL, &item);
+    return _api.list_stringw_lastIndexOfStringW(this, NULL, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const Range& range, const Ascii8& item) const
   {
-    return _api.list.stringw.lastIndexOfStubA(this, &range, &item);
+    return _api.list_stringw_lastIndexOfStubA(this, &range, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const Range& range, const StubW& item) const
   {
-    return _api.list.stringw.lastIndexOfStubW(this, &range, &item);
+    return _api.list_stringw_lastIndexOfStubW(this, &range, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const Range& range, const StringW& item) const
   {
-    return _api.list.stringw.lastIndexOfStringW(this, &range, &item);
+    return _api.list_stringw_lastIndexOfStringW(this, &range, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -870,17 +870,17 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE err_t sort(uint32_t sortOrder)
   {
-    return _api.list.stringw.sort(this, sortOrder, StringW::getCompareFunc());
+    return _api.list_stringw_sort(this, sortOrder, StringW::getCompareFunc());
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareFunc compareFunc)
   {
-    return _api.list.stringw.sort(this, sortOrder, compareFunc);
+    return _api.list_stringw_sort(this, sortOrder, compareFunc);
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
   {
-    return _api.list.stringw.sortEx(this, sortOrder, compareFunc, data);
+    return _api.list_stringw_sortEx(this, sortOrder, compareFunc, data);
   }
 
   // --------------------------------------------------------------------------
@@ -894,7 +894,7 @@ struct List<StringW> : public ListUntyped
     FOG_ASSERT_X(index2 < _d->length,
       "Fog::List<Fog::StringW>::swapItems() - Index2 out of range.");
 
-    return _api.list.stringw.swapItems(this, index1, index2);
+    return _api.list_stringw_swapItems(this, index1, index2);
   }
 
   // --------------------------------------------------------------------------
@@ -903,7 +903,7 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE bool eq(const List<StringW>& other) const
   {
-    return _api.list.untyped.customEq(this, &other, sizeof(StringW), StringW::getEqFunc());
+    return _api.list_untyped_customEq(this, &other, sizeof(StringW), StringW::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -912,25 +912,25 @@ struct List<StringW> : public ListUntyped
 
   FOG_INLINE List<StringW>& operator=(const List<StringW>& other)
   {
-    _api.list.stringw.opList(this, CONTAINER_OP_REPLACE, &other, NULL);
+    _api.list_stringw_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
     return *this;
   }
 
   FOG_INLINE List<StringW>& operator+=(const Ascii8& item)
   {
-    _api.list.stringw.appendStubA(this, &item);
+    _api.list_stringw_appendStubA(this, &item);
     return *this;
   }
 
   FOG_INLINE List<StringW>& operator+=(const StubW& item)
   {
-    _api.list.stringw.appendStubW(this, &item);
+    _api.list_stringw_appendStubW(this, &item);
     return *this;
   }
 
   FOG_INLINE List<StringW>& operator+=(const StringW& item)
   {
-    _api.list.stringw.appendStringW(this, &item);
+    _api.list_stringw_appendStringW(this, &item);
     return *this;
   }
 
@@ -951,7 +951,7 @@ struct List<StringW> : public ListUntyped
 
   static FOG_INLINE bool eq(const List<StringW>* a, const List<StringW>* b)
   {
-    return _api.list.untyped.customEq(a, b, sizeof(StringW), StringW::getEqFunc());
+    return _api.list_untyped_customEq(a, b, sizeof(StringW), StringW::getEqFunc());
   }
 };
 
@@ -962,42 +962,42 @@ struct List<StringW> : public ListUntyped
 FOG_INLINE List<StringA> StringA::split(char sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringA> t;
-  _api.stringa.splitChar(&t, CONTAINER_OP_APPEND, this, NULL, sep, splitBehavior, cs);
+  _api.stringa_splitChar(&t, CONTAINER_OP_APPEND, this, NULL, sep, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringA> StringA::split(const StringA& sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringA> t;
-  _api.stringa.splitStringA(&t, CONTAINER_OP_APPEND, this, NULL, &sep, splitBehavior, cs);
+  _api.stringa_splitStringA(&t, CONTAINER_OP_APPEND, this, NULL, &sep, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringA> StringA::split(const RegExpA& re, uint32_t splitBehavior)
 {
   List<StringA> t;
-  _api.stringa.splitRegExpA(&t, CONTAINER_OP_APPEND, this, NULL, &re, splitBehavior);
+  _api.stringa_splitRegExpA(&t, CONTAINER_OP_APPEND, this, NULL, &re, splitBehavior);
   return t;
 }
 
 FOG_INLINE List<StringA> StringA::split(const Range& range, char sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringA> t;
-  _api.stringa.splitChar(&t, CONTAINER_OP_APPEND, this, &range, sep, splitBehavior, cs);
+  _api.stringa_splitChar(&t, CONTAINER_OP_APPEND, this, &range, sep, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringA> StringA::split(const Range& range, const StringA& sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringA> t;
-  _api.stringa.splitStringA(&t, CONTAINER_OP_APPEND, this, &range, &sep, splitBehavior, cs);
+  _api.stringa_splitStringA(&t, CONTAINER_OP_APPEND, this, &range, &sep, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringA> StringA::split(const Range& range, const RegExpA& re, uint32_t splitBehavior)
 {
   List<StringA> t;
-  _api.stringa.splitRegExpA(&t, CONTAINER_OP_APPEND, this, &range, &re, splitBehavior);
+  _api.stringa_splitRegExpA(&t, CONTAINER_OP_APPEND, this, &range, &re, splitBehavior);
   return t;
 }
 
@@ -1008,42 +1008,42 @@ FOG_INLINE List<StringA> StringA::split(const Range& range, const RegExpA& re, u
 FOG_INLINE List<StringW> StringW::split(CharW sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringW> t;
-  _api.stringw.splitChar(&t, CONTAINER_OP_APPEND, this, NULL, sep._value, splitBehavior, cs);
+  _api.stringw_splitChar(&t, CONTAINER_OP_APPEND, this, NULL, sep._value, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringW> StringW::split(const StringW& sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringW> t;
-  _api.stringw.splitStringW(&t, CONTAINER_OP_APPEND, this, NULL, &sep, splitBehavior, cs);
+  _api.stringw_splitStringW(&t, CONTAINER_OP_APPEND, this, NULL, &sep, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringW> StringW::split(const RegExpW& re, uint32_t splitBehavior)
 {
   List<StringW> t;
-  _api.stringw.splitRegExpW(&t, CONTAINER_OP_APPEND, this, NULL, &re, splitBehavior);
+  _api.stringw_splitRegExpW(&t, CONTAINER_OP_APPEND, this, NULL, &re, splitBehavior);
   return t;
 }
 
 FOG_INLINE List<StringW> StringW::split(const Range& range, CharW sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringW> t;
-  _api.stringw.splitChar(&t, CONTAINER_OP_APPEND, this, &range, sep._value, splitBehavior, cs);
+  _api.stringw_splitChar(&t, CONTAINER_OP_APPEND, this, &range, sep._value, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringW> StringW::split(const Range& range, const StringW& sep, uint32_t splitBehavior, uint32_t cs)
 {
   List<StringW> t;
-  _api.stringw.splitStringW(&t, CONTAINER_OP_APPEND, this, &range, &sep, splitBehavior, cs);
+  _api.stringw_splitStringW(&t, CONTAINER_OP_APPEND, this, &range, &sep, splitBehavior, cs);
   return t;
 }
 
 FOG_INLINE List<StringW> StringW::split(const Range& range, const RegExpW& re, uint32_t splitBehavior)
 {
   List<StringW> t;
-  _api.stringw.splitRegExpW(&t, CONTAINER_OP_APPEND, this, &range, &re, splitBehavior);
+  _api.stringw_splitRegExpW(&t, CONTAINER_OP_APPEND, this, &range, &re, splitBehavior);
   return t;
 }
 

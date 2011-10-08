@@ -10,12 +10,11 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/FileSystem.h>
-#include <Fog/Core/IO/MapFile.h>
-#include <Fog/Core/IO/Stream.h>
+#include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/Strings.h>
@@ -292,7 +291,7 @@ err_t ImageCodecProvider::createDecoderForFile(const StringW& fileName, ImageDec
   if (FOG_IS_ERROR(err)) goto _End;
 
   // Extract extension to help opening from stream.
-  if ((err = FileSystem::extractExtension(extension, fileName)) || (err = extension.lower())) goto _End;
+  if ((err = FilePath::extractExtension(extension, fileName)) || (err = extension.lower())) goto _End;
 
   // Finally, create codec.
   err = createDecoderForStream(stream, extension, codec);

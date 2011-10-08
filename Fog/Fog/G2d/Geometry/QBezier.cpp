@@ -192,7 +192,7 @@ static void FOG_CDECL QBezierT_getLength(const NumT_(Point)* self, NumT* length)
 
 #define ADD_VERTEX(_x, _y) \
   do { \
-    FOG_ASSERT((size_t)(curVertex - dst._d->vertices) < dst._d->capacity); \
+    FOG_ASSERT((size_t)(curVertex - dst->_d->vertices) < dst->_d->capacity); \
     \
     curVertex->set(_x, _y); \
     curVertex++; \
@@ -201,7 +201,7 @@ static void FOG_CDECL QBezierT_getLength(const NumT_(Point)* self, NumT* length)
 template<typename NumT>
 static err_t FOG_CDECL QBezierT_flatten(
   const NumT_(Point)* self,
-  NumT_(Path)& dst,
+  NumT_(Path)* dst,
   uint8_t initialCommand,
   NumT flatness)
 {
@@ -213,7 +213,7 @@ static err_t FOG_CDECL QBezierT_flatten(
   NumT x2 = self[2].x;
   NumT y2 = self[2].y;
 
-  size_t initialLength = dst._d->length;
+  size_t initialLength = dst->_d->length;
   size_t level = 0;
 
   NumT_(Point)* curVertex;
@@ -224,15 +224,15 @@ static err_t FOG_CDECL QBezierT_flatten(
 
 _Realloc:
   {
-    size_t pos = dst._add(QUAD_CURVE_VERTEX_INITIAL_SIZE);
+    size_t pos = dst->_add(QUAD_CURVE_VERTEX_INITIAL_SIZE);
     if (pos == INVALID_INDEX)
     {
       // Purge dst length to its initial state.
-      if (dst._d->length != initialLength) dst._d->length = initialLength;
+      if (dst->_d->length != initialLength) dst->_d->length = initialLength;
       return ERR_RT_OUT_OF_MEMORY;
     }
 
-    curVertex = dst._d->vertices + pos;
+    curVertex = dst->_d->vertices + pos;
     endVertex = curVertex + QUAD_CURVE_VERTEX_INITIAL_SIZE - 1;
   }
 
@@ -241,7 +241,7 @@ _Realloc:
     // Realloc if needed, but update length if need to do.
     if (curVertex >= endVertex)
     {
-      dst._d->length = (size_t)(curVertex - dst._d->vertices);
+      dst->_d->length = (size_t)(curVertex - dst->_d->vertices);
       goto _Realloc;
     }
 
@@ -349,14 +349,14 @@ _Ret:
 
   {
     // Update dst length.
-    size_t length = (size_t)(curVertex - dst._d->vertices);
-    dst._d->length = length;
+    size_t length = (size_t)(curVertex - dst->_d->vertices);
+    dst->_d->length = length;
 
     // Make sure we are not out of bounds.
-    FOG_ASSERT(dst._d->capacity >= length);
+    FOG_ASSERT(dst->_d->capacity >= length);
 
     // Fill initial and LINE_TO commands.
-    uint8_t* commands = dst._d->commands + initialLength;
+    uint8_t* commands = dst->_d->commands + initialLength;
     size_t i = length - initialLength;
 
     if (i)
@@ -376,7 +376,7 @@ _Ret:
 
 _InvalidNumber:
   // Purge dst length to its initial state.
-  if (dst._d->length != initialLength) dst._d->length = initialLength;
+  if (dst->_d->length != initialLength) dst->_d->length = initialLength;
   return ERR_GEOMETRY_INVALID;
 }
 
@@ -386,17 +386,17 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void QBezier_init(void)
 {
-  _api.qbezierf.getBoundingBox = QBezierT_getBoundingBox<float>;
-  _api.qbezierd.getBoundingBox = QBezierT_getBoundingBox<double>;
+  _api.qbezierf_getBoundingBox = QBezierT_getBoundingBox<float>;
+  _api.qbezierd_getBoundingBox = QBezierT_getBoundingBox<double>;
 
-  _api.qbezierf.getSplineBBox = QBezierT_getSplineBBox<float>;
-  _api.qbezierd.getSplineBBox = QBezierT_getSplineBBox<double>;
+  _api.qbezierf_getSplineBBox = QBezierT_getSplineBBox<float>;
+  _api.qbezierd_getSplineBBox = QBezierT_getSplineBBox<double>;
 
-  _api.qbezierf.getLength = QBezierT_getLength<float>;
-  _api.qbezierd.getLength = QBezierT_getLength<double>;
+  _api.qbezierf_getLength = QBezierT_getLength<float>;
+  _api.qbezierd_getLength = QBezierT_getLength<double>;
 
-  _api.qbezierf.flatten = QBezierT_flatten<float>;
-  _api.qbezierd.flatten = QBezierT_flatten<double>;
+  _api.qbezierf_flatten = QBezierT_flatten<float>;
+  _api.qbezierd_flatten = QBezierT_flatten<double>;
 }
 
 } // Fog namespace

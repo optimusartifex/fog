@@ -1195,7 +1195,7 @@ static void FOG_CDECL StringUtil_itoa(NTOAContext* ctx, int64_t n, uint32_t base
 
   if (negative) n = -n;
 
-  _api.stringutil.utoa(ctx, (uint64_t)n, base, textCase);
+  _api.stringutil_utoa(ctx, (uint64_t)n, base, textCase);
   ctx->negative = negative;
 }
 
@@ -1965,116 +1965,116 @@ static err_t FOG_CDECL StringUtil_parseU64(uint64_t* dst, const CharT* src, size
 
 FOG_NO_EXPORT void StringUtil_init(void)
 {
-  _api.stringutil.copyA = StringUtil_copy<char>;
-  _api.stringutil.copyW = StringUtil_copy<CharW>;
+  _api.stringutil_copyA = StringUtil_copy<char>;
+  _api.stringutil_copyW = StringUtil_copy<CharW>;
 
-  _api.stringutil.latinFromUnicode = StringUtil_latinFromUnicode;
-  _api.stringutil.unicodeFromLatin = StringUtil_unicodeFromLatin;
+  _api.stringutil_latinFromUnicode = StringUtil_latinFromUnicode;
+  _api.stringutil_unicodeFromLatin = StringUtil_unicodeFromLatin;
 
-  _api.stringutil.moveA = StringUtil_move<char>;
-  _api.stringutil.moveW = StringUtil_move<CharW>;
+  _api.stringutil_moveA = StringUtil_move<char>;
+  _api.stringutil_moveW = StringUtil_move<CharW>;
 
-  _api.stringutil.fillA = StringUtil_fill<char>;
-  _api.stringutil.fillW = StringUtil_fill<CharW>;
+  _api.stringutil_fillA = StringUtil_fill<char>;
+  _api.stringutil_fillW = StringUtil_fill<CharW>;
 
-  _api.stringutil.lenA = StringUtil_len<char>;
-  _api.stringutil.lenW = StringUtil_len<CharW>;
+  _api.stringutil_lenA = StringUtil_len<char>;
+  _api.stringutil_lenW = StringUtil_len<CharW>;
 
-  _api.stringutil.nLenA = StringUtil_nLen<char>;
-  _api.stringutil.nLenW = StringUtil_nLen<CharW>;
+  _api.stringutil_nLenA = StringUtil_nLen<char>;
+  _api.stringutil_nLenW = StringUtil_nLen<CharW>;
 
-  _api.stringutil.eqA[CASE_SENSITIVE  ] = StringUtil_eqA_cs;
-  _api.stringutil.eqA[CASE_INSENSITIVE] = StringUtil_eqA_ci;
+  _api.stringutil_eqA[CASE_SENSITIVE  ] = StringUtil_eqA_cs;
+  _api.stringutil_eqA[CASE_INSENSITIVE] = StringUtil_eqA_ci;
 
-  _api.stringutil.eqW[CASE_SENSITIVE  ] = StringUtil_eqW_cs;
-  _api.stringutil.eqW[CASE_INSENSITIVE] = StringUtil_eqW_ci;
+  _api.stringutil_eqW[CASE_SENSITIVE  ] = StringUtil_eqW_cs;
+  _api.stringutil_eqW[CASE_INSENSITIVE] = StringUtil_eqW_ci;
 
-  _api.stringutil.eqMixed[CASE_SENSITIVE  ] = StringUtil_eqMixed_cs;
-  _api.stringutil.eqMixed[CASE_INSENSITIVE] = StringUtil_eqMixed_ci;
+  _api.stringutil_eqMixed[CASE_SENSITIVE  ] = StringUtil_eqMixed_cs;
+  _api.stringutil_eqMixed[CASE_INSENSITIVE] = StringUtil_eqMixed_ci;
 
-  _api.stringutil.countOfA[CASE_SENSITIVE  ] = StringUtil_countOfA_cs;
-  _api.stringutil.countOfA[CASE_INSENSITIVE] = StringUtil_countOfA_ci;
+  _api.stringutil_countOfA[CASE_SENSITIVE  ] = StringUtil_countOfA_cs;
+  _api.stringutil_countOfA[CASE_INSENSITIVE] = StringUtil_countOfA_ci;
 
-  _api.stringutil.countOfW[CASE_SENSITIVE  ] = StringUtil_countOfW_cs;
-  _api.stringutil.countOfW[CASE_INSENSITIVE] = StringUtil_countOfW_ci;
+  _api.stringutil_countOfW[CASE_SENSITIVE  ] = StringUtil_countOfW_cs;
+  _api.stringutil_countOfW[CASE_INSENSITIVE] = StringUtil_countOfW_ci;
 
-  _api.stringutil.indexOfCharA[CASE_SENSITIVE  ] = StringUtil_indexOfCharA_cs;
-  _api.stringutil.indexOfCharA[CASE_INSENSITIVE] = StringUtil_indexOfCharA_ci;
+  _api.stringutil_indexOfCharA[CASE_SENSITIVE  ] = StringUtil_indexOfCharA_cs;
+  _api.stringutil_indexOfCharA[CASE_INSENSITIVE] = StringUtil_indexOfCharA_ci;
 
-  _api.stringutil.indexOfCharW[CASE_SENSITIVE  ] = StringUtil_indexOfCharW_cs;
-  _api.stringutil.indexOfCharW[CASE_INSENSITIVE] = StringUtil_indexOfCharW_ci;
+  _api.stringutil_indexOfCharW[CASE_SENSITIVE  ] = StringUtil_indexOfCharW_cs;
+  _api.stringutil_indexOfCharW[CASE_INSENSITIVE] = StringUtil_indexOfCharW_ci;
 
-  _api.stringutil.indexOfStringA[CASE_SENSITIVE  ] = StringUtil_indexOfStringT_cs<char, char>;
-  _api.stringutil.indexOfStringA[CASE_INSENSITIVE] = StringUtil_indexOfStringA_ci;
+  _api.stringutil_indexOfStringA[CASE_SENSITIVE  ] = StringUtil_indexOfStringT_cs<char, char>;
+  _api.stringutil_indexOfStringA[CASE_INSENSITIVE] = StringUtil_indexOfStringA_ci;
 
-  _api.stringutil.indexOfStringWA[CASE_SENSITIVE  ] = StringUtil_indexOfStringT_cs<CharW, char>;
-  _api.stringutil.indexOfStringWA[CASE_INSENSITIVE] = StringUtil_indexOfStringW_ci<char>;
+  _api.stringutil_indexOfStringWA[CASE_SENSITIVE  ] = StringUtil_indexOfStringT_cs<CharW, char>;
+  _api.stringutil_indexOfStringWA[CASE_INSENSITIVE] = StringUtil_indexOfStringW_ci<char>;
 
-  _api.stringutil.indexOfStringW[CASE_SENSITIVE  ] = StringUtil_indexOfStringT_cs<CharW, CharW>;
-  _api.stringutil.indexOfStringW[CASE_INSENSITIVE] = StringUtil_indexOfStringW_ci<CharW>;
+  _api.stringutil_indexOfStringW[CASE_SENSITIVE  ] = StringUtil_indexOfStringT_cs<CharW, CharW>;
+  _api.stringutil_indexOfStringW[CASE_INSENSITIVE] = StringUtil_indexOfStringW_ci<CharW>;
 
-  _api.stringutil.indexOfAnyA[CASE_SENSITIVE  ] = StringUtil_indexOfAnyA_cs;
-  _api.stringutil.indexOfAnyA[CASE_INSENSITIVE] = StringUtil_indexOfAnyA_ci;
+  _api.stringutil_indexOfAnyA[CASE_SENSITIVE  ] = StringUtil_indexOfAnyA_cs;
+  _api.stringutil_indexOfAnyA[CASE_INSENSITIVE] = StringUtil_indexOfAnyA_ci;
 
-  _api.stringutil.indexOfAnyW[CASE_SENSITIVE  ] = StringUtil_indexOfAnyW_cs;
-  _api.stringutil.indexOfAnyW[CASE_INSENSITIVE] = StringUtil_indexOfAnyW_ci;
+  _api.stringutil_indexOfAnyW[CASE_SENSITIVE  ] = StringUtil_indexOfAnyW_cs;
+  _api.stringutil_indexOfAnyW[CASE_INSENSITIVE] = StringUtil_indexOfAnyW_ci;
 
-  _api.stringutil.lastIndexOfCharA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfCharA_cs;
-  _api.stringutil.lastIndexOfCharA[CASE_INSENSITIVE] = StringUtil_lastIndexOfCharA_ci;
+  _api.stringutil_lastIndexOfCharA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfCharA_cs;
+  _api.stringutil_lastIndexOfCharA[CASE_INSENSITIVE] = StringUtil_lastIndexOfCharA_ci;
 
-  _api.stringutil.lastIndexOfCharW[CASE_SENSITIVE  ] = StringUtil_lastIndexOfCharW_cs;
-  _api.stringutil.lastIndexOfCharW[CASE_INSENSITIVE] = StringUtil_lastIndexOfCharW_ci;
+  _api.stringutil_lastIndexOfCharW[CASE_SENSITIVE  ] = StringUtil_lastIndexOfCharW_cs;
+  _api.stringutil_lastIndexOfCharW[CASE_INSENSITIVE] = StringUtil_lastIndexOfCharW_ci;
 
-  _api.stringutil.lastIndexOfStringA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfStringT_cs<char, char>;
-  _api.stringutil.lastIndexOfStringA[CASE_INSENSITIVE] = StringUtil_lastIndexOfStringA_ci;
+  _api.stringutil_lastIndexOfStringA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfStringT_cs<char, char>;
+  _api.stringutil_lastIndexOfStringA[CASE_INSENSITIVE] = StringUtil_lastIndexOfStringA_ci;
 
-  _api.stringutil.lastIndexOfStringWA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfStringT_cs<CharW, char>;
-  _api.stringutil.lastIndexOfStringWA[CASE_INSENSITIVE] = StringUtil_lastIndexOfStringW_ci<char>;
+  _api.stringutil_lastIndexOfStringWA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfStringT_cs<CharW, char>;
+  _api.stringutil_lastIndexOfStringWA[CASE_INSENSITIVE] = StringUtil_lastIndexOfStringW_ci<char>;
 
-  _api.stringutil.lastIndexOfStringW[CASE_SENSITIVE  ] = StringUtil_lastIndexOfStringT_cs<CharW, CharW>;
-  _api.stringutil.lastIndexOfStringW[CASE_INSENSITIVE] = StringUtil_lastIndexOfStringW_ci<CharW>;
+  _api.stringutil_lastIndexOfStringW[CASE_SENSITIVE  ] = StringUtil_lastIndexOfStringT_cs<CharW, CharW>;
+  _api.stringutil_lastIndexOfStringW[CASE_INSENSITIVE] = StringUtil_lastIndexOfStringW_ci<CharW>;
 
-  _api.stringutil.lastIndexOfAnyA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfAnyA_cs;
-  _api.stringutil.lastIndexOfAnyA[CASE_INSENSITIVE] = StringUtil_lastIndexOfAnyA_ci;
+  _api.stringutil_lastIndexOfAnyA[CASE_SENSITIVE  ] = StringUtil_lastIndexOfAnyA_cs;
+  _api.stringutil_lastIndexOfAnyA[CASE_INSENSITIVE] = StringUtil_lastIndexOfAnyA_ci;
 
-  _api.stringutil.lastIndexOfAnyW[CASE_SENSITIVE  ] = StringUtil_lastIndexOfAnyW_cs;
-  _api.stringutil.lastIndexOfAnyW[CASE_INSENSITIVE] = StringUtil_lastIndexOfAnyW_ci;
+  _api.stringutil_lastIndexOfAnyW[CASE_SENSITIVE  ] = StringUtil_lastIndexOfAnyW_cs;
+  _api.stringutil_lastIndexOfAnyW[CASE_INSENSITIVE] = StringUtil_lastIndexOfAnyW_ci;
 
-  _api.stringutil.validateUtf8 = StringUtil_validateUtf8;
-  _api.stringutil.validateUtf16 = StringUtil_validateUtf16;
+  _api.stringutil_validateUtf8 = StringUtil_validateUtf8;
+  _api.stringutil_validateUtf16 = StringUtil_validateUtf16;
 
-  _api.stringutil.ucsFromUtf8Length = StringUtil_ucsFromUtf8Length;
-  _api.stringutil.ucsFromUtf16Length = StringUtil_ucsFromUtf16Length;
+  _api.stringutil_ucsFromUtf8Length = StringUtil_ucsFromUtf8Length;
+  _api.stringutil_ucsFromUtf16Length = StringUtil_ucsFromUtf16Length;
 
-  _api.stringutil.itoa = StringUtil_itoa;
-  _api.stringutil.utoa = StringUtil_utoa;
+  _api.stringutil_itoa = StringUtil_itoa;
+  _api.stringutil_utoa = StringUtil_utoa;
 
-  _api.stringutil.parseBoolA = StringUtil_parseBool<char>;
-  _api.stringutil.parseBoolW = StringUtil_parseBool<CharW>;
+  _api.stringutil_parseBoolA = StringUtil_parseBool<char>;
+  _api.stringutil_parseBoolW = StringUtil_parseBool<CharW>;
 
-  _api.stringutil.parseI8A = StringUtil_parseI8<char>;
-  _api.stringutil.parseI8W = StringUtil_parseI8<CharW>;
+  _api.stringutil_parseI8A = StringUtil_parseI8<char>;
+  _api.stringutil_parseI8W = StringUtil_parseI8<CharW>;
 
-  _api.stringutil.parseU8A = StringUtil_parseU8<char>;
-  _api.stringutil.parseU8W = StringUtil_parseU8<CharW>;
+  _api.stringutil_parseU8A = StringUtil_parseU8<char>;
+  _api.stringutil_parseU8W = StringUtil_parseU8<CharW>;
 
-  _api.stringutil.parseI16A = StringUtil_parseI16<char>;
-  _api.stringutil.parseI16W = StringUtil_parseI16<CharW>;
+  _api.stringutil_parseI16A = StringUtil_parseI16<char>;
+  _api.stringutil_parseI16W = StringUtil_parseI16<CharW>;
 
-  _api.stringutil.parseU16A = StringUtil_parseU16<char>;
-  _api.stringutil.parseU16W = StringUtil_parseU16<CharW>;
+  _api.stringutil_parseU16A = StringUtil_parseU16<char>;
+  _api.stringutil_parseU16W = StringUtil_parseU16<CharW>;
 
-  _api.stringutil.parseI32A = StringUtil_parseI32<char>;
-  _api.stringutil.parseI32W = StringUtil_parseI32<CharW>;
+  _api.stringutil_parseI32A = StringUtil_parseI32<char>;
+  _api.stringutil_parseI32W = StringUtil_parseI32<CharW>;
 
-  _api.stringutil.parseU32A = StringUtil_parseU32<char>;
-  _api.stringutil.parseU32W = StringUtil_parseU32<CharW>;
+  _api.stringutil_parseU32A = StringUtil_parseU32<char>;
+  _api.stringutil_parseU32W = StringUtil_parseU32<CharW>;
 
-  _api.stringutil.parseI64A = StringUtil_parseI64<char>;
-  _api.stringutil.parseI64W = StringUtil_parseI64<CharW>;
+  _api.stringutil_parseI64A = StringUtil_parseI64<char>;
+  _api.stringutil_parseI64W = StringUtil_parseI64<CharW>;
 
-  _api.stringutil.parseU64A = StringUtil_parseU64<char>;
-  _api.stringutil.parseU64W = StringUtil_parseU64<CharW>;
+  _api.stringutil_parseU64A = StringUtil_parseU64<char>;
+  _api.stringutil_parseU64W = StringUtil_parseU64<CharW>;
 }
 
 } // Fog namespace

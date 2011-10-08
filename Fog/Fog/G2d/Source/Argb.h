@@ -8,7 +8,7 @@
 #define _FOG_G2D_SOURCE_ARGB_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemOps.h>
@@ -325,21 +325,21 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   static FOG_INLINE Argb32 fromAhsv(const AhsvBaseF& ahsvf)
   {
     Argb32 argb32(UNINITIALIZED);
-    _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSV](&argb32, &ahsvf);
+    _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSV](&argb32, &ahsvf);
     return argb32;
   }
 
   static FOG_INLINE Argb32 fromAhsl(const AhslBaseF& ahslf)
   {
     Argb32 argb32(UNINITIALIZED);
-    _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSL](&argb32, &ahslf);
+    _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSL](&argb32, &ahslf);
     return argb32;
   }
 
   static FOG_INLINE Argb32 fromAcmyk(const AcmykBaseF& acmykf)
   {
     Argb32 argb32(UNINITIALIZED);
-    _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ACMYK](&argb32, &acmykf);
+    _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ACMYK](&argb32, &acmykf);
     return argb32;
   }
 };
@@ -523,10 +523,10 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
   //! @brief Set all values to @a other (converting from AHSV color format).
   FOG_INLINE void setArgbF(float af, float rf, float gf, float bf)
   {
-    a = Face::f32CvtU16FromFX(af);
-    r = Face::f32CvtU16FromFX(rf);
-    g = Face::f32CvtU16FromFX(gf);
-    b = Face::f32CvtU16FromFX(bf);
+    a = Math::uroundToWord65535(af);
+    r = Math::uroundToWord65535(rf);
+    g = Math::uroundToWord65535(gf);
+    b = Math::uroundToWord65535(bf);
   }
 
   // --------------------------------------------------------------------------
@@ -677,21 +677,21 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
   static FOG_INLINE Argb64 fromAhsv(const AhslBaseF& ahsvf)
   {
     Argb64 argb64(UNINITIALIZED);
-    _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSV](&argb64, &ahsvf);
+    _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSV](&argb64, &ahsvf);
     return argb64;
   }
 
   static FOG_INLINE Argb64 fromAhsl(const AhslBaseF& ahslf)
   {
     Argb64 argb64(UNINITIALIZED);
-    _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSL](&argb64, &ahslf);
+    _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSL](&argb64, &ahslf);
     return argb64;
   }
 
   static FOG_INLINE Argb64 fromAcmyk(const AcmykBaseF& acmykf)
   {
     Argb64 argb64(UNINITIALIZED);
-    _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ACMYK](&argb64, &acmykf);
+    _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ACMYK](&argb64, &acmykf);
     return argb64;
   }
 };
@@ -852,13 +852,13 @@ struct FOG_NO_EXPORT ArgbF : public ArgbBaseF
   //! @brief Get whether the alpha is close to 1.0 (fully-opaque).
   FOG_INLINE bool isOpaque() const
   {
-    return Math::isFuzzyGreaterEq(a, 1.0f);
+    return Math::isFuzzyGe(a, 1.0f);
   }
 
   //! @brief Get whether the alpha is close to 0.0 (fully-transparent).
   FOG_INLINE bool isTransparent() const
   {
-    return Math::isFuzzyLowerEq(a, 0.0f);
+    return Math::isFuzzyLe(a, 0.0f);
   }
 
   // --------------------------------------------------------------------------
@@ -876,21 +876,21 @@ struct FOG_NO_EXPORT ArgbF : public ArgbBaseF
   static FOG_INLINE ArgbF fromAhsv(const AhsvBaseF& ahsvf)
   {
     ArgbF argbf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](&argbf, &ahsvf);
+    _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV](&argbf, &ahsvf);
     return argbf;
   }
 
   static FOG_INLINE ArgbF fromAhsl(const AhslBaseF& ahslf)
   {
     ArgbF argbf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](&argbf, &ahslf);
+    _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL](&argbf, &ahslf);
     return argbf;
   }
 
   static FOG_INLINE ArgbF fromAcmyk(const AcmykBaseF& acmykf)
   {
     ArgbF argbf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](&argbf, &acmykf);
+    _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK](&argbf, &acmykf);
     return argbf;
   }
 };

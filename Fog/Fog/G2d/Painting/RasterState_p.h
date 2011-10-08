@@ -11,8 +11,8 @@
 #include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
+#include <Fog/G2d/Painting/RasterStructs_p.h>
 #include <Fog/G2d/Painting/Rasterizer_p.h>
-#include <Fog/G2d/Render/RenderStructs_p.h>
 
 namespace Fog {
 
@@ -92,8 +92,8 @@ struct FOG_NO_EXPORT RasterState
   // ------------------------------------------------------------------------
 
   RasterSource source;
-  RenderSolid solid;
-  RenderPatternContext* pc;
+  RasterSolid solid;
+  RasterPattern* pc;
 
   // ------------------------------------------------------------------------
   // [Stroke]

@@ -10,10 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/Var.h>
@@ -178,7 +178,7 @@ err_t IcoDecoder::readHeader()
     // to have more than 1024 frames in ICO?
     if (_framesCount > 1024)
     {
-      return (_headerResult = ERR_IMAGE_MALFORMED_HEADER);
+      return (_headerResult = ERR_IMAGE_MALFORMED_STRUCTURE);
     }
 
     size_t memSize = _framesCount * sizeof(IcoEntry);
@@ -215,7 +215,7 @@ err_t IcoDecoder::readHeader()
         MemMgr::free(_framesInfo);
         _framesInfo = NULL;
         _framesCount = 0;
-        return (_headerResult = ERR_IMAGE_MALFORMED_HEADER);
+        return (_headerResult = ERR_IMAGE_MALFORMED_STRUCTURE);
       }
     }
     // TODO:  ? check individual frames if the stream is seekable ?
@@ -233,7 +233,7 @@ err_t IcoDecoder::readImage(Image& image)
 {
   if (readHeader() != ERR_OK) return _headerResult;
 
-  if (_actualFrame == _framesCount || !_framesInfo) return ERR_IMAGE_NO_MORE_FRAMES;
+  if (_actualFrame == _framesCount || !_framesInfo) return ERR_IMAGE_NO_FRAMES;
 
   err_t err;
 

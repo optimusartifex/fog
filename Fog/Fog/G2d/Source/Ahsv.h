@@ -108,13 +108,13 @@ struct FOG_NO_EXPORT AhsvF : public AhsvBaseF
   //! @brief Get whether the alpha is close to 1.0 (fully-opaque).
   FOG_INLINE bool isOpaque() const
   {
-    return Math::isFuzzyGreaterEq(a, 1.0f);
+    return Math::isFuzzyGe(a, 1.0f);
   }
 
   //! @brief Get whether the alpha is close to 0.0 (fully-transparent).
   FOG_INLINE bool isTransparent() const
   {
-    return Math::isFuzzyLowerEq(a, 0.0f);
+    return Math::isFuzzyLe(a, 0.0f);
   }
 
   // --------------------------------------------------------------------------
@@ -124,35 +124,35 @@ struct FOG_NO_EXPORT AhsvF : public AhsvBaseF
   static FOG_INLINE AhsvF fromArgb(const ArgbBase32& argb32)
   {
     AhsvF ahsvf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB32](&ahsvf, &argb32);
+    _api.color_convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB32](&ahsvf, &argb32);
     return ahsvf;
   }
 
   static FOG_INLINE AhsvF fromArgb(const ArgbBase64& argb64)
   {
     AhsvF ahsvf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB64](&ahsvf, &argb64);
+    _api.color_convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB64](&ahsvf, &argb64);
     return ahsvf;
   }
 
   static FOG_INLINE AhsvF fromArgb(const ArgbBaseF& argbf)
   {
     AhsvF ahsvf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](&ahsvf, &argbf);
+    _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB](&ahsvf, &argbf);
     return ahsvf;
   }
 
   static FOG_INLINE AhsvF fromAhsl(const AhslBaseF& ahslf)
   {
     AhsvF ahsvf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_AHSL](&ahsvf, &ahslf);
+    _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_AHSL](&ahsvf, &ahslf);
     return ahsvf;
   }
 
   static FOG_INLINE AhsvF fromAcmyk(const AcmykBaseF& acmykf)
   {
     AhsvF ahsvf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ACMYK](&ahsvf, &acmykf);
+    _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ACMYK](&ahsvf, &acmykf);
     return ahsvf;
   }
 };

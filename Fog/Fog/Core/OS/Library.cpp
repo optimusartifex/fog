@@ -10,10 +10,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Memory/MemMgr.h>
+#include <Fog/Core/OS/FileUtil.h>
 #include <Fog/Core/OS/Library.h>
-#include <Fog/Core/OS/System.h>
+#include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
@@ -64,7 +64,7 @@ static FOG_INLINE err_t LibraryHandle_open(const StringW& fileName, void** handl
 
   HMODULE hLibrary = ::LoadLibraryW(reinterpret_cast<const wchar_t*>(fileNameW.getData()));
   if (!hLibrary)
-    return System::errorFromOSLastError();
+    return OSUtil::getErrFromOSLastError();
 
   *handle = (void*)hLibrary;
   return ERR_OK;
@@ -175,7 +175,7 @@ static err_t FOG_CDECL Library_openLibrary(Library* self, const StringW* fileNam
       break;
     }
 
-    LibraryData* newd = _api.library.dCreate(handle);
+    LibraryData* newd = _api.library_dCreate(handle);
     if (FOG_IS_NULL(newd))
     {
       LibraryHandle_close(handle);
@@ -214,7 +214,7 @@ static err_t FOG_CDECL Library_openPlugin(Library* self, const StringW* category
     FOG_RETURN_ON_ERROR(relative.append(CharW('.')));
     FOG_RETURN_ON_ERROR(relative.append(extensions.getAt(i)));
 
-    if (FileSystem::findFile(paths, relative, absolute))
+    if (FileUtil::findFile(absolute, relative, paths))
     {
       if ((libOpenError = self->openLibrary(absolute, NO_FLAGS)) == ERR_OK)
         return ERR_OK;
@@ -403,27 +403,27 @@ FOG_NO_EXPORT void Library_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.library.ctor = Library_ctor;
-  _api.library.ctorCopy = Library_ctorCopy;
-  _api.library.dtor = Library_dtor;
+  _api.library_ctor = Library_ctor;
+  _api.library_ctorCopy = Library_ctorCopy;
+  _api.library_dtor = Library_dtor;
 
-  _api.library.setLibrary = Library_setLibrary;
-  _api.library.openLibrary = Library_openLibrary;
-  _api.library.openPlugin = Library_openPlugin;
-  _api.library.close = Library_close;
-  _api.library.getSymbolStubA = Library_getSymbolStubA;
-  _api.library.getSymbolStringW = Library_getSymbolStringW;
-  _api.library.getSymbols = Library_getSymbols;
+  _api.library_setLibrary = Library_setLibrary;
+  _api.library_openLibrary = Library_openLibrary;
+  _api.library_openPlugin = Library_openPlugin;
+  _api.library_close = Library_close;
+  _api.library_getSymbolStubA = Library_getSymbolStubA;
+  _api.library_getSymbolStringW = Library_getSymbolStringW;
+  _api.library_getSymbols = Library_getSymbols;
 
-  _api.library.dCreate = Library_dCreate;
-  _api.library.dFree = Library_dFree;
+  _api.library_dCreate = Library_dCreate;
+  _api.library_dFree = Library_dFree;
 
-  _api.library.getSystemPrefix = Library_getSystemPrefix;
-  _api.library.getSystemExtensions = Library_getSystemExtensions;
-  _api.library.getLibraryPaths = Library_getLibraryPaths;
-  _api.library.addLibraryPath = Library_addLibraryPath;
-  _api.library.removeLibraryPath = Library_removeLibraryPath;
-  _api.library.hasLibraryPath = Library_hasLibraryPath;
+  _api.library_getSystemPrefix = Library_getSystemPrefix;
+  _api.library_getSystemExtensions = Library_getSystemExtensions;
+  _api.library_getLibraryPaths = Library_getLibraryPaths;
+  _api.library_addLibraryPath = Library_addLibraryPath;
+  _api.library_removeLibraryPath = Library_removeLibraryPath;
+  _api.library_hasLibraryPath = Library_hasLibraryPath;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -433,7 +433,7 @@ FOG_NO_EXPORT void Library_init(void)
   d->reference.init(1);
   d->handle = NULL;
 
-  _api.library.dNone = d;
+  _api.library_dNone = d;
 
   // --------------------------------------------------------------------------
   // [Windows Support]

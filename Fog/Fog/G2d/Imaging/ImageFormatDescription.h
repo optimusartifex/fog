@@ -31,7 +31,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
   FOG_INLINE uint32_t getBytesPerPixel() const { return _bytesPerPixel; }
   FOG_INLINE uint32_t getPrecision() const { return _precision; }
 
-  FOG_INLINE uint32_t getCompatibleFormat() const { return _api.imageformatdescription.getCompatibleFormat(this); }
+  FOG_INLINE uint32_t getCompatibleFormat() const { return _api.imageformatdescription_getCompatibleFormat(this); }
 
   FOG_INLINE uint32_t getComponentMask() const { return _componentMask; }
 
@@ -108,7 +108,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
     uint32_t depth, uint32_t flags,
     uint64_t aMask, uint64_t rMask, uint64_t gMask, uint64_t bMask)
   {
-    return _api.imageformatdescription.createArgb(this,
+    return _api.imageformatdescription_createArgb(this,
       depth, flags, aMask, rMask, gMask, bMask);
   }
 
@@ -131,15 +131,19 @@ struct FOG_NO_EXPORT ImageFormatDescription
     // Small optimization useful when comparing a list of image format
     // descriptions in a loop. If both formats are equal and built-in then
     // we can simply return true.
-    if (_format != other._format) return false;
-    if (_format < IMAGE_FORMAT_COUNT) return true;
+    if (_format != other._format)
+      return false;
+
+    if (_format < IMAGE_FORMAT_COUNT)
+      return true;
 
     return MemOps::eq_t<ImageFormatDescription>(this, &other);
   }
 
   FOG_INLINE bool operator!=(const ImageFormatDescription& other)
   {
-    if (_format != other._format) return true;
+    if (_format != other._format)
+      return true;
 
     return !MemOps::eq_t<ImageFormatDescription>(this, &other);
   }

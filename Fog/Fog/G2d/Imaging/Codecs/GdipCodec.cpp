@@ -13,13 +13,12 @@
 #if defined(FOG_OS_WINDOWS)
 
 // [Dependencies]
-#include <Fog/Core/Com/Com.h>
-#include <Fog/Core/Com/ComStream_p.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/OS/Library.h>
+#include <Fog/Core/OS/WinCom.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/GdipCodec_p.h>
@@ -348,8 +347,7 @@ GdipDecoder::~GdipDecoder()
 
 void GdipDecoder::attachStream(Stream& stream)
 {
-  _istream = fog_new ComStream(stream);
-
+  WinCOM::makeIStream(&_istream, stream);
   base::attachStream(stream);
 }
 
@@ -426,7 +424,7 @@ err_t GdipDecoder::readImage(Image& image)
   if (readHeader() != ERR_OK) return _headerResult;
 
   // Don't read image more than once.
-  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_MORE_FRAMES);
+  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_FRAMES);
 
   // Create image.
   if ((err = image.create(_size, _format)) != ERR_OK) return err;
@@ -506,8 +504,7 @@ GdipEncoder::~GdipEncoder()
 
 void GdipEncoder::attachStream(Stream& stream)
 {
-  _istream = fog_new ComStream(stream);
-
+  WinCOM::makeIStream(&_istream, stream);
   base::attachStream(stream);
 }
 

@@ -236,12 +236,12 @@ struct FOG_NO_EXPORT ShapeF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.shapef.getBoundingBox(_type, &_data, &dst, tr);
+    return _api.shapef_getBoundingBox(_type, &_data, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.shapef.getBoundingBox(_type, &_data, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.shapef_getBoundingBox(_type, &_data, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -253,7 +253,7 @@ struct FOG_NO_EXPORT ShapeF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _api.shapef.hitTest(_type, &_data, &pt);
+    return _api.shapef_hitTest(_type, &_data, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -401,12 +401,12 @@ struct FOG_NO_EXPORT ShapeD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.shaped.getBoundingBox(_type, &_data, &dst, tr);
+    return _api.shaped_getBoundingBox(_type, &_data, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.shaped.getBoundingBox(_type, &_data, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.shaped_getBoundingBox(_type, &_data, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -418,7 +418,7 @@ struct FOG_NO_EXPORT ShapeD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _api.shaped.hitTest(_type, &_data, &pt);
+    return _api.shaped_hitTest(_type, &_data, &pt);
   }
 
   // --------------------------------------------------------------------------

@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
-#include <Fog/Core/Face/Face_SSE2.h>
+#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Face/FaceSSE2.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
@@ -21,18 +21,15 @@
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/Painter.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
-#include <Fog/G2d/Painting/RasterFiller_p.h>
 #include <Fog/G2d/Painting/RasterPaintEngine_p.h>
+#include <Fog/G2d/Painting/RasterPaintWork_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterState_p.h>
-#include <Fog/G2d/Painting/RasterUtil_SSE2_p.h>
-#include <Fog/G2d/Painting/RasterWorker_p.h>
+#include <Fog/G2d/Painting/RasterUtil_p.h>
 #include <Fog/G2d/Painting/Rasterizer_p.h>
-#include <Fog/G2d/Render/RenderApi_p.h>
-#include <Fog/G2d/Render/RenderConstants_p.h>
-#include <Fog/G2d/Render/RenderUtil_p.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Text/Font.h>
@@ -52,7 +49,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32_byte_SSE2(Painter* self
   {
     engine->saveSourceAndDiscard();
     engine->sourceType = RASTER_SOURCE_ARGB32;
-    engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
+    engine->ctx.pc = (RasterPattern*)(size_t)0x1;
   }
   else
   {
@@ -66,7 +63,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32_byte_SSE2(Painter* self
   Face::m128iUnpackPI16FromPI8Lo(xmmARGB, xmmARGB);
   Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAAAA, xmmARGB);
   Face::m128iFillPBWi<3>(xmmARGB, xmmARGB);
-  Face::m128iMulDiv255PBW(xmmARGB, xmmARGB, xmmAAAA);
+  Face::m128iMulDiv255PI16(xmmARGB, xmmARGB, xmmAAAA);
   Face::m128iPackPU8FromPU16(xmmARGB, xmmARGB);
 
   engine->source.color->_argb32.u32 = argb32;
@@ -83,7 +80,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self
   {
     engine->saveSourceAndDiscard();
     engine->sourceType = RASTER_SOURCE_COLOR;
-    engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
+    engine->ctx.pc = (RasterPattern*)(size_t)0x1;
   }
   else
   {
@@ -115,7 +112,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self
   // Store ArgbF.
   Face::m128fStore16uLoHi(&engine->source.color->_data[0], xmmARGBF);
 
-  Face::m128iMulDiv255PBW(xmmARGB32, xmmARGB32, xmmAAAA32);
+  Face::m128iMulDiv255PI16(xmmARGB32, xmmARGB32, xmmAAAA32);
   Face::m128fZero(xmmARGBF);
   Face::m128iPackPU8FromPU16(xmmARGB32, xmmARGB32);
 
@@ -138,7 +135,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceColor_byte_SSE2(Painter* self,
   {
     engine->saveSourceAndDiscard();
     engine->sourceType = RASTER_SOURCE_COLOR;
-    engine->ctx.pc = (RenderPatternContext*)(size_t)0x1;
+    engine->ctx.pc = (RasterPattern*)(size_t)0x1;
   }
   else
   {
@@ -164,7 +161,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceColor_byte_SSE2(Painter* self,
   Face::m128iFillPBWi<3>(xmmARGB32, xmmARGB32);
 
   Face::m128iStore8(reinterpret_cast<char*>(&engine->source.color) +  0, xmm0);
-  Face::m128iMulDiv255PBW(xmmARGB32, xmmARGB32, xmmAAAA32);
+  Face::m128iMulDiv255PI16(xmmARGB32, xmmARGB32, xmmAAAA32);
 
   Face::m128iStore8(reinterpret_cast<char*>(&engine->source.color) +  8, xmm1);
   Face::m128iPackPU8FromPU16(xmmARGB32, xmmARGB32);

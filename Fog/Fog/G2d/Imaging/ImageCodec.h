@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Image.h>

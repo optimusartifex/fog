@@ -187,14 +187,14 @@ static uint FOG_CDECL CircleT_toCSpline(const NumT_(Circle)* self, NumT_(Point)*
 
 FOG_NO_EXPORT void Circle_init(void)
 {
-  _api.circlef.getBoundingBox = CircleT_getBoundingBox<float>;
-  _api.circled.getBoundingBox = CircleT_getBoundingBox<double>;
+  _api.circlef_getBoundingBox = CircleT_getBoundingBox<float>;
+  _api.circled_getBoundingBox = CircleT_getBoundingBox<double>;
 
-  _api.circlef.hitTest = CircleT_hitTest<float>;
-  _api.circled.hitTest = CircleT_hitTest<double>;
+  _api.circlef_hitTest = CircleT_hitTest<float>;
+  _api.circled_hitTest = CircleT_hitTest<double>;
 
-  _api.circlef.toCSpline = CircleT_toCSpline<float>;
-  _api.circled.toCSpline = CircleT_toCSpline<double>;
+  _api.circlef_toCSpline = CircleT_toCSpline<float>;
+  _api.circled_toCSpline = CircleT_toCSpline<double>;
 }
 
 } // Fog namespace

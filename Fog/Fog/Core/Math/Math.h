@@ -12,6 +12,18 @@
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/FloatBits.h>
 
+#if defined(FOG_HARDCODE_SSE)
+# include <Fog/Core/C++/IntrinSSE.h>
+#endif // FOG_HARDCODE_SSE
+
+#if defined(FOG_HARDCODE_SSE2)
+# include <Fog/Core/C++/IntrinSSE2.h>
+#endif // FOG_HARDCODE_SSE2
+
+#include <Fog/Core/Global/Types.h>
+#include <Fog/Core/Math/Constants.h>
+#include <Fog/Core/Math/FloatBits.h>
+
 // [Dependencies - C]
 #include <math.h>
 
@@ -68,6 +80,347 @@ namespace Math {
 
 //! @addtogroup Fog_Core_Math
 //! @{
+
+// ============================================================================
+// [Fog::Math - Finite / Infinite / NaN]
+// ============================================================================
+
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+// Little Endian.
+#define _FOG_MATH_DECLARE_CONST_F(_Var_, _V0_, _V1_, _V2_, _V3_) \
+  static const uint8_t _Var_[4] = { _V3_, _V2_, _V1_, _V0_ }
+#define _FOG_MATH_DECLARE_CONST_D(_Var_, _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_) \
+  static const uint8_t _Var_[8] = { _V7_, _V6_, _V5_, _V4_, _V3_, _V2_, _V1_, _V0_ }
+#else
+// Big Endian.
+#define _FOG_MATH_DECLARE_CONST_F(_Var_, _V0_, _V1_, _V2_, _V3_) \
+  static const uint8_t _Var_[4] = { _V0_, _V1_, _V2_, _V3_ }
+#define _FOG_MATH_DECLARE_CONST_D(_Var_, _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_) \
+  static const uint8_t _Var_[8] = { _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_ }
+#endif // FOG_BYTE_ORDER
+
+#define _FOG_MATH_GET_CONST_F(_Var_) reinterpret_cast<const float*>(_Var_)[0]
+#define _FOG_MATH_GET_CONST_D(_Var_) reinterpret_cast<const double*>(_Var_)[0]
+
+#define _FOG_MATH_DECLARE_VARIANT_TEMPLATE(_Func_) \
+  template<typename T> \
+  FOG_STATIC_INLINE_T T _Func_##T() { FOG_ASSERT_NOT_REACHED(); } \
+  \
+  template<> \
+  FOG_STATIC_INLINE_T float _Func_##T<float>() { return _Func_##F(); } \
+  \
+  template<> \
+  FOG_STATIC_INLINE_T double _Func_##T<double>() { return _Func_##D(); }
+
+static FOG_INLINE float getSNanF()
+{
+#if defined(_FOG_MATH_GET_SNAN_F)
+  return _FOG_MATH_GET_SNAN_F();
+#else
+  _FOG_MATH_DECLARE_CONST_F(_const_snan_f, 0x8F, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_F(_const_snan_f);
+#endif // _FOG_MATH_GET_SNAN_F
+}
+
+static FOG_INLINE double getSNanD()
+{
+#if defined(_FOG_MATH_GET_SNAN_D)
+  return _FOG_MATH_GET_SNAN_D();
+#else
+  _FOG_MATH_DECLARE_CONST_D(_const_snan_d, 0x8F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_D(_const_snan_d);
+#endif // _FOG_MATH_GET_SNAN_D
+}
+
+static FOG_INLINE float getQNanF()
+{
+#if defined(_FOG_MATH_GET_QNAN_F)
+  return _FOG_MATH_GET_QNAN_F();
+#else
+  _FOG_MATH_DECLARE_CONST_F(_const_qnan_f, 0xFF, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_F(_const_qnan_f);
+#endif // _FOG_MATH_GET_QNAN_F
+}
+
+static FOG_INLINE double getQNanD()
+{
+#if defined(_FOG_MATH_GET_QNAN_D)
+  return _FOG_MATH_GET_QNAN_D();
+#else
+  _FOG_MATH_DECLARE_CONST_D(_const_qnan_d, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+  return _FOG_MATH_GET_CONST_D(_const_qnan_d);
+#endif // _FOG_MATH_GET_QNAN_D
+}
+
+static FOG_INLINE float getPInfF()
+{
+#if defined(_FOG_MATH_GET_PINF_F)
+  return _FOG_MATH_GET_PINF_F();
+#else
+  _FOG_MATH_DECLARE_CONST_F(_const_pinf_f, 0x7F, 0x80, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_F(_const_pinf_f);
+#endif
+}
+
+static FOG_INLINE double getPInfD()
+{
+#if defined(_FOG_MATH_GET_PINF_D)
+  return _FOG_MATH_GET_PINF_D();
+#else
+  _FOG_MATH_DECLARE_CONST_D(_const_pinf_d, 0x7F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_D(_const_pinf_d);
+#endif
+}
+
+static FOG_INLINE float getNInfF()
+{
+#if defined(_FOG_MATH_GET_NINF_F)
+  return _FOG_MATH_GET_NINF_F();
+#else
+  _FOG_MATH_DECLARE_CONST_F(_const_ninf_f, 0xFF, 0x80, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_F(_const_ninf_f);
+#endif
+}
+
+static FOG_INLINE double getNInfD()
+{
+#if defined(_FOG_MATH_GET_NINF_D)
+  return _FOG_MATH_GET_NINF_D();
+#else
+  _FOG_MATH_DECLARE_CONST_D(_const_ninf_d, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+  return _FOG_MATH_GET_CONST_D(_const_ninf_d);
+#endif
+}
+
+// Abstract.
+_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getSNan)
+_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getQNan)
+_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getPInf)
+_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getNInf)
+
+static FOG_INLINE bool isFinite(float x)
+{
+#if defined(_FOG_MATH_IS_FINITE_F)
+  return _FOG_MATH_IS_FINITE_F(x);
+#else
+  FloatBits bits;
+  bits.f = x;
+  return (bits.u32 & 0x7F800000U) != 0x7F800000U;
+#endif // _FOG_MATH_IS_FINITE_F
+}
+
+static FOG_INLINE bool isFinite(double x)
+{
+#if defined(_FOG_MATH_IS_FINITE_D)
+  return _FOG_MATH_IS_FINITE_D(x);
+#else
+  DoubleBits bits;
+  bits.d = x;
+  return (bits.u32Hi & 0x7FF00000U) != 0x7FF00000U;
+#endif // _FOG_MATH_IS_FINITE_D
+}
+
+static FOG_INLINE bool isInfinite(float x)
+{
+#if defined(_FOG_MATH_IS_INFINITE_F)
+  return _FOG_MATH_IS_INFINITE_F(x);
+#else
+  FloatBits bits;
+  bits.f = x;
+  return (bits.u32 & 0x7F800000U) == 0x7F800000U;
+#endif // _FOG_MATH_IS_INFINITE_F
+}
+
+static FOG_INLINE bool isInfinite(double x)
+{
+#if defined(_FOG_MATH_IS_INFINITE_D)
+  return _FOG_MATH_IS_INFINITE_D(x);
+#else
+  DoubleBits bits;
+  bits.d = x;
+  return (bits.u32Hi & 0x7FF00000U) == 0x7FF00000U;
+#endif // _FOG_MATH_IS_INFINITE_D
+}
+
+static FOG_INLINE bool isNaN(float x)
+{
+#if defined(_FOG_MATH_IS_NAN_F)
+  return _FOG_MATH_IS_NAN_F(x);
+#else
+  return !(x == x);
+#endif // _FOG_MATH_IS_NAN_F
+}
+
+static FOG_INLINE bool isNaN(double x)
+{
+#if defined(_FOG_MATH_IS_NAN_D)
+  return _FOG_MATH_IS_NAN_D(x);
+#else
+  return !(x == x);
+#endif // _FOG_MATH_IS_NAN_D
+}
+
+// Clean-up.
+#undef _FOG_MATH_DECLARE_CONST_F
+#undef _FOG_MATH_DECLARE_CONST_D
+#undef _FOG_MATH_GET_CONST_F
+#undef _FOG_MATH_GET_CONST_D
+#undef _FOG_MATH_DECLARE_VARIANT_TEMPLATE
+
+// ============================================================================
+// [Fog::Math - IRound]
+// ============================================================================
+
+// According to MSDN the _M_IX86_FP is defined for x86 compilation. If the
+// _M_IX86_FP is set to 2 then the SSE2-Enabled code generation is used,
+// otherwise the x87 floating point stack is used.
+//
+// Note 1: When compiling for AMD64 the _M_IX86_FP is usually defined to 0, but
+// the code is SSE2 enabled.
+//
+// Note 2: This code assumes that the rounding mode is set to NEAREST,
+// otherwise the rounding will be incorrect and it's not our bug.
+
+static FOG_INLINE int iround(float x)
+{
+#if defined(FOG_ARCH_X86_64) || defined(FOG_HARDCODE_SSE)
+  return _mm_cvtss_si32(_mm_load_ss(&x));
+#elif defined(FOG_ARCH_X86) && defined(FOG_CC_MSC)
+  int t;
+  __asm {
+    fld dword ptr [x]
+    fistp dword ptr [t]
+  }
+  return t;
+#elif defined(FOG_ARCH_X86) && defined(FOG_CC_GNU)
+  int t;
+  __asm__ __volatile__("flds %1; fistpl %0;" : "=m" (t) : "m" (x));
+  return t;
+#else
+  return (int)(x + ((x < 0.0f) ? -0.5f : 0.5f));
+#endif
+}
+
+static FOG_INLINE int iround(double x)
+{
+#if defined(FOG_ARCH_X86_64) || defined(FOG_HARDCODE_SSE2)
+  return _mm_cvtsd_si32(_mm_load_sd(&x));
+#elif defined(FOG_ARCH_X86) && defined(FOG_CC_MSC)
+  int t;
+  __asm {
+    fld qword ptr [x]
+    fistp dword ptr [t]
+  }
+  return t;
+#elif defined(FOG_ARCH_X86) && defined(FOG_CC_GNU)
+  int t;
+  __asm__ __volatile__("fldl %1; fistpl %0;" : "=m" (t) : "m" (x));
+  return t;
+#else
+  return (int)(x + ((x < 0.0) ? -0.5 : 0.5));
+#endif
+}
+
+// ============================================================================
+// [Fog::Math - URound]
+// ============================================================================
+
+static FOG_INLINE uint uround(float x) { return (uint)iround(x); }
+static FOG_INLINE uint uround(double x) { return (uint)iround(x); }
+
+// ============================================================================
+// [Fog::Math - IFloor]
+// ============================================================================
+
+static FOG_INLINE int ifloor(float x)
+{
+#if defined(FOG_ARCH_X86_64) || defined(FOG_HARDCODE_SSE)
+  return _mm_cvttss_si32(_mm_load_ss(&x));
+#else
+  return (int)x;
+#endif
+}
+
+static FOG_INLINE int ifloor(double x)
+{
+#if defined(FOG_ARCH_X86_64) || defined(FOG_HARDCODE_SSE2)
+  return _mm_cvttsd_si32(_mm_load_sd(&x));
+#else
+  return (int)x;
+#endif
+}
+
+// ============================================================================
+// [Fog::Math - UFloor]
+// ============================================================================
+
+static FOG_INLINE uint ufloor(float x) { return (uint)ifloor(x); }
+static FOG_INLINE uint ufloor(double x) { return (uint)ifloor(x); }
+
+// ============================================================================
+// [Fog::Math - ICeil]
+// ============================================================================
+
+static FOG_INLINE int iceil(float x) { return (int)::ceilf(x); }
+static FOG_INLINE int iceil(double x) { return (int)::ceil(x); }
+
+// ============================================================================
+// [Fog::Math - UCeil]
+// ============================================================================
+
+static FOG_INLINE uint uceil(float x) { return (uint)iceil(x); }
+static FOG_INLINE uint uceil(double x) { return (uint)iceil(x); }
+
+// ============================================================================
+// [Fog::Math - ByteFromFloat]
+// ============================================================================
+
+static FOG_INLINE uint32_t uroundToByte255(float x) { return uround(x * 255.0f); }
+static FOG_INLINE uint32_t uroundToByte255(double x) { return uround(x * 255.0); }
+
+static FOG_INLINE uint32_t uroundToByte256(float x) { return uround(x * 256.0f); }
+static FOG_INLINE uint32_t uroundToByte256(double x) { return uround(x * 256.0); }
+
+static FOG_INLINE uint32_t uroundToWord65535(float x) { return uround(x * 65535.0f); }
+static FOG_INLINE uint32_t uroundToWord65535(double x) { return uround(x * 65535.0); }
+
+static FOG_INLINE uint32_t uroundToWord65536(float x) { return uround(x * 65536.0f); }
+static FOG_INLINE uint32_t uroundToWord65536(double x) { return uround(x * 65536.0); }
+
+// ============================================================================
+// [Fog::Math - FixedFromFloat]
+// ============================================================================
+
+// The formula used to get the magic number for conversion from 'float->fixed':
+//
+//   Magic = (1 << (FLOAT_MANTISSA_SIZE - FIXED_FRACTION_SIZE)) * 1.5
+//
+// This number can be used to do float to signed integer conversion (it handles
+// well the unsigned case). The default behavior of the constant is to round,
+// subtracting 0.5 from that constant means truncation.
+
+static FOG_INLINE Fixed24x8 fixed24x8FromFloat(double d)
+{
+  DoubleBits data;
+  data.d = d + 26388279066624.0;
+  return data.i32Lo;
+}
+
+static FOG_INLINE Fixed16x16 fixed16x16FromFloat(double d)
+{
+  DoubleBits data;
+  data.d = d + 103079215104.0;
+  return data.i32Lo;
+}
+
+static FOG_INLINE Fixed48x16 fixed48x16FromFloat(double d) { return (Fixed48x16)(d * 65536.0); }
+static FOG_INLINE Fixed32x32 fixed32x32FromFloat(double d) { return (Fixed32x32)(d * 4294967296.0); }
+
+static FOG_INLINE Fixed24x8 fixed24x8FromFloat(float d) { return fixed24x8FromFloat(double(d)); }
+static FOG_INLINE Fixed16x16 fixed16x16FromFloat(float d) { return fixed16x16FromFloat(double(d)); }
+
+static FOG_INLINE Fixed48x16 fixed48x16FromFloat(float d) { return fixed48x16FromFloat(double(d)); }
+static FOG_INLINE Fixed32x32 fixed32x32FromFloat(float d) { return fixed32x32FromFloat(double(d)); }
 
 // ============================================================================
 // [Fog::Math - Min]
@@ -274,191 +627,6 @@ FOG_STATIC_INLINE_T double abs(const double& a)
   return ::fabs(a);
 }
 
-// ============================================================================
-// [Fog::Math - Finite / Infinite / NaN]
-// ============================================================================
-
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-// Little Endian.
-#define _FOG_MATH_DECLARE_CONST_F(_Var_, _V0_, _V1_, _V2_, _V3_) \
-  static const uint8_t _Var_[4] = { _V3_, _V2_, _V1_, _V0_ }
-#define _FOG_MATH_DECLARE_CONST_D(_Var_, _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_) \
-  static const uint8_t _Var_[8] = { _V7_, _V6_, _V5_, _V4_, _V3_, _V2_, _V1_, _V0_ }
-#else
-// Big Endian.
-#define _FOG_MATH_DECLARE_CONST_F(_Var_, _V0_, _V1_, _V2_, _V3_) \
-  static const uint8_t _Var_[4] = { _V0_, _V1_, _V2_, _V3_ }
-#define _FOG_MATH_DECLARE_CONST_D(_Var_, _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_) \
-  static const uint8_t _Var_[8] = { _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_ }
-#endif // FOG_BYTE_ORDER
-
-#define _FOG_MATH_GET_CONST_F(_Var_) reinterpret_cast<const float*>(_Var_)[0]
-#define _FOG_MATH_GET_CONST_D(_Var_) reinterpret_cast<const double*>(_Var_)[0]
-
-#define _FOG_MATH_DECLARE_VARIANT_TEMPLATE(_Func_) \
-  template<typename T> \
-  FOG_STATIC_INLINE_T T _Func_##T() { FOG_ASSERT_NOT_REACHED(); } \
-  \
-  template<> \
-  FOG_STATIC_INLINE_T float _Func_##T<float>() { return _Func_##F(); } \
-  \
-  template<> \
-  FOG_STATIC_INLINE_T double _Func_##T<double>() { return _Func_##D(); }
-
-static FOG_INLINE float getSNanF()
-{
-#if defined(_FOG_MATH_GET_SNAN_F)
-  return _FOG_MATH_GET_SNAN_F();
-#else
-  _FOG_MATH_DECLARE_CONST_F(_const_snan_f, 0x8F, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_F(_const_snan_f);
-#endif // _FOG_MATH_GET_SNAN_F
-}
-
-static FOG_INLINE double getSNanD()
-{
-#if defined(_FOG_MATH_GET_SNAN_D)
-  return _FOG_MATH_GET_SNAN_D();
-#else
-  _FOG_MATH_DECLARE_CONST_D(_const_snan_d, 0x8F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_D(_const_snan_d);
-#endif // _FOG_MATH_GET_SNAN_D
-}
-
-static FOG_INLINE float getQNanF()
-{
-#if defined(_FOG_MATH_GET_QNAN_F)
-  return _FOG_MATH_GET_QNAN_F();
-#else
-  _FOG_MATH_DECLARE_CONST_F(_const_qnan_f, 0xFF, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_F(_const_qnan_f);
-#endif // _FOG_MATH_GET_QNAN_F
-}
-
-static FOG_INLINE double getQNanD()
-{
-#if defined(_FOG_MATH_GET_QNAN_D)
-  return _FOG_MATH_GET_QNAN_D();
-#else
-  _FOG_MATH_DECLARE_CONST_D(_const_qnan_d, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
-  return _FOG_MATH_GET_CONST_D(_const_qnan_d);
-#endif // _FOG_MATH_GET_QNAN_D
-}
-
-static FOG_INLINE float getPInfF()
-{
-#if defined(_FOG_MATH_GET_PINF_F)
-  return _FOG_MATH_GET_PINF_F();
-#else
-  _FOG_MATH_DECLARE_CONST_F(_const_pinf_f, 0x7F, 0x80, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_F(_const_pinf_f);
-#endif
-}
-
-static FOG_INLINE double getPInfD()
-{
-#if defined(_FOG_MATH_GET_PINF_D)
-  return _FOG_MATH_GET_PINF_D();
-#else
-  _FOG_MATH_DECLARE_CONST_D(_const_pinf_d, 0x7F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_D(_const_pinf_d);
-#endif
-}
-
-static FOG_INLINE float getNInfF()
-{
-#if defined(_FOG_MATH_GET_NINF_F)
-  return _FOG_MATH_GET_NINF_F();
-#else
-  _FOG_MATH_DECLARE_CONST_F(_const_ninf_f, 0xFF, 0x80, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_F(_const_ninf_f);
-#endif
-}
-
-static FOG_INLINE double getNInfD()
-{
-#if defined(_FOG_MATH_GET_NINF_D)
-  return _FOG_MATH_GET_NINF_D();
-#else
-  _FOG_MATH_DECLARE_CONST_D(_const_ninf_d, 0xFF, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-  return _FOG_MATH_GET_CONST_D(_const_ninf_d);
-#endif
-}
-
-// Abstract.
-_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getSNan)
-_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getQNan)
-_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getPInf)
-_FOG_MATH_DECLARE_VARIANT_TEMPLATE(getNInf)
-
-static FOG_INLINE bool isFinite(float x)
-{
-#if defined(_FOG_MATH_IS_FINITE_F)
-  return _FOG_MATH_IS_FINITE_F(x);
-#else
-  FloatBits bits;
-  bits.f = x;
-  return (bits.u32 & 0x7F800000U) != 0x7F800000U;
-#endif // _FOG_MATH_IS_FINITE_F
-}
-
-static FOG_INLINE bool isFinite(double x)
-{
-#if defined(_FOG_MATH_IS_FINITE_D)
-  return _FOG_MATH_IS_FINITE_D(x);
-#else
-  DoubleBits bits;
-  bits.d = x;
-  return (bits.u32Hi & 0x7FF00000U) != 0x7FF00000U;
-#endif // _FOG_MATH_IS_FINITE_D
-}
-
-static FOG_INLINE bool isInfinite(float x)
-{
-#if defined(_FOG_MATH_IS_INFINITE_F)
-  return _FOG_MATH_IS_INFINITE_F(x);
-#else
-  FloatBits bits;
-  bits.f = x;
-  return (bits.u32 & 0x7F800000U) == 0x7F800000U;
-#endif // _FOG_MATH_IS_INFINITE_F
-}
-
-static FOG_INLINE bool isInfinite(double x)
-{
-#if defined(_FOG_MATH_IS_INFINITE_D)
-  return _FOG_MATH_IS_INFINITE_D(x);
-#else
-  DoubleBits bits;
-  bits.d = x;
-  return (bits.u32Hi & 0x7FF00000U) == 0x7FF00000U;
-#endif // _FOG_MATH_IS_INFINITE_D
-}
-
-static FOG_INLINE bool isNaN(float x)
-{
-#if defined(_FOG_MATH_IS_NAN_F)
-  return _FOG_MATH_IS_NAN_F(x);
-#else
-  return !(x == x);
-#endif // _FOG_MATH_IS_NAN_F
-}
-
-static FOG_INLINE bool isNaN(double x)
-{
-#if defined(_FOG_MATH_IS_NAN_D)
-  return _FOG_MATH_IS_NAN_D(x);
-#else
-  return !(x == x);
-#endif // _FOG_MATH_IS_NAN_D
-}
-
-// Clean-up.
-#undef _FOG_MATH_DECLARE_CONST_F
-#undef _FOG_MATH_DECLARE_CONST_D
-#undef _FOG_MATH_GET_CONST_F
-#undef _FOG_MATH_GET_CONST_D
-#undef _FOG_MATH_DECLARE_VARIANT_TEMPLATE
 
 // ============================================================================
 // [Fog::Math - Ceil / Floor]

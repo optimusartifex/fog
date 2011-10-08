@@ -33,6 +33,9 @@ FOG_CAPI_DECLARE void _fog_init(void)
   // [Core/Memory]
   MemOps_init();                 // Depends on Cpu.
   MemMgr_init();
+
+  MemBlockAllocator_init();
+  MemZoneAllocator_init();
   MemPool_init();
 
   // [Core/Threading]
@@ -62,12 +65,23 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Date_init();
 
   // [Core/OS]
-  Library_init();
-  System_init();
+  Environment_init();
 
-  // [Core/Streaming]
-  DirEntry_init();
+#if defined(FOG_OS_WINDOWS)
+  WinUtil_init();
+  WinCOM_init();
+#endif // FOG_OS_WINDOWS
+
+  OSInfo_init();
+  OSUtil_init();
+  Library_init();
+
+  FileInfo_init();
+  FileMapping_init();
+  FilePath_init();
+  FileUtil_init();
   DirIterator_init();
+
   Stream_init();
 
   // [Core/Threading]
@@ -108,12 +122,6 @@ FOG_CAPI_DECLARE void _fog_init(void)
   PathStroker_init();
   PathInfo_init();
 
-  // [G2d/Painting]
-  Rasterizer_init();
-
-  // [G2d/Render]
-  Render_init();
-
   // [G2d/Source]
   Color_init();
   ColorStopList_init();
@@ -130,9 +138,17 @@ FOG_CAPI_DECLARE void _fog_init(void)
   ImageEffect_init();
 
   ColorMatrix_init();
+  ColorLutArray_init();
+  ColorLut_init();
+  ComponentTransferFunction_init();
+  ComponentTransfer_init();
+  ConvolutionMatrix_init();
 
   // [G2d/Painting]
+  RasterOps_init();
+  Rasterizer_init();
   PaintDeviceInfo_init();
+
   NullPaintEngine_init();
   RasterPaintEngine_init();
 

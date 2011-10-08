@@ -11,12 +11,12 @@
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/Core/IO/FileSystem.h>
 #include <Fog/Core/Kernel/Application.h>
 #include <Fog/Core/Kernel/EventLoop.h>
 #include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/OS/Library.h>
-#include <Fog/Core/OS/System.h>
+#include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Tools/Hash.h>
@@ -25,17 +25,23 @@
 #include <Fog/Core/Tools/TextCodec.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
 
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
+# include <Fog/Core/OS/WinUtil.h>
 # include <Fog/Gui/Engine/WinGuiEngine.h>
 # include <io.h>
-#elif defined(FOG_OS_MAC)
-# include <Fog/Gui/Engine/MacGuiEngine.h>
-#endif
+#endif // FOG_OS_WINDOWS
 
-#if defined(FOG_HAVE_UNISTD_H)
+// [Dependencies - Mac]
+#if defined(FOG_OS_MAC)
+# include <Fog/Gui/Engine/MacGuiEngine.h>
+#endif // FOG_OS_MAC
+
+// [Dependencies - Posix]
+#if defined(FOG_OS_POSIX)
 # include <errno.h>
 # include <unistd.h>
-#endif // FOG_HAVE_UNISTD_H
+#endif // FOG_OS_POSIX
 
 FOG_IMPLEMENT_OBJECT(Fog::Application)
 
@@ -229,10 +235,10 @@ EventLoop* Application_Local::createEventLoop(const StringW& name)
 void Application_Local::applicationArgumentsWasSet()
 {
   applicationExecutable = applicationArguments.getAt(0);
-  FileSystem::toAbsolutePath(applicationExecutable, StringW(), applicationExecutable);
+  FilePath::toAbsolute(applicationExecutable, applicationExecutable);
 
   StringW applicationDirectory;
-  FileSystem::extractDirectory(applicationDirectory, applicationExecutable);
+  FilePath::extractDirectory(applicationDirectory, applicationExecutable);
 
   // Application directory usually contains plugins and library itself under
   // Windows, but we will add it also for POSIX OSes. It can help if application
@@ -377,12 +383,12 @@ err_t Application::getWorkingDirectory(StringW& dst)
 err_t Application::setWorkingDirectory(const StringW& dir)
 {
   StringW dirW;
-  FOG_RETURN_ON_ERROR(System::makeWindowsPath(dirW, dir));
+  FOG_RETURN_ON_ERROR(WinUtil::makeWinPath(dirW, dir));
 
   if (SetCurrentDirectoryW(reinterpret_cast<const wchar_t*>(dirW.getData())) == 0)
     return ERR_OK;
   else
-    return System::errorFromOSLastError();
+    return OSUtil::getErrFromOSLastError();
 }
 #endif // FOG_OS_WINDOWS
 

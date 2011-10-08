@@ -1107,6 +1107,25 @@ static void FOG_CDECL PathStrokerT_ctor(NumT_(PathStroker)* self)
 }
 
 template<typename NumT>
+static void FOG_CDECL PathStrokerT_ctorCopy(NumT_(PathStroker)* self, const NumT_(PathStroker)* other)
+{
+  self->_params.initCustom1(other->_params);
+  self->_transform.initCustom1(other->_transform);
+  self->_clipBox = other->_clipBox;
+  self->_transformedClipBox = other->_transformedClipBox;
+  self->_w = other->_w;
+  self->_wAbs = other->_wAbs;
+  self->_wEps = other->_wEps;
+  self->_da = other->_da;
+  self->_flatness = other->_flatness;
+  self->_wSign = other->_wSign;
+  self->_isDirty = other->_isDirty;
+  self->_isClippingEnabled = other->_isClippingEnabled;
+  self->_isTransformSimple = other->_isTransformSimple;
+  self->_flattenType = other->_flattenType;
+}
+
+template<typename NumT>
 static void FOG_CDECL PathStrokerT_ctorParams(NumT_(PathStroker)* self,
   const NumT_(PathStrokerParams)* params, const NumT_(Transform)* tr, const NumT_(Box)* clipBox)
 {
@@ -1136,25 +1155,6 @@ static void FOG_CDECL PathStrokerT_ctorParams(NumT_(PathStroker)* self,
   self->_isClippingEnabled = false;
   self->_isTransformSimple = true;
   self->_flattenType = PATH_FLATTEN_DISABLED;
-}
-
-template<typename NumT>
-static void FOG_CDECL PathStrokerT_ctorOther(NumT_(PathStroker)* self, const NumT_(PathStroker)* other)
-{
-  self->_params.initCustom1(other->_params);
-  self->_transform.initCustom1(other->_transform);
-  self->_clipBox = other->_clipBox;
-  self->_transformedClipBox = other->_transformedClipBox;
-  self->_w = other->_w;
-  self->_wAbs = other->_wAbs;
-  self->_wEps = other->_wEps;
-  self->_da = other->_da;
-  self->_flatness = other->_flatness;
-  self->_wSign = other->_wSign;
-  self->_isDirty = other->_isDirty;
-  self->_isClippingEnabled = other->_isClippingEnabled;
-  self->_isTransformSimple = other->_isTransformSimple;
-  self->_flattenType = other->_flattenType;
 }
 
 template<typename NumT>
@@ -1306,25 +1306,25 @@ static void FOG_CDECL PathStrokerT_update(NumT_(PathStroker)* self)
 
 FOG_NO_EXPORT void PathStroker_init(void)
 {
-  _api.pathstrokerf.ctor = PathStrokerT_ctor<float>;
-  _api.pathstrokerf.ctorParams = PathStrokerT_ctorParams<float>;
-  _api.pathstrokerf.ctorOther = PathStrokerT_ctorOther<float>;
-  _api.pathstrokerf.dtor = PathStrokerT_dtor<float>;
-  _api.pathstrokerf.setParams = PathStrokerT_setParams<float>;
-  _api.pathstrokerf.setOther = PathStrokerT_setOther<float>;
-  _api.pathstrokerf.strokeShape = PathStrokerT_strokeShape<float>;
-  _api.pathstrokerf.strokePath = PathStrokerT_strokePath<float>;
-  _api.pathstrokerf.update = PathStrokerT_update<float>;
+  _api.pathstrokerf_ctor = PathStrokerT_ctor<float>;
+  _api.pathstrokerf_ctorCopy = PathStrokerT_ctorCopy<float>;
+  _api.pathstrokerf_ctorParams = PathStrokerT_ctorParams<float>;
+  _api.pathstrokerf_dtor = PathStrokerT_dtor<float>;
+  _api.pathstrokerf_setParams = PathStrokerT_setParams<float>;
+  _api.pathstrokerf_setOther = PathStrokerT_setOther<float>;
+  _api.pathstrokerf_strokeShape = PathStrokerT_strokeShape<float>;
+  _api.pathstrokerf_strokePath = PathStrokerT_strokePath<float>;
+  _api.pathstrokerf_update = PathStrokerT_update<float>;
 
-  _api.pathstrokerd.ctor = PathStrokerT_ctor<double>;
-  _api.pathstrokerd.ctorParams = PathStrokerT_ctorParams<double>;
-  _api.pathstrokerd.ctorOther = PathStrokerT_ctorOther<double>;
-  _api.pathstrokerd.dtor = PathStrokerT_dtor<double>;
-  _api.pathstrokerd.setParams = PathStrokerT_setParams<double>;
-  _api.pathstrokerd.setOther = PathStrokerT_setOther<double>;
-  _api.pathstrokerd.strokeShape = PathStrokerT_strokeShape<double>;
-  _api.pathstrokerd.strokePath = PathStrokerT_strokePath<double>;
-  _api.pathstrokerd.update = PathStrokerT_update<double>;
+  _api.pathstrokerd_ctor = PathStrokerT_ctor<double>;
+  _api.pathstrokerd_ctorCopy = PathStrokerT_ctorCopy<double>;
+  _api.pathstrokerd_ctorParams = PathStrokerT_ctorParams<double>;
+  _api.pathstrokerd_dtor = PathStrokerT_dtor<double>;
+  _api.pathstrokerd_setParams = PathStrokerT_setParams<double>;
+  _api.pathstrokerd_setOther = PathStrokerT_setOther<double>;
+  _api.pathstrokerd_strokeShape = PathStrokerT_strokeShape<double>;
+  _api.pathstrokerd_strokePath = PathStrokerT_strokePath<double>;
+  _api.pathstrokerd_update = PathStrokerT_update<double>;
 }
 
 } // Fog namespace

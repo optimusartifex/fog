@@ -4,7 +4,6 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/Algorithm.h>
 #include <Fog/Core/Tools/StringUtil.h>

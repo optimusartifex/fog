@@ -92,8 +92,8 @@ static bool FOG_CDECL ChordT_hitTest(const NumT_(Chord)* self, const NumT_(Point
 
 FOG_NO_EXPORT void Chord_init(void)
 {
-  _api.chordf.hitTest = ChordT_hitTest<float>;
-  _api.chordd.hitTest = ChordT_hitTest<double>;
+  _api.chordf_hitTest = ChordT_hitTest<float>;
+  _api.chordd_hitTest = ChordT_hitTest<double>;
 }
 
 } // Fog namespace

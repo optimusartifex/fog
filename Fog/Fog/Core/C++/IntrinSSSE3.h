@@ -15,4 +15,3 @@
 
 // [Guard]
 #endif // _FOG_CORE_CPP_INTRINSSSE3_H
-

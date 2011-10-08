@@ -113,7 +113,7 @@ struct FOG_NO_EXPORT PathInfoF
 
   static FOG_INLINE PathInfoF* generate(const PathF& path)
   {
-    return _api.pathinfof.generate(&path);
+    return _api.pathinfof_generate(&path);
   }
 
   // --------------------------------------------------------------------------
@@ -178,7 +178,7 @@ struct FOG_NO_EXPORT PathInfoD
 
   static FOG_INLINE PathInfoD* generate(const PathD& path)
   {
-    return _api.pathinfod.generate(&path);
+    return _api.pathinfod_generate(&path);
   }
 
   // --------------------------------------------------------------------------

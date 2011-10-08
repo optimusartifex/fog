@@ -4,11 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_GLOBAL_ENUMERR_H
-#define _FOG_CORE_GLOBAL_ENUMERR_H
+#ifndef _FOG_CORE_GLOBAL_ENUMERROR_H
+#define _FOG_CORE_GLOBAL_ENUMERROR_H
 
 // [Dependencies]
-#include <Fog/Core/Global/EnumCore.h>
+#include <Fog/Core/C++/Base.h>
 
 namespace Fog {
 
@@ -48,19 +48,31 @@ enum ERR_ENUM
   //! @brief Failed to allocate memory.
   ERR_RT_OUT_OF_MEMORY,
 
-  //! @brief Failed to create a thread (or to get thread from a thread pool).
+  //! @brief Failed to create a process.
+  ERR_RT_OUT_OF_PROCESSES,
+
+  //! @brief Failed to create a thread (or to get thread from a @c Fog::ThreadPool).
   ERR_RT_OUT_OF_THREADS,
+
+  //! @brief Failed to create a semaphore.
+  ERR_RT_OUT_OF_SEMAPHORES,
 
   //! @brief Assertion failure when running in release-mode.
   //!
   //! Please use issue tracker if you get this error, because it can be caused
   //! by your code or Fog-Framework itself. Fog never return this error code
   //! when compiled in debug-mode, instead the assertion is raised.
+  //!
+  //! @note When running under Windows and Windows error to Fog error translator 
+  //! is used, the ERR_RT_ASSERTION_FAILURE is translated from the following
+  //! Windows error codes:
+  //!   - ERROR_ASSERTION_FAILURE,
+  //!   - ERROR_WOW_ASSERTION.
   ERR_RT_ASSERTION_FAILURE,
 
   //! @brief Some code you wanted to use is not implemented yet.
   //!
-  //! Please use issue tracker if feature you need is not implemented yet.
+  //! Please use issue tracker if the feature you need is not implemented yet.
   ERR_RT_NOT_IMPLEMENTED,
 
   //! @brief Invalid argument passed to the Fog-Framework function.
@@ -78,6 +90,8 @@ enum ERR_ENUM
 
   //! @brief Overflow in integer or floating point arithmetic.
   ERR_RT_OVERFLOW,
+
+  ERR_RT_ACCESS_DENIED,
 
   ERR_RT_BUSY,
 
@@ -113,26 +127,59 @@ enum ERR_ENUM
   ERR_OBJECT_READ_ONLY_PROPERTY,
 
   // --------------------------------------------------------------------------
-  // [Core/IO]
+  // [Core/OS]
   // --------------------------------------------------------------------------
+
+  ERR_ENVIRONMENT_NOT_FOUND,
 
   // TODO: What is difference between ERR_IO_TOO_BIG and ERR_IO_FILE_TOO_BIG.
 
+  ERR_IO_DEVICE_FAILURE,
+  ERR_IO_DEVICE_FRAGMENTED,
+  ERR_IO_DEVICE_NOT_READY,
+  ERR_IO_DEVICE_MISMATCH,
+  ERR_IO_DEVICE_LOCKED,
+  ERR_IO_DEVICE_FULL,
+  ERR_IO_DEVICE_NOT_ATOMIC,
+
   ERR_IO_TOO_BIG,
-  ERR_IO_NOT_A_FILE,
+  ERR_IO_INVALID_NAME,
+
+  ERR_IO_PATH_NOT_FOUND,
+  ERR_IO_PATH_BUSY,
+
   ERR_IO_NOT_A_DIRECTORY,
+  ERR_IO_DIRECTORY_EXISTS,
+  ERR_IO_DIRECTORY_IN_USE,
+  ERR_IO_DIRECTORY_NOT_ROOT,
+  ERR_IO_DIRECTORY_NOT_EMPTY,
+
+  ERR_IO_NOT_A_FILE,
+  ERR_IO_FILE_EXISTS,
   ERR_IO_FILE_IS_EMPTY,
-
   ERR_IO_FILE_TOO_BIG,
+  ERR_IO_FILE_NOT_EXISTS,
+  ERR_IO_FILE_NOT_FOUND,
+  ERR_IO_FILE_TOO_MANY_OPEN,
+  ERR_IO_FILE_LOCKED,
+  ERR_IO_FILE_END,
 
+  ERR_IO_READ_ONLY,
+
+  ERR_IO_CANT_CREATE,
+  ERR_IO_CANT_OPEN,
   ERR_IO_CANT_READ,
   ERR_IO_CANT_WRITE,
   ERR_IO_CANT_SEEK,
   ERR_IO_CANT_RESIZE,
   ERR_IO_CANT_TRUNCATE,
 
-  ERR_IO_FILE_NOT_EXISTS,
-  ERR_IO_DIR_ALREADY_EXISTS,
+  ERR_IO_PIPE_BUSY,
+  ERR_IO_PIPE_EMPTY,
+  ERR_IO_PIPE_LOCAL,
+  ERR_IO_PIPE_DISCONNECTED,
+  ERR_IO_PIPE_END,
+  ERR_IO_PIPE_INVALID,
 
   // --------------------------------------------------------------------------
   // [Core/Locale]
@@ -141,11 +188,16 @@ enum ERR_ENUM
   ERR_LOCALE_NOT_MATCHED,
 
   // --------------------------------------------------------------------------
-  // [Core/OS]
+  // [Core/Library]
   // --------------------------------------------------------------------------
 
   ERR_LIBRARY_LOAD_FAILED,
+  ERR_LIBRARY_TOO_MANY,
   ERR_LIBRARY_NO_SYMBOL,
+
+  // --------------------------------------------------------------------------
+  // [Core/Environment]
+  // --------------------------------------------------------------------------
 
   ERR_ENVIRONMENT_VARIABLE_NOT_FOUND,
 
@@ -243,28 +295,27 @@ enum ERR_ENUM
   // [G2d/Imaging]
   // --------------------------------------------------------------------------
 
-  //! @brief Image size is invalid or zero.
-  ERR_IMAGE_INVALID_SIZE,
-
   //! @brief Image format is invalid.
   ERR_IMAGE_INVALID_FORMAT,
-
-  // TODO: Remove
-  ERR_IMAGE_UNSUPPORTED_FORMAT,
+  //! @brief Image type is invalid.
+  ERR_IMAGE_INVALID_TYPE,
+  //! @brief Image size is invalid.
+  ERR_IMAGE_INVALID_SIZE,
 
   ERR_IMAGEIO_INTERNAL_ERROR,
+  ERR_IMAGEIO_UNSUPPORTED_FORMAT,
 
   ERR_IMAGE_NO_DECODER,
   ERR_IMAGE_NO_ENCODER,
+  ERR_IMAGE_NO_FRAMES,
 
-  ERR_IMAGEIO_UNSUPPORTED_FORMAT,
   ERR_IMAGE_TERMINATED,
   ERR_IMAGE_TRUNCATED,
 
   ERR_IMAGE_MIME_NOT_MATCH,
-  ERR_IMAGE_MALFORMED_HEADER,
+
+  ERR_IMAGE_MALFORMED_STRUCTURE,
   ERR_IMAGE_MALFORMED_RLE,
-  ERR_IMAGE_NO_MORE_FRAMES,
 
   ERR_IMAGE_LIBJPEG_NOT_LOADED,
   ERR_IMAGE_LIBJPEG_ERROR,
@@ -412,4 +463,4 @@ enum ERR_ENUM
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_GLOBAL_ENUMERR_H
+#endif // _FOG_CORE_GLOBAL_ENUMERROR_H

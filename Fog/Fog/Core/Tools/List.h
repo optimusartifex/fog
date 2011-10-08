@@ -76,12 +76,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE void _ctorSlice(const List<ItemT>& other, const Range& range)
   {
-    _api.list.simple.ctorSlice(this, sizeof(ItemT), &other, &range);
+    _api.list_simple_ctorSlice(this, sizeof(ItemT), &other, &range);
   }
 
   FOG_INLINE void _dtor()
   {
-    _api.list.simple.dtor(this);
+    _api.list_simple_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -96,10 +96,10 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
   {
     return isDetached() ? (err_t)ERR_OK : _detach();
   }
-  
+
   FOG_INLINE err_t _detach()
   {
-    return _api.list.simple.detach(this, sizeof(ItemT));
+    return _api.list_simple_detach(this, sizeof(ItemT));
   }
 
   // --------------------------------------------------------------------------
@@ -112,27 +112,27 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.list.simple.reserve(this, sizeof(ItemT), capacity);
+    return _api.list_simple_reserve(this, sizeof(ItemT), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.list.simple.squeeze(this, sizeof(ItemT));
+    _api.list_simple_squeeze(this, sizeof(ItemT));
   }
 
   FOG_INLINE err_t _growLeft(size_t length)
   {
-    return _api.list.simple.growLeft(this, sizeof(ItemT), length);
+    return _api.list_simple_growLeft(this, sizeof(ItemT), length);
   }
 
   FOG_INLINE err_t _growRight(size_t length)
   {
-    return _api.list.simple.growRight(this, sizeof(ItemT), length);
+    return _api.list_simple_growRight(this, sizeof(ItemT), length);
   }
 
   FOG_INLINE ItemT* _prepare(uint32_t cntOp, size_t length)
   {
-    return reinterpret_cast<ItemT*>(_api.list.simple.prepare(this, sizeof(ItemT), cntOp, length));
+    return reinterpret_cast<ItemT*>(_api.list_simple_prepare(this, sizeof(ItemT), cntOp, length));
   }
 
   // --------------------------------------------------------------------------
@@ -183,9 +183,9 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
       "Fog::List<?>::setAt() - Index out of range.");
 
     if (sizeof(ItemT) % 4)
-      return _api.list.simple.setAt(this, sizeof(ItemT), index, &item);
+      return _api.list_simple_setAt(this, sizeof(ItemT), index, &item);
     else
-      return _api.list.simple.setAt_4x(this, sizeof(ItemT), index, &item);
+      return _api.list_simple_setAt_4x(this, sizeof(ItemT), index, &item);
   }
 
   FOG_INLINE err_t setAtX(size_t index, const ItemT& item)
@@ -205,12 +205,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE void clear()
   {
-    _api.list.simple.clear(this);
+    _api.list_simple_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.list.simple.reset(this);
+    _api.list_simple_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -219,18 +219,18 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t setList(const List<ItemT>& other)
   {
-    _api.list.simple.copy(this, &other);
+    _api.list_simple_copy(this, &other);
     return ERR_OK;
   }
 
   FOG_INLINE err_t setList(const List<ItemT>& other, const Range& range)
   {
-    return _api.list.simple.opList(this, sizeof(ItemT), CONTAINER_OP_REPLACE, &other, &range);
+    return _api.list_simple_opList(this, sizeof(ItemT), CONTAINER_OP_REPLACE, &other, &range);
   }
 
   FOG_INLINE err_t setList(const ItemT* data, size_t dataLength)
   {
-    return _api.list.simple.opData(this, sizeof(ItemT), CONTAINER_OP_REPLACE, data, dataLength);
+    return _api.list_simple_opData(this, sizeof(ItemT), CONTAINER_OP_REPLACE, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -240,24 +240,24 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
   FOG_INLINE err_t append(const ItemT& item)
   {
     if (sizeof(ItemT) % 4)
-      return _api.list.simple.appendItem(this, sizeof(ItemT), &item);
+      return _api.list_simple_appendItem(this, sizeof(ItemT), &item);
     else
-      return _api.list.simple.appendItem_4x(this, sizeof(ItemT), &item);
+      return _api.list_simple_appendItem_4x(this, sizeof(ItemT), &item);
   }
 
   FOG_INLINE err_t concat(const List<ItemT>& other)
   {
-    return _api.list.simple.opList(this, sizeof(ItemT), CONTAINER_OP_APPEND, &other, NULL);
+    return _api.list_simple_opList(this, sizeof(ItemT), CONTAINER_OP_APPEND, &other, NULL);
   }
 
   FOG_INLINE err_t concat(const List<ItemT>& other, const Range& range)
   {
-    return _api.list.simple.opList(this, sizeof(ItemT), CONTAINER_OP_APPEND, &other, &range);
+    return _api.list_simple_opList(this, sizeof(ItemT), CONTAINER_OP_APPEND, &other, &range);
   }
 
   FOG_INLINE err_t concat(const ItemT* data, size_t dataLength)
   {
-    return _api.list.simple.opData(this, sizeof(ItemT), CONTAINER_OP_APPEND, data, dataLength);
+    return _api.list_simple_opData(this, sizeof(ItemT), CONTAINER_OP_APPEND, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -276,9 +276,9 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
   FOG_INLINE err_t insert(size_t index, const ItemT& item)
   {
     if (sizeof(ItemT) % 4)
-      return _api.list.simple.insertItem(this, sizeof(ItemT), index, &item);
+      return _api.list_simple_insertItem(this, sizeof(ItemT), index, &item);
     else
-      return _api.list.simple.insertItem_4x(this, sizeof(ItemT), index, &item);
+      return _api.list_simple_insertItem_4x(this, sizeof(ItemT), index, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -287,7 +287,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.list.simple.remove(this, sizeof(ItemT), &range);
+    return _api.list_simple_remove(this, sizeof(ItemT), &range);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
@@ -312,12 +312,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t replace(const Range& range, const List<ItemT>& src)
   {
-    return _api.list.simple.replace(this, sizeof(ItemT), &range, &src, NULL);
+    return _api.list_simple_replace(this, sizeof(ItemT), &range, &src, NULL);
   }
 
   FOG_INLINE err_t replace(const Range& range, const List<ItemT>& src, const Range& srcRange)
   {
-    return _api.list.simple.replace(this, sizeof(ItemT), &range, &src, &srcRange);
+    return _api.list_simple_replace(this, sizeof(ItemT), &range, &src, &srcRange);
   }
 
   // --------------------------------------------------------------------------
@@ -326,7 +326,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t slice(const Range& range)
   {
-    return _api.list.simple.slice(this, sizeof(ItemT), &range);
+    return _api.list_simple_slice(this, sizeof(ItemT), &range);
   }
 
   // --------------------------------------------------------------------------
@@ -335,12 +335,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareFunc compareFunc)
   {
-    return _api.list.simple.sort(this, sizeof(ItemT), sortOrder, compareFunc);
+    return _api.list_simple_sort(this, sizeof(ItemT), sortOrder, compareFunc);
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
   {
-    return _api.list.simple.sortEx(this, sizeof(ItemT), sortOrder, compareFunc, data);
+    return _api.list_simple_sortEx(this, sizeof(ItemT), sortOrder, compareFunc, data);
   }
 
   // --------------------------------------------------------------------------
@@ -355,9 +355,9 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
     "Fog::List<?>::swapItems() - Index2 out of range.");
 
     if (sizeof(ItemT) % 4)
-      return _api.list.simple.swapItems(this, sizeof(ItemT), index1, index2);
+      return _api.list_simple_swapItems(this, sizeof(ItemT), index1, index2);
     else
-      return _api.list.simple.swapItems_4x(this, sizeof(ItemT), index1, index2);
+      return _api.list_simple_swapItems_4x(this, sizeof(ItemT), index1, index2);
   }
 
   // --------------------------------------------------------------------------
@@ -366,7 +366,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 0> : public ListUntyped
 
   FOG_INLINE void _copy(const List<ItemT>& other)
   {
-    _api.list.simple.copy(this, &other);
+    _api.list_simple_copy(this, &other);
   }
 };
 
@@ -379,7 +379,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 0, 1> : public ListImpl<ItemT, TYPE
 
   FOG_INLINE err_t sort(uint32_t sortOrder)
   {
-    return _api.list.simple.sort(this, sizeof(ItemT), sortOrder, TypeFunc<ItemT>::getCompareFunc());
+    return _api.list_simple_sort(this, sizeof(ItemT), sortOrder, TypeFunc<ItemT>::getCompareFunc());
   }
 };
 
@@ -442,11 +442,11 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 1, Comparable> : public ListImpl<It
   FOG_INLINE size_t indexOf(const ItemT& item) const
   {
     if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 4)
-      return _api.list.untyped.indexOf_4B(this, NULL, &item);
+      return _api.list_untyped_indexOf_4B(this, NULL, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 8)
-      return _api.list.untyped.indexOf_8B(this, NULL, &item);
+      return _api.list_untyped_indexOf_8B(this, NULL, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 16)
-      return _api.list.untyped.indexOf_16B(this, NULL, &item);
+      return _api.list_untyped_indexOf_16B(this, NULL, &item);
     else
       return _indexOf(item);
   }
@@ -455,11 +455,11 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 1, Comparable> : public ListImpl<It
   FOG_INLINE size_t indexOf(const Range& range_, const ItemT& item) const
   {
     if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 4)
-      return _api.list.untyped.indexOf_4B(this, &range_, &item);
+      return _api.list_untyped_indexOf_4B(this, &range_, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 8)
-      return _api.list.untyped.indexOf_8B(this, &range_, &item);
+      return _api.list_untyped_indexOf_8B(this, &range_, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 16)
-      return _api.list.untyped.indexOf_16B(this, &range_, &item);
+      return _api.list_untyped_indexOf_16B(this, &range_, &item);
     else
       return _indexOf(range_, item);
   }
@@ -512,11 +512,11 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 1, Comparable> : public ListImpl<It
   FOG_INLINE size_t lastIndexOf(const ItemT& item) const
   {
     if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 4)
-      return _api.list.untyped.lastIndexOf_4B(this, NULL, &item);
+      return _api.list_untyped_lastIndexOf_4B(this, NULL, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 8)
-      return _api.list.untyped.lastIndexOf_8B(this, NULL, &item);
+      return _api.list_untyped_lastIndexOf_8B(this, NULL, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 16)
-      return _api.list.untyped.lastIndexOf_16B(this, NULL, &item);
+      return _api.list_untyped_lastIndexOf_16B(this, NULL, &item);
     else
       return _lastIndexOf(item);
   }
@@ -525,11 +525,11 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 1, Comparable> : public ListImpl<It
   FOG_NO_INLINE size_t lastIndexOf(const Range& range_, const ItemT& item) const
   {
     if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 4)
-      return _api.list.untyped.lastIndexOf_4B(this, &range_, &item);
+      return _api.list_untyped_lastIndexOf_4B(this, &range_, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 8)
-      return _api.list.untyped.lastIndexOf_8B(this, &range_, &item);
+      return _api.list_untyped_lastIndexOf_8B(this, &range_, &item);
     else if (TypeInfo<ItemT>::BIN_EQ && sizeof(ItemT) == 16)
-      return _api.list.untyped.lastIndexOf_16B(this, &range_, &item);
+      return _api.list_untyped_lastIndexOf_16B(this, &range_, &item);
     else
       return _lastIndexOf(range_, item);
   }
@@ -541,9 +541,9 @@ struct ListImpl<ItemT, TYPE_CATEGORY_SIMPLE, 1, Comparable> : public ListImpl<It
   FOG_INLINE bool eq(const List<ItemT>& other) const
   {
     if (TypeInfo<ItemT>::BIN_EQ)
-      return _api.list.untyped.binaryEq(this, &other, sizeof(ItemT));
+      return _api.list_untyped_binaryEq(this, &other, sizeof(ItemT));
     else
-      return _api.list.untyped.customEq(this, &other, sizeof(ItemT), TypeFunc<ItemT>::getEqFunc());
+      return _api.list_untyped_customEq(this, &other, sizeof(ItemT), TypeFunc<ItemT>::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -567,12 +567,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE void _ctorSlice(const List<ItemT>& other, const Range& range)
   {
-    _api.list.unknown.ctorSlice(this, ListVTable<ItemT>::getVTable(), &other, &range);
+    _api.list_unknown_ctorSlice(this, ListVTable<ItemT>::getVTable(), &other, &range);
   }
 
   FOG_INLINE void _dtor()
   {
-    _api.list.unknown.dtor(this, ListVTable<ItemT>::getVTable());
+    _api.list_unknown_dtor(this, ListVTable<ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -587,10 +587,10 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
   {
     return isDetached() ? (err_t)ERR_OK : _detach();
   }
-  
+
   FOG_INLINE err_t _detach()
   {
-    return _api.list.unknown.detach(this, ListVTable<ItemT>::getVTable());
+    return _api.list_unknown_detach(this, ListVTable<ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -603,27 +603,27 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.list.unknown.reserve(this, ListVTable<ItemT>::getVTable(), capacity);
+    return _api.list_unknown_reserve(this, ListVTable<ItemT>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.list.unknown.squeeze(this, ListVTable<ItemT>::getVTable());
+    _api.list_unknown_squeeze(this, ListVTable<ItemT>::getVTable());
   }
 
   FOG_INLINE err_t _growLeft(size_t length)
   {
-    return _api.list.unknown.growLeft(this, ListVTable<ItemT>::getVTable(), length);
+    return _api.list_unknown_growLeft(this, ListVTable<ItemT>::getVTable(), length);
   }
 
   FOG_INLINE err_t _growRight(size_t length)
   {
-    return _api.list.unknown.growRight(this, ListVTable<ItemT>::getVTable(), length);
+    return _api.list_unknown_growRight(this, ListVTable<ItemT>::getVTable(), length);
   }
 
   FOG_INLINE ItemT* _prepare(uint32_t cntOp, size_t length)
   {
-    return reinterpret_cast<ItemT*>(_api.list.unknown.prepare(this, ListVTable<ItemT>::getVTable(), cntOp, length));
+    return reinterpret_cast<ItemT*>(_api.list_unknown_prepare(this, ListVTable<ItemT>::getVTable(), cntOp, length));
   }
 
   // --------------------------------------------------------------------------
@@ -696,12 +696,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE void clear()
   {
-    _api.list.unknown.clear(this, ListVTable<ItemT>::getVTable());
+    _api.list_unknown_clear(this, ListVTable<ItemT>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.list.unknown.reset(this, ListVTable<ItemT>::getVTable());
+    _api.list_unknown_reset(this, ListVTable<ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -710,18 +710,18 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t setList(const List<ItemT>& other)
   {
-    _api.list.unknown.copy(this, ListVTable<ItemT>::getVTable(), &other);
+    _api.list_unknown_copy(this, ListVTable<ItemT>::getVTable(), &other);
     return ERR_OK;
   }
 
   FOG_INLINE err_t setList(const List<ItemT>& other, const Range& range)
   {
-    return _api.list.unknown.opList(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_REPLACE, &other, &range);
+    return _api.list_unknown_opList(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_REPLACE, &other, &range);
   }
 
   FOG_INLINE err_t setList(const ItemT* data, size_t dataLength)
   {
-    return _api.list.unknown.opData(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_REPLACE, data, dataLength);
+    return _api.list_unknown_opData(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_REPLACE, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -730,7 +730,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t append(const ItemT& item)
   {
-    ItemT* p = reinterpret_cast<ItemT*>(_api.list.unknown.prepareAppendItem(this, ListVTable<ItemT>::getVTable()));
+    ItemT* p = reinterpret_cast<ItemT*>(_api.list_unknown_prepareAppendItem(this, ListVTable<ItemT>::getVTable()));
 
     if (FOG_IS_NULL(p))
       return ERR_RT_OUT_OF_MEMORY;
@@ -741,17 +741,17 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t concat(const List<ItemT>& other)
   {
-    return _api.list.unknown.opList(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_APPEND, &other, NULL);
+    return _api.list_unknown_opList(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_APPEND, &other, NULL);
   }
 
   FOG_INLINE err_t concat(const List<ItemT>& other, const Range& range)
   {
-    return _api.list.unknown.opList(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_APPEND, &other, &range);
+    return _api.list_unknown_opList(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_APPEND, &other, &range);
   }
 
   FOG_INLINE err_t concat(const ItemT* data, size_t dataLength)
   {
-    return _api.list.unknown.opData(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_APPEND, data, dataLength);
+    return _api.list_unknown_opData(this, ListVTable<ItemT>::getVTable(), CONTAINER_OP_APPEND, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -769,7 +769,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t insert(size_t index, const ItemT& item)
   {
-    ItemT* p = reinterpret_cast<ItemT*>(_api.list.unknown.prepareInsertItem(this, ListVTable<ItemT>::getVTable(), index));
+    ItemT* p = reinterpret_cast<ItemT*>(_api.list_unknown_prepareInsertItem(this, ListVTable<ItemT>::getVTable(), index));
 
     if (FOG_IS_NULL(p))
       return ERR_RT_OUT_OF_MEMORY;
@@ -784,7 +784,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.list.unknown.remove(this, ListVTable<ItemT>::getVTable(), &range);
+    return _api.list_unknown_remove(this, ListVTable<ItemT>::getVTable(), &range);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
@@ -809,12 +809,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t replace(const Range& range, const List<ItemT>& src)
   {
-    return _api.list.unknown.replace(this, ListVTable<ItemT>::getVTable(), &range, &src, NULL);
+    return _api.list_unknown_replace(this, ListVTable<ItemT>::getVTable(), &range, &src, NULL);
   }
 
   FOG_INLINE err_t replace(const Range& range, const List<ItemT>& src, const Range& srcRange)
   {
-    return _api.list.unknown.replace(this, ListVTable<ItemT>::getVTable(), &range, &src, &srcRange);
+    return _api.list_unknown_replace(this, ListVTable<ItemT>::getVTable(), &range, &src, &srcRange);
   }
 
   // --------------------------------------------------------------------------
@@ -823,7 +823,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t slice(const Range& range)
   {
-    return _api.list.unknown.slice(this, ListVTable<ItemT>::getVTable(), &range);
+    return _api.list_unknown_slice(this, ListVTable<ItemT>::getVTable(), &range);
   }
 
   // --------------------------------------------------------------------------
@@ -832,12 +832,12 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareFunc compareFunc)
   {
-    return _api.list.unknown.sort(this, ListVTable<ItemT>::getVTable(), sortOrder, compareFunc);
+    return _api.list_unknown_sort(this, ListVTable<ItemT>::getVTable(), sortOrder, compareFunc);
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
   {
-    return _api.list.unknown.sortEx(this, ListVTable<ItemT>::getVTable(), sortOrder, compareFunc, data);
+    return _api.list_unknown_sortEx(this, ListVTable<ItemT>::getVTable(), sortOrder, compareFunc, data);
   }
 
   // --------------------------------------------------------------------------
@@ -864,7 +864,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 0> : public ListUntyped
 
   FOG_INLINE void _copy(const List<ItemT>& other)
   {
-    _api.list.unknown.copy(this, ListVTable<ItemT>::getVTable(), &other);
+    _api.list_unknown_copy(this, ListVTable<ItemT>::getVTable(), &other);
   }
 };
 
@@ -877,7 +877,7 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 0, 1> : public ListImpl<ItemT, TYP
 
   FOG_INLINE err_t sort(uint32_t sortOrder)
   {
-    return _api.list.simple.sort(this, sizeof(ItemT), sortOrder, TypeFunc<ItemT>::getCompareFunc());
+    return _api.list_simple_sort(this, sizeof(ItemT), sortOrder, TypeFunc<ItemT>::getCompareFunc());
   }
 };
 
@@ -991,9 +991,9 @@ struct ListImpl<ItemT, TYPE_CATEGORY_MOVABLE, 1, Comparable> : public ListImpl<I
   FOG_INLINE bool eq(const List<ItemT>& other) const
   {
     if (TypeInfo<ItemT>::BIN_EQ)
-      return _api.list.untyped.binaryEq(this, &other, sizeof(ItemT));
+      return _api.list_untyped_binaryEq(this, &other, sizeof(ItemT));
     else
-      return _api.list.untyped.customEq(this, &other, sizeof(ItemT), TypeFunc<ItemT>::getEqFunc());
+      return _api.list_untyped_customEq(this, &other, sizeof(ItemT), TypeFunc<ItemT>::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -1019,12 +1019,12 @@ struct List : public ListImpl< ItemT, TypeInfo<ItemT>::TYPE, !TypeInfo<ItemT>::N
 
   FOG_INLINE List()
   {
-    _api.list.untyped.ctor(this);
+    _api.list_untyped_ctor(this);
   }
 
   FOG_INLINE List(const List& other)
   {
-    _api.list.untyped.ctorCopy(this, &other);
+    _api.list_untyped_ctorCopy(this, &other);
   }
 
   FOG_INLINE List(const List& other, const Range& range)

@@ -21,7 +21,7 @@ namespace Fog {
 
 //! @brief Memory buffer using static storage.
 //!
-//! This template is for fast routines that need to use memory preferably 
+//! This template is for fast routines that need to use memory preferably
 //! allocated on the stack, but the memory requirement is not known at compile
 //! time. The count of bytes allocated on the stack is the template parameter
 //! @a N.

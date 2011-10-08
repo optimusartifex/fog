@@ -20,7 +20,7 @@ namespace Fog {
 // ============================================================================
 
 // ${GRADIENT_TYPE:BEGIN}
-static const uint32_t Pattern_vTypeFromGradientTableF[GRADIENT_TYPE_COUNT] = 
+static const uint32_t Pattern_vTypeFromGradientTableF[GRADIENT_TYPE_COUNT] =
 {
   /* 00: GRADIENT_TYPE_LINEAR      */ VAR_TYPE_LINEAR_GRADIENTF,
   /* 01: GRADIENT_TYPE_RADIAL      */ VAR_TYPE_RADIAL_GRADIENTF,
@@ -30,7 +30,7 @@ static const uint32_t Pattern_vTypeFromGradientTableF[GRADIENT_TYPE_COUNT] =
 // ${GRADIENT_TYPE:END}
 
 // ${GRADIENT_TYPE:BEGIN}
-static const uint32_t Pattern_vTypeFromGradientTableD[GRADIENT_TYPE_COUNT] = 
+static const uint32_t Pattern_vTypeFromGradientTableD[GRADIENT_TYPE_COUNT] =
 {
   /* 00: GRADIENT_TYPE_LINEAR      */ VAR_TYPE_LINEAR_GRADIENTF,
   /* 01: GRADIENT_TYPE_RADIAL      */ VAR_TYPE_RADIAL_GRADIENTF,
@@ -67,7 +67,7 @@ static FOG_INLINE uint32_t Pattern_getGradientType(PatternData* d)
 
 static void FOG_CDECL Pattern_ctor(Pattern* self)
 {
-  self->_d = _api.pattern.oNull->_d;
+  self->_d = _api.pattern_oNull->_d;
 }
 
 static void FOG_CDECL Pattern_ctorCopy(Pattern* self, const Pattern* other)
@@ -78,11 +78,11 @@ static void FOG_CDECL Pattern_ctorCopy(Pattern* self, const Pattern* other)
 static void FOG_CDECL Pattern_ctorArgb32(Pattern* self, const ArgbBase32* argb32)
 {
   PatternColorData* d = reinterpret_cast<PatternColorData*>(
-    _api.pattern.dCreate(sizeof(PatternColorData)));
+    _api.pattern_dCreate(sizeof(PatternColorData)));
 
   if (FOG_IS_NULL(d))
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
@@ -96,11 +96,11 @@ static void FOG_CDECL Pattern_ctorArgb32(Pattern* self, const ArgbBase32* argb32
 static void FOG_CDECL Pattern_ctorColor(Pattern* self, const Color* color)
 {
   PatternColorData* d = reinterpret_cast<PatternColorData*>(
-    _api.pattern.dCreate(sizeof(PatternColorData)));
+    _api.pattern_dCreate(sizeof(PatternColorData)));
 
   if (FOG_IS_NULL(d))
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
@@ -114,11 +114,11 @@ static void FOG_CDECL Pattern_ctorColor(Pattern* self, const Color* color)
 static void FOG_CDECL Pattern_ctorTextureF(Pattern* self, const Texture* texture, const TransformF* tr)
 {
   PatternTextureDataF* d = reinterpret_cast<PatternTextureDataF*>(
-    _api.pattern.dCreate(sizeof(PatternTextureDataF)));
+    _api.pattern_dCreate(sizeof(PatternTextureDataF)));
 
   if (FOG_IS_NULL(d))
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
@@ -134,16 +134,16 @@ static void FOG_CDECL Pattern_ctorTextureD(Pattern* self, const Texture* texture
 {
   if (texture->getImage().isEmpty())
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
   PatternTextureDataD* d = reinterpret_cast<PatternTextureDataD*>(
-    _api.pattern.dCreate(sizeof(PatternTextureDataD)));
+    _api.pattern_dCreate(sizeof(PatternTextureDataD)));
 
   if (FOG_IS_NULL(d))
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
@@ -162,16 +162,16 @@ static void FOG_CDECL Pattern_ctorGradientF(Pattern* self, const GradientF* grad
   // Pattern disallows to use invalid (uninitialized) gradient.
   if (gradientType >= GRADIENT_TYPE_COUNT)
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
   PatternGradientDataF* d = reinterpret_cast<PatternGradientDataF*>(
-    _api.pattern.dCreate(sizeof(PatternGradientDataF)));
+    _api.pattern_dCreate(sizeof(PatternGradientDataF)));
 
   if (FOG_IS_NULL(d))
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
@@ -190,16 +190,16 @@ static void FOG_CDECL Pattern_ctorGradientD(Pattern* self, const GradientD* grad
   // Pattern disallows to use invalid (uninitialized) gradient.
   if (gradientType >= GRADIENT_TYPE_COUNT)
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
   PatternGradientDataD* d = reinterpret_cast<PatternGradientDataD*>(
-    _api.pattern.dCreate(sizeof(PatternGradientDataD)));
+    _api.pattern_dCreate(sizeof(PatternGradientDataD)));
 
   if (FOG_IS_NULL(d))
   {
-    self->_d = _api.pattern.oNull->_d;
+    self->_d = _api.pattern_oNull->_d;
     return;
   }
 
@@ -237,7 +237,7 @@ static err_t FOG_CDECL Pattern_detach(Pattern* self)
     case VAR_TYPE_COLOR:
     {
       PatternColorData* newd = reinterpret_cast<PatternColorData*>(
-        _api.pattern.dCreate(sizeof(PatternColorData)));
+        _api.pattern_dCreate(sizeof(PatternColorData)));
 
       if (FOG_IS_NULL(newd))
         return ERR_RT_OUT_OF_MEMORY;
@@ -253,7 +253,7 @@ static err_t FOG_CDECL Pattern_detach(Pattern* self)
     case VAR_TYPE_TEXTUREF:
     {
       PatternTextureDataF* newd = reinterpret_cast<PatternTextureDataF*>(
-        _api.pattern.dCreate(sizeof(PatternTextureDataF)));
+        _api.pattern_dCreate(sizeof(PatternTextureDataF)));
 
       if (FOG_IS_NULL(newd))
         return ERR_RT_OUT_OF_MEMORY;
@@ -270,7 +270,7 @@ static err_t FOG_CDECL Pattern_detach(Pattern* self)
     case VAR_TYPE_TEXTURED:
     {
       PatternTextureDataD* newd = reinterpret_cast<PatternTextureDataD*>(
-        _api.pattern.dCreate(sizeof(PatternTextureDataD)));
+        _api.pattern_dCreate(sizeof(PatternTextureDataD)));
 
       if (FOG_IS_NULL(newd))
         return ERR_RT_OUT_OF_MEMORY;
@@ -290,7 +290,7 @@ static err_t FOG_CDECL Pattern_detach(Pattern* self)
     case VAR_TYPE_RECTANGULAR_GRADIENTF:
     {
       PatternGradientDataF* newd = reinterpret_cast<PatternGradientDataF*>(
-        _api.pattern.dCreate(sizeof(PatternGradientDataF)));
+        _api.pattern_dCreate(sizeof(PatternGradientDataF)));
 
       if (FOG_IS_NULL(newd))
         return ERR_RT_OUT_OF_MEMORY;
@@ -310,7 +310,7 @@ static err_t FOG_CDECL Pattern_detach(Pattern* self)
     case VAR_TYPE_RECTANGULAR_GRADIENTD:
     {
       PatternGradientDataD* newd = reinterpret_cast<PatternGradientDataD*>(
-        _api.pattern.dCreate(sizeof(PatternGradientDataD)));
+        _api.pattern_dCreate(sizeof(PatternGradientDataD)));
 
       if (FOG_IS_NULL(newd))
         return ERR_RT_OUT_OF_MEMORY;
@@ -516,7 +516,7 @@ static err_t FOG_CDECL Pattern_createArgb32(Pattern* self, const ArgbBase32* arg
   if (d->patternType != PATTERN_TYPE_COLOR || d->reference.get() != 1)
   {
     d = reinterpret_cast<PatternColorData*>(
-      _api.pattern.dCreate(sizeof(PatternColorData)));
+      _api.pattern_dCreate(sizeof(PatternColorData)));
 
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
@@ -539,7 +539,7 @@ static err_t FOG_CDECL Pattern_createColor(Pattern* self, const Color* color)
   if (d->patternType != PATTERN_TYPE_COLOR || d->reference.get() != 1)
   {
     d = reinterpret_cast<PatternColorData*>(
-      _api.pattern.dCreate(sizeof(PatternColorData)));
+      _api.pattern_dCreate(sizeof(PatternColorData)));
 
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
@@ -562,7 +562,7 @@ static err_t FOG_CDECL Pattern_createTextureF(Pattern* self, const Texture* text
   if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
   {
     d = reinterpret_cast<PatternTextureDataF*>(
-      _api.pattern.dCreate(sizeof(PatternTextureDataF)));
+      _api.pattern_dCreate(sizeof(PatternTextureDataF)));
 
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
@@ -591,7 +591,7 @@ static err_t FOG_CDECL Pattern_createTextureD(Pattern* self, const Texture* text
   if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
   {
     d = reinterpret_cast<PatternTextureDataD*>(
-      _api.pattern.dCreate(sizeof(PatternTextureDataD)));
+      _api.pattern_dCreate(sizeof(PatternTextureDataD)));
 
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
@@ -618,7 +618,7 @@ static err_t FOG_CDECL Pattern_createGradientF(Pattern* self, const GradientF* g
   // Pattern disallows to use invalid (uninitialized) gradient.
   if (gradient->getGradientType() >= GRADIENT_TYPE_COUNT)
   {
-    _api.pattern.reset(self);
+    _api.pattern_reset(self);
     return ERR_OK;
   }
 
@@ -627,7 +627,7 @@ static err_t FOG_CDECL Pattern_createGradientF(Pattern* self, const GradientF* g
   if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
   {
     d = reinterpret_cast<PatternGradientDataF*>(
-      _api.pattern.dCreate(sizeof(PatternGradientDataF)));
+      _api.pattern_dCreate(sizeof(PatternGradientDataF)));
 
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
@@ -654,7 +654,7 @@ static err_t FOG_CDECL Pattern_createGradientD(Pattern* self, const GradientD* g
   // Pattern disallows to use invalid (uninitialized) gradient.
   if (gradient->getGradientType() >= GRADIENT_TYPE_COUNT)
   {
-    _api.pattern.reset(self);
+    _api.pattern_reset(self);
     return ERR_OK;
   }
 
@@ -663,7 +663,7 @@ static err_t FOG_CDECL Pattern_createGradientD(Pattern* self, const GradientD* g
   if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
   {
     d = reinterpret_cast<PatternGradientDataD*>(
-      _api.pattern.dCreate(sizeof(PatternGradientDataD)));
+      _api.pattern_dCreate(sizeof(PatternGradientDataD)));
 
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
@@ -901,7 +901,7 @@ _DoTransformD:
 
 static void FOG_CDECL Pattern_reset(Pattern* self)
 {
-  atomicPtrXchg(&self->_d, _api.pattern.oNull->_d)->release();
+  atomicPtrXchg(&self->_d, _api.pattern_oNull->_d)->release();
 }
 
 // ============================================================================
@@ -968,46 +968,46 @@ static void FOG_CDECL Pattern_dFree(PatternData* d)
 
 FOG_NO_EXPORT void Pattern_init(void)
 {
-  _api.pattern.ctor = Pattern_ctor;
-  _api.pattern.ctorCopy = Pattern_ctorCopy;
-  _api.pattern.ctorArgb32 = Pattern_ctorArgb32;
-  _api.pattern.ctorColor = Pattern_ctorColor;
-  _api.pattern.ctorTextureF = Pattern_ctorTextureF;
-  _api.pattern.ctorTextureD = Pattern_ctorTextureD;
-  _api.pattern.ctorGradientF = Pattern_ctorGradientF;
-  _api.pattern.ctorGradientD = Pattern_ctorGradientD;
-  _api.pattern.dtor = Pattern_dtor;
+  _api.pattern_ctor = Pattern_ctor;
+  _api.pattern_ctorCopy = Pattern_ctorCopy;
+  _api.pattern_ctorArgb32 = Pattern_ctorArgb32;
+  _api.pattern_ctorColor = Pattern_ctorColor;
+  _api.pattern_ctorTextureF = Pattern_ctorTextureF;
+  _api.pattern_ctorTextureD = Pattern_ctorTextureD;
+  _api.pattern_ctorGradientF = Pattern_ctorGradientF;
+  _api.pattern_ctorGradientD = Pattern_ctorGradientD;
+  _api.pattern_dtor = Pattern_dtor;
 
-  _api.pattern.detach = Pattern_detach;
+  _api.pattern_detach = Pattern_detach;
 
-  _api.pattern.getArgb32 = Pattern_getArgb32;
-  _api.pattern.getColor = Pattern_getColor;
-  _api.pattern.getTexture = Pattern_getTexture;
-  _api.pattern.getGradientF = Pattern_getGradientF;
-  _api.pattern.getGradientD = Pattern_getGradientD;
-  _api.pattern.getTransformF = Pattern_getTransformF;
-  _api.pattern.getTransformD = Pattern_getTransformD;
+  _api.pattern_getArgb32 = Pattern_getArgb32;
+  _api.pattern_getColor = Pattern_getColor;
+  _api.pattern_getTexture = Pattern_getTexture;
+  _api.pattern_getGradientF = Pattern_getGradientF;
+  _api.pattern_getGradientD = Pattern_getGradientD;
+  _api.pattern_getTransformF = Pattern_getTransformF;
+  _api.pattern_getTransformD = Pattern_getTransformD;
 
-  _api.pattern.createArgb32 = Pattern_createArgb32;
-  _api.pattern.createColor = Pattern_createColor;
-  _api.pattern.createTextureF = Pattern_createTextureF;
-  _api.pattern.createTextureD = Pattern_createTextureD;
-  _api.pattern.createGradientF = Pattern_createGradientF;
-  _api.pattern.createGradientD = Pattern_createGradientD;
+  _api.pattern_createArgb32 = Pattern_createArgb32;
+  _api.pattern_createColor = Pattern_createColor;
+  _api.pattern_createTextureF = Pattern_createTextureF;
+  _api.pattern_createTextureD = Pattern_createTextureD;
+  _api.pattern_createGradientF = Pattern_createGradientF;
+  _api.pattern_createGradientD = Pattern_createGradientD;
 
-  _api.pattern.setTransformF = Pattern_setTransformF;
-  _api.pattern.setTransformD = Pattern_setTransformD;
-  _api.pattern.applyTransform = Pattern_applyTransform;
-  _api.pattern.resetTransform = Pattern_resetTransform;
+  _api.pattern_setTransformF = Pattern_setTransformF;
+  _api.pattern_setTransformD = Pattern_setTransformD;
+  _api.pattern_applyTransform = Pattern_applyTransform;
+  _api.pattern_resetTransform = Pattern_resetTransform;
 
-  _api.pattern.reset = Pattern_reset;
-  _api.pattern.copy = Pattern_copy;
-  _api.pattern.eq = Pattern_eq;
+  _api.pattern_reset = Pattern_reset;
+  _api.pattern_copy = Pattern_copy;
+  _api.pattern_eq = Pattern_eq;
 
-  _api.pattern.dCreate = Pattern_dCreate;
-  _api.pattern.dFree = Pattern_dFree;
+  _api.pattern_dCreate = Pattern_dCreate;
+  _api.pattern_dFree = Pattern_dFree;
 
-  _api.pattern.oNull = reinterpret_cast<Pattern*>(_api.var.oNull);
+  _api.pattern_oNull = reinterpret_cast<Pattern*>(_api.var_oNull);
 }
 
 } // Fog namespace

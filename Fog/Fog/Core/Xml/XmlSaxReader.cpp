@@ -9,11 +9,10 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/IO/MapFile.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/Hash.h>
 #include <Fog/Core/Tools/List.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>

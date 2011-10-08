@@ -16,12 +16,6 @@
 
 namespace Fog {
 
-// [Fog/Core/IO]
-FOG_NO_EXPORT void DirEntry_init(void);
-FOG_NO_EXPORT void DirIterator_init(void);
-FOG_NO_EXPORT void Stream_init(void);
-FOG_NO_EXPORT void Stream_fini(void);
-
 // [Fog/Core/Math]
 FOG_NO_EXPORT void Math_init(void);
 
@@ -29,14 +23,10 @@ FOG_NO_EXPORT void Math_init(void);
 FOG_NO_EXPORT void MemMgr_init(void);
 FOG_NO_EXPORT void MemMgr_fini(void);
 
+FOG_NO_EXPORT void MemBlockAllocator_init(void);
 FOG_NO_EXPORT void MemOps_init(void);
 FOG_NO_EXPORT void MemPool_init(void);
-
-// [Fog/Core/OS]
-FOG_NO_EXPORT void Library_init(void);
-FOG_NO_EXPORT void Library_fini(void);
-
-FOG_NO_EXPORT void System_init(void);
+FOG_NO_EXPORT void MemZoneAllocator_init(void);
 
 // [Fog/Core/Kernel]
 FOG_NO_EXPORT void Application_init(void);
@@ -44,6 +34,28 @@ FOG_NO_EXPORT void Application_fini(void);
 
 FOG_NO_EXPORT void Object_init(void);
 FOG_NO_EXPORT void Object_fini(void);
+
+// [Fog/Core/OS]
+FOG_NO_EXPORT void DirIterator_init(void);
+FOG_NO_EXPORT void Environment_init(void);
+FOG_NO_EXPORT void FileInfo_init(void);
+FOG_NO_EXPORT void FileMapping_init(void);
+FOG_NO_EXPORT void FilePath_init(void);
+FOG_NO_EXPORT void FileUtil_init(void);
+
+FOG_NO_EXPORT void Library_init(void);
+FOG_NO_EXPORT void Library_fini(void);
+
+FOG_NO_EXPORT void OSInfo_init(void);
+FOG_NO_EXPORT void OSUtil_init(void);
+
+#if defined(FOG_OS_WINDOWS)
+FOG_NO_EXPORT void WinCOM_init(void);
+FOG_NO_EXPORT void WinUtil_init(void);
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_MAC)
+#endif // FOG_OS_MAC
 
 // [Fog/Core/Threading]
 FOG_NO_EXPORT void Lock_init(void);
@@ -70,6 +82,9 @@ FOG_NO_EXPORT void Locale_fini(void);
 
 FOG_NO_EXPORT void ManagedString_init(void);
 FOG_NO_EXPORT void ManagedString_fini(void);
+
+FOG_NO_EXPORT void Stream_init(void);
+FOG_NO_EXPORT void Stream_fini(void);
 
 FOG_NO_EXPORT void String_init(void);
 FOG_NO_EXPORT void StringUtil_init(void);
@@ -112,24 +127,26 @@ FOG_NO_EXPORT void PathInfo_init(void);
 // [Fog/G2d/Imaging]
 FOG_NO_EXPORT void Image_init(void);
 FOG_NO_EXPORT void ImagePalette_init(void);
-
 FOG_NO_EXPORT void ImageConverter_init(void);
-FOG_NO_EXPORT void ImageEffect_init(void);
 FOG_NO_EXPORT void ImageFormatDescription_init(void);
+FOG_NO_EXPORT void ImageEffect_init(void);
 
 FOG_NO_EXPORT void ImageCodecProvider_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_fini(void);
 
+FOG_NO_EXPORT void ColorLut_init(void);
+FOG_NO_EXPORT void ColorLutArray_init(void);
 FOG_NO_EXPORT void ColorMatrix_init(void);
+FOG_NO_EXPORT void ComponentTransfer_init(void);
+FOG_NO_EXPORT void ComponentTransferFunction_init(void);
+FOG_NO_EXPORT void ConvolutionMatrix_init(void);
 
 // [Fog/G2d/Painting]
-FOG_NO_EXPORT void PaintDeviceInfo_init(void);
 FOG_NO_EXPORT void NullPaintEngine_init(void);
+FOG_NO_EXPORT void PaintDeviceInfo_init(void);
 FOG_NO_EXPORT void RasterPaintEngine_init(void);
+FOG_NO_EXPORT void RasterOps_init(void);
 FOG_NO_EXPORT void Rasterizer_init(void);
-
-// [Fog/G2d/Render]
-FOG_NO_EXPORT void Render_init(void);
 
 // [Fog/G2d/Source]
 FOG_NO_EXPORT void Color_init(void);

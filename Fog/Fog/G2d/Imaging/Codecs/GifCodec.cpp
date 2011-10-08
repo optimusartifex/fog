@@ -14,10 +14,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Image.h>

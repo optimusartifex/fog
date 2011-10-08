@@ -10,7 +10,7 @@ namespace Fog {
 namespace Face {
 
 // ============================================================================
-// [Fog::Render - Data - Demultiply]
+// [Fog::Raster - Data - Demultiply]
 // ============================================================================
 
 const uint32_t _u8_divide_table_d[256] =

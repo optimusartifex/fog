@@ -86,7 +86,7 @@ static void FOG_CDECL Locale_ctorCopy(Locale* self, const Locale* other)
 static void FOG_CDECL Locale_ctorString(Locale* self, const StringW* name)
 {
   self->_d = Locale_dPosix->addRef();
-  _api.locale.create(self, name);
+  _api.locale_create(self, name);
 }
 
 static void FOG_CDECL Locale_dtor(Locale* self)
@@ -104,7 +104,7 @@ static err_t FOG_CDECL Locale_detach(Locale* self)
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  LocaleData* newd = _api.locale.dCreate();
+  LocaleData* newd = _api.locale_dCreate();
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -122,15 +122,6 @@ static err_t FOG_CDECL Locale_detach(Locale* self)
 static void FOG_CDECL Locale_reset(Locale* self)
 {
   atomicPtrXchg(&self->_d, Locale_dPosix->addRef())->release();
-}
-
-// ============================================================================
-// [Fog::Locale - SetLocale]
-// ============================================================================
-
-static void FOG_CDECL Locale_setLocale(Locale* self, const Locale* other)
-{
-  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
 }
 
 // ============================================================================
@@ -187,6 +178,40 @@ _End:
 }
 
 // ============================================================================
+// [Fog::Locale - Copy]
+// ============================================================================
+
+static err_t FOG_CDECL Locale_copy(Locale* self, const Locale* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::Locale - Equality]
+// ============================================================================
+
+static bool FOG_CDECL Locale_eq(const Locale* a, const Locale* b)
+{
+  LocaleData* a_d = a->_d;
+  LocaleData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  if (a_d->name() != b_d->name())
+    return false;
+
+  for (uint32_t i = 0; i < LOCALE_CHAR_COUNT; i++)
+  {
+    if (a_d->data[i] != b_d->data[i])
+      return false;
+  }
+
+  return true;
+}
+
+// ============================================================================
 // [Fog::Locale - LocaleData]
 // ============================================================================
 
@@ -200,7 +225,7 @@ static LocaleData* FOG_CDECL Locale_dCreate(void)
   d->vType = VAR_TYPE_LOCALE;
   FOG_PADDING_ZERO_64(d->padding0_32);
   d->name.init();
-  
+
   return d;
 }
 
@@ -222,18 +247,20 @@ FOG_NO_EXPORT void Locale_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.locale.ctor = Locale_ctor;
-  _api.locale.ctorCopy = Locale_ctorCopy;
-  _api.locale.ctorString = Locale_ctorString;
-  _api.locale.dtor = Locale_dtor;
-  _api.locale.detach = Locale_detach;
-  _api.locale.reset = Locale_reset;
-  _api.locale.create = Locale_create;
-  _api.locale.setLocale = Locale_setLocale;
-  _api.locale.setChar = Locale_setChar;
+  _api.locale_ctor = Locale_ctor;
+  _api.locale_ctorCopy = Locale_ctorCopy;
+  _api.locale_ctorString = Locale_ctorString;
+  _api.locale_dtor = Locale_dtor;
+  _api.locale_detach = Locale_detach;
+  _api.locale_reset = Locale_reset;
+  _api.locale_create = Locale_create;
+  _api.locale_setChar = Locale_setChar;
 
-  _api.locale.dCreate = Locale_dCreate;
-  _api.locale.dFree = Locale_dFree;
+  _api.locale_copy = Locale_copy;
+  _api.locale_eq = Locale_eq;
+
+  _api.locale_dCreate = Locale_dCreate;
+  _api.locale_dFree = Locale_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -246,7 +273,7 @@ FOG_NO_EXPORT void Locale_init(void)
   d->vType = VAR_TYPE_LOCALE;
   d->name.initCustom1(Ascii8("POSIX"));
 
-  _api.locale.oPosix = Locale_oPosix.initCustom1(d);
+  _api.locale_oPosix = Locale_oPosix.initCustom1(d);
   Locale_setPosix(d);
 
   d = &Locale_dUser;
@@ -254,7 +281,7 @@ FOG_NO_EXPORT void Locale_init(void)
   d->vType = VAR_TYPE_LOCALE;
   d->name.init();
 
-  _api.locale.oUser = Locale_oPosix.initCustom1(d);
+  _api.locale_oUser = Locale_oPosix.initCustom1(d);
   Locale_setLConv(d, localeconv());
 }
 

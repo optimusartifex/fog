@@ -144,6 +144,20 @@ enum COLOR_CHANNEL
 };
 
 // ============================================================================
+// [Fog::COLOR_INDEX]
+// ============================================================================
+
+enum COLOR_INDEX
+{
+  COLOR_INDEX_ALPHA = 0,
+  COLOR_INDEX_RED   = 1,
+  COLOR_INDEX_GREEN = 2,
+  COLOR_INDEX_BLUE  = 3,
+
+  COLOR_INDEX_COUNT = 4
+};
+
+// ============================================================================
 // [Fog::COLOR_MATRIX]
 // ============================================================================
 
@@ -404,6 +418,21 @@ enum COLOR_MIX_OP
   COLOR_MIX_OP_DIFFERENCE = 12,
 
   COLOR_MIX_OP_COUNT = 13
+};
+
+// ============================================================================
+// [Fog::COMPONENT_TRANSFER_FUNCTION]
+// ============================================================================
+
+enum COMPONENT_TRANSFER_FUNCTION
+{
+  COMPONENT_TRANSFER_FUNCTION_IDENTITY = 0,
+  COMPONENT_TRANSFER_FUNCTION_TABLE = 1,
+  COMPONENT_TRANSFER_FUNCTION_DISCRETE = 2,
+  COMPONENT_TRANSFER_FUNCTION_LINEAR = 3,
+  COMPONENT_TRANSFER_FUNCTION_GAMMA = 4,
+
+  COMPONENT_TRANSFER_FUNCTION_COUNT = 5
 };
 
 // ============================================================================
@@ -799,7 +828,7 @@ enum FILL_RULE
   FILL_RULE_EVEN_ODD = 1,
 
   //! @brief Default fill-rule.
-  FILL_RULE_DEFAULT = FILL_RULE_EVEN_ODD,
+  FILL_RULE_DEFAULT = FILL_RULE_NON_ZERO,
   //! @brief Used to catch invalid arguments.
   FILL_RULE_COUNT = 2
 };
@@ -1365,27 +1394,36 @@ enum IMAGE_ADOPT
 };
 
 // ============================================================================
-// [Fog::IMAGE_BUFFER]
+// [Fog::IMAGE_COLOR_KEY]
+// ============================================================================
+
+enum IMAGE_COLOR_KEY
+{
+  IMAGE_COLOR_KEY_NONE = 0x100
+};
+
+// ============================================================================
+// [Fog::IMAGE_TYPE]
 // ============================================================================
 
 //! @brief Image type.
-enum IMAGE_BUFFER
+enum IMAGE_TYPE
 {
-  //! @brief The image is a platform independent memory buffer.
+  //! @brief Image is a memory buffer (the default).
   //!
   //! @note This is the default image type.
-  IMAGE_BUFFER_MEMORY = 0,
+  IMAGE_TYPE_BUFFER = 0,
 
-  //! @brief The image is Windows-Dib (DIBSECTION).
+  //! @brief Image is a Win-DIBSECTION.
   //!
   //! @note This is Windows-only image type.
-  IMAGE_BUFFER_WIN_DIB = 1,
+  IMAGE_TYPE_WIN_DIB = 1,
 
   //! @brief Count of image types.
-  IMAGE_BUFFER_COUNT = 2,
+  IMAGE_TYPE_COUNT = 2,
 
-  //! @brief Ignore image type (used by some functions inside @c Image).
-  IMAGE_BUFFER_IGNORE = 0xFF
+  //! @brief Ignore the image type (used by some functions inside @c Image).
+  IMAGE_TYPE_IGNORE = 0xFF
 };
 
 // ============================================================================
@@ -1507,12 +1545,12 @@ enum IMAGE_FORMAT
 {
   // --------------------------------------------------------------------------
   // NOTE: When changing order, removing or adding image format please match
-  // ${IMAGE_FORMAT:BEGIN} -> ${IMAGE_FORMAT:END} and
-  // fix the code that depends on image-format order and their meaning.
+  // ${IMAGE_FORMAT:BEGIN} -> ${IMAGE_FORMAT:END} and fix the code that depends
+  // on the image format order.
   // --------------------------------------------------------------------------
 
   // --------------------------------------------------------------------------
-  // [8-bit per component or less]
+  // [8-bit Per Component or Less]
   // --------------------------------------------------------------------------
 
   //! @brief 32-bit ARGB (8 bits per component), premultiplied.
@@ -1528,7 +1566,7 @@ enum IMAGE_FORMAT
   IMAGE_FORMAT_I8 = 4,
 
   // --------------------------------------------------------------------------
-  // [16-bit per component]
+  // [16-bit Per Component]
   // --------------------------------------------------------------------------
 
   //! @brief 64-bit ARGB (16 bits per component), premultiplied.
@@ -1544,8 +1582,10 @@ enum IMAGE_FORMAT
 
   //! @brief Count of image formats.
   IMAGE_FORMAT_COUNT = 8,
+
   //! @brief Null image format (used only by empty images).
   IMAGE_FORMAT_NULL = IMAGE_FORMAT_COUNT,
+
   //! @brief Ignore image format (used by some functions inside the @c Image).
   IMAGE_FORMAT_IGNORE = IMAGE_FORMAT_COUNT
 };
@@ -1570,10 +1610,12 @@ enum IMAGE_LIMITS
 //! @brief Mirror modes used together with @c Image::mirror().
 enum IMAGE_MIRROR_MODE
 {
-  IMAGE_MIRROR_NONE       = 0x00,
-  IMAGE_MIRROR_HORIZONTAL = 0x01,
-  IMAGE_MIRROR_VERTICAL   = 0x02,
-  IMAGE_MIRROR_BOTH       = 0x03
+  IMAGE_MIRROR_NONE = 0,
+  IMAGE_MIRROR_HORIZONTAL = 1,
+  IMAGE_MIRROR_VERTICAL = 2,
+  IMAGE_MIRROR_BOTH = 3,
+
+  IMAGE_MIRROR_COUNT = 4
 };
 
 // ============================================================================
@@ -1595,10 +1637,12 @@ enum IMAGE_PRECISION
 //! @brief Rotate modes used together with @c Image::rotate() methods.
 enum IMAGE_ROTATE_MODE
 {
-  IMAGE_ROTATE_0   = 0x00,
-  IMAGE_ROTATE_90  = 0x01,
-  IMAGE_ROTATE_180 = 0x02,
-  IMAGE_ROTATE_270 = 0x03
+  IMAGE_ROTATE_0 = 0,
+  IMAGE_ROTATE_90 = 1,
+  IMAGE_ROTATE_180 = 2,
+  IMAGE_ROTATE_270 = 3,
+
+  IMAGE_ROTATE_COUNT = 4
 };
 
 // ============================================================================
@@ -2506,7 +2550,7 @@ enum TRANSFORM_TYPE
 //! device pixel by Fog-G2d engine.
 enum UNIT
 {
-  //! @brief No unit (compatible to @c UNIT_PX).
+  //! @brief No unit (compatible with @c UNIT_PX).
   UNIT_NONE = 0,
   //! @brief Pixel.
   UNIT_PX,
@@ -2541,7 +2585,7 @@ enum UNIT
 
 
 
-// TODO: Unfinished.
+
 
 
 
@@ -2549,66 +2593,58 @@ enum UNIT
 
 
 // ============================================================================
-// [Fog::IMAGE_EFFECT]
+// [Fog::IMAGE_FILTER_TYPE]
 // ============================================================================
 
-//! @brief Type of image filter, see @c ImageFxFilter and @c ColorFilter classes.
-enum IMAGE_EFFECT
+//! @brief Type of image filter.
+enum IMAGE_FILTER_TYPE
 {
-  //! @brief Image effect is none (COPY).
-  IMAGE_EFFECT_NONE = 0,
+  //! @brief None.
+  IMAGE_FILTER_TYPE_NONE = 0,
 
-  //! @brief @c Color adjust image effect.
-  IMAGE_EFFECT_COLOR_ADJUST = 1,
-  //! @brief @c Color LUT image effect.
-  IMAGE_EFFECT_COLOR_LUT = 2,
-  //! @brief @c Color matrix image effect.
-  IMAGE_EFFECT_COLOR_MATRIX = 3,
+  //! @brief @ref ColorLut filter.
+  IMAGE_FILTER_TYPE_COLOR_LUT = 1,
+  //! @brief @ref ColorMatrix filter.
+  IMAGE_FILTER_TYPE_COLOR_MATRIX = 2,
+  //! @brief @ref ComponentTransfer filter
+  IMAGE_FILTER_TYPE_COMPONENT_TRANSFER = 3,
 
-  //! @brief Image filter is box blur.
-  IMAGE_EFFECT_BLUR = 4,
-  //! @brief Image filter is convolution (using convolution matrix).
-  IMAGE_EFFECT_CONVOLVE_MATRIX = 5,
-  //! @brief Image filter is convolution (using convolution vectors - horizontal and vertical).
-  IMAGE_EFFECT_CONVOLVE_VECTOR = 6,
+  //! @brief @ref ConvolutionMatrix filter.
+  IMAGE_FILTER_TYPE_CONVOLUTION_MATRIX = 4,
+  //! @brief @ref ConvolutionSeparable filter.
+  IMAGE_FILTER_TYPE_CONVOLUTION_SEPARABLE = 5,
 
-  // TODO: Image effects.
-  IMAGE_EFFECT_EMBOSS = 7,
-  IMAGE_EFFECT_MORPHOLOGY = 8,
-  IMAGE_EFFECT_SHARPEN = 9,
-  IMAGE_EFFECT_SHADOW = 10,
-
-  IMAGE_EFFECT_COUNT = 11
+  //! @brief Count of image filter types.
+  IMAGE_FILTER_TYPE_COUNT = 6
 };
 
 // ============================================================================
-// [Fog::IMAGE_EFFECT_CHAR]
+// [Fog::IMAGE_FILTER_FLAG]
 // ============================================================================
 
 //! @brief Characteristics of image filter.
 //!
 //! Characteristics can be used to improve performance of filters by @c Painter.
-enum IMAGE_EFFECT_CHAR
+enum IMAGE_FILTER_FLAG
 {
   //! @brief Image filter does only color transformations.
   //!
   //! This flag must set all color filter, because it's very useful hint that
   //! enables very good code optimizations inside @c Painter and @c Image
   //! classes.
-  IMAGE_EFFECT_CHAR_COLOR_TRANSFORM = 0x0001,
+  IMAGE_FILTER_FLAG_COLOR_TRANSFORM = 0x0001,
 
-  //! @brief Image filter can extend image boundary (blur and convolution
-  //! filters).
-  IMAGE_EFFECT_CHAR_CAN_EXTEND = 0x0002,
+  //! @brief Image filter can extend image boundary (convolution based filters).
+  IMAGE_FILTER_FLAG_CAN_EXTEND = 0x0002,
 
   //! @brief Image filter constains standard processing mechanism - one pass.
-  IMAGE_EFFECT_CHAR_ENTIRE_PROCESSING = 0x0004,
+  IMAGE_FILTER_FLAG_ENTIRE_PROCESSING = 0x0004,
 
   //! @brief When doing entire processing the destination and source buffers
   //! can be shared (dst and src pointers can point to same location).
-  IMAGE_EFFECT_CHAR_ENTIRE_MEM_EQUAL = 0x0008,
+  IMAGE_FILTER_FLAG_ENTIRE_MEM_EQUAL = 0x0008,
 
-  //! @brief Image filter does vertical processing of image.
+  //! @brief Image filter does vertical processing of an image.
   //!
   //! This bit is set for all blur/convolution filters. Performance of filter
   //! is usually degraded, because filter processing function needs to access
@@ -2616,50 +2652,78 @@ enum IMAGE_EFFECT_CHAR
   //!
   //! @note Vertical processing can be combined with horizontal processing and
   //! painter tries to make this combination efficient.
-  IMAGE_EFFECT_CHAR_VERT_PROCESSING = 0x0010,
+  IMAGE_FILTER_FLAG_VERT_PROCESSING = 0x0010,
 
   //! @brief When doing vertical processing the destination and source buffers
   //! can be shared (dst and src pointers can point to same location).
-  IMAGE_EFFECT_CHAR_VERT_MEM_EQUAL = 0x0020,
+  IMAGE_FILTER_FLAG_VERT_MEM_EQUAL = 0x0020,
 
   //! @brief Image filter does horizontal processing of image.
   //!
   //! If filter needs only horizontal (no IMAGE_EFFECT_VERT_PROCESSING bit is
   //! set) then processing it can be very efficient in multithreaded painter
   //! engine.
-  IMAGE_EFFECT_CHAR_HORZ_PROCESSING = 0x0040,
+  IMAGE_FILTER_FLAG_HORZ_PROCESSING = 0x0040,
 
   //! @brief When doing vertical processing the destination and source buffers
   //! can be shared (dst and src pointers can point to same location).
-  IMAGE_EFFECT_CHAR_HORZ_MEM_EQUAL = 0x0080,
+  IMAGE_FILTER_FLAG_HORZ_MEM_EQUAL = 0x0080,
 
   //! @brief Contains both, @c IMAGE_EFFECT_VERT_PROCESSING and
   //! @c IMAGE_EFFECT_HORZ_PROCESSING flags.
-  IMAGE_EFFECT_CHAR_HV_PROCESSING =
-    IMAGE_EFFECT_CHAR_VERT_PROCESSING |
-    IMAGE_EFFECT_CHAR_HORZ_PROCESSING ,
+  IMAGE_FILTER_FLAG_HV_PROCESSING = IMAGE_FILTER_FLAG_VERT_PROCESSING | IMAGE_FILTER_FLAG_HORZ_PROCESSING,
 
   //! @brief Image filter supports @c IMAGE_FORMAT_PRGB32.
-  IMAGE_EFFECT_CHAR_SUPPORTS_PRGB32 = 0x0100,
+  IMAGE_FILTER_FLAG_SUPPORTS_PRGB32 = 0x0100,
 
   //! @brief Image filter supports @c IMAGE_FORMAT_XRGB32.
   //!
   //! @note This flag should be always set!
-  IMAGE_EFFECT_CHAR_SUPPORTS_XRGB32 = 0x0400,
+  IMAGE_FILTER_FLAG_SUPPORTS_XRGB32 = 0x0400,
 
   //! @brief Image filter supports @c IMAGE_FORMAT_A8.
   //!
   //! @note This flag should be always set!
-  IMAGE_EFFECT_CHAR_SUPPORTS_A8 = 0x0800,
+  IMAGE_FILTER_FLAG_SUPPORTS_A8 = 0x0800,
 
   //! @brief Image filter supports alpha-channel promotion. This means that
-  //! source image without alpha-channel can be converted to image with
+  //! source image without alpha-channel can be converted to an image with
   //! alpha-channel.
   //!
   //! This operation is supported by all blur-filters (and should be supported
   //! generally by all filters that extend image boundary).
-  IMAGE_EFFECT_CHAR_PROMOTE_ALPHA = 0x1000
+  IMAGE_FILTER_FLAG_PROMOTE_ALPHA = 0x1000
 };
+
+// ============================================================================
+// [Fog::IMAGE_FILTER_EXTEND]
+// ============================================================================
+
+//! @brief Border extend mode used by image effects (convolution and blurs).
+enum IMAGE_FILTER_EXTEND
+{
+  //! @brief Borders are extended by a color.
+  IMAGE_FILTER_EXTEND_COLOR = 0,
+
+  //! @brief Borders are extended using pad.
+  IMAGE_FILTER_EXTEND_PAD = 1,
+
+  //! @brief Borders are extended using repead.
+  IMAGE_FILTER_EXTEND_REPEAT = 2,
+
+  //! @brief Borders are extended using reflect.
+  IMAGE_FILTER_EXTEND_REFLECT = 3,
+
+  //! @brief Default border extend type.
+  IMAGE_FILTER_EXTEND_DEFAULT = IMAGE_FILTER_EXTEND_COLOR,
+
+  //! @brief Count of border extend types (for error checking).
+  IMAGE_FILTER_EXTEND_COUNT = 4
+};
+
+
+
+
 
 // ============================================================================
 // [Fog::BLUR_FX_TYPE]
@@ -2694,7 +2758,10 @@ enum BLUR_FX_TYPE
 };
 
 //! @brief Maximum blur radius.
-static const float BLUR_FX_MAX_RADIUS = 255.0f;
+enum 
+{
+  BLUR_FX_MAX_RADIUS = 255
+};
 
 // ============================================================================
 // [Fog::IMAGE_EFFECT_ALPHA_MODE]
@@ -2706,31 +2773,20 @@ enum IMAGE_EFFECT_ALPHA_MODE
   IMAGE_EFFECT_ALPHA_INCLUDE
 };
 
-// ============================================================================
-// [Fog::BORDER_EXTEND_TYPE]
-// ============================================================================
 
-//! @brief Border extend mode used by image effects (convolution and blurs).
-enum BORDER_EXTEND_TYPE
-{
-  //! @brief Borders are extended by a color.
-  BORDER_EXTEND_COLOR = 0,
 
-  //! @brief Borders are extended using pad.
-  BORDER_EXTEND_PAD = 1,
 
-  //! @brief Borders are extended using repead.
-  BORDER_EXTEND_REPEAT = 2,
 
-  //! @brief Borders are extended using reflect.
-  BORDER_EXTEND_REFLECT = 3,
 
-  //! @brief Default border extend type.
-  BORDER_EXTEND_DEFAULT = BORDER_EXTEND_COLOR,
 
-  //! @brief Count of border extend types (for error checking).
-  BORDER_EXTEND_COUNT = 4
-};
+
+
+
+
+
+
+
+
 
 //! @}
 

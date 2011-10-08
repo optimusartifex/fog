@@ -1626,12 +1626,12 @@ _Ret:
 
 static err_t FOG_CDECL StringA_opDouble(StringA* self, uint32_t cntOp, double d)
 {
-  return _api.stringa.opDoubleEx(self, cntOp, d, NULL);
+  return _api.stringa_opDoubleEx(self, cntOp, d, NULL);
 }
 
 static err_t FOG_CDECL StringW_opDouble(StringW* self, uint32_t cntOp, double d)
 {
-  return _api.stringw.opDoubleEx(self, cntOp, d, NULL, NULL);
+  return _api.stringw_opDoubleEx(self, cntOp, d, NULL, NULL);
 }
 
 static err_t FOG_CDECL StringA_opDoubleEx(StringA* self, uint32_t cntOp, double d, const FormatReal* fmt)
@@ -1681,10 +1681,10 @@ static err_t FOG_CDECL StringT_opVFormatPrivate(CharT_(String)* self, uint32_t c
 
   // Choose the default text-codec is not provided.
   if (tc == NULL)
-    tc = _api.textcodec.oCache[TEXT_CODEC_CACHE_ASCII];
+    tc = _api.textcodec_oCache[TEXT_CODEC_CACHE_ASCII];
 
   if (sizeof(CharT) > 1 && locale == NULL)
-    locale = _api.locale.oPosix;
+    locale = _api.locale_oPosix;
 
   if (cntOp == CONTAINER_OP_REPLACE)
     self->clear();
@@ -2105,7 +2105,7 @@ static err_t FOG_CDECL StringW_opVFormatStubA(StringW* self, uint32_t cntOp, con
   StringTmpW<256> fmtW;
 
   if (tc == NULL)
-    tc = _api.textcodec.oCache[TEXT_CODEC_CACHE_ASCII];
+    tc = _api.textcodec_oCache[TEXT_CODEC_CACHE_ASCII];
   FOG_RETURN_ON_ERROR(tc->decode(fmtW, *fmt));
 
   return StringT_opVFormatPrivate<CharW>(self, cntOp, fmtW.getData(), fmtW.getLength(), tc, locale, ap);
@@ -2195,7 +2195,7 @@ static err_t FOG_CDECL StringT_opZFormatString(CharT_(String)* self, uint32_t cn
 // ============================================================================
 
 template<typename CharT>
-static err_t FOG_CDECL StringT_opNormalizeSlashes(CharT_(String)* self, uint32_t cntOp, const CharT_(String)* other, uint32_t slashForm)
+static err_t FOG_CDECL StringT_opNormalizeSlashes(CharT_(String)* self, uint32_t cntOp, const CharT_(String)* other, const Range* range, uint32_t slashForm)
 {
   if (slashForm >= SLASH_FORM_COUNT)
     return ERR_RT_INVALID_ARGUMENT;
@@ -2207,12 +2207,26 @@ static err_t FOG_CDECL StringT_opNormalizeSlashes(CharT_(String)* self, uint32_t
     swap<CharT>(from, to);
 
   size_t oLength = other->getLength();
+  size_t oStart, oEnd;
+
+  if (!Range::fit(oStart, oEnd, oLength, range))
+  {
+    if (cntOp == CONTAINER_OP_REPLACE)
+      self->clear();
+    return ERR_OK;
+  }
 
   if (cntOp == CONTAINER_OP_REPLACE && self == other)
+  {
+    if (oStart != 0 || oEnd != oLength)
+      FOG_RETURN_ON_ERROR(self->slice(Range(oStart, oEnd)));
     return self->replace(from, to);
+  }
+
+  oLength = oEnd - oStart;
 
   CharT* p = self->_prepare(cntOp, oLength);
-  const CharT* s = other->getData();
+  const CharT* s = other->getData() + oStart;
 
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
@@ -3417,7 +3431,7 @@ static err_t FOG_CDECL StringT_justify(CharT_(String)* self, size_t n, CharT_Typ
 
   if (left != 0)
   {
-    StringT_chmove(p + left, p, dLength - left);
+    StringT_chmove(p + left, p, dLength);
     StringT_chfill(p, ch, left);
   }
   if (right != 0)
@@ -4684,17 +4698,17 @@ static err_t FOG_CDECL StringA_base64DecodeStringA(StringA* dst, uint32_t cntOp,
   if (dst == src)
   {
     StringA copy(*src);
-    return _api.stringa.base64DecodeDataA(dst, cntOp, copy.getData(), copy.getLength());
+    return _api.stringa_base64DecodeDataA(dst, cntOp, copy.getData(), copy.getLength());
   }
   else
   {
-    return _api.stringa.base64DecodeDataA(dst, cntOp, src->getData(), src->getLength());
+    return _api.stringa_base64DecodeDataA(dst, cntOp, src->getData(), src->getLength());
   }
 }
 
 static err_t FOG_CDECL StringA_base64DecodeStringW(StringA* dst, uint32_t cntOp, const StringW* src)
 {
-  return _api.stringa.base64DecodeDataW(dst, cntOp, src->getData(), src->getLength());
+  return _api.stringa_base64DecodeDataW(dst, cntOp, src->getData(), src->getLength());
 }
 
 template<typename SrcT>
@@ -4752,17 +4766,17 @@ static err_t FOG_CDECL StringA_base64EncodeStringA(StringA* dst, uint32_t cntOp,
   if (dst == src)
   {
     StringA copy(*src);
-    return _api.stringa.base64EncodeDataA(dst, cntOp, copy.getData(), copy.getLength());
+    return _api.stringa_base64EncodeDataA(dst, cntOp, copy.getData(), copy.getLength());
   }
   else
   {
-    return _api.stringa.base64EncodeDataA(dst, cntOp, src->getData(), src->getLength());
+    return _api.stringa_base64EncodeDataA(dst, cntOp, src->getData(), src->getLength());
   }
 }
 
 static err_t FOG_CDECL StringW_base64EncodeStringA(StringW* dst, uint32_t cntOp, const StringA* src)
 {
-  return _api.stringw.base64EncodeDataA(dst, cntOp, src->getData(), src->getLength());
+  return _api.stringw_base64EncodeDataA(dst, cntOp, src->getData(), src->getLength());
 }
 
 template<typename CharT>
@@ -5001,360 +5015,360 @@ FOG_NO_EXPORT void String_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.stringa.ctor = StringT_ctor<char>;
-  _api.stringa.ctorStubA = StringT_ctorStub<char, char>;
-  _api.stringa.ctorStubA2 = StringT_ctorStub2<char, char>;
-  _api.stringa.ctorCopyA = StringT_ctorCopy<char>;
-  _api.stringa.ctorCopyA2 = StringT_ctorCopy2<char>;
-  _api.stringa.ctorSubstr = StringT_ctorSubstr<char>;
-  _api.stringa.ctorU32 = StringT_ctorU32<char>;
-  _api.stringa.ctorU64 = StringT_ctorU64<char>;
-  _api.stringa.ctorDouble = StringT_ctorDouble<char>;
-  _api.stringa.dtor = StringT_dtor<char>;
-
-  _api.stringa.detach = StringT_detach<char>;
-  _api.stringa.reserve = StringT_reserve<char>;
-  _api.stringa.resize = StringT_resize<char>;
-  _api.stringa.truncate = StringT_truncate<char>;
-  _api.stringa.squeeze = StringT_squeeze<char>;
-  _api.stringa.prepare = StringT_prepare<char>;
-  _api.stringa.add = StringT_add<char>;
-
-  _api.stringa.clear = StringT_clear<char>;
-  _api.stringa.reset = StringT_reset<char>;
-
-  _api.stringa.getHashCode = StringT_getHashCode<char>;
-
-  _api.stringa.setStubA = StringT_setStub<char, char>;
-  _api.stringa.setStringA = StringT_setString<char, char>;
-  _api.stringa.setStringExA = StringT_setStringEx<char, char>;
-
-  _api.stringa.setDeep = StringT_setDeep<char>;
-
-  _api.stringa.appendStubA = StringT_appendStub<char, char>;
-  _api.stringa.appendStringA = StringT_appendString<char, char>;
-  _api.stringa.appendStringExA = StringT_appendStringEx<char, char>;
-
-  _api.stringa.opFill = StringT_opFill<char>;
-  _api.stringa.opBool = StringT_opBool<char>;
-  _api.stringa.opI32 = StringT_opI32<char>;
-  _api.stringa.opI32Ex = StringA_opI32Ex;
-  _api.stringa.opU32 = StringT_opU32<char>;
-  _api.stringa.opU32Ex = StringA_opU32Ex;
-  _api.stringa.opI64 = StringT_opI64<char>;
-  _api.stringa.opI64Ex = StringA_opI64Ex;
-  _api.stringa.opU64 = StringT_opU64<char>;
-  _api.stringa.opU64Ex = StringA_opU64Ex;
-  _api.stringa.opDouble = StringA_opDouble;
-  _api.stringa.opDoubleEx = StringA_opDoubleEx;
-
-  _api.stringa.opVFormatStubA = StringA_opVFormatStubA;
-  _api.stringa.opVFormatStringA = StringA_opVFormatStringA;
-
-  _api.stringa.opZFormatStubA = StringT_opZFormatStub<char, char>;
-  _api.stringa.opZFormatStringA = StringT_opZFormatString<char, char>;
-
-  _api.stringa.opNormalizeSlashesA = StringT_opNormalizeSlashes<char>;
-
-  _api.stringa.prependChars = StringT_prependChars<char>;
-  _api.stringa.prependStubA = StringT_prependStub<char, char>;
-  _api.stringa.prependStringA = StringT_prependString<char, char>;
-
-  _api.stringa.insertChars = StringT_insertChars<char>;
-  _api.stringa.insertStubA = StringT_insertStub<char, char>;
-  _api.stringa.insertStringA = StringT_insertString<char, char>;
-
-  _api.stringa.removeRange = StringT_removeRange<char>;
-  _api.stringa.removeRangeList = StringT_removeRangeList<char>;
-
-  _api.stringa.removeChar = StringT_removeChar<char>;
-  _api.stringa.removeStubA = StringT_removeStub<char, char>;
-  _api.stringa.removeStringA = StringT_removeString<char, char>;
-  _api.stringa.removeRegExpA = StringT_removeRegExp<char>;
-
-  _api.stringa.replaceRangeStubA = StringT_replaceRangeStub<char, char>;
-  _api.stringa.replaceRangeStringA = StringT_replaceRangeString<char, char>;
-
-  _api.stringa.replaceRangeListStubA = StringT_replaceRangeListStub<char, char>;
-  _api.stringa.replaceRangeListStringA = StringT_replaceRangeListString<char, char>;
-
-  _api.stringa.replaceChar = StringT_replaceChar<char>;
-  _api.stringa.replaceStringA = StringT_replaceString<char>;
-  _api.stringa.replaceRegExpA = StringT_replaceRegExp<char>;
-
-  _api.stringa.lower = StringT_lower<char>;
-  _api.stringa.upper = StringT_upper<char>;
-
-  _api.stringa.trim = StringT_trim<char>;
-  _api.stringa.simplify = StringT_simplify<char>;
-  _api.stringa.justify = StringT_justify<char>;
-
-  _api.stringa.splitChar = StringT_splitChar<char>;
-  _api.stringa.splitStringA = StringT_splitString<char>;
-  _api.stringa.splitRegExpA = StringT_splitRegExp<char>;
-
-  _api.stringa.slice = StringT_slice<char>;
-
-  _api.stringa.joinChar = StringT_joinChar<char>;
-  _api.stringa.joinStringA = StringT_joinString<char>;
-
-  _api.stringa.parseBool = StringT_parseBool<char>;
-  _api.stringa.parseI8 = StringT_parseI8<char>;
-  _api.stringa.parseU8 = StringT_parseU8<char>;
-  _api.stringa.parseI16 = StringT_parseI16<char>;
-  _api.stringa.parseU16 = StringT_parseU16<char>;
-  _api.stringa.parseI32 = StringT_parseI32<char>;
-  _api.stringa.parseU32 = StringT_parseU32<char>;
-  _api.stringa.parseI64 = StringT_parseI64<char>;
-  _api.stringa.parseU64 = StringT_parseU64<char>;
-  _api.stringa.parseFloat = StringT_parseFloat<char>;
-  _api.stringa.parseDouble = StringT_parseDouble<char>;
-
-  _api.stringa.countOfChar = StringT_countOfChar<char>;
-  _api.stringa.countOfStubA = StringT_countOfStub<char, char>;
-  _api.stringa.countOfStringA = StringT_countOfString<char, char>;
-  _api.stringa.countOfRegExpA = StringT_countOfRegExp<char>;
-
-  _api.stringa.indexOfChar = StringT_indexOfChar<char>;
-  _api.stringa.indexOfStubA = StringT_indexOfStub<char, char>;
-  _api.stringa.indexOfStringA = StringT_indexOfString<char, char>;
-  _api.stringa.indexOfRegExpA = StringT_indexOfRegExp<char>;
-  _api.stringa.indexOfAnyCharA = StringT_indexOfAnyChar<char>;
-
-  _api.stringa.lastIndexOfChar = StringT_lastIndexOfChar<char>;
-  _api.stringa.lastIndexOfStubA = StringT_lastIndexOfStub<char, char>;
-  _api.stringa.lastIndexOfStringA = StringT_lastIndexOfString<char, char>;
-  _api.stringa.lastIndexOfRegExpA = StringT_lastIndexOfRegExp<char>;
-  _api.stringa.lastIndexOfAnyCharA = StringT_lastIndexOfAnyChar<char>;
-
-  _api.stringa.startsWithChar = StringT_startsWithChar<char>;
-  _api.stringa.startsWithStubA = StringT_startsWithStub<char, char>;
-  _api.stringa.startsWithStringA = StringT_startsWithString<char, char>;
-  _api.stringa.startsWithRegExpA = StringT_startsWithRegExp<char>;
-
-  _api.stringa.endsWithChar = StringT_endsWithChar<char>;
-  _api.stringa.endsWithStubA = StringT_endsWithStub<char, char>;
-  _api.stringa.endsWithStringA = StringT_endsWithString<char, char>;
-  _api.stringa.endsWithRegExpA = StringT_endsWithRegExp<char>;
-
-  _api.stringa.eqStubA = StringT_eqStub<char, char>;
-  _api.stringa.eqStringA = StringT_eqString<char, char>;
-
-  _api.stringa.eqStubExA = StringT_eqStubEx<char, char>;
-  _api.stringa.eqStringExA = StringT_eqStringEx<char, char>;
-
-  _api.stringa.compareStubA = StringT_compareStub<char, char>;
-  _api.stringa.compareStringA = StringT_compareString<char, char>;
-
-  _api.stringa.compareStubExA = StringT_compareStubEx<char, char>;
-  _api.stringa.compareStringExA = StringT_compareStringEx<char, char>;
-
-  _api.stringa.validateUtf8 = StringA_validateUtf8;
-  _api.stringa.getUcsLength = StringA_getUcsLength;
-
-  _api.stringa.hexDecode = StringA_hexDecode;
-  _api.stringa.hexEncode = StringA_hexEncode;
-
-  _api.stringa.base64DecodeStringA = StringA_base64DecodeStringA;
-  _api.stringa.base64DecodeStringW = StringA_base64DecodeStringW;
-  _api.stringa.base64DecodeDataA = StringA_base64DecodeData<char>;
-  _api.stringa.base64DecodeDataW = StringA_base64DecodeData<CharW>;
-  _api.stringa.base64EncodeStringA = StringA_base64EncodeStringA;
-  _api.stringa.base64EncodeDataA = StringT_base64EncodeDataA<char>;
-
-  _api.stringa.dCreate = StringT_dCreate<char>;
-  _api.stringa.dCreateStubA = StringT_dCreateStub<char, char>;
-  _api.stringa.dAdopt = StringT_dAdopt<char>;
-  _api.stringa.dAdoptStubA = StringT_dAdoptStub<char, char>;
-  _api.stringa.dRealloc = StringT_dRealloc<char>;
-  _api.stringa.dFree = StringT_dFree<char>;
-
-  _api.stringw.ctor = StringT_ctor<CharW>;
-  _api.stringw.ctorStubA = StringT_ctorStub<CharW, char>;
-  _api.stringw.ctorStubW = StringT_ctorStub<CharW, CharW>;
-  _api.stringw.ctorStubA2 = StringT_ctorStub2<CharW, char>;
-  _api.stringw.ctorStubW2 = StringT_ctorStub2<CharW, CharW>;
-  _api.stringw.ctorCopyW = StringT_ctorCopy<CharW>;
-  _api.stringw.ctorCopyW2 = StringT_ctorCopy2<CharW>;
-  _api.stringw.ctorCodec = StringW_ctorCodec;
-  _api.stringw.ctorSubstr = StringT_ctorSubstr<CharW>;
-  _api.stringw.ctorU32 = StringT_ctorU32<CharW>;
-  _api.stringw.ctorU64 = StringT_ctorU64<CharW>;
-  _api.stringw.ctorDouble = StringT_ctorDouble<CharW>;
-  _api.stringw.dtor = StringT_dtor<CharW>;
-
-  _api.stringw.detach = StringT_detach<CharW>;
-  _api.stringw.reserve = StringT_reserve<CharW>;
-  _api.stringw.resize = StringT_resize<CharW>;
-  _api.stringw.truncate = StringT_truncate<CharW>;
-  _api.stringw.squeeze = StringT_squeeze<CharW>;
-  _api.stringw.prepare = StringT_prepare<CharW>;
-  _api.stringw.add = StringT_add<CharW>;
-
-  _api.stringw.clear = StringT_clear<CharW>;
-  _api.stringw.reset = StringT_reset<CharW>;
-
-  _api.stringw.getHashCode = StringT_getHashCode<CharW>;
-
-  _api.stringw.setStubA = StringW_setStubCodec;
-  _api.stringw.setStubW = StringT_setStub<CharW, CharW>;
-  _api.stringw.setStringA = StringW_setStringCodec;
-  _api.stringw.setStringW = StringT_setString<CharW, CharW>;
-  _api.stringw.setStringExW = StringT_setStringEx<CharW, CharW>;
-
-  _api.stringw.setDeep = StringT_setDeep<CharW>;
-
-  _api.stringw.appendStubA = StringW_appendStubCodec;
-  _api.stringw.appendStubW = StringT_appendStub<CharW, CharW>;
-  _api.stringw.appendStringA = StringW_appendStringCodec;
-  _api.stringw.appendStringW = StringT_appendString<CharW, CharW>;
-  _api.stringw.appendStringExW = StringT_appendStringEx<CharW, CharW>;
-
-  _api.stringw.opFill = StringT_opFill<CharW>;
-  _api.stringw.opBool = StringT_opBool<CharW>;
-  _api.stringw.opI32 = StringT_opI32<CharW>;
-  _api.stringw.opI32Ex = StringW_opI32Ex;
-  _api.stringw.opU32 = StringT_opU32<CharW>;
-  _api.stringw.opU32Ex = StringW_opU32Ex;
-  _api.stringw.opI64 = StringT_opI64<CharW>;
-  _api.stringw.opI64Ex = StringW_opI64Ex;
-  _api.stringw.opU64 = StringT_opU64<CharW>;
-  _api.stringw.opU64Ex = StringW_opU64Ex;
-  _api.stringw.opDouble = StringW_opDouble;
-  _api.stringw.opDoubleEx = StringW_opDoubleEx;
-
-  _api.stringw.opVFormatStubA = StringW_opVFormatStubA;
-  _api.stringw.opVFormatStubW = StringW_opVFormatStubW;
-  _api.stringw.opVFormatStringW = StringW_opVFormatStringW;
-
-  _api.stringw.opZFormatStubW = StringT_opZFormatStub<CharW, CharW>;
-  _api.stringw.opZFormatStringW = StringT_opZFormatString<CharW, CharW>;
-
-  _api.stringw.opNormalizeSlashesW = StringT_opNormalizeSlashes<CharW>;
-
-  _api.stringw.prependChars = StringT_prependChars<CharW>;
-  _api.stringw.prependStubA = StringW_prependStubCodec;
-  _api.stringw.prependStubW = StringT_prependStub<CharW, CharW>;
-  _api.stringw.prependStringA = StringW_prependStringCodec;
-  _api.stringw.prependStringW = StringT_prependString<CharW, CharW>;
-
-  _api.stringw.insertChars = StringT_insertChars<CharW>;
-  _api.stringw.insertStubA = StringW_insertStubCodec;
-  _api.stringw.insertStubW = StringT_insertStub<CharW, CharW>;
-  _api.stringw.insertStringA = StringW_insertStringCodec;
-  _api.stringw.insertStringW = StringT_insertString<CharW, CharW>;
-
-  _api.stringw.removeRange = StringT_removeRange<CharW>;
-  _api.stringw.removeRangeList = StringT_removeRangeList<CharW>;
-
-  _api.stringw.removeChar = StringT_removeChar<CharW>;
-  _api.stringw.removeStubA = StringT_removeStub<CharW, char>;
-  _api.stringw.removeStubW = StringT_removeStub<CharW, CharW>;
-  _api.stringw.removeStringW = StringT_removeString<CharW, CharW>;
-  _api.stringw.removeRegExpW = StringT_removeRegExp<CharW>;
-
-  _api.stringw.replaceRangeStubW = StringT_replaceRangeStub<CharW, CharW>;
-  _api.stringw.replaceRangeStringW = StringT_replaceRangeString<CharW, CharW>;
-
-  _api.stringw.replaceRangeListStubW = StringT_replaceRangeListStub<CharW, CharW>;
-  _api.stringw.replaceRangeListStringW = StringT_replaceRangeListString<CharW, CharW>;
-
-  _api.stringw.replaceChar = StringT_replaceChar<CharW>;
-  _api.stringw.replaceStringW = StringT_replaceString<CharW>;
-  _api.stringw.replaceRegExpW = StringT_replaceRegExp<CharW>;
-
-  _api.stringw.lower = StringT_lower<CharW>;
-  _api.stringw.upper = StringT_upper<CharW>;
-
-  _api.stringw.trim = StringT_trim<CharW>;
-  _api.stringw.simplify = StringT_simplify<CharW>;
-  _api.stringw.justify = StringT_justify<CharW>;
-
-  _api.stringw.splitChar = StringT_splitChar<CharW>;
-  _api.stringw.splitStringW = StringT_splitString<CharW>;
-  _api.stringw.splitRegExpW = StringT_splitRegExp<CharW>;
-
-  _api.stringw.slice = StringT_slice<CharW>;
-
-  _api.stringw.joinChar = StringT_joinChar<CharW>;
-  _api.stringw.joinStringW = StringT_joinString<CharW>;
-
-  _api.stringw.parseBool = StringT_parseBool<CharW>;
-  _api.stringw.parseI8 = StringT_parseI8<CharW>;
-  _api.stringw.parseU8 = StringT_parseU8<CharW>;
-  _api.stringw.parseI16 = StringT_parseI16<CharW>;
-  _api.stringw.parseU16 = StringT_parseU16<CharW>;
-  _api.stringw.parseI32 = StringT_parseI32<CharW>;
-  _api.stringw.parseU32 = StringT_parseU32<CharW>;
-  _api.stringw.parseI64 = StringT_parseI64<CharW>;
-  _api.stringw.parseU64 = StringT_parseU64<CharW>;
-  _api.stringw.parseFloat = StringT_parseFloat<CharW>;
-  _api.stringw.parseDouble = StringT_parseDouble<CharW>;
-
-  _api.stringw.countOfChar = StringT_countOfChar<CharW>;
-  _api.stringw.countOfStubA = StringT_countOfStub<CharW, char>;
-  _api.stringw.countOfStubW = StringT_countOfStub<CharW, CharW>;
-  _api.stringw.countOfStringW = StringT_countOfString<CharW, CharW>;
-  _api.stringw.countOfRegExpW = StringT_countOfRegExp<CharW>;
-
-  _api.stringw.indexOfChar = StringT_indexOfChar<CharW>;
-  _api.stringw.indexOfStubA = StringT_indexOfStub<CharW, char>;
-  _api.stringw.indexOfStubW = StringT_indexOfStub<CharW, CharW>;
-  _api.stringw.indexOfStringW = StringT_indexOfString<CharW, CharW>;
-  _api.stringw.indexOfRegExpW = StringT_indexOfRegExp<CharW>;
-  _api.stringw.indexOfAnyCharW = StringT_indexOfAnyChar<CharW>;
-
-  _api.stringw.lastIndexOfChar = StringT_lastIndexOfChar<CharW>;
-  _api.stringw.lastIndexOfStubA = StringT_lastIndexOfStub<CharW, char>;
-  _api.stringw.lastIndexOfStubW = StringT_lastIndexOfStub<CharW, CharW>;
-  _api.stringw.lastIndexOfStringW = StringT_lastIndexOfString<CharW, CharW>;
-  _api.stringw.lastIndexOfRegExpW = StringT_lastIndexOfRegExp<CharW>;
-  _api.stringw.lastIndexOfAnyCharW = StringT_lastIndexOfAnyChar<CharW>;
-
-  _api.stringw.startsWithChar = StringT_startsWithChar<CharW>;
-  _api.stringw.startsWithStubA = StringT_startsWithStub<CharW, char>;
-  _api.stringw.startsWithStubW = StringT_startsWithStub<CharW, CharW>;
-  _api.stringw.startsWithStringW = StringT_startsWithString<CharW, CharW>;
-  _api.stringw.startsWithRegExpW = StringT_startsWithRegExp<CharW>;
-
-  _api.stringw.endsWithChar = StringT_endsWithChar<CharW>;
-  _api.stringw.endsWithStubA = StringT_endsWithStub<CharW, char>;
-  _api.stringw.endsWithStubW = StringT_endsWithStub<CharW, CharW>;
-  _api.stringw.endsWithStringW = StringT_endsWithString<CharW, CharW>;
-  _api.stringw.endsWithRegExpW = StringT_endsWithRegExp<CharW>;
-
-  _api.stringw.eqStubA = StringT_eqStub<CharW, char>;
-  _api.stringw.eqStubW = StringT_eqStub<CharW, CharW>;
-  _api.stringw.eqStringW = StringT_eqString<CharW, CharW>;
-
-  _api.stringw.eqStubExA = StringT_eqStubEx<CharW, char>;
-  _api.stringw.eqStubExW = StringT_eqStubEx<CharW, CharW>;
-  _api.stringw.eqStringExW = StringT_eqStringEx<CharW, CharW>;
-
-  _api.stringw.compareStubA = StringT_compareStub<CharW, char>;
-  _api.stringw.compareStubW = StringT_compareStub<CharW, CharW>;
-  _api.stringw.compareStringW = StringT_compareString<CharW, CharW>;
-
-  _api.stringw.compareStubExA = StringT_compareStubEx<CharW, char>;
-  _api.stringw.compareStubExW = StringT_compareStubEx<CharW, CharW>;
-  _api.stringw.compareStringExW = StringT_compareStringEx<CharW, CharW>;
-
-  _api.stringw.validateUtf16 = StringW_validateUtf16;
-  _api.stringw.getUcsLength = StringW_getUcsLength;
-
-  _api.stringw.base64EncodeStringA = StringW_base64EncodeStringA;
-  _api.stringw.base64EncodeDataA = StringT_base64EncodeDataA<CharW>;
-
-  _api.stringw.bswap = StringW_bswap;
-
-  _api.stringw.dCreate = StringT_dCreate<CharW>;
-  _api.stringw.dCreateStubA = StringT_dCreateStub<CharW, char>;
-  _api.stringw.dCreateStubW = StringT_dCreateStub<CharW, CharW>;
-  _api.stringw.dAdopt = StringT_dAdopt<CharW>;
-  _api.stringw.dAdoptStubA = StringT_dAdoptStub<CharW, char>;
-  _api.stringw.dAdoptStubW = StringT_dAdoptStub<CharW, CharW>;
-  _api.stringw.dRealloc = StringT_dRealloc<CharW>;
-  _api.stringw.dFree = StringT_dFree<CharW>;
+  _api.stringa_ctor = StringT_ctor<char>;
+  _api.stringa_ctorStubA = StringT_ctorStub<char, char>;
+  _api.stringa_ctorStubA2 = StringT_ctorStub2<char, char>;
+  _api.stringa_ctorCopyA = StringT_ctorCopy<char>;
+  _api.stringa_ctorCopyA2 = StringT_ctorCopy2<char>;
+  _api.stringa_ctorSubstr = StringT_ctorSubstr<char>;
+  _api.stringa_ctorU32 = StringT_ctorU32<char>;
+  _api.stringa_ctorU64 = StringT_ctorU64<char>;
+  _api.stringa_ctorDouble = StringT_ctorDouble<char>;
+  _api.stringa_dtor = StringT_dtor<char>;
+
+  _api.stringa_detach = StringT_detach<char>;
+  _api.stringa_reserve = StringT_reserve<char>;
+  _api.stringa_resize = StringT_resize<char>;
+  _api.stringa_truncate = StringT_truncate<char>;
+  _api.stringa_squeeze = StringT_squeeze<char>;
+  _api.stringa_prepare = StringT_prepare<char>;
+  _api.stringa_add = StringT_add<char>;
+
+  _api.stringa_clear = StringT_clear<char>;
+  _api.stringa_reset = StringT_reset<char>;
+
+  _api.stringa_getHashCode = StringT_getHashCode<char>;
+
+  _api.stringa_setStubA = StringT_setStub<char, char>;
+  _api.stringa_setStringA = StringT_setString<char, char>;
+  _api.stringa_setStringExA = StringT_setStringEx<char, char>;
+
+  _api.stringa_setDeep = StringT_setDeep<char>;
+
+  _api.stringa_appendStubA = StringT_appendStub<char, char>;
+  _api.stringa_appendStringA = StringT_appendString<char, char>;
+  _api.stringa_appendStringExA = StringT_appendStringEx<char, char>;
+
+  _api.stringa_opFill = StringT_opFill<char>;
+  _api.stringa_opBool = StringT_opBool<char>;
+  _api.stringa_opI32 = StringT_opI32<char>;
+  _api.stringa_opI32Ex = StringA_opI32Ex;
+  _api.stringa_opU32 = StringT_opU32<char>;
+  _api.stringa_opU32Ex = StringA_opU32Ex;
+  _api.stringa_opI64 = StringT_opI64<char>;
+  _api.stringa_opI64Ex = StringA_opI64Ex;
+  _api.stringa_opU64 = StringT_opU64<char>;
+  _api.stringa_opU64Ex = StringA_opU64Ex;
+  _api.stringa_opDouble = StringA_opDouble;
+  _api.stringa_opDoubleEx = StringA_opDoubleEx;
+
+  _api.stringa_opVFormatStubA = StringA_opVFormatStubA;
+  _api.stringa_opVFormatStringA = StringA_opVFormatStringA;
+
+  _api.stringa_opZFormatStubA = StringT_opZFormatStub<char, char>;
+  _api.stringa_opZFormatStringA = StringT_opZFormatString<char, char>;
+
+  _api.stringa_opNormalizeSlashesA = StringT_opNormalizeSlashes<char>;
+
+  _api.stringa_prependChars = StringT_prependChars<char>;
+  _api.stringa_prependStubA = StringT_prependStub<char, char>;
+  _api.stringa_prependStringA = StringT_prependString<char, char>;
+
+  _api.stringa_insertChars = StringT_insertChars<char>;
+  _api.stringa_insertStubA = StringT_insertStub<char, char>;
+  _api.stringa_insertStringA = StringT_insertString<char, char>;
+
+  _api.stringa_removeRange = StringT_removeRange<char>;
+  _api.stringa_removeRangeList = StringT_removeRangeList<char>;
+
+  _api.stringa_removeChar = StringT_removeChar<char>;
+  _api.stringa_removeStubA = StringT_removeStub<char, char>;
+  _api.stringa_removeStringA = StringT_removeString<char, char>;
+  _api.stringa_removeRegExpA = StringT_removeRegExp<char>;
+
+  _api.stringa_replaceRangeStubA = StringT_replaceRangeStub<char, char>;
+  _api.stringa_replaceRangeStringA = StringT_replaceRangeString<char, char>;
+
+  _api.stringa_replaceRangeListStubA = StringT_replaceRangeListStub<char, char>;
+  _api.stringa_replaceRangeListStringA = StringT_replaceRangeListString<char, char>;
+
+  _api.stringa_replaceChar = StringT_replaceChar<char>;
+  _api.stringa_replaceStringA = StringT_replaceString<char>;
+  _api.stringa_replaceRegExpA = StringT_replaceRegExp<char>;
+
+  _api.stringa_lower = StringT_lower<char>;
+  _api.stringa_upper = StringT_upper<char>;
+
+  _api.stringa_trim = StringT_trim<char>;
+  _api.stringa_simplify = StringT_simplify<char>;
+  _api.stringa_justify = StringT_justify<char>;
+
+  _api.stringa_splitChar = StringT_splitChar<char>;
+  _api.stringa_splitStringA = StringT_splitString<char>;
+  _api.stringa_splitRegExpA = StringT_splitRegExp<char>;
+
+  _api.stringa_slice = StringT_slice<char>;
+
+  _api.stringa_joinChar = StringT_joinChar<char>;
+  _api.stringa_joinStringA = StringT_joinString<char>;
+
+  _api.stringa_parseBool = StringT_parseBool<char>;
+  _api.stringa_parseI8 = StringT_parseI8<char>;
+  _api.stringa_parseU8 = StringT_parseU8<char>;
+  _api.stringa_parseI16 = StringT_parseI16<char>;
+  _api.stringa_parseU16 = StringT_parseU16<char>;
+  _api.stringa_parseI32 = StringT_parseI32<char>;
+  _api.stringa_parseU32 = StringT_parseU32<char>;
+  _api.stringa_parseI64 = StringT_parseI64<char>;
+  _api.stringa_parseU64 = StringT_parseU64<char>;
+  _api.stringa_parseFloat = StringT_parseFloat<char>;
+  _api.stringa_parseDouble = StringT_parseDouble<char>;
+
+  _api.stringa_countOfChar = StringT_countOfChar<char>;
+  _api.stringa_countOfStubA = StringT_countOfStub<char, char>;
+  _api.stringa_countOfStringA = StringT_countOfString<char, char>;
+  _api.stringa_countOfRegExpA = StringT_countOfRegExp<char>;
+
+  _api.stringa_indexOfChar = StringT_indexOfChar<char>;
+  _api.stringa_indexOfStubA = StringT_indexOfStub<char, char>;
+  _api.stringa_indexOfStringA = StringT_indexOfString<char, char>;
+  _api.stringa_indexOfRegExpA = StringT_indexOfRegExp<char>;
+  _api.stringa_indexOfAnyCharA = StringT_indexOfAnyChar<char>;
+
+  _api.stringa_lastIndexOfChar = StringT_lastIndexOfChar<char>;
+  _api.stringa_lastIndexOfStubA = StringT_lastIndexOfStub<char, char>;
+  _api.stringa_lastIndexOfStringA = StringT_lastIndexOfString<char, char>;
+  _api.stringa_lastIndexOfRegExpA = StringT_lastIndexOfRegExp<char>;
+  _api.stringa_lastIndexOfAnyCharA = StringT_lastIndexOfAnyChar<char>;
+
+  _api.stringa_startsWithChar = StringT_startsWithChar<char>;
+  _api.stringa_startsWithStubA = StringT_startsWithStub<char, char>;
+  _api.stringa_startsWithStringA = StringT_startsWithString<char, char>;
+  _api.stringa_startsWithRegExpA = StringT_startsWithRegExp<char>;
+
+  _api.stringa_endsWithChar = StringT_endsWithChar<char>;
+  _api.stringa_endsWithStubA = StringT_endsWithStub<char, char>;
+  _api.stringa_endsWithStringA = StringT_endsWithString<char, char>;
+  _api.stringa_endsWithRegExpA = StringT_endsWithRegExp<char>;
+
+  _api.stringa_eqStubA = StringT_eqStub<char, char>;
+  _api.stringa_eqStringA = StringT_eqString<char, char>;
+
+  _api.stringa_eqStubExA = StringT_eqStubEx<char, char>;
+  _api.stringa_eqStringExA = StringT_eqStringEx<char, char>;
+
+  _api.stringa_compareStubA = StringT_compareStub<char, char>;
+  _api.stringa_compareStringA = StringT_compareString<char, char>;
+
+  _api.stringa_compareStubExA = StringT_compareStubEx<char, char>;
+  _api.stringa_compareStringExA = StringT_compareStringEx<char, char>;
+
+  _api.stringa_validateUtf8 = StringA_validateUtf8;
+  _api.stringa_getUcsLength = StringA_getUcsLength;
+
+  _api.stringa_hexDecode = StringA_hexDecode;
+  _api.stringa_hexEncode = StringA_hexEncode;
+
+  _api.stringa_base64DecodeStringA = StringA_base64DecodeStringA;
+  _api.stringa_base64DecodeStringW = StringA_base64DecodeStringW;
+  _api.stringa_base64DecodeDataA = StringA_base64DecodeData<char>;
+  _api.stringa_base64DecodeDataW = StringA_base64DecodeData<CharW>;
+  _api.stringa_base64EncodeStringA = StringA_base64EncodeStringA;
+  _api.stringa_base64EncodeDataA = StringT_base64EncodeDataA<char>;
+
+  _api.stringa_dCreate = StringT_dCreate<char>;
+  _api.stringa_dCreateStubA = StringT_dCreateStub<char, char>;
+  _api.stringa_dAdopt = StringT_dAdopt<char>;
+  _api.stringa_dAdoptStubA = StringT_dAdoptStub<char, char>;
+  _api.stringa_dRealloc = StringT_dRealloc<char>;
+  _api.stringa_dFree = StringT_dFree<char>;
+
+  _api.stringw_ctor = StringT_ctor<CharW>;
+  _api.stringw_ctorStubA = StringT_ctorStub<CharW, char>;
+  _api.stringw_ctorStubW = StringT_ctorStub<CharW, CharW>;
+  _api.stringw_ctorStubA2 = StringT_ctorStub2<CharW, char>;
+  _api.stringw_ctorStubW2 = StringT_ctorStub2<CharW, CharW>;
+  _api.stringw_ctorCopyW = StringT_ctorCopy<CharW>;
+  _api.stringw_ctorCopyW2 = StringT_ctorCopy2<CharW>;
+  _api.stringw_ctorCodec = StringW_ctorCodec;
+  _api.stringw_ctorSubstr = StringT_ctorSubstr<CharW>;
+  _api.stringw_ctorU32 = StringT_ctorU32<CharW>;
+  _api.stringw_ctorU64 = StringT_ctorU64<CharW>;
+  _api.stringw_ctorDouble = StringT_ctorDouble<CharW>;
+  _api.stringw_dtor = StringT_dtor<CharW>;
+
+  _api.stringw_detach = StringT_detach<CharW>;
+  _api.stringw_reserve = StringT_reserve<CharW>;
+  _api.stringw_resize = StringT_resize<CharW>;
+  _api.stringw_truncate = StringT_truncate<CharW>;
+  _api.stringw_squeeze = StringT_squeeze<CharW>;
+  _api.stringw_prepare = StringT_prepare<CharW>;
+  _api.stringw_add = StringT_add<CharW>;
+
+  _api.stringw_clear = StringT_clear<CharW>;
+  _api.stringw_reset = StringT_reset<CharW>;
+
+  _api.stringw_getHashCode = StringT_getHashCode<CharW>;
+
+  _api.stringw_setStubA = StringW_setStubCodec;
+  _api.stringw_setStubW = StringT_setStub<CharW, CharW>;
+  _api.stringw_setStringA = StringW_setStringCodec;
+  _api.stringw_setStringW = StringT_setString<CharW, CharW>;
+  _api.stringw_setStringExW = StringT_setStringEx<CharW, CharW>;
+
+  _api.stringw_setDeep = StringT_setDeep<CharW>;
+
+  _api.stringw_appendStubA = StringW_appendStubCodec;
+  _api.stringw_appendStubW = StringT_appendStub<CharW, CharW>;
+  _api.stringw_appendStringA = StringW_appendStringCodec;
+  _api.stringw_appendStringW = StringT_appendString<CharW, CharW>;
+  _api.stringw_appendStringExW = StringT_appendStringEx<CharW, CharW>;
+
+  _api.stringw_opFill = StringT_opFill<CharW>;
+  _api.stringw_opBool = StringT_opBool<CharW>;
+  _api.stringw_opI32 = StringT_opI32<CharW>;
+  _api.stringw_opI32Ex = StringW_opI32Ex;
+  _api.stringw_opU32 = StringT_opU32<CharW>;
+  _api.stringw_opU32Ex = StringW_opU32Ex;
+  _api.stringw_opI64 = StringT_opI64<CharW>;
+  _api.stringw_opI64Ex = StringW_opI64Ex;
+  _api.stringw_opU64 = StringT_opU64<CharW>;
+  _api.stringw_opU64Ex = StringW_opU64Ex;
+  _api.stringw_opDouble = StringW_opDouble;
+  _api.stringw_opDoubleEx = StringW_opDoubleEx;
+
+  _api.stringw_opVFormatStubA = StringW_opVFormatStubA;
+  _api.stringw_opVFormatStubW = StringW_opVFormatStubW;
+  _api.stringw_opVFormatStringW = StringW_opVFormatStringW;
+
+  _api.stringw_opZFormatStubW = StringT_opZFormatStub<CharW, CharW>;
+  _api.stringw_opZFormatStringW = StringT_opZFormatString<CharW, CharW>;
+
+  _api.stringw_opNormalizeSlashesW = StringT_opNormalizeSlashes<CharW>;
+
+  _api.stringw_prependChars = StringT_prependChars<CharW>;
+  _api.stringw_prependStubA = StringW_prependStubCodec;
+  _api.stringw_prependStubW = StringT_prependStub<CharW, CharW>;
+  _api.stringw_prependStringA = StringW_prependStringCodec;
+  _api.stringw_prependStringW = StringT_prependString<CharW, CharW>;
+
+  _api.stringw_insertChars = StringT_insertChars<CharW>;
+  _api.stringw_insertStubA = StringW_insertStubCodec;
+  _api.stringw_insertStubW = StringT_insertStub<CharW, CharW>;
+  _api.stringw_insertStringA = StringW_insertStringCodec;
+  _api.stringw_insertStringW = StringT_insertString<CharW, CharW>;
+
+  _api.stringw_removeRange = StringT_removeRange<CharW>;
+  _api.stringw_removeRangeList = StringT_removeRangeList<CharW>;
+
+  _api.stringw_removeChar = StringT_removeChar<CharW>;
+  _api.stringw_removeStubA = StringT_removeStub<CharW, char>;
+  _api.stringw_removeStubW = StringT_removeStub<CharW, CharW>;
+  _api.stringw_removeStringW = StringT_removeString<CharW, CharW>;
+  _api.stringw_removeRegExpW = StringT_removeRegExp<CharW>;
+
+  _api.stringw_replaceRangeStubW = StringT_replaceRangeStub<CharW, CharW>;
+  _api.stringw_replaceRangeStringW = StringT_replaceRangeString<CharW, CharW>;
+
+  _api.stringw_replaceRangeListStubW = StringT_replaceRangeListStub<CharW, CharW>;
+  _api.stringw_replaceRangeListStringW = StringT_replaceRangeListString<CharW, CharW>;
+
+  _api.stringw_replaceChar = StringT_replaceChar<CharW>;
+  _api.stringw_replaceStringW = StringT_replaceString<CharW>;
+  _api.stringw_replaceRegExpW = StringT_replaceRegExp<CharW>;
+
+  _api.stringw_lower = StringT_lower<CharW>;
+  _api.stringw_upper = StringT_upper<CharW>;
+
+  _api.stringw_trim = StringT_trim<CharW>;
+  _api.stringw_simplify = StringT_simplify<CharW>;
+  _api.stringw_justify = StringT_justify<CharW>;
+
+  _api.stringw_splitChar = StringT_splitChar<CharW>;
+  _api.stringw_splitStringW = StringT_splitString<CharW>;
+  _api.stringw_splitRegExpW = StringT_splitRegExp<CharW>;
+
+  _api.stringw_slice = StringT_slice<CharW>;
+
+  _api.stringw_joinChar = StringT_joinChar<CharW>;
+  _api.stringw_joinStringW = StringT_joinString<CharW>;
+
+  _api.stringw_parseBool = StringT_parseBool<CharW>;
+  _api.stringw_parseI8 = StringT_parseI8<CharW>;
+  _api.stringw_parseU8 = StringT_parseU8<CharW>;
+  _api.stringw_parseI16 = StringT_parseI16<CharW>;
+  _api.stringw_parseU16 = StringT_parseU16<CharW>;
+  _api.stringw_parseI32 = StringT_parseI32<CharW>;
+  _api.stringw_parseU32 = StringT_parseU32<CharW>;
+  _api.stringw_parseI64 = StringT_parseI64<CharW>;
+  _api.stringw_parseU64 = StringT_parseU64<CharW>;
+  _api.stringw_parseFloat = StringT_parseFloat<CharW>;
+  _api.stringw_parseDouble = StringT_parseDouble<CharW>;
+
+  _api.stringw_countOfChar = StringT_countOfChar<CharW>;
+  _api.stringw_countOfStubA = StringT_countOfStub<CharW, char>;
+  _api.stringw_countOfStubW = StringT_countOfStub<CharW, CharW>;
+  _api.stringw_countOfStringW = StringT_countOfString<CharW, CharW>;
+  _api.stringw_countOfRegExpW = StringT_countOfRegExp<CharW>;
+
+  _api.stringw_indexOfChar = StringT_indexOfChar<CharW>;
+  _api.stringw_indexOfStubA = StringT_indexOfStub<CharW, char>;
+  _api.stringw_indexOfStubW = StringT_indexOfStub<CharW, CharW>;
+  _api.stringw_indexOfStringW = StringT_indexOfString<CharW, CharW>;
+  _api.stringw_indexOfRegExpW = StringT_indexOfRegExp<CharW>;
+  _api.stringw_indexOfAnyCharW = StringT_indexOfAnyChar<CharW>;
+
+  _api.stringw_lastIndexOfChar = StringT_lastIndexOfChar<CharW>;
+  _api.stringw_lastIndexOfStubA = StringT_lastIndexOfStub<CharW, char>;
+  _api.stringw_lastIndexOfStubW = StringT_lastIndexOfStub<CharW, CharW>;
+  _api.stringw_lastIndexOfStringW = StringT_lastIndexOfString<CharW, CharW>;
+  _api.stringw_lastIndexOfRegExpW = StringT_lastIndexOfRegExp<CharW>;
+  _api.stringw_lastIndexOfAnyCharW = StringT_lastIndexOfAnyChar<CharW>;
+
+  _api.stringw_startsWithChar = StringT_startsWithChar<CharW>;
+  _api.stringw_startsWithStubA = StringT_startsWithStub<CharW, char>;
+  _api.stringw_startsWithStubW = StringT_startsWithStub<CharW, CharW>;
+  _api.stringw_startsWithStringW = StringT_startsWithString<CharW, CharW>;
+  _api.stringw_startsWithRegExpW = StringT_startsWithRegExp<CharW>;
+
+  _api.stringw_endsWithChar = StringT_endsWithChar<CharW>;
+  _api.stringw_endsWithStubA = StringT_endsWithStub<CharW, char>;
+  _api.stringw_endsWithStubW = StringT_endsWithStub<CharW, CharW>;
+  _api.stringw_endsWithStringW = StringT_endsWithString<CharW, CharW>;
+  _api.stringw_endsWithRegExpW = StringT_endsWithRegExp<CharW>;
+
+  _api.stringw_eqStubA = StringT_eqStub<CharW, char>;
+  _api.stringw_eqStubW = StringT_eqStub<CharW, CharW>;
+  _api.stringw_eqStringW = StringT_eqString<CharW, CharW>;
+
+  _api.stringw_eqStubExA = StringT_eqStubEx<CharW, char>;
+  _api.stringw_eqStubExW = StringT_eqStubEx<CharW, CharW>;
+  _api.stringw_eqStringExW = StringT_eqStringEx<CharW, CharW>;
+
+  _api.stringw_compareStubA = StringT_compareStub<CharW, char>;
+  _api.stringw_compareStubW = StringT_compareStub<CharW, CharW>;
+  _api.stringw_compareStringW = StringT_compareString<CharW, CharW>;
+
+  _api.stringw_compareStubExA = StringT_compareStubEx<CharW, char>;
+  _api.stringw_compareStubExW = StringT_compareStubEx<CharW, CharW>;
+  _api.stringw_compareStringExW = StringT_compareStringEx<CharW, CharW>;
+
+  _api.stringw_validateUtf16 = StringW_validateUtf16;
+  _api.stringw_getUcsLength = StringW_getUcsLength;
+
+  _api.stringw_base64EncodeStringA = StringW_base64EncodeStringA;
+  _api.stringw_base64EncodeDataA = StringT_base64EncodeDataA<CharW>;
+
+  _api.stringw_bswap = StringW_bswap;
+
+  _api.stringw_dCreate = StringT_dCreate<CharW>;
+  _api.stringw_dCreateStubA = StringT_dCreateStub<CharW, char>;
+  _api.stringw_dCreateStubW = StringT_dCreateStub<CharW, CharW>;
+  _api.stringw_dAdopt = StringT_dAdopt<CharW>;
+  _api.stringw_dAdoptStubA = StringT_dAdoptStub<CharW, char>;
+  _api.stringw_dAdoptStubW = StringT_dAdoptStub<CharW, CharW>;
+  _api.stringw_dRealloc = StringT_dRealloc<CharW>;
+  _api.stringw_dFree = StringT_dFree<CharW>;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -5369,8 +5383,8 @@ FOG_NO_EXPORT void String_init(void)
   dw->reference.init(1);
   dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_NONE;
 
-  _api.stringa.oEmpty = StringA_oEmpty.initCustom1(da);
-  _api.stringw.oEmpty = StringW_oEmpty.initCustom1(dw);
+  _api.stringa_oEmpty = StringA_oEmpty.initCustom1(da);
+  _api.stringw_oEmpty = StringW_oEmpty.initCustom1(dw);
 }
 
 } // Fog namespace

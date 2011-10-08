@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Hash.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -130,11 +130,11 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
       FOG_MACRO_END
 
       if (depth == 16)
-        _FOG_REDUCE_LOOP(2, Face::p32Load2aNative);
+        _FOG_REDUCE_LOOP(2, Face::p32Load2a);
       else if (depth == 24)
-        _FOG_REDUCE_LOOP(3, Face::p32Load3bNative);
+        _FOG_REDUCE_LOOP(3, Face::p32Load3b);
       else if (depth == 32)
-        _FOG_REDUCE_LOOP(4, Face::p32Load4aNative);
+        _FOG_REDUCE_LOOP(4, Face::p32Load4a);
 
       // If we are here, the color reduction is possible.
       i = 0;
@@ -201,7 +201,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
       case IMAGE_FORMAT_I8:
       {
         const Argb32* srcPal = image.getPalette().getData();
-        
+
         for (uint32_t i = 0; i < _count; i++)
           pal[i] = srcPal[_entities[i].key];
         break;

@@ -10,16 +10,16 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/PcxCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
-#include <Fog/G2d/Render/RenderApi_p.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
 
 // [Options]
 #define FOG_PCX_STRICT 1
@@ -462,7 +462,7 @@ err_t PcxDecoder::readImage(Image& image)
   if (readHeader() != ERR_OK) return getHeaderResult();
 
   // Don't read image more than once.
-  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_MORE_FRAMES);
+  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_FRAMES);
 
   // Error code.
   uint32_t err = ERR_OK;
@@ -619,7 +619,7 @@ err_t PcxDecoder::readImage(Image& image)
       {
         if ((err = _PcxDecodeScanline(pixels + pos[plane], &dataCur, dataEnd, (uint32_t)_size.w, ignore, increment)) != ERR_OK) goto _End;
       }
-      if (planeMax == 4) _g2d_render.convert.prgb32_from_argb32(pixels, pixels, _size.w, NULL);
+      if (planeMax == 4) _api_raster.convert.prgb32_from_argb32(pixels, pixels, _size.w, NULL);
       if ((y & 15) == 0) updateProgress(y, (uint32_t)_size.h);
     }
   }

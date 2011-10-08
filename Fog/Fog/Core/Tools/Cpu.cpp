@@ -21,8 +21,6 @@
 #if defined(FOG_OS_POSIX)
 # include <errno.h>
 # include <string.h>
-# include <sys/statvfs.h>
-# include <sys/utsname.h>
 # include <unistd.h>
 #endif // FOG_OS_POSIX
 
@@ -44,17 +42,13 @@ static uint32_t Cpu_detectNumberOfProcessors(void)
   SYSTEM_INFO info;
   GetSystemInfo(&info);
   return info.dwNumberOfProcessors;
-#elif defined(FOG_OS_POSIX)
-  // It seems that sysconf returns the number of "logical" processors on both
-  // mac and linux.  So we get the number of "online logical" processors.
-  long res = sysconf(_SC_NPROCESSORS_ONLN);
+#endif // FOG_OS_WINDOWS
 
-  if (res == -1)
-    return 1;
+#if defined(FOG_OS_POSIX)
+  long res = sysconf(_SC_NPROCESSORS_ONLN);
+  if (res == -1) return 1;
 
   return static_cast<uint32_t>(res);
-#else
-  return 1;
 #endif
 }
 
@@ -321,7 +315,7 @@ static void Cpu_detect(Cpu* cpu)
   // Finished...
   cpu->_features = features;
   simplifyBrandString(cpu->_brand);
-#endif // FOG_ARCH_X86 || FOG_ARCH_X64
+#endif // FOG_ARCH_X86 || FOG_ARCH_X86_64
 }
 
 // ============================================================================
@@ -330,8 +324,8 @@ static void Cpu_detect(Cpu* cpu)
 
 FOG_NO_EXPORT void Cpu_init(void)
 {
-  _api.cpu.instance = &Cpu_instance;
-  Cpu_detect(_api.cpu.instance);
+  _api.cpu_oInstance = &Cpu_instance;
+  Cpu_detect(_api.cpu_oInstance);
 }
 
 } // Fog namespace

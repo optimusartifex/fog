@@ -25,8 +25,8 @@ namespace Fog {
 
 //! @brief Converter blitter function.
 //!
-//! @note This structure is the same as the internal @c RenderVBlitLineFunc used
-//! by the private Fog::Render module.
+//! @note This structure is the same as the internal @c RasterVBlitLineFunc used
+//! by the private Fog::Raster module.
 typedef void (FOG_FASTCALL *ImageConverterBlitLineFunc)(
   uint8_t* dst,
   const uint8_t* src,
@@ -39,8 +39,8 @@ typedef void (FOG_FASTCALL *ImageConverterBlitLineFunc)(
 
 //! @brief The image converter closure used by the blitter.
 //!
-//! @note This structure is the same as the internal @c RenderClosure used by
-//! the private Fog::Render module.
+//! @note This structure is the same as the internal @c RasterClosure used by
+//! the private Fog::Raster module.
 struct FOG_NO_EXPORT ImageConverterClosure
 {
   //! @brief The dither origin, if dithering is in use, otherwise [0, 0].

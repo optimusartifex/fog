@@ -8,17 +8,17 @@
 #define _FOG_G2D_SOURCE_COLORUTIL_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Source/ColorBase.h>
 
 #if defined(FOG_HARDCODE_SSE)
-# include <Fog/Core/Face/Face_SSE.h>
+# include <Fog/Core/Face/FaceSSE.h>
 #endif // FOG_HARDCODE
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/Face/Face_SSE2.h>
+# include <Fog/Core/Face/FaceSSE2.h>
 #endif // FOG_HARDCODE
 
 namespace Fog {
@@ -75,14 +75,12 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iCvtPI32FromPS(xmm0, xmmf);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128iPackPU8FromPI32(xmm0, xmm0);
-
     Face::m128iStore4(&argb32.p32, xmm0);
 #else
-    argb32.u32 =
-      ((uint32_t)((int)(argbf[0] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_A) |
-      ((uint32_t)((int)(argbf[1] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_R) |
-      ((uint32_t)((int)(argbf[2] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_G) |
-      ((uint32_t)((int)(argbf[3] * (255.0f)) ) << PIXEL_ARGB32_SHIFT_B) ;
+    argb32.u32 = (Math::uroundToByte255(argbf[0]) << PIXEL_ARGB32_SHIFT_A) |
+                 (Math::uroundToByte255(argbf[1]) << PIXEL_ARGB32_SHIFT_R) |
+                 (Math::uroundToByte255(argbf[2]) << PIXEL_ARGB32_SHIFT_G) |
+                 (Math::uroundToByte255(argbf[3]) << PIXEL_ARGB32_SHIFT_B) ;
 #endif // FOG_HARDCODE
   }
 
@@ -93,8 +91,8 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128i xmm0;
     Face::m128iLoad4(xmm0, &argb32);
     Face::m128iUnpackPI16FromPI8Lo(xmm0, xmm0, xmm0);
-#if defined(FOG_ARCH_X64)
-    argb64._packed64 = _mm_cvtsi128_si64(xmm0);
+#if defined(FOG_ARCH_X86_64)
+    argb64.p64 = _mm_cvtsi128_si64(xmm0);
 #else
     Face::m128iStore8(&argb64.p64, xmm0);
 #endif
@@ -136,11 +134,10 @@ struct FOG_NO_EXPORT ColorUtil
 
     Face::m128iStore8(&argb64.p64, xmm0);
 #else
-    argb64.u64 =
-      ((uint64_t)((int)(argbf[0] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_A) |
-      ((uint64_t)((int)(argbf[1] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_R) |
-      ((uint64_t)((int)(argbf[2] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_G) |
-      ((uint64_t)((int)(argbf[3] * (65535.0f)) ) << PIXEL_ARGB64_SHIFT_B) ;
+    argb64.u64 = ((uint64_t)Math::uroundToWord65535(argbf[0]) << PIXEL_ARGB64_SHIFT_A) |
+                 ((uint64_t)Math::uroundToWord65535(argbf[1]) << PIXEL_ARGB64_SHIFT_R) |
+                 ((uint64_t)Math::uroundToWord65535(argbf[2]) << PIXEL_ARGB64_SHIFT_G) |
+                 ((uint64_t)Math::uroundToWord65535(argbf[3]) << PIXEL_ARGB64_SHIFT_B) ;
 #endif // FOG_HARDCODE
   }
 
@@ -160,10 +157,10 @@ struct FOG_NO_EXPORT ColorUtil
 #else
     uint32_t c0 = argb32.u32;
 
-    dst[0] = (float)((c0 >> PIXEL_ARGB32_SHIFT_A) & 0xFF) * (1.0f / 255.0f);
-    dst[1] = (float)((c0 >> PIXEL_ARGB32_SHIFT_R) & 0xFF) * (1.0f / 255.0f);
-    dst[2] = (float)((c0 >> PIXEL_ARGB32_SHIFT_G) & 0xFF) * (1.0f / 255.0f);
-    dst[3] = (float)((c0 >> PIXEL_ARGB32_SHIFT_B) & 0xFF) * (1.0f / 255.0f);
+    dst[0] = (float)((c0 >> PIXEL_ARGB32_SHIFT_A) & 0xFF) * float(MATH_1_DIV_255);
+    dst[1] = (float)((c0 >> PIXEL_ARGB32_SHIFT_R) & 0xFF) * float(MATH_1_DIV_255);
+    dst[2] = (float)((c0 >> PIXEL_ARGB32_SHIFT_G) & 0xFF) * float(MATH_1_DIV_255);
+    dst[3] = (float)((c0 >> PIXEL_ARGB32_SHIFT_B) & 0xFF) * float(MATH_1_DIV_255);
 #endif // FOG_HARDCODE
   }
 
@@ -181,10 +178,10 @@ struct FOG_NO_EXPORT ColorUtil
 
     Face::m128fStore16u(dst, xmmf);
 #else
-    dst[0] = (float)(argb64.a) * (1.0f / 65535.0f);
-    dst[1] = (float)(argb64.r) * (1.0f / 65535.0f);
-    dst[2] = (float)(argb64.g) * (1.0f / 65535.0f);
-    dst[3] = (float)(argb64.b) * (1.0f / 65535.0f);
+    dst[0] = (float)(argb64.a) * float(MATH_1_DIV_65535);
+    dst[1] = (float)(argb64.r) * float(MATH_1_DIV_65535);
+    dst[2] = (float)(argb64.g) * float(MATH_1_DIV_65535);
+    dst[3] = (float)(argb64.b) * float(MATH_1_DIV_65535);
 #endif // FOG_HARDCODE
   }
 

@@ -14,10 +14,10 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/IO/Stream.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/OS/Library.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/Var.h>

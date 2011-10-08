@@ -95,7 +95,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE void setModel(uint32_t model)
   {
-    _api.color.setModel(*this, model);
+    _api.color_setModel(this, model);
   }
 
   FOG_INLINE uint32_t getHints() const
@@ -110,8 +110,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE void setAlpha(float af)
   {
-    Face::p32 a8;
-    Face::f32CvtU8FromFX(a8, af);
+    Face::p32 a8 = Math::uroundToByte255(af);
 
     _data[0] = af;
     _argb32.a = (uint8_t)a8;
@@ -134,66 +133,66 @@ struct FOG_NO_EXPORT Color : public ColorBase
   FOG_INLINE Argb64 getArgb64() const
   {
     Argb64 argb64;
-    _api.color.convert[_COLOR_MODEL_ARGB64][_model](&argb64, _data);
+    _api.color_convert[_COLOR_MODEL_ARGB64][_model](&argb64, _data);
     return argb64;
   }
 
   FOG_INLINE ArgbF getArgbF() const
   {
     ArgbF argbf;
-    _api.color.convert[COLOR_MODEL_ARGB][_model](&argbf, _data);
+    _api.color_convert[COLOR_MODEL_ARGB][_model](&argbf, _data);
     return argbf;
   }
 
   FOG_INLINE AhsvF getAhsvF() const
   {
     AhsvF ahsvf;
-    _api.color.convert[COLOR_MODEL_AHSV][_model](&ahsvf, _data);
+    _api.color_convert[COLOR_MODEL_AHSV][_model](&ahsvf, _data);
     return ahsvf;
   }
 
   FOG_INLINE AhslF getAhslF() const
   {
     AhslF ahslf;
-    _api.color.convert[COLOR_MODEL_AHSL][_model](&ahslf, _data);
+    _api.color_convert[COLOR_MODEL_AHSL][_model](&ahslf, _data);
     return ahslf;
   }
 
   FOG_INLINE AcmykF getAcmykF() const
   {
     AcmykF acmykf;
-    _api.color.convert[COLOR_MODEL_ACMYK][_model](&acmykf, _data);
+    _api.color_convert[COLOR_MODEL_ACMYK][_model](&acmykf, _data);
     return acmykf;
   }
 
   FOG_INLINE void setArgb32(const ArgbBase32& argb32)
   {
-    _api.color.setData(*this, _COLOR_MODEL_ARGB32, &argb32);
+    _api.color_setData(this, _COLOR_MODEL_ARGB32, &argb32);
   }
 
   FOG_INLINE void setArgb64(const ArgbBase64& argb64)
   {
-    _api.color.setData(*this, _COLOR_MODEL_ARGB64, &argb64);
+    _api.color_setData(this, _COLOR_MODEL_ARGB64, &argb64);
   }
 
   FOG_INLINE void setArgbF(const ArgbBaseF& argbf)
   {
-    _api.color.setData(*this, COLOR_MODEL_ARGB, &argbf);
+    _api.color_setData(this, COLOR_MODEL_ARGB, &argbf);
   }
 
   FOG_INLINE void setAhsvF(const AhsvBaseF& ahsvf)
   {
-    _api.color.setData(*this, COLOR_MODEL_AHSV, &ahsvf);
+    _api.color_setData(this, COLOR_MODEL_AHSV, &ahsvf);
   }
 
   FOG_INLINE void setAhslF(const AhslBaseF& ahsl)
   {
-    _api.color.setData(*this, COLOR_MODEL_AHSL, &ahsl);
+    _api.color_setData(this, COLOR_MODEL_AHSL, &ahsl);
   }
 
   FOG_INLINE void setAcmykF(const AcmykBaseF& acmykf)
   {
-    _api.color.setData(*this, COLOR_MODEL_ACMYK, &acmykf);
+    _api.color_setData(this, COLOR_MODEL_ACMYK, &acmykf);
   }
 
   FOG_INLINE void setColor(const ColorBase& color)
@@ -226,7 +225,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE err_t mix(uint32_t mixOp, uint32_t alphaOp, const Color& secondary, float mask)
   {
-    return _api.color.mix(*this, mixOp, alphaOp, secondary, mask);
+    return _api.color_mix(this, mixOp, alphaOp, &secondary, mask);
   }
 
   // --------------------------------------------------------------------------
@@ -235,7 +234,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE err_t adjust(uint32_t adjustOp, float param)
   {
-    return _api.color.adjust(*this, adjustOp, param);
+    return _api.color_adjust(this, adjustOp, param);
   }
 
   // --------------------------------------------------------------------------
@@ -244,17 +243,18 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE err_t parse(const StubA& str, uint32_t flags = COLOR_NAME_ANY)
   {
-    return _api.color.parseA(*this, str, flags);
+    return _api.color_parseA(this, &str, flags);
   }
 
   FOG_INLINE err_t parse(const StubW& str, uint32_t flags = COLOR_NAME_ANY)
   {
-    return _api.color.parseU(*this, str, flags);
+    return _api.color_parseU(this, &str, flags);
   }
 
   FOG_INLINE err_t parse(const StringW& str, uint32_t flags = COLOR_NAME_ANY)
   {
-    return _api.color.parseU(*this, StubW(str.getData(), str.getLength()), flags);
+    StubW stub(str.getData(), str.getLength());
+    return _api.color_parseU(this, &stub, flags);
   }
 
   // --------------------------------------------------------------------------
@@ -275,41 +275,41 @@ struct FOG_NO_EXPORT Color : public ColorBase
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void convert(ArgbBase32& dst, const ArgbBase64& src) { _api.color.convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase32& dst, const ArgbBaseF&  src) { _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ARGB   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase32& dst, const AhsvBaseF&  src) { _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSV   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase32& dst, const AhslBaseF&  src) { _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSL   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase32& dst, const AcmykBaseF& src) { _api.color.convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ACMYK  ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase32& dst, const ArgbBase64& src) { _api.color_convert[_COLOR_MODEL_ARGB32][_COLOR_MODEL_ARGB64](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase32& dst, const ArgbBaseF&  src) { _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ARGB   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase32& dst, const AhsvBaseF&  src) { _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSV   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase32& dst, const AhslBaseF&  src) { _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_AHSL   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase32& dst, const AcmykBaseF& src) { _api.color_convert[_COLOR_MODEL_ARGB32][COLOR_MODEL_ACMYK  ](&dst, &src); }
 
-  static FOG_INLINE void convert(ArgbBase64& dst, const ArgbBase32& src) { _api.color.convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase64& dst, const ArgbBaseF&  src) { _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ARGB   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase64& dst, const AhsvBaseF&  src) { _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSV   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase64& dst, const AhslBaseF&  src) { _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSL   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBase64& dst, const AcmykBaseF& src) { _api.color.convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ACMYK  ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase64& dst, const ArgbBase32& src) { _api.color_convert[_COLOR_MODEL_ARGB64][_COLOR_MODEL_ARGB32](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase64& dst, const ArgbBaseF&  src) { _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ARGB   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase64& dst, const AhsvBaseF&  src) { _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSV   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase64& dst, const AhslBaseF&  src) { _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_AHSL   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBase64& dst, const AcmykBaseF& src) { _api.color_convert[_COLOR_MODEL_ARGB64][COLOR_MODEL_ACMYK  ](&dst, &src); }
 
-  static FOG_INLINE void convert(ArgbBaseF&  dst, const ArgbBase32& src) { _api.color.convert[COLOR_MODEL_ARGB][_COLOR_MODEL_ARGB32](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBaseF&  dst, const ArgbBase64& src) { _api.color.convert[COLOR_MODEL_ARGB][_COLOR_MODEL_ARGB64](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBaseF&  dst, const AhsvBaseF&  src) { _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBaseF&  dst, const AhslBaseF&  src) { _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL   ](&dst, &src); }
-  static FOG_INLINE void convert(ArgbBaseF&  dst, const AcmykBaseF& src) { _api.color.convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK  ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBaseF&  dst, const ArgbBase32& src) { _api.color_convert[COLOR_MODEL_ARGB][_COLOR_MODEL_ARGB32](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBaseF&  dst, const ArgbBase64& src) { _api.color_convert[COLOR_MODEL_ARGB][_COLOR_MODEL_ARGB64](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBaseF&  dst, const AhsvBaseF&  src) { _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSV   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBaseF&  dst, const AhslBaseF&  src) { _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_AHSL   ](&dst, &src); }
+  static FOG_INLINE void convert(ArgbBaseF&  dst, const AcmykBaseF& src) { _api.color_convert[COLOR_MODEL_ARGB][COLOR_MODEL_ACMYK  ](&dst, &src); }
 
-  static FOG_INLINE void convert(AhsvBaseF&  dst, const ArgbBase32& src) { _api.color.convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB32](&dst, &src); }
-  static FOG_INLINE void convert(AhsvBaseF&  dst, const ArgbBase64& src) { _api.color.convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB64](&dst, &src); }
-  static FOG_INLINE void convert(AhsvBaseF&  dst, const ArgbBaseF&  src) { _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB   ](&dst, &src); }
-  static FOG_INLINE void convert(AhsvBaseF&  dst, const AhslBaseF&  src) { _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_AHSL   ](&dst, &src); }
-  static FOG_INLINE void convert(AhsvBaseF&  dst, const AcmykBaseF& src) { _api.color.convert[COLOR_MODEL_AHSV][COLOR_MODEL_ACMYK  ](&dst, &src); }
+  static FOG_INLINE void convert(AhsvBaseF&  dst, const ArgbBase32& src) { _api.color_convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB32](&dst, &src); }
+  static FOG_INLINE void convert(AhsvBaseF&  dst, const ArgbBase64& src) { _api.color_convert[COLOR_MODEL_AHSV][_COLOR_MODEL_ARGB64](&dst, &src); }
+  static FOG_INLINE void convert(AhsvBaseF&  dst, const ArgbBaseF&  src) { _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ARGB   ](&dst, &src); }
+  static FOG_INLINE void convert(AhsvBaseF&  dst, const AhslBaseF&  src) { _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_AHSL   ](&dst, &src); }
+  static FOG_INLINE void convert(AhsvBaseF&  dst, const AcmykBaseF& src) { _api.color_convert[COLOR_MODEL_AHSV][COLOR_MODEL_ACMYK  ](&dst, &src); }
 
-  static FOG_INLINE void convert(AhslBaseF&  dst, const ArgbBase32& src) { _api.color.convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB32](&dst, &src); }
-  static FOG_INLINE void convert(AhslBaseF&  dst, const ArgbBase64& src) { _api.color.convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB64](&dst, &src); }
-  static FOG_INLINE void convert(AhslBaseF&  dst, const ArgbBaseF&  src) { _api.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB   ](&dst, &src); }
-  static FOG_INLINE void convert(AhslBaseF&  dst, const AhsvBaseF&  src) { _api.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_AHSV   ](&dst, &src); }
-  static FOG_INLINE void convert(AhslBaseF&  dst, const AcmykBaseF& src) { _api.color.convert[COLOR_MODEL_AHSL][COLOR_MODEL_ACMYK  ](&dst, &src); }
+  static FOG_INLINE void convert(AhslBaseF&  dst, const ArgbBase32& src) { _api.color_convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB32](&dst, &src); }
+  static FOG_INLINE void convert(AhslBaseF&  dst, const ArgbBase64& src) { _api.color_convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB64](&dst, &src); }
+  static FOG_INLINE void convert(AhslBaseF&  dst, const ArgbBaseF&  src) { _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB   ](&dst, &src); }
+  static FOG_INLINE void convert(AhslBaseF&  dst, const AhsvBaseF&  src) { _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_AHSV   ](&dst, &src); }
+  static FOG_INLINE void convert(AhslBaseF&  dst, const AcmykBaseF& src) { _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ACMYK  ](&dst, &src); }
 
-  static FOG_INLINE void convert(AcmykBaseF& dst, const ArgbBase32& src) { _api.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB32](&dst, &src); }
-  static FOG_INLINE void convert(AcmykBaseF& dst, const ArgbBase64& src) { _api.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB64](&dst, &src); }
-  static FOG_INLINE void convert(AcmykBaseF& dst, const ArgbBaseF&  src) { _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB   ](&dst, &src); }
-  static FOG_INLINE void convert(AcmykBaseF& dst, const AhsvBaseF&  src) { _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV   ](&dst, &src); }
-  static FOG_INLINE void convert(AcmykBaseF& dst, const AhslBaseF&  src) { _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL   ](&dst, &src); }
+  static FOG_INLINE void convert(AcmykBaseF& dst, const ArgbBase32& src) { _api.color_convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB32](&dst, &src); }
+  static FOG_INLINE void convert(AcmykBaseF& dst, const ArgbBase64& src) { _api.color_convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB64](&dst, &src); }
+  static FOG_INLINE void convert(AcmykBaseF& dst, const ArgbBaseF&  src) { _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB   ](&dst, &src); }
+  static FOG_INLINE void convert(AcmykBaseF& dst, const AhsvBaseF&  src) { _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV   ](&dst, &src); }
+  static FOG_INLINE void convert(AcmykBaseF& dst, const AhslBaseF&  src) { _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL   ](&dst, &src); }
 };
 #include <Fog/Core/C++/PackRestore.h>
 

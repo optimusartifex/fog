@@ -35,18 +35,18 @@ struct FOG_NO_EXPORT PathTmpF : public PathF
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE PathTmpF() : PathF(_api.pathf.dAdopt(&_storage, N))
+  FOG_INLINE PathTmpF() : PathF(_api.pathf_dAdopt(&_storage, N))
   {
   }
-  
+
   FOG_INLINE PathTmpF(const PathTmpF<N>& other) :
-    PathF(_api.pathf.dAdopt(&_storage, N))
+    PathF(_api.pathf_dAdopt(&_storage, N))
   {
     setDeep(other);
   }
 
   FOG_INLINE PathTmpF(const PathF& other) :
-    PathF(_api.pathf.dAdopt(_storage, N))
+    PathF(_api.pathf_dAdopt(_storage, N))
   {
     setDeep(other);
   }
@@ -99,18 +99,18 @@ struct FOG_NO_EXPORT PathTmpD : public PathD
   // --------------------------------------------------------------------------
 
   FOG_INLINE PathTmpD() :
-    PathD(_api.pathd.dAdopt(&_storage, N))
+    PathD(_api.pathd_dAdopt(&_storage, N))
   {
   }
-  
+
   FOG_INLINE PathTmpD(const PathTmpD<N>& other) :
-    PathD(_api.pathd.dAdopt(&_storage, N))
+    PathD(_api.pathd_dAdopt(&_storage, N))
   {
     setDeep(other);
   }
-  
+
   FOG_INLINE PathTmpD(const PathD& other) :
-    PathD(_api.pathd.dAdopt(&_storage, N))
+    PathD(_api.pathd_dAdopt(&_storage, N))
   {
     setDeep(other);
   }

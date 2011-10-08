@@ -155,12 +155,12 @@ struct FOG_NO_EXPORT ArcF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.arcf.getBoundingBox(this, &dst, tr, false);
+    return _api.arcf_getBoundingBox(this, &dst, tr, false);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.arcf.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, false);
+    err_t err = _api.arcf_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, false);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -181,7 +181,7 @@ struct FOG_NO_EXPORT ArcF
 
   FOG_INLINE uint toCSpline(PointF* dst) const
   {
-    return _api.arcf.toCSpline(this, dst);
+    return _api.arcf_toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -344,12 +344,12 @@ struct FOG_NO_EXPORT ArcD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.arcd.getBoundingBox(this, &dst, tr, false);
+    return _api.arcd_getBoundingBox(this, &dst, tr, false);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.arcd.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, false);
+    err_t err = _api.arcd_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, false);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -370,7 +370,7 @@ struct FOG_NO_EXPORT ArcD
 
   FOG_INLINE uint toCSpline(PointD* dst) const
   {
-    return _api.arcd.toCSpline(this, dst);
+    return _api.arcd_toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

@@ -42,6 +42,9 @@
       ::Fog::Debug::assertMessage(__FILE__, __LINE__, #_Expression_); \
   FOG_MACRO_END
 
+// TODO: Declare and use.
+// #define FOG_ASSERT_STATIC(_Expression_)
+
 #else // !FOG_DEBUG
 
 // ============================================================================

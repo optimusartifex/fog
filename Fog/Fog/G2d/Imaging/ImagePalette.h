@@ -53,9 +53,9 @@ struct FOG_NO_EXPORT ImagePaletteData
 
   // ${VAR:BEGIN}
   //
-  // This data-object is binary compatible to the VarData header in the first
+  // This data-object is binary compatible with the VarData header in the first
   // form called - "implicitly shared class". The members must be binary
-  // compatible to the header below:
+  // compatible with the header below:
   //
   // +==============+============+============================================+
   // | Size         | Name       | Description / Purpose                      |
@@ -90,7 +90,7 @@ struct FOG_NO_EXPORT ImagePaletteData
 // [Fog::ImagePalette]
 // ============================================================================
 
-//! @brief The ImagePalette is array of 256 RGB32 color elements which 
+//! @brief The ImagePalette is array of 256 RGB32 color elements which
 //! represents colors in 8-bit indexed image (the pixel value is index to the
 //! palette array).
 struct FOG_NO_EXPORT ImagePalette
@@ -101,12 +101,12 @@ struct FOG_NO_EXPORT ImagePalette
 
   FOG_INLINE ImagePalette()
   {
-    _api.imagepalette.ctor(this);
+    _api.imagepalette_ctor(this);
   }
 
   FOG_INLINE ImagePalette(const ImagePalette& other)
   {
-    _api.imagepalette.ctorCopy(this, &other);
+    _api.imagepalette_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE ImagePalette(ImagePaletteData* d) : _d(d)
@@ -115,7 +115,7 @@ struct FOG_NO_EXPORT ImagePalette
 
   FOG_INLINE ~ImagePalette()
   {
-    _api.imagepalette.dtor(this);
+    _api.imagepalette_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -130,7 +130,7 @@ struct FOG_NO_EXPORT ImagePalette
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
-  FOG_INLINE err_t _detach() { return _api.imagepalette.detach(this); }
+  FOG_INLINE err_t _detach() { return _api.imagepalette_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -154,19 +154,19 @@ struct FOG_NO_EXPORT ImagePalette
   //! @brief Set palette data to @a other, making weak-copy.
   FOG_INLINE err_t setData(const ImagePalette& other)
   {
-    return _api.imagepalette.copy(this, &other);
+    return _api.imagepalette_copy(this, &other);
   }
 
   //! @brief Set palette data to @a other, making deep-copy.
   FOG_INLINE err_t setDeep(const ImagePalette& other)
   {
-    return _api.imagepalette.setDeep(this, &other);
+    return _api.imagepalette_setDeep(this, &other);
   }
 
   //! @brief Replace palette data at @a range by @a data.
   FOG_INLINE err_t setData(const Range& range, const Argb32* data)
   {
-    return _api.imagepalette.setData(this, &range, data);
+    return _api.imagepalette_setData(this, &range, data);
   }
 
   //! @brief Get palette length.
@@ -178,7 +178,7 @@ struct FOG_NO_EXPORT ImagePalette
   //! @brief Set palette length.
   FOG_INLINE err_t setLength(size_t length)
   {
-    return _api.imagepalette.setLength(this, length);
+    return _api.imagepalette_setLength(this, length);
   }
 
   // --------------------------------------------------------------------------
@@ -199,12 +199,12 @@ struct FOG_NO_EXPORT ImagePalette
 
   FOG_INLINE void clear()
   {
-    _api.imagepalette.clear(this);
+    _api.imagepalette_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.imagepalette.reset(this);
+    _api.imagepalette_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -222,7 +222,7 @@ struct FOG_NO_EXPORT ImagePalette
 
   FOG_INLINE bool eq(const ImagePalette& other) const
   {
-    return _api.imagepalette.eq(this, &other);
+    return _api.imagepalette_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -231,7 +231,7 @@ struct FOG_NO_EXPORT ImagePalette
 
   FOG_INLINE const ImagePalette& operator=(const ImagePalette& other)
   {
-    _api.imagepalette.copy(this, &other);
+    _api.imagepalette_copy(this, &other);
     return *this;
   }
 
@@ -244,7 +244,7 @@ struct FOG_NO_EXPORT ImagePalette
 
   static FOG_INLINE const ImagePalette& empty()
   {
-    return *_api.imagepalette.oEmpty;
+    return *_api.imagepalette_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -253,12 +253,12 @@ struct FOG_NO_EXPORT ImagePalette
 
   static FOG_INLINE ImagePalette fromGreyscale(uint32_t length)
   {
-    return ImagePalette(_api.imagepalette.dCreateGreyscale(length));
+    return ImagePalette(_api.imagepalette_dCreateGreyscale(length));
   }
 
   static FOG_INLINE ImagePalette fromColorCube(uint32_t r, uint32_t g, uint32_t b)
   {
-    return ImagePalette(_api.imagepalette.dCreateColorCube(r, g, b));
+    return ImagePalette(_api.imagepalette_dCreateColorCube(r, g, b));
   }
 
   // --------------------------------------------------------------------------
@@ -267,12 +267,12 @@ struct FOG_NO_EXPORT ImagePalette
 
   static FOG_INLINE bool eq(const ImagePalette* a, const ImagePalette* b)
   {
-    return _api.imagepalette.eq(a, b);
+    return _api.imagepalette_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.imagepalette.eq;
+    return (EqFunc)_api.imagepalette_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -281,7 +281,7 @@ struct FOG_NO_EXPORT ImagePalette
 
   static FOG_INLINE bool isGreyscale(const Argb32* data, size_t length)
   {
-    return _api.imagepalette.isGreyscale(data, length);
+    return _api.imagepalette_isGreyscale(data, length);
   }
 
   // --------------------------------------------------------------------------

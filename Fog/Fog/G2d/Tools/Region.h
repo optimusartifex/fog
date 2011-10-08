@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT RegionData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.region.dFree(this);
+      _api.region_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -57,9 +57,9 @@ struct FOG_NO_EXPORT RegionData
 
   // ${VAR:BEGIN}
   //
-  // This data-object is binary compatible to the VarData header in the second
+  // This data-object is binary compatible with the VarData header in the second
   // form called - "implicitly shared container". The members must be binary
-  // compatible to the header below:
+  // compatible with the header below:
   //
   // +==============+============+============================================+
   // | Size         | Name       | Description / Purpose                      |
@@ -115,22 +115,22 @@ struct FOG_NO_EXPORT Region
 
   FOG_INLINE Region()
   {
-    _api.region.ctor(this);
+    _api.region_ctor(this);
   }
 
   FOG_INLINE Region(const Region& other)
   {
-    _api.region.ctorRegion(this, &other);
+    _api.region_ctorRegion(this, &other);
   }
 
   explicit FOG_INLINE Region(const BoxI& box)
   {
-    _api.region.ctorBox(this, &box);
+    _api.region_ctorBox(this, &box);
   }
 
   explicit FOG_INLINE Region(const RectI& rect)
   {
-    _api.region.ctorRect(this, &rect);
+    _api.region_ctorRect(this, &rect);
   }
 
   explicit FOG_INLINE Region(_Uninitialized) {}
@@ -138,7 +138,7 @@ struct FOG_NO_EXPORT Region
 
   FOG_INLINE ~Region()
   {
-    _api.region.dtor(this);
+    _api.region_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -153,7 +153,7 @@ struct FOG_NO_EXPORT Region
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
-  FOG_INLINE err_t _detach() { return _api.region.detach(this); }
+  FOG_INLINE err_t _detach() { return _api.region_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Container]
@@ -168,19 +168,19 @@ struct FOG_NO_EXPORT Region
   //! infinite then ERR_RT_INVALID_CONTEXT is returned.
   FOG_INLINE err_t reserve(size_t n)
   {
-    return _api.region.reserve(this, n);
+    return _api.region_reserve(this, n);
   }
 
   //! @brief Squeeze region (allocating memory exactly needed for this object).
   FOG_INLINE void squeeze()
   {
-    return _api.region.squeeze(this);
+    return _api.region_squeeze(this);
   }
 
   //! @brief Prepare @a n rectangles in region and clear it.
   FOG_INLINE err_t prepare(size_t n)
   {
-    return _api.region.prepare(this, n);
+    return _api.region_prepare(this, n);
   }
 
   // --------------------------------------------------------------------------
@@ -212,7 +212,7 @@ struct FOG_NO_EXPORT Region
   // --------------------------------------------------------------------------
 
   //! @brief Get type of region, see @c REGION_TYPE enum for possible values.
-  FOG_INLINE uint32_t getType() const { return _api.region.getType(this); }
+  FOG_INLINE uint32_t getType() const { return _api.region_getType(this); }
 
   //! @brief Get whether the region is empty (zero length and not infinite).
   FOG_INLINE bool isEmpty() const { return _d->length == 0; }
@@ -221,7 +221,7 @@ struct FOG_NO_EXPORT Region
   //! @brief Get whether the region is complex.
   FOG_INLINE bool isComplex() const { return _d->length > 1; }
   //! @brief Get whether the region is infinite.
-  FOG_INLINE bool isInfinite() const { return _d == _api.region.oInfinite->_d; }
+  FOG_INLINE bool isInfinite() const { return _d == _api.region_oInfinite->_d; }
 
   // --------------------------------------------------------------------------
   // [Clear]
@@ -230,7 +230,7 @@ struct FOG_NO_EXPORT Region
   //! @brief Removes all rectagnels from region.
   FOG_INLINE void clear()
   {
-    return _api.region.clear(this);
+    return _api.region_clear(this);
   }
 
   // --------------------------------------------------------------------------
@@ -240,7 +240,7 @@ struct FOG_NO_EXPORT Region
   //! @copydoc Doxygen::Implicit::reset().
   FOG_INLINE void reset()
   {
-    return _api.region.reset(this);
+    return _api.region_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -249,33 +249,33 @@ struct FOG_NO_EXPORT Region
 
   FOG_INLINE err_t setRegion(const Region& region)
   {
-    return _api.region.setRegion(this, &region);
+    return _api.region_setRegion(this, &region);
   }
 
   //! @brief Create a deep copy of region @a region.
   FOG_INLINE err_t setDeep(const Region& region)
   {
-    return _api.region.setDeep(this, &region);
+    return _api.region_setDeep(this, &region);
   }
 
   FOG_INLINE err_t setBox(const BoxI& box)
   {
-    return _api.region.setBox(this, &box);
+    return _api.region_setBox(this, &box);
   }
 
   FOG_INLINE err_t setRect(const RectI& rect)
   {
-    return _api.region.setRect(this, &rect);
+    return _api.region_setRect(this, &rect);
   }
 
   FOG_INLINE err_t setBoxList(const BoxI* data, size_t length)
   {
-    return _api.region.setBoxList(this, data, length);
+    return _api.region_setBoxList(this, data, length);
   }
 
   FOG_INLINE err_t setRectList(const RectI* data, size_t length)
   {
-    return _api.region.setRectList(this, data, length);
+    return _api.region_setRectList(this, data, length);
   }
 
   // --------------------------------------------------------------------------
@@ -284,18 +284,18 @@ struct FOG_NO_EXPORT Region
 
   FOG_INLINE err_t combine(const Region& region, uint32_t combineOp)
   {
-    return _api.region.combineRegionRegion(this, this, &region, combineOp);
+    return _api.region_combineRegionRegion(this, this, &region, combineOp);
   }
 
   FOG_INLINE err_t combine(const BoxI& box, uint32_t combineOp)
   {
-    return _api.region.combineRegionBox(this, this, &box, combineOp);
+    return _api.region_combineRegionBox(this, this, &box, combineOp);
   }
 
   FOG_INLINE err_t combine(const RectI& rect, uint32_t combineOp)
   {
     BoxI box(rect);
-    return _api.region.combineRegionBox(this, this, &box, combineOp);
+    return _api.region_combineRegionBox(this, this, &box, combineOp);
   }
 
   FOG_INLINE err_t union_(const Region& region) { return combine(region, REGION_OP_UNION); }
@@ -324,13 +324,13 @@ struct FOG_NO_EXPORT Region
 
   FOG_INLINE err_t translate(const PointI& pt)
   {
-    return _api.region.translate(this, this, &pt);
+    return _api.region_translate(this, this, &pt);
   }
 
   FOG_INLINE err_t translate(int x, int y)
   {
     PointI pt(x, y);
-    return _api.region.translate(this, this, &pt);
+    return _api.region_translate(this, this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -347,7 +347,7 @@ struct FOG_NO_EXPORT Region
   //! performance is increased.
   FOG_INLINE err_t translateAndClip(const PointI& pt, const BoxI& clipBox)
   {
-    return _api.region.translateAndClip(this, this, &pt, &clipBox);
+    return _api.region_translateAndClip(this, this, &pt, &clipBox);
   }
 
   //! @brief Intersect current region with the @a region and clip it into @a clipBox.
@@ -359,7 +359,7 @@ struct FOG_NO_EXPORT Region
   //! a single pass so the performance is increased.
   FOG_INLINE err_t intersectAndClip(const Region& region, const BoxI& clipBox)
   {
-    return _api.region.intersectAndClip(this, this, &region, &clipBox);
+    return _api.region_intersectAndClip(this, this, &region, &clipBox);
   }
 
   // --------------------------------------------------------------------------
@@ -379,23 +379,23 @@ struct FOG_NO_EXPORT Region
   //! @brief Tests if a given point is in region, see @c REGION_HIT_TEST enum.
   FOG_INLINE uint32_t hitTest(const PointI& pt) const
   {
-    return _api.region.hitTestPoint(this, &pt);
+    return _api.region_hitTestPoint(this, &pt);
   }
 
   FOG_INLINE uint32_t hitTest(int x, int y) const
   {
     PointI pt(x, y);
-    return _api.region.hitTestPoint(this, &pt);
+    return _api.region_hitTestPoint(this, &pt);
   }
 
   FOG_INLINE uint32_t hitTest(const BoxI& box) const
   {
-    return _api.region.hitTestBox(this, &box);
+    return _api.region_hitTestBox(this, &box);
   }
 
   FOG_INLINE uint32_t hitTest(const RectI& rect) const
   {
-    return _api.region.hitTestRect(this, &rect);
+    return _api.region_hitTestRect(this, &rect);
   }
 
   // --------------------------------------------------------------------------
@@ -404,7 +404,7 @@ struct FOG_NO_EXPORT Region
 
   FOG_INLINE bool eq(const Region& other) const
   {
-    return _api.region.eq(this, &other);
+    return _api.region_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -414,12 +414,12 @@ struct FOG_NO_EXPORT Region
 #if defined(FOG_OS_WINDOWS)
   FOG_INLINE err_t toHRGN(HRGN* hrgn) const
   {
-    return _api.region.hrgnFromRegion(hrgn, this);
+    return _api.region_hrgnFromRegion(hrgn, this);
   }
 
   FOG_INLINE err_t fromHRGN(HRGN hrgn)
   {
-    return _api.region.regionFromHRGN(this, hrgn);
+    return _api.region_regionFromHRGN(this, hrgn);
   }
 #endif // FOG_OS_WINDOWS
 
@@ -427,9 +427,9 @@ struct FOG_NO_EXPORT Region
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Region& operator=(const Region& other) { _api.region.setRegion(this, &other); return *this; }
-  FOG_INLINE Region& operator=(const BoxI& box) { _api.region.setBox(this, &box); return *this; }
-  FOG_INLINE Region& operator=(const RectI& rect) { _api.region.setRect(this, &rect); return *this; }
+  FOG_INLINE Region& operator=(const Region& other) { _api.region_setRegion(this, &other); return *this; }
+  FOG_INLINE Region& operator=(const BoxI& box) { _api.region_setBox(this, &box); return *this; }
+  FOG_INLINE Region& operator=(const RectI& rect) { _api.region_setRect(this, &rect); return *this; }
 
   FOG_INLINE Region& operator+=(const Region& other) { union_   (other); return *this; }
   FOG_INLINE Region& operator|=(const Region& other) { union_   (other); return *this; }
@@ -449,17 +449,17 @@ struct FOG_NO_EXPORT Region
   FOG_INLINE Region& operator^=(const RectI& rect) { xor_     (rect); return *this; }
   FOG_INLINE Region& operator-=(const RectI& rect) { subtract (rect); return *this; }
 
-  FOG_INLINE bool operator==(const Region& other) const { return  _api.region.eq(this, &other); }
-  FOG_INLINE bool operator!=(const Region& other) const { return !_api.region.eq(this, &other); }
+  FOG_INLINE bool operator==(const Region& other) const { return  _api.region_eq(this, &other); }
+  FOG_INLINE bool operator!=(const Region& other) const { return !_api.region_eq(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
   //! @brief Get empty region instance.
-  static FOG_INLINE const Region& empty() { return *_api.region.oEmpty; }
+  static FOG_INLINE const Region& empty() { return *_api.region_oEmpty; }
   //! @brief Get infinite region instance.
-  static FOG_INLINE const Region& infinite() { return *_api.region.oInfinite; }
+  static FOG_INLINE const Region& infinite() { return *_api.region_oInfinite; }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
@@ -467,12 +467,12 @@ struct FOG_NO_EXPORT Region
 
   static FOG_INLINE bool eq(const Region* a, const Region* b)
   {
-    return _api.region.eq(a, b);
+    return _api.region_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.region.eq;
+    return (EqFunc)_api.region_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -481,41 +481,41 @@ struct FOG_NO_EXPORT Region
 
   static FOG_INLINE err_t combine(Region& dst, const Region& a, const Region& b, uint32_t combineOp)
   {
-    return _api.region.combineRegionRegion(&dst, &a, &b, combineOp);
+    return _api.region_combineRegionRegion(&dst, &a, &b, combineOp);
   }
 
   static FOG_INLINE err_t combine(Region& dst, const Region& a, const BoxI& b, uint32_t combineOp)
   {
-    return _api.region.combineRegionBox(&dst, &a, &b, combineOp);
+    return _api.region_combineRegionBox(&dst, &a, &b, combineOp);
   }
 
   static FOG_INLINE err_t combine(Region& dst, const Region& a, const RectI& b, uint32_t combineOp)
   {
     BoxI bBox(b);
-    return _api.region.combineRegionBox(&dst, &a, &bBox, combineOp);
+    return _api.region_combineRegionBox(&dst, &a, &bBox, combineOp);
   }
 
   static FOG_INLINE err_t combine(Region& dst, const BoxI& a, const Region& b, uint32_t combineOp)
   {
-    return _api.region.combineBoxRegion(&dst, &a, &b, combineOp);
+    return _api.region_combineBoxRegion(&dst, &a, &b, combineOp);
   }
 
   static FOG_INLINE err_t combine(Region& dst, const RectI& a, const Region& b, uint32_t combineOp)
   {
     BoxI aBox(a);
-    return _api.region.combineBoxRegion(&dst, &aBox, &b, combineOp);
+    return _api.region_combineBoxRegion(&dst, &aBox, &b, combineOp);
   }
 
   static FOG_INLINE err_t combine(Region& dst, const BoxI& a, const BoxI& b, uint32_t combineOp)
   {
-    return _api.region.combineBoxBox(&dst, &a, &b, combineOp);
+    return _api.region_combineBoxBox(&dst, &a, &b, combineOp);
   }
 
   static FOG_INLINE err_t combine(Region& dst, const RectI& a, const RectI& b, uint32_t combineOp)
   {
     BoxI aBox(a);
     BoxI bBox(b);
-    return _api.region.combineBoxBox(&dst, &aBox, &bBox, combineOp);
+    return _api.region_combineBoxBox(&dst, &aBox, &bBox, combineOp);
   }
 
   static FOG_INLINE err_t union_(Region& dst, const Region& a, const Region& b) { return combine(dst, a, b, REGION_OP_UNION); }
@@ -556,12 +556,12 @@ struct FOG_NO_EXPORT Region
 
   static FOG_INLINE err_t translate(Region& dst, const Region& src, const PointI& pt)
   {
-    return _api.region.translate(&dst, &src, &pt);
+    return _api.region_translate(&dst, &src, &pt);
   }
 
   static FOG_INLINE err_t translateAndClip(Region& dst, const Region& src, const PointI& pt, const BoxI& clipBox)
   {
-    return _api.region.translateAndClip(&dst, &src, &pt, &clipBox);
+    return _api.region_translateAndClip(&dst, &src, &pt, &clipBox);
   }
 
   // --------------------------------------------------------------------------
@@ -573,7 +573,7 @@ struct FOG_NO_EXPORT Region
   //! @note Calling this method is faster than doing these operations individually.
   static FOG_INLINE err_t intersectAndClip(Region& dst, const Region& a, const Region& b, const BoxI& clipBox)
   {
-    return _api.region.intersectAndClip(&dst, &a, &b, &clipBox);
+    return _api.region_intersectAndClip(&dst, &a, &b, &clipBox);
   }
 
   // --------------------------------------------------------------------------

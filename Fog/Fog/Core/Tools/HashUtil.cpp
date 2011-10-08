@@ -30,7 +30,7 @@ namespace Fog {
 // our own hash function comparison confirmed this. The only difference to the
 // original function of B.J. here is that our version doesn't provide the
 // 'level' (= previous hash) argument for consistency reasons with the other
-// hash functions (i.e. same function signature). It can be definetely 
+// hash functions (i.e. same function signature). It can be definetely
 // recommended as a good general purpose hash function.
 
 static uint32_t HashUtil_hashBinary(const void* data, size_t length)
@@ -181,13 +181,13 @@ FOG_NO_EXPORT void HashUtil_init(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.hashutil.binary = HashUtil_hashBinary;
+  _api.hashutil_hashBinary = HashUtil_hashBinary;
 
-  _api.hashutil.vectorD = HashUtil_hashVectorD;
-  _api.hashutil.vectorQ = HashUtil_hashVectorQ;
+  _api.hashutil_hashVectorD = HashUtil_hashVectorD;
+  _api.hashutil_hashVectorQ = HashUtil_hashVectorQ;
 
-  _api.hashutil.stubA = HashUtil_hashStubA;
-  _api.hashutil.stubW = HashUtil_hashStubW;
+  _api.hashutil_hashStubA = HashUtil_hashStubA;
+  _api.hashutil_hashStubW = HashUtil_hashStubW;
 }
 
 } // Fog namespace

@@ -17,11 +17,9 @@
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
-#include <Fog/G2d/Render/RenderApi_p.h>
-#include <Fog/G2d/Render/RenderConstants_p.h>
-#include <Fog/G2d/Render/RenderFuncs_p.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Tools/Region.h>
@@ -107,64 +105,6 @@ union FOG_NO_EXPORT RasterHints
 };
 
 // ============================================================================
-// [Fog::RasterScope]
-// ============================================================================
-
-//! @brief Raster paint-engine per-thread scope.
-//!
-//! Default value for single-threaded rendering is zero for @c offset and one
-//! for @c delta. Any other combination means that multithreading is use. Each
-//! thread has the same @c delta value, but different @c offset.
-//!
-//! For example if four threads are used for rendering, the per-thread scope
-//! values will be:
-//!  - Thread #0 - Offset==0, Delta==4 (Scanlines 0, 4,  8, 12, 16, ...)
-//!  - Thread #1 - Offset==1, Delta==4 (Scanlines 1, 5,  9, 13, 17, ...)
-//!  - Thread #2 - Offset==2, Delta==4 (Scanlines 2, 6, 10, 14, 18, ...)
-//!  - Thread #3 - Offset==3, Delta==4 (Scanlines 3, 7, 11, 15, 19, ...)
-struct FOG_NO_EXPORT RasterScope
-{
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE int getDelta() const { return _delta; }
-  FOG_INLINE int getOffset() const { return _offset; }
-
-  FOG_INLINE void setScope(int delta, int offset)
-  {
-    _delta = delta;
-    _offset = offset;
-  }
-
-  FOG_INLINE bool isSingleThreaded() const { return _delta == 1; }
-  FOG_INLINE bool isMultiThreaded() const { return _delta > 1; }
-
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset()
-  {
-    _delta = 1;
-    _offset = 0;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! @brief Delta (how many scanlines to advance each scanline).
-  //!
-  //!
-  int _delta;
-
-  //! @brief Base offset from zero scanline (positive value at range from zero
-  //! to @c delta-1).
-  int _offset;
-};
-
-// ============================================================================
 // [Fog::RasterSource]
 // ============================================================================
 
@@ -237,9 +177,9 @@ struct FOG_NO_EXPORT RasterLayer
   uint32_t secondaryBPL;
 
   //! @brief The 'secondary-from-primary' format blitter.
-  RenderVBlitLineFunc cvtSecondaryFromPrimary;
+  RasterVBlitLineFunc cvtSecondaryFromPrimary;
   //! @brief The 'primary-from-secondary' format blitter.
-  RenderVBlitLineFunc cvtPrimaryFromSecondary;
+  RasterVBlitLineFunc cvtPrimaryFromSecondary;
 
   // --------------------------------------------------------------------------
   // [Members - Image Data]

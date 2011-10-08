@@ -63,7 +63,7 @@ void __fog_delete(T* inst)
   Fog::MemMgr::free(inst);
 }
 
-// Fog macros to make memory allocation more friendly and compatible to std
+// Fog macros to make memory allocation more friendly and compatible with std
 // version.
 #define fog_new new(fog_memmgr)
 #define fog_new_p(p) new(fog_memmgr, p)

@@ -88,12 +88,12 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.circlef.getBoundingBox(this, &dst, tr);
+    return _api.circlef_getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.circlef.getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = _api.circlef_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -105,7 +105,7 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _api.circlef.hitTest(this, &pt);
+    return _api.circlef_hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -123,7 +123,7 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE uint toCSpline(PointF* dst) const
   {
-    return _api.circlef.toCSpline(this, dst);
+    return _api.circlef_toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -214,12 +214,12 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.circled.getBoundingBox(this, &dst, tr);
+    return _api.circled_getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.circled.getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = _api.circled_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -231,7 +231,7 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _api.circled.hitTest(this, &pt);
+    return _api.circled_hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -249,7 +249,7 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE uint toCSpline(PointD* dst) const
   {
-    return _api.circled.toCSpline(this, dst);
+    return _api.circled_toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

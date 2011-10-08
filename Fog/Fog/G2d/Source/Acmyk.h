@@ -108,13 +108,13 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
   //! @brief Get whether the alpha is close to 1.0 (fully-opaque).
   FOG_INLINE bool isOpaque() const
   {
-    return Math::isFuzzyGreaterEq(a, 1.0f);
+    return Math::isFuzzyGe(a, 1.0f);
   }
 
   //! @brief Get whether the alpha is close to 0.0 (fully-transparent).
   FOG_INLINE bool isTransparent() const
   {
-    return Math::isFuzzyLowerEq(a, 0.0f);
+    return Math::isFuzzyLe(a, 0.0f);
   }
 
   // --------------------------------------------------------------------------
@@ -124,35 +124,35 @@ struct FOG_NO_EXPORT AcmykF : public AcmykBaseF
   static FOG_INLINE AcmykF fromArgb(const ArgbBase32& argb32)
   {
     AcmykF acmykf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB32](&acmykf, &argb32);
+    _api.color_convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB32](&acmykf, &argb32);
     return acmykf;
   }
 
   static FOG_INLINE AcmykF fromArgb(const ArgbBase64& argb64)
   {
     AcmykF acmykf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB64](&acmykf, &argb64);
+    _api.color_convert[COLOR_MODEL_ACMYK][_COLOR_MODEL_ARGB64](&acmykf, &argb64);
     return acmykf;
   }
 
   static FOG_INLINE AcmykF fromArgb(const ArgbBaseF& argbf)
   {
     AcmykF acmykf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](&acmykf, &argbf);
+    _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_ARGB](&acmykf, &argbf);
     return acmykf;
   }
 
   static FOG_INLINE AcmykF fromAhsv(const AhsvBaseF& ahsvf)
   {
     AcmykF acmykf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV](&acmykf, &ahsvf);
+    _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSV](&acmykf, &ahsvf);
     return acmykf;
   }
 
   static FOG_INLINE AcmykF fromAhsl(const AhsvBaseF& ahslf)
   {
     AcmykF acmykf(UNINITIALIZED);
-    _api.color.convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL](&acmykf, &ahslf);
+    _api.color_convert[COLOR_MODEL_ACMYK][COLOR_MODEL_AHSL](&acmykf, &ahslf);
     return acmykf;
   }
 };

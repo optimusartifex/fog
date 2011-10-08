@@ -11,7 +11,7 @@
 #include <Fog/Core/C++/Base.h>
 
 // ============================================================================
-// [Template helpers used only by Fog-Framework]
+// [Template #defs used by Fog-Framework templates]
 // ============================================================================
 
 #define NumT_(_Type_) typename _Type_##T<NumT>::T

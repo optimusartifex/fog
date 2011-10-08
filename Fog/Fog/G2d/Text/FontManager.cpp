@@ -287,7 +287,7 @@ FOG_NO_EXPORT void FontManager_init(void)
   // Initialize the font in default FontManager to font using NullFontFace.
   // NullFontFace is only used when something failed and system fonts are
   // inaccessible - This can probably happen only under linux if fontconfig
-  // configuration is broken and Fog-Framework can't find any other suitable 
+  // configuration is broken and Fog-Framework can't find any other suitable
   // font.
   FontManager_lock.init();
 

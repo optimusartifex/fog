@@ -359,39 +359,39 @@ FOG_NO_EXPORT void Matrix_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.matrixf.ctor = MatrixT_ctor<float>;
-  _api.matrixf.ctorCopy = MatrixT_ctorCopy<float>;
-  _api.matrixf.ctorCreate = MatrixT_ctorCreate<float>;
-  _api.matrixf.dtor = MatrixT_dtor<float>;
-  _api.matrixf.detach = MatrixT_detach<float>;
-  _api.matrixf.create = MatrixT_create<float>;
-  _api.matrixf.resize = MatrixT_resize<float>;
-  _api.matrixf.getCell = MatrixT_getCell<float>;
-  _api.matrixf.setCell = MatrixT_setCell<float>;
-  _api.matrixf.fill = MatrixT_fill<float>;
-  _api.matrixf.reset = MatrixT_reset<float>;
-  _api.matrixf.copy = MatrixT_copy<float>;
-  _api.matrixf.eq = MatrixT_eq<float>;
+  _api.matrixf_ctor = MatrixT_ctor<float>;
+  _api.matrixf_ctorCopy = MatrixT_ctorCopy<float>;
+  _api.matrixf_ctorCreate = MatrixT_ctorCreate<float>;
+  _api.matrixf_dtor = MatrixT_dtor<float>;
+  _api.matrixf_detach = MatrixT_detach<float>;
+  _api.matrixf_create = MatrixT_create<float>;
+  _api.matrixf_resize = MatrixT_resize<float>;
+  _api.matrixf_getCell = MatrixT_getCell<float>;
+  _api.matrixf_setCell = MatrixT_setCell<float>;
+  _api.matrixf_fill = MatrixT_fill<float>;
+  _api.matrixf_reset = MatrixT_reset<float>;
+  _api.matrixf_copy = MatrixT_copy<float>;
+  _api.matrixf_eq = MatrixT_eq<float>;
 
-  _api.matrixf.dCreate = MatrixT_dCreate<float>;
-  _api.matrixf.dFree = MatrixT_dFree<float>;
+  _api.matrixf_dCreate = MatrixT_dCreate<float>;
+  _api.matrixf_dFree = MatrixT_dFree<float>;
 
-  _api.matrixd.ctor = MatrixT_ctor<double>;
-  _api.matrixd.ctorCopy = MatrixT_ctorCopy<double>;
-  _api.matrixd.ctorCreate = MatrixT_ctorCreate<double>;
-  _api.matrixd.dtor = MatrixT_dtor<double>;
-  _api.matrixd.detach = MatrixT_detach<double>;
-  _api.matrixd.create = MatrixT_create<double>;
-  _api.matrixd.resize = MatrixT_resize<double>;
-  _api.matrixd.getCell = MatrixT_getCell<double>;
-  _api.matrixd.setCell = MatrixT_setCell<double>;
-  _api.matrixd.fill = MatrixT_fill<double>;
-  _api.matrixd.reset = MatrixT_reset<double>;
-  _api.matrixd.copy = MatrixT_copy<double>;
-  _api.matrixd.eq = MatrixT_eq<double>;
+  _api.matrixd_ctor = MatrixT_ctor<double>;
+  _api.matrixd_ctorCopy = MatrixT_ctorCopy<double>;
+  _api.matrixd_ctorCreate = MatrixT_ctorCreate<double>;
+  _api.matrixd_dtor = MatrixT_dtor<double>;
+  _api.matrixd_detach = MatrixT_detach<double>;
+  _api.matrixd_create = MatrixT_create<double>;
+  _api.matrixd_resize = MatrixT_resize<double>;
+  _api.matrixd_getCell = MatrixT_getCell<double>;
+  _api.matrixd_setCell = MatrixT_setCell<double>;
+  _api.matrixd_fill = MatrixT_fill<double>;
+  _api.matrixd_reset = MatrixT_reset<double>;
+  _api.matrixd_copy = MatrixT_copy<double>;
+  _api.matrixd_eq = MatrixT_eq<double>;
 
-  _api.matrixd.dCreate = MatrixT_dCreate<double>;
-  _api.matrixd.dFree = MatrixT_dFree<double>;
+  _api.matrixd_dCreate = MatrixT_dCreate<double>;
+  _api.matrixd_dFree = MatrixT_dFree<double>;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -406,8 +406,8 @@ FOG_NO_EXPORT void Matrix_init(void)
   dd->reference.init(1);
   dd->vType = VAR_TYPE_MATRIXF | VAR_FLAG_NONE;
 
-  _api.matrixf.oEmpty = MatrixF_oEmpty.initCustom1(df);
-  _api.matrixd.oEmpty = MatrixD_oEmpty.initCustom1(dd);
+  _api.matrixf_oEmpty = MatrixF_oEmpty.initCustom1(df);
+  _api.matrixd_oEmpty = MatrixD_oEmpty.initCustom1(dd);
 }
 
 } // Fog namespace

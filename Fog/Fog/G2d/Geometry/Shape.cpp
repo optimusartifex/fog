@@ -180,11 +180,11 @@ static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, 
 
 FOG_NO_EXPORT void Shape_init(void)
 {
-  _api.shapef.getBoundingBox = ShapeT_getBoundingBox<float>;
-  _api.shaped.getBoundingBox = ShapeT_getBoundingBox<double>;
+  _api.shapef_getBoundingBox = ShapeT_getBoundingBox<float>;
+  _api.shaped_getBoundingBox = ShapeT_getBoundingBox<double>;
 
-  _api.shapef.hitTest = ShapeT_hitTest<float>;
-  _api.shaped.hitTest = ShapeT_hitTest<double>;
+  _api.shapef_hitTest = ShapeT_hitTest<float>;
+  _api.shaped_hitTest = ShapeT_hitTest<double>;
 }
 
 } // Fog namespace

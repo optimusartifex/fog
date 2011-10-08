@@ -34,22 +34,22 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE GradientF(uint32_t gradientType = GRADIENT_TYPE_INVALID)
   {
-    _api.gradientf.ctor(this, gradientType);
+    _api.gradientf_ctor(this, gradientType);
   }
 
   FOG_INLINE GradientF(const GradientF& other)
   {
-    _api.gradientf.ctorCopyF(this, &other);
+    _api.gradientf_ctorCopyF(this, &other);
   }
 
   explicit FOG_INLINE GradientF(const GradientD& other)
   {
-    _api.gradientf.ctorCopyD(this, &other);
+    _api.gradientf_ctorCopyD(this, &other);
   }
-  
+
   FOG_INLINE ~GradientF()
   {
-    _api.gradientf.dtor(this);
+    _api.gradientf_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -98,7 +98,9 @@ struct FOG_NO_EXPORT GradientF
   FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops->setList(list); }
   FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops->setList(stops); }
   FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops->setList(stops, length); }
-  FOG_INLINE void resetStops() { _stops->clear(); }
+
+  FOG_INLINE void clearStops() { _stops->clear(); }
+  FOG_INLINE void resetStops() { _stops->reset(); }
 
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops->add(stop); }
 
@@ -122,12 +124,12 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE err_t setGradient(const GradientF& other)
   {
-    return _api.gradientf.copyF(this, &other);
+    return _api.gradientf_copyF(this, &other);
   }
 
   FOG_INLINE err_t setGradient(const GradientD& other)
   {
-    return _api.gradientf.copyD(this, &other);
+    return _api.gradientf_copyD(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -136,7 +138,7 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE void reset()
   {
-    return _api.gradientf.reset(this);
+    return _api.gradientf_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -145,7 +147,7 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE bool eq(const GradientF& other) const
   {
-    return _api.gradientf.eq(this, &other);
+    return _api.gradientf_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -164,12 +166,12 @@ struct FOG_NO_EXPORT GradientF
 
   static FOG_INLINE bool eq(const GradientF* a, const GradientF* b)
   {
-    return _api.gradientf.eq(a, b);
+    return _api.gradientf_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.gradientf.eq;
+    return (EqFunc)_api.gradientf_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -219,22 +221,22 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE GradientD(uint32_t gradientType = GRADIENT_TYPE_INVALID)
   {
-    _api.gradientd.ctor(this, gradientType);
+    _api.gradientd_ctor(this, gradientType);
   }
 
   FOG_INLINE GradientD(const GradientD& other)
   {
-    _api.gradientd.ctorCopyD(this, &other);
+    _api.gradientd_ctorCopyD(this, &other);
   }
 
   explicit FOG_INLINE GradientD(const GradientF& other)
   {
-    _api.gradientd.ctorCopyF(this, &other);
+    _api.gradientd_ctorCopyF(this, &other);
   }
-  
+
   FOG_INLINE ~GradientD()
   {
-    _api.gradientd.dtor(this);
+    _api.gradientd_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -283,7 +285,9 @@ struct FOG_NO_EXPORT GradientD
   FOG_INLINE err_t setStops(const ColorStopList& list) { return _stops->setList(list); }
   FOG_INLINE err_t setStops(const List<ColorStop>& stops) { return _stops->setList(stops); }
   FOG_INLINE err_t setStops(const ColorStop* stops, size_t length) { return _stops->setList(stops, length); }
-  FOG_INLINE void resetStops() { _stops->clear(); }
+
+  FOG_INLINE void clearStops() { _stops->clear(); }
+  FOG_INLINE void resetStops() { _stops->reset(); }
 
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops->add(stop); }
 
@@ -307,12 +311,12 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE err_t setGradient(const GradientF& other)
   {
-    return _api.gradientd.copyF(this, &other);
+    return _api.gradientd_copyF(this, &other);
   }
 
   FOG_INLINE err_t setGradient(const GradientD& other)
   {
-    return _api.gradientd.copyD(this, &other);
+    return _api.gradientd_copyD(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -321,7 +325,7 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE void reset()
   {
-    return _api.gradientd.reset(this);
+    return _api.gradientd_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -330,7 +334,7 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE bool eq(const GradientD& other) const
   {
-    return _api.gradientd.eq(this, &other);
+    return _api.gradientd_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -349,12 +353,12 @@ struct FOG_NO_EXPORT GradientD
 
   static FOG_INLINE bool eq(const GradientD* a, const GradientD* b)
   {
-    return _api.gradientd.eq(a, b);
+    return _api.gradientd_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.gradientd.eq;
+    return (EqFunc)_api.gradientd_eq;
   }
 
   // --------------------------------------------------------------------------

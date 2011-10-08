@@ -94,11 +94,11 @@ static bool FOG_CDECL TriangleT_hitTest(const NumT_(Point)* self,
 
 FOG_NO_EXPORT void Triangle_init(void)
 {
-  _api.trianglef.getBoundingBox = TriangleT_getBoundingBox<float>;
-  _api.triangled.getBoundingBox = TriangleT_getBoundingBox<double>;
+  _api.trianglef_getBoundingBox = TriangleT_getBoundingBox<float>;
+  _api.triangled_getBoundingBox = TriangleT_getBoundingBox<double>;
 
-  _api.trianglef.hitTest = TriangleT_hitTest<float>;
-  _api.triangled.hitTest = TriangleT_hitTest<double>;
+  _api.trianglef_hitTest = TriangleT_hitTest<float>;
+  _api.triangled_hitTest = TriangleT_hitTest<double>;
 }
 
 } // Fog namespace

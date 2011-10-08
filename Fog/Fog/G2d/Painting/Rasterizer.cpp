@@ -9,18 +9,18 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/Swap.h>
-#include <Fog/G2d/Painting/RasterFiller_p.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
+#include <Fog/G2d/Painting/RasterStructs_p.h>
 #include <Fog/G2d/Painting/Rasterizer_p.h>
-#include <Fog/G2d/Render/RenderApi_p.h>
 #include <Fog/G2d/Tools/Region.h>
 #include <Fog/G2d/Tools/RegionUtil_p.h>
 
@@ -538,7 +538,7 @@ void PathRasterizer8::reset()
 
 err_t PathRasterizer8::init()
 {
-  _allocator.reuse();
+  _allocator.clear();
   _boundingBox.setBox(-1, -1, -1, -1);
 
   _error = ERR_OK;
@@ -579,7 +579,7 @@ _End:
 
 template<typename SrcT>
 static void PathRasterizer8_addPathData(PathRasterizer8* self,
-  const SrcT_(Point)* srcPts, const uint8_t* srcCmd, size_t count)
+  const SrcT_(Point)* srcPts, const uint8_t* srcCmd, size_t count, const SrcT_(Point)& offset)
 {
   if (count == 0)
     return;
@@ -618,8 +618,8 @@ _Start:
     if (PathCmd::isMoveTo(c))
     {
 _MoveTo:
-      x0 = startX0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].x + self->_offsetF.x), 0, self->_size24x8.w);
-      y0 = startY0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].y + self->_offsetF.y), 0, self->_size24x8.h);
+      x0 = startX0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].x + offset.x), 0, self->_size24x8.w);
+      y0 = startY0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].y + offset.y), 0, self->_size24x8.h);
       break;
     }
   }
@@ -636,8 +636,8 @@ _MoveTo:
 
     if (PathCmd::isLineTo(c))
     {
-      Fixed24x8 x1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].x + self->_offsetF.x), 0, self->_size24x8.w);
-      Fixed24x8 y1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].y + self->_offsetF.y), 0, self->_size24x8.h);
+      Fixed24x8 x1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].x + offset.x), 0, self->_size24x8.w);
+      Fixed24x8 y1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].y + offset.y), 0, self->_size24x8.h);
 
       if ((x0 != x1) | (y0 != y1) && !PathRasterizer8_renderLine(self, x0, y0, x1, y1))
         return;
@@ -658,10 +658,10 @@ _MoveTo:
     {
       PointI* curve = curveStack;
 
-      curve[0].x = upscale24x8(srcPts[ 1].x + self->_offsetF.x);
-      curve[0].y = upscale24x8(srcPts[ 1].y + self->_offsetF.y);
-      curve[1].x = upscale24x8(srcPts[ 0].x + self->_offsetF.x);
-      curve[1].y = upscale24x8(srcPts[ 0].y + self->_offsetF.y);
+      curve[0].x = upscale24x8(srcPts[ 1].x + offset.x);
+      curve[0].y = upscale24x8(srcPts[ 1].y + offset.y);
+      curve[1].x = upscale24x8(srcPts[ 0].x + offset.x);
+      curve[1].y = upscale24x8(srcPts[ 0].y + offset.y);
       curve[2].x = x0;
       curve[2].y = y0;
 
@@ -732,12 +732,12 @@ _MoveTo:
       PointI* curve = curveStack;
       PointI* curveEnd = curve + 31 * 3;
 
-      curve[0].x = upscale24x8(srcPts[ 2].x + self->_offsetF.x);
-      curve[0].y = upscale24x8(srcPts[ 2].y + self->_offsetF.y);
-      curve[1].x = upscale24x8(srcPts[ 1].x + self->_offsetF.x);
-      curve[1].y = upscale24x8(srcPts[ 1].y + self->_offsetF.y);
-      curve[2].x = upscale24x8(srcPts[ 0].x + self->_offsetF.x);
-      curve[2].y = upscale24x8(srcPts[ 0].y + self->_offsetF.y);
+      curve[0].x = upscale24x8(srcPts[ 2].x + offset.x);
+      curve[0].y = upscale24x8(srcPts[ 2].y + offset.y);
+      curve[1].x = upscale24x8(srcPts[ 1].x + offset.x);
+      curve[1].y = upscale24x8(srcPts[ 1].y + offset.y);
+      curve[2].x = upscale24x8(srcPts[ 0].x + offset.x);
+      curve[2].y = upscale24x8(srcPts[ 0].y + offset.y);
       curve[3].x = x0;
       curve[3].y = y0;
 
@@ -898,7 +898,16 @@ void PathRasterizer8::addPath(const PathF& path)
   FOG_ASSERT(_isFinalized == false);
   if (_error != ERR_OK) return;
 
-  PathRasterizer8_addPathData<float>(this, path.getVertices(), path.getCommands(), path.getLength());
+  PathRasterizer8_addPathData<float>(this, path.getVertices(), path.getCommands(), path.getLength(), _offsetF);
+}
+
+void PathRasterizer8::addPath(const PathF& path, const PointF& _offset)
+{
+  FOG_ASSERT(_isFinalized == false);
+  if (_error != ERR_OK) return;
+
+  PointF offset = _offset + _offsetF;
+  PathRasterizer8_addPathData<float>(this, path.getVertices(), path.getCommands(), path.getLength(), offset);
 }
 
 void PathRasterizer8::addPath(const PathD& path)
@@ -906,7 +915,16 @@ void PathRasterizer8::addPath(const PathD& path)
   FOG_ASSERT(_isFinalized == false);
   if (_error != ERR_OK) return;
 
-  PathRasterizer8_addPathData<double>(this, path.getVertices(), path.getCommands(), path.getLength());
+  PathRasterizer8_addPathData<double>(this, path.getVertices(), path.getCommands(), path.getLength(), _offsetD);
+}
+
+void PathRasterizer8::addPath(const PathD& path, const PointD& _offset)
+{
+  FOG_ASSERT(_isFinalized == false);
+  if (_error != ERR_OK) return;
+
+  PointD offset = _offset + _offsetD;
+  PathRasterizer8_addPathData<double>(this, path.getVertices(), path.getCommands(), path.getLength(), offset);
 }
 
 // ============================================================================
@@ -925,24 +943,35 @@ static const uint8_t Rasterizer_boxCommands[8] =
   0xFF
 };
 
-template<typename SrcT>
-static void PathRasterizer8_addBox(PathRasterizer8* self, const SrcT_(Box)& box)
+void PathRasterizer8::addBox(const BoxF& box)
 {
-  if (self->_error != ERR_OK) return;
-  FOG_ASSERT(self->_isFinalized == false);
+  if (_error != ERR_OK) return;
+  FOG_ASSERT(_isFinalized == false);
 
-  SrcT_(Point) vertices[5];
-  vertices[0].set(box.x0, box.y0);
-  vertices[1].set(box.x1, box.y0);
-  vertices[2].set(box.x1, box.y1);
-  vertices[3].set(box.x0, box.y1);
-  vertices[4].set(SrcT(0.0), SrcT(0.0));
+  PointF pts[5];
+  pts[0].set(box.x0, box.y0);
+  pts[1].set(box.x1, box.y0);
+  pts[2].set(box.x1, box.y1);
+  pts[3].set(box.x0, box.y1);
+  pts[4].set(0.0f, 0.0f);
 
-  PathRasterizer8_addPathData<SrcT>(self, vertices, Rasterizer_boxCommands, 5);
+  PathRasterizer8_addPathData<float>(this, pts, Rasterizer_boxCommands, 5, _offsetF);
 }
 
-void PathRasterizer8::addBox(const BoxF& box) { PathRasterizer8_addBox<float>(this, box); }
-void PathRasterizer8::addBox(const BoxD& box) { PathRasterizer8_addBox<double>(this, box); }
+void PathRasterizer8::addBox(const BoxD& box)
+{
+  if (_error != ERR_OK) return;
+  FOG_ASSERT(_isFinalized == false);
+
+  PointD pts[5];
+  pts[0].set(box.x0, box.y0);
+  pts[1].set(box.x1, box.y0);
+  pts[2].set(box.x1, box.y1);
+  pts[3].set(box.x0, box.y1);
+  pts[4].set(0.0, 0.0);
+
+  PathRasterizer8_addPathData<double>(this, pts, Rasterizer_boxCommands, 5, _offsetD);
+}
 
 // ============================================================================
 // [Fog::PathRasterizer8 - Render]
@@ -1557,7 +1586,7 @@ static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8
   return cover;
 }
 
-#define RENDER_FETCH_DECLARE() \
+#define RASTER_FETCH_DECLARE() \
   PathRasterizer8::Chunk* chunk; \
   PathRasterizer8::Cell* cPtr; \
   PathRasterizer8::Cell* cEnd; \
@@ -1567,7 +1596,7 @@ static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8
   int area; \
   int cover
 
-#define RENDER_FETCH_BEGIN(_Skip_) \
+#define RASTER_FETCH_BEGIN(_Skip_) \
   scanline->begin(); \
   \
   FOG_ASSERT(chunk != NULL); \
@@ -1577,7 +1606,7 @@ static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8
   xNext = chunk->x0 + xOffset; \
   cover = 0;
 
-#define RENDER_FETCH_CELL() \
+#define RASTER_FETCH_CELL() \
   FOG_MACRO_BEGIN \
     x      = xNext; \
     area   = cPtr->area; \
@@ -1915,7 +1944,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_region(
     // [Declare]
     // ------------------------------------------------------------------------
 
-    RENDER_FETCH_DECLARE();
+    RASTER_FETCH_DECLARE();
     int bandX0;
     int bandX1 = bandCur->x1;
 
@@ -1938,7 +1967,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_region(
     // [Fetch]
     // ------------------------------------------------------------------------
 
-    RENDER_FETCH_BEGIN(_SkipScanline);
+    RASTER_FETCH_BEGIN(_SkipScanline);
 
     // Discard clip-boxes that can't intersect.
     while (bandX1 <= xNext)
@@ -1953,7 +1982,7 @@ _AdvanceClip:
 
     for (;;)
     {
-      RENDER_FETCH_CELL();
+      RASTER_FETCH_CELL();
 
       // ----------------------------------------------------------------------
       // [H-Line]
@@ -1980,7 +2009,7 @@ _AdvanceClip:
 
         for (;;)
         {
-          RENDER_FETCH_CELL();
+          RASTER_FETCH_CELL();
           alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
 
           if (++x == xNext)
@@ -2149,7 +2178,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_mask(
     // [Declare]
     // ------------------------------------------------------------------------
 
-    RENDER_FETCH_DECLARE();
+    RASTER_FETCH_DECLARE();
     const RasterSpan8* mask;                // Mask-span instance.
     int maskX0;                             // Mask-span x0.
     int maskX1;                             // Mask-span x1.
@@ -2177,7 +2206,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_mask(
     // [Fetch]
     // ------------------------------------------------------------------------
 
-    RENDER_FETCH_BEGIN(_SkipScanline);
+    RASTER_FETCH_BEGIN(_SkipScanline);
 
     // ------------------------------------------------------------------------
     // [Clip]
@@ -2217,7 +2246,7 @@ _AdvanceClip:
 _Continue:
     for (;;)
     {
-      RENDER_FETCH_CELL();
+      RASTER_FETCH_CELL();
       FOG_ASSERT(x < maskX1);
 
       // ----------------------------------------------------------------------
@@ -2255,7 +2284,7 @@ _Continue:
 
             for (;;)
             {
-              RENDER_FETCH_CELL();
+              RASTER_FETCH_CELL();
               FOG_ASSERT(x >= maskX0 && x < maskX1);
 
               alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
@@ -2304,7 +2333,7 @@ _Continue:
 
             for (;;)
             {
-              RENDER_FETCH_CELL();
+              RASTER_FETCH_CELL();
               FOG_ASSERT(x >= maskX0 && x < maskX1);
 
               alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
@@ -2339,7 +2368,7 @@ _Continue:
           {
             Face::p32 m;
 
-            Face::p32Load2aNative(m, maskData + x * 2);
+            Face::p32Load2a(m, maskData + x * 2);
             Face::p32MulDiv256SBW(m, m, alpha);
 
             if (m == 0x00)
@@ -2354,11 +2383,11 @@ _Continue:
 
             for (;;)
             {
-              RENDER_FETCH_CELL();
+              RASTER_FETCH_CELL();
               FOG_ASSERT(x >= maskX0 && x < maskX1);
 
               alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-              Face::p32Load2aNative(m, maskData + x * 2);
+              Face::p32Load2a(m, maskData + x * 2);
               Face::p32MulDiv256SBW(m, m, alpha);
 
               if (++x == xNext)
@@ -2390,7 +2419,7 @@ _Continue:
           {
             Face::p32 m;
 
-            Face::p32Load4aNative(m, maskData + x * 4);
+            Face::p32Load4a(m, maskData + x * 4);
             Face::p32MulDiv256PBB_SBW(m, m, alpha);
 
             if (m == 0x00000000)
@@ -2405,11 +2434,11 @@ _Continue:
 
             for (;;)
             {
-              RENDER_FETCH_CELL();
+              RASTER_FETCH_CELL();
               FOG_ASSERT(x >= maskX0 && x < maskX1);
 
               alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-              Face::p32Load4aNative(m, maskData + x * 4);
+              Face::p32Load4a(m, maskData + x * 4);
               Face::p32MulDiv256PBB_SBW(m, m, alpha);
 
               if (++x == xNext)
@@ -2476,7 +2505,7 @@ _Continue:
                 break;
 
               case RASTER_SPAN_AX_EXTRA:
-                Face::p32Load4aNative(m, maskData + x * 2);
+                Face::p32Load4a(m, maskData + x * 2);
 _VLine_AxExtra:
                 Face::p32MulDiv256SBW(m, m, alpha);
 
@@ -2490,7 +2519,7 @@ _VLine_AxExtra:
 
               case RASTER_SPAN_ARGB32_GLYPH:
               case RASTER_SPAN_ARGBXX_GLYPH:
-                Face::p32Load4aNative(m, maskData + x * 4);
+                Face::p32Load4a(m, maskData + x * 4);
                 Face::p32MulDiv256PBB_SBW(m, m, alpha);
 
                 if (m != 0x00000000)
@@ -2553,7 +2582,7 @@ _VLine_AxExtra:
               {
                 // TODO: Rasterizer.
                 /*
-                _g2d_render.mask[MASK_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
+                _api_raster.mask[MASK_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
                   scanline->lnkA8Extra_buf(x, toX),  // Destination.
                   maskData + x,                     // Source A.
                   alpha,                            // Source B.
@@ -2611,7 +2640,7 @@ _VLine_AxExtra:
                   {
                     // TODO: Rasterizer.
                     /*
-                    _g2d_render.mask[MASK_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
+                    _api_raster.mask[MASK_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
                       scanline->lnkA8Extra_buf(maskX0, toX),  // Destination.
                       maskData + maskX0,                     // Source A.
                       alpha,                                 // Source B.
@@ -2674,8 +2703,8 @@ _SkipScanline:
 }
 
 #undef RENDER_VARIABLES
-#undef RENDER_FETCH_ROW
-#undef RENDER_FETCH_CELL
+#undef RASTER_FETCH_ROW
+#undef RASTER_FETCH_CELL
 
 // ============================================================================
 // [Fog::PathRasterizer8 - Finalize]
@@ -2713,9 +2742,9 @@ err_t PathRasterizer8::finalize()
 
   // Setup render method.
   if (self->_fillRule == FILL_RULE_NON_ZERO)
-    self->_render = Rasterizer_api.path8.render_nonzero[self->_opacity != 0x100][self->_clipType]; 
+    self->_render = Rasterizer_api.path8.render_nonzero[self->_opacity != 0x100][self->_clipType];
   else
-    self->_render = Rasterizer_api.path8.render_evenodd[self->_opacity != 0x100][self->_clipType]; 
+    self->_render = Rasterizer_api.path8.render_evenodd[self->_opacity != 0x100][self->_clipType];
   return ERR_OK;
 
 _NotValid:

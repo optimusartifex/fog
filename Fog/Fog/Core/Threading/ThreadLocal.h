@@ -45,7 +45,7 @@ struct FOG_NO_EXPORT ThreadLocal
 
   FOG_INLINE ~ThreadLocal()
   {
-    _api.threadlocal.destroy(_slot);
+    _api.threadlocal_destroy(_slot);
   }
 
   // --------------------------------------------------------------------------
@@ -59,7 +59,7 @@ struct FOG_NO_EXPORT ThreadLocal
 
   FOG_INLINE err_t create(ThreadLocalDestructorFunc dtor = NULL)
   {
-    return _api.threadlocal.create(&_slot, (void*)dtor);
+    return _api.threadlocal_create(&_slot, (void*)dtor);
   }
 
   // --------------------------------------------------------------------------
@@ -68,12 +68,12 @@ struct FOG_NO_EXPORT ThreadLocal
 
   FOG_INLINE void* get() const
   {
-    return _api.threadlocal.get(_slot);
+    return _api.threadlocal_get(_slot);
   }
 
   FOG_INLINE err_t set(void* p)
   {
-    return _api.threadlocal.set(_slot, p);
+    return _api.threadlocal_set(_slot, p);
   }
 
   // --------------------------------------------------------------------------

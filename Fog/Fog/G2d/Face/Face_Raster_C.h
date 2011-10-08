@@ -8,7 +8,7 @@
 #define _FOG_G2D_FACE_FACE_RASTER_C_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_C.h>
+#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
@@ -785,13 +785,14 @@ static FOG_INLINE void p32RGB24QuadFromXRGB32Quad(
 template<int M_INDEX>
 static FOG_INLINE uint32_t p32ARGB32ExtractMaskT(const p32& msk0_0, const p32& msk0_1)
 {
-  switch (M_INDEX)
-  {
-    case 0: return msk0_0 & 0xFFFF;
-    case 1: return msk0_0 >> 16;
-    case 2: return msk0_1 & 0xFFFF;
-    case 3: return msk0_1 >> 16;
-  }
+  if (M_INDEX == 0)
+    return msk0_0 & 0xFFFF;
+  else if (M_INDEX == 1)
+    return msk0_0 >> 16;
+  else if (M_INDEX == 2)
+    return msk0_1 & 0xFFFF;
+  else
+    return msk0_1 >> 16;
 }
 
 template<int M_0, int M_1, int M_2, int M_3>
@@ -1127,13 +1128,13 @@ static FOG_INLINE void p32RGB48Load(
   const uint8_t* src = reinterpret_cast<const uint8_t*>(srcp);
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  p32Load2aNative(db0, src + 0);
-  p32Load2aNative(dg0, src + 2);
-  p32Load2aNative(dr0, src + 4);
+  p32Load2a(db0, src + 0);
+  p32Load2a(dg0, src + 2);
+  p32Load2a(dr0, src + 4);
 #else
-  p32Load2aNative(dr0, src + 0);
-  p32Load2aNative(dg0, src + 2);
-  p32Load2aNative(db0, src + 4);
+  p32Load2a(dr0, src + 0);
+  p32Load2a(dg0, src + 2);
+  p32Load2a(db0, src + 4);
 #endif
 }
 
@@ -1165,13 +1166,13 @@ static FOG_INLINE void p32RGB48Store(
   uint8_t* dst = reinterpret_cast<uint8_t*>(dstp);
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  p32Store2aNative(dst + 0, sb0);
-  p32Store2aNative(dst + 2, sg0);
-  p32Store2aNative(dst + 4, sr0);
+  p32Store2a(dst + 0, sb0);
+  p32Store2a(dst + 2, sg0);
+  p32Store2a(dst + 4, sr0);
 #else
-  p32Store2aNative(dst + 0, sr0);
-  p32Store2aNative(dst + 2, sg0);
-  p32Store2aNative(dst + 4, sb0);
+  p32Store2a(dst + 0, sr0);
+  p32Store2a(dst + 2, sg0);
+  p32Store2a(dst + 4, sb0);
 #endif
 }
 
@@ -1191,13 +1192,13 @@ static FOG_INLINE void p32RGB48StoreFromARGB32(
   gg = ((src0 & 0x0000FF00U) * a0) >> 8;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  p32Store2aNative(dst + 0, rb);
-  p32Store2aNative(dst + 2, gg);
-  p32Store2aNative(dst + 4, rb >> 16);
+  p32Store2a(dst + 0, rb);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb >> 16);
 #else
-  p32Store2aNative(dst + 0, rb >> 16);
-  p32Store2aNative(dst + 2, gg);
-  p32Store2aNative(dst + 4, rb);
+  p32Store2a(dst + 0, rb >> 16);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb);
 #endif
 }
 
@@ -1210,13 +1211,13 @@ static FOG_INLINE void p32RGB48StoreFromXRGB32(
   p32 gg = ((src0 & 0x0000FF00U) * 0x00000101U) >> 8;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  p32Store2aNative(dst + 0, rb);
-  p32Store2aNative(dst + 2, gg);
-  p32Store2aNative(dst + 4, rb >> 16);
+  p32Store2a(dst + 0, rb);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb >> 16);
 #else
-  p32Store2aNative(dst + 0, rb >> 16);
-  p32Store2aNative(dst + 2, gg);
-  p32Store2aNative(dst + 4, rb);
+  p32Store2a(dst + 0, rb >> 16);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb);
 #endif
 }
 

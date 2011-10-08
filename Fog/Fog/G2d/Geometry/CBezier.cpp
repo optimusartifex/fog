@@ -367,7 +367,7 @@ static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, Nu
 
 #define ADD_VERTEX(_X_, _Y_) \
   FOG_MACRO_BEGIN \
-    FOG_ASSERT((size_t)(curVertex - dst._d->vertices) < dst._d->capacity); \
+    FOG_ASSERT((size_t)(curVertex - dst->_d->vertices) < dst->_d->capacity); \
     \
     curVertex->set(_X_, _Y_); \
     curVertex++; \
@@ -376,7 +376,7 @@ static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, Nu
 template<typename NumT>
 static err_t FOG_CDECL CBezierT_flatten(
   const NumT_(Point)* self,
-  NumT_(Path)& dst,
+  NumT_(Path)* dst,
   uint8_t initialCommand,
   NumT flatness)
 {
@@ -390,7 +390,7 @@ static err_t FOG_CDECL CBezierT_flatten(
   NumT x3 = self[3].x;
   NumT y3 = self[3].y;
 
-  size_t initialLength = dst._d->length;
+  size_t initialLength = dst->_d->length;
   size_t level = 0;
 
   NumT_(Point)* curVertex;
@@ -401,16 +401,16 @@ static err_t FOG_CDECL CBezierT_flatten(
 
 _Realloc:
   {
-    size_t pos = dst._add(CUBIC_CURVE_VERTEX_INITIAL_SIZE);
+    size_t pos = dst->_add(CUBIC_CURVE_VERTEX_INITIAL_SIZE);
 
     if (pos == INVALID_INDEX)
     {
       // Purge dst length to it's initial state.
-      if (dst._d->length != initialLength) dst._d->length = initialLength;
+      if (dst->_d->length != initialLength) dst->_d->length = initialLength;
       return ERR_RT_OUT_OF_MEMORY;
     }
 
-    curVertex = dst._d->vertices + pos;
+    curVertex = dst->_d->vertices + pos;
     endVertex = curVertex + CUBIC_CURVE_VERTEX_INITIAL_SIZE - 2;
   }
 
@@ -419,7 +419,7 @@ _Realloc:
     // Realloc if needed.
     if (curVertex >= endVertex)
     {
-      dst._d->length = (size_t)(curVertex - dst._d->vertices);
+      dst->_d->length = (size_t)(curVertex - dst->_d->vertices);
       goto _Realloc;
     }
 
@@ -587,14 +587,14 @@ _Ret:
 
   {
     // Update dst length.
-    size_t length = (size_t)(curVertex - dst._d->vertices);
-    dst._d->length = length;
+    size_t length = (size_t)(curVertex - dst->_d->vertices);
+    dst->_d->length = length;
 
     // Make sure we are not out of bounds.
-    FOG_ASSERT(dst._d->capacity >= length);
+    FOG_ASSERT(dst->_d->capacity >= length);
 
     // Fill initial and MoveTo commands.
-    uint8_t* commands = dst._d->commands + initialLength;
+    uint8_t* commands = dst->_d->commands + initialLength;
     size_t i = length - initialLength;
 
     if (i)
@@ -614,7 +614,7 @@ _Ret:
 
 _InvalidNumber:
   // Purge dst length to its initial state.
-  if (dst._d->length != initialLength) dst._d->length = initialLength;
+  if (dst->_d->length != initialLength) dst->_d->length = initialLength;
   return ERR_GEOMETRY_INVALID;
 }
 
@@ -624,23 +624,23 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void CBezier_init(void)
 {
-  _api.cbezierf.getBoundingBox = CBezierT_getBoundingBox<float>;
-  _api.cbezierd.getBoundingBox = CBezierT_getBoundingBox<double>;
+  _api.cbezierf_getBoundingBox = CBezierT_getBoundingBox<float>;
+  _api.cbezierd_getBoundingBox = CBezierT_getBoundingBox<double>;
 
-  _api.cbezierf.getSplineBBox = CBezierT_getSplineBBox<float>;
-  _api.cbezierd.getSplineBBox = CBezierT_getSplineBBox<double>;
+  _api.cbezierf_getSplineBBox = CBezierT_getSplineBBox<float>;
+  _api.cbezierd_getSplineBBox = CBezierT_getSplineBBox<double>;
 
-  _api.cbezierf.getLength = CBezierT_getLength<float>;
-  _api.cbezierd.getLength = CBezierT_getLength<double>;
+  _api.cbezierf_getLength = CBezierT_getLength<float>;
+  _api.cbezierd_getLength = CBezierT_getLength<double>;
 
-  _api.cbezierf.getInflectionPoints = CBezierT_getInflectionPoints<float>;
-  _api.cbezierd.getInflectionPoints = CBezierT_getInflectionPoints<double>;
+  _api.cbezierf_getInflectionPoints = CBezierT_getInflectionPoints<float>;
+  _api.cbezierd_getInflectionPoints = CBezierT_getInflectionPoints<double>;
 
-  _api.cbezierf.simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
-  _api.cbezierd.simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
+  _api.cbezierf_simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
+  _api.cbezierd_simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
 
-  _api.cbezierf.flatten = CBezierT_flatten<float>;
-  _api.cbezierd.flatten = CBezierT_flatten<double>;
+  _api.cbezierf_flatten = CBezierT_flatten<float>;
+  _api.cbezierd_flatten = CBezierT_flatten<double>;
 }
 
 } // Fog namespace

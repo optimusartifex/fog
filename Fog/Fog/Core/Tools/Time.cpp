@@ -340,11 +340,11 @@ static time_t FOG_CDECL Time_toTimeT(int64_t us)
 
 FOG_NO_EXPORT void Time_init(void)
 {
-  _api.time.now = Time_now;
-  _api.time.fromTimeT = Time_fromTimeT;
-  _api.time.toTimeT = Time_toTimeT;
+  _api.time_now = Time_now;
+  _api.time_fromTimeT = Time_fromTimeT;
+  _api.time_toTimeT = Time_toTimeT;
 
-  _api.timeticks.now = TimeTicks_now;
+  _api.timeticks_now = TimeTicks_now;
 
 #if defined(FOG_OS_WINDOWS)
   Time_global.init();

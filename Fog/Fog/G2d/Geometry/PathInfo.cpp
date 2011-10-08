@@ -11,7 +11,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Private.h>
-#include <Fog/Core/Memory/ZoneAllocator_p.h>
+#include <Fog/Core/Memory/MemZoneAllocator.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/QBezier.h>
@@ -81,7 +81,7 @@ static NumT_(PathInfo)* FOG_CDECL PathInfoT_generate(const NumT_(Path)* path)
     return NULL;
 
   NumT_(PathInfo)* info = NULL;
-  ZoneAllocatorT<16 * sizeof(NumT_(PathInfoFigureItem))> allocator(4000);
+  MemZoneAllocatorTmp<16 * sizeof(NumT_(PathInfoFigureItem))> allocator(4000);
 
   NumT_(PathInfoFigureItem)* firstFigure = NULL;
   NumT_(PathInfoFigureItem)* currentFigure = NULL;
@@ -373,8 +373,8 @@ _Invalid:
 
 FOG_NO_EXPORT void PathInfo_init(void)
 {
-  _api.pathinfof.generate = PathInfoT_generate<float>;
-  _api.pathinfod.generate = PathInfoT_generate<double>;
+  _api.pathinfof_generate = PathInfoT_generate<float>;
+  _api.pathinfod_generate = PathInfoT_generate<double>;
 }
 
 } // Fog namespace

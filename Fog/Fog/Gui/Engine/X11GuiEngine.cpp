@@ -1635,7 +1635,7 @@ _XKeyPressNoXIC:
   }
 }
 
-// Tell the active window manager that we want to move our window to a specific 
+// Tell the active window manager that we want to move our window to a specific
 // position (or the window manager will discard it and use own calculation).
 void X11GuiWindow::setMoveableHints()
 {

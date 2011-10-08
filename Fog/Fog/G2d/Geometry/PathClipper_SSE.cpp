@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/Face_SSE.h>
+#include <Fog/Core/Face/FaceSSE.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
@@ -208,7 +208,7 @@ _Invalid:
 
 FOG_NO_EXPORT void PathClipper_init_SSE(void)
 {
-  _api.pathclipperf.measurePath = PathClipperF_measurePath_SSE;
+  _api.pathclipperf_measurePath = PathClipperF_measurePath_SSE;
 }
 
 } // Fog namespace

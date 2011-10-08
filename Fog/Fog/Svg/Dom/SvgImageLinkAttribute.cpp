@@ -9,6 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Svg/Dom/SvgElement.h>

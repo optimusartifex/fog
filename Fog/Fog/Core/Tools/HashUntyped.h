@@ -99,9 +99,9 @@ struct FOG_NO_EXPORT HashUntypedData
 
   // ${VAR:BEGIN}
   //
-  // This data-object is binary compatible to the VarData header in the second
+  // This data-object is binary compatible with the VarData header in the second
   // form called - "implicitly shared container". The members must be binary
-  // compatible to the header below:
+  // compatible with the header below:
   //
   // +==============+============+============================================+
   // | Size         | Name       | Description / Purpose                      |
@@ -132,13 +132,13 @@ struct FOG_NO_EXPORT HashUntypedData
   // |                           | Hash<StringW, Var>, or Var.                |
   // +---------------------------+--------------------------------------------+
   // | HASH_STRINGA_STRINGA      | Hash<StringA, StringA>, typed list         |
-  // |                           | compatible to Hash<StringA, Var> and Var.  |
+  // |                           | compatible with Hash<StringA, Var> and Var.|
   // +---------------------------+--------------------------------------------+
   // | HASH_STRINGA_VAR          | Hash<StringA, Var>, typed list compatible  |
   // |                           | to Var.                                    |
   // +---------------------------+--------------------------------------------+
   // | HASH_STRINGW_STRINGW      | Hash<StringW, StringW>, typed list         |
-  // |                           | compatible to Hash<StringW, Var> and Var.  |
+  // |                           | compatible with Hash<StringW, Var> and Var.|
   // +---------------------------+--------------------------------------------+
   // | HASH_STRINGW_VAR          | Hash<StringW, Var>, typed list compatible  |
   // |                           | to Var.                                    |
@@ -162,7 +162,7 @@ struct FOG_NO_EXPORT HashUntypedData
   //! @brief Length.
   size_t length;
 
-  //! @brief Count of buckets we will expand to if length becomes greater than 
+  //! @brief Count of buckets we will expand to if length becomes greater than
   //! @c _expandLength.
   size_t expandCapacity;
   //! @brief Count of nodes to grow.

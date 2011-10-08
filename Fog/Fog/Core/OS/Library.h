@@ -36,7 +36,7 @@ struct FOG_NO_EXPORT LibraryData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.library.dFree(this);
+      _api.library_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -63,17 +63,17 @@ struct FOG_NO_EXPORT Library
 
   FOG_INLINE Library()
   {
-    _api.library.ctor(this);
+    _api.library_ctor(this);
   }
 
   FOG_INLINE Library(const Library& other)
   {
-    _api.library.ctorCopy(this, &other);
+    _api.library_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Library()
   {
-    _api.library.dtor(this);
+    _api.library_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -103,17 +103,17 @@ struct FOG_NO_EXPORT Library
 
   FOG_INLINE err_t openLibrary(const StringW& fileName, uint32_t flags = LIBRARY_OPEN_DEFAULT)
   {
-    return _api.library.openLibrary(this, &fileName, flags);
+    return _api.library_openLibrary(this, &fileName, flags);
   }
 
   FOG_INLINE err_t openPlugin(const StringW& category, const StringW& name)
   {
-    return _api.library.openPlugin(this, &category, &name);
+    return _api.library_openPlugin(this, &category, &name);
   }
 
   FOG_INLINE void close()
   {
-    _api.library.close(this);
+    _api.library_close(this);
   }
 
   // --------------------------------------------------------------------------
@@ -132,18 +132,18 @@ struct FOG_NO_EXPORT Library
   FOG_INLINE void* getSymbol(const char* sym)
   {
     StubA symA(sym, DETECT_LENGTH);
-    return _api.library.getSymbolStubA(this, &symA);
+    return _api.library_getSymbolStubA(this, &symA);
   }
 
   FOG_INLINE void* getSymbol(const Ascii8& sym)
   {
-    return _api.library.getSymbolStubA(this, &sym);
+    return _api.library_getSymbolStubA(this, &sym);
   }
 
   //! @overload
   FOG_INLINE void* getSymbol(const StringW& sym)
   {
-    return _api.library.getSymbolStringW(this, &sym);
+    return _api.library_getSymbolStringW(this, &sym);
   }
 
   //! @brief Loads more symbols at the time.
@@ -162,7 +162,7 @@ struct FOG_NO_EXPORT Library
   //! symbol name that wasn't loaded.
   FOG_INLINE size_t getSymbols(void** target, const char* symbols, size_t symbolsLength, size_t symbolsCount, char** fail = NULL)
   {
-    return _api.library.getSymbols(this, target, symbols, symbolsLength, symbolsCount, fail);
+    return _api.library_getSymbols(this, target, symbols, symbolsLength, symbolsCount, fail);
   }
 
   // --------------------------------------------------------------------------
@@ -171,7 +171,7 @@ struct FOG_NO_EXPORT Library
 
   FOG_INLINE Library& operator=(const Library& other)
   {
-    _api.library.setLibrary(this, &other);
+    _api.library_setLibrary(this, &other);
     return *this;
   }
 
@@ -185,37 +185,37 @@ struct FOG_NO_EXPORT Library
   static FOG_INLINE StringW getSystemPrefix()
   {
     StringW result;
-    _api.library.getSystemPrefix(&result);
+    _api.library_getSystemPrefix(&result);
     return result;
   }
 
   static FOG_INLINE List<StringW> getSystemExtensions()
   {
     List<StringW> result;
-    _api.library.getSystemExtensions(&result);
+    _api.library_getSystemExtensions(&result);
     return result;
   }
 
   static FOG_INLINE List<StringW> getLibraryPaths()
   {
     List<StringW> result;
-    _api.library.getLibraryPaths(&result);
+    _api.library_getLibraryPaths(&result);
     return result;
   }
 
   static FOG_INLINE err_t addLibraryPath(const StringW& path, uint32_t mode = LIBRARY_PATH_APPEND)
   {
-    return _api.library.addLibraryPath(&path, mode);
+    return _api.library_addLibraryPath(&path, mode);
   }
 
   static FOG_INLINE err_t removeLibraryPath(const StringW& path)
   {
-    return _api.library.removeLibraryPath(&path);
+    return _api.library_removeLibraryPath(&path);
   }
 
   static FOG_INLINE bool hasLibraryPath(const StringW& path)
   {
-    return _api.library.hasLibraryPath(&path);
+    return _api.library_hasLibraryPath(&path);
   }
 
   // --------------------------------------------------------------------------

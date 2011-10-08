@@ -257,12 +257,12 @@ struct FOG_NO_EXPORT TextCodec
 
   FOG_INLINE TextCodec()
   {
-    _api.textcodec.ctor(this);
+    _api.textcodec_ctor(this);
   }
 
   FOG_INLINE TextCodec(const TextCodec& other)
   {
-    _api.textcodec.ctorCopy(this, &other);
+    _api.textcodec_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE TextCodec(TextCodecData* d) : _d(d)
@@ -271,7 +271,7 @@ struct FOG_NO_EXPORT TextCodec
 
   FOG_INLINE ~TextCodec()
   {
-    _api.textcodec.dtor(this);
+    _api.textcodec_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -308,28 +308,28 @@ struct FOG_NO_EXPORT TextCodec
 
   FOG_INLINE err_t createFromCode(uint32_t code)
   {
-    return _api.textcodec.createFromCode(this, code);
+    return _api.textcodec_createFromCode(this, code);
   }
 
   FOG_INLINE err_t createFromMime(const char* mime)
   {
     StubA stub(mime);
-    return _api.textcodec.createFromMimeStubA(this, &stub);
+    return _api.textcodec_createFromMimeStubA(this, &stub);
   }
 
   FOG_INLINE err_t createFromMime(const Ascii8& mime)
   {
-    return _api.textcodec.createFromMimeStubA(this, &mime);
+    return _api.textcodec_createFromMimeStubA(this, &mime);
   }
 
   FOG_INLINE err_t createFromMime(const StringW& mime)
   {
-    return _api.textcodec.createFromMimeStringW(this, &mime);
+    return _api.textcodec_createFromMimeStringW(this, &mime);
   }
 
   FOG_INLINE err_t createFromBom(const void* data, size_t length)
   {
-    return _api.textcodec.createFromBom(this, data, length);
+    return _api.textcodec_createFromBom(this, data, length);
   }
 
   // --------------------------------------------------------------------------
@@ -338,7 +338,7 @@ struct FOG_NO_EXPORT TextCodec
 
   FOG_INLINE void reset()
   {
-    _api.textcodec.reset(this);
+    _api.textcodec_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -348,25 +348,25 @@ struct FOG_NO_EXPORT TextCodec
   FOG_INLINE err_t encode(StringA& dst, const StubW& src, TextCodecState* state = NULL,
     TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.textcodec.encodeStubW(this, &dst, &src, state, handler, cntOp);
+    return _api.textcodec_encodeStubW(this, &dst, &src, state, handler, cntOp);
   }
 
   FOG_INLINE err_t encode(StringA& dst, const StringW& src, TextCodecState* state = NULL,
     TextCodecHandler* handler = NULL, uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.textcodec.encodeStringW(this, &dst, &src, state, handler, cntOp);
+    return _api.textcodec_encodeStringW(this, &dst, &src, state, handler, cntOp);
   }
 
   FOG_INLINE err_t decode(StringW& dst, const StubA& src, TextCodecState* state = NULL,
     uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.textcodec.decodeStubA(this, &dst, &src, state, cntOp);
+    return _api.textcodec_decodeStubA(this, &dst, &src, state, cntOp);
   }
 
   FOG_INLINE err_t decode(StringW& dst, const StringA& src, TextCodecState* state = NULL,
     uint32_t cntOp = CONTAINER_OP_REPLACE) const
   {
-    return _api.textcodec.decodeStringA(this, &dst, &src, state, cntOp);
+    return _api.textcodec_decodeStringA(this, &dst, &src, state, cntOp);
   }
 
   // --------------------------------------------------------------------------
@@ -375,7 +375,7 @@ struct FOG_NO_EXPORT TextCodec
 
   FOG_INLINE TextCodec& operator=(const TextCodec& other)
   {
-    _api.textcodec.copy(this, &other);
+    _api.textcodec_copy(this, &other);
     return *this;
   }
 
@@ -383,12 +383,12 @@ struct FOG_NO_EXPORT TextCodec
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const TextCodec& ascii8() { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_ASCII]; }
-  static FOG_INLINE const TextCodec& local8() { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_LOCAL]; }
-  static FOG_INLINE const TextCodec& utf8()   { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_UTF8 ]; }
-  static FOG_INLINE const TextCodec& utf16()  { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_UTF16]; }
-  static FOG_INLINE const TextCodec& utf32()  { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_UTF32]; }
-  static FOG_INLINE const TextCodec& localW() { return *_api.textcodec.oCache[TEXT_CODEC_CACHE_WCHAR]; }
+  static FOG_INLINE const TextCodec& ascii8() { return *_api.textcodec_oCache[TEXT_CODEC_CACHE_ASCII]; }
+  static FOG_INLINE const TextCodec& local8() { return *_api.textcodec_oCache[TEXT_CODEC_CACHE_LOCAL]; }
+  static FOG_INLINE const TextCodec& utf8()   { return *_api.textcodec_oCache[TEXT_CODEC_CACHE_UTF8 ]; }
+  static FOG_INLINE const TextCodec& utf16()  { return *_api.textcodec_oCache[TEXT_CODEC_CACHE_UTF16]; }
+  static FOG_INLINE const TextCodec& utf32()  { return *_api.textcodec_oCache[TEXT_CODEC_CACHE_UTF32]; }
+  static FOG_INLINE const TextCodec& localW() { return *_api.textcodec_oCache[TEXT_CODEC_CACHE_WCHAR]; }
 
   // --------------------------------------------------------------------------
   // [Members]

@@ -444,7 +444,7 @@ struct FOG_API Object
   //! Called by @ref Object or @ref Widget destructors. Children are deleted
   //! from last to first (the backward direction as they was added into).
   //!
-  //! @note All Objects inside that has flag @ref VAR_FLAG_STATIC are removed 
+  //! @note All Objects inside that has flag @ref VAR_FLAG_STATIC are removed
   //! from the hierarchy using the @c _removeChild() method, but not deleted.
   err_t _deleteChildren();
 

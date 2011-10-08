@@ -39,11 +39,11 @@
 #include <X11/keysymdef.h>
 #include <X11/Xpoll.h>
 
-// We need XShm extension to speedup our blits to top level windows.
+// XShm extension to speedup blits on top level windows.
 #include <X11/extensions/XShm.h>
-// We need XRender extension?
+// XRender extension.
 #include <X11/extensions/Xrender.h>
-// We need shape extension to enable non-rectangular windows.
+// Shape extension for non-rectangular (XRegion) windows.
 #include <X11/extensions/shape.h>
 
 #undef Atom

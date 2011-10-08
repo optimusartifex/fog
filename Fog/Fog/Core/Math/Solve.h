@@ -54,25 +54,25 @@ namespace Math {
 static FOG_INLINE int solve(float* dst, const float* func, uint32_t type)
 {
   FOG_ASSERT(type < MATH_SOLVE_COUNT);
-  return _api.mathf.solve[type](dst, func);
+  return _api.mathf_solve[type](dst, func);
 }
 
 //! @overload
 static FOG_INLINE int solve(double* dst, const double* func, uint32_t type)
 {
-  return _api.mathd.solve[type](dst, func);
+  return _api.mathd_solve[type](dst, func);
 }
 
 static FOG_INLINE int solve(float* dst, const float* func, uint32_t type, const IntervalF& interval)
 {
   FOG_ASSERT(type < MATH_SOLVE_COUNT);
-  return _api.mathf.solveAt[type](dst, func, &interval);
+  return _api.mathf_solveAt[type](dst, func, &interval);
 }
 
 //! @overload
 static FOG_INLINE int solve(double* dst, const double* func, uint32_t type, const IntervalD& interval)
 {
-  return _api.mathd.solveAt[type](dst, func, &interval);
+  return _api.mathd_solveAt[type](dst, func, &interval);
 }
 
 //! @}

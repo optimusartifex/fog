@@ -15,8 +15,8 @@
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
-#include <Fog/G2d/Render/RenderApi_p.h>
-#include <Fog/G2d/Render/RenderConstants_p.h>
+#include <Fog/G2d/Painting/RasterApi_p.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
 
 namespace Fog {
 
@@ -59,7 +59,7 @@ static err_t FOG_CDECL ImagePalette_detach(ImagePalette* self)
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  ImagePaletteData* newd = _api.imagepalette.dCreate();
+  ImagePaletteData* newd = _api.imagepalette_dCreate();
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -81,7 +81,7 @@ static err_t FOG_CDECL ImagePalette_setDeep(ImagePalette* self, const ImagePalet
 
   if (d->reference.get() > 1)
   {
-    ImagePaletteData* newd = _api.imagepalette.dCreate();
+    ImagePaletteData* newd = _api.imagepalette_dCreate();
 
     if (FOG_IS_NULL(newd))
       return ERR_RT_OUT_OF_MEMORY;
@@ -116,7 +116,7 @@ static err_t FOG_CDECL ImagePalette_setData(ImagePalette* self, const Range* ran
   ImagePaletteData* d = self->_d;
   if (d->reference.get() > 1)
   {
-    ImagePaletteData* newd = _api.imagepalette.dCreate();
+    ImagePaletteData* newd = _api.imagepalette_dCreate();
 
     if (FOG_IS_NULL(newd))
       return ERR_RT_OUT_OF_MEMORY;
@@ -129,7 +129,7 @@ static err_t FOG_CDECL ImagePalette_setData(ImagePalette* self, const Range* ran
 
   d->length = Math::max<uint32_t>(d->length, (uint32_t)rEnd);
 
-  _g2d_render.get_FuncsCompositeCore(IMAGE_FORMAT_XRGB32, COMPOSITE_SRC)->vblit_line[IMAGE_FORMAT_PRGB32](
+  _api_raster.getCompositeCore(IMAGE_FORMAT_XRGB32, COMPOSITE_SRC)->vblit_line[IMAGE_FORMAT_PRGB32](
     reinterpret_cast<uint8_t*>(d->data + rStart),
     reinterpret_cast<const uint8_t*>(data), (uint)rLen, NULL);
 
@@ -149,7 +149,7 @@ static err_t FOG_CDECL ImagePalette_setLength(ImagePalette* self, size_t length)
 
   if (d->reference.get() > 1)
   {
-    FOG_RETURN_ON_ERROR(_api.imagepalette.detach(self));
+    FOG_RETURN_ON_ERROR(_api.imagepalette_detach(self));
     d = self->_d;
   }
 
@@ -273,7 +273,7 @@ static ImagePaletteData* FOG_CDECL ImagePalette_dCreateGreyscale(uint32_t length
   if (length == 256)
     return ImagePalette_dGreyscale->addRef();
 
-  ImagePaletteData* d = _api.imagepalette.dCreate();
+  ImagePaletteData* d = _api.imagepalette_dCreate();
   if (FOG_IS_NULL(d))
     return ImagePalette_dEmpty->addRef();
 
@@ -304,7 +304,7 @@ static ImagePaletteData* FOG_CDECL ImagePalette_dCreateColorCube(uint32_t r, uin
   if (r <= 1 || g <= 1 || b <= 1)
     return ImagePalette_dEmpty->addRef();
 
-  ImagePaletteData* d = _api.imagepalette.dCreate();
+  ImagePaletteData* d = _api.imagepalette_dCreate();
   if (FOG_IS_NULL(d))
     return ImagePalette_dEmpty->addRef();
 
@@ -372,24 +372,24 @@ FOG_NO_EXPORT void ImagePalette_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.imagepalette.ctor = ImagePalette_ctor;
-  _api.imagepalette.ctorCopy = ImagePalette_ctorCopy;
-  _api.imagepalette.dtor = ImagePalette_dtor;
-  _api.imagepalette.detach = ImagePalette_detach;
-  _api.imagepalette.setData = ImagePalette_setData;
-  _api.imagepalette.setDeep = ImagePalette_setDeep;
-  _api.imagepalette.setLength = ImagePalette_setLength;
-  _api.imagepalette.clear = ImagePalette_clear;
-  _api.imagepalette.reset = ImagePalette_reset;
-  _api.imagepalette.copy = ImagePalette_copy;
-  _api.imagepalette.eq = ImagePalette_eq;
+  _api.imagepalette_ctor = ImagePalette_ctor;
+  _api.imagepalette_ctorCopy = ImagePalette_ctorCopy;
+  _api.imagepalette_dtor = ImagePalette_dtor;
+  _api.imagepalette_detach = ImagePalette_detach;
+  _api.imagepalette_setData = ImagePalette_setData;
+  _api.imagepalette_setDeep = ImagePalette_setDeep;
+  _api.imagepalette_setLength = ImagePalette_setLength;
+  _api.imagepalette_clear = ImagePalette_clear;
+  _api.imagepalette_reset = ImagePalette_reset;
+  _api.imagepalette_copy = ImagePalette_copy;
+  _api.imagepalette_eq = ImagePalette_eq;
 
-  _api.imagepalette.dCreate = ImagePalette_dCreate;
-  _api.imagepalette.dCreateGreyscale = ImagePalette_dCreateGreyscale;
-  _api.imagepalette.dCreateColorCube = ImagePalette_dCreateColorCube;
-  _api.imagepalette.dFree = ImagePalette_dFree;
+  _api.imagepalette_dCreate = ImagePalette_dCreate;
+  _api.imagepalette_dCreateGreyscale = ImagePalette_dCreateGreyscale;
+  _api.imagepalette_dCreateColorCube = ImagePalette_dCreateColorCube;
+  _api.imagepalette_dFree = ImagePalette_dFree;
 
-  _api.imagepalette.isGreyscale = ImagePalette_isGreyscale;
+  _api.imagepalette_isGreyscale = ImagePalette_isGreyscale;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -406,6 +406,8 @@ FOG_NO_EXPORT void ImagePalette_init(void)
 
   for (i = 0, c0 = 0xFF000000; i < 256; i++)
     d->data[i] = c0;
+
+  _api.imagepalette_oEmpty = ImagePalette_oEmpty.initCustom1(d);
 
   d = &ImagePalette_dGreyscale;
   d->reference.init(1);

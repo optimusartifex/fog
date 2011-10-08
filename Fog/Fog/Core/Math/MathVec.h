@@ -25,12 +25,12 @@ namespace Math {
 
 static FOG_INLINE void vFloatFromDouble(float* dst, const double* src, size_t length)
 {
-  _api.mathf.vecFloatFromDouble(dst, src, length);
+  _api.mathf_vecFloatFromDouble(dst, src, length);
 }
 
 static FOG_INLINE void vDoubleFromFloat(double* dst, const float* src, size_t length)
 {
-  _api.mathd.vecDoubleFromFloat(dst, src, length);
+  _api.mathd_vecDoubleFromFloat(dst, src, length);
 }
 
 template<typename DstNumber, typename SrcNumber>
@@ -43,13 +43,13 @@ static FOG_INLINE void vConvertFloat(DstNumber* dst, const SrcNumber* src, size_
 template<>
 FOG_INLINE void vConvertFloat<double, float>(double* dst, const float* src, size_t length)
 {
-  _api.mathd.vecDoubleFromFloat(dst, src, length);
+  _api.mathd_vecDoubleFromFloat(dst, src, length);
 }
 
 template<>
 FOG_INLINE void vConvertFloat<float, double>(float* dst, const double* src, size_t length)
 {
-  _api.mathf.vecFloatFromDouble(dst, src, length);
+  _api.mathf_vecFloatFromDouble(dst, src, length);
 }
 
 //! @}

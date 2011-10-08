@@ -5,25 +5,24 @@
 
 #include <Fog/Core/Face/Face_MMX.h>
 #include <Fog/Core/Face/Face_3dNow.h>
+#include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Global/Constants.h>
-#include <Fog/G2d/Global/Init_G2d_p.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Transform - MapPoint(s)]
+// [Fog::Transform - MapPoints]
 // ============================================================================
 
-static void FOG_CDECL G2d_TransformF_mapPointsF_Translation_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Translation_3dNow(const TransformF* self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
   __m64 m_20_21;
 
-  Face::m64fLoad8(m_20_21, &self._20);
+  Face::m64fLoad8(m_20_21, &self->_20);
 
   for (i = length >> 2; i; i--, dst += 4, src += 4)
   {
@@ -57,15 +56,15 @@ static void FOG_CDECL G2d_TransformF_mapPointsF_Translation_3dNow(const Transfor
   Face::m64fEMMS();
 }
 
-static void FOG_CDECL G2d_TransformF_mapPointsF_Scaling_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Scaling_3dNow(const TransformF* self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
   __m64 m_00_11;
   __m64 m_20_21;
 
-  Face::m64fLoad8(m_00_11, &self._00, &self._11);
-  Face::m64fLoad8(m_20_21, &self._20);
+  Face::m64fLoad8(m_00_11, &self->_00, &self->_11);
+  Face::m64fLoad8(m_20_21, &self->_20);
 
   for (i = length >> 2; i; i--, dst += 4, src += 4)
   {
@@ -105,7 +104,7 @@ static void FOG_CDECL G2d_TransformF_mapPointsF_Scaling_3dNow(const TransformF& 
   Face::m64fEMMS();
 }
 
-static void FOG_CDECL G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& self, PointF* dst, const PointF* src, size_t length)
+static void FOG_CDECL TransformF_mapPointsF_Affine_3dNow(const TransformF* self, PointF* dst, const PointF* src, size_t length)
 {
   size_t i;
 
@@ -113,9 +112,9 @@ static void FOG_CDECL G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& s
   __m64 m_10_01;
   __m64 m_20_21;
 
-  Face::m64fLoad8(m_00_11, &self._00, &self._11);
-  Face::m64fLoad8(m_10_01, &self._10, &self._01);
-  Face::m64fLoad8(m_20_21, &self._20);
+  Face::m64fLoad8(m_00_11, &self->_00, &self->_11);
+  Face::m64fLoad8(m_10_01, &self->_10, &self->_01);
+  Face::m64fLoad8(m_20_21, &self->_20);
 
   for (i = length >> 2; i; i--, dst += 4, src += 4)
   {
@@ -188,10 +187,10 @@ static void FOG_CDECL G2d_TransformF_mapPointsF_Affine_3dNow(const TransformF& s
 
 FOG_NO_EXPORT void Transform_init_3dNow(void)
 {
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _G2d_TransformF_mapPointsF_Translation_3dNow;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_SCALING    ] = _G2d_TransformF_mapPointsF_Scaling_3dNow;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_ROTATION   ] = _G2d_TransformF_mapPointsF_Affine_3dNow;
-  _g2d.transformf.mapPointsF[TRANSFORM_TYPE_AFFINE     ] = _G2d_TransformF_mapPointsF_Affine_3dNow;
+  _api.transformf_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = _TransformF_mapPointsF_Translation_3dNow;
+  _api.transformf_mapPointsF[TRANSFORM_TYPE_SCALING    ] = _TransformF_mapPointsF_Scaling_3dNow;
+  _api.transformf_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = _TransformF_mapPointsF_Affine_3dNow;
+  _api.transformf_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = _TransformF_mapPointsF_Affine_3dNow;
 }
 
 } // Fog namespace

@@ -219,16 +219,16 @@ static HashUntypedData* Hash_Unknown_Unknown_getDEmptyForType(uint32_t vType)
   {
     case VAR_TYPE_UNKNOWN:
       return &Hash_Unknown_Unknown_dEmpty;
-    
+
     case VAR_TYPE_HASH_STRINGA_STRINGA:
       return &Hash_StringA_StringA_dEmpty;
-    
+
     case VAR_TYPE_HASH_STRINGA_VAR:
       return &Hash_StringA_Var_dEmpty;
-    
+
     case VAR_TYPE_HASH_STRINGW_STRINGW:
       return &Hash_StringW_StringW_dEmpty;
-    
+
     case VAR_TYPE_HASH_STRINGW_VAR:
       return &Hash_StringW_Var_dEmpty;
 
@@ -256,7 +256,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_dtor(HashUntyped* self, const HashUnt
   HashUntypedData* d = self->_d;
 
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, v);
+    _api.hash_unknown_unknown_dFree(d, v);
 }
 
 // ============================================================================
@@ -271,7 +271,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
   size_t oldCapacity = d->capacity;
   size_t newCapacity = capacity;
 
-  HashUntypedData* newd = _api.hash.unknown_unknown.dCreate(newCapacity);
+  HashUntypedData* newd = _api.hash_unknown_unknown_dCreate(newCapacity);
   if (FOG_IS_NULL(newd))
   {
     return ERR_RT_OUT_OF_MEMORY;
@@ -282,7 +282,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
 
   if (FOG_IS_ERROR(err))
   {
-    _api.hash.unknown_unknown.dFree(newd, v);
+    _api.hash_unknown_unknown_dFree(newd, v);
     return err;
   }
 
@@ -321,7 +321,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
           // We preallocated all nodes, it's not possible to get NULL here.
           FOG_ASSERT(nNode != NULL);
 
-          *nPrev = v->ctor(nNode, reinterpret_cast<uint8_t*>(oNode) + idxKey, 
+          *nPrev = v->ctor(nNode, reinterpret_cast<uint8_t*>(oNode) + idxKey,
                                   reinterpret_cast<uint8_t*>(oNode) + idxItem);
           nPrev = &nNode->next;
         }
@@ -354,7 +354,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
           // We preallocated all nodes, it's not possible to get NULL here.
           FOG_ASSERT(nNode != NULL);
 
-          v->ctor(nNode, reinterpret_cast<uint8_t*>(oNode) + idxKey, 
+          v->ctor(nNode, reinterpret_cast<uint8_t*>(oNode) + idxKey,
                          reinterpret_cast<uint8_t*>(oNode) + idxItem);
 
           nNode->next = *nPrev;
@@ -369,7 +369,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
 #if defined(FOG_DEBUG)
   if (exclude != NULL)
   {
-    FOG_ASSERT_X(excluded, 
+    FOG_ASSERT_X(excluded,
       "Fog::Hash<?, ?::rehashExclude() - Exclude node specified, but not found.");
   }
 #endif // FOG_DEBUG
@@ -378,7 +378,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
 
   d = atomicPtrXchg(&self->_d, newd);
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, v);
+    _api.hash_unknown_unknown_dFree(d, v);
 
   return ERR_OK;
 }
@@ -408,7 +408,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_reserve(HashUntyped* self, const Has
   capacity = Hash_getClosestPrime(capacity);
 
   if (d->reference.get() != 1 || d->capacity < capacity)
-    return _api.hash.unknown_unknown.rehash(self, v, capacity);
+    return _api.hash_unknown_unknown_rehash(self, v, capacity);
   else
     return ERR_OK;
 }
@@ -419,7 +419,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_squeeze(HashUntyped* self, const Hash
   size_t optimal = Hash_getClosestPrime(d->length);
 
   if (optimal < d->capacity)
-    _api.hash.unknown_unknown.rehash(self, v, optimal);
+    _api.hash_unknown_unknown_rehash(self, v, optimal);
 }
 
 // ============================================================================
@@ -434,7 +434,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_clear(HashUntyped* self, const HashUn
 
   if (d->reference.get() != 1)
   {
-    _api.hash.unknown_unknown.reset(self, v);
+    _api.hash_unknown_unknown_reset(self, v);
     return;
   }
 
@@ -466,9 +466,9 @@ static void FOG_CDECL Hash_Unknown_Unknown_reset(HashUntyped* self, const HashUn
 {
   HashUntypedData* d = atomicPtrXchg(&self->_d,
     Hash_Unknown_Unknown_getDEmptyForType(self->_d->vType & VAR_TYPE_MASK)->addRef());
-  
+
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, v);
+    _api.hash_unknown_unknown_dFree(d, v);
 }
 
 // ============================================================================
@@ -538,7 +538,7 @@ _Match:
   if (d->reference.get() == 1)
     return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
 
-  if (_api.hash.unknown_unknown.detach(self, v) != ERR_OK)
+  if (_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
     return NULL;
 
   d = self->_d;
@@ -554,12 +554,12 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_put(HashUntyped* self, const HashUnt
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash.unknown_unknown.reserve(self, v, Hash_primeTable[0]));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, Hash_primeTable[0]));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.hash.unknown_unknown.detach(self, v));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_detach(self, v));
     d = self->_d;
   }
 
@@ -591,7 +591,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_put(HashUntyped* self, const HashUnt
   *pPrev = node;
 
   if (++d->length >= d->expandLength)
-    _api.hash.unknown_unknown.rehash(self, v, d->expandCapacity);
+    _api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
   return ERR_OK;
 
 _Match:
@@ -651,7 +651,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_copy(HashUntyped* self, const HashUnt
 {
   HashUntypedData* d = atomicPtrXchg(&self->_d, other->_d->addRef());
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, v);
+    _api.hash_unknown_unknown_dFree(d, v);
 }
 
 // ============================================================================
@@ -699,7 +699,7 @@ static bool FOG_CDECL Hash_Unknown_Unknown_eq(const HashUntyped* a, const HashUn
   // is equal to 'aIndex' and hashCode is not needed at all.
   if (aCapacity == bCapacity)
   {
-    do { 
+    do {
       const HashUntypedNode* aNode = aData[aIndex];
       const HashUntypedNode* bNode = bData[aIndex];
 
@@ -741,7 +741,7 @@ static bool FOG_CDECL Hash_Unknown_Unknown_eq(const HashUntyped* a, const HashUn
   }
   else
   {
-    do { 
+    do {
       const HashUntypedNode* aNode = aData[aIndex];
 
       while (aNode)
@@ -804,8 +804,8 @@ static HashUntypedData* FOG_CDECL Hash_Unknown_Unknown_dCreate(size_t capacity)
   d->capacity = capacity;
   d->length = 0;
 
-  size_t expand = _api.hash.helper.calcExpandCapacity(capacity);
-  size_t shrink = _api.hash.helper.calcShrinkCapacity(capacity);
+  size_t expand = _api.hashhelper_calcExpandCapacity(capacity);
+  size_t shrink = _api.hashhelper_calcShrinkCapacity(capacity);
 
   d->expandCapacity = expand;
   d->shrinkCapacity = shrink;
@@ -948,7 +948,7 @@ _Match:
   if (d->reference.get() == 1)
     return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
 
-  if (_api.hash.unknown_unknown.detach(self, v) != ERR_OK)
+  if (_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
     return NULL;
 
   d = self->_d;
@@ -991,7 +991,7 @@ _Match:
   if (d->reference.get() == 1)
     return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
 
-  if (_api.hash.unknown_unknown.detach(self, v) != ERR_OK)
+  if (_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
     return NULL;
 
   d = self->_d;
@@ -1008,12 +1008,12 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putStub(HashUntyped* self, const Has
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash.unknown_unknown.reserve(self, v, Hash_primeTable[0]));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, Hash_primeTable[0]));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.hash.unknown_unknown.detach(self, v));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_detach(self, v));
     d = self->_d;
   }
 
@@ -1060,7 +1060,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putStub(HashUntyped* self, const Has
 
 
   if (++d->length >= d->expandLength)
-    _api.hash.unknown_unknown.rehash(self, v, d->expandCapacity);
+    _api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
   return ERR_OK;
 
 _Match:
@@ -1081,12 +1081,12 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putString(HashUntyped* self, const H
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash.unknown_unknown.reserve(self, v, Hash_primeTable[0]));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, Hash_primeTable[0]));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.hash.unknown_unknown.detach(self, v));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_detach(self, v));
     d = self->_d;
   }
 
@@ -1121,7 +1121,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putString(HashUntyped* self, const H
   *pPrev = node;
 
   if (++d->length >= d->expandLength)
-    _api.hash.unknown_unknown.rehash(self, v, d->expandCapacity);
+    _api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
   return ERR_OK;
 
 _Match:
@@ -1262,7 +1262,7 @@ static bool FOG_CDECL Hash_StringT_Unknown_eq(const HashUntyped* a, const HashUn
   // is equal to 'aIndex' and hashCode is not needed at all.
   if (aCapacity == bCapacity)
   {
-    do { 
+    do {
       const HashKeyNode<CharT_(String)>* aNode = aData[aIndex];
       const HashKeyNode<CharT_(String)>* bNode = bData[aIndex];
 
@@ -1303,7 +1303,7 @@ static bool FOG_CDECL Hash_StringT_Unknown_eq(const HashUntyped* a, const HashUn
   }
   else
   {
-    do { 
+    do {
       const HashKeyNode<CharT_(String)>* aNode = aData[aIndex];
 
       while (aNode)
@@ -1373,56 +1373,56 @@ static void FOG_CDECL Hash_StringA_StringA_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, &Hash_StringA_StringA_vTable);
+    _api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
 }
 
 static const StringA* FOG_CDECL Hash_StringA_StringA_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const StringA*>(
-    _api.hash.stringa_unknown.getStubA(self, &Hash_StringA_StringA_vTable, key));
+    _api.hash_stringa_unknown_getStubA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static const StringA* FOG_CDECL Hash_StringA_StringA_getStringA(const HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<const StringA*>(
-    _api.hash.stringa_unknown.getStringA(self, &Hash_StringA_StringA_vTable, key));
+    _api.hash_stringa_unknown_getStringA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static StringA* FOG_CDECL Hash_StringA_StringA_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<StringA*>(
-    _api.hash.stringa_unknown.useStubA(self, &Hash_StringA_StringA_vTable, key));
+    _api.hash_stringa_unknown_useStubA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static StringA* FOG_CDECL Hash_StringA_StringA_useStringA(HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<StringA*>(
-    _api.hash.stringa_unknown.useStringA(self, &Hash_StringA_StringA_vTable, key));
+    _api.hash_stringa_unknown_useStringA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_putStubA(HashUntyped* self, const StubA* key, const StringA* item, bool replace)
 {
-  return _api.hash.stringa_unknown.putStubA(self, &Hash_StringA_StringA_vTable, key, item, replace);
+  return _api.hash_stringa_unknown_putStubA(self, &Hash_StringA_StringA_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_putStringA(HashUntyped* self, const StringA* key, const StringA* item, bool replace)
 {
-  return _api.hash.stringa_unknown.putStringA(self, &Hash_StringA_StringA_vTable, key, item, replace);
+  return _api.hash_stringa_unknown_putStringA(self, &Hash_StringA_StringA_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash.stringa_unknown.removeStubA(self, &Hash_StringA_StringA_vTable, key);
+  return _api.hash_stringa_unknown_removeStubA(self, &Hash_StringA_StringA_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_removeStringA(HashUntyped* self, const StringA* key)
 {
-  return _api.hash.stringa_unknown.removeStringA(self, &Hash_StringA_StringA_vTable, key);
+  return _api.hash_stringa_unknown_removeStringA(self, &Hash_StringA_StringA_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringA_StringA_dFree(HashUntypedData* d)
 {
-  _api.hash.unknown_unknown.dFree(d, &Hash_StringA_StringA_vTable);
+  _api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
 }
 
 // ============================================================================
@@ -1456,56 +1456,56 @@ static void FOG_CDECL Hash_StringA_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, &Hash_StringA_Var_vTable);
+    _api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
 }
 
 static const Var* FOG_CDECL Hash_StringA_Var_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash.stringa_unknown.getStubA(self, &Hash_StringA_Var_vTable, key));
+    _api.hash_stringa_unknown_getStubA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static const Var* FOG_CDECL Hash_StringA_Var_getStringA(const HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash.stringa_unknown.getStringA(self, &Hash_StringA_Var_vTable, key));
+    _api.hash_stringa_unknown_getStringA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringA_Var_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash.stringa_unknown.useStubA(self, &Hash_StringA_Var_vTable, key));
+    _api.hash_stringa_unknown_useStubA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringA_Var_useStringA(HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash.stringa_unknown.useStringA(self, &Hash_StringA_Var_vTable, key));
+    _api.hash_stringa_unknown_useStringA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_putStubA(HashUntyped* self, const StubA* key, const Var* item, bool replace)
 {
-  return _api.hash.stringa_unknown.putStubA(self, &Hash_StringA_Var_vTable, key, item, replace);
+  return _api.hash_stringa_unknown_putStubA(self, &Hash_StringA_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_putStringA(HashUntyped* self, const StringA* key, const Var* item, bool replace)
 {
-  return _api.hash.stringa_unknown.putStringA(self, &Hash_StringA_Var_vTable, key, item, replace);
+  return _api.hash_stringa_unknown_putStringA(self, &Hash_StringA_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash.stringa_unknown.removeStubA(self, &Hash_StringA_Var_vTable, key);
+  return _api.hash_stringa_unknown_removeStubA(self, &Hash_StringA_Var_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_removeStringA(HashUntyped* self, const StringA* key)
 {
-  return _api.hash.stringa_unknown.removeStringA(self, &Hash_StringA_Var_vTable, key);
+  return _api.hash_stringa_unknown_removeStringA(self, &Hash_StringA_Var_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringA_Var_dFree(HashUntypedData* d)
 {
-  _api.hash.unknown_unknown.dFree(d, &Hash_StringA_Var_vTable);
+  _api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
 }
 
 // ============================================================================
@@ -1539,78 +1539,78 @@ static void FOG_CDECL Hash_StringW_StringW_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, &Hash_StringW_StringW_vTable);
+    _api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const StringW*>(
-    _api.hash.stringw_unknown.getStubA(self, &Hash_StringW_StringW_vTable, key));
+    _api.hash_stringw_unknown_getStubA(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStubW(const HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<const StringW*>(
-    _api.hash.stringw_unknown.getStubW(self, &Hash_StringW_StringW_vTable, key));
+    _api.hash_stringw_unknown_getStubW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStringW(const HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<const StringW*>(
-    _api.hash.stringw_unknown.getStringW(self, &Hash_StringW_StringW_vTable, key));
+    _api.hash_stringw_unknown_getStringW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static StringW* FOG_CDECL Hash_StringW_StringW_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<StringW*>(
-    _api.hash.stringw_unknown.useStubA(self, &Hash_StringW_StringW_vTable, key));
+    _api.hash_stringw_unknown_useStubA(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static StringW* FOG_CDECL Hash_StringW_StringW_useStubW(HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<StringW*>(
-    _api.hash.stringw_unknown.useStubW(self, &Hash_StringW_StringW_vTable, key));
+    _api.hash_stringw_unknown_useStubW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static StringW* FOG_CDECL Hash_StringW_StringW_useStringW(HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<StringW*>(
-    _api.hash.stringw_unknown.useStringW(self, &Hash_StringW_StringW_vTable, key));
+    _api.hash_stringw_unknown_useStringW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_putStubA(HashUntyped* self, const StubA* key, const StringW* item, bool replace)
 {
-  return _api.hash.stringw_unknown.putStubA(self, &Hash_StringW_StringW_vTable, key, item, replace);
+  return _api.hash_stringw_unknown_putStubA(self, &Hash_StringW_StringW_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_putStubW(HashUntyped* self, const StubW* key, const StringW* item, bool replace)
 {
-  return _api.hash.stringw_unknown.putStubW(self, &Hash_StringW_StringW_vTable, key, item, replace);
+  return _api.hash_stringw_unknown_putStubW(self, &Hash_StringW_StringW_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_putStringW(HashUntyped* self, const StringW* key, const StringW* item, bool replace)
 {
-  return _api.hash.stringw_unknown.putStringW(self, &Hash_StringW_StringW_vTable, key, item, replace);
+  return _api.hash_stringw_unknown_putStringW(self, &Hash_StringW_StringW_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash.stringw_unknown.removeStubA(self, &Hash_StringW_StringW_vTable, key);
+  return _api.hash_stringw_unknown_removeStubA(self, &Hash_StringW_StringW_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_removeStubW(HashUntyped* self, const StubW* key)
 {
-  return _api.hash.stringw_unknown.removeStubW(self, &Hash_StringW_StringW_vTable, key);
+  return _api.hash_stringw_unknown_removeStubW(self, &Hash_StringW_StringW_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_removeStringW(HashUntyped* self, const StringW* key)
 {
-  return _api.hash.stringw_unknown.removeStringW(self, &Hash_StringW_StringW_vTable, key);
+  return _api.hash_stringw_unknown_removeStringW(self, &Hash_StringW_StringW_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringW_StringW_dFree(HashUntypedData* d)
 {
-  _api.hash.unknown_unknown.dFree(d, &Hash_StringW_StringW_vTable);
+  _api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
 }
 
 // ============================================================================
@@ -1644,78 +1644,78 @@ static void FOG_CDECL Hash_StringW_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash.unknown_unknown.dFree(d, &Hash_StringW_Var_vTable);
+    _api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash.stringw_unknown.getStubA(self, &Hash_StringW_Var_vTable, key));
+    _api.hash_stringw_unknown_getStubA(self, &Hash_StringW_Var_vTable, key));
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStubW(const HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash.stringw_unknown.getStubW(self, &Hash_StringW_Var_vTable, key));
+    _api.hash_stringw_unknown_getStubW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStringW(const HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash.stringw_unknown.getStringW(self, &Hash_StringW_Var_vTable, key));
+    _api.hash_stringw_unknown_getStringW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringW_Var_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash.stringw_unknown.useStubA(self, &Hash_StringW_Var_vTable, key));
+    _api.hash_stringw_unknown_useStubA(self, &Hash_StringW_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringW_Var_useStubW(HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash.stringw_unknown.useStubW(self, &Hash_StringW_Var_vTable, key));
+    _api.hash_stringw_unknown_useStubW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringW_Var_useStringW(HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash.stringw_unknown.useStringW(self, &Hash_StringW_Var_vTable, key));
+    _api.hash_stringw_unknown_useStringW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_putStubA(HashUntyped* self, const StubA* key, const Var* item, bool replace)
 {
-  return _api.hash.stringw_unknown.putStubA(self, &Hash_StringW_Var_vTable, key, item, replace);
+  return _api.hash_stringw_unknown_putStubA(self, &Hash_StringW_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_putStubW(HashUntyped* self, const StubW* key, const Var* item, bool replace)
 {
-  return _api.hash.stringw_unknown.putStubW(self, &Hash_StringW_Var_vTable, key, item, replace);
+  return _api.hash_stringw_unknown_putStubW(self, &Hash_StringW_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_putStringW(HashUntyped* self, const StringW* key, const Var* item, bool replace)
 {
-  return _api.hash.stringw_unknown.putStringW(self, &Hash_StringW_Var_vTable, key, item, replace);
+  return _api.hash_stringw_unknown_putStringW(self, &Hash_StringW_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash.stringw_unknown.removeStubA(self, &Hash_StringW_Var_vTable, key);
+  return _api.hash_stringw_unknown_removeStubA(self, &Hash_StringW_Var_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_removeStubW(HashUntyped* self, const StubW* key)
 {
-  return _api.hash.stringw_unknown.removeStubW(self, &Hash_StringW_Var_vTable, key);
+  return _api.hash_stringw_unknown_removeStubW(self, &Hash_StringW_Var_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_removeStringW(HashUntyped* self, const StringW* key)
 {
-  return _api.hash.stringw_unknown.removeStringW(self, &Hash_StringW_Var_vTable, key);
+  return _api.hash_stringw_unknown_removeStringW(self, &Hash_StringW_Var_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringW_Var_dFree(HashUntypedData* d)
 {
-  _api.hash.unknown_unknown.dFree(d, &Hash_StringW_Var_vTable);
+  _api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
 }
 
 // ============================================================================
@@ -1749,7 +1749,7 @@ static bool FOG_CDECL HashIterator_start(HashUntypedIterator* i)
     node = nodeList[index];
     if (node != NULL) goto _Match;
   } while (++index < capacity);
-  
+
   // We checked the length so this is impossible.
   FOG_ASSERT(false);
 
@@ -1812,162 +1812,162 @@ FOG_NO_EXPORT void Hash_init(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.hash.helper.calcExpandCapacity = Hash_calcExpandCapacity;
-  _api.hash.helper.calcShrinkCapacity = Hash_calcShrinkCapacity;
+  _api.hashhelper_calcExpandCapacity = Hash_calcExpandCapacity;
+  _api.hashhelper_calcShrinkCapacity = Hash_calcShrinkCapacity;
 
   // Hash<?, ?>
-  _api.hash.unknown_unknown.ctor = Hash_Unknown_Unknown_ctor;
-  _api.hash.unknown_unknown.ctorCopy = Hash_Unknown_Unknown_ctorCopy;
-  _api.hash.unknown_unknown.dtor = Hash_Unknown_Unknown_dtor;
-  
-  _api.hash.unknown_unknown.detach = Hash_Unknown_Unknown_detach;
-  _api.hash.unknown_unknown.rehash = Hash_Unknown_Unknown_rehash;
-  _api.hash.unknown_unknown.reserve = Hash_Unknown_Unknown_reserve;
-  _api.hash.unknown_unknown.squeeze = Hash_Unknown_Unknown_squeeze;
-  
-  _api.hash.unknown_unknown.clear = Hash_Unknown_Unknown_clear;
-  _api.hash.unknown_unknown.reset = Hash_Unknown_Unknown_reset;
-  
-  _api.hash.unknown_unknown.get = Hash_Unknown_Unknown_get;
-  _api.hash.unknown_unknown.use = Hash_Unknown_Unknown_use;
-  _api.hash.unknown_unknown.put = Hash_Unknown_Unknown_put;
-  _api.hash.unknown_unknown.remove = Hash_Unknown_Unknown_remove;
+  _api.hash_unknown_unknown_ctor = Hash_Unknown_Unknown_ctor;
+  _api.hash_unknown_unknown_ctorCopy = Hash_Unknown_Unknown_ctorCopy;
+  _api.hash_unknown_unknown_dtor = Hash_Unknown_Unknown_dtor;
 
-  _api.hash.unknown_unknown.copy = Hash_Unknown_Unknown_copy;
-  _api.hash.unknown_unknown.eq = Hash_Unknown_Unknown_eq;
+  _api.hash_unknown_unknown_detach = Hash_Unknown_Unknown_detach;
+  _api.hash_unknown_unknown_rehash = Hash_Unknown_Unknown_rehash;
+  _api.hash_unknown_unknown_reserve = Hash_Unknown_Unknown_reserve;
+  _api.hash_unknown_unknown_squeeze = Hash_Unknown_Unknown_squeeze;
 
-  _api.hash.unknown_unknown.dCreate = Hash_Unknown_Unknown_dCreate;
-  _api.hash.unknown_unknown.dFree = Hash_Unknown_Unknown_dFree;
+  _api.hash_unknown_unknown_clear = Hash_Unknown_Unknown_clear;
+  _api.hash_unknown_unknown_reset = Hash_Unknown_Unknown_reset;
+
+  _api.hash_unknown_unknown_get = Hash_Unknown_Unknown_get;
+  _api.hash_unknown_unknown_use = Hash_Unknown_Unknown_use;
+  _api.hash_unknown_unknown_put = Hash_Unknown_Unknown_put;
+  _api.hash_unknown_unknown_remove = Hash_Unknown_Unknown_remove;
+
+  _api.hash_unknown_unknown_copy = Hash_Unknown_Unknown_copy;
+  _api.hash_unknown_unknown_eq = Hash_Unknown_Unknown_eq;
+
+  _api.hash_unknown_unknown_dCreate = Hash_Unknown_Unknown_dCreate;
+  _api.hash_unknown_unknown_dFree = Hash_Unknown_Unknown_dFree;
 
   // Hash<int32_t, ?>
-  _api.hash.int32_unknown.get;
-  _api.hash.int32_unknown.use;
-  _api.hash.int32_unknown.put;
-  _api.hash.int32_unknown.remove;
+  _api.hash_int32_unknown_get;
+  _api.hash_int32_unknown_use;
+  _api.hash_int32_unknown_put;
+  _api.hash_int32_unknown_remove;
 
   // Hash<int64_t, ?>
-  _api.hash.int64_unknown.get;
-  _api.hash.int64_unknown.use;
-  _api.hash.int64_unknown.put;
-  _api.hash.int64_unknown.remove;
+  _api.hash_int64_unknown_get;
+  _api.hash_int64_unknown_use;
+  _api.hash_int64_unknown_put;
+  _api.hash_int64_unknown_remove;
 
   // Hash<StringA, ?>
-  _api.hash.stringa_unknown.getStubA = Hash_StringT_Unknown_getStub<char, char>;
-  _api.hash.stringa_unknown.getStringA = Hash_StringT_Unknown_getString<char, char>;
+  _api.hash_stringa_unknown_getStubA = Hash_StringT_Unknown_getStub<char, char>;
+  _api.hash_stringa_unknown_getStringA = Hash_StringT_Unknown_getString<char, char>;
 
-  _api.hash.stringa_unknown.useStubA = Hash_StringT_Unknown_useStub<char, char>;
-  _api.hash.stringa_unknown.useStringA = Hash_StringT_Unknown_useString<char, char>;
+  _api.hash_stringa_unknown_useStubA = Hash_StringT_Unknown_useStub<char, char>;
+  _api.hash_stringa_unknown_useStringA = Hash_StringT_Unknown_useString<char, char>;
 
-  _api.hash.stringa_unknown.putStubA = Hash_StringT_Unknown_putStub<char, char>;
-  _api.hash.stringa_unknown.putStringA = Hash_StringT_Unknown_putString<char, char>;
+  _api.hash_stringa_unknown_putStubA = Hash_StringT_Unknown_putStub<char, char>;
+  _api.hash_stringa_unknown_putStringA = Hash_StringT_Unknown_putString<char, char>;
 
-  _api.hash.stringa_unknown.removeStubA = Hash_StringT_Unknown_removeStub<char, char>;
-  _api.hash.stringa_unknown.removeStringA = Hash_StringT_Unknown_removeString<char, char>;
+  _api.hash_stringa_unknown_removeStubA = Hash_StringT_Unknown_removeStub<char, char>;
+  _api.hash_stringa_unknown_removeStringA = Hash_StringT_Unknown_removeString<char, char>;
 
-  _api.hash.stringa_unknown.eq = Hash_StringT_Unknown_eq<char>;
+  _api.hash_stringa_unknown_eq = Hash_StringT_Unknown_eq<char>;
 
   // Hash<StringA, StringA>
-  _api.hash.stringa_stringa.ctor = Hash_StringA_StringA_ctor;
-  _api.hash.stringa_stringa.dtor = Hash_StringA_StringA_dtor;
+  _api.hash_stringa_stringa_ctor = Hash_StringA_StringA_ctor;
+  _api.hash_stringa_stringa_dtor = Hash_StringA_StringA_dtor;
 
-  _api.hash.stringa_stringa.getStubA = Hash_StringA_StringA_getStubA;
-  _api.hash.stringa_stringa.getStringA = Hash_StringA_StringA_getStringA;
-    
-  _api.hash.stringa_stringa.useStubA = Hash_StringA_StringA_useStubA;
-  _api.hash.stringa_stringa.useStringA = Hash_StringA_StringA_useStringA;
-    
-  _api.hash.stringa_stringa.putStubA = Hash_StringA_StringA_putStubA;
-  _api.hash.stringa_stringa.putStringA = Hash_StringA_StringA_putStringA;
-    
-  _api.hash.stringa_stringa.removeStubA = Hash_StringA_StringA_removeStubA;
-  _api.hash.stringa_stringa.removeStringA = Hash_StringA_StringA_removeStringA;
+  _api.hash_stringa_stringa_getStubA = Hash_StringA_StringA_getStubA;
+  _api.hash_stringa_stringa_getStringA = Hash_StringA_StringA_getStringA;
 
-  _api.hash.stringa_stringa.dFree = Hash_StringA_StringA_dFree;
+  _api.hash_stringa_stringa_useStubA = Hash_StringA_StringA_useStubA;
+  _api.hash_stringa_stringa_useStringA = Hash_StringA_StringA_useStringA;
+
+  _api.hash_stringa_stringa_putStubA = Hash_StringA_StringA_putStubA;
+  _api.hash_stringa_stringa_putStringA = Hash_StringA_StringA_putStringA;
+
+  _api.hash_stringa_stringa_removeStubA = Hash_StringA_StringA_removeStubA;
+  _api.hash_stringa_stringa_removeStringA = Hash_StringA_StringA_removeStringA;
+
+  _api.hash_stringa_stringa_dFree = Hash_StringA_StringA_dFree;
 
   // Hash<StringA, Var>
-  _api.hash.stringa_var.ctor = Hash_StringA_Var_ctor;
-  _api.hash.stringa_var.dtor = Hash_StringA_Var_dtor;
+  _api.hash_stringa_var_ctor = Hash_StringA_Var_ctor;
+  _api.hash_stringa_var_dtor = Hash_StringA_Var_dtor;
 
-  _api.hash.stringa_var.getStubA = Hash_StringA_Var_getStubA;
-  _api.hash.stringa_var.getStringA = Hash_StringA_Var_getStringA;
-    
-  _api.hash.stringa_var.useStubA = Hash_StringA_Var_useStubA;
-  _api.hash.stringa_var.useStringA = Hash_StringA_Var_useStringA;
-    
-  _api.hash.stringa_var.putStubA = Hash_StringA_Var_putStubA;
-  _api.hash.stringa_var.putStringA = Hash_StringA_Var_putStringA;
-    
-  _api.hash.stringa_var.removeStubA = Hash_StringA_Var_removeStubA;
-  _api.hash.stringa_var.removeStringA = Hash_StringA_Var_removeStringA;
+  _api.hash_stringa_var_getStubA = Hash_StringA_Var_getStubA;
+  _api.hash_stringa_var_getStringA = Hash_StringA_Var_getStringA;
 
-  _api.hash.stringa_var.dFree = Hash_StringA_Var_dFree;
+  _api.hash_stringa_var_useStubA = Hash_StringA_Var_useStubA;
+  _api.hash_stringa_var_useStringA = Hash_StringA_Var_useStringA;
+
+  _api.hash_stringa_var_putStubA = Hash_StringA_Var_putStubA;
+  _api.hash_stringa_var_putStringA = Hash_StringA_Var_putStringA;
+
+  _api.hash_stringa_var_removeStubA = Hash_StringA_Var_removeStubA;
+  _api.hash_stringa_var_removeStringA = Hash_StringA_Var_removeStringA;
+
+  _api.hash_stringa_var_dFree = Hash_StringA_Var_dFree;
 
   // Hash<StringW, ?>
-  _api.hash.stringw_unknown.getStubA = Hash_StringT_Unknown_getStub<CharW, char>;
-  _api.hash.stringw_unknown.getStubW = Hash_StringT_Unknown_getStub<CharW, CharW>;
-  _api.hash.stringw_unknown.getStringW = Hash_StringT_Unknown_getString<CharW, CharW>;
-    
-  _api.hash.stringw_unknown.useStubA = Hash_StringT_Unknown_useStub<CharW, char>;
-  _api.hash.stringw_unknown.useStubW = Hash_StringT_Unknown_useStub<CharW, CharW>;
-  _api.hash.stringw_unknown.useStringW = Hash_StringT_Unknown_useString<CharW, CharW>;
+  _api.hash_stringw_unknown_getStubA = Hash_StringT_Unknown_getStub<CharW, char>;
+  _api.hash_stringw_unknown_getStubW = Hash_StringT_Unknown_getStub<CharW, CharW>;
+  _api.hash_stringw_unknown_getStringW = Hash_StringT_Unknown_getString<CharW, CharW>;
 
-  _api.hash.stringw_unknown.putStubA = Hash_StringT_Unknown_putStub<CharW, char>;
-  _api.hash.stringw_unknown.putStubW = Hash_StringT_Unknown_putStub<CharW, CharW>;
-  _api.hash.stringw_unknown.putStringW = Hash_StringT_Unknown_putString<CharW, CharW>;
+  _api.hash_stringw_unknown_useStubA = Hash_StringT_Unknown_useStub<CharW, char>;
+  _api.hash_stringw_unknown_useStubW = Hash_StringT_Unknown_useStub<CharW, CharW>;
+  _api.hash_stringw_unknown_useStringW = Hash_StringT_Unknown_useString<CharW, CharW>;
 
-  _api.hash.stringw_unknown.removeStubA = Hash_StringT_Unknown_removeStub<CharW, char>;
-  _api.hash.stringw_unknown.removeStubW = Hash_StringT_Unknown_removeStub<CharW, CharW>;
-  _api.hash.stringw_unknown.removeStringW = Hash_StringT_Unknown_removeString<CharW, CharW>;
+  _api.hash_stringw_unknown_putStubA = Hash_StringT_Unknown_putStub<CharW, char>;
+  _api.hash_stringw_unknown_putStubW = Hash_StringT_Unknown_putStub<CharW, CharW>;
+  _api.hash_stringw_unknown_putStringW = Hash_StringT_Unknown_putString<CharW, CharW>;
 
-  _api.hash.stringw_unknown.eq = Hash_StringT_Unknown_eq<CharW>;
+  _api.hash_stringw_unknown_removeStubA = Hash_StringT_Unknown_removeStub<CharW, char>;
+  _api.hash_stringw_unknown_removeStubW = Hash_StringT_Unknown_removeStub<CharW, CharW>;
+  _api.hash_stringw_unknown_removeStringW = Hash_StringT_Unknown_removeString<CharW, CharW>;
+
+  _api.hash_stringw_unknown_eq = Hash_StringT_Unknown_eq<CharW>;
 
   // Hash<StringW, StringW>
-  _api.hash.stringw_stringw.ctor = Hash_StringW_StringW_ctor;
-  _api.hash.stringw_stringw.dtor = Hash_StringW_StringW_dtor;
+  _api.hash_stringw_stringw_ctor = Hash_StringW_StringW_ctor;
+  _api.hash_stringw_stringw_dtor = Hash_StringW_StringW_dtor;
 
-  _api.hash.stringw_stringw.getStubA = Hash_StringW_StringW_getStubA;
-  _api.hash.stringw_stringw.getStubW = Hash_StringW_StringW_getStubW;
-  _api.hash.stringw_stringw.getStringW = Hash_StringW_StringW_getStringW;
-    
-  _api.hash.stringw_stringw.useStubA = Hash_StringW_StringW_useStubA;
-  _api.hash.stringw_stringw.useStubW = Hash_StringW_StringW_useStubW;
-  _api.hash.stringw_stringw.useStringW = Hash_StringW_StringW_useStringW;
-    
-  _api.hash.stringw_stringw.putStubA = Hash_StringW_StringW_putStubA;
-  _api.hash.stringw_stringw.putStubW = Hash_StringW_StringW_putStubW;
-  _api.hash.stringw_stringw.putStringW = Hash_StringW_StringW_putStringW;
-    
-  _api.hash.stringw_stringw.removeStubA = Hash_StringW_StringW_removeStubA;
-  _api.hash.stringw_stringw.removeStubW = Hash_StringW_StringW_removeStubW;
-  _api.hash.stringw_stringw.removeStringW = Hash_StringW_StringW_removeStringW;
+  _api.hash_stringw_stringw_getStubA = Hash_StringW_StringW_getStubA;
+  _api.hash_stringw_stringw_getStubW = Hash_StringW_StringW_getStubW;
+  _api.hash_stringw_stringw_getStringW = Hash_StringW_StringW_getStringW;
 
-  _api.hash.stringw_stringw.dFree = Hash_StringW_StringW_dFree;
+  _api.hash_stringw_stringw_useStubA = Hash_StringW_StringW_useStubA;
+  _api.hash_stringw_stringw_useStubW = Hash_StringW_StringW_useStubW;
+  _api.hash_stringw_stringw_useStringW = Hash_StringW_StringW_useStringW;
+
+  _api.hash_stringw_stringw_putStubA = Hash_StringW_StringW_putStubA;
+  _api.hash_stringw_stringw_putStubW = Hash_StringW_StringW_putStubW;
+  _api.hash_stringw_stringw_putStringW = Hash_StringW_StringW_putStringW;
+
+  _api.hash_stringw_stringw_removeStubA = Hash_StringW_StringW_removeStubA;
+  _api.hash_stringw_stringw_removeStubW = Hash_StringW_StringW_removeStubW;
+  _api.hash_stringw_stringw_removeStringW = Hash_StringW_StringW_removeStringW;
+
+  _api.hash_stringw_stringw_dFree = Hash_StringW_StringW_dFree;
 
   // Hash<StringW, Var>
-  _api.hash.stringw_var.ctor = Hash_StringW_Var_ctor;
-  _api.hash.stringw_var.dtor = Hash_StringW_Var_dtor;
+  _api.hash_stringw_var_ctor = Hash_StringW_Var_ctor;
+  _api.hash_stringw_var_dtor = Hash_StringW_Var_dtor;
 
-  _api.hash.stringw_var.getStubA = Hash_StringW_Var_getStubA;
-  _api.hash.stringw_var.getStubW = Hash_StringW_Var_getStubW;
-  _api.hash.stringw_var.getStringW = Hash_StringW_Var_getStringW;
-    
-  _api.hash.stringw_var.useStubA = Hash_StringW_Var_useStubA;
-  _api.hash.stringw_var.useStubW = Hash_StringW_Var_useStubW;
-  _api.hash.stringw_var.useStringW = Hash_StringW_Var_useStringW;
-    
-  _api.hash.stringw_var.putStubA = Hash_StringW_Var_putStubA;
-  _api.hash.stringw_var.putStubW = Hash_StringW_Var_putStubW;
-  _api.hash.stringw_var.putStringW = Hash_StringW_Var_putStringW;
-    
-  _api.hash.stringw_var.removeStubA = Hash_StringW_Var_removeStubA;
-  _api.hash.stringw_var.removeStubW = Hash_StringW_Var_removeStubW;
-  _api.hash.stringw_var.removeStringW = Hash_StringW_Var_removeStringW;
-  
-  _api.hash.stringw_var.dFree = Hash_StringW_Var_dFree;
+  _api.hash_stringw_var_getStubA = Hash_StringW_Var_getStubA;
+  _api.hash_stringw_var_getStubW = Hash_StringW_Var_getStubW;
+  _api.hash_stringw_var_getStringW = Hash_StringW_Var_getStringW;
+
+  _api.hash_stringw_var_useStubA = Hash_StringW_Var_useStubA;
+  _api.hash_stringw_var_useStubW = Hash_StringW_Var_useStubW;
+  _api.hash_stringw_var_useStringW = Hash_StringW_Var_useStringW;
+
+  _api.hash_stringw_var_putStubA = Hash_StringW_Var_putStubA;
+  _api.hash_stringw_var_putStubW = Hash_StringW_Var_putStubW;
+  _api.hash_stringw_var_putStringW = Hash_StringW_Var_putStringW;
+
+  _api.hash_stringw_var_removeStubA = Hash_StringW_Var_removeStubA;
+  _api.hash_stringw_var_removeStubW = Hash_StringW_Var_removeStubW;
+  _api.hash_stringw_var_removeStringW = Hash_StringW_Var_removeStringW;
+
+  _api.hash_stringw_var_dFree = Hash_StringW_Var_dFree;
 
   // HashIterator<?, ?>
-  _api.hashiterator.start = HashIterator_start;
-  _api.hashiterator.next = HashIterator_next;
+  _api.hashiterator_start = HashIterator_start;
+  _api.hashiterator_next = HashIterator_next;
 
   // -------------------------------------------------------------------------
   // [Data]
@@ -1983,7 +1983,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = Hash_primeTable[0];
 
   Hash_Unknown_Unknown_oEmpty->_d = d;
-  _api.hash.unknown_unknown.oEmpty = &Hash_Unknown_Unknown_oEmpty;
+  _api.hash_unknown_unknown_oEmpty = &Hash_Unknown_Unknown_oEmpty;
 
   // Hash<StringA, StringA>
   d = &Hash_StringA_StringA_dEmpty;
@@ -1994,7 +1994,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringA_StringA_oEmpty->_d = d;
-  _api.hash.stringa_stringa.oEmpty = &Hash_StringA_StringA_oEmpty;
+  _api.hash_stringa_stringa_oEmpty = &Hash_StringA_StringA_oEmpty;
 
   // HashVTable<StringA, StringA>
   Hash_StringA_StringA_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringA>, key);
@@ -2003,10 +2003,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringA_StringA_vTable->szItemT = sizeof(StringA);
   Hash_StringA_StringA_vTable->ctor = Hash_StringA_StringA_Node_ctor;
   Hash_StringA_StringA_vTable->dtor = Hash_StringA_StringA_Node_dtor;
-  Hash_StringA_StringA_vTable->setItem = (HashUntypedVTable::SetItem)_api.stringa.setStringA;
-  Hash_StringA_StringA_vTable->hashKey = (HashFunc)_api.stringa.getHashCode;
-  Hash_StringA_StringA_vTable->eqKey = (EqFunc)_api.stringa.eqStringA;
-  _api.hash.stringa_stringa.vTable = &Hash_StringA_StringA_vTable;
+  Hash_StringA_StringA_vTable->setItem = (HashUntypedVTable::SetItem)_api.stringa_setStringA;
+  Hash_StringA_StringA_vTable->hashKey = (HashFunc)_api.stringa_getHashCode;
+  Hash_StringA_StringA_vTable->eqKey = (EqFunc)_api.stringa_eqStringA;
+  _api.hash_stringa_stringa_vTable = &Hash_StringA_StringA_vTable;
 
   // Hash<StringA, Var>
   d = &Hash_StringW_Var_dEmpty;
@@ -2017,7 +2017,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringA_Var_oEmpty->_d = d;
-  _api.hash.stringa_var.oEmpty = &Hash_StringA_Var_oEmpty;
+  _api.hash_stringa_var_oEmpty = &Hash_StringA_Var_oEmpty;
 
   // HashVTable<StringA, Var>
   Hash_StringA_Var_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringA>, key);
@@ -2026,10 +2026,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringA_Var_vTable->szItemT = sizeof(Var);
   Hash_StringA_Var_vTable->ctor = Hash_StringA_Var_Node_ctor;
   Hash_StringA_Var_vTable->dtor = Hash_StringA_Var_Node_dtor;
-  Hash_StringA_Var_vTable->setItem = (HashUntypedVTable::SetItem)_api.var.copy;
-  Hash_StringA_Var_vTable->hashKey = (HashFunc)_api.stringa.getHashCode;
-  Hash_StringA_Var_vTable->eqKey = (EqFunc)_api.stringa.eqStringA;
-  _api.hash.stringa_var.vTable = &Hash_StringA_Var_vTable;
+  Hash_StringA_Var_vTable->setItem = (HashUntypedVTable::SetItem)_api.var_copy;
+  Hash_StringA_Var_vTable->hashKey = (HashFunc)_api.stringa_getHashCode;
+  Hash_StringA_Var_vTable->eqKey = (EqFunc)_api.stringa_eqStringA;
+  _api.hash_stringa_var_vTable = &Hash_StringA_Var_vTable;
 
   // Hash<StringW, StringW>
   d = &Hash_StringW_StringW_dEmpty;
@@ -2040,7 +2040,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringW_StringW_oEmpty->_d = d;
-  _api.hash.stringw_stringw.oEmpty = &Hash_StringW_StringW_oEmpty;
+  _api.hash_stringw_stringw_oEmpty = &Hash_StringW_StringW_oEmpty;
 
   // HashVTable<StringW, StringW>
   Hash_StringW_StringW_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringW>, key);
@@ -2049,10 +2049,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringW_StringW_vTable->szItemT = sizeof(StringW);
   Hash_StringW_StringW_vTable->ctor = Hash_StringW_StringW_Node_ctor;
   Hash_StringW_StringW_vTable->dtor = Hash_StringW_StringW_Node_dtor;
-  Hash_StringW_StringW_vTable->setItem = (HashUntypedVTable::SetItem)_api.stringw.setStringW;
-  Hash_StringW_StringW_vTable->hashKey = (HashFunc)_api.stringw.getHashCode;
-  Hash_StringW_StringW_vTable->eqKey = (EqFunc)_api.stringw.eqStringW;
-  _api.hash.stringw_stringw.vTable = &Hash_StringW_StringW_vTable;
+  Hash_StringW_StringW_vTable->setItem = (HashUntypedVTable::SetItem)_api.stringw_setStringW;
+  Hash_StringW_StringW_vTable->hashKey = (HashFunc)_api.stringw_getHashCode;
+  Hash_StringW_StringW_vTable->eqKey = (EqFunc)_api.stringw_eqStringW;
+  _api.hash_stringw_stringw_vTable = &Hash_StringW_StringW_vTable;
 
   // Hash<StringW, Var>
   d = &Hash_StringW_Var_dEmpty;
@@ -2063,7 +2063,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringW_Var_oEmpty->_d = d;
-  _api.hash.stringw_var.oEmpty = &Hash_StringW_Var_oEmpty;
+  _api.hash_stringw_var_oEmpty = &Hash_StringW_Var_oEmpty;
 
   // HashVTable<StringW, Var>
   Hash_StringW_Var_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringW>, key);
@@ -2072,10 +2072,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringW_Var_vTable->szItemT = sizeof(Var);
   Hash_StringW_Var_vTable->ctor = Hash_StringW_Var_Node_ctor;
   Hash_StringW_Var_vTable->dtor = Hash_StringW_Var_Node_dtor;
-  Hash_StringW_Var_vTable->setItem = (HashUntypedVTable::SetItem)_api.var.copy;
-  Hash_StringW_Var_vTable->hashKey = (HashFunc)_api.stringw.getHashCode;
-  Hash_StringW_Var_vTable->eqKey = (EqFunc)_api.stringw.eqStringW;
-  _api.hash.stringa_var.vTable = &Hash_StringW_Var_vTable;
+  Hash_StringW_Var_vTable->setItem = (HashUntypedVTable::SetItem)_api.var_copy;
+  Hash_StringW_Var_vTable->hashKey = (HashFunc)_api.stringw_getHashCode;
+  Hash_StringW_Var_vTable->eqKey = (EqFunc)_api.stringw_eqStringW;
+  _api.hash_stringa_var_vTable = &Hash_StringW_Var_vTable;
 }
 
 } // Fog namespace

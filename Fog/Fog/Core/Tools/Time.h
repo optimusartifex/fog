@@ -136,7 +136,7 @@ struct FOG_NO_EXPORT Time
   FOG_INLINE bool isNull() const { return _us == 0; }
 
   //! @brief Get time converted to @c time_t.
-  FOG_INLINE time_t getTimeT() const { return _api.time.toTimeT(_us); }
+  FOG_INLINE time_t getTimeT() const { return _api.time_toTimeT(_us); }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -178,13 +178,13 @@ struct FOG_NO_EXPORT Time
   //! successive calls will be increasing.
   static FOG_INLINE Time now()
   {
-    return Time(_api.time.now());
+    return Time(_api.time_now());
   }
 
   //! @brief Create a @c Time from @c time_t (in seconds).
   static FOG_INLINE Time fromTimeT(time_t t)
   {
-    return Time(_api.time.fromTimeT(t));
+    return Time(_api.time_fromTimeT(t));
   }
 
   // --------------------------------------------------------------------------
@@ -267,7 +267,7 @@ struct FOG_NO_EXPORT TimeTicks
   //! used only when it is really needed (benchmarking, for example)
   static FOG_INLINE TimeTicks now(uint32_t ticksPrecision = TICKS_PRECISION_LOW)
   {
-    return TimeTicks(_api.timeticks.now(ticksPrecision));
+    return TimeTicks(_api.timeticks_now(ticksPrecision));
   }
 
   // --------------------------------------------------------------------------

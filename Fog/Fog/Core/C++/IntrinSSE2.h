@@ -31,7 +31,8 @@ static FOG_INLINE __m128i _mm_castps_si128(__m128 n) { return *(__m128i*)&n; }
 #endif // _MSC_VER
 
 // Our extensions (can't be inlined, because MSVC complains about constant expression).
-#define _mm_shuffle_epi32_f(_Src_, _Imm_) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(_Src_), _Imm_))
+#define _mm_shuffle_epi32_f(_Src_, _Imm_) \
+  _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(_Src_), _Imm_))
 
 // Fix for stupid msvc debugger feature that will assert you if you want to fill
 // xmm register by ones using _mm_cmpeq_epi8() on currently uninitialized variable.

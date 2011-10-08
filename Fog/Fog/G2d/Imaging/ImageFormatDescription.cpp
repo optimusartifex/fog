@@ -26,7 +26,11 @@ static uint32_t ImageFormatDescription_detectId(ImageFormatDescription* self)
 
   for (format = 0; format < IMAGE_FORMAT_COUNT; format++)
   {
-    if (*self == ImageFormatDescription_list[format])
+    const ImageFormatDescription* other = &ImageFormatDescription_list[format];
+
+    if (self->_depth == other->_depth && MemOps::eq_s<sizeof(ImageFormatDescription) - 4>(
+      reinterpret_cast<const uint8_t*>(self) + 4,
+      reinterpret_cast<const uint8_t*>(other) + 4))
     {
       self->_format = format;
       break;
@@ -427,8 +431,8 @@ const ImageFormatDescription ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1]
 
 FOG_NO_EXPORT void ImageFormatDescription_init(void)
 {
-  _api.imageformatdescription.getCompatibleFormat = ImageFormatDescription_getCompatibleFormat;
-  _api.imageformatdescription.createArgb = ImageFormatDescription_createArgb;
+  _api.imageformatdescription_getCompatibleFormat = ImageFormatDescription_getCompatibleFormat;
+  _api.imageformatdescription_createArgb = ImageFormatDescription_createArgb;
 }
 
 } // Fog namespace

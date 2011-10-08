@@ -9,8 +9,8 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Assert.h>
-#include <Fog/Core/Memory/BlockAllocator_p.h>
-#include <Fog/Core/Memory/ZoneAllocator_p.h>
+#include <Fog/Core/Memory/MemBlockAllocator.h>
+#include <Fog/Core/Memory/MemZoneAllocator.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/Thread.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
@@ -22,11 +22,11 @@
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintWork_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterState_p.h>
 #include <Fog/G2d/Painting/RasterUtil_p.h>
-#include <Fog/G2d/Painting/RasterWorker_p.h>
 #include <Fog/G2d/Painting/Rasterizer_p.h>
 
 namespace Fog {
@@ -77,7 +77,6 @@ struct FOG_NO_EXPORT RasterSerializer
   typedef err_t (FOG_FASTCALL *ClipNormalizedBoxI)(RasterPaintEngine* engine, uint32_t clipOp, const BoxI& box);
   typedef err_t (FOG_FASTCALL *ClipNormalizedBoxF)(RasterPaintEngine* engine, uint32_t clipOp, const BoxF& box);
   typedef err_t (FOG_FASTCALL *ClipNormalizedBoxD)(RasterPaintEngine* engine, uint32_t clipOp, const BoxD& box);
-
   typedef err_t (FOG_FASTCALL *ClipNormalizedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF& path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *ClipNormalizedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD& path, uint32_t fillRule);
 
@@ -258,7 +257,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   err_t createPatternContext();
 
   FOG_INLINE void discardSource();
-  FOG_INLINE void destroyPatternContext(RenderPatternContext* pc);
+  FOG_INLINE void destroyPatternContext(RasterPattern* pc);
 
   // --------------------------------------------------------------------------
   // [Changed]
@@ -399,7 +398,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Zone memory allocator for @c RasterState objects.
-  ZoneAllocator stateAllocator;
+  MemZoneAllocator stateAllocator;
   //! @brief Unused states pool.
   RasterState* statePool;
   //! @brief State.
@@ -410,7 +409,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Pattern-context allocator.
-  ZoneAllocator pcAllocator;
+  MemZoneAllocator pcAllocator;
   //! @brief Pattern-context pool.
   RasterAbstractLinkedList* pcPool;
 
@@ -419,7 +418,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief The worker manager.
-  RasterWorkerManager* wm;
+  RasterPaintWorkMgr* wm;
 
   //! @brief The maximum number of threads that can be used for rendering after
   //! the multithreading is initialized.
@@ -447,6 +446,38 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
 extern FOG_NO_EXPORT PaintEngineVTable RasterPaintEngine_vtable[IMAGE_PRECISION_COUNT];
 extern FOG_NO_EXPORT RasterSerializer RasterPaintEngine_serializer[RASTER_MODE_COUNT];
+
+// ============================================================================
+// [Fog::RasterPaintEngine - Defs]
+// ============================================================================
+
+#define _FOG_RASTER_ENSURE_PATTERN(_Engine_) \
+  FOG_MACRO_BEGIN \
+    if (_Engine_->ctx.pc == NULL) \
+    { \
+      FOG_RETURN_ON_ERROR(_Engine_->createPatternContext()); \
+    } \
+  FOG_MACRO_END
+
+#define _FOG_RASTER_ENTER_CLIP_FUNC() \
+  FOG_MACRO_BEGIN \
+    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
+    \
+    if (FOG_UNLIKELY(ctx.state & RASTER_CONTEXT_NO_PAINT_WORK_REGION)) \
+      return ERR_OK; \
+  FOG_MACRO_END
+
+#define _FOG_RASTER_ENTER_CLIP_COND(__condition__) \
+  FOG_MACRO_BEGIN \
+    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
+    \
+    if (FOG_UNLIKELY(ctx.state & RASTER_CONTEXT_NO_PAINT_WORK_REGION)) \
+      return ERR_OK; \
+    \
+    if (FOG_UNLIKELY(!(__condition__))) \
+      return _clipOpNull(clipOp); \
+    \
+  FOG_MACRO_END
 
 //! @}
 

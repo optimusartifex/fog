@@ -418,7 +418,7 @@ _DetectLoopDo:
 
         initialFlags = NO_INITIAL_FLAGS;
         currentFlags = PathClipperT_getFlags<NumT>(srcPts[0], clipBox);
-        
+
         if (currentFlags != CLIP_SIDE_NONE)
           goto _ClipLoop;
 
@@ -493,7 +493,7 @@ _DetectLoopDo:
       case PATH_CMD_CLOSE:
         if (FOG_UNLIKELY(initialFlags == NO_INITIAL_FLAGS))
           goto _Invalid;
-        
+
         // Need clip to connect with the initial point?
         if ((initialFlags | previousFlags) != CLIP_SIDE_NONE)
           goto _ClipLoop;
@@ -1520,15 +1520,15 @@ FOG_CPU_DECLARE_INITIALIZER_SSE2(PathClipper_init_SSE2)
 
 FOG_NO_EXPORT void PathClipper_init(void)
 {
-  _api.pathclipperf.measurePath = PathClipperT_measurePath<float>;
-  _api.pathclipperf.continuePath = PathClipperT_continuePath<float>;
-  _api.pathclipperf.continuePathData = PathClipperT_continuePathData<float>;
-  _api.pathclipperf.clipPath = PathClipperT_clipPath<float>;
+  _api.pathclipperf_measurePath = PathClipperT_measurePath<float>;
+  _api.pathclipperf_continuePath = PathClipperT_continuePath<float>;
+  _api.pathclipperf_continuePathData = PathClipperT_continuePathData<float>;
+  _api.pathclipperf_clipPath = PathClipperT_clipPath<float>;
 
-  _api.pathclipperd.measurePath = PathClipperT_measurePath<double>;
-  _api.pathclipperd.continuePath = PathClipperT_continuePath<double>;
-  _api.pathclipperd.continuePathData = PathClipperT_continuePathData<double>;
-  _api.pathclipperd.clipPath = PathClipperT_clipPath<double>;
+  _api.pathclipperd_measurePath = PathClipperT_measurePath<double>;
+  _api.pathclipperd_continuePath = PathClipperT_continuePath<double>;
+  _api.pathclipperd_continuePathData = PathClipperT_continuePathData<double>;
+  _api.pathclipperd_clipPath = PathClipperT_clipPath<double>;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

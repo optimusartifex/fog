@@ -102,11 +102,11 @@
 // ============================================================================
 
 #if FOG_ARCH_BITS >= 64
-#define FOG_PADDING_ZERO_32(_Variable_) FOG_NOP
-#define FOG_PADDING_ZERO_64(_Variable_) _Variable_ = 0
+# define FOG_PADDING_ZERO_32(_Variable_) FOG_NOP
+# define FOG_PADDING_ZERO_64(_Variable_) _Variable_ = 0
 #else
-#define FOG_PADDING_ZERO_32(_Variable_) _Variable_ = 0
-#define FOG_PADDING_ZERO_64(_Variable_) FOG_NOP
+# define FOG_PADDING_ZERO_32(_Variable_) _Variable_ = 0
+# define FOG_PADDING_ZERO_64(_Variable_) FOG_NOP
 #endif
 
 //! @}

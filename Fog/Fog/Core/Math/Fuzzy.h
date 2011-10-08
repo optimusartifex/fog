@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Math/Constants.h>
-#include <Fog/Core/Math/Convert.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {
@@ -111,11 +110,11 @@ static FOG_INLINE bool isFuzzyNegativeNumber(double a, double epsilon = MATH_EPS
 static FOG_INLINE bool isFuzzyEq(float a, float b, float epsilon = MATH_EPSILON_F) { return abs(a - b) <= epsilon; }
 static FOG_INLINE bool isFuzzyEq(double a, double b, double epsilon = MATH_EPSILON_D) { return abs(a - b) <= epsilon; }
 
-static FOG_INLINE bool isFuzzyLowerEq(float a, float b, float epsilon = MATH_EPSILON_F) { return a < b + epsilon; }
-static FOG_INLINE bool isFuzzyLowerEq(double a, double b, double epsilon = MATH_EPSILON_D) { return a < b + epsilon; }
+static FOG_INLINE bool isFuzzyGe(float a, float b, float epsilon = MATH_EPSILON_F) { return a > b - epsilon; }
+static FOG_INLINE bool isFuzzyGe(double a, double b, double epsilon = MATH_EPSILON_D) { return a > b - epsilon; }
 
-static FOG_INLINE bool isFuzzyGreaterEq(float a, float b, float epsilon = MATH_EPSILON_F) { return a > b - epsilon; }
-static FOG_INLINE bool isFuzzyGreaterEq(double a, double b, double epsilon = MATH_EPSILON_D) { return a > b - epsilon; }
+static FOG_INLINE bool isFuzzyLe(float a, float b, float epsilon = MATH_EPSILON_F) { return a < b + epsilon; }
+static FOG_INLINE bool isFuzzyLe(double a, double b, double epsilon = MATH_EPSILON_D) { return a < b + epsilon; }
 
 static FOG_INLINE bool isFuzzyToInt(float a, int& result, float epsilon = MATH_EPSILON_F)
 {

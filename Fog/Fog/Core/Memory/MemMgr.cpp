@@ -18,6 +18,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// [Dependencies - POSIX]
+#if defined(FOG_OS_POSIX)
+# include <stdlib.h>
+# include <unistd.h>
+#endif // FOG_OS_POSIX
+
+// [Dependencies - MAC]
+#if defined(FOG_OS_MAC)
+# include <mach/mach_host.h>
+# include <mach/mach_init.h>
+#endif // FOG_OS_MAC
+
 namespace Fog {
 
 // ===========================================================================
@@ -62,12 +74,12 @@ static void* FOG_CDECL Memory_realloc(void* p, size_t size)
 
   if (FOG_IS_NULL(p))
   {
-    return _api.memmgr._m_alloc(size);
+    return _api.memmgr_alloc(size);
   }
 
   if (FOG_UNLIKELY(size == 0))
   {
-    _api.memmgr._m_free(p);
+    _api.memmgr_free(p);
     return NULL;
   }
 
@@ -252,7 +264,7 @@ static err_t FOG_CDECL MemMgr_unregisterCleanupFunc(MemCleanupFunc func, void* c
   { AutoLock locked(MemMgr_global->lock);
 
     MemCleanupItem** prev = &MemMgr_global->first;
-    
+
     item = *prev;
     while (item)
     {
@@ -304,20 +316,82 @@ static err_t FOG_CDECL MemMgr_unregisterCleanupFunc(MemCleanupFunc func, void* c
   return ERR_OK;
 }
 
+// ===========================================================================
+// [Fog::MemMgr - Physical Memory (Windows)]
+// ===========================================================================
+
+#if defined(FOG_OS_WINDOWS)
+static uint64_t FOG_CDECL MemMgr_getAmountOfPhysicalMemory(void)
+{
+  MEMORYSTATUSEX meminfo;
+  meminfo.dwLength = sizeof(meminfo);
+
+  if (!GlobalMemoryStatusEx(&meminfo))
+    return 0;
+
+  return (uint64_t)meminfo.ullTotalPhys;
+}
+#endif // FOG_OS_WINDOWS
+
+// ===========================================================================
+// [Fog::MemMgr - Physical Memory (Posix)]
+// ===========================================================================
+
+#if defined(FOG_OS_POSIX)
+static uint64_t FOG_CDECL MemMgr_getAmountOfPhysicalMemory(void)
+{
+// _SC_PHYS_PAGES is not part of POSIX and not available on OS X.
+#if defined(FOG_OS_MAC)
+  struct host_basic_info hostinfo;
+  mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
+
+  int result = host_info(mach_host_self(), HOST_BASIC_INFO,
+    reinterpret_cast<host_info_t>(&hostinfo), &count);
+  
+  if (result != KERN_SUCCESS)
+    return 0;
+  if (count != HOST_BASIC_INFO_COUNT)
+    return 0;
+
+  return static_cast<uint64_t>(hostinfo.max_mem);
+#else
+  long pages = sysconf(_SC_PHYS_PAGES);
+  long pageSize = sysconf(_SC_PAGE_SIZE);
+
+  if (pages == -1 || pageSize == -1)
+    return 0;
+
+  return (uint64_t)pages * (ulong)pageSize;
+#endif
+}
+#endif // FOG_OS_POSIX
+
+// ===========================================================================
+// [Fog::MemMgr - Physical Memory (Shared)]
+// ===========================================================================
+
+static uint32_t FOG_CDECL MemMgr_getAmountOfPhysicalMemoryMB(void)
+{
+  return (uint32_t)(MemMgr::getAmountOfPhysicalMemory() / 1048576);
+}
+
 // ============================================================================
 // [Init / Fini]
 // ============================================================================
 
 FOG_NO_EXPORT void MemMgr_init(void)
 {
-  _api.memmgr._m_alloc = Memory_alloc;
-  _api.memmgr._m_calloc = Memory_calloc;
-  _api.memmgr._m_realloc = Memory_realloc;
-  _api.memmgr._m_free = Memory_free;
+  _api.memmgr_alloc = Memory_alloc;
+  _api.memmgr_calloc = Memory_calloc;
+  _api.memmgr_realloc = Memory_realloc;
+  _api.memmgr_free = Memory_free;
 
-  _api.memmgr.cleanup = MemMgr_cleanup;
-  _api.memmgr.registerCleanupFunc = MemMgr_registerCleanupFunc;
-  _api.memmgr.unregisterCleanupFunc = MemMgr_unregisterCleanupFunc;
+  _api.memmgr_cleanup = MemMgr_cleanup;
+  _api.memmgr_registerCleanupFunc = MemMgr_registerCleanupFunc;
+  _api.memmgr_unregisterCleanupFunc = MemMgr_unregisterCleanupFunc;
+
+  _api.memmgr_getAmountOfPhysicalMemory = MemMgr_getAmountOfPhysicalMemory;
+  _api.memmgr_getAmountOfPhysicalMemoryMB = MemMgr_getAmountOfPhysicalMemoryMB;
 
   if (FOG_DEBUG_MEMORY)
     MemDebug_init();

@@ -9,10 +9,19 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Math/Convert.h>
+#include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Render/RenderStructs_p.h>
+#include <Fog/G2d/Imaging/ImageFormatDescription.h>
+#include <Fog/G2d/Painting/RasterConstants_p.h>
+
+// ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+namespace Fog {
+struct RasterPattern;
+} // Fog namespace
 
 namespace Fog {
 namespace RasterUtil {
@@ -21,9 +30,67 @@ namespace RasterUtil {
 //! @{
 
 // ============================================================================
-// [Fog::RasterUtil - Debugging]
+// [Fog::RasterUtil - Composite - CoreOp / ExtOp]
 // ============================================================================
 
+static FOG_INLINE bool isCompositeCoreOp(uint32_t compositingOperator)
+{
+  return compositingOperator < RASTER_COMPOSITE_CORE_COUNT;
+}
+
+static FOG_INLINE bool isCompositeExtOp(uint32_t compositingOperator)
+{
+  return compositingOperator >= RASTER_COMPOSITE_CORE_COUNT;
+}
+
+// ============================================================================
+// [Fog::RasterUtil - Composite - CopyOp / NopOp]
+// ============================================================================
+
+static FOG_INLINE bool isCompositeCopyOp(uint32_t dstFormat, uint32_t srcFormat, uint32_t compositingOperator)
+{
+  if (compositingOperator > COMPOSITE_SRC_OVER)
+    return false;
+
+  const ImageFormatDescription& dstDescription = ImageFormatDescription::getByFormat(dstFormat);
+  const ImageFormatDescription& srcDescription = ImageFormatDescription::getByFormat(srcFormat);
+
+  if (dstDescription.getDepth() != srcDescription.getDepth())
+    return false;
+
+  return compositingOperator == COMPOSITE_SRC || srcDescription.getASize() == 0;
+};
+
+static FOG_INLINE bool isCompositeNopOp(uint32_t op)
+{
+  return op == COMPOSITE_DST;
+}
+
+// ============================================================================
+// [Fog::RasterUtil - Composite - Compat]
+// ============================================================================
+
+static FOG_INLINE uint32_t getCompositeCompatFormat(uint32_t dstFormat, uint32_t srcFormat)
+{
+  FOG_ASSERT(dstFormat <= IMAGE_FORMAT_COUNT);
+  FOG_ASSERT(srcFormat <= IMAGE_FORMAT_COUNT);
+
+  return _g2d_render_compatibleFormat[dstFormat][srcFormat].srcFormat;
+}
+
+static FOG_INLINE uint32_t getCompositeCompatVBlitId(uint32_t dstFormat, uint32_t srcFormat)
+{
+  FOG_ASSERT(dstFormat <= IMAGE_FORMAT_COUNT);
+  FOG_ASSERT(srcFormat <= IMAGE_FORMAT_COUNT);
+
+  return _g2d_render_compatibleFormat[dstFormat][srcFormat].vblitId;
+}
+
+// ============================================================================
+// [Fog::RasterUtil - Debug]
+// ============================================================================
+
+// TODO: RLE - Not needed.
 #if defined(FOG_DEBUG)
 // Check whether all spans are inside screen.
 template<typename SpanT>
@@ -41,11 +108,10 @@ static FOG_INLINE void validateSpans(const SpanT* span, int screenX0, int screen
     span = span->getNext();
   }
 }
-
 #endif // FOG_DEBUG
 
 // ============================================================================
-// [Fog::RasterUtil - Multi-Threading]
+// [Fog::RasterUtil - Scope]
 // ============================================================================
 
 static FOG_INLINE int alignToDelta(int y, int offset, int delta)
@@ -74,38 +140,15 @@ static FOG_INLINE int alignToDelta(int y, int offset, int delta)
 // [Fog::RasterUtil - Pattern]
 // ============================================================================
 
-static FOG_INLINE bool isSolidContext(RenderPatternContext* pc)
+static FOG_INLINE bool isSolidContext(RasterPattern* pc)
 {
   return (size_t)pc == (size_t)0x1;
 }
 
-static FOG_INLINE bool isPatternContext(RenderPatternContext* pc)
+static FOG_INLINE bool isPatternContext(RasterPattern* pc)
 {
   return (size_t)pc > (size_t)0x1;
 }
-
-// ============================================================================
-// [Fog::RasterUtil - CompositingOperator]
-// ============================================================================
-
-static FOG_INLINE bool isCompositingOperatorNop(uint32_t op)
-{
-  return op == COMPOSITE_DST;
-}
-
-static FOG_INLINE bool isCompositeCopyOp(uint32_t dstFormat, uint32_t srcFormat, uint32_t compositingOperator)
-{
-  if (compositingOperator > COMPOSITE_SRC_OVER)
-    return false;
-
-  const ImageFormatDescription& dstDescription = ImageFormatDescription::getByFormat(dstFormat);
-  const ImageFormatDescription& srcDescription = ImageFormatDescription::getByFormat(srcFormat);
-
-  if (dstDescription.getDepth() != srcDescription.getDepth())
-    return false;
-
-  return compositingOperator == COMPOSITE_SRC || srcDescription.getASize() == 0;
-};
 
 // ============================================================================
 // [Fog::RasterUtil - Geometry]
@@ -139,62 +182,6 @@ static FOG_INLINE bool canAlignToGrid(BoxI& dst, const RectD& src, double x, dou
 
   return true;
 }
-
-// ============================================================================
-// [Fog::RasterUtil - Engine-Macros]
-// ============================================================================
-
-#define _FOG_RASTER_ENSURE_PATTERN(_Engine_) \
-  FOG_MACRO_BEGIN \
-    if (_Engine_->ctx.pc == NULL) \
-    { \
-      FOG_RETURN_ON_ERROR(_Engine_->createPatternContext()); \
-    } \
-  FOG_MACRO_END
-
-// ============================================================================
-// [Fog::RasterUtil - Mask-Macros]
-// ============================================================================
-
-// Get usable span instance from span retrieved from mask. We encode 'owned'
-// bit into pointer itself so it's needed to clear it to access the instance.
-#define RASTER_CLIP_SPAN_GET_USABLE(__span__) \
-  ( (RasterSpan8*) ((size_t)(__span__) & ~1) )
-
-// Get whether a given span instance is 'owned' or not. Owned means that it
-// can be directly manipulated by clipping method. If span is not owned then
-// you must replace the entire clip row with new span list.
-#define RASTER_CLIP_SPAN_IS_OWNED(__span__) \
-  (((size_t)(__span__) & 0x1) == 0)
-
-// Whether a given span instance is VSpan that contains own embedded clip mask.
-#define RASTER_CLIP_IS_EMBEDDED_VSPAN(__span__) \
-  (reinterpret_cast<const uint8_t*>(__span__) + sizeof(RasterMaskSpan8) == __span__->getGenericMask())
-
-#define RASTER_ENTER_CLIP_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
-    \
-    if (FOG_UNLIKELY(ctx.state & RASTER_CONTEXT_NO_PAINT_WORK_REGION)) \
-      return ERR_OK; \
-  FOG_MACRO_END
-
-#define RASTER_ENTER_CLIP_COND(__condition__) \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
-    \
-    if (FOG_UNLIKELY(ctx.state & RASTER_CONTEXT_NO_PAINT_WORK_REGION)) \
-      return ERR_OK; \
-    \
-    if (FOG_UNLIKELY(!(__condition__))) \
-      return _clipOpNull(clipOp); \
-    \
-  FOG_MACRO_END
-
-// ============================================================================
-// [Fog::RasterUtil - Region]
-// ============================================================================
-
 
 //! @}
 

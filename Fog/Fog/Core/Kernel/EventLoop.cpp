@@ -16,7 +16,7 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Kernel/EventLoop.h>
 #include <Fog/Core/Kernel/Task.h>
-#include <Fog/Core/OS/System.h>
+#include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/Core/Tools/List.h>
@@ -25,12 +25,7 @@
 #include <Fog/Core/Tools/Time.h>
 
 #if defined(FOG_OS_WINDOWS)
-# if !defined(USER_TIMER_MINIMUM)
-#  define USER_TIMER_MINIMUM 0x0000000A
-# endif // USER_TIMER_MINIMUM
-# if !defined(USER_TIMER_MAXIMUM)
-#  define USER_TIMER_MAXIMUM 0x7FFFFFFF
-# endif // USER_TIMER_MAXIMUM
+# include <Fog/Core/OS/WinUtil.h>
 #endif // FOG_OS_WINDOWS
 
 namespace Fog {
@@ -413,6 +408,15 @@ void DefaultEventLoop::_scheduleDelayedWork(const Time& delayedWorkTime)
 // [Fog::WinEventLoop]
 // ============================================================================
 
+#if defined(FOG_OS_WINDOWS)
+# if !defined(USER_TIMER_MINIMUM)
+#  define USER_TIMER_MINIMUM 0x0000000A
+# endif // USER_TIMER_MINIMUM
+# if !defined(USER_TIMER_MAXIMUM)
+#  define USER_TIMER_MAXIMUM 0x7FFFFFFF
+# endif // USER_TIMER_MAXIMUM
+#endif // FOG_OS_WINDOWS
+
 static const WCHAR EVENT_LOOP_WND_CLASS[] = L"Fog::WinEventLoop";
 
 // Message sent to get an additional time slice for pumping (processing)
@@ -454,7 +458,7 @@ void WinEventLoop::pumpOutPendingPaintMessages()
   // to get the job done. Actual common max is 4 peeks, but we'll be a little
   // safe here.
   static const int PAINT_MAX_PEEK_COUNT = 20;
-  bool win2k = System::getWindowsVersion() <= OS_WIN_VERSION_2000;
+  bool win2k = WinUtil::getWinVersion() <= WIN_VERSION_2000;
   int peekCount;
   MSG msg;
 

@@ -1612,6 +1612,7 @@ static const char* TextCodec_getCodeset(void)
   // that returns "Language_Country.CODEPAGE
   const char* codeset = setlocale(LC_ALL, NULL); // get locale...
   const char* chr = strchr(codeset, '.');
+
   if (chr)
   {
     // Text codec knows 1250, 1251, ...
@@ -1619,7 +1620,7 @@ static const char* TextCodec_getCodeset(void)
   }
   else
   {
-    Debug::dbgFunc("Fog::TextCodec", "Fog::TextCodec::getCodeset", "Can't get system codeset.\n");
+    Debug::dbgFunc("Fog::TextCodec", "getCodeset", "Can't get system codeset, using ISO-8859-1.\n");
     return "ISO-8859-1";
   }
 #else
@@ -1812,23 +1813,23 @@ FOG_NO_EXPORT void TextCodec_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.textcodec.ctor = TextCodec_ctor;
-  _api.textcodec.ctorCopy = TextCodec_ctorCopy;
-  _api.textcodec.dtor = TextCodec_dtor;
+  _api.textcodec_ctor = TextCodec_ctor;
+  _api.textcodec_ctorCopy = TextCodec_ctorCopy;
+  _api.textcodec_dtor = TextCodec_dtor;
 
-  _api.textcodec.createFromCode = TextCodec_createFromCode;
-  _api.textcodec.createFromMimeStubA = TextCodec_createFromMimeStubA;
-  _api.textcodec.createFromMimeStringW = TextCodec_createFromMimeStringW;
-  _api.textcodec.createFromBom = TextCodec_createFromBom;
+  _api.textcodec_createFromCode = TextCodec_createFromCode;
+  _api.textcodec_createFromMimeStubA = TextCodec_createFromMimeStubA;
+  _api.textcodec_createFromMimeStringW = TextCodec_createFromMimeStringW;
+  _api.textcodec_createFromBom = TextCodec_createFromBom;
 
-  _api.textcodec.reset = TextCodec_reset;
-  _api.textcodec.copy = TextCodec_copy;
+  _api.textcodec_reset = TextCodec_reset;
+  _api.textcodec_copy = TextCodec_copy;
 
-  _api.textcodec.encodeStubW = TextCodec_encodeStubW;
-  _api.textcodec.encodeStringW = TextCodec_encodeStringW;
+  _api.textcodec_encodeStubW = TextCodec_encodeStubW;
+  _api.textcodec_encodeStringW = TextCodec_encodeStringW;
 
-  _api.textcodec.decodeStubA = TextCodec_decodeStubA;
-  _api.textcodec.decodeStringA = TextCodec_decodeStringA;
+  _api.textcodec_decodeStubA = TextCodec_decodeStubA;
+  _api.textcodec_decodeStringA = TextCodec_decodeStringA;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -1839,7 +1840,7 @@ FOG_NO_EXPORT void TextCodec_init(void)
 
   // Initialize the oCache pointers.
   for (i = 0; i < TEXT_CODEC_CACHE_COUNT; i++)
-    _api.textcodec.oCache[i] = &TextCodec_oCache[i];
+    _api.textcodec_oCache[i] = &TextCodec_oCache[i];
 
   // LOCAL codec is initially initialized to LATIN-1.
   TextCodec_oCache[TEXT_CODEC_CACHE_NONE ]->_d = TextCodec_create(TEXT_ENCODING_NONE     );

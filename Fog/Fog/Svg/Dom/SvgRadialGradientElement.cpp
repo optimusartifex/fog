@@ -101,7 +101,7 @@ err_t SvgRadialGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
   _walkAndAddColorStops(const_cast<SvgRadialGradientElement*>(this), gradient);
 
   // Create Pattern instance.
-  Pattern pattern(gradient, a_gradientTransform.isAssigned() 
+  Pattern pattern(gradient, a_gradientTransform.isAssigned()
     ? a_gradientTransform.getTransform()
     : TransformF::identity()
   );

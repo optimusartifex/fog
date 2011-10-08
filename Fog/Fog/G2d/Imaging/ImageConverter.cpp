@@ -243,7 +243,7 @@ void ImageConverter::blitSpan(void* dst, const void* src, int w, const PointI& d
   ImageConverterClosure closure;
   setupClosure(&closure, ditherOrigin);
 
-    _d->blitFn(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<const uint8_t*>(src), w, &closure);
+  _d->blitFn(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<const uint8_t*>(src), w, &closure);
 }
 
 // ============================================================================

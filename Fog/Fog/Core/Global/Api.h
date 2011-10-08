@@ -2034,7 +2034,9 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(bool, colorstoplist_isOpaqueARGB32)(const ColorStopList* self);
   FOG_CAPI_METHOD(void, colorstoplist_clear)(ColorStopList* self);
   FOG_CAPI_METHOD(void, colorstoplist_reset)(ColorStopList* self);
-  FOG_CAPI_METHOD(err_t, colorstoplist_addStop)(ColorStopList* self, const ColorStop* stop);
+  FOG_CAPI_METHOD(err_t, colorstoplist_addArgb32)(ColorStopList* self, float offset, const Argb32* argb32);
+  FOG_CAPI_METHOD(err_t, colorstoplist_addColor)(ColorStopList* self, float offset, const Color* color);
+  FOG_CAPI_METHOD(err_t, colorstoplist_addColorStop)(ColorStopList* self, const ColorStop* stop);
   FOG_CAPI_METHOD(err_t, colorstoplist_removeOffset)(ColorStopList* self, float offset);
   FOG_CAPI_METHOD(err_t, colorstoplist_removeStop)(ColorStopList* self, const ColorStop* stop);
   FOG_CAPI_METHOD(err_t, colorstoplist_removeAt)(ColorStopList* self, size_t index);

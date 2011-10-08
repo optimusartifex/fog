@@ -941,7 +941,8 @@ err_t BmpEncoder::writeImage(const Image& image)
     }
   }
 
-  if (FOG_IS_ERROR(err)) goto _End;
+  if (FOG_IS_ERROR(err))
+    goto _End;
 
   bmpFileHeader.imageOffset      = 14 + headerSize + paletteEntries * 4;
   bmpFileHeader.fileSize         = bmpFileHeader.imageOffset + imageSize;

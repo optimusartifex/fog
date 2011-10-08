@@ -230,9 +230,19 @@ struct FOG_NO_EXPORT ColorStopList
   // [Methods]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE err_t add(float offset, const Argb32& argb32)
+  {
+    return _api.colorstoplist_addArgb32(this, offset, &argb32);
+  }
+
+  FOG_INLINE err_t add(float offset, const Color& color)
+  {
+    return _api.colorstoplist_addColor(this, offset, &color);
+  }
+
   FOG_INLINE err_t add(const ColorStop& stop)
   {
-    return _api.colorstoplist_addStop(this, &stop);
+    return _api.colorstoplist_addColorStop(this, &stop);
   }
 
   FOG_INLINE err_t remove(float offset)

@@ -253,7 +253,19 @@ static void FOG_CDECL ColorStopList_reset(ColorStopList* self)
 // [Fog::ColorStopList - Methods]
 // ============================================================================
 
-static err_t FOG_CDECL ColorStopList_addStop(ColorStopList* self, const ColorStop* stop)
+static err_t FOG_CDECL ColorStopList_addArgb32(ColorStopList* self, float offset, const Argb32* argb32)
+{
+  ColorStop stop(offset, *argb32);
+  return self->add(stop);
+}
+
+static err_t FOG_CDECL ColorStopList_addColor(ColorStopList* self, float offset, const Color* color)
+{
+  ColorStop stop(offset, *color);
+  return self->add(stop);
+}
+
+static err_t FOG_CDECL ColorStopList_addColorStop(ColorStopList* self, const ColorStop* stop)
 {
   if (!stop->isValid())
     return ERR_RT_INVALID_ARGUMENT;
@@ -536,7 +548,9 @@ FOG_NO_EXPORT void ColorStopList_init(void)
   _api.colorstoplist_isOpaqueARGB32 = ColorStopList_isOpaqueARGB32;
   _api.colorstoplist_clear = ColorStopList_clear;
   _api.colorstoplist_reset = ColorStopList_reset;
-  _api.colorstoplist_addStop = ColorStopList_addStop;
+  _api.colorstoplist_addArgb32 = ColorStopList_addArgb32;
+  _api.colorstoplist_addColor = ColorStopList_addColor;
+  _api.colorstoplist_addColorStop = ColorStopList_addColorStop;
   _api.colorstoplist_removeOffset = ColorStopList_removeOffset;
   _api.colorstoplist_removeStop = ColorStopList_removeStop;
   _api.colorstoplist_removeAt = ColorStopList_removeAt;

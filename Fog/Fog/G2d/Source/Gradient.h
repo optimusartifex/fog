@@ -102,6 +102,8 @@ struct FOG_NO_EXPORT GradientF
   FOG_INLINE void clearStops() { _stops->clear(); }
   FOG_INLINE void resetStops() { _stops->reset(); }
 
+  FOG_INLINE err_t addStop(float offset, const Argb32& argb32) { return _stops->add(offset, argb32); }
+  FOG_INLINE err_t addStop(float offset, const Color& color) { return _stops->add(offset, color); }
   FOG_INLINE err_t addStop(const ColorStop& stop) { return _stops->add(stop); }
 
   FOG_INLINE err_t removeStop(float offset) { return _stops->remove(offset); }

@@ -52,10 +52,10 @@ struct FOG_NO_EXPORT ColorLut : public ImageFilterTag
     return c[component]();
   }
 
-  FOG_INLINE const ColorLutArray& getAlphaFunction() const { return getComponentArray(COLOR_INDEX_ALPHA); }
-  FOG_INLINE const ColorLutArray& getRedFunction() const { return getComponentArray(COLOR_INDEX_RED); }
-  FOG_INLINE const ColorLutArray& getGreenFunction() const { return getComponentArray(COLOR_INDEX_GREEN); }
-  FOG_INLINE const ColorLutArray& getBlueFunction() const { return getComponentArray(COLOR_INDEX_BLUE); }
+  FOG_INLINE const ColorLutArray& getAlphaArray() const { return getComponentArray(COLOR_INDEX_ALPHA); }
+  FOG_INLINE const ColorLutArray& getRedArray() const { return getComponentArray(COLOR_INDEX_RED); }
+  FOG_INLINE const ColorLutArray& getGreenArray() const { return getComponentArray(COLOR_INDEX_GREEN); }
+  FOG_INLINE const ColorLutArray& getBlueArray() const { return getComponentArray(COLOR_INDEX_BLUE); }
 
   FOG_INLINE err_t setComponentArray(uint32_t component, const ColorLutArray& lutArray)
   {
@@ -65,10 +65,10 @@ struct FOG_NO_EXPORT ColorLut : public ImageFilterTag
     return ERR_OK;
   }
 
-  FOG_INLINE err_t setAlphaFunction(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_ALPHA, lutArray); }
-  FOG_INLINE err_t setRedFunction(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_RED, lutArray); }
-  FOG_INLINE err_t setGreenFunction(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_GREEN, lutArray); }
-  FOG_INLINE err_t setBlueFunction(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_BLUE, lutArray); }
+  FOG_INLINE err_t setAlphaArray(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_ALPHA, lutArray); }
+  FOG_INLINE err_t setRedArray(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_RED, lutArray); }
+  FOG_INLINE err_t setGreenArray(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_GREEN, lutArray); }
+  FOG_INLINE err_t setBlueArray(const ColorLutArray& lutArray) { return setComponentArray(COLOR_INDEX_BLUE, lutArray); }
 
   // --------------------------------------------------------------------------
   // [Reset]

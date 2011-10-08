@@ -95,9 +95,9 @@ void BenchFog::configureGradient(Fog::LinearGradientF& gradient,
   gradient.setEnd(Fog::PointF(r.x + r.w, r.y + r.h));
 
   gradient.clearStops();
-  gradient.addStop(Fog::ColorStop(0.0f, c0));
-  gradient.addStop(Fog::ColorStop(0.5f, c1));
-  gradient.addStop(Fog::ColorStop(1.0f, c2));
+  gradient.addStop(0.0f, c0);
+  gradient.addStop(0.5f, c1);
+  gradient.addStop(1.0f, c2);
 }
 
 void BenchFog::configureGradient(Fog::LinearGradientF& gradient,
@@ -107,9 +107,9 @@ void BenchFog::configureGradient(Fog::LinearGradientF& gradient,
   gradient.setEnd(Fog::PointF(r.x + r.w, r.y + r.h));
 
   gradient.clearStops();
-  gradient.addStop(Fog::ColorStop(0.0f, c0));
-  gradient.addStop(Fog::ColorStop(0.5f, c1));
-  gradient.addStop(Fog::ColorStop(1.0f, c2));
+  gradient.addStop(0.0f, c0);
+  gradient.addStop(0.5f, c1);
+  gradient.addStop(1.0f, c2);
 }
 
 void BenchFog::runCreateDestroy(BenchOutput& output, const BenchParams& params)

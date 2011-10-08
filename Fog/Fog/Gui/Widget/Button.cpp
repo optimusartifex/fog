@@ -58,12 +58,12 @@ void Button::onPaint(PaintEvent* e)
   LinearGradientF gs(gf);
 
   gf.setGradientSpread(GRADIENT_SPREAD_PAD);
-  gf.addStop(ColorStop(0.0f, Argb32(0xFFFFFFFF)));
-  gf.addStop(ColorStop(1.0f, Argb32(isMouseOver() ? 0xFFCADAFF : 0xFFB8C8FF)));
+  gf.addStop(0.0f, Argb32(0xFFFFFFFF));
+  gf.addStop(1.0f, Argb32(isMouseOver() ? 0xFFCADAFF : 0xFFB8C8FF));
 
   gs.setGradientSpread(GRADIENT_SPREAD_PAD);
-  gs.addStop(ColorStop(0.0f, Argb32(0xFF5070D0)));
-  gs.addStop(ColorStop(1.0f, Argb32(0xFF4F4F7F)));
+  gs.addStop(0.0f, Argb32(0xFF5070D0));
+  gs.addStop(1.0f, Argb32(0xFF4F4F7F));
 
   p->setSource(gf);
   p->fillRound(round);

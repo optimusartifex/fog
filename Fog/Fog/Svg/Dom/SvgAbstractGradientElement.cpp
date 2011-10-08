@@ -92,7 +92,7 @@ _Start:
           color.setAlpha(_stop->a_style._stopOpacity);
         }
 
-        gradient.addStop(ColorStop(offset, color));
+        gradient.addStop(offset, color);
         stopsParsed = true;
       }
     }

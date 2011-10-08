@@ -137,11 +137,13 @@ FOG_CAPI_DECLARE void _fog_init(void)
   ImageCodecProvider_init();
   ImageEffect_init();
 
-  ColorMatrix_init();
   ColorLutArray_init();
   ColorLut_init();
+  ColorMatrix_init();
   ComponentTransferFunction_init();
   ComponentTransfer_init();
+
+  Blur_init();
   ConvolutionMatrix_init();
 
   // [G2d/Painting]

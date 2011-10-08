@@ -51,6 +51,49 @@ enum AXIS
 };
 
 // ============================================================================
+// [Fog::BLUR_LIMIT]
+// ============================================================================
+
+//! @brief Blur limitations
+enum BLUR_LIMIT
+{
+  //! @brief Maximum blur filter radius.
+  BLUR_LIMIT_RADIUS = 255
+};
+
+// ============================================================================
+// [Fog::BLUR_TYPE]
+// ============================================================================
+
+//! @brief Type of blur, see @c ImageFxFilter.
+enum BLUR_TYPE
+{
+  //! @brief The box-blur effect (default).
+  //!
+  //! The box-blur effect is low-level quality blur, but very efficient.
+  BLUR_TYPE_BOX = 0,
+
+  //! @brief The linear-blur effect.
+  //!
+  //! The Linear-blur effect quality is between box-blur and gaussian-blur.
+  //! The result and performance of this effect is optimal for the most
+  //! operations.
+  BLUR_TYPE_LINEAR = 1,
+
+  //! @brief The gaussian-blur type.
+  //!
+  //! The gaussian-blur effect is high-quality blur, but computation intensive
+  //! (poor performance).
+  BLUR_TYPE_GAUSSIAN = 2,
+
+  //! @brief The default blur type.
+  BLUR_TYPE_DEFAULT = BLUR_TYPE_BOX,
+
+  //! @brief Count of blur effects.
+  BLUR_TYPE_COUNT = 3
+};
+
+// ============================================================================
 // [Fog::CLIP_OP]
 // ============================================================================
 
@@ -1493,6 +1536,159 @@ enum IMAGE_FD_FLAGS
 };
 
 // ============================================================================
+// [Fog::IMAGE_FILTER_TYPE]
+// ============================================================================
+
+//! @brief Type of image filter.
+enum IMAGE_FILTER_TYPE
+{
+  //! @brief No filter.
+  IMAGE_FILTER_TYPE_NONE = 0,
+
+  // --------------------------------------------------------------------------
+  // [Color Filters]
+  // --------------------------------------------------------------------------
+
+  //! @brief @ref ColorLut filter.
+  IMAGE_FILTER_TYPE_COLOR_LUT = 1,
+  //! @brief @ref ColorMatrix filter.
+  IMAGE_FILTER_TYPE_COLOR_MATRIX = 2,
+  //! @brief @ref ComponentTransfer filter
+  IMAGE_FILTER_TYPE_COMPONENT_TRANSFER = 3,
+
+  // --------------------------------------------------------------------------
+  // [Image Filters]
+  // --------------------------------------------------------------------------
+
+  //! @brief @ref Blur filter.
+  IMAGE_FILTER_TYPE_BLUR = 4,
+  //! @brief @ref ConvolutionMatrix filter.
+  IMAGE_FILTER_TYPE_CONVOLUTION_MATRIX = 5,
+  //! @brief @ref ConvolutionSeparable filter.
+  IMAGE_FILTER_TYPE_CONVOLUTION_SEPARABLE = 6,
+
+  //! @brief Count of image filter types.
+  IMAGE_FILTER_TYPE_COUNT = 7
+};
+
+// ============================================================================
+// [Fog::IMAGE_FILTER_FLAG]
+// ============================================================================
+
+// TODO:
+
+//! @brief Characteristics of image filter.
+//!
+//! Characteristics can be used to improve performance of filters by @c Painter.
+enum IMAGE_FILTER_FLAG
+{
+  //! @brief Image filter does only color transformations.
+  //!
+  //! This flag must set all color filter, because it's very useful hint that
+  //! enables very good code optimizations inside @c Painter and @c Image
+  //! classes.
+  IMAGE_FILTER_FLAG_COLOR_TRANSFORM = 0x0001,
+
+  //! @brief Image filter can extend image boundary (convolution based filters).
+  IMAGE_FILTER_FLAG_CAN_EXTEND = 0x0002,
+
+  //! @brief Image filter constains standard processing mechanism - one pass.
+  IMAGE_FILTER_FLAG_ENTIRE_PROCESSING = 0x0004,
+
+  //! @brief When doing entire processing the destination and source buffers
+  //! can be shared (dst and src pointers can point to same location).
+  IMAGE_FILTER_FLAG_ENTIRE_MEM_EQUAL = 0x0008,
+
+  //! @brief Image filter does vertical processing of an image.
+  //!
+  //! This bit is set for all blur/convolution filters. Performance of filter
+  //! is usually degraded, because filter processing function needs to access
+  //!  pixels in different scanlines (cache misses, etc...).
+  //!
+  //! @note Vertical processing can be combined with horizontal processing and
+  //! painter tries to make this combination efficient.
+  IMAGE_FILTER_FLAG_VERT_PROCESSING = 0x0010,
+
+  //! @brief When doing vertical processing the destination and source buffers
+  //! can be shared (dst and src pointers can point to same location).
+  IMAGE_FILTER_FLAG_VERT_MEM_EQUAL = 0x0020,
+
+  //! @brief Image filter does horizontal processing of image.
+  //!
+  //! If filter needs only horizontal (no IMAGE_EFFECT_VERT_PROCESSING bit is
+  //! set) then processing it can be very efficient in multithreaded painter
+  //! engine.
+  IMAGE_FILTER_FLAG_HORZ_PROCESSING = 0x0040,
+
+  //! @brief When doing vertical processing the destination and source buffers
+  //! can be shared (dst and src pointers can point to same location).
+  IMAGE_FILTER_FLAG_HORZ_MEM_EQUAL = 0x0080,
+
+  //! @brief Contains both, @c IMAGE_EFFECT_VERT_PROCESSING and
+  //! @c IMAGE_EFFECT_HORZ_PROCESSING flags.
+  IMAGE_FILTER_FLAG_HV_PROCESSING = IMAGE_FILTER_FLAG_VERT_PROCESSING | IMAGE_FILTER_FLAG_HORZ_PROCESSING,
+
+  //! @brief Image filter supports @c IMAGE_FORMAT_PRGB32.
+  IMAGE_FILTER_FLAG_SUPPORTS_PRGB32 = 0x0100,
+
+  //! @brief Image filter supports @c IMAGE_FORMAT_XRGB32.
+  //!
+  //! @note This flag should be always set!
+  IMAGE_FILTER_FLAG_SUPPORTS_XRGB32 = 0x0400,
+
+  //! @brief Image filter supports @c IMAGE_FORMAT_A8.
+  //!
+  //! @note This flag should be always set!
+  IMAGE_FILTER_FLAG_SUPPORTS_A8 = 0x0800,
+
+  //! @brief Image filter supports alpha-channel promotion. This means that
+  //! source image without alpha-channel can be converted to an image with
+  //! alpha-channel.
+  //!
+  //! This operation is supported by all blur-filters (and should be supported
+  //! generally by all filters that extend image boundary).
+  IMAGE_FILTER_FLAG_PROMOTE_ALPHA = 0x1000
+};
+
+// ============================================================================
+// [Fog::IMAGE_FILTER_EXTEND]
+// ============================================================================
+
+//! @brief Border extend mode used by image effects (convolution and blurs).
+enum IMAGE_FILTER_EXTEND
+{
+  //! @brief Borders are extended by a color.
+  IMAGE_FILTER_EXTEND_COLOR = 0,
+
+  //! @brief Borders are extended using pad.
+  IMAGE_FILTER_EXTEND_PAD = 1,
+
+  //! @brief Borders are extended using repead.
+  IMAGE_FILTER_EXTEND_REPEAT = 2,
+
+  //! @brief Borders are extended using reflect.
+  IMAGE_FILTER_EXTEND_REFLECT = 3,
+
+  //! @brief Default border extend type.
+  IMAGE_FILTER_EXTEND_DEFAULT = IMAGE_FILTER_EXTEND_COLOR,
+
+  //! @brief Count of border extend types (for error checking).
+  IMAGE_FILTER_EXTEND_COUNT = 4
+};
+
+// ============================================================================
+// [Fog::IMAGE_FILTER_MODE]
+// ============================================================================
+
+// TODO:
+
+enum IMAGE_FILTER_MODE
+{
+  IMAGE_EFFECT_MODE_NORMAL,
+  IMAGE_EFFECT_MODE_ALPHA
+};
+
+// ============================================================================
 // [Fog::IMAGE_FORMAT]
 // ============================================================================
 
@@ -2579,214 +2775,6 @@ enum UNIT
   //! @brief Count of coord units.
   UNIT_COUNT
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================================
-// [Fog::IMAGE_FILTER_TYPE]
-// ============================================================================
-
-//! @brief Type of image filter.
-enum IMAGE_FILTER_TYPE
-{
-  //! @brief None.
-  IMAGE_FILTER_TYPE_NONE = 0,
-
-  //! @brief @ref ColorLut filter.
-  IMAGE_FILTER_TYPE_COLOR_LUT = 1,
-  //! @brief @ref ColorMatrix filter.
-  IMAGE_FILTER_TYPE_COLOR_MATRIX = 2,
-  //! @brief @ref ComponentTransfer filter
-  IMAGE_FILTER_TYPE_COMPONENT_TRANSFER = 3,
-
-  //! @brief @ref ConvolutionMatrix filter.
-  IMAGE_FILTER_TYPE_CONVOLUTION_MATRIX = 4,
-  //! @brief @ref ConvolutionSeparable filter.
-  IMAGE_FILTER_TYPE_CONVOLUTION_SEPARABLE = 5,
-
-  //! @brief Count of image filter types.
-  IMAGE_FILTER_TYPE_COUNT = 6
-};
-
-// ============================================================================
-// [Fog::IMAGE_FILTER_FLAG]
-// ============================================================================
-
-//! @brief Characteristics of image filter.
-//!
-//! Characteristics can be used to improve performance of filters by @c Painter.
-enum IMAGE_FILTER_FLAG
-{
-  //! @brief Image filter does only color transformations.
-  //!
-  //! This flag must set all color filter, because it's very useful hint that
-  //! enables very good code optimizations inside @c Painter and @c Image
-  //! classes.
-  IMAGE_FILTER_FLAG_COLOR_TRANSFORM = 0x0001,
-
-  //! @brief Image filter can extend image boundary (convolution based filters).
-  IMAGE_FILTER_FLAG_CAN_EXTEND = 0x0002,
-
-  //! @brief Image filter constains standard processing mechanism - one pass.
-  IMAGE_FILTER_FLAG_ENTIRE_PROCESSING = 0x0004,
-
-  //! @brief When doing entire processing the destination and source buffers
-  //! can be shared (dst and src pointers can point to same location).
-  IMAGE_FILTER_FLAG_ENTIRE_MEM_EQUAL = 0x0008,
-
-  //! @brief Image filter does vertical processing of an image.
-  //!
-  //! This bit is set for all blur/convolution filters. Performance of filter
-  //! is usually degraded, because filter processing function needs to access
-  //!  pixels in different scanlines (cache misses, etc...).
-  //!
-  //! @note Vertical processing can be combined with horizontal processing and
-  //! painter tries to make this combination efficient.
-  IMAGE_FILTER_FLAG_VERT_PROCESSING = 0x0010,
-
-  //! @brief When doing vertical processing the destination and source buffers
-  //! can be shared (dst and src pointers can point to same location).
-  IMAGE_FILTER_FLAG_VERT_MEM_EQUAL = 0x0020,
-
-  //! @brief Image filter does horizontal processing of image.
-  //!
-  //! If filter needs only horizontal (no IMAGE_EFFECT_VERT_PROCESSING bit is
-  //! set) then processing it can be very efficient in multithreaded painter
-  //! engine.
-  IMAGE_FILTER_FLAG_HORZ_PROCESSING = 0x0040,
-
-  //! @brief When doing vertical processing the destination and source buffers
-  //! can be shared (dst and src pointers can point to same location).
-  IMAGE_FILTER_FLAG_HORZ_MEM_EQUAL = 0x0080,
-
-  //! @brief Contains both, @c IMAGE_EFFECT_VERT_PROCESSING and
-  //! @c IMAGE_EFFECT_HORZ_PROCESSING flags.
-  IMAGE_FILTER_FLAG_HV_PROCESSING = IMAGE_FILTER_FLAG_VERT_PROCESSING | IMAGE_FILTER_FLAG_HORZ_PROCESSING,
-
-  //! @brief Image filter supports @c IMAGE_FORMAT_PRGB32.
-  IMAGE_FILTER_FLAG_SUPPORTS_PRGB32 = 0x0100,
-
-  //! @brief Image filter supports @c IMAGE_FORMAT_XRGB32.
-  //!
-  //! @note This flag should be always set!
-  IMAGE_FILTER_FLAG_SUPPORTS_XRGB32 = 0x0400,
-
-  //! @brief Image filter supports @c IMAGE_FORMAT_A8.
-  //!
-  //! @note This flag should be always set!
-  IMAGE_FILTER_FLAG_SUPPORTS_A8 = 0x0800,
-
-  //! @brief Image filter supports alpha-channel promotion. This means that
-  //! source image without alpha-channel can be converted to an image with
-  //! alpha-channel.
-  //!
-  //! This operation is supported by all blur-filters (and should be supported
-  //! generally by all filters that extend image boundary).
-  IMAGE_FILTER_FLAG_PROMOTE_ALPHA = 0x1000
-};
-
-// ============================================================================
-// [Fog::IMAGE_FILTER_EXTEND]
-// ============================================================================
-
-//! @brief Border extend mode used by image effects (convolution and blurs).
-enum IMAGE_FILTER_EXTEND
-{
-  //! @brief Borders are extended by a color.
-  IMAGE_FILTER_EXTEND_COLOR = 0,
-
-  //! @brief Borders are extended using pad.
-  IMAGE_FILTER_EXTEND_PAD = 1,
-
-  //! @brief Borders are extended using repead.
-  IMAGE_FILTER_EXTEND_REPEAT = 2,
-
-  //! @brief Borders are extended using reflect.
-  IMAGE_FILTER_EXTEND_REFLECT = 3,
-
-  //! @brief Default border extend type.
-  IMAGE_FILTER_EXTEND_DEFAULT = IMAGE_FILTER_EXTEND_COLOR,
-
-  //! @brief Count of border extend types (for error checking).
-  IMAGE_FILTER_EXTEND_COUNT = 4
-};
-
-
-
-
-
-// ============================================================================
-// [Fog::BLUR_FX_TYPE]
-// ============================================================================
-
-//! @brief Type of blur, see @c ImageFxFilter.
-enum BLUR_FX_TYPE
-{
-  //! @brief The linear-blur effect (default).
-  //!
-  //! The Linear-blur effect quality is between box-blur and gaussian-blur.
-  //! The result and performance of this effect is optimal for the most
-  //! operations.
-  BLUR_FX_LINEAR = 0,
-
-  //! @brief The box-blur effect.
-  //!
-  //! The box-blur effect is low-level quality blur, but very efficient.
-  BLUR_FX_BOX = 1,
-
-  //! @brief The gaussian-blur type.
-  //!
-  //! The gaussian-blur effect is high-quality blur, but computation intensive
-  //! (poor performance).
-  BLUR_FX_GAUSSIAN = 2,
-
-  //! @brief The default blur type.
-  BLUR_FX_DEFAULT = BLUR_FX_LINEAR,
-
-  //! @brief Count of blur effects.
-  BLUR_FX_COUNT = 3
-};
-
-//! @brief Maximum blur radius.
-enum 
-{
-  BLUR_FX_MAX_RADIUS = 255
-};
-
-// ============================================================================
-// [Fog::IMAGE_EFFECT_ALPHA_MODE]
-// ============================================================================
-
-enum IMAGE_EFFECT_ALPHA_MODE
-{
-  IMAGE_EFFECT_ALPHA_NORMAL,
-  IMAGE_EFFECT_ALPHA_INCLUDE
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //! @}
 

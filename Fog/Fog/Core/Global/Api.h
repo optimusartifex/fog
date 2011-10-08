@@ -1837,6 +1837,10 @@ struct FOG_NO_EXPORT Api
   Image* image_oEmpty;
 
   // --------------------------------------------------------------------------
+  // [G2d/Imaging - ImageConverter]
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
   // [G2d/Imaging - ImageFormatDescription]
   // --------------------------------------------------------------------------
 
@@ -1871,6 +1875,17 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(bool, imagepalette_isGreyscale)(const Argb32* data, size_t length);
 
   ImagePalette* imagepalette_oEmpty;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging/Filters - Blur]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(blur_ctor)(Blur* self);
+  FOG_CAPI_CTOR(blur_ctorCopy)(Blur* self, const Blur* other);
+
+  FOG_CAPI_METHOD(void, blur_reset)(Blur* self);
+  FOG_CAPI_METHOD(err_t, blur_copy)(Blur* self, const Blur* other);
+  FOG_CAPI_STATIC(bool, blur_eq)(const Blur* a, const Blur* b);
 
   // --------------------------------------------------------------------------
   // [G2d/Imaging/Filters - ColorLut]

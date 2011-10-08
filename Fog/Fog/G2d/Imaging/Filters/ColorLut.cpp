@@ -10,8 +10,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Math/Constants.h>
-#include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Imaging/Filters/ColorLut.h>
 #include <Fog/G2d/Imaging/Filters/ColorLutArray.h>
 

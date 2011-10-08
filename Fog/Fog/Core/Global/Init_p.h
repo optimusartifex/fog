@@ -134,6 +134,7 @@ FOG_NO_EXPORT void ImageEffect_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_fini(void);
 
+FOG_NO_EXPORT void Blur_init(void);
 FOG_NO_EXPORT void ColorLut_init(void);
 FOG_NO_EXPORT void ColorLutArray_init(void);
 FOG_NO_EXPORT void ColorMatrix_init(void);

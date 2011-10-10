@@ -51,49 +51,6 @@ enum AXIS
 };
 
 // ============================================================================
-// [Fog::BLUR_LIMIT]
-// ============================================================================
-
-//! @brief Blur limitations
-enum BLUR_LIMIT
-{
-  //! @brief Maximum blur filter radius.
-  BLUR_LIMIT_RADIUS = 255
-};
-
-// ============================================================================
-// [Fog::BLUR_TYPE]
-// ============================================================================
-
-//! @brief Type of blur, see @c ImageFxFilter.
-enum BLUR_TYPE
-{
-  //! @brief The box-blur effect (default).
-  //!
-  //! The box-blur effect is low-level quality blur, but very efficient.
-  BLUR_TYPE_BOX = 0,
-
-  //! @brief The linear-blur effect.
-  //!
-  //! The Linear-blur effect quality is between box-blur and gaussian-blur.
-  //! The result and performance of this effect is optimal for the most
-  //! operations.
-  BLUR_TYPE_LINEAR = 1,
-
-  //! @brief The gaussian-blur type.
-  //!
-  //! The gaussian-blur effect is high-quality blur, but computation intensive
-  //! (poor performance).
-  BLUR_TYPE_GAUSSIAN = 2,
-
-  //! @brief The default blur type.
-  BLUR_TYPE_DEFAULT = BLUR_TYPE_BOX,
-
-  //! @brief Count of blur effects.
-  BLUR_TYPE_COUNT = 3
-};
-
-// ============================================================================
 // [Fog::CLIP_OP]
 // ============================================================================
 
@@ -198,142 +155,6 @@ enum COLOR_INDEX
   COLOR_INDEX_BLUE  = 3,
 
   COLOR_INDEX_COUNT = 4
-};
-
-// ============================================================================
-// [Fog::COLOR_MATRIX]
-// ============================================================================
-
-//! @brief Color matrix characteristics.
-enum COLOR_MATRIX
-{
-  //! @brief Matrix contains RGB shear part.
-  //!
-  //! RGB shear part is illustrated here:
-  //!   [n X X n n]
-  //!   [X n X n n]
-  //!   [X X n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  COLOR_MATRIX_SHEAR_RGB = 0x01,
-
-  //! @brief Matrix contains alpha shear part.
-  //!
-  //! Alpha shear part is illustrated here:
-  //!   [n n n X n]
-  //!   [n n n X n]
-  //!   [n n n X n]
-  //!   [X X X n n]
-  //!   [n n n n n]
-  COLOR_MATRIX_SHEAR_ALPHA = 0x02,
-
-  //! @brief Matrix contains ARGB shear part.
-  //!
-  //! ARGB shear part is illustrated here:
-  //!   [n X X X n]
-  //!   [X n X X n]
-  //!   [X X n X n]
-  //!   [X X X n n]
-  //!   [n n n n n]
-  //!
-  //! @note ARGB shear is combination of RGB and Alpha shear parts.
-  COLOR_MATRIX_SHEAR_ARGB = 0x03,
-
-  //! @brief Matrix contains RGB lut part.
-  //!
-  //! RGB lut part is illustrated here:
-  //!   [X n n n n]
-  //!   [n X n n n]
-  //!   [n n X n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  COLOR_MATRIX_LUT_RGB = 0x04,
-
-  //! @brief Matrix contains RGB lut part.
-  //!
-  //! Alpha lut part is illustrated here:
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n X n]
-  //!   [n n n n n]
-  COLOR_MATRIX_LUT_ALPHA = 0x08,
-
-  //! @brief Matrix contains ARGB lut part.
-  //!
-  //! ARGB lut part is illustrated here:
-  //!   [X n n n n]
-  //!   [n X n n n]
-  //!   [n n X n n]
-  //!   [n n n X n]
-  //!   [n n n n n]
-  //!
-  //! @note ARGB lut is combination of RGB and Alpha lut parts.
-  COLOR_MATRIX_LUT_ARGB = 0x0C,
-
-  //! @brief Matrix contains const RGB lut part (all cells are set to 1.0).
-  //!
-  //! Const RGB lut part is illustrated here:
-  //!   [1 n n n n]
-  //!   [n 1 n n n]
-  //!   [n n 1 n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  COLOR_MATRIX_CONST_RGB = 0x10,
-
-  //! @brief Matrix contains const alpha lut part (cell set to 1.0).
-  //!
-  //! Const alpha lut part is illustrated here:
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n 1 n]
-  //!   [n n n n n]
-  COLOR_MATRIX_CONST_ALPHA = 0x20,
-
-  //! @brief Matrix contains const ARGB lut part (all cells are set to 1.0).
-  //!
-  //! Const ARGB lut part is illustrated here:
-  //!   [1 n n n n]
-  //!   [n 1 n n n]
-  //!   [n n 1 n n]
-  //!   [n n n 1 n]
-  //!   [n n n n n]
-  //!
-  //! @note ARGB const lut is combination of RGB a Alpha const lut.
-  COLOR_MATRIX_CONST_ARGB = 0x30,
-
-  //! @brief Matrix contains RGB translation part
-  //!
-  //! RGB translation part is illustrated here:
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [X X X n n]
-  COLOR_MATRIX_TRANSLATE_RGB  = 0x40,
-
-  //! @brief Matrix contains alpha translation part
-  //!
-  //! Alpha translation part is illustrated here:
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n X n]
-  COLOR_MATRIX_TRANSLATE_ALPHA = 0x80,
-
-  //! @brief Matrix contains ARGB translation part
-  //!
-  //! ARGB translation part is illustrated here:
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [n n n n n]
-  //!   [X X X X n]
-  //!
-  //! @note ARGB translation is combination of RGB and Alpha translation parts.
-  COLOR_MATRIX_TRANSLATE_ARGB = 0xC0
 };
 
 // ============================================================================
@@ -461,21 +282,6 @@ enum COLOR_MIX_OP
   COLOR_MIX_OP_DIFFERENCE = 12,
 
   COLOR_MIX_OP_COUNT = 13
-};
-
-// ============================================================================
-// [Fog::COMPONENT_TRANSFER_FUNCTION]
-// ============================================================================
-
-enum COMPONENT_TRANSFER_FUNCTION
-{
-  COMPONENT_TRANSFER_FUNCTION_IDENTITY = 0,
-  COMPONENT_TRANSFER_FUNCTION_TABLE = 1,
-  COMPONENT_TRANSFER_FUNCTION_DISCRETE = 2,
-  COMPONENT_TRANSFER_FUNCTION_LINEAR = 3,
-  COMPONENT_TRANSFER_FUNCTION_GAMMA = 4,
-
-  COMPONENT_TRANSFER_FUNCTION_COUNT = 5
 };
 
 // ============================================================================
@@ -856,6 +662,213 @@ enum DITHER_TYPE
 {
   DITHER_TYPE_NONE = 0,
   DITHER_TYPE_PATTERN = 1
+};
+
+// ============================================================================
+// [Fog::FE_BLUR_LIMIT]
+// ============================================================================
+
+//! @brief Blur limitations
+enum FE_BLUR_LIMIT
+{
+  //! @brief Maximum blur filter radius.
+  FE_BLUR_LIMIT_RADIUS = 255
+};
+
+// ============================================================================
+// [Fog::FE_BLUR_TYPE]
+// ============================================================================
+
+//! @brief Type of blur, see @c ImageFxFilter.
+enum FE_BLUR_TYPE
+{
+  //! @brief The box-blur effect (default).
+  //!
+  //! The box-blur effect is low-level quality blur, but very efficient.
+  FE_BLUR_TYPE_BOX = 0,
+
+  //! @brief The linear-blur effect.
+  //!
+  //! The Linear-blur effect quality is between box-blur and gaussian-blur.
+  //! The result and performance of this effect is optimal for the most
+  //! operations.
+  FE_BLUR_TYPE_LINEAR = 1,
+
+  //! @brief The gaussian-blur type.
+  //!
+  //! The gaussian-blur effect is high-quality blur, but computation intensive
+  //! (poor performance).
+  FE_BLUR_TYPE_GAUSSIAN = 2,
+
+  //! @brief The default blur type.
+  FE_BLUR_TYPE_DEFAULT = FE_BLUR_TYPE_BOX,
+
+  //! @brief Count of blur effects.
+  FE_BLUR_TYPE_COUNT = 3
+};
+
+// ============================================================================
+// [Fog::FE_COLOR_MATRIX]
+// ============================================================================
+
+//! @brief Color matrix characteristics.
+enum FE_COLOR_MATRIX
+{
+  //! @brief Matrix contains RGB shear part.
+  //!
+  //! RGB shear part is illustrated here:
+  //!   [n X X n n]
+  //!   [X n X n n]
+  //!   [X X n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  FE_COLOR_MATRIX_SHEAR_RGB = 0x01,
+
+  //! @brief Matrix contains alpha shear part.
+  //!
+  //! Alpha shear part is illustrated here:
+  //!   [n n n X n]
+  //!   [n n n X n]
+  //!   [n n n X n]
+  //!   [X X X n n]
+  //!   [n n n n n]
+  FE_COLOR_MATRIX_SHEAR_ALPHA = 0x02,
+
+  //! @brief Matrix contains ARGB shear part.
+  //!
+  //! ARGB shear part is illustrated here:
+  //!   [n X X X n]
+  //!   [X n X X n]
+  //!   [X X n X n]
+  //!   [X X X n n]
+  //!   [n n n n n]
+  //!
+  //! @note ARGB shear is combination of RGB and Alpha shear parts.
+  FE_COLOR_MATRIX_SHEAR_ARGB = 0x03,
+
+  //! @brief Matrix contains RGB lut part.
+  //!
+  //! RGB lut part is illustrated here:
+  //!   [X n n n n]
+  //!   [n X n n n]
+  //!   [n n X n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  FE_COLOR_MATRIX_LUT_RGB = 0x04,
+
+  //! @brief Matrix contains RGB lut part.
+  //!
+  //! Alpha lut part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n X n]
+  //!   [n n n n n]
+  FE_COLOR_MATRIX_LUT_ALPHA = 0x08,
+
+  //! @brief Matrix contains ARGB lut part.
+  //!
+  //! ARGB lut part is illustrated here:
+  //!   [X n n n n]
+  //!   [n X n n n]
+  //!   [n n X n n]
+  //!   [n n n X n]
+  //!   [n n n n n]
+  //!
+  //! @note ARGB lut is combination of RGB and Alpha lut parts.
+  FE_COLOR_MATRIX_LUT_ARGB = 0x0C,
+
+  //! @brief Matrix contains const RGB lut part (all cells are set to 1.0).
+  //!
+  //! Const RGB lut part is illustrated here:
+  //!   [1 n n n n]
+  //!   [n 1 n n n]
+  //!   [n n 1 n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  FE_COLOR_MATRIX_CONST_RGB = 0x10,
+
+  //! @brief Matrix contains const alpha lut part (cell set to 1.0).
+  //!
+  //! Const alpha lut part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n 1 n]
+  //!   [n n n n n]
+  FE_COLOR_MATRIX_CONST_ALPHA = 0x20,
+
+  //! @brief Matrix contains const ARGB lut part (all cells are set to 1.0).
+  //!
+  //! Const ARGB lut part is illustrated here:
+  //!   [1 n n n n]
+  //!   [n 1 n n n]
+  //!   [n n 1 n n]
+  //!   [n n n 1 n]
+  //!   [n n n n n]
+  //!
+  //! @note ARGB const lut is combination of RGB a Alpha const lut.
+  FE_COLOR_MATRIX_CONST_ARGB = 0x30,
+
+  //! @brief Matrix contains RGB translation part
+  //!
+  //! RGB translation part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [X X X n n]
+  FE_COLOR_MATRIX_TRANSLATE_RGB  = 0x40,
+
+  //! @brief Matrix contains alpha translation part
+  //!
+  //! Alpha translation part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n X n]
+  FE_COLOR_MATRIX_TRANSLATE_ALPHA = 0x80,
+
+  //! @brief Matrix contains ARGB translation part
+  //!
+  //! ARGB translation part is illustrated here:
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [n n n n n]
+  //!   [X X X X n]
+  //!
+  //! @note ARGB translation is combination of RGB and Alpha translation parts.
+  FE_COLOR_MATRIX_TRANSLATE_ARGB = 0xC0
+};
+
+// ============================================================================
+// [Fog::FE_COMPONENT_FUNCTION]
+// ============================================================================
+
+enum FE_COMPONENT_FUNCTION
+{
+  FE_COMPONENT_FUNCTION_IDENTITY = 0,
+  FE_COMPONENT_FUNCTION_TABLE = 1,
+  FE_COMPONENT_FUNCTION_DISCRETE = 2,
+  FE_COMPONENT_FUNCTION_LINEAR = 3,
+  FE_COMPONENT_FUNCTION_GAMMA = 4,
+
+  FE_COMPONENT_FUNCTION_COUNT = 5
+};
+
+// ============================================================================
+// [Fog::FE_MORPHOLOGY_TYPE]
+// ============================================================================
+
+enum FE_MORPHOLOGY_TYPE
+{
+  FE_MORPHOLOGY_TYPE_ERODE = 0,
+  FE_MORPHOLOGY_TYPE_DILATE = 1,
+
+  FE_MORPHOLOGY_TYPE_DEFAULT = FE_MORPHOLOGY_TYPE_ERODE,
+  FE_MORPHOLOGY_TYPE_COUNT = 2
 };
 
 // ============================================================================
@@ -1549,26 +1562,28 @@ enum IMAGE_FILTER_TYPE
   // [Color Filters]
   // --------------------------------------------------------------------------
 
-  //! @brief @ref ColorLut filter.
+  //! @brief @ref FeColorLut filter.
   IMAGE_FILTER_TYPE_COLOR_LUT = 1,
-  //! @brief @ref ColorMatrix filter.
+  //! @brief @ref FeColorMatrix filter.
   IMAGE_FILTER_TYPE_COLOR_MATRIX = 2,
-  //! @brief @ref ComponentTransfer filter
+  //! @brief @ref FeComponentTransfer filter
   IMAGE_FILTER_TYPE_COMPONENT_TRANSFER = 3,
 
   // --------------------------------------------------------------------------
   // [Image Filters]
   // --------------------------------------------------------------------------
 
-  //! @brief @ref Blur filter.
+  //! @brief @ref FeBlur filter.
   IMAGE_FILTER_TYPE_BLUR = 4,
-  //! @brief @ref ConvolutionMatrix filter.
-  IMAGE_FILTER_TYPE_CONVOLUTION_MATRIX = 5,
-  //! @brief @ref ConvolutionSeparable filter.
-  IMAGE_FILTER_TYPE_CONVOLUTION_SEPARABLE = 6,
+  //! @brief @ref FeConvolveMatrix filter.
+  IMAGE_FILTER_TYPE_CONVOLVE_MATRIX = 5,
+  //! @brief @ref FeConvolveSeparable filter.
+  IMAGE_FILTER_TYPE_CONVOLVE_SEPARABLE = 6,
+  //! @brief @ref FeMorphology filter
+  IMAGE_FILTER_TYPE_MORPHOLOGY = 7,
 
   //! @brief Count of image filter types.
-  IMAGE_FILTER_TYPE_COUNT = 7
+  IMAGE_FILTER_TYPE_COUNT = 8
 };
 
 // ============================================================================

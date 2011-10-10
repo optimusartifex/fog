@@ -13,49 +13,49 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
-#include <Fog/G2d/Imaging/Filters/ColorLutArray.h>
-#include <Fog/G2d/Imaging/Filters/ComponentTransferFunction.h>
+#include <Fog/G2d/Imaging/Filters/FeColorLutArray.h>
+#include <Fog/G2d/Imaging/Filters/FeComponentFunction.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ColorLutArray - Global]
+// [Fog::FeColorLutArray - Global]
 // ============================================================================
 
-static Static<ColorLutArrayData> ColorLutArray_dIdentity;
-static Static<ColorLutArray> ColorLutArray_oIdentity;
+static Static<FeColorLutArrayData> FeColorLutArray_dIdentity;
+static Static<FeColorLutArray> FeColorLutArray_oIdentity;
 
 // ============================================================================
-// [Fog::ColorLutArray - Construction / Destruction]
+// [Fog::FeColorLutArray - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL ColorLutArray_ctor(ColorLutArray* self)
+static void FOG_CDECL FeColorLutArray_ctor(FeColorLutArray* self)
 {
-  self->_d = ColorLutArray_dIdentity->addRef();
+  self->_d = FeColorLutArray_dIdentity->addRef();
 }
 
-static void FOG_CDECL ColorLutArray_ctorCopy(ColorLutArray* self, const ColorLutArray* other)
+static void FOG_CDECL FeColorLutArray_ctorCopy(FeColorLutArray* self, const FeColorLutArray* other)
 {
   self->_d = other->_d->addRef();
 }
 
-static void FOG_CDECL ColorLutArray_dtor(ColorLutArray* self)
+static void FOG_CDECL FeColorLutArray_dtor(FeColorLutArray* self)
 {
   self->_d->release();
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - Sharing]
+// [Fog::FeColorLutArray - Sharing]
 // ============================================================================
 
-static err_t FOG_CDECL ColorLutArray_detach(ColorLutArray* self)
+static err_t FOG_CDECL FeColorLutArray_detach(FeColorLutArray* self)
 {
-  ColorLutArrayData* d;
+  FeColorLutArrayData* d;
 
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  ColorLutArrayData* newd = _api.colorlutarray_dCreate();
+  FeColorLutArrayData* newd = _api.fecolorlutarray_dCreate();
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -67,10 +67,10 @@ static err_t FOG_CDECL ColorLutArray_detach(ColorLutArray* self)
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - Accessors]
+// [Fog::FeColorLutArray - Accessors]
 // ============================================================================
 
-static err_t FOG_CDECL ColorLutArray_setAt(ColorLutArray* self, size_t index, uint8_t value)
+static err_t FOG_CDECL FeColorLutArray_setAt(FeColorLutArray* self, size_t index, uint8_t value)
 {
   FOG_ASSERT(index < 256);
 
@@ -80,7 +80,7 @@ static err_t FOG_CDECL ColorLutArray_setAt(ColorLutArray* self, size_t index, ui
   return ERR_OK;
 }
 
-static err_t FOG_CDECL ColorLutArray_setFromFunction(ColorLutArray* self, const ComponentTransferFunction* func)
+static err_t FOG_CDECL FeColorLutArray_setFromComponentFunction(FeColorLutArray* self, const FeComponentFunction* func)
 {
   if (func->resultsInIdentity())
   {
@@ -88,36 +88,36 @@ static err_t FOG_CDECL ColorLutArray_setFromFunction(ColorLutArray* self, const 
     return ERR_OK;
   }
 
-  ColorLutArrayData* d = self->_d;
+  FeColorLutArrayData* d = self->_d;
   if (d->reference.get() != 1)
   {
-    d = _api.colorlutarray_dCreate();
+    d = _api.fecolorlutarray_dCreate();
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&self->_d, d)->release();
   }
 
-  const ComponentTransferFunctionData* fd = func->_d;
+  const FeComponentFunctionData* fd = func->_d;
   uint8_t* data = d->data;
 
   switch (fd->functionType)
   {
     // C' = C
-    case COMPONENT_TRANSFER_FUNCTION_IDENTITY:
+    case FE_COMPONENT_FUNCTION_IDENTITY:
     {
-      // Should be catched by ComponentTransferFunction::resultsInIdentity().
+      // Should be catched by FeComponentFunction::resultsInIdentity().
       FOG_ASSERT_NOT_REACHED();
     }
 
     // k/n <= C < (k+1)/n
     // C' = v[k] + (C - k/n)*n * (v[k+1] - v[k])
-    case COMPONENT_TRANSFER_FUNCTION_TABLE:
+    case FE_COMPONENT_FUNCTION_TABLE:
     {
       size_t tableLength = fd->table().getLength();
       const float* tableData = fd->table().getData();
 
-      // Should be catched by ComponentTransferFunction::resultsInIdentity().
+      // Should be catched by FeComponentFunction::resultsInIdentity().
       FOG_ASSERT(tableLength != 0);
 
       // Constant fill.
@@ -162,12 +162,12 @@ static err_t FOG_CDECL ColorLutArray_setFromFunction(ColorLutArray* self, const 
 
     // k/n <= C < (k+1)/n
     // C' = v[k]
-    case COMPONENT_TRANSFER_FUNCTION_DISCRETE:
+    case FE_COMPONENT_FUNCTION_DISCRETE:
     {
       size_t tableLength = fd->table().getLength();
       const float* tableData = fd->table().getData();
 
-      // Should be catched by ComponentTransferFunction::resultsInIdentity().
+      // Should be catched by FeComponentFunction::resultsInIdentity().
       FOG_ASSERT(tableLength != 0);
 
       // Constant fill.
@@ -200,7 +200,7 @@ static err_t FOG_CDECL ColorLutArray_setFromFunction(ColorLutArray* self, const 
     }
 
     // C' = slope * C + intercept
-    case COMPONENT_TRANSFER_FUNCTION_LINEAR:
+    case FE_COMPONENT_FUNCTION_LINEAR:
     {
       float slope = fd->linear().getSlope();
       float intercept = fd->linear().getIntercept();
@@ -218,7 +218,7 @@ static err_t FOG_CDECL ColorLutArray_setFromFunction(ColorLutArray* self, const 
     }
 
     // C' = amplitude * pow(C, exponent) + offset
-    case COMPONENT_TRANSFER_FUNCTION_GAMMA:
+    case FE_COMPONENT_FUNCTION_GAMMA:
     {
       float amplitude = fd->gamma().getAmplitude();
       float exponent = fd->gamma().getExponent();
@@ -244,40 +244,40 @@ static err_t FOG_CDECL ColorLutArray_setFromFunction(ColorLutArray* self, const 
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - Reset]
+// [Fog::FeColorLutArray - Reset]
 // ============================================================================
 
-static void FOG_CDECL ColorLutArray_reset(ColorLutArray* self)
+static void FOG_CDECL FeColorLutArray_reset(FeColorLutArray* self)
 {
-  atomicPtrXchg(&self->_d, ColorLutArray_dIdentity->addRef())->release();
+  atomicPtrXchg(&self->_d, FeColorLutArray_dIdentity->addRef())->release();
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - Copy]
+// [Fog::FeColorLutArray - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL ColorLutArray_copy(ColorLutArray* self, const ColorLutArray* other)
+static err_t FOG_CDECL FeColorLutArray_copy(FeColorLutArray* self, const FeColorLutArray* other)
 {
   atomicPtrXchg(&self->_d, other->_d->addRef())->release();
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - Eq]
+// [Fog::FeColorLutArray - Eq]
 // ============================================================================
 
-static bool FOG_CDECL ColorLutArray_eq(const ColorLutArray* a, const ColorLutArray* b)
+static bool FOG_CDECL FeColorLutArray_eq(const FeColorLutArray* a, const FeColorLutArray* b)
 {
   return MemOps::eq(a->_d->data, b->_d->data, 256);
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - ColorLutArrayData]
+// [Fog::FeColorLutArray - FeColorLutArrayData]
 // ============================================================================
 
-static ColorLutArrayData* FOG_CDECL ColorLutArray_dCreate(void)
+static FeColorLutArrayData* FOG_CDECL FeColorLutArray_dCreate(void)
 {
-  ColorLutArrayData* d = reinterpret_cast<ColorLutArrayData*>(MemMgr::alloc(sizeof(ColorLutArrayData)));
+  FeColorLutArrayData* d = reinterpret_cast<FeColorLutArrayData*>(MemMgr::alloc(sizeof(FeColorLutArrayData)));
 
   if (FOG_IS_NULL(d))
     return NULL;
@@ -287,16 +287,16 @@ static ColorLutArrayData* FOG_CDECL ColorLutArray_dCreate(void)
   return d;
 }
 
-static void FOG_CDECL ColorLutArray_dFree(ColorLutArrayData* d)
+static void FOG_CDECL FeColorLutArray_dFree(FeColorLutArrayData* d)
 {
   MemMgr::free(d);
 }
 
 // ============================================================================
-// [Fog::ColorLutArray - Helpers]
+// [Fog::FeColorLutArray - Helpers]
 // ============================================================================
 
-static void FOG_CDECL ColorLutArray_setIdentity(uint8_t* _data)
+static void FOG_CDECL FeColorLutArray_setIdentity(uint8_t* _data)
 {
   if (sizeof(size_t) == 4 || ((size_t)_data & 0x7) != 0)
   {
@@ -322,9 +322,9 @@ static void FOG_CDECL ColorLutArray_setIdentity(uint8_t* _data)
   }
 }
 
-static bool FOG_CDECL ColorLutArray_isIdentity(const uint8_t* _data)
+static bool FOG_CDECL FeColorLutArray_isIdentity(const uint8_t* _data)
 {
-  if (_data == ColorLutArray_dIdentity->data)
+  if (_data == FeColorLutArray_dIdentity->data)
     return true;
 
   if (sizeof(size_t) == 4 || ((size_t)_data & 0x7) != 0)
@@ -359,38 +359,38 @@ static bool FOG_CDECL ColorLutArray_isIdentity(const uint8_t* _data)
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void ColorLutArray_init(void)
+FOG_NO_EXPORT void FeColorLutArray_init(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.colorlutarray_ctor = ColorLutArray_ctor;
-  _api.colorlutarray_ctorCopy = ColorLutArray_ctorCopy;
-  _api.colorlutarray_dtor = ColorLutArray_dtor;
+  _api.fecolorlutarray_ctor = FeColorLutArray_ctor;
+  _api.fecolorlutarray_ctorCopy = FeColorLutArray_ctorCopy;
+  _api.fecolorlutarray_dtor = FeColorLutArray_dtor;
 
-  _api.colorlutarray_setAt = ColorLutArray_setAt;
-  _api.colorlutarray_setFromFunction = ColorLutArray_setFromFunction;
-  _api.colorlutarray_reset = ColorLutArray_reset;
-  _api.colorlutarray_copy = ColorLutArray_copy;
-  _api.colorlutarray_eq = ColorLutArray_eq;
+  _api.fecolorlutarray_setAt = FeColorLutArray_setAt;
+  _api.fecolorlutarray_setFromComponentFunction = FeColorLutArray_setFromComponentFunction;
+  _api.fecolorlutarray_reset = FeColorLutArray_reset;
+  _api.fecolorlutarray_copy = FeColorLutArray_copy;
+  _api.fecolorlutarray_eq = FeColorLutArray_eq;
 
-  _api.colorlutarray_dCreate = ColorLutArray_dCreate;
-  _api.colorlutarray_dFree = ColorLutArray_dFree;
+  _api.fecolorlutarray_dCreate = FeColorLutArray_dCreate;
+  _api.fecolorlutarray_dFree = FeColorLutArray_dFree;
 
-  _api.colorlutarray_setIdentity = ColorLutArray_setIdentity;
-  _api.colorlutarray_isIdentity = ColorLutArray_isIdentity;
+  _api.fecolorlutarray_setIdentity = FeColorLutArray_setIdentity;
+  _api.fecolorlutarray_isIdentity = FeColorLutArray_isIdentity;
 
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
 
-  ColorLutArrayData* d = &ColorLutArray_dIdentity;
+  FeColorLutArrayData* d = &FeColorLutArray_dIdentity;
 
   d->reference.init(1);
-  ColorLutArray_setIdentity(d->data);
+  FeColorLutArray_setIdentity(d->data);
 
-  _api.colorlutarray_oIdentity = ColorLutArray_oIdentity.initCustom1(d);
+  _api.fecolorlutarray_oIdentity = FeColorLutArray_oIdentity.initCustom1(d);
 }
 
 } // Fog namespace

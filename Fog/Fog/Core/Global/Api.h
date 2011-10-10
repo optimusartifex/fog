@@ -1928,137 +1928,149 @@ struct FOG_NO_EXPORT Api
   ImagePalette* imagepalette_oEmpty;
 
   // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - Blur]
+  // [G2d/Imaging/Filters - FeBlur]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(blur_ctor)(Blur* self);
-  FOG_CAPI_CTOR(blur_ctorCopy)(Blur* self, const Blur* other);
+  FOG_CAPI_CTOR(feblur_ctor)(FeBlur* self);
+  FOG_CAPI_CTOR(feblur_ctorCopy)(FeBlur* self, const FeBlur* other);
 
-  FOG_CAPI_METHOD(void, blur_reset)(Blur* self);
-  FOG_CAPI_METHOD(err_t, blur_copy)(Blur* self, const Blur* other);
-  FOG_CAPI_STATIC(bool, blur_eq)(const Blur* a, const Blur* b);
-
-  // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - ColorLut]
-  // --------------------------------------------------------------------------
-
-  FOG_CAPI_CTOR(colorlut_ctor)(ColorLut* self);
-  FOG_CAPI_CTOR(colorlut_ctorCopy)(ColorLut* self, const ColorLut* other);
-  FOG_CAPI_CTOR(colorlut_dtor)(ColorLut* self);
-
-  FOG_CAPI_METHOD(void, colorlut_reset)(ColorLut* self);
-  FOG_CAPI_METHOD(err_t, colorlut_copy)(ColorLut* self, const ColorLut* other);
-  FOG_CAPI_STATIC(bool, colorlut_eq)(const ColorLut* a, const ColorLut* b);
+  FOG_CAPI_METHOD(void, feblur_reset)(FeBlur* self);
+  FOG_CAPI_METHOD(err_t, feblur_copy)(FeBlur* self, const FeBlur* other);
+  FOG_CAPI_STATIC(bool, feblur_eq)(const FeBlur* a, const FeBlur* b);
 
   // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - ColorLutArray]
+  // [G2d/Imaging/Filters - FeColorLut]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(colorlutarray_ctor)(ColorLutArray* self);
-  FOG_CAPI_CTOR(colorlutarray_ctorCopy)(ColorLutArray* self, const ColorLutArray* other);
-  FOG_CAPI_CTOR(colorlutarray_dtor)(ColorLutArray* self);
+  FOG_CAPI_CTOR(fecolorlut_ctor)(FeColorLut* self);
+  FOG_CAPI_CTOR(fecolorlut_ctorCopy)(FeColorLut* self, const FeColorLut* other);
+  FOG_CAPI_CTOR(fecolorlut_dtor)(FeColorLut* self);
 
-  FOG_CAPI_METHOD(err_t, colorlutarray_detach)(ColorLutArray* self);
-  FOG_CAPI_METHOD(err_t, colorlutarray_setAt)(ColorLutArray* self, size_t index, uint8_t value);
-  FOG_CAPI_METHOD(err_t, colorlutarray_setFromFunction)(ColorLutArray* self, const ComponentTransferFunction* func);
-
-  FOG_CAPI_METHOD(void, colorlutarray_reset)(ColorLutArray* self);
-  FOG_CAPI_METHOD(err_t, colorlutarray_copy)(ColorLutArray* self, const ColorLutArray* other);
-  FOG_CAPI_STATIC(bool, colorlutarray_eq)(const ColorLutArray* a, const ColorLutArray* b);
-
-  FOG_CAPI_STATIC(ColorLutArrayData*, colorlutarray_dCreate)(void);
-  FOG_CAPI_STATIC(void, colorlutarray_dFree)(ColorLutArrayData* d);
-
-  FOG_CAPI_STATIC(void, colorlutarray_setIdentity)(uint8_t* data);
-  FOG_CAPI_STATIC(bool, colorlutarray_isIdentity)(const uint8_t* data);
-
-  ColorLutArray* colorlutarray_oIdentity;
+  FOG_CAPI_METHOD(void, fecolorlut_reset)(FeColorLut* self);
+  FOG_CAPI_METHOD(err_t, fecolorlut_copy)(FeColorLut* self, const FeColorLut* other);
+  FOG_CAPI_STATIC(bool, fecolorlut_eq)(const FeColorLut* a, const FeColorLut* b);
 
   // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - ColorMatrix]
+  // [G2d/Imaging/Filters - FeColorLutArray]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(colormatrix_ctor)(ColorMatrix* self);
-  FOG_CAPI_METHOD(uint32_t, colormatrix_getType)(const ColorMatrix* self);
+  FOG_CAPI_CTOR(fecolorlutarray_ctor)(FeColorLutArray* self);
+  FOG_CAPI_CTOR(fecolorlutarray_ctorCopy)(FeColorLutArray* self, const FeColorLutArray* other);
+  FOG_CAPI_CTOR(fecolorlutarray_dtor)(FeColorLutArray* self);
 
-  FOG_CAPI_METHOD(err_t, colormatrix_addMatrix)(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b);
-  FOG_CAPI_METHOD(err_t, colormatrix_addScalar)(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s);
+  FOG_CAPI_METHOD(err_t, fecolorlutarray_detach)(FeColorLutArray* self);
+  FOG_CAPI_METHOD(err_t, fecolorlutarray_setAt)(FeColorLutArray* self, size_t index, uint8_t value);
+  FOG_CAPI_METHOD(err_t, fecolorlutarray_setFromComponentFunction)(FeColorLutArray* self, const FeComponentFunction* func);
 
-  FOG_CAPI_METHOD(err_t, colormatrix_subtractMatrix)(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b);
-  FOG_CAPI_METHOD(err_t, colormatrix_subtractScalar)(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s);
+  FOG_CAPI_METHOD(void, fecolorlutarray_reset)(FeColorLutArray* self);
+  FOG_CAPI_METHOD(err_t, fecolorlutarray_copy)(FeColorLutArray* self, const FeColorLutArray* other);
+  FOG_CAPI_STATIC(bool, fecolorlutarray_eq)(const FeColorLutArray* a, const FeColorLutArray* b);
 
-  FOG_CAPI_METHOD(err_t, colormatrix_multiplyOther)(ColorMatrix* dst, const ColorMatrix* other, uint32_t order);
-  FOG_CAPI_METHOD(err_t, colormatrix_multiplyMatrix)(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b);
-  FOG_CAPI_METHOD(err_t, colormatrix_multiplyScalar)(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s);
+  FOG_CAPI_STATIC(FeColorLutArrayData*, fecolorlutarray_dCreate)(void);
+  FOG_CAPI_STATIC(void, fecolorlutarray_dFree)(FeColorLutArrayData* d);
 
-  FOG_CAPI_METHOD(err_t, colormatrix_simplifiedPremultiply)(ColorMatrix* self, const ColorMatrix* other);
+  FOG_CAPI_STATIC(void, fecolorlutarray_setIdentity)(uint8_t* data);
+  FOG_CAPI_STATIC(bool, fecolorlutarray_isIdentity)(const uint8_t* data);
 
-  FOG_CAPI_METHOD(err_t, colormatrix_translateArgb)(ColorMatrix* self, float a, float r, float g, float b, uint32_t order);
-  FOG_CAPI_METHOD(err_t, colormatrix_scaleArgb)(ColorMatrix* self, float a, float r, float g, float b, uint32_t order);
-  FOG_CAPI_METHOD(err_t, colormatrix_scaleTint)(ColorMatrix* self, float phi, float amount);
-  FOG_CAPI_METHOD(err_t, colormatrix_saturate)(ColorMatrix* self, float s, uint32_t order);
-  FOG_CAPI_METHOD(err_t, colormatrix_rotateColor)(ColorMatrix* self, int x, int y, float phi, uint32_t order);
-  FOG_CAPI_METHOD(err_t, colormatrix_rotateHue)(ColorMatrix* self, float phi);
-  FOG_CAPI_METHOD(err_t, colormatrix_shearColor)(ColorMatrix* self, int x, int y0, float c0, int y1, float c1, uint32_t order);
-
-  FOG_CAPI_METHOD(void, colormatrix_mapArgb32)(const ColorMatrix* self, Argb32* dst, const Argb32* src);
-  FOG_CAPI_METHOD(void, colormatrix_mapArgb64)(const ColorMatrix* self, Argb64* dst, const Argb64* src);
-  FOG_CAPI_METHOD(void, colormatrix_mapArgbF)(const ColorMatrix* self, ArgbF* dst, const ArgbF* src);
-
-  FOG_CAPI_STATIC(void, colormatrix_copy)(float* dst, const float* src);
-  FOG_CAPI_STATIC(bool, colormatrix_eq)(const ColorMatrix* a, const ColorMatrix* b);
-
-  const ColorMatrix* colormatrix_oIdentity;
-  const ColorMatrix* colormatrix_oZero;
-  const ColorMatrix* colormatrix_oGreyscale;
-  const ColorMatrix* colormatrix_oPreHue;
-  const ColorMatrix* colormatrix_oPostHue;
+  FeColorLutArray* fecolorlutarray_oIdentity;
 
   // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - ComponentTransfer]
+  // [G2d/Imaging/Filters - FeColorMatrix]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(componenttransfer_ctor)(ComponentTransfer* self);
-  FOG_CAPI_CTOR(componenttransfer_ctorCopy)(ComponentTransfer* self, const ComponentTransfer* other);
-  FOG_CAPI_CTOR(componenttransfer_dtor)(ComponentTransfer* self);
+  FOG_CAPI_CTOR(fecolormatrix_ctor)(FeColorMatrix* self);
+  FOG_CAPI_METHOD(uint32_t, fecolormatrix_getType)(const FeColorMatrix* self);
 
-  FOG_CAPI_METHOD(void, componenttransfer_reset)(ComponentTransfer* self);
-  FOG_CAPI_METHOD(err_t, componenttransfer_copy)(ComponentTransfer* self, const ComponentTransfer* other);
-  FOG_CAPI_STATIC(bool, componenttransfer_eq)(const ComponentTransfer* a, const ComponentTransfer* b);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_addMatrix)(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_addScalar)(FeColorMatrix* dst, const FeColorMatrix* a, const RectI* rect, float s);
+
+  FOG_CAPI_METHOD(err_t, fecolormatrix_subtractMatrix)(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_subtractScalar)(FeColorMatrix* dst, const FeColorMatrix* a, const RectI* rect, float s);
+
+  FOG_CAPI_METHOD(err_t, fecolormatrix_multiplyOther)(FeColorMatrix* dst, const FeColorMatrix* other, uint32_t order);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_multiplyMatrix)(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_multiplyScalar)(FeColorMatrix* dst, const FeColorMatrix* a, const RectI* rect, float s);
+
+  FOG_CAPI_METHOD(err_t, fecolormatrix_simplifiedPremultiply)(FeColorMatrix* self, const FeColorMatrix* other);
+
+  FOG_CAPI_METHOD(err_t, fecolormatrix_translateArgb)(FeColorMatrix* self, float a, float r, float g, float b, uint32_t order);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_scaleArgb)(FeColorMatrix* self, float a, float r, float g, float b, uint32_t order);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_scaleTint)(FeColorMatrix* self, float phi, float amount);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_saturate)(FeColorMatrix* self, float s, uint32_t order);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_rotateColor)(FeColorMatrix* self, int x, int y, float phi, uint32_t order);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_rotateHue)(FeColorMatrix* self, float phi);
+  FOG_CAPI_METHOD(err_t, fecolormatrix_shearColor)(FeColorMatrix* self, int x, int y0, float c0, int y1, float c1, uint32_t order);
+
+  FOG_CAPI_METHOD(void, fecolormatrix_mapArgb32)(const FeColorMatrix* self, Argb32* dst, const Argb32* src);
+  FOG_CAPI_METHOD(void, fecolormatrix_mapArgb64)(const FeColorMatrix* self, Argb64* dst, const Argb64* src);
+  FOG_CAPI_METHOD(void, fecolormatrix_mapArgbF)(const FeColorMatrix* self, ArgbF* dst, const ArgbF* src);
+
+  FOG_CAPI_STATIC(void, fecolormatrix_copy)(float* dst, const float* src);
+  FOG_CAPI_STATIC(bool, fecolormatrix_eq)(const FeColorMatrix* a, const FeColorMatrix* b);
+
+  const FeColorMatrix* fecolormatrix_oIdentity;
+  const FeColorMatrix* fecolormatrix_oZero;
+  const FeColorMatrix* fecolormatrix_oGreyscale;
+  const FeColorMatrix* fecolormatrix_oPreHue;
+  const FeColorMatrix* fecolormatrix_oPostHue;
 
   // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - ComponentTransferFunction]
+  // [G2d/Imaging/Filters - FeComponentFunction]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(componenttransferfunction_ctor)(ComponentTransferFunction* self);
-  FOG_CAPI_CTOR(componenttransferfunction_ctorCopy)(ComponentTransferFunction* self, const ComponentTransferFunction* other);
-  FOG_CAPI_CTOR(componenttransferfunction_dtor)(ComponentTransferFunction* self);
+  FOG_CAPI_CTOR(fecomponentfunction_ctor)(FeComponentFunction* self);
+  FOG_CAPI_CTOR(fecomponentfunction_ctorCopy)(FeComponentFunction* self, const FeComponentFunction* other);
+  FOG_CAPI_CTOR(fecomponentfunction_dtor)(FeComponentFunction* self);
 
-  FOG_CAPI_METHOD(bool, componenttransferfunction_resultsInIdentity)(const ComponentTransferFunction* self);
+  FOG_CAPI_METHOD(bool, fecomponentfunction_resultsInIdentity)(const FeComponentFunction* self);
 
-  FOG_CAPI_METHOD(err_t, componenttransferfunction_getData)(const ComponentTransferFunction* self, uint32_t functionType, void* functionData);
-  FOG_CAPI_METHOD(err_t, componenttransferfunction_setData)(ComponentTransferFunction* self, uint32_t functionType, const void* functionData);
+  FOG_CAPI_METHOD(err_t, fecomponentfunction_getData)(const FeComponentFunction* self, uint32_t functionType, void* functionData);
+  FOG_CAPI_METHOD(err_t, fecomponentfunction_setData)(FeComponentFunction* self, uint32_t functionType, const void* functionData);
 
-  FOG_CAPI_METHOD(void, componenttransferfunction_reset)(ComponentTransferFunction* self);
-  FOG_CAPI_METHOD(err_t, componenttransferfunction_copy)(ComponentTransferFunction* self, const ComponentTransferFunction* other);
-  FOG_CAPI_STATIC(bool, componenttransferfunction_eq)(const ComponentTransferFunction* a, const ComponentTransferFunction* b);
+  FOG_CAPI_METHOD(void, fecomponentfunction_reset)(FeComponentFunction* self);
+  FOG_CAPI_METHOD(err_t, fecomponentfunction_copy)(FeComponentFunction* self, const FeComponentFunction* other);
+  FOG_CAPI_STATIC(bool, fecomponentfunction_eq)(const FeComponentFunction* a, const FeComponentFunction* b);
 
-  FOG_CAPI_STATIC(ComponentTransferFunctionData*, componenttransferfunction_dCreate)(uint32_t functionType, const void* functionData);
-  FOG_CAPI_STATIC(void, componenttransferfunction_dFree)(ComponentTransferFunctionData* d);
+  FOG_CAPI_STATIC(FeComponentFunctionData*, fecomponentfunction_dCreate)(uint32_t functionType, const void* functionData);
+  FOG_CAPI_STATIC(void, fecomponentfunction_dFree)(FeComponentFunctionData* d);
 
-  ComponentTransferFunction* componenttransferfunction_oIdentity;
+  FeComponentFunction* fecomponentfunction_oIdentity;
 
   // --------------------------------------------------------------------------
-  // [G2d/Imaging/Filters - ConvolutionMatrix]
+  // [G2d/Imaging/Filters - FeComponentTransfer]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(convolutionmatrix_ctor)(ConvolutionMatrix* self);
-  FOG_CAPI_CTOR(convolutionmatrix_ctorCopy)(ConvolutionMatrix* self, const ConvolutionMatrix* other);
-  FOG_CAPI_CTOR(convolutionmatrix_dtor)(ConvolutionMatrix* self);
+  FOG_CAPI_CTOR(fecomponenttransfer_ctor)(FeComponentTransfer* self);
+  FOG_CAPI_CTOR(fecomponenttransfer_ctorCopy)(FeComponentTransfer* self, const FeComponentTransfer* other);
+  FOG_CAPI_CTOR(fecomponenttransfer_dtor)(FeComponentTransfer* self);
 
-  FOG_CAPI_METHOD(void, convolutionmatrix_reset)(ConvolutionMatrix* self);
-  FOG_CAPI_METHOD(err_t, convolutionmatrix_copy)(ConvolutionMatrix* self, const ConvolutionMatrix* other);
-  FOG_CAPI_STATIC(bool, convolutionmatrix_eq)(const ConvolutionMatrix* a, const ConvolutionMatrix* b);
+  FOG_CAPI_METHOD(void, fecomponenttransfer_reset)(FeComponentTransfer* self);
+  FOG_CAPI_METHOD(err_t, fecomponenttransfer_copy)(FeComponentTransfer* self, const FeComponentTransfer* other);
+  FOG_CAPI_STATIC(bool, fecomponenttransfer_eq)(const FeComponentTransfer* a, const FeComponentTransfer* b);
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging/Filters - FeConvolveMatrix]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(feconvolvematrix_ctor)(FeConvolveMatrix* self);
+  FOG_CAPI_CTOR(feconvolvematrix_ctorCopy)(FeConvolveMatrix* self, const FeConvolveMatrix* other);
+  FOG_CAPI_CTOR(feconvolvematrix_dtor)(FeConvolveMatrix* self);
+
+  FOG_CAPI_METHOD(void, feconvolvematrix_reset)(FeConvolveMatrix* self);
+  FOG_CAPI_METHOD(err_t, feconvolvematrix_copy)(FeConvolveMatrix* self, const FeConvolveMatrix* other);
+  FOG_CAPI_STATIC(bool, feconvolvematrix_eq)(const FeConvolveMatrix* a, const FeConvolveMatrix* b);
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging/Filters - FeMorphology]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(femorphology_ctor)(FeMorphology* self);
+  FOG_CAPI_CTOR(femorphology_ctorCopy)(FeMorphology* self, const FeMorphology* other);
+  FOG_CAPI_CTOR(femorphology_dtor)(FeMorphology* self);
+
+  FOG_CAPI_METHOD(void, femorphology_reset)(FeMorphology* self);
+  FOG_CAPI_METHOD(err_t, femorphology_copy)(FeMorphology* self, const FeMorphology* other);
+  FOG_CAPI_STATIC(bool, femorphology_eq)(const FeMorphology* a, const FeMorphology* b);
 
   // --------------------------------------------------------------------------
   // [G2d/Painting - Painter]

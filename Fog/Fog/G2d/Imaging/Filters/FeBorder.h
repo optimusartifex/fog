@@ -4,11 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_BORDERFILTERTAG_H
-#define _FOG_G2D_IMAGING_BORDERFILTERTAG_H
+#ifndef _FOG_G2D_IMAGING_FILTERS_FEBORDER_H
+#define _FOG_G2D_IMAGING_FILTERS_FEBORDER_H
 
 // [Dependencies]
-#include <Fog/G2d/Imaging/ImageFilterTag.h>
+#include <Fog/G2d/Imaging/Filters/FeBase.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
@@ -17,11 +17,11 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::BorderFilter]
+// [Fog::FeBorder]
 // ============================================================================
 
 #include <Fog/Core/C++/PackByte.h>
-struct FOG_NO_EXPORT BorderFilterTag : public ImageFilterTag
+struct FOG_NO_EXPORT FeBorder : public FeBase
 {
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -49,4 +49,4 @@ struct FOG_NO_EXPORT BorderFilterTag : public ImageFilterTag
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_BORDERFILTERTAG_H
+#endif // _FOG_G2D_IMAGING_FILTERS_FEBORDER_H

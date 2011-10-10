@@ -439,15 +439,15 @@ _FOG_TYPE_DECLARE(Fog::ImageFormatDescription  , C(SIMPLE )               | F(NO
 _FOG_TYPE_DECLARE(Fog::ImagePalette            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 
 // [Fog/G2d/Imaging/Filters]
-_FOG_TYPE_DECLARE(Fog::Blur                    , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ColorMatrix             , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ColorLut                , C(MOVABLE)               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ColorLutArray           , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ComponentTransfer       , C(MOVABLE)               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ComponentTransferFunction,C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-
-_FOG_TYPE_DECLARE(Fog::ComponentTransferFunctionGamma , C(SIMPLE)         | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ComponentTransferFunctionLinear, C(SIMPLE)         | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeBlur                  , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeColorMatrix           , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeColorLut              , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeColorLutArray         , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeComponentFunction     , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeComponentFunctionGamma, C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeComponentFunctionLinear,C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeComponentTransfer     , C(MOVABLE)               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FeMorphology            , C(SIMPLE )               | F(NO_CMP )            )
 
 // [Fog/G2d/Painting]
 _FOG_TYPE_DECLARE(Fog::PaintDeviceInfo         , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )

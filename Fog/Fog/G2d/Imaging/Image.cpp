@@ -3300,7 +3300,7 @@ err_t Image::filter(const ColorFilter& f, const RectI* area)
   return err;
 }
 
-err_t Image::filter(const ColorLutFx& lut, const RectI* area)
+err_t Image::filter(const FeColorLutFx& lut, const RectI* area)
 {
   BoxI abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX0(), area->getY0(), area->getX1(), area->getY1());
@@ -3311,7 +3311,7 @@ err_t Image::filter(const ColorLutFx& lut, const RectI* area)
   return applyColorFilter(*this, abox, fn, lut.getData());
 }
 
-err_t Image::filter(const ColorMatrix& cm, const RectI* area)
+err_t Image::filter(const FeColorMatrix& cm, const RectI* area)
 {
   BoxI abox(0, 0, getWidth(), getHeight());
   if (area) abox.set(area->getX0(), area->getY0(), area->getX1(), area->getY1());

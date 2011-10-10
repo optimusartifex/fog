@@ -4,12 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_FILTERS_COLORMATRIX_H
-#define _FOG_G2D_IMAGING_FILTERS_COLORMATRIX_H
+#ifndef _FOG_G2D_IMAGING_FILTERS_FECOLORMATRIX_H
+#define _FOG_G2D_IMAGING_FILTERS_FECOLORMATRIX_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/G2d/Imaging/ImageFilterTag.h>
+#include <Fog/G2d/Imaging/Filters/FeBase.h>
 
 namespace Fog {
 
@@ -17,37 +17,37 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ColorMatrix]
+// [Fog::FeColorMatrix]
 // ============================================================================
 
 //! @brief Color matrix.
 //!
 //! The color matrix is a 5x5 matrix that can be used to do a linear color
 //! transformation.
-struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
+struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorMatrix()
+  FOG_INLINE FeColorMatrix()
   {
-    _api.colormatrix_ctor(this);
+    _api.fecolormatrix_ctor(this);
   }
 
-  FOG_INLINE ColorMatrix(const float data[25])
-  {
-    _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
-    _api.colormatrix_copy(m, data);
-  }
-
-  FOG_INLINE ColorMatrix(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix(const float data[25])
   {
     _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
-    _api.colormatrix_copy(m, other.m);
+    _api.fecolormatrix_copy(m, data);
   }
 
-  FOG_INLINE ColorMatrix(
+  FOG_INLINE FeColorMatrix(const FeColorMatrix& other)
+  {
+    _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
+    _api.fecolormatrix_copy(m, other.m);
+  }
+
+  FOG_INLINE FeColorMatrix(
     float m00, float m01, float m02, float m03, float m04,
     float m10, float m11, float m12, float m13, float m14,
     float m20, float m21, float m22, float m23, float m24,
@@ -61,7 +61,7 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
     m[20] = m40; m[21] = m41; m[22] = m42; m[23] = m43; m[24] = m44;
   }
 
-  explicit FOG_INLINE ColorMatrix(_Uninitialized)
+  explicit FOG_INLINE FeColorMatrix(_Uninitialized)
   {
     _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
   }
@@ -91,26 +91,26 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   //! @see @c Type for type possibilities and its descriptions.
   FOG_INLINE uint32_t getType() const
   {
-    return _api.colormatrix_getType(this);
+    return _api.fecolormatrix_getType(this);
   }
 
   // --------------------------------------------------------------------------
   // [Set]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorMatrix& setMatrix(const float data[25])
+  FOG_INLINE FeColorMatrix& setMatrix(const float data[25])
   {
-    _api.colormatrix_copy(m, data);
+    _api.fecolormatrix_copy(m, data);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& setMatrix(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& setMatrix(const FeColorMatrix& other)
   {
-    _api.colormatrix_copy(m, other.m);
+    _api.fecolormatrix_copy(m, other.m);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& setMatrix(
+  FOG_INLINE FeColorMatrix& setMatrix(
     float m00, float m01, float m02, float m03, float m04,
     float m10, float m11, float m12, float m13, float m14,
     float m20, float m21, float m22, float m23, float m24,
@@ -131,21 +131,21 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Add other matrix into this matrix.
-  FOG_INLINE ColorMatrix& add(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& add(const FeColorMatrix& other)
   {
-    _api.colormatrix_addMatrix(this, this, &other);
+    _api.fecolormatrix_addMatrix(this, this, &other);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& add(float scalar)
+  FOG_INLINE FeColorMatrix& add(float scalar)
   {
-    _api.colormatrix_addScalar(this, this, NULL, scalar);
+    _api.fecolormatrix_addScalar(this, this, NULL, scalar);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& add(const RectI& rect, float scalar)
+  FOG_INLINE FeColorMatrix& add(const RectI& rect, float scalar)
   {
-    _api.colormatrix_addScalar(this, this, &rect, scalar);
+    _api.fecolormatrix_addScalar(this, this, &rect, scalar);
     return *this;
   }
 
@@ -154,21 +154,21 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Subtract other matrix from this matrix.
-  FOG_INLINE ColorMatrix& subtract(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& subtract(const FeColorMatrix& other)
   {
-    _api.colormatrix_subtractMatrix(this, this, &other);
+    _api.fecolormatrix_subtractMatrix(this, this, &other);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& subtract(float scalar)
+  FOG_INLINE FeColorMatrix& subtract(float scalar)
   {
-    _api.colormatrix_subtractScalar(this, this, NULL, scalar);
+    _api.fecolormatrix_subtractScalar(this, this, NULL, scalar);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& subtract(const RectI& rect, float scalar)
+  FOG_INLINE FeColorMatrix& subtract(const RectI& rect, float scalar)
   {
-    _api.colormatrix_subtractScalar(this, this, &rect, scalar);
+    _api.fecolormatrix_subtractScalar(this, this, &rect, scalar);
     return *this;
   }
 
@@ -177,30 +177,30 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Multiply this matrix with @a other matrix.
-  FOG_INLINE ColorMatrix& multiply(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& multiply(const FeColorMatrix& other)
   {
-    _api.colormatrix_multiplyMatrix(this, &other, this);
+    _api.fecolormatrix_multiplyMatrix(this, &other, this);
     return *this;
   }
 
   //! @brief Multiply this matrix with @a other matrix.
-  FOG_INLINE ColorMatrix& multiply(const ColorMatrix& other, uint32_t order)
+  FOG_INLINE FeColorMatrix& multiply(const FeColorMatrix& other, uint32_t order)
   {
-    _api.colormatrix_multiplyOther(this, &other, order);
+    _api.fecolormatrix_multiplyOther(this, &other, order);
     return *this;
   }
 
   //! @brief Multiply this matrix with scalar value.
-  FOG_INLINE ColorMatrix& multiply(float scalar)
+  FOG_INLINE FeColorMatrix& multiply(float scalar)
   {
-    _api.colormatrix_multiplyScalar(this, this, NULL, scalar);
+    _api.fecolormatrix_multiplyScalar(this, this, NULL, scalar);
     return *this;
   }
 
   //! @overload
-  FOG_INLINE ColorMatrix& multiply(const RectI& rect, float scalar)
+  FOG_INLINE FeColorMatrix& multiply(const RectI& rect, float scalar)
   {
-    _api.colormatrix_multiplyScalar(this, this, &rect, scalar);
+    _api.fecolormatrix_multiplyScalar(this, this, &rect, scalar);
     return *this;
   }
 
@@ -209,21 +209,21 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Translate the color components of the matrix.
-  FOG_INLINE ColorMatrix& translateArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& translateArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_translateArgb(this, a, r, g, b, order);
+    _api.fecolormatrix_translateArgb(this, a, r, g, b, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& translateRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& translateRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_translateArgb(this, 1.0f, c, c, c, order);
+    _api.fecolormatrix_translateArgb(this, 1.0f, c, c, c, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& translateAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& translateAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_translateArgb(this, a, 1.0f, 1.0f, 1.0f, order);
+    _api.fecolormatrix_translateArgb(this, a, 1.0f, 1.0f, 1.0f, order);
     return *this;
   }
 
@@ -232,21 +232,21 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Scale the color components of the matrix.
-  FOG_INLINE ColorMatrix& scaleArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& scaleArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_scaleArgb(this, a, r, g, b, order);
+    _api.fecolormatrix_scaleArgb(this, a, r, g, b, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& scaleRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& scaleRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_scaleArgb(this, 1.0f, c, c, c, order);
+    _api.fecolormatrix_scaleArgb(this, 1.0f, c, c, c, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& scaleAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& scaleAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_scaleArgb(this, a, 1.0f, 1.0f, 1.0f, order);
+    _api.fecolormatrix_scaleArgb(this, a, 1.0f, 1.0f, 1.0f, order);
     return *this;
   }
 
@@ -254,9 +254,9 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   //!
   //! @param phi [-PI to PI, 0 = blue]
   //! @param amount [-1.0 to 1.0, 0 = neutral]
-  FOG_INLINE ColorMatrix& scaleTint(float phi, float amount)
+  FOG_INLINE FeColorMatrix& scaleTint(float phi, float amount)
   {
-    _api.colormatrix_scaleTint(this, phi, amount);
+    _api.fecolormatrix_scaleTint(this, phi, amount);
     return *this;
   }
 
@@ -264,30 +264,30 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // [Rotate]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorMatrix& rotateRed(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& rotateRed(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_rotateColor(this, 2, 1, phi, order);
+    _api.fecolormatrix_rotateColor(this, 2, 1, phi, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& rotateGreen(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& rotateGreen(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_rotateColor(this, 0, 2, phi, order);
+    _api.fecolormatrix_rotateColor(this, 0, 2, phi, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& rotateBlue(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& rotateBlue(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_rotateColor(this, 1, 0, phi, order);
+    _api.fecolormatrix_rotateColor(this, 1, 0, phi, order);
     return *this;
   }
 
   //! @brief Rotate the hue about the gray axis.
   //!
   //! Luminance is fixed, other colors are rotated.
-  FOG_INLINE ColorMatrix& rotateHue(float phi)
+  FOG_INLINE FeColorMatrix& rotateHue(float phi)
   {
-    _api.colormatrix_rotateHue(this, phi);
+    _api.fecolormatrix_rotateHue(this, phi);
     return *this;
   }
 
@@ -295,21 +295,21 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // [Shear]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorMatrix& shearRed(float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& shearRed(float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_shearColor(this, 0, 1, g, 2, b, order);
+    _api.fecolormatrix_shearColor(this, 0, 1, g, 2, b, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& shearGreen( float r, float b, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& shearGreen( float r, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_shearColor(this, 1, 0, r, 2, b, order);
+    _api.fecolormatrix_shearColor(this, 1, 0, r, 2, b, order);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& shearBlue(float r, float g, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& shearBlue(float r, float g, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_shearColor(this, 2, 0, r, 1, g, order);
+    _api.fecolormatrix_shearColor(this, 2, 0, r, 1, g, order);
     return *this;
   }
 
@@ -320,9 +320,9 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   //! @brief Saturate.
   //!
   //! Saturation of 0.0 yields black & white, 1.0 is neutral.
-  FOG_INLINE ColorMatrix& saturate(float s, uint32_t order = MATRIX_ORDER_PREPEND)
+  FOG_INLINE FeColorMatrix& saturate(float s, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.colormatrix_saturate(this, s, order);
+    _api.fecolormatrix_saturate(this, s, order);
     return *this;
   }
 
@@ -330,9 +330,9 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // [Equality]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const ColorMatrix& other) const
+  FOG_INLINE bool eq(const FeColorMatrix& other) const
   {
-    return _api.colormatrix_eq(this, &other);
+    return _api.fecolormatrix_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -342,37 +342,37 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   //! @brief Map @a argb color.
   FOG_INLINE void mapArgb(Argb32& argb) const
   {
-    return _api.colormatrix_mapArgb32(this, &argb, &argb);
+    return _api.fecolormatrix_mapArgb32(this, &argb, &argb);
   }
 
   //! @overload.
   FOG_INLINE void mapArgb(Argb32& dst, const Argb32& src) const
   {
-    return _api.colormatrix_mapArgb32(this, &dst, &src);
+    return _api.fecolormatrix_mapArgb32(this, &dst, &src);
   }
 
   //! @brief Map @a argb color.
   FOG_INLINE void mapArgb(Argb64& argb) const
   {
-    return _api.colormatrix_mapArgb64(this, &argb, &argb);
+    return _api.fecolormatrix_mapArgb64(this, &argb, &argb);
   }
 
   //! @overload.
   FOG_INLINE void mapArgb(Argb64& dst, const Argb64& src) const
   {
-    return _api.colormatrix_mapArgb64(this, &dst, &src);
+    return _api.fecolormatrix_mapArgb64(this, &dst, &src);
   }
 
   //! @brief Map @a argb color.
   FOG_INLINE void mapArgb(ArgbF& argb) const
   {
-    return _api.colormatrix_mapArgbF(this, &argb, &argb);
+    return _api.fecolormatrix_mapArgbF(this, &argb, &argb);
   }
 
   //! @overload.
   FOG_INLINE void mapArgb(ArgbF& dst, const ArgbF& src) const
   {
-    return _api.colormatrix_mapArgbF(this, &dst, &src);
+    return _api.fecolormatrix_mapArgbF(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -380,84 +380,84 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Assignment operator.
-  FOG_INLINE ColorMatrix& operator=(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& operator=(const FeColorMatrix& other)
   {
-    _api.colormatrix_copy(m, other.m);
+    _api.fecolormatrix_copy(m, other.m);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& operator+=(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& operator+=(const FeColorMatrix& other)
   {
-    _api.colormatrix_addMatrix(this, this, &other);
+    _api.fecolormatrix_addMatrix(this, this, &other);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& operator+=(float scalar)
+  FOG_INLINE FeColorMatrix& operator+=(float scalar)
   {
-    _api.colormatrix_addScalar(this, this, NULL, scalar);
+    _api.fecolormatrix_addScalar(this, this, NULL, scalar);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& operator-=(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& operator-=(const FeColorMatrix& other)
   {
-    _api.colormatrix_subtractMatrix(this, this, &other);
+    _api.fecolormatrix_subtractMatrix(this, this, &other);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& operator-=(float scalar)
+  FOG_INLINE FeColorMatrix& operator-=(float scalar)
   {
-    _api.colormatrix_subtractScalar(this, this, NULL, scalar);
+    _api.fecolormatrix_subtractScalar(this, this, NULL, scalar);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& operator*=(const ColorMatrix& other)
+  FOG_INLINE FeColorMatrix& operator*=(const FeColorMatrix& other)
   {
-    _api.colormatrix_multiplyMatrix(this, this, &other);
+    _api.fecolormatrix_multiplyMatrix(this, this, &other);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix& operator*=(float scalar)
+  FOG_INLINE FeColorMatrix& operator*=(float scalar)
   {
-    _api.colormatrix_multiplyScalar(this, this, NULL, scalar);
+    _api.fecolormatrix_multiplyScalar(this, this, NULL, scalar);
     return *this;
   }
 
-  FOG_INLINE ColorMatrix operator+(const ColorMatrix& other) const
+  FOG_INLINE FeColorMatrix operator+(const FeColorMatrix& other) const
   {
-    ColorMatrix t(UNINITIALIZED);
-    _api.colormatrix_addMatrix(&t, this, &other);
+    FeColorMatrix t(UNINITIALIZED);
+    _api.fecolormatrix_addMatrix(&t, this, &other);
     return t;
   }
 
-  FOG_INLINE ColorMatrix operator-(const ColorMatrix& other) const
+  FOG_INLINE FeColorMatrix operator-(const FeColorMatrix& other) const
   {
-    ColorMatrix t(UNINITIALIZED);
-    _api.colormatrix_subtractMatrix(&t, this, &other);
+    FeColorMatrix t(UNINITIALIZED);
+    _api.fecolormatrix_subtractMatrix(&t, this, &other);
     return t;
   }
 
-  FOG_INLINE ColorMatrix operator*(const ColorMatrix& other) const
+  FOG_INLINE FeColorMatrix operator*(const FeColorMatrix& other) const
   {
-    ColorMatrix t(UNINITIALIZED);
-    _api.colormatrix_multiplyMatrix(&t, this, &other);
+    FeColorMatrix t(UNINITIALIZED);
+    _api.fecolormatrix_multiplyMatrix(&t, this, &other);
     return t;
   }
 
-  FOG_INLINE bool operator==(const ColorMatrix& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const ColorMatrix& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FeColorMatrix& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FeColorMatrix& other) const { return !eq(other); }
 
   //! @brief Overload the [] operator for access to a row. This will enable
   //! access to the elements by using [y][x].
   FOG_INLINE float* operator[](size_t y)
   {
-    FOG_ASSERT_X(y < 5, "Fog::ColorMatrix::operator[] - Index out of bounds.");
+    FOG_ASSERT_X(y < 5, "Fog::FeColorMatrix::operator[] - Index out of bounds.");
     return &m[y * 5];
   }
 
   //! @overload.
   FOG_INLINE const float* const operator[](size_t y) const
   {
-    FOG_ASSERT_X(y < 5, "Fog::ColorMatrix::operator[] - Index out of bounds.");
+    FOG_ASSERT_X(y < 5, "Fog::FeColorMatrix::operator[] - Index out of bounds.");
     return &m[y * 5];
   }
 
@@ -466,28 +466,28 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Get global identity matrix.
-  static FOG_INLINE const ColorMatrix& identity() { return *_api.colormatrix_oIdentity; }
+  static FOG_INLINE const FeColorMatrix& identity() { return *_api.fecolormatrix_oIdentity; }
   //! @brief Get global zero matrix.
-  static FOG_INLINE const ColorMatrix& zero() { return *_api.colormatrix_oZero; }
+  static FOG_INLINE const FeColorMatrix& zero() { return *_api.fecolormatrix_oZero; }
   //! @brief Get global grayscale matrix.
-  static FOG_INLINE const ColorMatrix& greyscale() { return *_api.colormatrix_oGreyscale; }
+  static FOG_INLINE const FeColorMatrix& greyscale() { return *_api.fecolormatrix_oGreyscale; }
   //! @brief Get global pre-hue matrix (used by rotate-hue).
-  static FOG_INLINE const ColorMatrix& preHue() { return *_api.colormatrix_oPreHue; }
+  static FOG_INLINE const FeColorMatrix& preHue() { return *_api.fecolormatrix_oPreHue; }
   //! @brief Get global post-hue matrix (used by rotate-hue).
-  static FOG_INLINE const ColorMatrix& postHue() { return *_api.colormatrix_oPostHue; }
+  static FOG_INLINE const FeColorMatrix& postHue() { return *_api.fecolormatrix_oPostHue; }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE bool eq(const ColorMatrix* a, const ColorMatrix* b)
+  static FOG_INLINE bool eq(const FeColorMatrix* a, const FeColorMatrix* b)
   {
-    return _api.colormatrix_eq(a, b);
+    return _api.fecolormatrix_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.colormatrix_eq;
+    return (EqFunc)_api.fecolormatrix_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -502,4 +502,4 @@ struct FOG_NO_EXPORT ColorMatrix : public ImageFilterTag
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_FILTERS_COLORMATRIX_H
+#endif // _FOG_G2D_IMAGING_FILTERS_FECOLORMATRIX_H

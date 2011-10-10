@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_IMAGEFILTERTAG_H
-#define _FOG_G2D_IMAGING_IMAGEFILTERTAG_H
+#ifndef _FOG_G2D_IMAGING_FILTERS_FEBASE_H
+#define _FOG_G2D_IMAGING_FILTERS_FEBASE_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -16,10 +16,10 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ImageFilterTag]
+// [Fog::FeBase]
 // ============================================================================
 
-struct FOG_NO_EXPORT ImageFilterTag
+struct FOG_NO_EXPORT FeBase
 {
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -39,4 +39,4 @@ struct FOG_NO_EXPORT ImageFilterTag
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_IMAGEFILTERTAG_H
+#endif // _FOG_G2D_IMAGING_FILTERS_FEBASE_H

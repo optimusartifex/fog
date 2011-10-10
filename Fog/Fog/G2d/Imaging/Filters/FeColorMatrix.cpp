@@ -14,16 +14,16 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/Cpu.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Imaging/Filters/ColorMatrix.h>
+#include <Fog/G2d/Imaging/Filters/FeColorMatrix.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ColorMatrix - Global]
+// [Fog::FeColorMatrix - Global]
 // ============================================================================
 
-struct FOG_NO_EXPORT ColorMatrixStatic
+struct FOG_NO_EXPORT FeColorMatrixStatic
 {
   uint32_t _filterType;
   float m[25];
@@ -34,8 +34,8 @@ static const float LumR = 0.213f;
 static const float LumG = 0.715f;
 static const float LumB = 0.072f;
 
-#define _FOG_COLOR_MATRIX_STATIC(_Name_, M00, M01, M02, M03, M04, M10, M11, M12, M13, M14, M20, M21, M22, M23, M24, M30, M31, M32, M33, M34, M40, M41, M42, M43, M44) \
-  static const ColorMatrixStatic _Name_ = \
+#define _FOG_FE_COLOR_MATRIX_STATIC(_Name_, M00, M01, M02, M03, M04, M10, M11, M12, M13, M14, M20, M21, M22, M23, M24, M30, M31, M32, M33, M34, M40, M41, M42, M43, M44) \
+  static const FeColorMatrixStatic _Name_ = \
   { \
     IMAGE_FILTER_TYPE_COLOR_MATRIX, \
     { \
@@ -47,7 +47,7 @@ static const float LumB = 0.072f;
     } \
   }
 
-_FOG_COLOR_MATRIX_STATIC(ColorMatrix_oIdentity,
+_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oIdentity,
   1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -55,7 +55,7 @@ _FOG_COLOR_MATRIX_STATIC(ColorMatrix_oIdentity,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 );
 
-_FOG_COLOR_MATRIX_STATIC(ColorMatrix_oZero,
+_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oZero,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -63,7 +63,7 @@ _FOG_COLOR_MATRIX_STATIC(ColorMatrix_oZero,
   0.0f, 0.0f, 0.0f, 0.0f, 0.0f
 );
 
-_FOG_COLOR_MATRIX_STATIC(ColorMatrix_oGreyscale,
+_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oGreyscale,
   LumR, LumR, LumR, 0.0f, 0.0f,
   LumG, LumG, LumG, 0.0f, 0.0f,
   LumB, LumB, LumB, 0.0f, 0.0f,
@@ -71,7 +71,7 @@ _FOG_COLOR_MATRIX_STATIC(ColorMatrix_oGreyscale,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 );
 
-_FOG_COLOR_MATRIX_STATIC(ColorMatrix_oPreHue,
+_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oPreHue,
   0.8164966106f, 0.0f         , 0.5345109105f, 0.0f, 0.0f,
  -0.4082482755f, 0.7071067691f, 1.0555117130f, 0.0f, 0.0f,
  -0.4082482755f,-0.7071067691f, 0.1420281678f, 0.0f, 0.0f,
@@ -79,7 +79,7 @@ _FOG_COLOR_MATRIX_STATIC(ColorMatrix_oPreHue,
   0.0f         , 0.0f         , 0.0f         , 0.0f, 1.0f
 );
 
-_FOG_COLOR_MATRIX_STATIC(ColorMatrix_oPostHue,
+_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oPostHue,
   0.8467885852f,-0.3779562712f,-0.3779562712f, 0.0f, 0.0f,
  -0.3729280829f, 0.3341786563f,-1.0800348520f, 0.0f, 0.0f,
   0.5773502588f, 0.5773502588f, 0.5773502588f, 0.0f, 0.0f,
@@ -88,10 +88,10 @@ _FOG_COLOR_MATRIX_STATIC(ColorMatrix_oPostHue,
 );
 
 // ============================================================================
-// [Fog::ColorMatrix - Helpers]
+// [Fog::FeColorMatrix - Helpers]
 // ============================================================================
 
-static bool ColorMatrix_fitRect(uint& x0, uint& y0, uint& x1, uint& y1, const RectI* rect)
+static bool FeColorMatrix_fitRect(uint& x0, uint& y0, uint& x1, uint& y1, const RectI* rect)
 {
   FOG_ASSERT(rect != NULL);
 
@@ -105,20 +105,20 @@ static bool ColorMatrix_fitRect(uint& x0, uint& y0, uint& x1, uint& y1, const Re
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Construction / Destruction]
+// [Fog::FeColorMatrix - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL ColorMatrix_ctor(ColorMatrix* self)
+static void FOG_CDECL FeColorMatrix_ctor(FeColorMatrix* self)
 {
   self->_filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
-  _api.colormatrix_copy(self->m, ColorMatrix_oIdentity.m);
+  _api.fecolormatrix_copy(self->m, FeColorMatrix_oIdentity.m);
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - GetType]
+// [Fog::FeColorMatrix - GetType]
 // ============================================================================
 
-static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
+static uint32_t FOG_CDECL FeColorMatrix_getType(const FeColorMatrix* self)
 {
   const float* m = self->m;
   uint32_t type = 0;
@@ -133,7 +133,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
       m[ 5] != 0.0f || m[ 7] != 0.0f ||
       m[10] != 0.0f || m[11] != 0.0f)
   {
-    type |= COLOR_MATRIX_SHEAR_RGB;
+    type |= FE_COLOR_MATRIX_SHEAR_RGB;
   }
 
   // Alpha shear part is illustrated here:
@@ -147,7 +147,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
       m[13] != 0.0f ||
       m[10] != 0.0f || m[11] != 0.0f || m[12] != 0.0f)
   {
-    type |= COLOR_MATRIX_SHEAR_ALPHA;
+    type |= FE_COLOR_MATRIX_SHEAR_ALPHA;
   }
 
   // RGB lut part is illustrated here:
@@ -160,7 +160,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
       m[ 6] != 0.0f ||
       m[12] != 0.0f)
   {
-    type |= COLOR_MATRIX_LUT_RGB;
+    type |= FE_COLOR_MATRIX_LUT_RGB;
   }
 
   // Alpha lut part is illustrated here:
@@ -171,7 +171,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
   //   [n n n n n]
   if (m[18] != 0.0f)
   {
-    type |= COLOR_MATRIX_LUT_ALPHA;
+    type |= FE_COLOR_MATRIX_LUT_ALPHA;
   }
 
   //! @brief Matrix contains const RGB lut part (all cells are set to 1.0).
@@ -186,7 +186,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
       m[ 6] == 1.0f &&
       m[12] == 1.0f)
   {
-    type |= COLOR_MATRIX_CONST_RGB;
+    type |= FE_COLOR_MATRIX_CONST_RGB;
   }
 
   //! @brief Matrix contains const alpha lut part (cell set to 1.0).
@@ -199,7 +199,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
   //!   [n n n n n]
   if (m[18] == 1.0f)
   {
-    type |= COLOR_MATRIX_CONST_ALPHA;
+    type |= FE_COLOR_MATRIX_CONST_ALPHA;
   }
 
   // RGB translation part is illustrated here:
@@ -210,7 +210,7 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
   //   [X X X n n]
   if (m[20] != 0.0f || m[21] != 0.0f || m[22] != 0.0f)
   {
-    type |= COLOR_MATRIX_TRANSLATE_RGB;
+    type |= FE_COLOR_MATRIX_TRANSLATE_RGB;
   }
 
   // Alpha translation part is illustrated here:
@@ -221,17 +221,17 @@ static uint32_t FOG_CDECL ColorMatrix_getType(const ColorMatrix* self)
   //   [n n n X n]
   if (m[23] != 0.0f)
   {
-    type |= COLOR_MATRIX_TRANSLATE_ALPHA;
+    type |= FE_COLOR_MATRIX_TRANSLATE_ALPHA;
   }
 
   return type;
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Add]
+// [Fog::FeColorMatrix - Add]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_addMatrix(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b)
+static err_t FOG_CDECL FeColorMatrix_addMatrix(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b)
 {
   uint i;
 
@@ -247,7 +247,7 @@ static err_t FOG_CDECL ColorMatrix_addMatrix(ColorMatrix* dst, const ColorMatrix
   return ERR_OK;
 }
 
-static err_t FOG_CDECL ColorMatrix_addScalar(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s)
+static err_t FOG_CDECL FeColorMatrix_addScalar(FeColorMatrix* dst, const FeColorMatrix* a, const RectI* rect, float s)
 {
   uint i;
   uint x0, y0, x1, y1;
@@ -262,7 +262,7 @@ static err_t FOG_CDECL ColorMatrix_addScalar(ColorMatrix* dst, const ColorMatrix
       dm[i] = am[i] + s;
     }
   }
-  else if (ColorMatrix_fitRect(x0, y0, x1, y1, rect))
+  else if (FeColorMatrix_fitRect(x0, y0, x1, y1, rect))
   {
     dm += y0 * 5;
     am += y0 * 5;
@@ -281,10 +281,10 @@ static err_t FOG_CDECL ColorMatrix_addScalar(ColorMatrix* dst, const ColorMatrix
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Subtract]
+// [Fog::FeColorMatrix - Subtract]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_subtractMatrix(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b)
+static err_t FOG_CDECL FeColorMatrix_subtractMatrix(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b)
 {
   uint i;
 
@@ -300,7 +300,7 @@ static err_t FOG_CDECL ColorMatrix_subtractMatrix(ColorMatrix* dst, const ColorM
   return ERR_OK;
 }
 
-static err_t FOG_CDECL ColorMatrix_subtractScalar(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s)
+static err_t FOG_CDECL FeColorMatrix_subtractScalar(FeColorMatrix* dst, const FeColorMatrix* a, const RectI* rect, float s)
 {
   uint i;
   uint x0, y0, x1, y1;
@@ -315,7 +315,7 @@ static err_t FOG_CDECL ColorMatrix_subtractScalar(ColorMatrix* dst, const ColorM
       dm[i] = am[i] - s;
     }
   }
-  else if (ColorMatrix_fitRect(x0, y0, x1, y1, rect))
+  else if (FeColorMatrix_fitRect(x0, y0, x1, y1, rect))
   {
     dm += y0 * 5;
     am += y0 * 5;
@@ -334,18 +334,18 @@ static err_t FOG_CDECL ColorMatrix_subtractScalar(ColorMatrix* dst, const ColorM
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Multiply]
+// [Fog::FeColorMatrix - Multiply]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_multiplyOther(ColorMatrix* dst, const ColorMatrix* other, uint32_t order)
+static err_t FOG_CDECL FeColorMatrix_multiplyOther(FeColorMatrix* dst, const FeColorMatrix* other, uint32_t order)
 {
   if (order == MATRIX_ORDER_PREPEND)
-    return _api.colormatrix_multiplyMatrix(dst, other, dst);
+    return _api.fecolormatrix_multiplyMatrix(dst, other, dst);
   else
-    return _api.colormatrix_multiplyMatrix(dst, dst, other);
+    return _api.fecolormatrix_multiplyMatrix(dst, dst, other);
 }
 
-static err_t FOG_CDECL ColorMatrix_multiplyMatrix(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b)
+static err_t FOG_CDECL FeColorMatrix_multiplyMatrix(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b)
 {
   float tmp[25];
 
@@ -355,7 +355,7 @@ static err_t FOG_CDECL ColorMatrix_multiplyMatrix(ColorMatrix* dst, const ColorM
 
   if (a == dst || b == dst)
   {
-    _api.colormatrix_copy(tmp, dst->m);
+    _api.fecolormatrix_copy(tmp, dst->m);
     if (a == dst) am = tmp;
     if (b == dst) bm = tmp;
   }
@@ -393,7 +393,7 @@ static err_t FOG_CDECL ColorMatrix_multiplyMatrix(ColorMatrix* dst, const ColorM
   return ERR_OK;
 }
 
-static err_t FOG_CDECL ColorMatrix_multiplyScalar(ColorMatrix* dst, const ColorMatrix* a, const RectI* rect, float s)
+static err_t FOG_CDECL FeColorMatrix_multiplyScalar(FeColorMatrix* dst, const FeColorMatrix* a, const RectI* rect, float s)
 {
   uint i;
   uint x0, y0, x1, y1;
@@ -408,7 +408,7 @@ static err_t FOG_CDECL ColorMatrix_multiplyScalar(ColorMatrix* dst, const ColorM
       dm[i] = am[i] * s;
     }
   }
-  else if (ColorMatrix_fitRect(x0, y0, x1, y1, rect))
+  else if (FeColorMatrix_fitRect(x0, y0, x1, y1, rect))
   {
     dm += y0 * 5;
     am += y0 * 5;
@@ -437,7 +437,7 @@ static err_t FOG_CDECL ColorMatrix_multiplyScalar(ColorMatrix* dst, const ColorM
 //   M = |h i j 0 0| * M
 //       |0 0 0 1 0|
 //       |0 0 0 0 1|
-static err_t FOG_CDECL ColorMatrix_simplifiedPremultiply(ColorMatrix* self, const ColorMatrix* other)
+static err_t FOG_CDECL FeColorMatrix_simplifiedPremultiply(FeColorMatrix* self, const FeColorMatrix* other)
 {
   FOG_ASSERT(self != other);
 
@@ -477,10 +477,10 @@ static err_t FOG_CDECL ColorMatrix_simplifiedPremultiply(ColorMatrix* self, cons
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - TranslateArgb]
+// [Fog::FeColorMatrix - TranslateArgb]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_translateArgb(ColorMatrix* self, float a, float r, float g, float b, uint32_t order)
+static err_t FOG_CDECL FeColorMatrix_translateArgb(FeColorMatrix* self, float a, float r, float g, float b, uint32_t order)
 {
   float* m = self->m;
 
@@ -536,10 +536,10 @@ static err_t FOG_CDECL ColorMatrix_translateArgb(ColorMatrix* self, float a, flo
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - ScaleArgb]
+// [Fog::FeColorMatrix - ScaleArgb]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_scaleArgb(ColorMatrix* self, float a, float r, float g, float b, uint32_t order)
+static err_t FOG_CDECL FeColorMatrix_scaleArgb(FeColorMatrix* self, float a, float r, float g, float b, uint32_t order)
 {
   float* m = self->m;
 
@@ -612,7 +612,7 @@ static err_t FOG_CDECL ColorMatrix_scaleArgb(ColorMatrix* self, float a, float r
   return ERR_OK;
 }
 
-static err_t FOG_CDECL ColorMatrix_scaleTint(ColorMatrix* self, float phi, float amount)
+static err_t FOG_CDECL FeColorMatrix_scaleTint(FeColorMatrix* self, float phi, float amount)
 {
   // Rotate the hue, scale the blue and rotate back.
   self->rotateHue(phi);
@@ -623,10 +623,10 @@ static err_t FOG_CDECL ColorMatrix_scaleTint(ColorMatrix* self, float phi, float
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Saturate]
+// [Fog::FeColorMatrix - Saturate]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_saturate(ColorMatrix* self, float s, uint32_t order)
+static err_t FOG_CDECL FeColorMatrix_saturate(FeColorMatrix* self, float s, uint32_t order)
 {
   // If the saturation is 1.0, then this matrix remains unchanged.
   // If the saturation is 0.0, each color is scaled by its luminance.
@@ -712,24 +712,24 @@ static err_t FOG_CDECL ColorMatrix_saturate(ColorMatrix* self, float s, uint32_t
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Rotate]
+// [Fog::FeColorMatrix - Rotate]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_rotateHue(ColorMatrix* self, float phi)
+static err_t FOG_CDECL FeColorMatrix_rotateHue(FeColorMatrix* self, float phi)
 {
   // Rotate the gray vector to the blue axis and rotate around the blue axis.
-  _api.colormatrix_simplifiedPremultiply(self,
-    reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oPreHue));
+  _api.fecolormatrix_simplifiedPremultiply(self,
+    reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue));
 
   self->rotateBlue(phi);
 
-  _api.colormatrix_simplifiedPremultiply(self,
-    reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oPostHue));
+  _api.fecolormatrix_simplifiedPremultiply(self,
+    reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue));
 
   return ERR_OK;
 }
 
-static err_t FOG_CDECL ColorMatrix_rotateColor(ColorMatrix* self, int x, int y, float phi, uint32_t order)
+static err_t FOG_CDECL FeColorMatrix_rotateColor(FeColorMatrix* self, int x, int y, float phi, uint32_t order)
 {
   if ((uint)x >= 5 || (uint)y >= 5)
     return ERR_RT_INVALID_ARGUMENT;
@@ -738,7 +738,7 @@ static err_t FOG_CDECL ColorMatrix_rotateColor(ColorMatrix* self, int x, int y, 
   float phiCos;
   Math::sincos(phi, &phiSin, &phiCos);
 
-  ColorMatrix rot;
+  FeColorMatrix rot;
 
   rot[x][x] = phiCos;
   rot[x][y] =-phiSin;
@@ -746,32 +746,32 @@ static err_t FOG_CDECL ColorMatrix_rotateColor(ColorMatrix* self, int x, int y, 
   rot[y][y] = phiCos;
 
   if (Math::max(x, y) < 3 && order == MATRIX_ORDER_PREPEND)
-    return _api.colormatrix_simplifiedPremultiply(self, &rot);
+    return _api.fecolormatrix_simplifiedPremultiply(self, &rot);
   else
-    return _api.colormatrix_multiplyOther(self, &rot, order);
+    return _api.fecolormatrix_multiplyOther(self, &rot, order);
 }
 
-static err_t FOG_CDECL ColorMatrix_shearColor(ColorMatrix* self, int x, int y0, float c0, int y1, float c1, uint32_t order)
+static err_t FOG_CDECL FeColorMatrix_shearColor(FeColorMatrix* self, int x, int y0, float c0, int y1, float c1, uint32_t order)
 {
   if ((uint)x >= 5 || (uint)y0 >= 5 || (uint)y1 >= 5)
     return ERR_RT_INVALID_ARGUMENT;
 
-  ColorMatrix shear;
+  FeColorMatrix shear;
 
   shear[y0][x] = c0;
   shear[y1][x] = c1;
 
   if (Math::max(x, y0, y1) < 3 && order == MATRIX_ORDER_PREPEND)
-    return _api.colormatrix_simplifiedPremultiply(self, &shear);
+    return _api.fecolormatrix_simplifiedPremultiply(self, &shear);
   else
-    return _api.colormatrix_multiplyOther(self, &shear, order);
+    return _api.fecolormatrix_multiplyOther(self, &shear, order);
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Map]
+// [Fog::FeColorMatrix - Map]
 // ============================================================================
 
-static void FOG_CDECL ColorMatrix_mapArgb32(const ColorMatrix* self, Argb32* dst, const Argb32* src)
+static void FOG_CDECL FeColorMatrix_mapArgb32(const FeColorMatrix* self, Argb32* dst, const Argb32* src)
 {
   const float* m = self->m;
 
@@ -791,7 +791,7 @@ static void FOG_CDECL ColorMatrix_mapArgb32(const ColorMatrix* self, Argb32* dst
   dst->a = Math::boundToByte(ta);
 }
 
-static void FOG_CDECL ColorMatrix_mapArgb64(const ColorMatrix* self, Argb64* dst, const Argb64* src)
+static void FOG_CDECL FeColorMatrix_mapArgb64(const FeColorMatrix* self, Argb64* dst, const Argb64* src)
 {
   const float* m = self->m;
 
@@ -811,7 +811,7 @@ static void FOG_CDECL ColorMatrix_mapArgb64(const ColorMatrix* self, Argb64* dst
   dst->a = Math::boundToWord(ta);
 }
 
-static void FOG_CDECL ColorMatrix_mapArgbF(const ColorMatrix* self, ArgbF* dst, const ArgbF* src)
+static void FOG_CDECL FeColorMatrix_mapArgbF(const FeColorMatrix* self, ArgbF* dst, const ArgbF* src)
 {
   const float* m = self->m;
 
@@ -827,36 +827,36 @@ static void FOG_CDECL ColorMatrix_mapArgbF(const ColorMatrix* self, ArgbF* dst, 
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Copy]
+// [Fog::FeColorMatrix - Copy]
 // ============================================================================
 
-static void FOG_CDECL ColorMatrix_copy(float* dst, const float* src)
+static void FOG_CDECL FeColorMatrix_copy(float* dst, const float* src)
 {
   MemOps::copy(dst, src, 25 * sizeof(float));
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Equality]
+// [Fog::FeColorMatrix - Equality]
 // ============================================================================
 
-static bool FOG_CDECL ColorMatrix_eq(const ColorMatrix* a, const ColorMatrix* b)
+static bool FOG_CDECL FeColorMatrix_eq(const FeColorMatrix* a, const FeColorMatrix* b)
 {
   return MemOps::eq(a->m, b->m, 25 * sizeof(float));
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Dump]
+// [Fog::FeColorMatrix - Dump]
 // ============================================================================
 
 // TODO: Rerun, update hue rotation to use the snippet defined by SVG 1.1 instead.
 #if 0
 // Dump code to generate PreHue and PostHue matrices. The original code to
-// generate these matrices comes probably from QColorMatrix class by Sjaak
+// generate these matrices comes probably from QFeColorMatrix class by Sjaak
 // Priester (sjaak@sjaakpriester.nl). I used some comments from the original
 // code which should describe how pre-hue and post-hue matrices are generated.
 
-// Dump ColorMatrix as C code to stdout.
-static void ColorMatrix_dump(const ColorMatrix& m, const char* name)
+// Dump FeColorMatrix as C code to stdout.
+static void FeColorMatrix_dump(const FeColorMatrix& m, const char* name)
 {
   printf("static const float %s[25] =\n");
   printf("{\n");
@@ -872,10 +872,10 @@ static void ColorMatrix_dump(const ColorMatrix& m, const char* name)
 }
 
 // Dump pre-hue and post-hue matrices.
-static void ColorMatrix_dumpHelpers()
+static void FeColorMatrix_dumpHelpers()
 {
-  ColorMatrix preHue;
-  ColorMatrix postHue;
+  FeColorMatrix preHue;
+  FeColorMatrix postHue;
 
   // NOTE: Theoretically, greenRotation should have the value of 39.182655
   // degrees, being the angle for which the sine is 1/(sqrt(3)), and the
@@ -904,8 +904,8 @@ static void ColorMatrix_dumpHelpers()
   postHue.rotateGreen(greenRotation);
   postHue.rotateRed(Math::deg2rad(-45.0f));
 
-  ColorMatrix_dump(preHue, "ColorMatrix_oPreHue");
-  ColorMatrix_dump(postHue, "ColorMatrix_oPostHue");
+  FeColorMatrix_dump(preHue, "FeColorMatrix_oPreHue");
+  FeColorMatrix_dump(postHue, "FeColorMatrix_oPostHue");
 }
 #endif
 
@@ -913,56 +913,56 @@ static void ColorMatrix_dumpHelpers()
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE(ColorMatrix_init_SSE)
+FOG_CPU_DECLARE_INITIALIZER_SSE(FeColorMatrix_init_SSE)
 
-FOG_NO_EXPORT void ColorMatrix_init(void)
+FOG_NO_EXPORT void FeColorMatrix_init(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.colormatrix_ctor = ColorMatrix_ctor;
-  _api.colormatrix_getType = ColorMatrix_getType;
+  _api.fecolormatrix_ctor = FeColorMatrix_ctor;
+  _api.fecolormatrix_getType = FeColorMatrix_getType;
 
-  _api.colormatrix_addMatrix = ColorMatrix_addMatrix;
-  _api.colormatrix_addScalar = ColorMatrix_addScalar;
-  _api.colormatrix_subtractMatrix = ColorMatrix_subtractMatrix;
-  _api.colormatrix_subtractScalar = ColorMatrix_subtractScalar;
-  _api.colormatrix_multiplyOther = ColorMatrix_multiplyOther;
-  _api.colormatrix_multiplyMatrix = ColorMatrix_multiplyMatrix;
-  _api.colormatrix_multiplyScalar = ColorMatrix_multiplyScalar;
-  _api.colormatrix_simplifiedPremultiply = ColorMatrix_simplifiedPremultiply;
+  _api.fecolormatrix_addMatrix = FeColorMatrix_addMatrix;
+  _api.fecolormatrix_addScalar = FeColorMatrix_addScalar;
+  _api.fecolormatrix_subtractMatrix = FeColorMatrix_subtractMatrix;
+  _api.fecolormatrix_subtractScalar = FeColorMatrix_subtractScalar;
+  _api.fecolormatrix_multiplyOther = FeColorMatrix_multiplyOther;
+  _api.fecolormatrix_multiplyMatrix = FeColorMatrix_multiplyMatrix;
+  _api.fecolormatrix_multiplyScalar = FeColorMatrix_multiplyScalar;
+  _api.fecolormatrix_simplifiedPremultiply = FeColorMatrix_simplifiedPremultiply;
 
-  _api.colormatrix_translateArgb = ColorMatrix_translateArgb;
-  _api.colormatrix_scaleArgb = ColorMatrix_scaleArgb;
-  _api.colormatrix_scaleTint = ColorMatrix_scaleTint;
-  _api.colormatrix_saturate = ColorMatrix_saturate;
-  _api.colormatrix_rotateHue = ColorMatrix_rotateHue;
-  _api.colormatrix_rotateColor = ColorMatrix_rotateColor;
-  _api.colormatrix_shearColor = ColorMatrix_shearColor;
+  _api.fecolormatrix_translateArgb = FeColorMatrix_translateArgb;
+  _api.fecolormatrix_scaleArgb = FeColorMatrix_scaleArgb;
+  _api.fecolormatrix_scaleTint = FeColorMatrix_scaleTint;
+  _api.fecolormatrix_saturate = FeColorMatrix_saturate;
+  _api.fecolormatrix_rotateHue = FeColorMatrix_rotateHue;
+  _api.fecolormatrix_rotateColor = FeColorMatrix_rotateColor;
+  _api.fecolormatrix_shearColor = FeColorMatrix_shearColor;
 
-  _api.colormatrix_mapArgb32 = ColorMatrix_mapArgb32;
-  _api.colormatrix_mapArgb64 = ColorMatrix_mapArgb64;
-  _api.colormatrix_mapArgbF = ColorMatrix_mapArgbF;
+  _api.fecolormatrix_mapArgb32 = FeColorMatrix_mapArgb32;
+  _api.fecolormatrix_mapArgb64 = FeColorMatrix_mapArgb64;
+  _api.fecolormatrix_mapArgbF = FeColorMatrix_mapArgbF;
 
-  _api.colormatrix_copy = ColorMatrix_copy;
-  _api.colormatrix_eq = ColorMatrix_eq;
+  _api.fecolormatrix_copy = FeColorMatrix_copy;
+  _api.fecolormatrix_eq = FeColorMatrix_eq;
 
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
 
-  _api.colormatrix_oIdentity = reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oIdentity);
-  _api.colormatrix_oZero = reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oZero);
-  _api.colormatrix_oGreyscale = reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oGreyscale);
-  _api.colormatrix_oPreHue = reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oPreHue);
-  _api.colormatrix_oPostHue = reinterpret_cast<const ColorMatrix*>(&ColorMatrix_oPostHue);
+  _api.fecolormatrix_oIdentity = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oIdentity);
+  _api.fecolormatrix_oZero = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oZero);
+  _api.fecolormatrix_oGreyscale = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oGreyscale);
+  _api.fecolormatrix_oPreHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue);
+  _api.fecolormatrix_oPostHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue);
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_SSE(ColorMatrix_init_SSE)
+  FOG_CPU_USE_INITIALIZER_SSE(FeColorMatrix_init_SSE)
 }
 
 } // Fog namespace

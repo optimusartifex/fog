@@ -130,7 +130,20 @@ int main(int argc, char* argv[])
   PRINT_TYPE(ImageFormatDescription);
   PRINT_TYPE(ImagePalette);
   PRINT_TYPE(ImagePaletteData);
-  PRINT_TYPE(ColorMatrix);
+  PRINT_TYPE(FeBase);
+  PRINT_TYPE(FeBlur);
+  PRINT_TYPE(FeBorder);
+  PRINT_TYPE(FeColorLut);
+  PRINT_TYPE(FeColorLutArray);
+  PRINT_TYPE(FeColorLutArrayData);
+  PRINT_TYPE(FeColorMatrix);
+  PRINT_TYPE(FeComponentFunction);
+  PRINT_TYPE(FeComponentFunctionData);
+  PRINT_TYPE(FeComponentFunctionGamma);
+  PRINT_TYPE(FeComponentFunctionLinear);
+  PRINT_TYPE(FeComponentTransfer);
+  PRINT_TYPE(FeConvolveMatrix);
+  // PRINT_TYPE(FeConvolveSeparable);
 
   // [G2d/Painting]
   PRINT_PART("G2d/Painting");

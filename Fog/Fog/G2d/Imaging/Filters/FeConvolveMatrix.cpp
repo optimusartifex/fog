@@ -13,17 +13,17 @@
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Imaging/Filters/ConvolutionMatrix.h>
+#include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ConvolutionMatrix - Construction / Destruction]
+// [Fog::FeConvolveMatrix - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL ConvolutionMatrix_ctor(ConvolutionMatrix* self)
+static void FOG_CDECL FeConvolveMatrix_ctor(FeConvolveMatrix* self)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_CONVOLUTION_MATRIX;
+  self->_filterType = IMAGE_FILTER_TYPE_CONVOLVE_MATRIX;
   self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
   self->_extendColor.init();
   self->_matrix.init();
@@ -31,24 +31,24 @@ static void FOG_CDECL ConvolutionMatrix_ctor(ConvolutionMatrix* self)
   self->_bias = 0.0f;
 }
 
-static void FOG_CDECL ConvolutionMatrix_ctorCopy(ConvolutionMatrix* self, const ConvolutionMatrix* other)
+static void FOG_CDECL FeConvolveMatrix_ctorCopy(FeConvolveMatrix* self, const FeConvolveMatrix* other)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_CONVOLUTION_MATRIX;
+  self->_filterType = IMAGE_FILTER_TYPE_CONVOLVE_MATRIX;
   self->_extendType = other->_extendType;
   self->_extendColor.init(other->_extendColor);
   self->_matrix.initCustom1(other->_matrix());
 }
 
-static void FOG_CDECL ConvolutionMatrix_dtor(ConvolutionMatrix* self)
+static void FOG_CDECL FeConvolveMatrix_dtor(FeConvolveMatrix* self)
 {
   self->_matrix.destroy();
 }
 
 // ============================================================================
-// [Fog::ConvolutionMatrix - Reset]
+// [Fog::FeConvolveMatrix - Reset]
 // ============================================================================
 
-static void FOG_CDECL ConvolutionMatrix_reset(ConvolutionMatrix* self)
+static void FOG_CDECL FeConvolveMatrix_reset(FeConvolveMatrix* self)
 {
   self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
   self->_extendColor->reset();
@@ -58,10 +58,10 @@ static void FOG_CDECL ConvolutionMatrix_reset(ConvolutionMatrix* self)
 }
 
 // ============================================================================
-// [Fog::ConvolutionMatrix - Copy]
+// [Fog::FeConvolveMatrix - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL ConvolutionMatrix_copy(ConvolutionMatrix* self, const ConvolutionMatrix* other)
+static err_t FOG_CDECL FeConvolveMatrix_copy(FeConvolveMatrix* self, const FeConvolveMatrix* other)
 {
   self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
   self->_extendColor.init();
@@ -73,10 +73,10 @@ static err_t FOG_CDECL ConvolutionMatrix_copy(ConvolutionMatrix* self, const Con
 }
 
 // ============================================================================
-// [Fog::ConvolutionMatrix - Eq]
+// [Fog::FeConvolveMatrix - Eq]
 // ============================================================================
 
-static bool FOG_CDECL ConvolutionMatrix_eq(const ConvolutionMatrix* a, const ConvolutionMatrix* b)
+static bool FOG_CDECL FeConvolveMatrix_eq(const FeConvolveMatrix* a, const FeConvolveMatrix* b)
 {
   return a->_extendType == b->_extendType &&
          a->_extendColor() == b->_extendColor() &&
@@ -89,19 +89,19 @@ static bool FOG_CDECL ConvolutionMatrix_eq(const ConvolutionMatrix* a, const Con
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void ConvolutionMatrix_init(void)
+FOG_NO_EXPORT void FeConvolveMatrix_init(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.convolutionmatrix_ctor = ConvolutionMatrix_ctor;
-  _api.convolutionmatrix_ctorCopy = ConvolutionMatrix_ctorCopy;
-  _api.convolutionmatrix_dtor = ConvolutionMatrix_dtor;
+  _api.feconvolvematrix_ctor = FeConvolveMatrix_ctor;
+  _api.feconvolvematrix_ctorCopy = FeConvolveMatrix_ctorCopy;
+  _api.feconvolvematrix_dtor = FeConvolveMatrix_dtor;
 
-  _api.convolutionmatrix_reset = ConvolutionMatrix_reset;
-  _api.convolutionmatrix_copy = ConvolutionMatrix_copy;
-  _api.convolutionmatrix_eq = ConvolutionMatrix_eq;
+  _api.feconvolvematrix_reset = FeConvolveMatrix_reset;
+  _api.feconvolvematrix_copy = FeConvolveMatrix_copy;
+  _api.feconvolvematrix_eq = FeConvolveMatrix_eq;
 }
 
 } // Fog namespace

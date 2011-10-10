@@ -10,18 +10,18 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/G2d/Imaging/Filters/ColorLut.h>
-#include <Fog/G2d/Imaging/Filters/ColorLutArray.h>
+#include <Fog/G2d/Imaging/Filters/FeColorLut.h>
+#include <Fog/G2d/Imaging/Filters/FeColorLutArray.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ColorLut - Construction / Destruction]
+// [Fog::FeColorLut - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL ColorLut_ctor(ColorLut* self)
+static void FOG_CDECL FeColorLut_ctor(FeColorLut* self)
 {
-  ColorLutArrayData* identity = _api.colorlutarray_oIdentity->_d;
+  FeColorLutArrayData* identity = _api.fecolorlutarray_oIdentity->_d;
   identity->reference.add(4);
 
   self->_filterType = IMAGE_FILTER_TYPE_COLOR_LUT;
@@ -31,7 +31,7 @@ static void FOG_CDECL ColorLut_ctor(ColorLut* self)
   self->c[3].initCustom1(identity);
 }
 
-static void FOG_CDECL ColorLut_ctorCopy(ColorLut* self, const ColorLut* other)
+static void FOG_CDECL FeColorLut_ctorCopy(FeColorLut* self, const FeColorLut* other)
 {
   self->_filterType = IMAGE_FILTER_TYPE_COLOR_LUT;
   self->c[0].initCustom1(other->c[0]->_d->addRef());
@@ -40,7 +40,7 @@ static void FOG_CDECL ColorLut_ctorCopy(ColorLut* self, const ColorLut* other)
   self->c[3].initCustom1(other->c[3]->_d->addRef());
 }
 
-static void FOG_CDECL ColorLut_dtor(ColorLut* self)
+static void FOG_CDECL FeColorLut_dtor(FeColorLut* self)
 {
   self->c[0]->_d->release();
   self->c[1]->_d->release();
@@ -49,12 +49,12 @@ static void FOG_CDECL ColorLut_dtor(ColorLut* self)
 }
 
 // ============================================================================
-// [Fog::ColorLut - Reset]
+// [Fog::FeColorLut - Reset]
 // ============================================================================
 
-static void FOG_CDECL ColorLut_reset(ColorLut* self)
+static void FOG_CDECL FeColorLut_reset(FeColorLut* self)
 {
-  ColorLutArrayData* identity = _api.colorlutarray_oIdentity->_d;
+  FeColorLutArrayData* identity = _api.fecolorlutarray_oIdentity->_d;
   identity->reference.add(4);
 
   atomicPtrXchg(&self->c[0]->_d, identity)->release();
@@ -64,10 +64,10 @@ static void FOG_CDECL ColorLut_reset(ColorLut* self)
 }
 
 // ============================================================================
-// [Fog::ColorLut - Copy]
+// [Fog::FeColorLut - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL ColorLut_copy(ColorLut* self, const ColorLut* other)
+static err_t FOG_CDECL FeColorLut_copy(FeColorLut* self, const FeColorLut* other)
 {
   atomicPtrXchg(&self->c[0]->_d, other->c[0]->_d->addRef())->release();
   atomicPtrXchg(&self->c[1]->_d, other->c[1]->_d->addRef())->release();
@@ -78,10 +78,10 @@ static err_t FOG_CDECL ColorLut_copy(ColorLut* self, const ColorLut* other)
 }
 
 // ============================================================================
-// [Fog::ColorLut - Eq]
+// [Fog::FeColorLut - Eq]
 // ============================================================================
 
-static bool FOG_CDECL ColorLut_eq(const ColorLut* a, const ColorLut* b)
+static bool FOG_CDECL FeColorLut_eq(const FeColorLut* a, const FeColorLut* b)
 {
   return a->c[0]() == b->c[0]() &&
          a->c[1]() == b->c[1]() &&
@@ -93,19 +93,19 @@ static bool FOG_CDECL ColorLut_eq(const ColorLut* a, const ColorLut* b)
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void ColorLut_init(void)
+FOG_NO_EXPORT void FeColorLut_init(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.colorlut_ctor = ColorLut_ctor;
-  _api.colorlut_ctorCopy = ColorLut_ctorCopy;
-  _api.colorlut_dtor = ColorLut_dtor;
+  _api.fecolorlut_ctor = FeColorLut_ctor;
+  _api.fecolorlut_ctorCopy = FeColorLut_ctorCopy;
+  _api.fecolorlut_dtor = FeColorLut_dtor;
 
-  _api.colorlut_reset = ColorLut_reset;
-  _api.colorlut_copy = ColorLut_copy;
-  _api.colorlut_eq = ColorLut_eq;
+  _api.fecolorlut_reset = FeColorLut_reset;
+  _api.fecolorlut_copy = FeColorLut_copy;
+  _api.fecolorlut_eq = FeColorLut_eq;
 }
 
 } // Fog namespace

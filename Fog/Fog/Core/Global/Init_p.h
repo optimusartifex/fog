@@ -135,13 +135,14 @@ FOG_NO_EXPORT void ImageEffect_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_fini(void);
 
-FOG_NO_EXPORT void Blur_init(void);
-FOG_NO_EXPORT void ColorLut_init(void);
-FOG_NO_EXPORT void ColorLutArray_init(void);
-FOG_NO_EXPORT void ColorMatrix_init(void);
-FOG_NO_EXPORT void ComponentTransfer_init(void);
-FOG_NO_EXPORT void ComponentTransferFunction_init(void);
-FOG_NO_EXPORT void ConvolutionMatrix_init(void);
+FOG_NO_EXPORT void FeBlur_init(void);
+FOG_NO_EXPORT void FeColorLut_init(void);
+FOG_NO_EXPORT void FeColorLutArray_init(void);
+FOG_NO_EXPORT void FeColorMatrix_init(void);
+FOG_NO_EXPORT void FeComponentFunction_init(void);
+FOG_NO_EXPORT void FeComponentTransfer_init(void);
+FOG_NO_EXPORT void FeConvolveMatrix_init(void);
+FOG_NO_EXPORT void FeMorphology_init(void);
 
 // [Fog/G2d/Painting]
 FOG_NO_EXPORT void NullPaintEngine_init(void);

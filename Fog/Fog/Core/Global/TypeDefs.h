@@ -178,7 +178,6 @@ struct TriangleF;
 struct TriangleD;
 
 // G2d/Imaging.
-struct BorderFilter;
 struct Image;
 struct ImageBits;
 struct ImageCodec;
@@ -192,25 +191,27 @@ struct ImageDither8Params;
 struct ImageEncoder;
 struct ImageFilter;
 struct ImageFilterData;
-struct ImageFilterTag;
 struct ImageFormatDescription;
 struct ImagePalette;
 struct ImagePaletteData;
 struct ImageVTable;
 
 // G2d/Imaging/Filters.
-struct Blur;
-struct ColorLut;
-struct ColorLutArray;
-struct ColorLutArrayData;
-struct ColorMatrix;
-struct ComponentTransfer;
-struct ComponentTransferFunction;
-struct ComponentTransferFunctionData;
-struct ComponentTransferFunctionGamma;
-struct ComponentTransferFunctionLinear;
-struct ConvolutionMatrix;
-struct ConvolutionSeparable;
+struct FeBase;
+struct FeBlur;
+struct FeBorder;
+struct FeColorLut;
+struct FeColorLutArray;
+struct FeColorLutArrayData;
+struct FeColorMatrix;
+struct FeComponentTransfer;
+struct FeComponentFunction;
+struct FeComponentFunctionData;
+struct FeComponentFunctionGamma;
+struct FeComponentFunctionLinear;
+struct FeConvolveMatrix;
+struct FeConvolveSeparable;
+struct FeMorphology;
 
 // G2d/Painting.
 struct Painter;

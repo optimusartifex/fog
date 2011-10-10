@@ -11,63 +11,63 @@
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/MemOps.h>
-#include <Fog/G2d/Imaging/Filters/Blur.h>
+#include <Fog/G2d/Imaging/Filters/FeMorphology.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::Blur - Construction / Destruction]
+// [Fog::FeMorphology - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL Blur_ctor(Blur* self)
+static void FOG_CDECL FeMorphology_ctor(FeMorphology* self)
 {
   self->_filterType = IMAGE_FILTER_TYPE_BLUR;
   self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
   self->_extendColor.init();
 
-  self->_blurType = BLUR_TYPE_DEFAULT;
+  self->_morphologyType = FE_MORPHOLOGY_TYPE_DEFAULT;
   self->_hRadius = 0.0f;
   self->_vRadius = 0.0f;
 }
 
-static void FOG_CDECL Blur_ctorCopy(Blur* self, const Blur* other)
+static void FOG_CDECL FeMorphology_ctorCopy(FeMorphology* self, const FeMorphology* other)
 {
-  MemOps::copy_t<Blur>(self, other);
+  MemOps::copy_t<FeMorphology>(self, other);
 }
 
 // ============================================================================
-// [Fog::Blur - Reset]
+// [Fog::FeMorphology - Reset]
 // ============================================================================
 
-static void FOG_CDECL Blur_reset(Blur* self)
+static void FOG_CDECL FeMorphology_reset(FeMorphology* self)
 {
   self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
   self->_extendColor.init();
 
-  self->_blurType = BLUR_TYPE_DEFAULT;
+  self->_morphologyType = FE_MORPHOLOGY_TYPE_DEFAULT;
   self->_hRadius = 0.0f;
   self->_vRadius = 0.0f;
 }
 
 // ============================================================================
-// [Fog::Blur - Copy]
+// [Fog::FeMorphology - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL Blur_copy(Blur* self, const Blur* other)
+static err_t FOG_CDECL FeMorphology_copy(FeMorphology* self, const FeMorphology* other)
 {
-  MemOps::copy_t<Blur>(self, other);
+  MemOps::copy_t<FeMorphology>(self, other);
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::Blur - Eq]
+// [Fog::FeMorphology - Eq]
 // ============================================================================
 
-static bool FOG_CDECL Blur_eq(const Blur* a, const Blur* b)
+static bool FOG_CDECL FeMorphology_eq(const FeMorphology* a, const FeMorphology* b)
 {
   return a->_extendType == b->_extendType &&
          a->_extendColor() == b->_extendColor() &&
-         a->_blurType == b->_blurType &&
+         a->_morphologyType == b->_morphologyType &&
          a->_hRadius == b->_hRadius &&
          a->_vRadius == b->_vRadius;
 }
@@ -76,18 +76,18 @@ static bool FOG_CDECL Blur_eq(const Blur* a, const Blur* b)
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void Blur_init(void)
+FOG_NO_EXPORT void FeMorphology_init(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.blur_ctor = Blur_ctor;
-  _api.blur_ctorCopy = Blur_ctorCopy;
+  _api.femorphology_ctor = FeMorphology_ctor;
+  _api.femorphology_ctorCopy = FeMorphology_ctorCopy;
 
-  _api.blur_reset = Blur_reset;
-  _api.blur_copy = Blur_copy;
-  _api.blur_eq = Blur_eq;
+  _api.femorphology_reset = FeMorphology_reset;
+  _api.femorphology_copy = FeMorphology_copy;
+  _api.femorphology_eq = FeMorphology_eq;
 }
 
 } // Fog namespace

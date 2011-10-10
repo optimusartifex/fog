@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_FILTERS_COLORLUTARRAY_H
-#define _FOG_G2D_IMAGING_FILTERS_COLORLUTARRAY_H
+#ifndef _FOG_G2D_IMAGING_FILTERS_FECOLORLUTARRAY_H
+#define _FOG_G2D_IMAGING_FILTERS_FECOLORLUTARRAY_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -17,25 +17,25 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ColorLutArrayData]
+// [Fog::FeColorLutArrayData]
 // ============================================================================
 
-struct FOG_NO_EXPORT ColorLutArrayData
+struct FOG_NO_EXPORT FeColorLutArrayData
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorLutArrayData* addRef() const
+  FOG_INLINE FeColorLutArrayData* addRef() const
   {
     reference.inc();
-    return const_cast<ColorLutArrayData*>(this);
+    return const_cast<FeColorLutArrayData*>(this);
   }
 
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.colorlutarray_dFree(this);
+      _api.fecolorlutarray_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -50,33 +50,33 @@ struct FOG_NO_EXPORT ColorLutArrayData
 };
 
 // ============================================================================
-// [Fog::ColorLutArray]
+// [Fog::FeColorLutArray]
 // ============================================================================
 
-struct FOG_NO_EXPORT ColorLutArray
+struct FOG_NO_EXPORT FeColorLutArray
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ColorLutArray()
+  FOG_INLINE FeColorLutArray()
   {
-    _api.colorlutarray_ctor(this);
+    _api.fecolorlutarray_ctor(this);
   }
 
-  FOG_INLINE ColorLutArray(const ColorLutArray& other)
+  FOG_INLINE FeColorLutArray(const FeColorLutArray& other)
   {
-    _api.colorlutarray_ctorCopy(this, &other);
+    _api.fecolorlutarray_ctorCopy(this, &other);
   }
 
-  explicit FOG_INLINE ColorLutArray(ColorLutArrayData* d) :
+  explicit FOG_INLINE FeColorLutArray(FeColorLutArrayData* d) :
     _d(d)
   {
   }
 
-  FOG_INLINE ~ColorLutArray()
+  FOG_INLINE ~FeColorLutArray()
   {
-    _api.colorlutarray_dtor(this);
+    _api.fecolorlutarray_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -87,7 +87,7 @@ struct FOG_NO_EXPORT ColorLutArray
   FOG_INLINE bool isDetached() const { return _d->reference.get() == 1; }
 
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
-  FOG_INLINE err_t _detach() { return _api.colorlutarray_detach(this); }
+  FOG_INLINE err_t _detach() { return _api.fecolorlutarray_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -96,7 +96,7 @@ struct FOG_NO_EXPORT ColorLutArray
   FOG_INLINE uint8_t getAt(size_t index) const
   {
     FOG_ASSERT_X(index < 256,
-      "Fog::ColorLutArray::getAt() - Index out of range.");
+      "Fog::FeColorLutArray::getAt() - Index out of range.");
 
     return _d->data[index];
   }
@@ -104,9 +104,9 @@ struct FOG_NO_EXPORT ColorLutArray
   FOG_INLINE err_t setAt(size_t index, uint8_t value)
   {
     FOG_ASSERT_X(index < 256,
-      "Fog::ColorLutArray::setAt() - Index out of range.");
+      "Fog::FeColorLutArray::setAt() - Index out of range.");
 
-    return _api.colorlutarray_setAt(this, index, value);
+    return _api.fecolorlutarray_setAt(this, index, value);
   }
 
   FOG_INLINE const uint8_t* getData() const
@@ -117,19 +117,19 @@ struct FOG_NO_EXPORT ColorLutArray
   FOG_INLINE uint8_t* getDataX() const
   {
     FOG_ASSERT_X(isDetached(),
-      "Fog::ColorLutArray::getDataX() - Not detached.");
+      "Fog::FeColorLutArray::getDataX() - Not detached.");
 
     return _d->data;
   }
 
-  FOG_INLINE err_t setFromFunction(ColorLutArray* self, const ComponentTransferFunction& func)
+  FOG_INLINE err_t setFromFunction(FeColorLutArray* self, const FeComponentFunction& func)
   {
-    return _api.colorlutarray_setFromFunction(self, &func);
+    return _api.fecolorlutarray_setFromComponentFunction(self, &func);
   }
 
   FOG_INLINE bool isIdentity() const
   {
-    return _api.colorlutarray_isIdentity(_d->data);
+    return _api.fecolorlutarray_isIdentity(_d->data);
   }
 
   // --------------------------------------------------------------------------
@@ -138,16 +138,16 @@ struct FOG_NO_EXPORT ColorLutArray
 
   FOG_INLINE void reset()
   {
-    _api.colorlutarray_reset(this);
+    _api.fecolorlutarray_reset(this);
   }
 
   // --------------------------------------------------------------------------
   // [Equality]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const ColorLutArray& other) const
+  FOG_INLINE bool eq(const FeColorLutArray& other) const
   {
-    return _api.colorlutarray_eq(this, &other);
+    return _api.fecolorlutarray_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -155,19 +155,19 @@ struct FOG_NO_EXPORT ColorLutArray
   // --------------------------------------------------------------------------
 
   //! @brief Assignment operator.
-  FOG_INLINE ColorLutArray& operator=(const ColorLutArray& other)
+  FOG_INLINE FeColorLutArray& operator=(const FeColorLutArray& other)
   {
-    _api.colorlutarray_copy(this, &other);
+    _api.fecolorlutarray_copy(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const ColorLutArray& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const ColorLutArray& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FeColorLutArray& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FeColorLutArray& other) const { return !eq(other); }
 
   FOG_INLINE uint8_t operator[](size_t index) const
   {
     FOG_ASSERT_X(index < 256,
-      "Fog::ColorLutArray::operator[] - Index out of range.");
+      "Fog::FeColorLutArray::operator[] - Index out of range.");
 
     return _d->data[index];
   }
@@ -176,23 +176,23 @@ struct FOG_NO_EXPORT ColorLutArray
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const ColorLutArray& identity()
+  static FOG_INLINE const FeColorLutArray& identity()
   {
-    return *_api.colorlutarray_oIdentity;
+    return *_api.fecolorlutarray_oIdentity;
   }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE bool eq(const ColorLutArray* a, const ColorLutArray* b)
+  static FOG_INLINE bool eq(const FeColorLutArray* a, const FeColorLutArray* b)
   {
-    return _api.colorlutarray_eq(a, b);
+    return _api.fecolorlutarray_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.colorlutarray_eq;
+    return (EqFunc)_api.fecolorlutarray_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -201,19 +201,19 @@ struct FOG_NO_EXPORT ColorLutArray
 
   static FOG_INLINE void setIdentity(uint8_t* data)
   {
-    _api.colorlutarray_setIdentity(data);
+    _api.fecolorlutarray_setIdentity(data);
   }
 
   static FOG_INLINE bool isIdentity(const uint8_t* data)
   {
-    return _api.colorlutarray_isIdentity(data);
+    return _api.fecolorlutarray_isIdentity(data);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(ColorLutArrayData)
+  _FOG_CLASS_D(FeColorLutArrayData)
 };
 
 //! @}
@@ -221,4 +221,4 @@ struct FOG_NO_EXPORT ColorLutArray
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_FILTERS_COLORLUTARRAY_H
+#endif // _FOG_G2D_IMAGING_FILTERS_FECOLORLUTARRAY_H

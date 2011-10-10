@@ -839,7 +839,6 @@ Set(FOG_G2D_IMAGING_SOURCES
 )
 
 Set(FOG_G2D_IMAGING_HEADERS
-  Fog/G2d/Imaging/BorderFilterTag.h
   Fog/G2d/Imaging/Image.h
   Fog/G2d/Imaging/ImageBits.h
   Fog/G2d/Imaging/ImageCodec.h
@@ -848,7 +847,6 @@ Set(FOG_G2D_IMAGING_HEADERS
   Fog/G2d/Imaging/ImageDecoder.h
   Fog/G2d/Imaging/ImageEncoder.h
   Fog/G2d/Imaging/ImageFilter.h
-  Fog/G2d/Imaging/ImageFilterTag.h
   Fog/G2d/Imaging/ImageFormatDescription.h
   Fog/G2d/Imaging/ImagePalette.h
 )
@@ -873,29 +871,33 @@ Set(FOG_G2D_IMAGING_CODECS_HEADERS
 )
 
 Set(FOG_G2D_IMAGING_FILTERS_SOURCES
-  Fog/G2d/Imaging/Filters/Blur.cpp
-  Fog/G2d/Imaging/Filters/ColorLut.cpp
-  Fog/G2d/Imaging/Filters/ColorLutArray.cpp
-  Fog/G2d/Imaging/Filters/ColorMatrix.cpp
-  Fog/G2d/Imaging/Filters/ComponentTransfer.cpp
-  Fog/G2d/Imaging/Filters/ComponentTransferFunction.cpp
-  Fog/G2d/Imaging/Filters/ConvolutionMatrix.cpp
-  Fog/G2d/Imaging/Filters/ConvolutionSeparable.cpp
+  Fog/G2d/Imaging/Filters/FeBlur.cpp
+  Fog/G2d/Imaging/Filters/FeColorLut.cpp
+  Fog/G2d/Imaging/Filters/FeColorLutArray.cpp
+  Fog/G2d/Imaging/Filters/FeColorMatrix.cpp
+  Fog/G2d/Imaging/Filters/FeComponentFunction.cpp
+  Fog/G2d/Imaging/Filters/FeComponentTransfer.cpp
+  Fog/G2d/Imaging/Filters/FeConvolveMatrix.cpp
+  Fog/G2d/Imaging/Filters/FeConvolveSeparable.cpp
+  Fog/G2d/Imaging/Filters/FeMorphology.cpp
 )
 
 Set(FOG_G2D_IMAGING_FILTERS_HEADERS
-  Fog/G2d/Imaging/Filters/Blur.h
-  Fog/G2d/Imaging/Filters/ColorLut.h
-  Fog/G2d/Imaging/Filters/ColorLutArray.h
-  Fog/G2d/Imaging/Filters/ColorMatrix.h
-  Fog/G2d/Imaging/Filters/ComponentTransfer.h
-  Fog/G2d/Imaging/Filters/ComponentTransferFunction.h
-  Fog/G2d/Imaging/Filters/ConvolutionMatrix.h
-  Fog/G2d/Imaging/Filters/ConvolutionSeparable.h
+  Fog/G2d/Imaging/Filters/FeBorder.h
+  Fog/G2d/Imaging/Filters/FeBase.h
+  Fog/G2d/Imaging/Filters/FeBlur.h
+  Fog/G2d/Imaging/Filters/FeColorLut.h
+  Fog/G2d/Imaging/Filters/FeColorLutArray.h
+  Fog/G2d/Imaging/Filters/FeColorMatrix.h
+  Fog/G2d/Imaging/Filters/FeComponentFunction.h
+  Fog/G2d/Imaging/Filters/FeComponentTransfer.h
+  Fog/G2d/Imaging/Filters/FeConvolveMatrix.h
+  Fog/G2d/Imaging/Filters/FeConvolveSeparable.h
+  Fog/G2d/Imaging/Filters/FeMorphology.h
 )
 
 AddOptimizedSources(FOG_G2D_IMAGING_FILTERS_SOURCES SSE
-  Fog/G2d/Imaging/Filters/ColorMatrix_SSE.cpp
+  Fog/G2d/Imaging/Filters/FeColorMatrix_SSE.cpp
 )
 
 If(NOT FOG_HAVE_LIBJPEG)

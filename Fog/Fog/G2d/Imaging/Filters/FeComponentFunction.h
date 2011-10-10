@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_FILTERS_COMPONENTTRANSFERFUNCTION_H
-#define _FOG_G2D_IMAGING_FILTERS_COMPONENTTRANSFERFUNCTION_H
+#ifndef _FOG_G2D_IMAGING_FILTERS_FECOMPONENTFUNCTION_H
+#define _FOG_G2D_IMAGING_FILTERS_FECOMPONENTFUNCTION_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -19,24 +19,24 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ComponentTransferFunctionLinear]
+// [Fog::FeComponentFunctionLinear]
 // ============================================================================
 
-struct FOG_NO_EXPORT ComponentTransferFunctionLinear
+struct FOG_NO_EXPORT FeComponentFunctionLinear
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ComponentTransferFunctionLinear(float slope = 1.0f, float intercept = 0.0f) :
+  FOG_INLINE FeComponentFunctionLinear(float slope = 1.0f, float intercept = 0.0f) :
     _slope(slope),
     _intercept(intercept)
   {
   }
 
-  FOG_INLINE ComponentTransferFunctionLinear(const ComponentTransferFunctionLinear& other)
+  FOG_INLINE FeComponentFunctionLinear(const FeComponentFunctionLinear& other)
   {
-    MemOps::copy_t<ComponentTransferFunctionLinear>(this, &other);
+    MemOps::copy_t<FeComponentFunctionLinear>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -63,23 +63,23 @@ struct FOG_NO_EXPORT ComponentTransferFunctionLinear
   // [Equality]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const ComponentTransferFunctionLinear& other) const
+  FOG_INLINE bool eq(const FeComponentFunctionLinear& other) const
   {
-    return MemOps::eq_t<ComponentTransferFunctionLinear>(this, &other);
+    return MemOps::eq_t<FeComponentFunctionLinear>(this, &other);
   }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ComponentTransferFunctionLinear& operator=(const ComponentTransferFunctionLinear& other)
+  FOG_INLINE FeComponentFunctionLinear& operator=(const FeComponentFunctionLinear& other)
   {
-    MemOps::copy_t<ComponentTransferFunctionLinear>(this, &other);
+    MemOps::copy_t<FeComponentFunctionLinear>(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const ComponentTransferFunctionLinear& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const ComponentTransferFunctionLinear& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FeComponentFunctionLinear& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FeComponentFunctionLinear& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -90,16 +90,16 @@ struct FOG_NO_EXPORT ComponentTransferFunctionLinear
 };
 
 // ============================================================================
-// [Fog::ComponentTransferFunctionGamma]
+// [Fog::FeComponentFunctionGamma]
 // ============================================================================
 
-struct FOG_NO_EXPORT ComponentTransferFunctionGamma
+struct FOG_NO_EXPORT FeComponentFunctionGamma
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ComponentTransferFunctionGamma(float amplitude = 1.0f, float exponent = 1.0f, float offset = 0.0f) :
+  FOG_INLINE FeComponentFunctionGamma(float amplitude = 1.0f, float exponent = 1.0f, float offset = 0.0f) :
     _amplitude(amplitude),
     _exponent(exponent),
     _offset(offset),
@@ -107,9 +107,9 @@ struct FOG_NO_EXPORT ComponentTransferFunctionGamma
   {
   }
 
-  FOG_INLINE ComponentTransferFunctionGamma(const ComponentTransferFunctionGamma& other)
+  FOG_INLINE FeComponentFunctionGamma(const FeComponentFunctionGamma& other)
   {
-    MemOps::copy_t<ComponentTransferFunctionGamma>(this, &other);
+    MemOps::copy_t<FeComponentFunctionGamma>(this, &other);
   }
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -138,23 +138,23 @@ struct FOG_NO_EXPORT ComponentTransferFunctionGamma
   // [Equality]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const ComponentTransferFunctionGamma& other) const
+  FOG_INLINE bool eq(const FeComponentFunctionGamma& other) const
   {
-    return MemOps::eq_t<ComponentTransferFunctionGamma>(this, &other);
+    return MemOps::eq_t<FeComponentFunctionGamma>(this, &other);
   }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ComponentTransferFunctionGamma& operator=(const ComponentTransferFunctionGamma& other)
+  FOG_INLINE FeComponentFunctionGamma& operator=(const FeComponentFunctionGamma& other)
   {
-    MemOps::copy_t<ComponentTransferFunctionGamma>(this, &other);
+    MemOps::copy_t<FeComponentFunctionGamma>(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const ComponentTransferFunctionGamma& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const ComponentTransferFunctionGamma& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FeComponentFunctionGamma& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FeComponentFunctionGamma& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -167,25 +167,25 @@ struct FOG_NO_EXPORT ComponentTransferFunctionGamma
 };
 
 // ============================================================================
-// [Fog::ComponentTransferFunctionData]
+// [Fog::FeComponentFunctionData]
 // ============================================================================
 
-struct FOG_NO_EXPORT ComponentTransferFunctionData
+struct FOG_NO_EXPORT FeComponentFunctionData
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ComponentTransferFunctionData* addRef() const
+  FOG_INLINE FeComponentFunctionData* addRef() const
   {
     reference.inc();
-    return const_cast<ComponentTransferFunctionData*>(this);
+    return const_cast<FeComponentFunctionData*>(this);
   }
 
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.componenttransferfunction_dFree(this);
+      _api.fecomponentfunction_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -201,39 +201,39 @@ struct FOG_NO_EXPORT ComponentTransferFunctionData
   union
   {
     Static< List<float> > table;
-    Static< ComponentTransferFunctionLinear > linear;
-    Static< ComponentTransferFunctionGamma > gamma;
+    Static< FeComponentFunctionLinear > linear;
+    Static< FeComponentFunctionGamma > gamma;
   };
 };
 
 // ============================================================================
-// [Fog::ComponentTransferFunction]
+// [Fog::FeComponentFunction]
 // ============================================================================
 
-struct FOG_NO_EXPORT ComponentTransferFunction
+struct FOG_NO_EXPORT FeComponentFunction
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ComponentTransferFunction()
+  FOG_INLINE FeComponentFunction()
   {
-    _api.componenttransferfunction_ctor(this);
+    _api.fecomponentfunction_ctor(this);
   }
 
-  FOG_INLINE ComponentTransferFunction(const ComponentTransferFunction& other)
+  FOG_INLINE FeComponentFunction(const FeComponentFunction& other)
   {
-    _api.componenttransferfunction_ctorCopy(this, &other);
+    _api.fecomponentfunction_ctorCopy(this, &other);
   }
 
-  explicit FOG_INLINE ComponentTransferFunction(ComponentTransferFunctionData* d) :
+  explicit FOG_INLINE FeComponentFunction(FeComponentFunctionData* d) :
     _d(d)
   {
   }
 
-  FOG_INLINE ~ComponentTransferFunction()
+  FOG_INLINE ~FeComponentFunction()
   {
-    _api.componenttransferfunction_dtor(this);
+    _api.fecomponentfunction_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -247,62 +247,62 @@ struct FOG_NO_EXPORT ComponentTransferFunction
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getFunctionType() const { return _d->functionType; }
-  FOG_INLINE bool resultsInIdentity() const { return _api.componenttransferfunction_resultsInIdentity(this); }
+  FOG_INLINE bool resultsInIdentity() const { return _api.fecomponentfunction_resultsInIdentity(this); }
 
   FOG_INLINE err_t _getData(uint32_t functionType, void* functionData) const
   {
-    return _api.componenttransferfunction_getData(this, functionType, functionData);
+    return _api.fecomponentfunction_getData(this, functionType, functionData);
   }
 
   FOG_INLINE err_t getTable(List<float>& dst) const
   {
-    return _getData(COMPONENT_TRANSFER_FUNCTION_TABLE, &dst);
+    return _getData(FE_COMPONENT_FUNCTION_TABLE, &dst);
   }
 
   FOG_INLINE err_t getDiscrete(List<float>& dst) const
   {
-    return _getData(COMPONENT_TRANSFER_FUNCTION_DISCRETE, &dst);
+    return _getData(FE_COMPONENT_FUNCTION_DISCRETE, &dst);
   }
 
-  FOG_INLINE err_t getLinear(ComponentTransferFunctionLinear& dst) const
+  FOG_INLINE err_t getLinear(FeComponentFunctionLinear& dst) const
   {
-    return _getData(COMPONENT_TRANSFER_FUNCTION_LINEAR, &dst);
+    return _getData(FE_COMPONENT_FUNCTION_LINEAR, &dst);
   }
 
-  FOG_INLINE err_t getGamma(ComponentTransferFunctionGamma& dst) const
+  FOG_INLINE err_t getGamma(FeComponentFunctionGamma& dst) const
   {
-    return _getData(COMPONENT_TRANSFER_FUNCTION_GAMMA, &dst);
+    return _getData(FE_COMPONENT_FUNCTION_GAMMA, &dst);
   }
 
   FOG_INLINE err_t setIdentity()
   {
-    _api.componenttransferfunction_reset(this);
+    _api.fecomponentfunction_reset(this);
     return ERR_OK;
   }
 
   FOG_INLINE err_t _setData(uint32_t functionType, const void* functionData)
   {
-    return _api.componenttransferfunction_setData(this, functionType, functionData);
+    return _api.fecomponentfunction_setData(this, functionType, functionData);
   }
 
   FOG_INLINE err_t setTable(const List<float>& dst)
   {
-    return _setData(COMPONENT_TRANSFER_FUNCTION_TABLE, &dst);
+    return _setData(FE_COMPONENT_FUNCTION_TABLE, &dst);
   }
 
   FOG_INLINE err_t setDiscrete(const List<float>& dst)
   {
-    return _setData(COMPONENT_TRANSFER_FUNCTION_DISCRETE, &dst);
+    return _setData(FE_COMPONENT_FUNCTION_DISCRETE, &dst);
   }
 
-  FOG_INLINE err_t setLinear(const ComponentTransferFunctionLinear& dst)
+  FOG_INLINE err_t setLinear(const FeComponentFunctionLinear& dst)
   {
-    return _setData(COMPONENT_TRANSFER_FUNCTION_LINEAR, &dst);
+    return _setData(FE_COMPONENT_FUNCTION_LINEAR, &dst);
   }
 
-  FOG_INLINE err_t setGamma(const ComponentTransferFunctionGamma& dst)
+  FOG_INLINE err_t setGamma(const FeComponentFunctionGamma& dst)
   {
-    return _setData(COMPONENT_TRANSFER_FUNCTION_GAMMA, &dst);
+    return _setData(FE_COMPONENT_FUNCTION_GAMMA, &dst);
   }
 
   // --------------------------------------------------------------------------
@@ -311,16 +311,16 @@ struct FOG_NO_EXPORT ComponentTransferFunction
 
   FOG_INLINE void reset()
   {
-    _api.componenttransferfunction_reset(this);
+    _api.fecomponentfunction_reset(this);
   }
 
   // --------------------------------------------------------------------------
   // [Equality]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const ComponentTransferFunction& other) const
+  FOG_INLINE bool eq(const FeComponentFunction& other) const
   {
-    return _api.componenttransferfunction_eq(this, &other);
+    return _api.fecomponentfunction_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -328,43 +328,43 @@ struct FOG_NO_EXPORT ComponentTransferFunction
   // --------------------------------------------------------------------------
 
   //! @brief Assignment operator.
-  FOG_INLINE ComponentTransferFunction& operator=(const ComponentTransferFunction& other)
+  FOG_INLINE FeComponentFunction& operator=(const FeComponentFunction& other)
   {
-    _api.componenttransferfunction_copy(this, &other);
+    _api.fecomponentfunction_copy(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const ComponentTransferFunction& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const ComponentTransferFunction& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FeComponentFunction& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FeComponentFunction& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const ComponentTransferFunction& identity()
+  static FOG_INLINE const FeComponentFunction& identity()
   {
-    return *_api.componenttransferfunction_oIdentity;
+    return *_api.fecomponentfunction_oIdentity;
   }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE bool eq(const ComponentTransferFunction* a, const ComponentTransferFunction* b)
+  static FOG_INLINE bool eq(const FeComponentFunction* a, const FeComponentFunction* b)
   {
-    return _api.componenttransferfunction_eq(a, b);
+    return _api.fecomponentfunction_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.componenttransferfunction_eq;
+    return (EqFunc)_api.fecomponentfunction_eq;
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(ComponentTransferFunctionData)
+  _FOG_CLASS_D(FeComponentFunctionData)
 };
 
 //! @}
@@ -372,4 +372,4 @@ struct FOG_NO_EXPORT ComponentTransferFunction
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_FILTERS_COMPONENTTRANSFERFUNCTION_H
+#endif // _FOG_G2D_IMAGING_FILTERS_FECOMPONENTFUNCTION_H

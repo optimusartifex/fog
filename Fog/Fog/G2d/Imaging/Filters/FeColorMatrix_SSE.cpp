@@ -14,16 +14,16 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/Cpu.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Imaging/Filters/ColorMatrix.h>
+#include <Fog/G2d/Imaging/Filters/FeColorMatrix.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ColorMatrix - Add]
+// [Fog::FeColorMatrix - Add]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_addMatrix_SSE(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b)
+static err_t FOG_CDECL FeColorMatrix_addMatrix_SSE(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b)
 {
   float *dm = dst->m;
   const float *am = a->m;
@@ -76,10 +76,10 @@ static err_t FOG_CDECL ColorMatrix_addMatrix_SSE(ColorMatrix* dst, const ColorMa
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Subtract]
+// [Fog::FeColorMatrix - Subtract]
 // ============================================================================
 
-static err_t FOG_CDECL ColorMatrix_subtractMatrix_SSE(ColorMatrix* dst, const ColorMatrix* a, const ColorMatrix* b)
+static err_t FOG_CDECL FeColorMatrix_subtractMatrix_SSE(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b)
 {
   float *dm = dst->m;
   const float *am = a->m;
@@ -132,10 +132,10 @@ static err_t FOG_CDECL ColorMatrix_subtractMatrix_SSE(ColorMatrix* dst, const Co
 }
 
 // ============================================================================
-// [Fog::ColorMatrix - Map]
+// [Fog::FeColorMatrix - Map]
 // ============================================================================
 
-static void FOG_CDECL ColorMatrix_mapArgbF_SSE(const ColorMatrix* self, ArgbF* dst, const ArgbF* src)
+static void FOG_CDECL FeColorMatrix_mapArgbF_SSE(const FeColorMatrix* self, ArgbF* dst, const ArgbF* src)
 {
   const float* m = self->m;
 
@@ -182,15 +182,15 @@ static void FOG_CDECL ColorMatrix_mapArgbF_SSE(const ColorMatrix* self, ArgbF* d
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void ColorMatrix_init_SSE(void)
+FOG_NO_EXPORT void FeColorMatrix_init_SSE(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.colormatrix_addMatrix = ColorMatrix_addMatrix_SSE;
-  _api.colormatrix_subtractMatrix = ColorMatrix_subtractMatrix_SSE;
-  _api.colormatrix_mapArgbF = ColorMatrix_mapArgbF_SSE;
+  _api.fecolormatrix_addMatrix = FeColorMatrix_addMatrix_SSE;
+  _api.fecolormatrix_subtractMatrix = FeColorMatrix_subtractMatrix_SSE;
+  _api.fecolormatrix_mapArgbF = FeColorMatrix_mapArgbF_SSE;
 }
 
 } // Fog namespace

@@ -4,12 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_FILTERS_CONVOLUTIONMATRIX_H
-#define _FOG_G2D_IMAGING_FILTERS_CONVOLUTIONMATRIX_H
+#ifndef _FOG_G2D_IMAGING_FILTERS_FECONVOLVEMATRIX_H
+#define _FOG_G2D_IMAGING_FILTERS_FECONVOLVEMATRIX_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
-#include <Fog/G2d/Imaging/BorderFilterTag.h>
+#include <Fog/G2d/Imaging/Filters/FeBorder.h>
 #include <Fog/G2d/Tools/Matrix.h>
 
 namespace Fog {
@@ -18,29 +18,29 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ConvolutionMatrix]
+// [Fog::FeConvolveMatrix]
 // ============================================================================
 
 //! @brief Component transfer.
-struct FOG_NO_EXPORT ConvolutionMatrix : public BorderFilterTag
+struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ConvolutionMatrix()
+  FOG_INLINE FeConvolveMatrix()
   {
-    _api.convolutionmatrix_ctor(this);
+    _api.feconvolvematrix_ctor(this);
   }
 
-  FOG_INLINE ConvolutionMatrix(const ConvolutionMatrix& other)
+  FOG_INLINE FeConvolveMatrix(const FeConvolveMatrix& other)
   {
-    _api.convolutionmatrix_ctorCopy(this, &other);
+    _api.feconvolvematrix_ctorCopy(this, &other);
   }
 
-  FOG_INLINE ~ConvolutionMatrix()
+  FOG_INLINE ~FeConvolveMatrix()
   {
-    _api.convolutionmatrix_dtor(this);
+    _api.feconvolvematrix_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -61,16 +61,16 @@ struct FOG_NO_EXPORT ConvolutionMatrix : public BorderFilterTag
 
   FOG_INLINE void reset()
   {
-    _api.convolutionmatrix_reset(this);
+    _api.feconvolvematrix_reset(this);
   }
 
   // --------------------------------------------------------------------------
   // [Equality]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const ConvolutionMatrix& other) const
+  FOG_INLINE bool eq(const FeConvolveMatrix& other) const
   {
-    return _api.convolutionmatrix_eq(this, &other);
+    return _api.feconvolvematrix_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -78,27 +78,27 @@ struct FOG_NO_EXPORT ConvolutionMatrix : public BorderFilterTag
   // --------------------------------------------------------------------------
 
   //! @brief Assignment operator.
-  FOG_INLINE ConvolutionMatrix& operator=(const ConvolutionMatrix& other)
+  FOG_INLINE FeConvolveMatrix& operator=(const FeConvolveMatrix& other)
   {
-    _api.convolutionmatrix_copy(this, &other);
+    _api.feconvolvematrix_copy(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const ConvolutionMatrix& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const ConvolutionMatrix& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FeConvolveMatrix& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FeConvolveMatrix& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE bool eq(const ConvolutionMatrix* a, const ConvolutionMatrix* b)
+  static FOG_INLINE bool eq(const FeConvolveMatrix* a, const FeConvolveMatrix* b)
   {
-    return _api.convolutionmatrix_eq(a, b);
+    return _api.feconvolvematrix_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.convolutionmatrix_eq;
+    return (EqFunc)_api.feconvolvematrix_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -115,4 +115,4 @@ struct FOG_NO_EXPORT ConvolutionMatrix : public BorderFilterTag
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_FILTERS_CONVOLUTIONMATRIX_H
+#endif // _FOG_G2D_IMAGING_FILTERS_FECONVOLVEMATRIX_H

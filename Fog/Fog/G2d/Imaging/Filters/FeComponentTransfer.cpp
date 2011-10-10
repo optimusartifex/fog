@@ -12,18 +12,18 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
-#include <Fog/G2d/Imaging/Filters/ComponentTransfer.h>
-#include <Fog/G2d/Imaging/Filters/ComponentTransferFunction.h>
+#include <Fog/G2d/Imaging/Filters/FeComponentFunction.h>
+#include <Fog/G2d/Imaging/Filters/FeComponentTransfer.h>
 
 namespace Fog {
 
 // ============================================================================
-// [Fog::ComponentTransfer - Construction / Destruction]
+// [Fog::FeComponentTransfer - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL ComponentTransfer_ctor(ComponentTransfer* self)
+static void FOG_CDECL FeComponentTransfer_ctor(FeComponentTransfer* self)
 {
-  ComponentTransferFunctionData* identity = _api.componenttransferfunction_oIdentity->_d;
+  FeComponentFunctionData* identity = _api.fecomponentfunction_oIdentity->_d;
   identity->reference.add(4);
 
   self->_filterType = IMAGE_FILTER_TYPE_COMPONENT_TRANSFER;
@@ -33,7 +33,7 @@ static void FOG_CDECL ComponentTransfer_ctor(ComponentTransfer* self)
   self->c[3].initCustom1(identity);
 }
 
-static void FOG_CDECL ComponentTransfer_ctorCopy(ComponentTransfer* self, const ComponentTransfer* other)
+static void FOG_CDECL FeComponentTransfer_ctorCopy(FeComponentTransfer* self, const FeComponentTransfer* other)
 {
   self->_filterType = IMAGE_FILTER_TYPE_COMPONENT_TRANSFER;
   self->c[0].initCustom1(other->c[0]->_d->addRef());
@@ -42,7 +42,7 @@ static void FOG_CDECL ComponentTransfer_ctorCopy(ComponentTransfer* self, const 
   self->c[3].initCustom1(other->c[3]->_d->addRef());
 }
 
-static void FOG_CDECL ComponentTransfer_dtor(ComponentTransfer* self)
+static void FOG_CDECL FeComponentTransfer_dtor(FeComponentTransfer* self)
 {
   self->c[0]->_d->release();
   self->c[1]->_d->release();
@@ -51,12 +51,12 @@ static void FOG_CDECL ComponentTransfer_dtor(ComponentTransfer* self)
 }
 
 // ============================================================================
-// [Fog::ComponentTransfer - Reset]
+// [Fog::FeComponentTransfer - Reset]
 // ============================================================================
 
-static void FOG_CDECL ComponentTransfer_reset(ComponentTransfer* self)
+static void FOG_CDECL FeComponentTransfer_reset(FeComponentTransfer* self)
 {
-  ComponentTransferFunctionData* identity = _api.componenttransferfunction_oIdentity->_d;
+  FeComponentFunctionData* identity = _api.fecomponentfunction_oIdentity->_d;
   identity->reference.add(4);
 
   atomicPtrXchg(&self->c[0]->_d, identity)->release();
@@ -66,10 +66,10 @@ static void FOG_CDECL ComponentTransfer_reset(ComponentTransfer* self)
 }
 
 // ============================================================================
-// [Fog::ComponentTransfer - Copy]
+// [Fog::FeComponentTransfer - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL ComponentTransfer_copy(ComponentTransfer* self, const ComponentTransfer* other)
+static err_t FOG_CDECL FeComponentTransfer_copy(FeComponentTransfer* self, const FeComponentTransfer* other)
 {
   atomicPtrXchg(&self->c[0]->_d, other->c[0]->_d->addRef())->release();
   atomicPtrXchg(&self->c[1]->_d, other->c[1]->_d->addRef())->release();
@@ -80,10 +80,10 @@ static err_t FOG_CDECL ComponentTransfer_copy(ComponentTransfer* self, const Com
 }
 
 // ============================================================================
-// [Fog::ComponentTransfer - Eq]
+// [Fog::FeComponentTransfer - Eq]
 // ============================================================================
 
-static bool FOG_CDECL ComponentTransfer_eq(const ComponentTransfer* a, const ComponentTransfer* b)
+static bool FOG_CDECL FeComponentTransfer_eq(const FeComponentTransfer* a, const FeComponentTransfer* b)
 {
   return a->c[0]() == b->c[0]() &&
          a->c[1]() == b->c[1]() &&
@@ -95,19 +95,19 @@ static bool FOG_CDECL ComponentTransfer_eq(const ComponentTransfer* a, const Com
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void ComponentTransfer_init(void)
+FOG_NO_EXPORT void FeComponentTransfer_init(void)
 {
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.componenttransfer_ctor = ComponentTransfer_ctor;
-  _api.componenttransfer_ctorCopy = ComponentTransfer_ctorCopy;
-  _api.componenttransfer_dtor = ComponentTransfer_dtor;
+  _api.fecomponenttransfer_ctor = FeComponentTransfer_ctor;
+  _api.fecomponenttransfer_ctorCopy = FeComponentTransfer_ctorCopy;
+  _api.fecomponenttransfer_dtor = FeComponentTransfer_dtor;
 
-  _api.componenttransfer_reset = ComponentTransfer_reset;
-  _api.componenttransfer_copy = ComponentTransfer_copy;
-  _api.componenttransfer_eq = ComponentTransfer_eq;
+  _api.fecomponenttransfer_reset = FeComponentTransfer_reset;
+  _api.fecomponenttransfer_copy = FeComponentTransfer_copy;
+  _api.fecomponenttransfer_eq = FeComponentTransfer_eq;
 }
 
 } // Fog namespace

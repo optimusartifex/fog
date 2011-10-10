@@ -182,9 +182,9 @@ struct FOG_NO_EXPORT ImageFormatDescription
 
   //! @brief Whether the R.G.B components are premultiplied by the alpha.
   uint8_t _isPremultiplied : 1;
-  //! @brief Whether the pixel is index to an external @c Palette.
+  //! @brief Whether the pixel is index to an external @c ImagePalette.
   uint8_t _isIndexed : 1;
-  //! @brief Whether the pixel is byte-swapped.
+  //! @brief Whether the pixel is byte-swapped (16, 24, 32, 48, and 64-bit pixels only).
   uint8_t _isByteSwapped : 1;
   //! @brief Whether the pixel components are aligned to bytes/words/dwords (hint).
   uint8_t _hasAlignedComponents : 1;

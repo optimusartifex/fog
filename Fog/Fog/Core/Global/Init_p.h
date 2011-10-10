@@ -48,6 +48,7 @@ FOG_NO_EXPORT void Library_fini(void);
 
 FOG_NO_EXPORT void OSInfo_init(void);
 FOG_NO_EXPORT void OSUtil_init(void);
+FOG_NO_EXPORT void UserUtil_init(void);
 
 #if defined(FOG_OS_WINDOWS)
 FOG_NO_EXPORT void WinCOM_init(void);

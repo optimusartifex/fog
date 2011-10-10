@@ -546,7 +546,7 @@ static err_t FOG_CDECL Image_convert(Image* self, uint32_t format)
   int h = d->size.h;
   int y;
 
-  const ApiRaster::_CompositeCore* funcs = _api_raster.getCompositeCore(targetFormat, COMPOSITE_SRC);
+  const RasterCompositeCoreFuncs* funcs = _api_raster.getCompositeCore(targetFormat, COMPOSITE_SRC);
   RasterVBlitLineFunc blitLine = funcs->vblit_line[sourceFormat];
 
   RasterClosure closure;

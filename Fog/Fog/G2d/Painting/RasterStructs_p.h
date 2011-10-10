@@ -89,14 +89,35 @@ struct FOG_NO_EXPORT RasterScope
 
 struct FOG_NO_EXPORT RasterConvertPass
 {
+  //! @brief Fill mask for integer based formats (up to 64 bits per pixel).
+  uint64_t fill;
+
+  //! @brief Alpha shift.
+  uint8_t aDstShift;
+  //! @brief Red shift.
+  uint8_t rDstShift;
+  //! @brief Green shift.
+  uint8_t gDstShift;
+  //! @brief Blue shift.
+  uint8_t bDstShift;
+
+  //! @brief Alpha shift.
+  uint8_t aSrcShift;
+  //! @brief Red shift.
+  uint8_t rSrcShift;
+  //! @brief Green shift.
+  uint8_t gSrcShift;
+  //! @brief Blue shift.
+  uint8_t bSrcShift;
+
   //! @brief Alpha mask (after shift).
-  uint32_t aMask;
+  uint32_t aSrcMask;
   //! @brief Red mask (after shift).
-  uint32_t rMask;
+  uint32_t rSrcMask;
   //! @brief Green mask (after shift).
-  uint32_t gMask;
+  uint32_t gSrcMask;
   //! @brief Blue mask (after shift).
-  uint32_t bMask;
+  uint32_t bSrcMask;
 
   //! @brief Alpha scale constant (integer).
   uint32_t aScale;
@@ -106,18 +127,6 @@ struct FOG_NO_EXPORT RasterConvertPass
   uint32_t gScale;
   //! @brief Blue scale constant (integer).
   uint32_t bScale;
-
-  //! @brief Alpha shift.
-  uint8_t aShift;
-  //! @brief Red shift.
-  uint8_t rShift;
-  //! @brief Green shift.
-  uint8_t gShift;
-  //! @brief Blue shift.
-  uint8_t bShift;
-
-  //! @brief Fill mask for integer based formats (up to 64 bits per pixel).
-  uint64_t fill;
 };
 
 // ============================================================================

@@ -222,6 +222,8 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(err_t, filepath_toAbsolute)(StringW* dst, const StringW* path, const StringW* base);
   FOG_CAPI_STATIC(bool, filepath_isAbsolute)(const StringW* path);
 
+  FOG_CAPI_STATIC(err_t, filepath_substituteEnvironmentVars)(StringW* dst, const StringW* path, uint32_t format);
+
   // --------------------------------------------------------------------------
   // [Core/OS - FileUtil]
   // --------------------------------------------------------------------------
@@ -278,6 +280,14 @@ struct FOG_NO_EXPORT Api
 
   FOG_CAPI_STATIC(err_t, osutil_getErrFromOSErrorCode)(int code);
   FOG_CAPI_STATIC(err_t, osutil_getErrFromOSLastError)(void);
+
+  // --------------------------------------------------------------------------
+  // [Core/OS - UserUtil]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_STATIC(uint32_t, userutil_getUid)(void);
+  FOG_CAPI_STATIC(uint32_t, userutil_getGid)(void);
+  FOG_CAPI_STATIC(err_t, userutil_getUserDirectory)(StringW* dst, uint32_t directoryId);
 
 #if defined(FOG_OS_WINDOWS)
 

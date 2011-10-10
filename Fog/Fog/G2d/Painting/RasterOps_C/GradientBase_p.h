@@ -148,7 +148,11 @@ struct FOG_NO_EXPORT PGradientBase
 
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
       uint i, len = (uint)_w - p1 + 1;
-      for (i = 0; i < len; i++) dst[i] = cp;
+
+      for (i = 0; i < len; i++)
+      {
+        dst[i] = cp;
+      }
     }
   }
 

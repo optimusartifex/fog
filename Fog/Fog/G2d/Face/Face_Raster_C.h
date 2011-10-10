@@ -1119,6 +1119,34 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_PBW_2031(p32& dst0, const p32& x0
 }
 
 // ============================================================================
+// [Fog::Face - ARGB16_4444 - From - ARGB32]
+// ============================================================================
+
+static FOG_INLINE void p32ARGB16_4444FromARGB32(p32& dst0, const p32& x0)
+{
+  //                                 // [AAAAAAAA] [RRRRRRRR] [GGGGGGGG] [BBBBBBBB]
+
+  uint32_t t0 = (x0 >>  4) & 0x000FU;// [00000000] [00000000] [00000000] [0000BBBB]
+  uint32_t t1 = (x0 >>  8) & 0x00F0U;// [00000000] [00000000] [00000000] [GGGG0000]
+  uint32_t t2 = (x0 >> 12) & 0x0F00U;// [00000000] [00000000] [0000RRRR] [00000000]
+  uint32_t t3 = (x0 >> 16) & 0xF000U;// [00000000] [00000000] [AAAA0000] [00000000]
+
+  dst0 = _FOG_FACE_COMBINE_4(t0, t1, t2, t3);
+}
+
+static FOG_INLINE void p32ARGB16_4444_bsFromARGB32(p32& dst0, const p32& x0)
+{
+  //                                 // [AAAAAAAA] [RRRRRRRR] [GGGGGGGG] [BBBBBBBB]
+
+  uint32_t t0 = (x0 <<  8) & 0xF000U;// [00000000] [00000000] [BBBB0000] [00000000]
+  uint32_t t1 = (x0 >>  4) & 0x0F00U;// [00000000] [00000000] [0000GGGG] [00000000]
+  uint32_t t2 = (x0 >> 16) & 0x00F0U;// [00000000] [00000000] [00000000] [RRRR0000]
+  uint32_t t3 = (x0 >> 28) & 0x000FU;// [00000000] [00000000] [00000000] [0000AAAA]
+
+  dst0 = _FOG_FACE_COMBINE_4(t0, t1, t2, t3);
+}
+
+// ============================================================================
 // [Fog::Face - RGB48 - Load / Store]
 // ============================================================================
 
@@ -1202,6 +1230,32 @@ static FOG_INLINE void p32RGB48StoreFromARGB32(
 #endif
 }
 
+static FOG_INLINE void p32RGB48StoreBSwapFromARGB32(
+  void* dstp, const p32& src0)
+{
+  uint8_t* dst = reinterpret_cast<uint8_t*>(dstp);
+
+  p32 a0;
+  p32 rb;
+  p32 gg;
+
+  p32ExtractPBB3(a0, src0);
+  p32Cvt256SBWFrom255SBW(a0, a0);
+
+  rb = ((src0 & 0x00FF00FFU) * a0);
+  gg = ((src0 & 0x0000FF00U) * a0) >> 8;
+
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+  p32Store2a(dst + 0, rb >> 16);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb);
+#else
+  p32Store2a(dst + 0, rb);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb >> 16);
+#endif
+}
+
 static FOG_INLINE void p32RGB48StoreFromXRGB32(
   void* dstp, const p32& src0)
 {
@@ -1221,6 +1275,24 @@ static FOG_INLINE void p32RGB48StoreFromXRGB32(
 #endif
 }
 
+static FOG_INLINE void p32RGB48StoreBSwapFromXRGB32(
+  void* dstp, const p32& src0)
+{
+  uint8_t* dst = reinterpret_cast<uint8_t*>(dstp);
+
+  p32 rb = ((src0 & 0x00FF00FFU) * 0x00000101U);
+  p32 gg = ((src0 & 0x0000FF00U) * 0x00000101U) >> 8;
+
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+  p32Store2a(dst + 0, rb >> 16);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb);
+#else
+  p32Store2a(dst + 0, rb);
+  p32Store2a(dst + 2, gg);
+  p32Store2a(dst + 4, rb >> 16);
+#endif
+}
 // ============================================================================
 // [Fog::Face - XRGB64 - From - RGB16_555]
 // ============================================================================

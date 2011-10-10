@@ -388,6 +388,14 @@ void MyWindow::onPaint(PaintEvent* e)
 // [MAIN]
 // ============================================================================
 
+static void stdlog(const StringW& s)
+{
+  StringA local;
+  TextCodec::local8().encode(local, s);
+  fputs(local.getData(), stderr);
+  fputc('\n', stderr);
+}
+
 FOG_UI_MAIN()
 {
   //Api* api = &_api;

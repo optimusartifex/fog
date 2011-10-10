@@ -46,58 +46,41 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // [RasterOps - Convert - API]
   // --------------------------------------------------------------------------
 
-  ApiRaster::_Convert& convert = api.convert;
-
-  // --------------------------------------------------------------------------
-  // [RasterOps - Convert - A8 <-> Extended]
-  // --------------------------------------------------------------------------
-
-  convert.a8_from_custom    [RASTER_FORMAT_A8               ] = api.convert.copy[RASTER_COPY_8];
-  convert.a8_from_custom    [RASTER_FORMAT_A16              ] = api.compositeCore[IMAGE_FORMAT_A8][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_A16];
-
-  convert.custom_from_a8    [RASTER_FORMAT_A8               ] = api.convert.copy[RASTER_COPY_8];
-  convert.custom_from_a8    [RASTER_FORMAT_A16              ] = api.compositeCore[IMAGE_FORMAT_A16][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_A8];
-  convert.custom_from_a8    [RASTER_FORMAT_A16_BS           ] = api.compositeCore[IMAGE_FORMAT_A16][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_A8];
-
-  // --------------------------------------------------------------------------
-  //[RasterOps - Convert - A16 <-> Extended]
-  // --------------------------------------------------------------------------
-
-  convert.a16_from_custom   [RASTER_FORMAT_A8               ] = api.compositeCore[IMAGE_FORMAT_A16][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_A8];
-  convert.a16_from_custom   [RASTER_FORMAT_A16              ] = api.convert.copy[RASTER_COPY_16];
-  convert.a16_from_custom   [RASTER_FORMAT_A16_BS           ] = api.convert.bswap[RASTER_BSWAP_16];
-
-  convert.custom_from_a16   [RASTER_FORMAT_A8               ] = api.compositeCore[IMAGE_FORMAT_A8][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_A16];
-  convert.custom_from_a16   [RASTER_FORMAT_A16              ] = api.convert.copy[RASTER_COPY_16];
-  convert.custom_from_a16   [RASTER_FORMAT_A16_BS           ] = api.convert.bswap[RASTER_BSWAP_16];
+  RasterConvertFuncs& convert = api.convert;
 
   // --------------------------------------------------------------------------
   //[RasterOps - Convert - ARGB32 <-> Extended]
   // --------------------------------------------------------------------------
 
-  convert.argb32_from_custom[RASTER_FORMAT_RGB24_888        ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB24];
-  convert.argb32_from_custom[RASTER_FORMAT_RGB32_888        ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_XRGB32];
-  convert.argb32_from_custom[RASTER_FORMAT_RGB48_161616     ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB48];
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB32_8888      ] = api.convert.copy[RASTER_COPY_32];
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB64_16161616  ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
-  convert.argb32_from_custom[RASTER_FORMAT_I8               ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_I8];
+  convert.argb32_from[RASTER_FORMAT_RGB24_888          ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB24 ];
+  convert.argb32_from[RASTER_FORMAT_RGB32_888          ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_XRGB32];
+  convert.argb32_from[RASTER_FORMAT_ARGB32_8888        ] = api.convert.copy[RASTER_COPY_32];
+  convert.argb32_from[RASTER_FORMAT_RGB48_161616       ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB48];
+  convert.argb32_from[RASTER_FORMAT_ARGB64_16161616    ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
+  convert.argb32_from[RASTER_FORMAT_I8                 ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_I8    ];
 
-  convert.custom_from_argb32[RASTER_FORMAT_RGB24_888        ] = api.compositeCore[IMAGE_FORMAT_RGB24 ][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB32];
-
-  // TODO:
+  convert.from_argb32[RASTER_FORMAT_RGB24_888          ] = api.compositeCore[IMAGE_FORMAT_RGB24 ][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB32];
+  convert.from_argb32[RASTER_FORMAT_RGB32_888          ] = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB32];
+  convert.from_argb32[RASTER_FORMAT_RGB48_161616       ] = api.compositeCore[IMAGE_FORMAT_RGB48 ][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB32];
+  convert.from_argb32[RASTER_FORMAT_ARGB32_8888        ] = api.convert.copy[RASTER_COPY_32];
+  convert.from_argb32[RASTER_FORMAT_ARGB64_16161616    ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB32];
 
   // --------------------------------------------------------------------------
   //[RasterOps - Convert - ARGB64 <-> Extended]
   // --------------------------------------------------------------------------
 
-  convert.argb64_from_custom[RASTER_FORMAT_RGB24_888        ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB24];
-  convert.argb64_from_custom[RASTER_FORMAT_RGB32_888        ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_XRGB32];
-  convert.argb64_from_custom[RASTER_FORMAT_RGB48_161616     ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB48];
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB32_8888      ] = api.convert.copy[RASTER_COPY_32];
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB64_16161616  ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
-  convert.argb64_from_custom[RASTER_FORMAT_I8               ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_I8];
+  convert.argb64_from[RASTER_FORMAT_RGB24_888          ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB24 ];
+  convert.argb64_from[RASTER_FORMAT_RGB32_888          ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_XRGB32];
+  convert.argb64_from[RASTER_FORMAT_ARGB32_8888        ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB32];
+  convert.argb64_from[RASTER_FORMAT_RGB48_161616       ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_RGB48 ];
+  convert.argb64_from[RASTER_FORMAT_ARGB64_16161616    ] = api.convert.copy[RASTER_COPY_64];
+  convert.argb64_from[RASTER_FORMAT_I8                 ] = api.compositeCore[IMAGE_FORMAT_PRGB64][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_I8    ];
 
-  // TODO:
+  convert.from_argb64[RASTER_FORMAT_RGB24_888          ] = api.compositeCore[IMAGE_FORMAT_RGB24 ][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
+  convert.from_argb64[RASTER_FORMAT_RGB32_888          ] = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
+  convert.from_argb64[RASTER_FORMAT_ARGB32_8888        ] = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
+  convert.from_argb64[RASTER_FORMAT_RGB48_161616       ] = api.compositeCore[IMAGE_FORMAT_RGB48 ][RASTER_COMPOSITE_CORE_SRC].vblit_line[IMAGE_FORMAT_PRGB64];
+  convert.from_argb64[RASTER_FORMAT_ARGB64_16161616    ] = api.convert.copy[RASTER_COPY_64];
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - Src/SrcOver]
@@ -105,8 +88,8 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
 
   for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
   {
-    ApiRaster::_CompositeCore& fCopy = api.compositeCore[i][RASTER_COMPOSITE_CORE_SRC];
-    ApiRaster::_CompositeCore& fOver = api.compositeCore[i][RASTER_COMPOSITE_CORE_SRC_OVER];
+    RasterCompositeCoreFuncs& fCopy = api.compositeCore[i][RASTER_COMPOSITE_CORE_SRC];
+    RasterCompositeCoreFuncs& fOver = api.compositeCore[i][RASTER_COMPOSITE_CORE_SRC_OVER];
 
     fCopy.cblit_line[RASTER_CBLIT_XRGB     ] = fCopy.cblit_line[RASTER_CBLIT_PRGB];
     fCopy.cblit_span[RASTER_CBLIT_XRGB     ] = fCopy.cblit_span[RASTER_CBLIT_PRGB];

@@ -86,7 +86,7 @@ static FOG_INLINE void p64Store4uBSwap(void* dstp, const p64& src0) { ((uint32_t
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
 
-static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6a(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -94,7 +94,7 @@ static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
                               (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
 }
 
-static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6u(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -102,16 +102,7 @@ static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
                               (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
 }
 
-static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
-{
-  const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
-
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ),
-                              (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
-  dst0 = Memory::bswap64(dst0) >> 16;
-}
-
-static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6aBSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -120,7 +111,16 @@ static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
   dst0 = Memory::bswap64(dst0) >> 16;
 }
 
-static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Load6uBSwap(p64& dst0, const void* srcp)
+{
+  const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
+
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint32_t*)(src8 + 0))[0] ),
+                              (uint64_t)( ((const uint16_t*)(src8 + 4))[0] ) << 32);
+  dst0 = Memory::bswap64(dst0) >> 16;
+}
+
+static FOG_INLINE void p64Store6a(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -128,7 +128,7 @@ static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
   ((uint16_t*)(dst8 + 4))[0] = (uint16_t)(src0 >> 32);
 }
 
-static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6u(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -136,7 +136,7 @@ static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
   ((uint16_t*)(dst8 + 4))[0] = (uint16_t)(src0 >> 32);
 }
 
-static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6aBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
   uint64_t x0 = Memory::bswap64(src0) >> 16;
@@ -145,7 +145,7 @@ static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
   ((uint16_t*)(dst8 + 4))[0] = (uint16_t)(x0 >> 32);
 }
 
-static FOG_INLINE void p64Store6uSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6uBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
   uint64_t x0 = Memory::bswap64(src0) >> 16;
@@ -156,7 +156,7 @@ static FOG_INLINE void p64Store6uSwap(void* dstp, const p64& src0)
 
 #else
 
-static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6a(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -164,7 +164,7 @@ static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
                               (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
 }
 
-static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6u(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -172,16 +172,7 @@ static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
                               (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
 }
 
-static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
-{
-  const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
-
-  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32,
-                              (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
-  dst0 = Memory::bswap64(dst0) >> 16;
-}
-
-static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6aBSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -190,7 +181,16 @@ static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
   dst0 = Memory::bswap64(dst0) >> 16;
 }
 
-static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Load6uBSwap(p64& dst0, const void* srcp)
+{
+  const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
+
+  dst0 = _FOG_FACE_COMBINE_2( (uint64_t)( ((const uint16_t*)(src8 + 0))[0] ) << 32,
+                              (uint64_t)( ((const uint32_t*)(src8 + 2))[0] ) );
+  dst0 = Memory::bswap64(dst0) >> 16;
+}
+
+static FOG_INLINE void p64Store6a(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -198,7 +198,7 @@ static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
   ((uint32_t*)(dst8 + 2))[0] = (uint32_t)(src0);
 }
 
-static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6u(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -206,7 +206,7 @@ static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
   ((uint32_t*)(dst8 + 2))[0] = (uint32_t)(src0);
 }
 
-static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6aBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
   uint64_t x0 = Memory::bswap64(src0);
@@ -215,7 +215,7 @@ static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
   ((uint32_t*)(dst8 + 2))[0] = (uint32_t)(x0);
 }
 
-static FOG_INLINE void p64Store6uSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6uBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
   uint64_t x0 = Memory::bswap64(src0);
@@ -269,7 +269,7 @@ static FOG_INLINE void p64Store4uBSwap(void* dstp, const p64& src0) { ((uint32_t
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
 
-static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6a(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -277,7 +277,7 @@ static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
   dst0.u32Hi = ((const uint16_t*)(src8 + 4))[0];
 }
 
-static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6u(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -285,7 +285,7 @@ static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
   dst0.u32Hi = ((const uint16_t*)(src8 + 4))[0];
 }
 
-static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6aBSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -293,7 +293,7 @@ static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
   dst0.u32Lo = Memory::bswap32( ((const uint32_t*)(src8 + 2))[0] );
 }
 
-static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6uBSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -301,7 +301,7 @@ static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
   dst0.u32Lo = Memory::bswap32( ((const uint32_t*)(src8 + 2))[0] );
 }
 
-static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6a(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -309,7 +309,7 @@ static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
   ((uint16_t*)(dst8 + 4))[0] = (uint16_t)src0.u32Hi;
 }
 
-static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6u(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -317,7 +317,7 @@ static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
   ((uint16_t*)(dst8 + 4))[0] = (uint16_t)src0.u32Hi;
 }
 
-static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6aBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -325,7 +325,7 @@ static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
   ((uint32_t*)(dst8 + 2))[0] = Memory::bswap32((uint32_t)src0.u32Lo);
 }
 
-static FOG_INLINE void p64Store6uSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6uBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -335,7 +335,7 @@ static FOG_INLINE void p64Store6uSwap(void* dstp, const p64& src0)
 
 #else
 
-static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6a(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -343,7 +343,7 @@ static FOG_INLINE void p64Load6aNative(p64& dst0, const void* srcp)
   dst0.u32Lo = ((const uint32_t*)(src8 + 2))[0];
 }
 
-static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6u(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -351,7 +351,7 @@ static FOG_INLINE void p64Load6uNative(p64& dst0, const void* srcp)
   dst0.u32Lo = ((const uint32_t*)(src8 + 2))[0];
 }
 
-static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6aBSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -359,7 +359,7 @@ static FOG_INLINE void p64Load6aSwap(p64& dst0, const void* srcp)
   dst0.u32Hi = Memory::bswap16( ((const uint16_t*)(src8 + 4))[0] );
 }
 
-static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
+static FOG_INLINE void p64Load6uBSwap(p64& dst0, const void* srcp)
 {
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
@@ -367,7 +367,7 @@ static FOG_INLINE void p64Load6uSwap(p64& dst0, const void* srcp)
   dst0.u32Hi = Memory::bswap16( ((const uint16_t*)(src8 + 4))[0] );
 }
 
-static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6a(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -375,7 +375,7 @@ static FOG_INLINE void p64Store6aNative(void* dstp, const p64& src0)
   ((uint32_t*)(dst8 + 2))[0] = (uint32_t)src0.u32Lo;
 
 }
-static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6u(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -383,7 +383,7 @@ static FOG_INLINE void p64Store6uNative(void* dstp, const p64& src0)
   ((uint32_t*)(dst8 + 2))[0] = (uint32_t)src0.u32Lo;
 }
 
-static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6aBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 
@@ -391,7 +391,7 @@ static FOG_INLINE void p64Store6aSwap(void* dstp, const p64& src0)
   ((uint16_t*)(dst8 + 4))[0] = Memory::bswap16( (uint16_t)src0.u32Hi );
 
 }
-static FOG_INLINE void p64Store6uSwap(void* dstp, const p64& src0)
+static FOG_INLINE void p64Store6uBSwap(void* dstp, const p64& src0)
 {
   uint8_t* dst8 = reinterpret_cast<uint8_t*>(dstp);
 

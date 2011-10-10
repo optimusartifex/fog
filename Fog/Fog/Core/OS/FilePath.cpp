@@ -10,7 +10,9 @@
 
 // [Dependencies]
 #include <Fog/Core/Kernel/Application.h>
+#include <Fog/Core/OS/Environment.h>
 #include <Fog/Core/OS/FilePath.h>
+#include <Fog/Core/OS/UserUtil.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -463,6 +465,249 @@ static bool FOG_CDECL FilePath_isAbsolute(const StringW* path)
 }
 
 // ============================================================================
+// [Fog::FilePath - Environment Substitution]
+// ============================================================================
+
+static err_t FOG_CDECL FilePath_substituteFunc(StringW* dst, const StringW* key)
+{
+  StringTmpW<256> value;
+
+  FOG_RETURN_ON_ERROR(Environment::getValue(*key, value));
+  FOG_RETURN_ON_ERROR(dst->append(value));
+  
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const StringW* path, uint32_t format)
+{
+  err_t err = ERR_OK;
+  size_t length = path->getLength();
+
+  const CharW* p = path->getData();
+  const CharW* pEnd = p + length;
+  const CharW* mark;
+
+  StringW tmp;
+  StringW* dst = _dst;
+
+  StringTmpW<256> varName;
+
+  if (dst == path)
+    dst = &tmp;
+  
+  if (length == 0)
+    return dst->set(*path);
+
+  err = dst->reserve(128);
+  if (FOG_IS_ERROR(err))
+    goto _Fail;
+
+  // --------------------------------------------------------------------------
+  // [Detect HOME]
+  // --------------------------------------------------------------------------
+
+  {
+    uint32_t homeLen = 0;
+
+    if (p[0] == CharW('~'))
+    {
+      homeLen = 1;
+    }
+    else
+    {
+      if ((format & FILE_PATH_SUBSTITUTE_FORMAT_WINDOWS) != 0)
+      {
+        if (length >= 6 && StringUtil::eq(p, "%HOME%", 6))
+          homeLen = 6;
+        else if (length >= 14 && StringUtil::eq(p, "%USER_PROFILE%", 14))
+          homeLen = 14;
+      }
+
+      if ((format & FILE_PATH_SUBSTITUTE_FORMAT_UNIX) != 0)
+      {
+        if (length >= 5 && StringUtil::eq(p, "$HOME", 5) && 
+           (length == 5 || !(p[5].isNumlet() || p[5] == CharW('_'))))
+          homeLen = 5;
+        else if (length >= 7 && StringUtil::eq(p, "${HOME}", 7))
+          homeLen = 7;
+      }
+    }
+
+    if (homeLen)
+    {
+      FOG_RETURN_ON_ERROR(UserUtil::getUserDirectory(*dst, USER_DIRECTORY_HOME));
+      p += homeLen;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // [Detect Environment Variables]
+  // --------------------------------------------------------------------------
+
+  mark = p;
+
+  if (format != FILE_PATH_SUBSTITUTE_FORMAT_NONE)
+  {
+    const CharW* variableName = NULL;
+    size_t variableLen = 0;
+
+    while (p != pEnd)
+    {
+      CharW c = p[0];
+
+      // UNIX style.
+      if (c == CharW('$') && (format & FILE_PATH_SUBSTITUTE_FORMAT_UNIX))
+      {
+        if (mark != p)
+        {
+          err = dst->append(StubW(mark, (size_t)(p - mark)));
+          if (FOG_IS_ERROR(err))
+            goto _Fail;
+          mark = p;
+        }
+
+        if (++p == pEnd)
+          goto _End;
+        
+        c = p[0];
+        bool hasBracket = c == CharW('{');
+
+        // Detect "{"
+        if (hasBracket)
+        {
+          if (++p == pEnd)
+            goto _End;
+
+          variableName = p;
+
+          // Environment name must start with a letter.
+          c = p[0];
+          if (!(c.isAsciiLetter() || c == CharW('_')))
+            goto _BadSyntax;
+
+          for (;;)
+          {
+            c = p[0];
+            if (!(c.isAsciiNumlet() || c == CharW('_')))
+            {
+              if (c == CharW('}'))
+              {
+                variableLen = (size_t)(p - variableName);
+                p++;
+                break;
+              }
+              else
+                goto _BadSyntax;
+            }
+
+            if (++p == pEnd)
+              goto _BadSyntax;
+          }
+        }
+        else
+        {
+          // Environment name must start with a letter.
+          c = p[0];
+          if (!(c.isAsciiLetter() || c == CharW('_')))
+            goto _BadSyntax;
+
+          variableName = p;
+          
+          for (;;)
+          {
+            c = p[0];
+            if (!(c.isAsciiNumlet() || c == CharW('_')))
+              break;
+
+            if (++p == pEnd)
+              break;
+          }
+
+          variableLen = (size_t)(p - variableName);
+        }
+        
+        goto _Substitute;
+      }
+      // Windows style.
+      else if (c == CharW('%') && (format & FILE_PATH_SUBSTITUTE_FORMAT_WINDOWS))
+      {
+        if (mark != p)
+        {
+          err = dst->append(StubW(mark, (size_t)(p - mark)));
+          if (FOG_IS_ERROR(err))
+            goto _Fail;
+          mark = p;
+        }
+
+        if (++p == pEnd)
+          goto _End;
+        
+        variableName = p;
+
+        // Environment name must start with a letter.
+        c = p[0];
+        if (!(c.isAsciiLetter() || c == CharW('_')))
+          goto _BadSyntax;
+
+        for (;;)
+        {
+          c = p[0];
+          if (!(c.isAsciiNumlet() || c == CharW('_')))
+          {
+            if (c == CharW('%'))
+            {
+              variableLen = (size_t)(p - variableName);
+              p++;
+              break;
+            }
+            else
+              goto _BadSyntax;
+          }
+
+          if (++p == pEnd)
+            goto _BadSyntax;
+        }
+
+_Substitute:
+        err = varName.set(StubW(variableName, variableLen));
+        if (FOG_IS_ERROR(err))
+          goto _Fail;
+
+        err = FilePath_substituteFunc(dst, &varName);
+        if (FOG_IS_ERROR(err))
+          goto _Fail;
+
+        mark = p;
+        if (p == pEnd)
+          break;
+      }
+
+      p++;
+    }
+  }
+
+_End:
+  if (mark != pEnd)
+    err = dst->append(StubW(mark, (size_t)(pEnd - mark)));
+
+  if (FOG_IS_ERROR(err))
+  {
+_Fail:
+    _dst->clear();
+  }
+  else if (dst == &tmp)
+  {
+    _dst->set(tmp);
+  }
+
+  return err;
+  
+_BadSyntax:
+  err = ERR_IO_PATH_BAD_SYNTAX;
+  goto _Fail;
+}
+
+// ============================================================================
 // [Init / Fini]
 // ============================================================================
 
@@ -473,18 +718,15 @@ FOG_NO_EXPORT void FilePath_init(void)
   _api.filepath_extractFile = FilePath_extractFile;
   _api.filepath_extractExtension = FilePath_extractExtension;
   _api.filepath_extractDirectory = FilePath_extractDirectory;
-
   _api.filepath_containsFile = FilePath_containsFile;
   _api.filepath_containsExtension = FilePath_containsExtension;
   _api.filepath_containsDirectory = FilePath_containsDirectory;
-
   _api.filepath_normalize = FilePath_normalize;
   _api.filepath_isNormalized = FilePath_isNormalized;
-
   _api.filepath_isRoot = FilePath_isRoot;
-
   _api.filepath_toAbsolute = FilePath_toAbsolute;
   _api.filepath_isAbsolute = FilePath_isAbsolute;
+  _api.filepath_substituteEnvironmentVars = FilePath_substituteEnvironmentVars;
 }
 
 } // Fog namespace

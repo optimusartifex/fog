@@ -256,7 +256,7 @@ struct FOG_NO_EXPORT ImageConverter
     return _api.imageconverter_blitLine(this, dst, src, w, NULL);
   }
 
-  FOG_INLINE void blitSpan(void* dst, const void* src, int w, const PointI& ditherOrigin) const
+  FOG_INLINE void blitLine(void* dst, const void* src, int w, const PointI& ditherOrigin) const
   {
     return _api.imageconverter_blitLine(this, dst, src, w, &ditherOrigin);
   }

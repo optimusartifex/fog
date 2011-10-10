@@ -81,7 +81,7 @@ struct FOG_NO_EXPORT PTextureBase
 
     // Choose the format of fetched pixels.
     uint32_t fetchFormat = srcFormat;
-    const ApiRaster::_Texture::_Fetch* fetchFuncs;
+    const RasterTextureFuncs::_Fetch* fetchFuncs;
 
     // ${IMAGE_FORMAT:BEGIN}
     switch (dstFormat)

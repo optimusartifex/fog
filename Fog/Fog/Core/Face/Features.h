@@ -91,10 +91,12 @@ namespace Face {
 # define _FOG_FACE_COMBINE_2(_X0_, _X1_) ((_X0_) + (_X1_))
 # define _FOG_FACE_COMBINE_3(_X0_, _X1_, _X2_) ((_X0_) + (_X1_) + (_X2_))
 # define _FOG_FACE_COMBINE_4(_X0_, _X1_, _X2_, _X3_) ((_X0_) + (_X1_) + (_X2_) + (_X3_))
+# define _FOG_FACE_COMBINE_5(_X0_, _X1_, _X2_, _X3_, _X4_) ((_X0_) + (_X1_) + (_X2_) + (_X3_) + (_X4_))
 #else
 # define _FOG_FACE_COMBINE_2(_X0_, _X1_) ((_X0_) | (_X1_))
 # define _FOG_FACE_COMBINE_3(_X0_, _X1_, _X2_) ((_X0_) | (_X1_) | (_X2_))
 # define _FOG_FACE_COMBINE_4(_X0_, _X1_, _X2_, _X3_) ((_X0_) | (_X1_) | (_X2_) | (_X3_))
+# define _FOG_FACE_COMBINE_5(_X0_, _X1_, _X2_, _X3_, _X4_) ((_X0_) | (_X1_) | (_X2_) | (_X3_) | (_X4_))
 #endif // FOG_FACE_HAS_FAST_ADD
 
 // ============================================================================

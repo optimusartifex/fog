@@ -75,6 +75,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   OSInfo_init();
   OSUtil_init();
   Library_init();
+  UserUtil_init();
 
   FileInfo_init();
   FileMapping_init();
@@ -82,6 +83,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   FileUtil_init();
   DirIterator_init();
 
+  // [Core/Tools]
   Stream_init();
 
   // [Core/Threading]

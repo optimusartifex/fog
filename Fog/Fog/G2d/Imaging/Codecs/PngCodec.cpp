@@ -414,7 +414,7 @@ err_t PngDecoder::readImage(Image& image)
       for (y = 0; y < _size.h; y++, yi++, dstPixels += dstStride)
       {
         png.read_rows(_png_ptr, &dstPixels, NULL, 1);
-        if (converter.isValid()) converter.blitSpan(dstPixels, dstPixels, _size.w);
+        if (converter.isValid()) converter.blitLine(dstPixels, dstPixels, _size.w);
         if ((yi & 15) == 0) updateProgress(yi, ytotal);
       }
     }

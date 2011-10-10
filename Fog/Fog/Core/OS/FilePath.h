@@ -137,6 +137,21 @@ struct FOG_NO_EXPORT FilePath
   {
     return _api.filepath_isAbsolute(&path);
   }
+
+  // --------------------------------------------------------------------------
+  // [Environment Substitution]
+  // --------------------------------------------------------------------------
+
+  //! @brief Substitute environment variables in @a path.
+  //!
+  //! @param dst Destination string where to write the substitution.
+  //! @param path Source path which will be substituted.
+  //! @param format Environment variable format, See @ref FILE_PATH_SUBSTITUTE_FORMAT.
+  static FOG_INLINE err_t substituteEnvironmentVars(StringW& dst, const StringW& path,
+    uint32_t format = FILE_PATH_SUBSTITUTE_FORMAT_DEFAULT)
+  {
+    return _api.filepath_substituteEnvironmentVars(&dst, &path, format);
+  }
 };
 
 //! @}

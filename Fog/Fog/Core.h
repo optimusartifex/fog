@@ -52,7 +52,7 @@
 #include <Fog/Core/OS/Library.h>
 #include <Fog/Core/OS/OSInfo.h>
 #include <Fog/Core/OS/OSUtil.h>
-#include <Fog/Core/OS/UserInfo.h>
+#include <Fog/Core/OS/UserUtil.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/AtomicPadding.h>
 #include <Fog/Core/Threading/Lock.h>

@@ -889,7 +889,7 @@ err_t PcxEncoder::writeImage(const Image& image)
 
       for (int y = 0; y != h; y++, pixels += stride, ditherOrigin.y++)
       {
-        converter.blitSpan(buffer.getMem(), pixels, w, ditherOrigin);
+        converter.blitLine(buffer.getMem(), pixels, w, ditherOrigin);
 
         for (uint plane = 0; plane != nPlanes; plane++)
         {

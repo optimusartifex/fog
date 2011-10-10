@@ -56,7 +56,8 @@ static err_t ImageFormatDescription_detectIntegerFormatValues(ImageFormatDescrip
     self->_componentMask |= IMAGE_COMPONENT_RGB;
 
     // Unused compnents?
-    if (self->_rMask == 0 || self->_gMask == 0 || self->_bMask == 0) goto _Fail;
+    if (self->_rMask == 0 || self->_gMask == 0 || self->_bMask == 0)
+      goto _Fail;
   }
 
   // No components?
@@ -200,18 +201,20 @@ static err_t ImageFormatDescription_detectIntegerFormatValues(ImageFormatDescrip
       if ((mask & FOG_UINT64_C(0x000000FF)) == 0) { mask >>=  8; pos +=  8; }
 
       // Max 16-bits per mask.
-      if (mask > 0xFFFF) goto _Fail;
+      if (mask > 0xFFFF)
+        goto _Fail;
 
       // 32-bit arithmetic is faster when running on 32-bit.
       uint32_t m = (uint32_t)mask;
 
       // Get rid off all zero bits.
-      while (m & 0x0) { m >>= 1; pos++; }
+      while ((m & 0x1) == 0x0) { m >>= 1; pos++; }
       // Calculate ones, this gives us the precision of the component.
-      while (m & 0x1) { m >>= 1; size++; }
+      while ((m & 0x1) == 0x1) { m >>= 1; size++; }
 
       // Detect non-continuous mask, for example [110011] is an invalid mask.
-      if (m) goto _Fail;
+      if (m)
+        goto _Fail;
 
       if (size > 8) self->_precision = IMAGE_PRECISION_WORD;
     }

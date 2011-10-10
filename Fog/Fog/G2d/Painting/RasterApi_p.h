@@ -192,6 +192,153 @@ typedef void (FOG_FASTCALL *RasterGradientInterpolateFunc)(
   uint8_t* dst, int w, const ColorStop* stops, size_t length);
 
 // ============================================================================
+// [Fog::RasterConvertFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterConvertFuncs
+{
+  RasterConvertInitFunc init;
+
+  RasterVBlitLineFunc copy[RASTER_COPY_COUNT];
+  RasterVBlitLineFunc fill[RASTER_FILL_COUNT];
+  RasterVBlitLineFunc bswap[RASTER_BSWAP_COUNT];
+
+  RasterVBlitLineFunc argb32_from_prgb32;
+  RasterVBlitLineFunc prgb32_from_argb32;
+
+  RasterVBlitLineFunc argb64_from_prgb64;
+  RasterVBlitLineFunc prgb64_from_argb64;
+
+  RasterVBlitLineFunc argb32_from[RASTER_FORMAT_COUNT];
+  RasterVBlitLineFunc from_argb32[RASTER_FORMAT_COUNT];
+
+  RasterVBlitLineFunc argb64_from[RASTER_FORMAT_COUNT];
+  RasterVBlitLineFunc from_argb64[RASTER_FORMAT_COUNT];
+
+  // TODO: Not Implemented.
+  RasterVBlitLineFunc dithered_from_xrgb32[RASTER_DITHER_COUNT];
+  RasterVBlitLineFunc dithered_from_rgb24 [RASTER_DITHER_COUNT];
+};
+
+// ============================================================================
+// [Fog::RasterCompositeCoreFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterCompositeCoreFuncs
+{
+  RasterCBlitRectFunc cblit_rect[RASTER_CBLIT_COUNT];
+  RasterCBlitLineFunc cblit_line[RASTER_CBLIT_COUNT];
+  RasterCBlitSpanFunc cblit_span[RASTER_CBLIT_COUNT];
+
+  RasterVBlitRectFunc vblit_rect[IMAGE_FORMAT_COUNT];
+  RasterVBlitLineFunc vblit_line[IMAGE_FORMAT_COUNT];
+  RasterVBlitSpanFunc vblit_span[IMAGE_FORMAT_COUNT];
+};
+
+// ============================================================================
+// [Fog::RasterCompositeExtFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterCompositeExtFuncs
+{
+  RasterCBlitLineFunc cblit_line[RASTER_CBLIT_COUNT];
+  RasterCBlitSpanFunc cblit_span[RASTER_CBLIT_COUNT];
+
+  RasterVBlitLineFunc vblit_line[RASTER_VBLIT_COUNT];
+  RasterVBlitSpanFunc vblit_span[RASTER_VBLIT_COUNT];
+};
+
+// ============================================================================
+// [Fog::RasterSolidFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterSolidFuncs
+{
+  RasterSolidCreateFunc create;
+  RasterPatternDestroyFunc destroy;
+
+  RasterPatternPrepareFunc prepare;
+  RasterPatternFetchFunc fetch[IMAGE_FORMAT_COUNT];
+};
+
+// ============================================================================
+// [Fog::RasterTextureFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterTextureFuncs
+{
+  RasterTextureCreateFunc create;
+
+  struct FOG_NO_EXPORT _Fetch
+  {
+    RasterPatternFetchFunc fetch_simple_align[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    RasterPatternFetchFunc fetch_simple_subx0[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    RasterPatternFetchFunc fetch_simple_sub0y[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    RasterPatternFetchFunc fetch_simple_subxy[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+
+    RasterPatternFetchFunc fetch_scale_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    RasterPatternFetchFunc fetch_scale_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+
+    RasterPatternFetchFunc fetch_affine_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    RasterPatternFetchFunc fetch_affine_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+
+    RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+    RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
+  };
+
+  _Fetch prgb32;
+  _Fetch a8;
+
+  _Fetch prgb64;
+  _Fetch rgb48;
+  _Fetch a16;
+};
+
+// ============================================================================
+// [Fog::RasterGradientFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterGradientFuncs
+{
+  RasterGradientInterpolateFunc interpolate[IMAGE_FORMAT_COUNT];
+
+  RasterGradientCreateFunc create[GRADIENT_TYPE_COUNT];
+
+  struct _Linear
+  {
+    RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+
+    RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+  } linear;
+
+  struct _Radial
+  {
+    RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+
+    RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+  } radial;
+
+  struct _Conical
+  {
+    RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT];
+    RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT];
+  } conical;
+
+  struct _Rectangular
+  {
+    RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+
+    RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+    RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
+  } rectangular;
+};
+
+// ============================================================================
 // [Fog::ApiRaster]
 // ============================================================================
 
@@ -200,278 +347,6 @@ typedef void (FOG_FASTCALL *RasterGradientInterpolateFunc)(
 //! @brief Fog/G2d render functions.
 struct FOG_NO_EXPORT ApiRaster
 {
-  // --------------------------------------------------------------------------
-  // [Members - Convert]
-  // --------------------------------------------------------------------------
-
-  struct FOG_NO_EXPORT _Convert
-  {
-    // ------------------------------------------------------------------------
-    // [Init]
-    // ------------------------------------------------------------------------
-
-    RasterConvertInitFunc init;
-
-    // ------------------------------------------------------------------------
-    // [Copy]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc copy[RASTER_COPY_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [BSwap]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc bswap[RASTER_BSWAP_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [Premultiply / Demultiply]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc argb32_from_prgb32;
-    RasterVBlitLineFunc prgb32_from_argb32;
-
-    RasterVBlitLineFunc argb64_from_prgb64;
-    RasterVBlitLineFunc prgb64_from_argb64;
-
-    // ------------------------------------------------------------------------
-    // [A8 <-> Extended]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc a8_from_custom[RASTER_FORMAT_COUNT];
-    RasterVBlitLineFunc custom_from_a8[RASTER_FORMAT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [A16 <-> Extended]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc a16_from_custom[RASTER_FORMAT_COUNT];
-    RasterVBlitLineFunc custom_from_a16[RASTER_FORMAT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [ARGB32 <-> Extended]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc argb32_from_custom[RASTER_FORMAT_COUNT];
-    RasterVBlitLineFunc custom_from_argb32[RASTER_FORMAT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [ARGB64 <-> Extended]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc argb64_from_custom[RASTER_FORMAT_COUNT];
-    RasterVBlitLineFunc custom_from_argb64[RASTER_FORMAT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [Dithered]
-    // ------------------------------------------------------------------------
-
-    // TODO: Not Implemented.
-    RasterVBlitLineFunc dithered_from_xrgb32[RASTER_DITHER_COUNT];
-    RasterVBlitLineFunc dithered_from_rgb24 [RASTER_DITHER_COUNT];
-  } convert;
-
-  // --------------------------------------------------------------------------
-  // [Members - Composite - Core]
-  // --------------------------------------------------------------------------
-
-  struct FOG_NO_EXPORT _CompositeCore
-  {
-    // ------------------------------------------------------------------------
-    // [CompositeCore - CBlit]
-    // ------------------------------------------------------------------------
-
-    RasterCBlitRectFunc cblit_rect[RASTER_CBLIT_COUNT];
-    RasterCBlitLineFunc cblit_line[RASTER_CBLIT_COUNT];
-    RasterCBlitSpanFunc cblit_span[RASTER_CBLIT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [CompositeCore - VBlit]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitRectFunc vblit_rect[IMAGE_FORMAT_COUNT];
-    RasterVBlitLineFunc vblit_line[IMAGE_FORMAT_COUNT];
-    RasterVBlitSpanFunc vblit_span[IMAGE_FORMAT_COUNT];
-  };
-
-  _CompositeCore compositeCore[IMAGE_FORMAT_COUNT][RASTER_COMPOSITE_CORE_COUNT];
-
-  // --------------------------------------------------------------------------
-  // [Members - Composite - Extended]
-  // --------------------------------------------------------------------------
-
-  struct FOG_NO_EXPORT _CompositeExt
-  {
-    // ------------------------------------------------------------------------
-    // [CompositeExt - CBlit]
-    // ------------------------------------------------------------------------
-
-    RasterCBlitLineFunc cblit_line[RASTER_CBLIT_COUNT];
-    RasterCBlitSpanFunc cblit_span[RASTER_CBLIT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [CompositeExt - VBlit]
-    // ------------------------------------------------------------------------
-
-    RasterVBlitLineFunc vblit_line[RASTER_VBLIT_COUNT];
-    RasterVBlitSpanFunc vblit_span[RASTER_VBLIT_COUNT];
-  };
-
-  _CompositeExt compositeExt[IMAGE_FORMAT_COUNT][RASTER_COMPOSITE_EXT_COUNT];
-
-  // --------------------------------------------------------------------------
-  // [Members - Pattern - Solid]
-  // --------------------------------------------------------------------------
-
-  struct FOG_NO_EXPORT _Solid
-  {
-    // ------------------------------------------------------------------------
-    // [Create / Destroy]
-    // ------------------------------------------------------------------------
-
-    RasterSolidCreateFunc create;
-    RasterPatternDestroyFunc destroy;
-
-    // ------------------------------------------------------------------------
-    // [Prepare]
-    // ------------------------------------------------------------------------
-
-    RasterPatternPrepareFunc prepare;
-
-    // ------------------------------------------------------------------------
-    // [Fetch]
-    // ------------------------------------------------------------------------
-
-    RasterPatternFetchFunc fetch[IMAGE_FORMAT_COUNT];
-  };
-
-  _Solid solid;
-
-  // --------------------------------------------------------------------------
-  // [Members - Pattern - Texture]
-  // --------------------------------------------------------------------------
-
-  struct FOG_NO_EXPORT _Texture
-  {
-    // ------------------------------------------------------------------------
-    // [Create]
-    // ------------------------------------------------------------------------
-
-    RasterTextureCreateFunc create;
-
-    struct _Fetch
-    {
-      // ----------------------------------------------------------------------
-      // [Fetch - Simple]
-      // ----------------------------------------------------------------------
-
-      RasterPatternFetchFunc fetch_simple_align[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RasterPatternFetchFunc fetch_simple_subx0[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RasterPatternFetchFunc fetch_simple_sub0y[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RasterPatternFetchFunc fetch_simple_subxy[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-
-      // ----------------------------------------------------------------------
-      // [Fetch - Scale]
-      // ----------------------------------------------------------------------
-
-      RasterPatternFetchFunc fetch_scale_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RasterPatternFetchFunc fetch_scale_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-
-      // ----------------------------------------------------------------------
-      // [Fetch - Affine]
-      // ----------------------------------------------------------------------
-
-      RasterPatternFetchFunc fetch_affine_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RasterPatternFetchFunc fetch_affine_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-
-      // ----------------------------------------------------------------------
-      // [Fetch - Projection]
-      // ----------------------------------------------------------------------
-
-      RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-      RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][TEXTURE_TILE_COUNT];
-    };
-
-    _Fetch prgb32;
-    _Fetch a8;
-
-    _Fetch prgb64;
-    _Fetch rgb48;
-    _Fetch a16;
-  };
-
-  _Texture texture;
-
-  // --------------------------------------------------------------------------
-  // [Members - Pattern - Gradient]
-  // --------------------------------------------------------------------------
-
-  struct FOG_NO_EXPORT _Gradient
-  {
-    // ------------------------------------------------------------------------
-    // [Interpolate]
-    // ------------------------------------------------------------------------
-
-    RasterGradientInterpolateFunc interpolate[IMAGE_FORMAT_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [Create / Destroy]
-    // ------------------------------------------------------------------------
-
-    RasterGradientCreateFunc create[GRADIENT_TYPE_COUNT];
-
-    // ------------------------------------------------------------------------
-    // [Linear]
-    // ------------------------------------------------------------------------
-
-    struct _Linear
-    {
-      RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-
-      RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    } linear;
-
-    // ------------------------------------------------------------------------
-    // [Radial]
-    // ------------------------------------------------------------------------
-
-    struct _Radial
-    {
-      RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-
-      RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    } radial;
-
-    // ------------------------------------------------------------------------
-    // [Conical]
-    // ------------------------------------------------------------------------
-
-    struct _Conical
-    {
-      RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT];
-      RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT];
-    } conical;
-
-    // ------------------------------------------------------------------------
-    // [Rectangular]
-    // ------------------------------------------------------------------------
-
-    struct _Rectangular
-    {
-      RasterPatternFetchFunc fetch_simple_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RasterPatternFetchFunc fetch_simple_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-
-      RasterPatternFetchFunc fetch_proj_nearest[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-      RasterPatternFetchFunc fetch_proj_bilinear[IMAGE_FORMAT_COUNT][GRADIENT_SPREAD_COUNT];
-    } rectangular;
-  };
-
-  _Gradient gradient;
-
   // --------------------------------------------------------------------------
   // [Accessors - Convert]
   // --------------------------------------------------------------------------
@@ -519,7 +394,7 @@ struct FOG_NO_EXPORT ApiRaster
   // [Accessors - Composite - Core]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const _CompositeCore* getCompositeCore(uint32_t format, uint32_t op) const
+  FOG_INLINE const RasterCompositeCoreFuncs* getCompositeCore(uint32_t format, uint32_t op) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
     FOG_ASSERT(op >= RASTER_COMPOSITE_CORE_START &&
@@ -532,7 +407,7 @@ struct FOG_NO_EXPORT ApiRaster
   // [Accessors - Composite - Extended]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const _CompositeExt* getCompositeExt(uint32_t format, uint32_t op) const
+  FOG_INLINE const RasterCompositeExtFuncs* getCompositeExt(uint32_t format, uint32_t op) const
   {
     FOG_ASSERT(format < IMAGE_FORMAT_COUNT);
     FOG_ASSERT(op >= RASTER_COMPOSITE_EXT_START &&
@@ -576,6 +451,18 @@ struct FOG_NO_EXPORT ApiRaster
     else
       return getCompositeExt(dstFormat, op)->vblit_span[RasterUtil::getCompositeCompatVBlitId(dstFormat, srcFormat)];
   }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  RasterConvertFuncs convert;
+  RasterCompositeCoreFuncs compositeCore[IMAGE_FORMAT_COUNT][RASTER_COMPOSITE_CORE_COUNT];
+  RasterCompositeExtFuncs compositeExt[IMAGE_FORMAT_COUNT][RASTER_COMPOSITE_EXT_COUNT];
+
+  RasterSolidFuncs solid;
+  RasterTextureFuncs texture;
+  RasterGradientFuncs gradient;
 };
 
 extern FOG_API ApiRaster _api_raster;

@@ -14,7 +14,6 @@
 #include <Fog/Core/OS/DirIterator.h>
 #include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/OS/OSUtil.h>
-#include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -403,24 +402,30 @@ static bool FOG_CDECL DirIterator_readFileInfo(DirIterator* self, FileInfo* file
     // Get entry name length.
     size_t nameLength = strlen(name);
 
-    // Translate entry name to unicode.
+    // Translate entry name to unicode. We use the StringW instance associated
+    // with the fileInfo to prevent dynamic memory allocation per read() request.
     FOG_ASSERT(fileInfo->isDetached());
-    TextCodec::local8().decode(fileInfo->_d->fileName, StubA(name, nameLength));
+    StringW& fileName = fileInfo->_d->fileName;
+
+    if (TextCodec::local8().decode(fileName, StubA(name, nameLength)) != ERR_OK)
+    {
+      // TODO:
+      // What to do here?
+    }
 
     d->pathCache->resize(d->pathCacheBaseLength);
     d->pathCache->append('/');
     d->pathCache->append(name, nameLength);
 
-    uint type = 0;
     struct stat s;
-
     if (::stat(d->pathCache->getData(), &s) == 0)
     {
-      if (fileInfo->fromStat(d->pathAbs(), fileInfo->_d->fileName, &s) != ERR_OK)
+      if (fileInfo->fromStat(d->pathAbs(), fileName, &s) != ERR_OK)
         return false;
     }
     else
     {
+      // TODO:
       // Bad symbolic link?
     }
 

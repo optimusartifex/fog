@@ -38,7 +38,7 @@ enum RASTER_CBLIT
 // [Fog::Raster - RASTER_VBLIT]
 // ============================================================================
 
-//! @brief Compatibility format IDs used by the compositing-ext operators.
+//! @brief Compatibility format IDs used by the composite-ext operators.
 enum RASTER_VBLIT
 {
   // --------------------------------------------------------------------------
@@ -165,7 +165,7 @@ enum
 };
 
 // ============================================================================
-// [RASTER_CONVERT]
+// [RASTER_COPY]
 // ============================================================================
 
 enum RASTER_COPY
@@ -180,6 +180,10 @@ enum RASTER_COPY
   RASTER_COPY_COUNT
 };
 
+// ============================================================================
+// [RASTER_BSWAP]
+// ============================================================================
+
 enum RASTER_BSWAP
 {
   RASTER_BSWAP_16 = 0,
@@ -191,39 +195,25 @@ enum RASTER_BSWAP
   RASTER_BSWAP_COUNT
 };
 
+// ============================================================================
+// [RASTER_FILL]
+// ============================================================================
+
+enum RASTER_FILL
+{
+  RASTER_FILL_8 = 0,
+  RASTER_FILL_16,
+
+  RASTER_FILL_COUNT
+};
+
 enum RASTER_FORMAT
 {
-  // --------------------------------------------------------------------------
-  // [Indexed]
-  // --------------------------------------------------------------------------
-
-  RASTER_FORMAT_I8 = 0,
-
-  // --------------------------------------------------------------------------
-  // [RGB]
-  // --------------------------------------------------------------------------
-
-  RASTER_FORMAT_RGB16_555,
+  RASTER_FORMAT_RGB16_555 = 0,
   RASTER_FORMAT_RGB16_555_BS,
 
   RASTER_FORMAT_RGB16_565,
   RASTER_FORMAT_RGB16_565_BS,
-
-  RASTER_FORMAT_RGB24_888,
-  RASTER_FORMAT_RGB24_888_BS,
-
-  RASTER_FORMAT_RGB32_888,
-  RASTER_FORMAT_RGB32_888_BS,
-
-  RASTER_FORMAT_RGB48_161616,
-  RASTER_FORMAT_RGB48_161616_BS,
-
-  RASTER_FORMAT_RGB48_CUSTOM,
-  RASTER_FORMAT_RGB48_CUSTOM_BS,
-
-  // --------------------------------------------------------------------------
-  // [ARGB/PRGB]
-  // --------------------------------------------------------------------------
 
   RASTER_FORMAT_ARGB16_4444,
   RASTER_FORMAT_ARGB16_4444_BS,
@@ -231,8 +221,14 @@ enum RASTER_FORMAT
   RASTER_FORMAT_ARGB16_CUSTOM,
   RASTER_FORMAT_ARGB16_CUSTOM_BS,
 
+  RASTER_FORMAT_RGB24_888,
+  RASTER_FORMAT_RGB24_888_BS,
+
   RASTER_FORMAT_ARGB24_CUSTOM,
   RASTER_FORMAT_ARGB24_CUSTOM_BS,
+
+  RASTER_FORMAT_RGB32_888,
+  RASTER_FORMAT_RGB32_888_BS,
 
   RASTER_FORMAT_ARGB32_8888,
   RASTER_FORMAT_ARGB32_8888_BS,
@@ -243,15 +239,17 @@ enum RASTER_FORMAT
   RASTER_FORMAT_ARGB48_CUSTOM,
   RASTER_FORMAT_ARGB48_CUSTOM_BS,
 
+  RASTER_FORMAT_RGB48_161616,
+  RASTER_FORMAT_RGB48_161616_BS,
+
+  RASTER_FORMAT_RGB48_CUSTOM,
+  RASTER_FORMAT_RGB48_CUSTOM_BS,
+
   RASTER_FORMAT_ARGB64_16161616,
   RASTER_FORMAT_ARGB64_16161616_BS,
 
   RASTER_FORMAT_ARGB64_CUSTOM,
   RASTER_FORMAT_ARGB64_CUSTOM_BS,
-
-  // --------------------------------------------------------------------------
-  // [Alpha]
-  // --------------------------------------------------------------------------
 
   RASTER_FORMAT_A8,
 
@@ -267,10 +265,17 @@ enum RASTER_FORMAT
   // RASTER_FORMAT_GREY16_BS,
 
   // --------------------------------------------------------------------------
+  // [Indexed]
+  // --------------------------------------------------------------------------
+
+  RASTER_FORMAT_I8,
+
+  // --------------------------------------------------------------------------
   // [...]
   // --------------------------------------------------------------------------
 
-  RASTER_FORMAT_COUNT
+  RASTER_FORMAT_COUNT,
+  RASTER_FORMAT_INVALID = RASTER_FORMAT_COUNT
 };
 
 // ============================================================================

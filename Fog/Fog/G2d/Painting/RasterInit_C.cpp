@@ -52,7 +52,7 @@ namespace Fog {
 // [Init / Fini]
 // ============================================================================
 
-static void fog_rasterengine_set_nops(ApiRaster::_CompositeExt* funcs)
+static void fog_rasterengine_set_nops(RasterCompositeExtFuncs* funcs)
 {
   funcs->cblit_line[RASTER_CBLIT_PRGB ] = RasterOps_C::CompositeNop::nop_cblit_line;
   funcs->cblit_span[RASTER_CBLIT_PRGB ] = RasterOps_C::CompositeNop::nop_cblit_span;
@@ -74,7 +74,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // [RasterOps - Convert - API]
   // --------------------------------------------------------------------------
 
-  ApiRaster::_Convert& convert = api.convert;
+  RasterConvertFuncs& convert = api.convert;
 
   convert.init = RasterOps_C::Convert::init;
 
@@ -88,6 +88,13 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   convert.copy[RASTER_COPY_32] = (ImageConverterBlitLineFunc)RasterOps_C::Convert::copy_32;
   convert.copy[RASTER_COPY_48] = (ImageConverterBlitLineFunc)RasterOps_C::Convert::copy_48;
   convert.copy[RASTER_COPY_64] = (ImageConverterBlitLineFunc)RasterOps_C::Convert::copy_64;
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Convert - Fill]
+  // --------------------------------------------------------------------------
+
+  convert.fill[RASTER_FILL_8] = (ImageConverterBlitLineFunc)RasterOps_C::Convert::fill_8;
+  convert.fill[RASTER_FILL_16] = (ImageConverterBlitLineFunc)RasterOps_C::Convert::fill_16;
 
   // --------------------------------------------------------------------------
   // [RasterOps - Convert - BSwap]
@@ -105,115 +112,146 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 
   convert.prgb32_from_argb32 = (ImageConverterBlitLineFunc)RasterOps_C::Convert::prgb32_from_argb32;
   convert.argb32_from_prgb32 = (ImageConverterBlitLineFunc)RasterOps_C::Convert::argb32_from_prgb32;
+  convert.prgb64_from_argb64 = (ImageConverterBlitLineFunc)RasterOps_C::Convert::prgb64_from_argb64;
+  convert.argb64_from_prgb64 = (ImageConverterBlitLineFunc)RasterOps_C::Convert::argb64_from_prgb64;
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Convert - A8 <-> Extended]
+  //[RasterOps - Convert - ARGB32]
   // --------------------------------------------------------------------------
 
-//convert.a8_from_custom    [RASTER_FORMAT_A8                 ] = SKIP;
-//convert.a8_from_custom    [RASTER_FORMAT_A16                ] = SKIP;
-//convert.a8_from_custom    [RASTER_FORMAT_A16_BS             ] = RasterOps_C::Convert::a8_native_from_a16_bs;
+  convert.argb32_from[RASTER_FORMAT_RGB16_555          ] = RasterOps_C::Convert::argb32_from_rgb16_555;
+  convert.argb32_from[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::argb32_from_rgb16_555_bs;
+  convert.argb32_from[RASTER_FORMAT_RGB16_565          ] = RasterOps_C::Convert::argb32_from_rgb16_565;
+  convert.argb32_from[RASTER_FORMAT_RGB16_565_BS       ] = RasterOps_C::Convert::argb32_from_rgb16_565_bs;
+  convert.argb32_from[RASTER_FORMAT_ARGB16_4444        ] = RasterOps_C::Convert::argb32_from_argb16_4444;
+  convert.argb32_from[RASTER_FORMAT_ARGB16_4444_BS     ] = RasterOps_C::Convert::argb32_from_argb16_4444_bs;
+  convert.argb32_from[RASTER_FORMAT_ARGB16_CUSTOM      ] = RasterOps_C::Convert::argb32_from_argb16_custom;
+  convert.argb32_from[RASTER_FORMAT_ARGB16_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_from_argb16_custom_bs;
+//convert.argb32_from[RASTER_FORMAT_RGB24_888          ] = SKIP;
+  convert.argb32_from[RASTER_FORMAT_RGB24_888_BS       ] = RasterOps_C::Convert::argb32_from_rgb24_888_bs;
+  convert.argb32_from[RASTER_FORMAT_ARGB24_CUSTOM      ] = RasterOps_C::Convert::argb32_from_argb24_custom;
+  convert.argb32_from[RASTER_FORMAT_ARGB24_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_from_argb24_custom_bs;
+//convert.argb32_from[RASTER_FORMAT_RGB32_888          ] = SKIP;
+  convert.argb32_from[RASTER_FORMAT_RGB32_888_BS       ] = RasterOps_C::Convert::argb32_from_rgb32_888_bs;
+//convert.argb32_from[RASTER_FORMAT_ARGB32_8888        ] = SKIP;
+  convert.argb32_from[RASTER_FORMAT_ARGB32_8888_BS     ] = RasterOps_C::Convert::argb32_from_argb32_8888_bs;
+  convert.argb32_from[RASTER_FORMAT_ARGB32_CUSTOM      ] = RasterOps_C::Convert::argb32_from_argb32_custom;
+  convert.argb32_from[RASTER_FORMAT_ARGB32_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_from_argb32_custom_bs;
+//convert.argb32_from[RASTER_FORMAT_RGB48_161616       ] = SKIP;
+  convert.argb32_from[RASTER_FORMAT_RGB48_161616_BS    ] = RasterOps_C::Convert::argb32_from_rgb48_161616_bs;
+  convert.argb32_from[RASTER_FORMAT_RGB48_CUSTOM       ] = RasterOps_C::Convert::argb32_from_rgb48_custom;
+  convert.argb32_from[RASTER_FORMAT_RGB48_CUSTOM_BS    ] = RasterOps_C::Convert::argb32_from_rgb48_custom_bs;
+  convert.argb32_from[RASTER_FORMAT_ARGB48_CUSTOM      ] = RasterOps_C::Convert::argb32_from_argb48_custom;
+  convert.argb32_from[RASTER_FORMAT_ARGB48_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_from_argb48_custom_bs;
+//convert.argb32_from[RASTER_FORMAT_ARGB64_16161616    ] = SKIP;
+  convert.argb32_from[RASTER_FORMAT_ARGB64_16161616_BS ] = RasterOps_C::Convert::argb32_from_argb64_16161616_bs;
+  convert.argb32_from[RASTER_FORMAT_ARGB64_CUSTOM      ] = RasterOps_C::Convert::argb32_from_argb64_custom;
+  convert.argb32_from[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_from_argb64_custom_bs;
+//convert.argb32_from[RASTER_FORMAT_I8                 ];
 
-//convert.custom_from_a8    [RASTER_FORMAT_A8                 ] = SKIP;
-//convert.custom_from_a8    [RASTER_FORMAT_A16                ] = SKIP;
-//convert.custom_from_a8    [RASTER_FORMAT_A16_BS             ] = SKIP;
+  convert.from_argb32[RASTER_FORMAT_RGB16_555          ] = RasterOps_C::Convert::rgb16_555_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::rgb16_555_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_RGB16_565          ] = RasterOps_C::Convert::rgb16_565_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_RGB16_565_BS       ] = RasterOps_C::Convert::rgb16_565_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB16_4444        ] = RasterOps_C::Convert::argb16_4444_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB16_4444_BS     ] = RasterOps_C::Convert::argb16_4444_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB16_CUSTOM      ] = RasterOps_C::Convert::argb16_custom_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB16_CUSTOM_BS   ] = RasterOps_C::Convert::argb16_custom_bs_from_argb32;
+//convert.from_argb32[RASTER_FORMAT_RGB24_888          ] = SKIP;
+  convert.from_argb32[RASTER_FORMAT_RGB24_888_BS       ] = RasterOps_C::Convert::rgb24_888_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB24_CUSTOM      ] = RasterOps_C::Convert::argb24_custom_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB24_CUSTOM_BS   ] = RasterOps_C::Convert::argb24_custom_bs_from_argb32;
+//convert.from_argb32[RASTER_FORMAT_RGB32_888          ] = SKIP;
+  convert.from_argb32[RASTER_FORMAT_RGB32_888_BS       ] = RasterOps_C::Convert::rgb32_888_bs_from_argb32;
+//convert.from_argb32[RASTER_FORMAT_ARGB32_8888        ] = SKIP;
+  convert.from_argb32[RASTER_FORMAT_ARGB32_8888_BS     ] = RasterOps_C::Convert::argb32_8888_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB32_CUSTOM      ] = RasterOps_C::Convert::argb32_custom_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB32_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_custom_bs_from_argb32;
+//convert.from_argb32[RASTER_FORMAT_RGB48_161616       ] = SKIP;
+  convert.from_argb32[RASTER_FORMAT_RGB48_161616_BS    ] = RasterOps_C::Convert::rgb48_161616_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_RGB48_CUSTOM       ] = RasterOps_C::Convert::rgb48_custom_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_RGB48_CUSTOM_BS    ] = RasterOps_C::Convert::rgb48_custom_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB48_CUSTOM      ] = RasterOps_C::Convert::argb48_custom_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB48_CUSTOM_BS   ] = RasterOps_C::Convert::argb48_custom_bs_from_argb32;
+//convert.from_argb32[RASTER_FORMAT_ARGB64_16161616    ] = SKIP;
+  convert.from_argb32[RASTER_FORMAT_ARGB64_16161616_BS ] = RasterOps_C::Convert::argb64_16161616_bs_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB64_CUSTOM      ] = RasterOps_C::Convert::argb64_custom_from_argb32;
+  convert.from_argb32[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_custom_bs_from_argb32;
+//convert.from_argb32[RASTER_FORMAT_I8                 ];
 
   // --------------------------------------------------------------------------
-  //[RasterOps - Convert - A16 <-> Extended]
+  //[RasterOps - Convert - ARGB64]
   // --------------------------------------------------------------------------
 
-//convert.a16_from_custom   [RASTER_FORMAT_A8                 ] = SKIP;
-//convert.a16_from_custom   [RASTER_FORMAT_A16                ] = SKIP;
-//convert.a16_from_custom   [RASTER_FORMAT_A16_BS             ] = SKIP;
-
-//convert.custom_from_a16   [RASTER_FORMAT_A8                 ] = SKIP;
-//convert.custom_from_a16   [RASTER_FORMAT_A16                ] = SKIP;
-//convert.custom_from_a16   [RASTER_FORMAT_A16_BS             ] = SKIP;
-
-  // --------------------------------------------------------------------------
-  //[RasterOps - Convert - ARGB32 <-> Extended]
-  // --------------------------------------------------------------------------
-
-//convert.argb32_from_custom[RASTER_FORMAT_RGB16_555          ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::argb32_native_from_rgb16_555_bs;
-//convert.argb32_from_custom[RASTER_FORMAT_RGB16_565          ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB16_565_BS       ] = RasterOps_C::Convert::argb32_native_from_rgb16_565_bs;
-//convert.argb32_from_custom[RASTER_FORMAT_RGB24_888          ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB24_888_BS       ] = RasterOps_C::Convert::argb32_native_from_rgb24_888_bs;
-//convert.argb32_from_custom[RASTER_FORMAT_RGB32_888          ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB32_888_BS       ] = RasterOps_C::Convert::argb32_native_from_rgb32_888_bs;
-//convert.argb32_from_custom[RASTER_FORMAT_RGB48_161616       ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB48_161616_BS    ] = RasterOps_C::Convert::argb32_native_from_rgb48_161616_bs;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB48_CUSTOM       ] = RasterOps_C::Convert::argb32_native_from_rgb48_dib;
-  convert.argb32_from_custom[RASTER_FORMAT_RGB48_CUSTOM_BS    ] = RasterOps_C::Convert::argb32_native_from_rgb48_dib_bs;
-
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB16_4444        ] = RasterOps_C::Convert::argb32_native_from_argb16_4444;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB16_4444_BS     ] = RasterOps_C::Convert::argb32_native_from_argb16_4444_bs;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB16_CUSTOM      ] = RasterOps_C::Convert::argb32_native_from_argb16_dib;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB16_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_native_from_argb16_dib_bs;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB24_CUSTOM      ] = RasterOps_C::Convert::argb32_native_from_argb24_dib;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB24_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_native_from_argb24_dib_bs;
-//convert.argb32_from_custom[RASTER_FORMAT_ARGB32_8888        ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB32_8888_BS     ] = RasterOps_C::Convert::argb32_native_from_argb32_8888_bs;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB32_CUSTOM      ] = RasterOps_C::Convert::argb32_native_from_argb32_dib;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB32_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_native_from_argb32_dib_bs;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB48_CUSTOM      ] = RasterOps_C::Convert::argb32_native_from_argb48_dib;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB48_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_native_from_argb48_dib_bs;
-//convert.argb32_from_custom[RASTER_FORMAT_ARGB64_16161616    ] = SKIP;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB64_16161616_BS ] = RasterOps_C::Convert::argb32_native_from_argb64_16161616_bs;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB64_CUSTOM      ] = RasterOps_C::Convert::argb32_native_from_argb64_dib;
-  convert.argb32_from_custom[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_native_from_argb64_dib_bs;
-
-//convert.argb32_from_custom[RASTER_FORMAT_I8                 ];
-
-//convert.custom_from_argb32[RASTER_FORMAT_RGB24_888          ] = RasterOps_C::CompositeSrc::rgb24_vblit_xrgb32_line;
+  convert.argb64_from[RASTER_FORMAT_RGB16_555          ] = RasterOps_C::Convert::argb64_from_rgb16_555;
+  convert.argb64_from[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::argb64_from_rgb16_555_bs;
+  convert.argb64_from[RASTER_FORMAT_RGB16_565          ] = RasterOps_C::Convert::argb64_from_rgb16_565;
+  convert.argb64_from[RASTER_FORMAT_RGB16_565_BS       ] = RasterOps_C::Convert::argb64_from_rgb16_565_bs;
+  convert.argb64_from[RASTER_FORMAT_ARGB16_4444        ] = RasterOps_C::Convert::argb64_from_argb16_4444;
+  convert.argb64_from[RASTER_FORMAT_ARGB16_4444_BS     ] = RasterOps_C::Convert::argb64_from_argb16_4444_bs;
+  convert.argb64_from[RASTER_FORMAT_ARGB16_CUSTOM      ] = RasterOps_C::Convert::argb64_from_argb16_custom;
+  convert.argb64_from[RASTER_FORMAT_ARGB16_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_from_argb16_custom_bs;
+//convert.argb64_from[RASTER_FORMAT_RGB24_888          ] = SKIP;
+  convert.argb64_from[RASTER_FORMAT_RGB24_888_BS       ] = RasterOps_C::Convert::argb64_from_rgb24_888_bs;
+  convert.argb64_from[RASTER_FORMAT_ARGB24_CUSTOM      ] = RasterOps_C::Convert::argb64_from_argb24_custom;
+  convert.argb64_from[RASTER_FORMAT_ARGB24_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_from_argb24_custom_bs;
+//convert.argb64_from[RASTER_FORMAT_RGB32_888          ] = SKIP;
+  convert.argb64_from[RASTER_FORMAT_RGB32_888_BS       ] = RasterOps_C::Convert::argb64_from_rgb32_888_bs;
+//convert.argb64_from[RASTER_FORMAT_ARGB32_8888        ] = SKIP;
+  convert.argb64_from[RASTER_FORMAT_ARGB32_8888_BS     ] = RasterOps_C::Convert::argb64_from_argb32_8888_bs;
+  convert.argb64_from[RASTER_FORMAT_ARGB32_CUSTOM      ] = RasterOps_C::Convert::argb64_from_argb32_custom;
+  convert.argb64_from[RASTER_FORMAT_ARGB32_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_from_argb32_custom_bs;
+//convert.argb64_from[RASTER_FORMAT_RGB48_161616       ] = SKIP;
+  convert.argb64_from[RASTER_FORMAT_RGB48_161616_BS    ] = RasterOps_C::Convert::argb64_from_rgb48_161616_bs;
+  convert.argb64_from[RASTER_FORMAT_RGB48_CUSTOM       ] = RasterOps_C::Convert::argb64_from_rgb48_custom;
+  convert.argb64_from[RASTER_FORMAT_RGB48_CUSTOM_BS    ] = RasterOps_C::Convert::argb64_from_rgb48_custom_bs;
+  convert.argb64_from[RASTER_FORMAT_ARGB48_CUSTOM      ] = RasterOps_C::Convert::argb64_from_argb48_custom;
+  convert.argb64_from[RASTER_FORMAT_ARGB48_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_from_argb48_custom_bs;
+//convert.argb64_from[RASTER_FORMAT_ARGB64_16161616    ] = SKIP;
+  convert.argb64_from[RASTER_FORMAT_ARGB64_16161616_BS ] = RasterOps_C::Convert::argb64_from_argb64_16161616_bs;
+  convert.argb64_from[RASTER_FORMAT_ARGB64_CUSTOM      ] = RasterOps_C::Convert::argb64_from_argb64_custom;
+  convert.argb64_from[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_from_argb64_custom_bs;
+//convert.argb64_from[RASTER_FORMAT_I8                 ];
 
   // TODO:
-
-  // --------------------------------------------------------------------------
-  //[RasterOps - Convert - ARGB64 <-> Extended]
-  // --------------------------------------------------------------------------
-
-//convert.argb64_from_custom[RASTER_FORMAT_RGB16_555          ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::argb64_native_from_rgb16_555_bs;
-//convert.argb64_from_custom[RASTER_FORMAT_RGB16_565          ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB16_565_BS       ] = RasterOps_C::Convert::argb64_native_from_rgb16_565_bs;
-//convert.argb64_from_custom[RASTER_FORMAT_RGB24_888          ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB24_888_BS       ] = RasterOps_C::Convert::argb64_native_from_rgb24_888_bs;
-//convert.argb64_from_custom[RASTER_FORMAT_RGB32_888          ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB32_888_BS       ] = RasterOps_C::Convert::argb64_native_from_rgb32_888_bs;
-//convert.argb64_from_custom[RASTER_FORMAT_RGB48_161616       ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB48_161616_BS    ] = RasterOps_C::Convert::argb64_native_from_rgb48_161616_bs;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB48_CUSTOM       ] = RasterOps_C::Convert::argb64_native_from_rgb48_dib;
-  convert.argb64_from_custom[RASTER_FORMAT_RGB48_CUSTOM_BS    ] = RasterOps_C::Convert::argb64_native_from_rgb48_dib_bs;
-
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB16_4444        ] = RasterOps_C::Convert::argb64_native_from_argb16_4444;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB16_4444_BS     ] = RasterOps_C::Convert::argb64_native_from_argb16_4444_bs;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB16_CUSTOM      ] = RasterOps_C::Convert::argb64_native_from_argb16_dib;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB16_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_native_from_argb16_dib_bs;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB24_CUSTOM      ] = RasterOps_C::Convert::argb64_native_from_argb24_dib;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB24_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_native_from_argb24_dib_bs;
-//convert.argb64_from_custom[RASTER_FORMAT_ARGB32_8888        ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB32_8888_BS     ] = RasterOps_C::Convert::argb64_native_from_argb32_8888_bs;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB32_CUSTOM      ] = RasterOps_C::Convert::argb64_native_from_argb32_dib;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB32_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_native_from_argb32_dib_bs;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB48_CUSTOM      ] = RasterOps_C::Convert::argb64_native_from_argb48_dib;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB48_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_native_from_argb48_dib_bs;
-//convert.argb64_from_custom[RASTER_FORMAT_ARGB64_16161616    ] = SKIP;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB64_16161616_BS ] = RasterOps_C::Convert::argb64_native_from_argb64_16161616_bs;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB64_CUSTOM      ] = RasterOps_C::Convert::argb64_native_from_argb64_dib;
-  convert.argb64_from_custom[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_native_from_argb64_dib_bs;
-
-//convert.argb64_from_custom[RASTER_FORMAT_I8                 ];
-
-  // TODO:
+  /*
+  convert.from_argb64[RASTER_FORMAT_RGB16_555          ] = RasterOps_C::Convert::rgb16_555_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::rgb16_555_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_RGB16_565          ] = RasterOps_C::Convert::rgb16_565_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_RGB16_565_BS       ] = RasterOps_C::Convert::rgb16_565_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB16_4444        ] = RasterOps_C::Convert::argb16_4444_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB16_4444_BS     ] = RasterOps_C::Convert::argb16_4444_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB16_CUSTOM      ] = RasterOps_C::Convert::argb16_custom_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB16_CUSTOM_BS   ] = RasterOps_C::Convert::argb16_custom_bs_from_argb64;
+//convert.from_argb64[RASTER_FORMAT_RGB24_888          ] = SKIP;
+  convert.from_argb64[RASTER_FORMAT_RGB24_888_BS       ] = RasterOps_C::Convert::rgb24_888_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB24_CUSTOM      ] = RasterOps_C::Convert::argb24_custom_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB24_CUSTOM_BS   ] = RasterOps_C::Convert::argb24_custom_bs_from_argb64;
+//convert.from_argb64[RASTER_FORMAT_RGB32_888          ] = SKIP;
+  convert.from_argb64[RASTER_FORMAT_RGB32_888_BS       ] = RasterOps_C::Convert::rgb32_888_bs_from_argb64;
+//convert.from_argb64[RASTER_FORMAT_ARGB32_8888        ] = SKIP;
+  convert.from_argb64[RASTER_FORMAT_ARGB32_8888_BS     ] = RasterOps_C::Convert::argb32_8888_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB32_CUSTOM      ] = RasterOps_C::Convert::argb32_custom_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB32_CUSTOM_BS   ] = RasterOps_C::Convert::argb32_custom_bs_from_argb64;
+//convert.from_argb64[RASTER_FORMAT_RGB48_161616       ] = SKIP;
+  convert.from_argb64[RASTER_FORMAT_RGB48_161616_BS    ] = RasterOps_C::Convert::rgb48_161616_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_RGB48_CUSTOM       ] = RasterOps_C::Convert::rgb48_custom_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_RGB48_CUSTOM_BS    ] = RasterOps_C::Convert::rgb48_custom_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB48_CUSTOM      ] = RasterOps_C::Convert::argb48_custom_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB48_CUSTOM_BS   ] = RasterOps_C::Convert::argb48_custom_bs_from_argb64;
+//convert.from_argb64[RASTER_FORMAT_ARGB64_16161616    ] = SKIP;
+  convert.from_argb64[RASTER_FORMAT_ARGB64_16161616_BS ] = RasterOps_C::Convert::argb64_16161616_bs_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB64_CUSTOM      ] = RasterOps_C::Convert::argb64_custom_from_argb64;
+  convert.from_argb64[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_custom_bs_from_argb64;
+//convert.from_argb64[RASTER_FORMAT_I8                 ];
+  */
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - Src - PRGB32]
   // --------------------------------------------------------------------------
 
   {
-    ApiRaster::_CompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC];
+    RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrc::prgb32_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
@@ -245,7 +283,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // --------------------------------------------------------------------------
 
   {
-    ApiRaster::_CompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC];
+    RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrc::xrgb32_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
@@ -277,7 +315,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // --------------------------------------------------------------------------
 
   {
-    ApiRaster::_CompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_RGB24][RASTER_COMPOSITE_CORE_SRC];
+    RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_RGB24][RASTER_COMPOSITE_CORE_SRC];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrc::rgb24_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
@@ -309,7 +347,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // --------------------------------------------------------------------------
 
   {
-    ApiRaster::_CompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC_OVER];
+    RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC_OVER];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrcOver::prgb32_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
@@ -341,7 +379,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // --------------------------------------------------------------------------
 
   {
-    ApiRaster::_CompositeCore& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC_OVER];
+    RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC_OVER];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrcOver::prgb32_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
@@ -384,7 +422,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 
 #if defined(FOG_RASTER_INIT_C)
   {
-    ApiRaster::_Solid& solid = api.solid;
+    RasterSolidFuncs& solid = api.solid;
 
     solid.create = RasterOps_C::Helpers::p_solid_create_solid;
     solid.destroy = RasterOps_C::Helpers::p_solid_destroy;
@@ -404,7 +442,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // [RasterOps - Gradient - API]
   // --------------------------------------------------------------------------
 
-  ApiRaster::_Gradient& gradient = api.gradient;
+  RasterGradientFuncs& gradient = api.gradient;
 
   // --------------------------------------------------------------------------
   // [RasterOps - Gradient - Interpolate]
@@ -508,7 +546,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // [RasterOps - Texture - API]
   // --------------------------------------------------------------------------
 
-  ApiRaster::_Texture& texture = api.texture;
+  RasterTextureFuncs& texture = api.texture;
 
   // --------------------------------------------------------------------------
   // [RasterOps - Texture - Simple]

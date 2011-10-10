@@ -767,7 +767,7 @@ _Rle8Start:
       for (y = 0; y < (uint32_t)_size.h; y++, pixelsCur -= stride, ditherOrigin.y++)
       {
         if (_stream.read(buffer, bmpStride) != bmpStride) goto _Truncated;
-        converter.blitSpan(pixelsCur, buffer, _size.w, ditherOrigin);
+        converter.blitLine(pixelsCur, buffer, _size.w, ditherOrigin);
 
         if ((y & 15) == 0) updateProgress(y, _size.h);
       }
@@ -999,7 +999,7 @@ err_t BmpEncoder::writeImage(const Image& image)
 
       for (uint y = 0; y != (uint)h; y++, scanline += stride, ditherOrigin.y--)
       {
-        converter.blitSpan(buffer, scanline, w, ditherOrigin);
+        converter.blitLine(buffer, scanline, w, ditherOrigin);
         if (_stream.write(buffer, bpl) != bpl) goto _Fail;
 
         if ((y & 15) == 0) updateProgress(y, h);

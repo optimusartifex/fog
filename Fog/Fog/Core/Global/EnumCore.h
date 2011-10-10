@@ -1364,8 +1364,6 @@ enum FILE_INFO
   FILE_INFO_ALL = 0xFFFFFFFF
 };
 
-
-
 // ============================================================================
 // [Fog::FILE_MAPPING_OPEN]
 // ============================================================================
@@ -1373,6 +1371,33 @@ enum FILE_INFO
 enum FILE_MAPPING_FLAG
 {
   FILE_MAPPING_FLAG_LOAD_FALLBACK = 0x00000001
+};
+
+// ============================================================================
+// [Fog::FILE_PATH_SUBSTITUTE_FORMAT]
+// ============================================================================
+
+enum FILE_PATH_SUBSTITUTE_FORMAT
+{
+  //! @brief Substitute only home directory in format "~".
+  FILE_PATH_SUBSTITUTE_FORMAT_NONE = 0x0,
+
+  //! @brief Substitute environment variables in Windows %ENVVAR% format.
+  FILE_PATH_SUBSTITUTE_FORMAT_WINDOWS = 0x1,
+
+  //! @brief Substitute environment variables in UNIX $ENVVAR or ${ENVVAR} format.
+  FILE_PATH_SUBSTITUTE_FORMAT_UNIX = 0x2,
+
+#if defined(FOG_OS_WINDOWS)
+  FILE_PATH_SUBSTITUTE_FORMAT_DEFAULT = FILE_PATH_SUBSTITUTE_FORMAT_WINDOWS,
+#else
+  FILE_PATH_SUBSTITUTE_FORMAT_DEFAULT = FILE_PATH_SUBSTITUTE_FORMAT_UNIX,
+#endif
+
+  //! @brief Substitute environment variables in both formats.
+  //!
+  //! @note This option makes no sense when running UNIX based OS.
+  FILE_PATH_SUBSTITUTE_FORMAT_BOTH = 0x3
 };
 
 // ============================================================================
@@ -2161,13 +2186,16 @@ enum UNICODE_CHAR
 enum USER_DIRECTORY
 {
   USER_DIRECTORY_HOME = 0,
-  USER_DIRECTORY_DESKTOP = 1,
-  USER_DIRECTORY_DOCUMENTS = 2,
-  USER_DIRECTORY_MUSIC = 3,
-  USER_DIRECTORY_PICTURES = 4,
-  USER_DIRECTORY_VIDEOS = 5,
+  USER_DIRECTORY_CONFIG = 1,
+  USER_DIRECTORY_DATA = 2,
+  USER_DIRECTORY_CACHE = 3,
+  USER_DIRECTORY_DESKTOP = 4,
+  USER_DIRECTORY_DOCUMENTS = 5,
+  USER_DIRECTORY_MUSIC = 6,
+  USER_DIRECTORY_PICTURES = 7,
+  USER_DIRECTORY_VIDEOS = 8,
 
-  USER_DIRECTORY_COUNT = 6
+  USER_DIRECTORY_COUNT = 9
 };
 
 // ============================================================================

@@ -146,6 +146,7 @@ enum ERR_ENUM
   ERR_IO_INVALID_NAME,
 
   ERR_IO_PATH_NOT_FOUND,
+  ERR_IO_PATH_BAD_SYNTAX,
   ERR_IO_PATH_BUSY,
 
   ERR_IO_NOT_A_DIRECTORY,
@@ -254,8 +255,7 @@ enum ERR_ENUM
   // [Core/User]
   // --------------------------------------------------------------------------
 
-  ERR_USER_NO_HOME_DIRECTORY,
-  ERR_USER_NO_XDG_DIRECTORY,
+  ERR_USER_NO_DIRECTORY,
 
   // --------------------------------------------------------------------------
   // [Core/Xml]

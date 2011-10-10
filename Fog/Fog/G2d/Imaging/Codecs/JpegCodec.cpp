@@ -208,13 +208,13 @@ struct MyJpegSourceMgr
 
 // Initialize source
 // called by jpeg_read_header before any data is actually read.
-static FOG_CDECL void MyJpegInitSource(j_decompress_ptr cinfo)
+static void FOG_CDECL MyJpegInitSource(j_decompress_ptr cinfo)
 {
   // We don't actually need to do anything...
   return;
 }
 
-static FOG_CDECL int MyJpegFillInputBuffer(j_decompress_ptr cinfo)
+static boolean FOG_CDECL MyJpegFillInputBuffer(j_decompress_ptr cinfo)
 {
   MyJpegSourceMgr* src = (MyJpegSourceMgr*)cinfo->src;
   size_t nbytes;
@@ -244,7 +244,7 @@ static FOG_CDECL int MyJpegFillInputBuffer(j_decompress_ptr cinfo)
 // that the next read will cause a fill_input_buffer call that can suspend.
 // Arranging for additional bytes to be discarded before reloading the input
 // buffer is the application writer's problem.
-static FOG_CDECL void MyJpegSkipInputData(j_decompress_ptr cinfo, long num_bytes)
+static void FOG_CDECL MyJpegSkipInputData(j_decompress_ptr cinfo, long num_bytes)
 {
   MyJpegSourceMgr* src = (MyJpegSourceMgr*) cinfo->src;
   ssize_t remain = (ssize_t)( (uint8_t *)src->buffer + INPUT_BUFFER_SIZE - (uint8_t*)src->pub.next_input_byte );
@@ -266,7 +266,7 @@ static FOG_CDECL void MyJpegSkipInputData(j_decompress_ptr cinfo, long num_bytes
 
 // Terminate source
 // called by jpeg_finish_decompress after all data has been read.
-static FOG_CDECL void MyJpegTermSource(j_decompress_ptr cinfo)
+static void FOG_CDECL MyJpegTermSource(j_decompress_ptr cinfo)
 {
   // we don't actually need to do anything
   return;
@@ -278,13 +278,13 @@ struct MyJpegErrorMgr
   jmp_buf escape;
 };
 
-static FOG_CDECL void MyJpegErrorExit(j_common_ptr cinfo)
+static void FOG_CDECL MyJpegErrorExit(j_common_ptr cinfo)
 {
   MyJpegErrorMgr* err = (MyJpegErrorMgr*)cinfo->err;
   longjmp(err->escape, 1);
 }
 
-static FOG_CDECL void MyJpegMessage(j_common_ptr cinfo)
+static void FOG_CDECL MyJpegMessage(j_common_ptr cinfo)
 {
   FOG_UNUSED(cinfo);
 }
@@ -546,13 +546,13 @@ struct MyJpegDestMgr
   uint8_t buffer[OUTPUT_BUF_SIZE * sizeof(JOCTET)];
 };
 
-static FOG_CDECL void MyJpegInitDestination(j_compress_ptr cinfo)
+static void FOG_CDECL MyJpegInitDestination(j_compress_ptr cinfo)
 {
   // We don't actually need to do anything
   return;
 }
 
-static int MyJpegEmptyOutputBuffer(j_compress_ptr cinfo)
+static boolean FOG_CDECL MyJpegEmptyOutputBuffer(j_compress_ptr cinfo)
 {
   MyJpegDestMgr* dest = (MyJpegDestMgr*) cinfo->dest;
 

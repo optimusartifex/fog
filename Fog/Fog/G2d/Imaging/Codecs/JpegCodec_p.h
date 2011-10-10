@@ -60,7 +60,7 @@ struct FOG_NO_EXPORT JpegLibrary
       JDIMENSION (FOG_CDECL *create_decompress)(jpeg_decompress_struct*, int, size_t);
       int (FOG_CDECL *finish_compress)(jpeg_compress_struct*);
       int (FOG_CDECL *finish_decompress)(jpeg_decompress_struct*);
-      int (FOG_CDECL *resync_to_restart)(jpeg_decompress_struct*, int);
+      boolean (FOG_CDECL *resync_to_restart)(jpeg_decompress_struct*, int);
       void (FOG_CDECL *destroy_compress)(jpeg_compress_struct*);
       void (FOG_CDECL *destroy_decompress)(jpeg_decompress_struct*);
     };

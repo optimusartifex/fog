@@ -52,14 +52,21 @@ struct FOG_NO_EXPORT Convert
       d->blitFn = (ImageConverterBlitLineFunc)_api_raster.getCopyFullFunc(df.getFormat(), sf.getFormat());
 
       // We are blitting from Fog supported format into another Fog supported
-      // format. This blit is realized using COMPOSITE_SRC operator  which must
+      // format. This blit is realized using COMPOSITE_SRC operator which must
       // be always implemented. This assert is here mainly for the future to
-      // support the case that the image formats was extended but the 
-      // implementation is missing.
+      // detect the case that the image formats were extended but the no
+      // appropriate implementation was found.
       FOG_ASSERT(d->blitFn);
 
       return ERR_OK;
     }
+
+    // ------------------------------------------------------------------------
+    // [Raster Format]
+    // ------------------------------------------------------------------------
+
+    uint32_t dfRasterFormat = getRasterFormat(df);
+    uint32_t sfRasterFormat = getRasterFormat(sf);
 
     // ------------------------------------------------------------------------
     // [Special Case - Copy]
@@ -79,6 +86,26 @@ struct FOG_NO_EXPORT Convert
         case  32: d->blitFn = _api_raster.convert.copy[RASTER_COPY_32 ]; return ERR_OK;
         case  48: d->blitFn = _api_raster.convert.copy[RASTER_COPY_48 ]; return ERR_OK;
         case  64: d->blitFn = _api_raster.convert.copy[RASTER_COPY_64 ]; return ERR_OK;
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // [Special Case - Fill]
+    // ------------------------------------------------------------------------
+
+    if ((df.getComponentMask() & IMAGE_COMPONENT_RGB  ) == 0 &&
+        (sf.getComponentMask() & IMAGE_COMPONENT_ALPHA) == 0)
+    {
+      if (df.getFormat() == IMAGE_FORMAT_A8)
+      {
+        d->blitFn = _api_raster.convert.fill[RASTER_FILL_8];
+        return ERR_OK;
+      }
+
+      if (df.getFormat() == IMAGE_FORMAT_A16)
+      {
+        d->blitFn = _api_raster.convert.fill[RASTER_FILL_16];
+        return ERR_OK;
       }
     }
 
@@ -120,10 +147,9 @@ struct FOG_NO_EXPORT Convert
       // Destination is PRGB32 or XRGB32.
       if (df.getFormat() == IMAGE_FORMAT_PRGB32 || df.getFormat() == IMAGE_FORMAT_XRGB32)
       {
-        uint32_t sfDibFormat = getDibFormat(sf);
-        RasterVBlitLineFunc blitLine = _api_raster.convert.argb32_from_custom[sfDibFormat];
+        RasterVBlitLineFunc blitLine = _api_raster.convert.argb32_from[sfRasterFormat];
 
-        initIntegerPassConstants(multi->pass[0], df, sf);
+        initSinglePass(multi->pass[0], df, sf);
 
         if (keepColorSpace)
         {
@@ -134,7 +160,7 @@ struct FOG_NO_EXPORT Convert
         {
           // One pass run, but including post-process (color-space conversion).
           multi->blit[0] = blitLine;
-          d->blitFn = pass_one_postprocess;
+          d->blitFn = passOnePostprocess;
         }
 
         return ERR_OK;
@@ -143,10 +169,8 @@ struct FOG_NO_EXPORT Convert
       // Source is PRGB32, or XRGB32.
       if (sf.getFormat() == IMAGE_FORMAT_PRGB32 || sf.getFormat() == IMAGE_FORMAT_XRGB32)
       {
-        uint32_t dfDibFormat = getDibFormat(df);
-        RasterVBlitLineFunc blitLine = _api_raster.convert.custom_from_argb32[dfDibFormat];
-
-        initIntegerPassConstants(multi->pass[0], df, sf);
+        RasterVBlitLineFunc blitLine = _api_raster.convert.from_argb32[dfRasterFormat];
+        initSinglePass(multi->pass[0], df, sf);
 
         if (keepColorSpace)
         {
@@ -160,7 +184,7 @@ struct FOG_NO_EXPORT Convert
           multi->dstAdvance = df.getBytesPerPixel() * multi->step;
           multi->srcAdvance = sf.getBytesPerPixel() * multi->step;
           multi->blit[0] = blitLine;
-          d->blitFn = pass_one_preprocess;
+          d->blitFn = passOnePreprocess;
         }
 
         return ERR_OK;
@@ -171,14 +195,11 @@ struct FOG_NO_EXPORT Convert
         const ImageFormatDescription& mf = ImageFormatDescription::getByFormat(
           sf.getASize() > 0 ? IMAGE_FORMAT_PRGB32 : IMAGE_FORMAT_XRGB32);
 
-        uint32_t sfDibFormat = getDibFormat(sf);
-        uint32_t dfDibFormat = getDibFormat(df);
+        RasterVBlitLineFunc mfFromSf = _api_raster.convert.argb32_from[sfRasterFormat];
+        RasterVBlitLineFunc dfFromMf = _api_raster.convert.from_argb32[dfRasterFormat];
 
-        RasterVBlitLineFunc mfFromSf = _api_raster.convert.argb32_from_custom[sfDibFormat];
-        RasterVBlitLineFunc dfFromMf = _api_raster.convert.custom_from_argb32[dfDibFormat];
-
-        initIntegerPassConstants(multi->pass[0], mf, sf);
-        initIntegerPassConstants(multi->pass[1], df, mf);
+        initSinglePass(multi->pass[0], mf, sf);
+        initSinglePass(multi->pass[1], df, mf);
 
         multi->step = RASTER_CONVERT_BUFFER_SIZE / 4;
         multi->dstAdvance = df.getBytesPerPixel() * multi->step;
@@ -186,7 +207,7 @@ struct FOG_NO_EXPORT Convert
 
         multi->blit[0] = mfFromSf;
         multi->blit[1] = dfFromMf;
-        d->blitFn = pass_two;
+        d->blitFn = passTwo;
 
         return ERR_OK;
       }
@@ -209,10 +230,8 @@ struct FOG_NO_EXPORT Convert
       // Destination is ARGB64 or PRGB64.
       if (df.getFormat() == IMAGE_FORMAT_PRGB64)
       {
-        uint32_t sfDibFormat = getDibFormat(sf);
-        RasterVBlitLineFunc blitLine = _api_raster.convert.argb64_from_custom[sfDibFormat];
-
-        initIntegerPassConstants(multi->pass[0], df, sf);
+        RasterVBlitLineFunc blitLine = _api_raster.convert.argb64_from[sfRasterFormat];
+        initSinglePass(multi->pass[0], df, sf);
 
         if (keepColorSpace)
         {
@@ -223,7 +242,7 @@ struct FOG_NO_EXPORT Convert
         {
           // One pass run, but including post-process (color-space conversion).
           multi->blit[0] = blitLine;
-          d->blitFn = pass_one_postprocess;
+          d->blitFn = passOnePostprocess;
         }
 
         return ERR_OK;
@@ -232,10 +251,8 @@ struct FOG_NO_EXPORT Convert
       // Source is ARGB64 or PRGB64.
       if (sf.getFormat() == IMAGE_FORMAT_PRGB64)
       {
-        uint32_t dfDibFormat = getDibFormat(df);
-        RasterVBlitLineFunc blitLine = _api_raster.convert.custom_from_argb64[dfDibFormat];
-
-        initIntegerPassConstants(multi->pass[0], df, sf);
+        RasterVBlitLineFunc blitLine = _api_raster.convert.from_argb64[dfRasterFormat];
+        initSinglePass(multi->pass[0], df, sf);
 
         if (keepColorSpace)
         {
@@ -249,7 +266,7 @@ struct FOG_NO_EXPORT Convert
           multi->dstAdvance = df.getBytesPerPixel() * multi->step;
           multi->srcAdvance = sf.getBytesPerPixel() * multi->step;
           multi->blit[0] = blitLine;
-          d->blitFn = pass_one_preprocess;
+          d->blitFn = passOnePreprocess;
         }
 
         return ERR_OK;
@@ -259,14 +276,11 @@ struct FOG_NO_EXPORT Convert
       {
         const ImageFormatDescription& mf = ImageFormatDescription::getByFormat(IMAGE_FORMAT_PRGB64);
 
-        uint32_t sfDibFormat = getDibFormat(sf);
-        uint32_t dfDibFormat = getDibFormat(df);
+        RasterVBlitLineFunc mfFromSf = _api_raster.convert.argb64_from[sfRasterFormat];
+        RasterVBlitLineFunc dfFromMf = _api_raster.convert.from_argb64[dfRasterFormat];
 
-        RasterVBlitLineFunc mfFromSf = _api_raster.convert.argb64_from_custom[sfDibFormat];
-        RasterVBlitLineFunc dfFromMf = _api_raster.convert.custom_from_argb64[dfDibFormat];
-
-        initIntegerPassConstants(multi->pass[0], mf, sf);
-        initIntegerPassConstants(multi->pass[1], df, mf);
+        initSinglePass(multi->pass[0], mf, sf);
+        initSinglePass(multi->pass[1], df, mf);
 
         multi->step = RASTER_CONVERT_BUFFER_SIZE / 8;
         multi->dstAdvance = df.getBytesPerPixel() * multi->step;
@@ -274,94 +288,143 @@ struct FOG_NO_EXPORT Convert
 
         multi->blit[0] = mfFromSf;
         multi->blit[1] = dfFromMf;
-        d->blitFn = pass_two;
+        d->blitFn = passTwo;
+
+        return ERR_OK;
       }
-      return ERR_OK;
     }
-    else
-    {
-      return ERR_RT_INVALID_ARGUMENT;
-    }
+
+    return ERR_IMAGE_INVALID_FORMAT;
   }
 
   // ==========================================================================
   // [Helpers - Initialization]
   // ==========================================================================
 
-  static void initIntegerPassConstants(
+  static void FOG_FASTCALL initSinglePass(
     RasterConvertPass& pass,
     const ImageFormatDescription& df,
     const ImageFormatDescription& sf)
   {
-    pass.aMask = sf.getAMax();
-    pass.rMask = sf.getRMax();
-    pass.gMask = sf.getGMax();
-    pass.bMask = sf.getBMax();
+    pass.fill = FOG_UINT64_C(0);
 
-    pass.aScale = (uint32_t)((double)(int)df.getAMax() * 65537.0 / (double)(int)sf.getAMax());
-    pass.rScale = (uint32_t)((double)(int)df.getRMax() * 65537.0 / (double)(int)sf.getRMax());
-    pass.gScale = (uint32_t)((double)(int)df.getGMax() * 65537.0 / (double)(int)sf.getGMax());
-    pass.bScale = (uint32_t)((double)(int)df.getBMax() * 65537.0 / (double)(int)sf.getBMax());
+    if (df.getASize() != 0 && sf.getASize() == 0)
+      pass.fill |= df.getAMask64();
 
-    pass.aShift = sf.getAPos();
-    pass.rShift = sf.getRPos();
-    pass.gShift = sf.getGPos();
-    pass.bShift = sf.getBPos();
+    if (df.fillUnusedBits())
+      pass.fill |= df.getUnusedBits64();
 
-    if (df.getASize() != 0 && sf.getASize() == 0) pass.fill = df.getAMask64();
-    if (df.fillUnusedBits()) pass.fill |= df.getUnusedBits64();
+    pass.aDstShift = df.getAPos();
+    pass.rDstShift = df.getRPos();
+    pass.gDstShift = df.getGPos();
+    pass.bDstShift = df.getBPos();
+
+    pass.aSrcShift = sf.getAPos();
+    pass.rSrcShift = sf.getRPos();
+    pass.gSrcShift = sf.getGPos();
+    pass.bSrcShift = sf.getBPos();
+
+    pass.aSrcMask = sf.getAMax();
+    pass.rSrcMask = sf.getRMax();
+    pass.gSrcMask = sf.getGMax();
+    pass.bSrcMask = sf.getBMax();
+
+    pass.aScale = getScaleConstant(df.getASize(), sf.getASize());
+    pass.rScale = getScaleConstant(df.getRSize(), sf.getRSize());
+    pass.gScale = getScaleConstant(df.getGSize(), sf.getGSize());
+    pass.bScale = getScaleConstant(df.getBSize(), sf.getBSize());
   }
 
-  static uint32_t getDibFormat(const ImageFormatDescription& d)
+  static uint32_t FOG_FASTCALL getRasterFormat(const ImageFormatDescription& d)
   {
     switch (d.getDepth())
     {
       case 8:
-        if (d.getFormat() == IMAGE_FORMAT_A8) return RASTER_FORMAT_A8;
-        if (d.getFormat() == IMAGE_FORMAT_I8) return RASTER_FORMAT_I8;
+        if (d.getFormat() == IMAGE_FORMAT_A8)
+          return RASTER_FORMAT_A8;
+        
+        if (d.getFormat() == IMAGE_FORMAT_I8)
+          return RASTER_FORMAT_I8;
+
         break;
 
       case 16:
         if (d.getAMask32() == 0xFFFF)
           return RASTER_FORMAT_A16 + d.isByteSwapped();
-        else if (d.getAMask32() == 0x0000 && d.getRMask32() == 0x7C00 && d.getGMask32() == 0x03E0 && d.getBMask32() == 0x001F)
+
+        if (d.getAMask32() == 0x0000 &&
+            d.getRMask32() == 0x7C00 &&
+            d.getGMask32() == 0x03E0 &&
+            d.getBMask32() == 0x001F)
           return RASTER_FORMAT_RGB16_555 + d.isByteSwapped();
-        else if (d.getAMask32() == 0x0000 && d.getRMask32() == 0xF800 && d.getGMask32() == 0x07E0 && d.getBMask32() == 0x001F)
+        
+        if (d.getAMask32() == 0x0000 &&
+            d.getRMask32() == 0xF800 &&
+            d.getGMask32() == 0x07E0 &&
+            d.getBMask32() == 0x001F)
           return RASTER_FORMAT_RGB16_565 + d.isByteSwapped();
-        else if (d.getAMask32() == 0xF000 && d.getRMask32() == 0x0F00 && d.getGMask32() == 0x00F0 && d.getBMask32() == 0x000F)
+
+        if (d.getAMask32() == 0xF000 &&
+            d.getRMask32() == 0x0F00 &&
+            d.getGMask32() == 0x00F0 &&
+            d.getBMask32() == 0x000F)
           return RASTER_FORMAT_ARGB16_4444 + d.isByteSwapped();
-        else
-          return RASTER_FORMAT_ARGB16_CUSTOM + d.isByteSwapped();
+
+        return RASTER_FORMAT_ARGB16_CUSTOM + d.isByteSwapped();
 
       case 24:
-        if (d.getAMask32() == 0 && d.getRMask32() == 0x00FF0000 && d.getGMask32() == 0x0000FF00 && d.getBMask32() == 0x000000FF)
+        if (d.getAMask32() == 0x00000000 &&
+            d.getRMask32() == 0x00FF0000 &&
+            d.getGMask32() == 0x0000FF00 &&
+            d.getBMask32() == 0x000000FF)
           return RASTER_FORMAT_RGB24_888;
-        else if (d.getAMask32() == 0 && d.getRMask32() == 0x000000FF && d.getGMask32() == 0x0000FF00 && d.getBMask32() == 0x00FF0000)
+        
+        if (d.getAMask32() == 0x00000000 &&
+            d.getRMask32() == 0x000000FF &&
+            d.getGMask32() == 0x0000FF00 &&
+            d.getBMask32() == 0x00FF0000)
           return RASTER_FORMAT_RGB24_888_BS;
-        else
-          return RASTER_FORMAT_ARGB24_CUSTOM + d.isByteSwapped();
+
+        return RASTER_FORMAT_ARGB24_CUSTOM + d.isByteSwapped();
 
       case 32:
-        if (d.getAMask32() == 0 && d.getRMask32() == 0x00FF0000 && d.getGMask32() == 0x0000FF00 && d.getBMask32() == 0x000000FF)
+        if (d.getAMask32() == 0x00000000 &&
+            d.getRMask32() == 0x00FF0000 &&
+            d.getGMask32() == 0x0000FF00 &&
+            d.getBMask32() == 0x000000FF)
           return RASTER_FORMAT_RGB32_888;
-        else if (d.getAMask32() == 0 && d.getRMask32() == 0x000000FF && d.getGMask32() == 0x0000FF00 && d.getBMask32() == 0x00FF0000)
+        
+        if (d.getAMask32() == 0x00000000 &&
+            d.getRMask32() == 0x000000FF &&
+            d.getGMask32() == 0x0000FF00 &&
+            d.getBMask32() == 0x00FF0000)
           return RASTER_FORMAT_RGB32_888_BS;
-        else if (d.getAMask32() == 0xFF000000 && d.getRMask32() == 0x00FF0000 && d.getGMask32() == 0x0000FF00 && d.getBMask32() == 0x000000FF)
+        
+        if (d.getAMask32() == 0xFF000000 &&
+            d.getRMask32() == 0x00FF0000 &&
+            d.getGMask32() == 0x0000FF00 &&
+            d.getBMask32() == 0x000000FF)
           return RASTER_FORMAT_ARGB32_8888;
-        else if (d.getAMask32() == 0x000000FF && d.getRMask32() == 0x0000FF00 && d.getGMask32() == 0x00FF0000 && d.getBMask32() == 0xFF000000)
+        
+        if (d.getAMask32() == 0x000000FF &&
+            d.getRMask32() == 0x0000FF00 &&
+            d.getGMask32() == 0x00FF0000 &&
+            d.getBMask32() == 0xFF000000)
           return RASTER_FORMAT_ARGB32_8888_BS;
-        else
-          return RASTER_FORMAT_ARGB32_CUSTOM + d.isByteSwapped();
+
+        return RASTER_FORMAT_ARGB32_CUSTOM + d.isByteSwapped();
 
       case 48:
-        if (d.getAMask64() == 0 && d.getRMask64() == FOG_UINT64_C(0x0000FFFF00000000) &&
-                                   d.getGMask64() == FOG_UINT64_C(0x00000000FFFF0000) &&
-                                   d.getBMask32() == FOG_UINT64_C(0x000000000000FFFF))
+        if (d.getAMask64() == FOG_UINT64_C(0x0000000000000000) &&
+            d.getRMask64() == FOG_UINT64_C(0x0000FFFF00000000) &&
+            d.getGMask64() == FOG_UINT64_C(0x00000000FFFF0000) &&
+            d.getBMask32() == FOG_UINT64_C(0x000000000000FFFF))
           return RASTER_FORMAT_RGB48_161616 + d.isByteSwapped();
-        else if (d.getAMask64() == 0)
+
+        if (d.getAMask64() == 0)
           return RASTER_FORMAT_RGB48_CUSTOM + d.isByteSwapped();
-        else
-          return RASTER_FORMAT_ARGB48_CUSTOM + d.isByteSwapped();
+
+        return RASTER_FORMAT_ARGB48_CUSTOM + d.isByteSwapped();
 
       case 64:
         if (d.getAMask64() == FOG_UINT64_C(0xFFFF000000000000) &&
@@ -369,25 +432,37 @@ struct FOG_NO_EXPORT Convert
             d.getGMask64() == FOG_UINT64_C(0x00000000FFFF0000) &&
             d.getBMask32() == FOG_UINT64_C(0x000000000000FFFF))
           return RASTER_FORMAT_ARGB64_16161616 + d.isByteSwapped();
-        else
-          return RASTER_FORMAT_ARGB64_CUSTOM + d.isByteSwapped();
+
+        return RASTER_FORMAT_ARGB64_CUSTOM + d.isByteSwapped();
     }
 
     // Failed, shouldn't happen.
     return RASTER_FORMAT_COUNT;
   }
 
+  static uint32_t FOG_FASTCALL getScaleConstant(uint32_t dstSize, uint32_t srcSize)
+  {
+    if (dstSize == 0 || srcSize == 0)
+      return 0;
+
+    if (dstSize <= srcSize)
+      // Just scale to match the destination, remaining pixels will be masked.
+      return (uint32_t)1 << (16 + dstSize - srcSize);
+    else
+      return (uint32_t)( (uint64_t)((1 << dstSize) - 1) * 65537 / ((1 << srcSize) - 1) );
+  }
+
   // ==========================================================================
   // [Helpers - Conversion]
   // ==========================================================================
 
-  static void FOG_FASTCALL pass_one_preprocess(
+  static void FOG_FASTCALL passOnePreprocess(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const ImageConverterData* d = reinterpret_cast<const ImageConverterData*>(closure->data);
     const RasterConvertMulti* multi = reinterpret_cast<const RasterConvertMulti*>(d->buffer);
 
-    int step = (int)multi->step;
+    int step = multi->step;
     FOG_ASSUME(step > 0);
 
     RasterClosure passClosure;
@@ -416,7 +491,7 @@ struct FOG_NO_EXPORT Convert
     }
   }
 
-  static void FOG_FASTCALL pass_one_postprocess(
+  static void FOG_FASTCALL passOnePostprocess(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const ImageConverterData* d = reinterpret_cast<const ImageConverterData*>(closure->data);
@@ -434,13 +509,13 @@ struct FOG_NO_EXPORT Convert
     multi->middleware(dst, dst, w, &passClosure);
   }
 
-  static void FOG_FASTCALL pass_two(
+  static void FOG_FASTCALL passTwo(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const ImageConverterData* d = reinterpret_cast<const ImageConverterData*>(closure->data);
     const RasterConvertMulti* multi = reinterpret_cast<const RasterConvertMulti*>(d->buffer);
 
-    int step = (int)multi->step;
+    int step = multi->step;
     FOG_ASSUME(step > 0);
 
     RasterClosure passClosure;
@@ -476,6 +551,20 @@ struct FOG_NO_EXPORT Convert
   }
 
   // ==========================================================================
+  // [MemCopy - Helpers]
+  // ==========================================================================
+
+  static FOG_INLINE uint32_t scalePixel(uint32_t pix0, uint32_t shift, uint32_t mask, uint32_t scale)
+  {
+    return ((pix0 >> shift) & mask) * scale;
+  }
+
+  static FOG_INLINE uint32_t scalePixel(uint64_t pix0, uint32_t shift, uint32_t mask, uint32_t scale)
+  {
+    return ((uint32_t)(pix0 >> shift) & mask) * scale;
+  }
+
+  // ==========================================================================
   // [MemCopy - 8]
   // ==========================================================================
 
@@ -507,6 +596,9 @@ struct FOG_NO_EXPORT Convert
     }
 
     w += 4;
+    if (w == 0)
+      return;
+
     dst += w;
     src += w;
 
@@ -515,9 +607,10 @@ struct FOG_NO_EXPORT Convert
       case 3: MemOps::copy_1(dst - 3, src - 3);
       case 2: MemOps::copy_1(dst - 2, src - 2);
       case 1: MemOps::copy_1(dst - 1, src - 1);
-      case 0: break;
+        break;
 
-      default: FOG_ASSERT_NOT_REACHED();
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
 
@@ -553,17 +646,21 @@ struct FOG_NO_EXPORT Convert
     }
 
     w += 4;
+    if (w == 0)
+      return;
+
     dst += (uint)w * 2;
     src += (uint)w * 2;
 
     switch (w)
     {
-      default: FOG_ASSERT_NOT_REACHED();
-
       case 3: MemOps::copy_2(dst - 6, src - 6);
       case 2: MemOps::copy_2(dst - 4, src - 4);
       case 1: MemOps::copy_2(dst - 2, src - 2);
-      case 0: break;
+        break;
+      
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
 
@@ -601,6 +698,9 @@ struct FOG_NO_EXPORT Convert
     }
 
     w += 4;
+    if (w == 0)
+      return;
+
     dst += w;
     src += w;
 
@@ -609,9 +709,10 @@ struct FOG_NO_EXPORT Convert
       case 3: MemOps::copy_1(dst - 3, src - 3);
       case 2: MemOps::copy_1(dst - 2, src - 2);
       case 1: MemOps::copy_1(dst - 1, src - 1);
-      case 0: break;
+        break;
 
-      default: FOG_ASSERT_NOT_REACHED();
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
 
@@ -641,13 +742,14 @@ struct FOG_NO_EXPORT Convert
     }
 
     w += 8;
+    if (w == 0)
+      return;
+
     dst += (uint)w * 4;
     src += (uint)w * 4;
 
     switch (w)
     {
-      default: FOG_ASSERT_NOT_REACHED();
-
       case 7: MemOps::copy_4(dst - 28, src - 28);
       case 6: MemOps::copy_4(dst - 24, src - 24);
       case 5: MemOps::copy_4(dst - 20, src - 20);
@@ -655,7 +757,10 @@ struct FOG_NO_EXPORT Convert
       case 3: MemOps::copy_4(dst - 12, src - 12);
       case 2: MemOps::copy_4(dst -  8, src -  8);
       case 1: MemOps::copy_4(dst -  4, src -  4);
-      case 0: break;
+        break;
+      
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
 
@@ -673,6 +778,7 @@ struct FOG_NO_EXPORT Convert
       MemOps::copy_2(dst, src);
       dst += 2;
       src += 2;
+
       w--;
       FOG_ASSERT(w >= 0);
     }
@@ -694,17 +800,21 @@ struct FOG_NO_EXPORT Convert
     }
 
     w += 4;
+    if (w == 0)
+      return;
+
     dst += (uint)w * 2;
     src += (uint)w * 2;
 
     switch (w)
     {
-      default: FOG_ASSERT_NOT_REACHED();
-
       case 3: MemOps::copy_2(dst - 6, src - 6);
       case 2: MemOps::copy_2(dst - 4, src - 4);
       case 1: MemOps::copy_2(dst - 2, src - 2);
-      case 0: break;
+        break;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
 
@@ -723,17 +833,133 @@ struct FOG_NO_EXPORT Convert
     }
 
     w += 4;
+    if (w == 0)
+      return;
+
     dst += (uint)w * 8;
     src += (uint)w * 8;
 
     switch (w)
     {
-      default: FOG_ASSERT_NOT_REACHED();
-
       case 3: MemOps::copy_8(dst - 24, src - 24);
       case 2: MemOps::copy_8(dst - 16, src - 16);
       case 1: MemOps::copy_8(dst -  8, src -  8);
-      case 0: break;
+        break;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+  }
+
+  // ==========================================================================
+  // [Fill - 8]
+  // ==========================================================================
+
+  static void FOG_FASTCALL fill_8(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    Face::p32 p0 = 0xFFFFFFFF;
+
+    while ( ((size_t)dst & (sizeof(size_t) - 1)) )
+    {
+      Face::p32Store1b(dst, p0);
+      dst += 1;
+      if (--w == 0) return;
+    }
+
+    while ((w -= 32) >= 0)
+    {
+      Face::p32Store4a(dst +  0, p0);
+      Face::p32Store4a(dst +  4, p0);
+      Face::p32Store4a(dst +  8, p0);
+      Face::p32Store4a(dst + 12, p0);
+      Face::p32Store4a(dst + 16, p0);
+      Face::p32Store4a(dst + 20, p0);
+      Face::p32Store4a(dst + 24, p0);
+      Face::p32Store4a(dst + 28, p0);
+      dst += 32;
+    }
+
+    w += 32;
+
+    while ((w -= 4) >= 0)
+    {
+      Face::p32Store4a(dst, p0);
+      dst += 4;
+    }
+
+    w += 4;
+    if (w == 0)
+      return;
+
+    dst += w;
+    src += w;
+
+    switch (w)
+    {
+      case 3: Face::p32Store1b(dst - 3, p0);
+      case 2: Face::p32Store1b(dst - 2, p0);
+      case 1: Face::p32Store1b(dst - 1, p0);
+        break;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+  }
+
+  // ==========================================================================
+  // [Fill - 16]
+  // ==========================================================================
+
+  static void FOG_FASTCALL fill_16(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    Face::p32 p0 = 0xFFFFFFFF;
+
+    while ( ((size_t)dst & (sizeof(size_t) - 1)) )
+    {
+      Face::p32Store2a(dst, p0);
+      dst += 2;
+      if (--w == 0) return;
+    }
+
+    while ((w -= 16) >= 0)
+    {
+      Face::p32Store4a(dst +  0, p0);
+      Face::p32Store4a(dst +  4, p0);
+      Face::p32Store4a(dst +  8, p0);
+      Face::p32Store4a(dst + 12, p0);
+      Face::p32Store4a(dst + 16, p0);
+      Face::p32Store4a(dst + 20, p0);
+      Face::p32Store4a(dst + 24, p0);
+      Face::p32Store4a(dst + 28, p0);
+      dst += 32;
+    }
+
+    w += 16;
+
+    while ((w -= 4) >= 0)
+    {
+      Face::p32Store4a(dst + 0, p0);
+      Face::p32Store4a(dst + 4, p0);
+      dst += 8;
+    }
+
+    w += 4;
+    if (w == 0)
+      return;
+
+    dst += (uint)w * 2;
+
+    switch (w)
+    {
+      case 3: Face::p32Store2a(dst - 6, p0);
+      case 2: Face::p32Store2a(dst - 4, p0);
+      case 1: Face::p32Store2a(dst - 2, p0);
+        break;
+      
+      default:
+        FOG_ASSERT_NOT_REACHED();
     }
   }
 
@@ -869,29 +1095,54 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
+  static void FOG_FASTCALL prgb64_from_argb64(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p64 c0;
+      Face::p64Load8a(c0, src);
+      Face::p64PRGB64FromARGB64(c0, c0);
+      Face::p64Store8a(dst, c0);
+
+      dst += 8;
+      src += 8;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_prgb64(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p64 c0;
+      Face::p64Load8a(c0, src);
+      Face::p64ARGB64FromPRGB64(c0, c0);
+      Face::p64Store8a(dst, c0);
+
+      dst += 8;
+      src += 8;
+    } while (--w);
+  }
+
   // ==========================================================================
-  // [Convert - A8]
+  // [Convert - ARGB32 <- Custom]
   // ==========================================================================
 
-  static void FOG_FASTCALL a8_native_from_a16_bs(
+  static void FOG_FASTCALL argb32_from_rgb16_555(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
       Face::p32 pix0p;
 
       Face::p32Load2a(pix0p, src);
-      Face::p32Store1b(dst, pix0p);
+      Face::p32FRGB32FromRGB16_555(pix0p, pix0p);
+      Face::p32Store4a(dst, pix0p);
 
-      dst += 1;
+      dst += 4;
       src += 2;
     } while (--w);
   }
 
-  // ==========================================================================
-  // [Convert - ARGB32]
-  // ==========================================================================
-
-  static void FOG_FASTCALL argb32_native_from_rgb16_555_bs(
+  static void FOG_FASTCALL argb32_from_rgb16_555_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -906,7 +1157,22 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_rgb16_565_bs(
+  static void FOG_FASTCALL argb32_from_rgb16_565(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load2a(pix0p, src);
+      Face::p32FRGB32FromRGB16_565(pix0p, pix0p);
+      Face::p32Store4a(dst, pix0p);
+
+      dst += 4;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_rgb16_565_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -921,110 +1187,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_rgb24_888_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    do {
-      Face::p32 pix0p;
-
-      Face::p32Load3bBSwap(pix0p, src);
-      Face::p32FillPBB3(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
-
-      dst += 4;
-      src += 3;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb32_native_from_rgb32_888_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    do {
-      Face::p32 pix0p;
-
-      Face::p32Load4aBSwap(pix0p, src);
-      Face::p32FillPBB3(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
-
-      dst += 4;
-      src += 4;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb32_native_from_rgb48_161616_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    do {
-      Face::p32 pix0r;
-      Face::p32 pix0g;
-      Face::p32 pix0b;
-
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-      Face::p32Load2a(pix0r, src + 0);
-      Face::p32Load2a(pix0g, src + 2);
-      Face::p32Load2a(pix0b, src + 4);
-#else
-      Face::p32Load2a(pix0b, src + 0);
-      Face::p32Load2a(pix0g, src + 2);
-      Face::p32Load2a(pix0r, src + 4);
-#endif // FOG_BYTE_ORDER
-
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r << 16, (pix0g & 0xFF) << 8, (pix0b & 0xFF)));
-
-      dst += 4;
-      src += 6;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb32_native_from_rgb48_dib(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p64 pix0p;
-      Face::p32 pix0r;
-      Face::p32 pix0g;
-      Face::p32 pix0b;
-
-      Face::p64Load6aNative(pix0p, dst);
-
-      pix0r = (((uint32_t)( Face::u64FromP64(pix0p) >> d->rShift ) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((uint32_t)( Face::u64FromP64(pix0p) >> d->gShift ) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((uint32_t)( Face::u64FromP64(pix0p) >> d->bShift ) * d->bScale ) >> 16);
-
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
-
-      dst += 4;
-      src += 6;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb32_native_from_rgb48_dib_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p64 pix0p;
-      Face::p32 pix0r;
-      Face::p32 pix0g;
-      Face::p32 pix0b;
-
-      Face::p64Load6aSwap(pix0p, dst);
-
-      pix0r = (((uint32_t)( Face::u64FromP64(pix0p) >> d->rShift ) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((uint32_t)( Face::u64FromP64(pix0p) >> d->gShift ) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((uint32_t)( Face::u64FromP64(pix0p) >> d->bShift ) * d->bScale ) >> 16);
-
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
-
-      dst += 4;
-      src += 6;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb32_native_from_argb16_4444(
+  static void FOG_FASTCALL argb32_from_argb16_4444(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1039,7 +1202,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb16_4444_bs(
+  static void FOG_FASTCALL argb32_from_argb16_4444_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1054,82 +1217,85 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb16_dib(
+  static void FOG_FASTCALL argb32_from_argb16_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
 
     do {
       Face::p32 pix0p;
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
 
       Face::p32Load2a(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((pix0p >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 2;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb16_dib_bs(
+  static void FOG_FASTCALL argb32_from_argb16_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
 
     do {
       Face::p32 pix0p;
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
 
       Face::p32Load2aBSwap(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((pix0p >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 2;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb24_dib(
+  static void FOG_FASTCALL argb32_from_rgb24_888_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
     do {
       Face::p32 pix0p;
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
 
-      Face::p32Load3b(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((pix0p >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      Face::p32Load3bBSwap(pix0p, src);
+      Face::p32FillPBB3(pix0p, pix0p);
+      Face::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 3;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb24_dib_bs(
+  static void FOG_FASTCALL argb32_from_argb24_custom(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load3b(pix0p, src);
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 4;
+      src += 3;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_argb24_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1140,21 +1306,33 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p32Load3bBSwap(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((pix0p >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 3;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb32_8888_bs(
+  static void FOG_FASTCALL argb32_from_rgb32_888_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4aBSwap(pix0p, src);
+      Face::p32FillPBB3(pix0p, pix0p);
+      Face::p32Store4a(dst, pix0p);
+
+      dst += 4;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_argb32_8888_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     Face::p32 fill = (uint32_t)reinterpret_cast<const RasterConvertPass*>(closure->data)->fill;
@@ -1171,7 +1349,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb32_dib(
+  static void FOG_FASTCALL argb32_from_argb32_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1182,21 +1360,18 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p32Load4a(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((pix0p >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 4;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb32_dib_bs(
+  static void FOG_FASTCALL argb32_from_argb32_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1207,21 +1382,81 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p32Load4aBSwap(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (((pix0p >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 4;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb48_dib(
+  static void FOG_FASTCALL argb32_from_rgb48_161616_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0r, pix0g, pix0b;
+
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+      Face::p32Load2a(pix0r, src + 0);
+      Face::p32Load2a(pix0g, src + 2);
+      Face::p32Load2a(pix0b, src + 4);
+#else
+      Face::p32Load2a(pix0b, src + 0);
+      Face::p32Load2a(pix0g, src + 2);
+      Face::p32Load2a(pix0r, src + 4);
+#endif // FOG_BYTE_ORDER
+
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_3((pix0r << 16) | 0xFF000000, (pix0g & 0xFF) << 8, (pix0b & 0xFF)));
+
+      dst += 4;
+      src += 6;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_rgb48_custom(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p64 pix0p;
+      Face::p32 pix0r, pix0g, pix0b;
+
+      Face::p64Load6a(pix0p, dst);
+      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
+
+      dst += 4;
+      src += 6;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_rgb48_custom_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p64 pix0p;
+      Face::p32 pix0r, pix0g, pix0b;
+
+      Face::p64Load6aBSwap(pix0p, dst);
+      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
+
+      dst += 4;
+      src += 6;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_from_argb48_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1231,22 +1466,19 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0r, pix0g;
       Face::p32 pix0b, pix0a;
 
-      Face::p64Load6aNative(pix0p, src);
-
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      Face::p64Load6a(pix0p, src);
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 6;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb48_dib_bs(
+  static void FOG_FASTCALL argb32_from_argb48_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1256,22 +1488,19 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0r, pix0g;
       Face::p32 pix0b, pix0a;
 
-      Face::p64Load6aSwap(pix0p, src);
-
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      Face::p64Load6aBSwap(pix0p, src);
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 6;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb64_16161616_bs(
+  static void FOG_FASTCALL argb32_from_argb64_16161616_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     Face::p32 fill = (uint32_t)reinterpret_cast<const RasterConvertPass*>(closure->data)->fill;
@@ -1290,7 +1519,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb64_dib(
+  static void FOG_FASTCALL argb32_from_argb64_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1301,21 +1530,18 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p64Load8a(pix0p, src);
-
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 8;
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb32_native_from_argb64_dib_bs(
+  static void FOG_FASTCALL argb32_from_argb64_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1326,14 +1552,11 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p64Load8aBSwap(pix0p, src);
-
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale ) <<  8) & 0xFF000000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale )      ) & 0x00FF0000;
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale ) >>  8) & 0x0000FF00;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
-
-      pix0a |= (uint32_t)d->fill;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(pix0a, pix0r, pix0g, pix0b));
+      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 8;
@@ -1341,10 +1564,483 @@ struct FOG_NO_EXPORT Convert
   }
 
   // ==========================================================================
-  // [Convert - ARGB64 Destination]
+  // [Convert - Custom <- ARGB32]
   // ==========================================================================
 
-  static void FOG_FASTCALL argb64_native_from_rgb16_555_bs(
+  static void FOG_FASTCALL rgb16_555_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32RGB16_555FromXRGB32(pix0p, pix0p);
+      Face::p32Store2a(dst, pix0p);
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb16_555_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32RGB16_555FromXRGB32(pix0p, pix0p);
+      Face::p32Store2aBSwap(dst, pix0p);
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb16_565_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32RGB16_565FromXRGB32(pix0p, pix0p);
+      Face::p32Store2a(dst, pix0p);
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb16_565_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32RGB16_565FromXRGB32(pix0p, pix0p);
+      Face::p32Store2aBSwap(dst, pix0p);
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb16_4444_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32ARGB16_4444FromARGB32(pix0p, pix0p);
+      Face::p32Store2a(dst, pix0p);
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb16_4444_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32ARGB16_4444_bsFromARGB32(pix0p, pix0p);
+      Face::p32Store2a(dst, pix0p);
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb16_custom_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
+      pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
+      pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
+      pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
+      Face::p32Store2a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb16_custom_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
+      pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
+      pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
+      pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
+      Face::p32Store2aBSwap(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 2;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb24_888_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32Store3bBSwap(dst, pix0p);
+
+      dst += 3;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb24_custom_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
+      pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
+      pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
+      pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
+      Face::p32Store3b(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 3;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb24_custom_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0r, pix0g;
+      Face::p32 pix0b, pix0a;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
+      pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
+      pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
+      pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
+      Face::p32Store3bBSwap(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 3;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb32_888_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32Or(pix0p, pix0p, (uint32_t)d->fill);
+      Face::p32Store4aBSwap(dst, pix0p);
+
+      dst += 4;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_8888_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32Store4aBSwap(dst, pix0p);
+
+      dst += 4;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_custom_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
+      pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
+      pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
+      pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
+      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 4;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb32_custom_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
+      pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
+      pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
+      pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
+      Face::p32Store4aBSwap(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+
+      dst += 4;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb48_161616_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32RGB48StoreBSwapFromXRGB32(dst, pix0p);
+
+      dst += 6;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb48_custom_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p64 pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+
+      Face::p64Combine(pix0r, pix0r, pix0g);
+      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
+      Face::p64Combine(pix0r, pix0r, pix0b);
+
+      Face::p64Store6a(dst, pix0r);
+
+      dst += 6;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL rgb48_custom_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p64 pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+
+      Face::p64Combine(pix0r, pix0r, pix0g);
+      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
+      Face::p64Combine(pix0r, pix0r, pix0b);
+
+      Face::p64Store6aBSwap(dst, pix0r);
+
+      dst += 6;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb48_custom_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p64 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+
+      Face::p64Combine(pix0r, pix0r, pix0g);
+      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
+      Face::p64Combine(pix0r, pix0r, pix0a);
+      Face::p64Combine(pix0r, pix0r, pix0b);
+
+      Face::p64Store6a(dst, pix0r);
+
+      dst += 6;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb48_custom_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p64 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+
+      Face::p64Combine(pix0r, pix0r, pix0g);
+      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
+      Face::p64Combine(pix0r, pix0r, pix0a);
+      Face::p64Combine(pix0r, pix0r, pix0b);
+
+      Face::p64Store6aBSwap(dst, pix0r);
+
+      dst += 6;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_16161616_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    Face::p32 fill = (uint32_t)reinterpret_cast<const RasterConvertPass*>(closure->data)->fill;
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32Load4a(pix0p, src);
+      Face::p32PRGB64FromPRGB32(pix0p_10, pix0p_32, pix0p);
+      Face::p32Store8a(dst, Memory::bswap32(pix0p_32), Memory::bswap32(pix0p_10));
+
+      dst += 8;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_custom_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p64 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+
+      Face::p64Combine(pix0r, pix0r, pix0g);
+      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
+      Face::p64Combine(pix0r, pix0r, pix0a);
+      Face::p64Combine(pix0r, pix0r, pix0b);
+
+      Face::p64Store8a(dst, pix0r);
+
+      dst += 8;
+      src += 4;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_custom_bs_from_argb32(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p64 pix0a, pix0r, pix0g, pix0b;
+
+      Face::p32Load4a(pix0p, src);
+      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+
+      Face::p64Combine(pix0r, pix0r, pix0g);
+      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
+      Face::p64Combine(pix0r, pix0r, pix0a);
+      Face::p64Combine(pix0r, pix0r, pix0b);
+
+      Face::p64Store8aBSwap(dst, pix0r);
+
+      dst += 8;
+      src += 4;
+    } while (--w);
+  }
+
+  // ==========================================================================
+  // [Convert - ARGB64 <- Custom]
+  // ==========================================================================
+
+  static void FOG_FASTCALL argb64_from_rgb16_555(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32Load2a(pix0p_10, src);
+      Face::p32FRGB64FromRGB16_555(pix0p_10, pix0p_32, pix0p_10);
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_rgb16_555_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1359,7 +2055,22 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_rgb16_565_bs(
+  static void FOG_FASTCALL argb64_from_rgb16_565(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32Load2a(pix0p_10, src);
+      Face::p32FRGB64FromRGB16_565(pix0p_10, pix0p_32, pix0p_10);
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_rgb16_565_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1374,7 +2085,95 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_rgb24_888_bs(
+  static void FOG_FASTCALL argb64_from_argb16_4444(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32Load2a(pix0p_10, src);
+      Face::p32ARGB64FromARGB16_4444(pix0p_10, pix0p_32, pix0p_10);
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_argb16_4444_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32Load2a(pix0p_10, src);
+      Face::p32ARGB64FromARGB16_4444_bs(pix0p_10, pix0p_32, pix0p_10);
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_argb16_custom(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32 pix0r, pix0g;
+      Face::p32 pix0b, pix0a;
+
+      Face::p32Load2a(pix0p, src);
+
+      pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
+
+      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_argb16_custom_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32 pix0r, pix0g;
+      Face::p32 pix0b, pix0a;
+
+      Face::p32Load2aBSwap(pix0p, src);
+
+      pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
+
+      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 2;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_rgb24_888_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1405,7 +2204,65 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_rgb32_888_bs(
+  static void FOG_FASTCALL argb64_from_argb24_custom(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32 pix0r, pix0g;
+      Face::p32 pix0b, pix0a;
+
+      Face::p32Load3b(pix0p, src);
+
+      pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
+
+      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 3;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_argb24_custom_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p32 pix0p;
+      Face::p32 pix0p_10, pix0p_32;
+
+      Face::p32 pix0r, pix0g;
+      Face::p32 pix0b, pix0a;
+
+      Face::p32Load3bBSwap(pix0p, src);
+
+      pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
+
+      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 3;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_rgb32_888_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1420,222 +2277,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_rgb48_161616_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    do {
-      Face::p64 pix0p;
-
-      Face::p64Load6aSwap(pix0p, src);
-      Face::p64FillPWW3(pix0p, pix0p);
-      Face::p64Store8a(dst, pix0p);
-
-      dst += 8;
-      src += 6;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_rgb48_dib(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p64 pix0p;
-      Face::p32 pix0p_10;
-      Face::p32 pix0p_32;
-
-      Face::p64Load6aNative(pix0p, src);
-
-      pix0p_10 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) & d->gMask) * d->gScale) & 0xFFFF0000,
-                                      (((uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) & d->bMask) * d->bScale) >> 16 );
-      pix0p_32 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) & d->rMask) * d->rScale) >> 16,
-                                      0xFFFF0000);
-
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 6;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_rgb48_dib_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p64 pix0p;
-      Face::p32 pix0p_10;
-      Face::p32 pix0p_32;
-
-      Face::p64Load6aSwap(pix0p, src);
-
-      pix0p_10 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) & d->gMask) * d->gScale) & 0xFFFF0000,
-                                      (((uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) & d->bMask) * d->bScale) >> 16 );
-      pix0p_32 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) & d->rMask) * d->rScale) >> 16,
-                                      0xFFFF0000);
-
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 6;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb16_4444(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    // TODO: UNUSED.
-    Face::p32 fill = (uint32_t)reinterpret_cast<const RasterConvertPass*>(closure->data)->fill;
-
-    do {
-      Face::p32 pix0p_10, pix0p_32;
-
-      Face::p32Load2a(pix0p_10, src);
-      Face::p32ARGB64FromARGB16_4444(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 2;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb16_4444_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    // TODO: Unused
-    Face::p32 fill = (uint32_t)reinterpret_cast<const RasterConvertPass*>(closure->data)->fill;
-
-    do {
-      Face::p32 pix0p_10, pix0p_32;
-
-      Face::p32Load2a(pix0p_10, src);
-      Face::p32ARGB64FromARGB16_4444_bs(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 2;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb16_dib(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p32 pix0p;
-      Face::p32 pix0p_10, pix0p_32;
-
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
-
-      Face::p32Load2a(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (((pix0p >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
-
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 2;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb16_dib_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p32 pix0p;
-      Face::p32 pix0p_10, pix0p_32;
-
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
-
-      Face::p32Load2aBSwap(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (((pix0p >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
-
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 2;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb24_dib(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p32 pix0p;
-      Face::p32 pix0p_10, pix0p_32;
-
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
-
-      Face::p32Load3b(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (((pix0p >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
-
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 3;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb24_dib_bs(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
-
-    do {
-      Face::p32 pix0p;
-      Face::p32 pix0p_10, pix0p_32;
-
-      Face::p32 pix0r, pix0g;
-      Face::p32 pix0b, pix0a;
-
-      Face::p32Load3bBSwap(pix0p, src);
-
-      pix0a = (((pix0p >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (((pix0p >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
-
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
-
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
-
-      dst += 8;
-      src += 3;
-    } while (--w);
-  }
-
-  static void FOG_FASTCALL argb64_native_from_argb32_8888_bs(
+  static void FOG_FASTCALL argb64_from_argb32_8888_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1650,7 +2292,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb32_dib(
+  static void FOG_FASTCALL argb64_from_argb32_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1664,10 +2306,10 @@ struct FOG_NO_EXPORT Convert
 
       Face::p32Load4a(pix0p, src);
 
-      pix0a = (((pix0p >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (((pix0p >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
+      pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
       pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
       pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
@@ -1679,7 +2321,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb32_dib_bs(
+  static void FOG_FASTCALL argb64_from_argb32_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1693,10 +2335,10 @@ struct FOG_NO_EXPORT Convert
 
       Face::p32Load4aBSwap(pix0p, src);
 
-      pix0a = (((pix0p >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (((pix0p >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (((pix0p >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (((pix0p >> d->bShift) * d->bScale ) >> 16);
+      pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
       pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
       pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
@@ -1708,7 +2350,70 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb48_dib(
+  static void FOG_FASTCALL argb64_from_rgb48_161616_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    do {
+      Face::p64 pix0p;
+
+      Face::p64Load6aBSwap(pix0p, src);
+      Face::p64FillPWW3(pix0p, pix0p);
+      Face::p64Store8a(dst, pix0p);
+
+      dst += 8;
+      src += 6;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_rgb48_custom(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p64 pix0p;
+      Face::p32 pix0p_10;
+      Face::p32 pix0p_32;
+
+      Face::p64Load6a(pix0p, src);
+
+      pix0p_10 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) & d->gSrcMask) * d->gScale) & 0xFFFF0000,
+                                      (((uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) & d->bSrcMask) * d->bScale) >> 16 );
+      pix0p_32 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) & d->rSrcMask) * d->rScale) >> 16,
+                                      0xFFFF0000);
+
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 6;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_rgb48_custom_bs(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
+
+    do {
+      Face::p64 pix0p;
+      Face::p32 pix0p_10;
+      Face::p32 pix0p_32;
+
+      Face::p64Load6aBSwap(pix0p, src);
+
+      pix0p_10 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) & d->gSrcMask) * d->gScale) & 0xFFFF0000,
+                                      (((uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) & d->bSrcMask) * d->bScale) >> 16 );
+      pix0p_32 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) & d->rSrcMask) * d->rScale) >> 16,
+                                      0xFFFF0000);
+
+      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+
+      dst += 8;
+      src += 6;
+    } while (--w);
+  }
+
+  static void FOG_FASTCALL argb64_from_argb48_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1720,12 +2425,12 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0r, pix0g;
       Face::p32 pix0b, pix0a;
 
-      Face::p64Load6aNative(pix0p, src);
+      Face::p64Load6a(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
       pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
       pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
@@ -1737,7 +2442,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb48_dib_bs(
+  static void FOG_FASTCALL argb64_from_argb48_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1749,12 +2454,12 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0r, pix0g;
       Face::p32 pix0b, pix0a;
 
-      Face::p64Load6aSwap(pix0p, src);
+      Face::p64Load6aBSwap(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
       pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
       pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
@@ -1766,7 +2471,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb64_16161616_bs(
+  static void FOG_FASTCALL argb64_from_argb64_16161616_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     do {
@@ -1780,7 +2485,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb64_dib(
+  static void FOG_FASTCALL argb64_from_argb64_custom(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1794,10 +2499,10 @@ struct FOG_NO_EXPORT Convert
 
       Face::p64Load8a(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
       pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
       pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
@@ -1809,7 +2514,7 @@ struct FOG_NO_EXPORT Convert
     } while (--w);
   }
 
-  static void FOG_FASTCALL argb64_native_from_argb64_dib_bs(
+  static void FOG_FASTCALL argb64_from_argb64_custom_bs(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const RasterConvertPass* d = reinterpret_cast<const RasterConvertPass*>(closure->data);
@@ -1823,10 +2528,10 @@ struct FOG_NO_EXPORT Convert
 
       Face::p64Load8aBSwap(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
       pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
       pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
@@ -1837,9 +2542,18 @@ struct FOG_NO_EXPORT Convert
       src += 8;
     } while (--w);
   }
+
+  // ==========================================================================
+  // [Convert - Custom <- ARGB64]
+  // ==========================================================================
 };
 
 
+
+
+
+
+// TODO: Port
 #if 0
 // ============================================================================
 // [Fog::RasterC - Dib]
@@ -2072,7 +2786,7 @@ struct FOG_NO_EXPORT DibC
 
 
 
-  static void FOG_FASTCALL frgb32_from_rgb24_native(
+  static void FOG_FASTCALL frgb32_from_rgb24(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
@@ -2197,7 +2911,7 @@ struct FOG_NO_EXPORT DibC
     }
   }
 
-  static void FOG_FASTCALL rgb24_native_from_xrgb32(
+  static void FOG_FASTCALL rgb24_from_xrgb32(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
@@ -2251,7 +2965,7 @@ struct FOG_NO_EXPORT DibC
     }
   }
 
-  static void FOG_FASTCALL rgb24_native_from_argb32(
+  static void FOG_FASTCALL rgb24_from_argb32(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
@@ -2305,7 +3019,7 @@ struct FOG_NO_EXPORT DibC
     }
   }
 
-  static void FOG_FASTCALL rgb24_native_from_i8(
+  static void FOG_FASTCALL rgb24_from_i8(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     const uint32_t* srcPal = closure->srcPalette + ImagePalette::INDEX_PRGB32;
@@ -2500,7 +3214,7 @@ struct FOG_NO_EXPORT DibC
     } while (--w);
   }
 
-  static void FOG_FASTCALL rgb16_555_native_from_xrgb32_dither(
+  static void FOG_FASTCALL rgb16_555_from_xrgb32_dither(
     uint8_t* dst, const uint8_t* src, int w, const PointI& origin)
   {
     const uint8_t* dt = DitherTable::matrix[origin.getY() & DitherTable::MASK];
@@ -2528,7 +3242,7 @@ struct FOG_NO_EXPORT DibC
     } while (--w);
   }
 
-  static void FOG_FASTCALL rgb16_565_native_from_xrgb32_dither(
+  static void FOG_FASTCALL rgb16_565_from_xrgb32_dither(
     uint8_t* dst, const uint8_t* src, int w, const PointI& origin)
   {
     const uint8_t* dt = DitherTable::matrix[origin.getY() & DitherTable::MASK];

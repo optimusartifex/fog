@@ -309,7 +309,7 @@ EndIf()
 # =============================================================================
 
 If(FOG_OS_WINDOWS)
-  List(APPEND FOG_LIBRARIES user32 gdi32 advapi32 winmm uuid)
+  List(APPEND FOG_LIBRARIES advapi32 gdi32 ole32 user32 uuid shell32 winmm)
 EndIf()
 
 If(FOG_OS_MAC)
@@ -537,7 +537,7 @@ Set(FOG_CORE_OS_SOURCES
   Fog/Core/OS/Library.cpp
   Fog/Core/OS/OSInfo.cpp
   Fog/Core/OS/OSUtil.cpp
-  Fog/Core/OS/UserInfo.cpp
+  Fog/Core/OS/UserUtil.cpp
 )
 
 Set(FOG_CORE_OS_HEADERS
@@ -550,7 +550,7 @@ Set(FOG_CORE_OS_HEADERS
   Fog/Core/OS/Library.h
   Fog/Core/OS/OSInfo.h
   Fog/Core/OS/OSUtil.h
-  Fog/Core/OS/UserInfo.h
+  Fog/Core/OS/UserUtil.h
 )
 
 If(FOG_OS_WINDOWS)
@@ -1652,9 +1652,8 @@ EndForEach()
 # =============================================================================
 
 # Write CMAKE_ #defines into Fog/Core/C++/ConfigCMake.h files
-Configure_File(
-  ${CMAKE_CURRENT_LIST_DIR}/Fog/Core/C++/ConfigCMake.h.cmake
-  ${CMAKE_CURRENT_LIST_DIR}/Fog/Core/C++/ConfigCMake.h)
+Configure_File(${CMAKE_CURRENT_LIST_DIR}/Fog/Core/C++/ConfigCMake.h.cmake
+               ${CMAKE_CURRENT_LIST_DIR}/Fog/Core/C++/ConfigCMake.h)
 
 # =============================================================================
 # [Setup - Fix]

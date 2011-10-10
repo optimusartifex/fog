@@ -916,6 +916,7 @@ MMapStreamDevice::~MMapStreamDevice()
 
 err_t MMapStreamDevice::map(const StringW& fileName, bool loadOnFail)
 {
+  // TODO: loadOnFail not used, merge with FILE_MAPPING_FLAG.
   err_t err = fileMapping.open(fileName, FILE_MAPPING_FLAG_LOAD_FALLBACK);
   if (FOG_IS_ERROR(err)) return err;
 

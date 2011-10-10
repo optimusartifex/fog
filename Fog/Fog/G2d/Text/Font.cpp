@@ -11,7 +11,6 @@
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/MemMgr.h>
-#include <Fog/Core/OS/UserInfo.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/Hash.h>
 #include <Fog/Core/Tools/String.h>

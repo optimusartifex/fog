@@ -11,11 +11,10 @@
 // [Dependencies]
 #include <Fog/Core/Kernel/Application.h>
 #include <Fog/Core/Memory/MemMgr.h>
-#include <Fog/Core/OS/FileMapping.h>
 #include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/OS/FileUtil.h>
 #include <Fog/Core/OS/OSUtil.h>
-#include <Fog/Core/OS/UserInfo.h>
+#include <Fog/Core/OS/UserUtil.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/StringUtil.h>
@@ -157,8 +156,8 @@ static uint32_t FileUtil_testStat(struct stat *s, uint32_t flags)
                 FILE_INFO_CAN_WRITE  |
                 FILE_INFO_CAN_EXECUTE)) != 0)
   {
-    uid_t uid = UserInfo::uid();
-    gid_t gid = UserInfo::gid();
+    uid_t uid = UserUtil::getUid();
+    gid_t gid = UserUtil::getGid();
 
     if (s->st_uid == uid && (s->st_mode & S_IRWXU))
     {

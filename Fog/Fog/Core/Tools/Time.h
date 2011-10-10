@@ -135,8 +135,36 @@ struct FOG_NO_EXPORT Time
   //! @brief Get whether the object has not been initialized.
   FOG_INLINE bool isNull() const { return _us == 0; }
 
+  // --------------------------------------------------------------------------
+  // [Conversion - time_t]
+  // --------------------------------------------------------------------------
+
   //! @brief Get time converted to @c time_t.
-  FOG_INLINE time_t getTimeT() const { return _api.time_toTimeT(_us); }
+  FOG_INLINE err_t toTimeT(time_t& dst) const
+  {
+    return _api.time_toTimeT(_us, &dst);
+  }
+
+  FOG_INLINE err_t fromTimeT(const time_t& src)
+  {
+    return _api.time_fromTimeT(&_us, &src);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Conversion - FILETIME]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_WINDOWS)
+  FOG_INLINE err_t toFILETIME(FILETIME& dst) const
+  {
+    return _api.time_toFILETIME(_us, &dst);
+  }
+
+  FOG_INLINE err_t fromFILETIME(const FILETIME& src)
+  {
+    return _api.time_fromFILETIME(&_us, &src);
+  }
+#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -179,12 +207,6 @@ struct FOG_NO_EXPORT Time
   static FOG_INLINE Time now()
   {
     return Time(_api.time_now());
-  }
-
-  //! @brief Create a @c Time from @c time_t (in seconds).
-  static FOG_INLINE Time fromTimeT(time_t t)
-  {
-    return Time(_api.time_fromTimeT(t));
   }
 
   // --------------------------------------------------------------------------

@@ -1072,7 +1072,6 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_SBW_8b(p32& dst0, const p32& x0, 
 
 static FOG_INLINE void p32RGB16_565_565_MulDiv_SBW_6b(p32& dst0, const p32& x0, const p32& u0_6b)
 {
-  // TODO: Unused variable
   uint32_t t0 = (x0 & 0x001F001FU);       // 0000000000011111 0000000000011111.
   uint32_t t1 = (x0 & 0x07E007E0U) >> 5;  // 0000011111100000 0000011111100000.
   uint32_t t2 = (x0 & 0xF800F800U) >> 6;  // 1111100000000000 1111100000000000.

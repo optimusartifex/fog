@@ -1467,10 +1467,10 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p64Load6a(pix0p, src);
-      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
       Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
@@ -1489,10 +1489,10 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p64Load6aBSwap(pix0p, src);
-      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
       Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
@@ -1530,10 +1530,10 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p64Load8a(pix0p, src);
-      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
       Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
@@ -1552,10 +1552,10 @@ struct FOG_NO_EXPORT Convert
       Face::p32 pix0b, pix0a;
 
       Face::p64Load8aBSwap(pix0p, src);
-      pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
       Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;

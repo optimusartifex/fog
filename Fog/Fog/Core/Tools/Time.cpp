@@ -38,11 +38,11 @@
 
 namespace Fog {
 
-// ============================================================================
-// [Fog::Time - Windows]
-// ============================================================================
-
 #if defined(FOG_OS_WINDOWS)
+
+// ============================================================================
+// [Fog::Time - Helpers (Windows)]
+// ============================================================================
 
 // FILETIME "Contains a 64-bit value representing the number of 100-nanosecond
 // intervals since January 1, 1601 (UTC).
@@ -51,20 +51,6 @@ union FILETIME_U64
   uint64_t u64;
   FILETIME ft;
 };
-
-static FOG_INLINE void Time_FILETIMEFromUS(FILETIME& ft, const int64_t& us)
-{
-  uint64_t ns100 = (uint64_t)(us * 10);
-
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  FILETIME_U64 u;
-  u.u64 = ns100;
-  ft = u.ft;
-#else
-  ft.dwHighDateTime = (uint32_t)(ns100 >> 32);
-  ft.dwLowDateTime  = (uint32_t)(ns100      );
-#endif // FOG_BYTE_ORDER
-}
 
 static FOG_INLINE void Time_USFromFILETIME(int64_t& us, const FILETIME& ft)
 {
@@ -93,6 +79,10 @@ static FOG_INLINE int64_t Time_getCurrentWallClock()
 
   return us;
 }
+
+// ============================================================================
+// [Fog::Time - Global (Windows)]
+// ============================================================================
 
 // Helper which uses winmm (Windows multimedia library) to get high-resolution
 // ticks-count. It handles rollover which happens each ~50 days.
@@ -203,6 +193,10 @@ struct FOG_NO_EXPORT Time_Global
 
 static Static<Time_Global> Time_global;
 
+// ============================================================================
+// [Fog::Time / Fog::TimeTicks - Now]
+// ============================================================================
+
 static int64_t FOG_CDECL Time_now()
 {
   AutoLock locked(Time_global->lock);
@@ -215,6 +209,10 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
   return Time_global->getTicks(ticksPrecision);
 }
 
+// ============================================================================
+// [Fog::Time - Conversion - time_t (Windows)]
+// ============================================================================
+
 // The internal representation of time_t under Windows uses FILETIME, which
 // epoch is 1601-01-01 00:00:00 UTC.
 //
@@ -223,43 +221,77 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
 // 1700, 1800, and 1900.
 static const int64_t TIME_T_OFFSET = FOG_INT64_C(11644473600000000);
 
-static int64_t FOG_CDECL Time_fromTimeT(time_t t)
+static err_t FOG_CDECL Time_fromTimeT(int64_t* us, const time_t* src)
 {
-  if (t != 0)
-    return (int64_t)t * TIME_US_PER_SECOND + TIME_T_OFFSET;
+  time_t t = *src;
+
+  if (t == 0)
+  {
+    *us = 0;
+    return ERR_OK;
+  }
+
+  if (t > INT64_MAX / TIME_US_PER_SECOND - TIME_T_OFFSET)
+  {
+    *us = 0;
+    return ERR_RT_OVERFLOW;
+  }
+
+  *us = (int64_t)t * TIME_US_PER_SECOND + TIME_T_OFFSET;
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Time_toTimeT(int64_t us, time_t* dst)
+{
+  if (us == 0)
+    *dst = 0;
   else
-    return 0;
+    *dst = (time_t)((us - TIME_T_OFFSET) / TIME_US_PER_SECOND);
+  return ERR_OK;
 }
 
-static time_t FOG_CDECL Time_toTimeT(int64_t us)
+// ============================================================================
+// [Fog::Time - Conversion - FILETIME]
+// ============================================================================
+
+static err_t FOG_CDECL Time_fromFILETIME(int64_t* us, const FILETIME* src)
 {
-  if (us != 0)
-    return (time_t)((us - TIME_T_OFFSET) / TIME_US_PER_SECOND);
-  else
-    return (time_t)0;
+  Time_USFromFILETIME(*us, *src);
+  return ERR_OK;
 }
 
-/*
-Time Time::fromFILETIME(FILETIME ft)
+static err_t FOG_CDECL Time_toFILETIME(int64_t us, FILETIME* dst)
 {
-  return Time(fileTimeToMicroseconds(ft));
-}
+  if ((uint64_t)us > UINT64_MAX / 10)
+  {
+    dst->dwLowDateTime = 0;
+    dst->dwHighDateTime = 0;
+    return ERR_RT_OVERFLOW;
+  }
 
-FILETIME Time::toFILETIME() const
-{
-  FILETIME utc_ft;
-  microsecondsToFileTime(_us, &utc_ft);
-  return utc_ft;
+  uint64_t ns100 = (uint64_t)us * 10;
+
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+  FILETIME_U64 u;
+  u.u64 = ns100;
+
+  dst->dwLowDateTime = u.ft.dwLowDateTime;
+  dst->dwHighDateTime = u.ft.dwHighDateTime;
+#else
+  dst->dwHighDateTime = (uint32_t)(ns100 >> 32);
+  dst->dwLowDateTime  = (uint32_t)(ns100      );
+#endif // FOG_BYTE_ORDER
+
+  return ERR_OK;
 }
-*/
 
 #endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_POSIX)
 
 // ============================================================================
 // [Fog::Time - Posix]
 // ============================================================================
-
-#if defined(FOG_OS_POSIX)
 
 static int64_t FOG_CDECL Time_now()
 {
@@ -267,10 +299,7 @@ static int64_t FOG_CDECL Time_now()
   struct timezone tz = { 0, 0 }; // UTC.
 
   if (gettimeofday(&tv, &tz) != 0)
-  {
-    // TODO: "gettimeofday() failed".
     return 0;
-  }
 
   // Combine to microseconds.
   return tv.tv_sec * TIME_US_PER_SECOND + tv.tv_usec;
@@ -303,10 +332,7 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
   struct timespec ts;
 
   if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
-  {
-    // TODO: "clock_gettime(CLOCK_MONOTONIC) failed."
     return 0;
-  }
 
   // Combine to microseconds.
   return (int64_t(ts.tv_sec ) * 1000000) +
@@ -316,22 +342,38 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
 #endif  // _POSIX_MONOTONIC_CLOCK
 }
 
-static int64_t FOG_CDECL Time_fromTimeT(time_t t)
+// ============================================================================
+// [Fog::Time - Conversion - time_t]
+// ============================================================================
+
+static err_t FOG_CDECL Time_fromTimeT(int64_t* us, const time_t* src)
 {
-  if (t != 0)
-    return (int64_t)t * TIME_US_PER_SECOND;
-  else
-    return 0;
+  time_t t = *src;
+
+  if (t == 0)
+  {
+    *us = 0;
+    return ERR_OK;
+  }
+
+  if (t > INT64_MAX / TIME_US_PER_SECOND)
+  {
+    *us = 0;
+    return ERR_RT_OVERFLOW;
+  }
+
+  *us = (int64_t)t * TIME_US_PER_SECOND;
+  return ERR_OK;
 }
 
-static time_t FOG_CDECL Time_toTimeT(int64_t us)
+static err_t FOG_CDECL Time_toTimeT(int64_t us, time_t* dst)
 {
-  if (us != 0)
-    return (time_t)(us / TIME_US_PER_SECOND);
+  if (us == 0)
+    *dst = 0;
   else
-    return (time_t)0;
+    *dst = (time_t)(us / TIME_US_PER_SECOND);
+  return ERR_OK;
 }
-
 #endif // FOG_OS_POSIX
 
 // ============================================================================
@@ -341,13 +383,15 @@ static time_t FOG_CDECL Time_toTimeT(int64_t us)
 FOG_NO_EXPORT void Time_init(void)
 {
   _api.time_now = Time_now;
+  _api.timeticks_now = TimeTicks_now;
+
   _api.time_fromTimeT = Time_fromTimeT;
   _api.time_toTimeT = Time_toTimeT;
 
-  _api.timeticks_now = TimeTicks_now;
-
 #if defined(FOG_OS_WINDOWS)
   Time_global.init();
+  _api.time_fromFILETIME = Time_fromFILETIME;
+  _api.time_toFILETIME = Time_toFILETIME;
 #endif // FOG_OS_WINDOWS
 }
 

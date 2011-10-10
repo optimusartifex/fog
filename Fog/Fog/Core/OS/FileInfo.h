@@ -11,6 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/Core/Tools/Time.h>
 
 #if defined(FOG_OS_POSIX)
 # include <sys/stat.h>
@@ -61,6 +62,20 @@ struct FOG_NO_EXPORT FileInfoData
 
   //! @brief File size.
   uint64_t size;
+
+  //! @brief The time when the file was created.
+  //!
+  //! @note Can be zero if filesystem doesn't support such attribute.
+  Time creationTime;
+
+  //! @brief The last time when the file was modified.
+  Time modifiedTime;
+
+  //! @brief The last time when the file was accessed.
+  //!
+  //! @note Can be zero due to performance reasons. Access time is often turned
+  //! off.
+  Time accessTime;
 };
 
 // ============================================================================
@@ -117,8 +132,9 @@ struct FOG_NO_EXPORT FileInfo
 
   FOG_INLINE const StringW& getFileName() const { return _d->fileName; }
   FOG_INLINE uint32_t getFileFlags() const { return _d->fileFlags; }
-
-  FOG_INLINE size_t getSize() const { return _d->size; }
+  FOG_INLINE uint64_t getSize() const { return _d->size; }
+  FOG_INLINE Time getCreationTime() const { return _d->creationTime; }
+  FOG_INLINE Time getModifiedTime() const { return _d->modifiedTime; }
 
   // --------------------------------------------------------------------------
   // [Read]

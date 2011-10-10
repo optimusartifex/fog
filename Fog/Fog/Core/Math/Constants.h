@@ -211,9 +211,6 @@ struct MathConstant<float>
 
   //! @brief Get coinciding points maximal distance (float).
   static FOG_INLINE float getDistanceEpsilon() { return 1.0e-6f; }
-
-  //! @brief Get epsilon used to prevent from adding degenerate curves (float).
-  static FOG_INLINE float getAngleEpsilon() { return MATH_EPSILON_F; }
 };
 
 template<>
@@ -232,10 +229,6 @@ struct MathConstant<double>
 
   //! @brief Get coinciding points maximal distance (double).
   static FOG_INLINE double getDistanceEpsilon() { return 1.0e-14; }
-
-  //! TODO: DEPRECATED, remove getAngleEpsilon.
-  //! @brief Get epsilon used to prevent from adding degenerate curves (double).
-  static FOG_INLINE double getAngleEpsilon() { return MATH_EPSILON_D; }
 };
 
 //! @}

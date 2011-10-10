@@ -1285,8 +1285,14 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
   FOG_CAPI_STATIC(int64_t, time_now)(void);
-  FOG_CAPI_STATIC(time_t, time_toTimeT)(int64_t us);
-  FOG_CAPI_STATIC(int64_t, time_fromTimeT)(time_t t);
+
+  FOG_CAPI_STATIC(err_t, time_fromTimeT)(int64_t* us, const time_t* src);
+  FOG_CAPI_STATIC(err_t, time_toTimeT)(int64_t us, time_t* dst);
+
+#if defined(FOG_OS_WINDOWS)
+  FOG_CAPI_STATIC(err_t, time_fromFILETIME)(int64_t* us, const FILETIME* src);
+  FOG_CAPI_STATIC(err_t, time_toFILETIME)(int64_t us, FILETIME* dst);
+#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Core/Tools - TimeTicks]

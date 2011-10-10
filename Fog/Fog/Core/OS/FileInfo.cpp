@@ -69,7 +69,11 @@ static err_t FOG_CDECL FileInfo_detach(FileInfo* self)
     return ERR_RT_OUT_OF_MEMORY;
 
   newd->fileFlags = d->fileFlags;
+  newd->filePath = d->filePath;
   newd->size = d->size;
+  newd->creationTime = d->creationTime;
+  newd->modifiedTime = d->modifiedTime;
+  newd->accessTime = d->accessTime;
 
   atomicPtrXchg(&self->_d, newd)->release();
   return ERR_OK;
@@ -220,6 +224,11 @@ static err_t FOG_CDECL FileInfo_fromWinFileAttributeData(FileInfo* self, const S
   FOG_RETURN_ON_ERROR(d->filePath->set(*filePath));
   FOG_RETURN_ON_ERROR(d->fileName->set(*fileName));
 
+  // Not fatal if these fails, they shouldn't in fact.
+  d->creationTime.fromFILETIME(wfad->ftCreationTime);
+  d->modifiedTime.fromFILETIME(wfad->ftLastWriteTime);
+  d->accessTime.fromFILETIME(wfad->ftLastAccessTime);
+
   FileInfo_fromWinFileAttributeDataPrivate(d, wfad);
   return ERR_OK;
 }
@@ -236,6 +245,11 @@ static err_t FOG_CDECL FileInfo_fromWinFindData(FileInfo* self, const StringW* f
 
   FOG_RETURN_ON_ERROR(d->filePath->set(*filePath));
   FOG_RETURN_ON_ERROR(d->fileName->setWChar(wfd->cFileName));
+
+  // Not fatal if these fails, they shouldn't in fact.
+  d->creationTime.fromFILETIME(wfd->ftCreationTime);
+  d->modifiedTime.fromFILETIME(wfd->ftLastWriteTime);
+  d->accessTime.fromFILETIME(wfd->ftLastAccessTime);
 
   return ERR_OK;
 }
@@ -303,6 +317,10 @@ static err_t FOG_CDECL FileInfo_fromStat(FileInfo* self, const StringW* filePath
 
   if (flags & FILE_INFO_REGULAR_FILE)
     d->size = (uint64_t)s->st_size;
+
+  d->creationTime.reset();
+  d->modifiedTime.fromTimeT(s->st_mtime);
+  d->accessTime.fromTimeT(s->st_atime);
 }
 #endif // FOG_OS_POSIX
 

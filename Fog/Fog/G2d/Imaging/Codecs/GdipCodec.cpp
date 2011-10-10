@@ -303,7 +303,8 @@ err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) con
   FOG_ASSERT(codec != NULL);
 
   GdipLibrary* gdip = GdipLibrary::get();
-  if (FOG_IS_NULL(gdip)) return ERR_IMAGE_GDIPLUS_NOT_LOADED;
+  if (FOG_IS_NULL(gdip))
+    return ERR_IMAGE_GDIPLUS_NOT_LOADED;
 
   ImageCodec* c = NULL;
   switch (codecType)
@@ -318,9 +319,10 @@ err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) con
       return ERR_RT_INVALID_ARGUMENT;
   }
 
-  if (FOG_IS_NULL(c)) return ERR_RT_OUT_OF_MEMORY;
-  *codec = c;
+  if (FOG_IS_NULL(c))
+    return ERR_RT_OUT_OF_MEMORY;
 
+  *codec = c;
   return ERR_OK;
 }
 
@@ -489,7 +491,9 @@ err_t GdipDecoder::setProperty(const ManagedString& name, const Var& src)
 // ===========================================================================
 
 GdipEncoder::GdipEncoder(ImageCodecProvider* provider) :
-  ImageEncoder(provider)
+  ImageEncoder(provider),
+  _istream(NULL),
+  _gdip(GdipLibrary::get())
 {
   _GdipCodec_clearCommonParams(&_params, _streamType);
 }

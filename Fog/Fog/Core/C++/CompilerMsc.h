@@ -51,7 +51,7 @@
 #endif
 
 // 32-bit x86 calling conventions.
-#ifdef FOG_ARCH_X86
+#if defined(FOG_ARCH_X86)
 # define FOG_FASTCALL __fastcall
 # define FOG_STDCALL __stdcall
 # define FOG_CDECL __cdecl

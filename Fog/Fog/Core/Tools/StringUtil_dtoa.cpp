@@ -2055,7 +2055,7 @@ static BInt* BContext_s2b(BContext* context, const CharT* s, int nd0, int nd, ui
 }
 
 template<typename CharT>
-static FOG_CDECL err_t StringUtil_parseDouble(double* dst, const CharT* str, size_t length, CharT_Type decimalPoint, size_t* pEnd, uint32_t* pFlags)
+static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, size_t length, CharT_Type decimalPoint, size_t* pEnd, uint32_t* pFlags)
 {
   BContext context;
 

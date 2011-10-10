@@ -10,6 +10,10 @@
 #error "Fog::Core::C++ - Compiler.h can be only included by Fog/Core/C++/Base.h"
 #endif // _FOG_CORE_CPP_BASE_H
 
+// [Dependencies]
+#include <Fog/Core/C++/StdArch.h>
+#include <Fog/Core/C++/StdOS.h>
+
 // ============================================================================
 // [Fog::Core::Config - C++ Compiler]
 // ============================================================================

@@ -1412,7 +1412,7 @@ static const StringUtil_ATOBMap StringUtil_parseBoolMap[] =
 #include <Fog/Core/C++/PackRestore.h>
 
 template<typename CharT>
-static FOG_CDECL err_t StringUtil_parseBool(bool* dst, const CharT* src, size_t length, size_t* pEnd, uint32_t* pFlags)
+static err_t FOG_CDECL StringUtil_parseBool(bool* dst, const CharT* src, size_t length, size_t* pEnd, uint32_t* pFlags)
 {
   err_t err = ERR_STRING_INVALID_INPUT;
 

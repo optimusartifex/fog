@@ -456,9 +456,9 @@ struct FOG_NO_EXPORT PathF
 
   //! @brief Get range of subpath at index @a index (range is from the @a index
   //! to next 'move-to' command or to the end of the path).
-  FOG_INLINE Range getSubpathRange(size_t index) const
+  FOG_INLINE err_t getSubpathRange(Range& dst, size_t index) const
   {
-    return _api.pathf_getSubpathRange(this, index);
+    return _api.pathf_getSubpathRange(this, &dst, index);
   }
 
   // --------------------------------------------------------------------------
@@ -1298,9 +1298,9 @@ struct FOG_NO_EXPORT PathD
 
   //! @brief Get range of subpath at index @a index (range is from the @a index
   //! to next 'move-to' command or to the end of the path).
-  FOG_INLINE Range getSubpathRange(size_t index) const
+  FOG_INLINE err_t getSubpathRange(Range& dst, size_t index) const
   {
-    return _api.pathd_getSubpathRange(this, index);
+    return _api.pathd_getSubpathRange(this, &dst, index);
   }
 
   // --------------------------------------------------------------------------

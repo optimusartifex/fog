@@ -313,6 +313,21 @@ void Widget::updateClientGeometry()
   }
 }
 
+RectI Widget::getClientContentGeometry() const
+{
+  RectI ret = _clientGeometry;
+
+  if (ret.getWidth() == 0 && ret.getHeight() == 0)
+    return RectI(0, 0, 0, 0);
+
+  ret.setLeft(getContentLeftMargin());
+  ret.setTop(getContentTopMargin());
+  ret.setWidth(_clientGeometry.getWidth() - getContentRightMargin());
+  ret.setHeight(_clientGeometry.getHeight() - getContentBottomMargin());
+
+  return ret;
+}
+
 // ============================================================================
 // [Fog::Widget - Client Origin]
 // ============================================================================
@@ -857,6 +872,30 @@ void Widget::setMaximumSize(const SizeI& maxSize)
   }
 
   // TODO: Write EventListener for GuiWindow to allow/disallow min/max
+}
+
+void Widget::setMinimumHeight(int height)
+{
+  int width = hasMinimumHeight()? _extra->_minwidth : -1;
+  setMinimumSize(SizeI(width,height));
+}
+
+void Widget::setMinimumWidth(int width)
+{
+  int height = hasMinimumHeight()? _extra->_maxheight : -1;
+  setMinimumSize(SizeI(width,height));
+}
+
+void Widget::setMaximumHeight(int height)
+{
+  int width = hasMaximumHeight()? _extra->_minwidth : -1;
+  setMaximumSize(SizeI(width,height));
+}
+
+void Widget::setMaximumWidth(int width)
+{
+  int height = hasMaximumHeight()? _extra->_maxheight : -1;
+  setMaximumSize(SizeI(width,height));
 }
 
 // ============================================================================

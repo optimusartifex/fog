@@ -22,6 +22,16 @@ namespace Fog {
 
 static Atomic<uint32_t> uid_val = FOG_ATOMIC_SET(EVENT_UID);
 
+Event::Event(uint32_t code, uint32_t flags)
+{
+  _code = code;
+  _flags = flags;
+  _receiver = NULL;
+  _prev = NULL;
+  _next = NULL;
+  _wasDeleted = 0;
+}
+
 void Event::run()
 {
   if (!wasDeleted())

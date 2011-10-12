@@ -221,7 +221,7 @@ static err_t FOG_CDECL Library_openPlugin(Library* self, const StringW* category
     }
     else
     {
-      libOpenError = ERR_IO_FILE_NOT_EXISTS;
+      libOpenError = ERR_FILE_NOT_FOUND;
     }
   }
 

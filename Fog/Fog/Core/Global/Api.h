@@ -278,6 +278,9 @@ struct FOG_NO_EXPORT Api
   // [Core/OS - OSUtil]
   // --------------------------------------------------------------------------
 
+  FOG_CAPI_STATIC(err_t, osutil_getErrFromLibCErrorCode)(int code);
+  FOG_CAPI_STATIC(err_t, osutil_getErrFromLibCErrno)(void);
+
   FOG_CAPI_STATIC(err_t, osutil_getErrFromOSErrorCode)(int code);
   FOG_CAPI_STATIC(err_t, osutil_getErrFromOSLastError)(void);
 
@@ -1450,7 +1453,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, pathf_setDeepF)(PathF* self, const PathF* other);
   FOG_CAPI_METHOD(err_t, pathf_getLastVertex)(const PathF* self, PointF* dst);
   FOG_CAPI_METHOD(err_t, pathf_setVertex)(PathF* self, size_t index, const PointF* pt);
-  FOG_CAPI_METHOD(Range, pathf_getSubpathRange)(const PathF* self, size_t index);
+  FOG_CAPI_METHOD(err_t, pathf_getSubpathRange)(const PathF* self, Range* dst, size_t index);
   FOG_CAPI_METHOD(err_t, pathf_moveTo)(PathF* self, const PointF* pt0);
   FOG_CAPI_METHOD(err_t, pathf_moveToRel)(PathF* self, const PointF* pt0);
   FOG_CAPI_METHOD(err_t, pathf_lineTo)(PathF* self, const PointF* pt0);
@@ -1531,7 +1534,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, pathd_setDeepD)(PathD* self, const PathD* other);
   FOG_CAPI_METHOD(err_t, pathd_getLastVertex)(const PathD* self, PointD* dst);
   FOG_CAPI_METHOD(err_t, pathd_setVertex)(PathD* self, size_t index, const PointD* pt);
-  FOG_CAPI_METHOD(Range, pathd_getSubpathRange)(const PathD* self, size_t index);
+  FOG_CAPI_METHOD(err_t, pathd_getSubpathRange)(const PathD* self, Range* dst, size_t index);
   FOG_CAPI_METHOD(err_t, pathd_moveTo)(PathD* self, const PointD* pt0);
   FOG_CAPI_METHOD(err_t, pathd_moveToRel)(PathD* self, const PointD* pt0);
   FOG_CAPI_METHOD(err_t, pathd_lineTo)(PathD* self, const PointD* pt0);
@@ -1719,7 +1722,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, transformf_create)(TransformF* self, uint32_t createType, const void* params);
   FOG_CAPI_METHOD(uint32_t, transformf_update)(const TransformF* self);
   FOG_CAPI_METHOD(err_t, transformf_transform)(TransformF* self, uint32_t transformOp, const void* params);
-  FOG_CAPI_METHOD(TransformF, transformf_transformed)(const TransformF* self, uint32_t transformOp, const void* params);
+  FOG_CAPI_STATIC(err_t, transformf_transform2)(TransformF* dst, const TransformF* src, uint32_t transformOp, const void* params);
   FOG_CAPI_METHOD(void, transformf_multiply)(TransformF* self, const TransformF* a, const TransformF* b);
   FOG_CAPI_METHOD(bool, transformf_invert)(TransformF* self, const TransformF* a);
   FOG_CAPI_METHOD(void, transformf_mapPointF)(const TransformF* self, PointF* dst, const PointF* src);
@@ -1731,7 +1734,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, transformf_mapPathDataF)(const TransformF* self, PathF* dst, const uint8_t* srcCmd, const PointF* srcPts, size_t length, uint32_t cntOp);
   FOG_CAPI_METHOD(void, transformf_mapBoxF)(const TransformF* self, BoxF* dst, const BoxF* src);
   FOG_CAPI_METHOD(void, transformf_mapVectorF)(const TransformF* self, PointF* dst, const PointF* src);
-  FOG_CAPI_METHOD(PointF, transformf_getScaling)(const TransformF* self, bool absolute);
+  FOG_CAPI_METHOD(err_t, transformf_getScaling)(const TransformF* self, PointF* dst, bool absolute);
   FOG_CAPI_METHOD(float, transformf_getRotation)(const TransformF* self);
   FOG_CAPI_METHOD(float, transformf_getAverageScaling)(const TransformF* self);
 
@@ -1744,7 +1747,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, transformd_create)(TransformD* self, uint32_t createType, const void* params);
   FOG_CAPI_METHOD(uint32_t, transformd_update)(const TransformD* self);
   FOG_CAPI_METHOD(err_t, transformd_transform)(TransformD* self, uint32_t transformOp, const void* params);
-  FOG_CAPI_METHOD(TransformD, transformd_transformed)(const TransformD* self, uint32_t transformOp, const void* params);
+  FOG_CAPI_STATIC(err_t, transformd_transform2)(TransformD* dst, const TransformD* src, uint32_t transformOp, const void* params);
   FOG_CAPI_METHOD(void, transformd_multiply)(TransformD* self, const TransformD* a, const TransformD* b);
   FOG_CAPI_METHOD(bool, transformd_invert)(TransformD* self, const TransformD* a);
   FOG_CAPI_METHOD(void, transformd_mapPointD)(const TransformD* self, PointD* dst, const PointD* src);
@@ -1761,7 +1764,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, transformd_mapPathDataD)(const TransformD* self, PathD* dst, const uint8_t* srcCmd, const PointD* srcPts, size_t length, uint32_t cntOp);
   FOG_CAPI_METHOD(void, transformd_mapBoxD)(const TransformD* self, BoxD* dst, const BoxD* src);
   FOG_CAPI_METHOD(void, transformd_mapVectorD)(const TransformD* self, PointD* dst, const PointD* src);
-  FOG_CAPI_METHOD(PointD, transformd_getScaling)(const TransformD* self, bool absolute);
+  FOG_CAPI_METHOD(err_t, transformd_getScaling)(const TransformD* self, PointD* dst, bool absolute);
   FOG_CAPI_METHOD(double, transformd_getRotation)(const TransformD* self);
   FOG_CAPI_METHOD(double, transformd_getAverageScaling)(const TransformD* self);
 

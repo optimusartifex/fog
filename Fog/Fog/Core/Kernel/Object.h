@@ -195,7 +195,7 @@ public: \
 #define FOG_EVENT_BEGIN() \
   virtual FOG_NO_INLINE void onEvent(::Fog::Event* e) \
   { \
-    switch (e->getCode()) \
+    switch (e->_code) \
     {
 
 //! @brief Add event into event handled declared by

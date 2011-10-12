@@ -50,10 +50,10 @@ enum ERR_ENUM
 
   //! @brief Failed to create a process.
   ERR_RT_OUT_OF_PROCESSES,
-
   //! @brief Failed to create a thread (or to get thread from a @c Fog::ThreadPool).
   ERR_RT_OUT_OF_THREADS,
-
+  //! @brief Failed to create a lock.
+  ERR_RT_OUT_OF_LOCKS,
   //! @brief Failed to create a semaphore.
   ERR_RT_OUT_OF_SEMAPHORES,
 
@@ -81,26 +81,37 @@ enum ERR_ENUM
   //! should fix your code.
   ERR_RT_INVALID_ARGUMENT,
 
-  //! @brief Invalid context means that member method you called can't do the
-  //! job, because instance state not allows it to do it.
-  ERR_RT_INVALID_OBJECT,
+  //! @brief Invalid handle or file descriptor (shouldn't happen).
+  ERR_RT_INVALID_HANDLE,
 
   //! @brief Invalid state.
+  //!
+  //! This is generic error which is returned if some object is accessed 
+  //! improperly. Fog contains objects that wraps others (for example @ref
+  //! Pattern). If the method to retrieve the current state of the instance
+  //! is used improperly (for example getting a color, but the object is a
+  //! linear gradient) then the @c ERR_RT_INVALID_STATE is returned.
   ERR_RT_INVALID_STATE,
 
-  //! @brief Overflow in integer or floating point arithmetic.
-  ERR_RT_OVERFLOW,
-
+  //! @brief Operation not permitted.
+  ERR_RT_NOT_PERMITTED,
+  //! @brief Access denied.
   ERR_RT_ACCESS_DENIED,
 
+  //! @brief Resource or device is busy.
   ERR_RT_BUSY,
+  //! @brief Resource or synchronization deadlock.
+  ERR_RT_DEADLOCK,
 
-  ERR_RT_INVALID_HANDLE,
   ERR_RT_OBJECT_NOT_FOUND,
   ERR_RT_OBJECT_ALREADY_EXISTS,
 
-  ERR_RT_NOT_COMPATIBLE,
+  //! @brief Object value cannot be converted to a finite number (@ref Var).
   ERR_RT_NOT_A_NUMBER,
+  //! @brief Objects (@ref Var) are not compatible.
+  ERR_RT_NOT_COMPATIBLE,
+  //! @brief Overflow in integer or floating point arithmetic.
+  ERR_RT_OVERFLOW,
 
   // --------------------------------------------------------------------------
   // [Core/Kernel]
@@ -127,45 +138,42 @@ enum ERR_ENUM
   ERR_OBJECT_READ_ONLY_PROPERTY,
 
   // --------------------------------------------------------------------------
-  // [Core/OS]
+  // [Core/OS - Environment]
   // --------------------------------------------------------------------------
 
   ERR_ENVIRONMENT_NOT_FOUND,
 
-  // TODO: What is difference between ERR_IO_TOO_BIG and ERR_IO_FILE_TOO_BIG.
+  // --------------------------------------------------------------------------
+  // [Core/OS - IO]
+  // --------------------------------------------------------------------------
 
-  ERR_IO_DEVICE_FAILURE,
-  ERR_IO_DEVICE_FRAGMENTED,
-  ERR_IO_DEVICE_NOT_READY,
-  ERR_IO_DEVICE_MISMATCH,
-  ERR_IO_DEVICE_LOCKED,
-  ERR_IO_DEVICE_FULL,
-  ERR_IO_DEVICE_NOT_ATOMIC,
+  ERR_NOT_A_BLOCK_DEVICE,
+  ERR_DEVICE_NOT_FOUND,
+  ERR_DEVICE_NOT_READY,
+  ERR_DEVICE_READ_ONLY,
+  ERR_DEVICE_FULL,
+  ERR_DEVICE_FAILURE,
+  ERR_DEVICE_MISMATCH,
+  ERR_DEVICE_LOCKED,
+  ERR_DEVICE_NOT_ATOMIC,
+  ERR_DEVICE_FRAGMENTED,
 
-  ERR_IO_TOO_BIG,
-  ERR_IO_INVALID_NAME,
+  ERR_NOT_A_DIRECTORY,
+  ERR_DIRECTORY_IN_USE,
+  ERR_DIRECTORY_NOT_ROOT,
+  ERR_DIRECTORY_NOT_EMPTY,
 
-  ERR_IO_PATH_NOT_FOUND,
-  ERR_IO_PATH_BAD_SYNTAX,
-  ERR_IO_PATH_BUSY,
+  ERR_NOT_A_FILE,
+  ERR_FILE_NOT_FOUND,
+  ERR_FILE_IS_EMPTY,
+  ERR_FILE_LOCKED,
+  ERR_FILE_END,
+  ERR_FILE_TOO_LARGE,
 
-  ERR_IO_NOT_A_DIRECTORY,
-  ERR_IO_DIRECTORY_EXISTS,
-  ERR_IO_DIRECTORY_IN_USE,
-  ERR_IO_DIRECTORY_NOT_ROOT,
-  ERR_IO_DIRECTORY_NOT_EMPTY,
-
-  ERR_IO_NOT_A_FILE,
-  ERR_IO_FILE_EXISTS,
-  ERR_IO_FILE_IS_EMPTY,
-  ERR_IO_FILE_TOO_BIG,
-  ERR_IO_FILE_NOT_EXISTS,
-  ERR_IO_FILE_NOT_FOUND,
-  ERR_IO_FILE_TOO_MANY_OPEN,
-  ERR_IO_FILE_LOCKED,
-  ERR_IO_FILE_END,
-
-  ERR_IO_READ_ONLY,
+  ERR_PATH_EXISTS,
+  ERR_PATH_NAME_INVALID,
+  ERR_PATH_NOT_FOUND,
+  ERR_PATH_BAD_SYNTAX,
 
   ERR_IO_CANT_CREATE,
   ERR_IO_CANT_OPEN,
@@ -175,21 +183,24 @@ enum ERR_ENUM
   ERR_IO_CANT_RESIZE,
   ERR_IO_CANT_TRUNCATE,
 
-  ERR_IO_PIPE_BUSY,
-  ERR_IO_PIPE_EMPTY,
-  ERR_IO_PIPE_LOCAL,
-  ERR_IO_PIPE_DISCONNECTED,
-  ERR_IO_PIPE_END,
-  ERR_IO_PIPE_INVALID,
+  ERR_SEEK_OUT_OF_RANGE,
+  ERR_NON_SEEKABLE,
+  ERR_INVALID_IOCTL,
+
+  ERR_TOO_MANY_FILES,
+  ERR_TOO_MANY_LINKS,
+
+  ERR_PIPE_BUSY,
+  ERR_PIPE_EMPTY,
+  ERR_PIPE_LOCAL,
+  ERR_PIPE_DISCONNECTED,
+  ERR_PIPE_END,
+  ERR_PIPE_INVALID,
+
+  ERR_NOT_AN_EXECUTABLE,
 
   // --------------------------------------------------------------------------
-  // [Core/Locale]
-  // --------------------------------------------------------------------------
-
-  ERR_LOCALE_NOT_MATCHED,
-
-  // --------------------------------------------------------------------------
-  // [Core/Library]
+  // [Core/OS - Library]
   // --------------------------------------------------------------------------
 
   ERR_LIBRARY_LOAD_FAILED,
@@ -197,13 +208,33 @@ enum ERR_ENUM
   ERR_LIBRARY_NO_SYMBOL,
 
   // --------------------------------------------------------------------------
-  // [Core/Environment]
+  // [Core/OS - Process]
   // --------------------------------------------------------------------------
 
-  ERR_ENVIRONMENT_VARIABLE_NOT_FOUND,
+  ERR_PROCESS_NOT_FOUND,
+  ERR_PROCESS_ARGUMENTS_TOO_LONG,
+  ERR_NO_CHILD_PROCESS,
 
   // --------------------------------------------------------------------------
-  // [Core/Text]
+  // [Core/OS - UserUtil]
+  // --------------------------------------------------------------------------
+
+  ERR_USER_NO_DIRECTORY,
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Date]
+  // --------------------------------------------------------------------------
+
+  ERR_DATE_INVALID,
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - Locale]
+  // --------------------------------------------------------------------------
+
+  ERR_LOCALE_NOT_FOUND,
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - String]
   // --------------------------------------------------------------------------
 
   //! @brief Invalid text input (converting strings to numbers).
@@ -235,27 +266,14 @@ enum ERR_ENUM
   //! This can only happen when converting unicode to non-unicode encoding.
   ERR_STRING_LOST,
 
-
   // --------------------------------------------------------------------------
-  // [Core/Thread]
+  // [Core/Threading - ThreadLocal]
   // --------------------------------------------------------------------------
 
   //! @brien Invalid TLS index catched by @c ThreadLocal.
   ERR_THREAD_TLS_INVALID,
   //! @brief TLS indices exhausted.
   ERR_THREAD_TLS_EXHAUSTED,
-
-  // --------------------------------------------------------------------------
-  // [Core/Tools]
-  // --------------------------------------------------------------------------
-
-  ERR_DATE_INVALID,
-
-  // --------------------------------------------------------------------------
-  // [Core/User]
-  // --------------------------------------------------------------------------
-
-  ERR_USER_NO_DIRECTORY,
 
   // --------------------------------------------------------------------------
   // [Core/Xml]

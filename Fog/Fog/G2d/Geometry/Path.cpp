@@ -514,10 +514,15 @@ static err_t FOG_CDECL PathT_setVertex(NumT_(Path)* self, size_t index, const Nu
 // ============================================================================
 
 template<typename NumT>
-static Range FOG_CDECL PathT_getSubpathRange(const NumT_(Path)* self, size_t index)
+static err_t FOG_CDECL PathT_getSubpathRange(const NumT_(Path)* self, Range* dst, size_t index)
 {
   size_t length = self->_d->length;
-  if (index >= length) return Range(INVALID_INDEX, INVALID_INDEX);
+
+  if (index >= length)
+  {
+    dst->setRange(INVALID_INDEX, INVALID_INDEX);
+    return ERR_RT_INVALID_ARGUMENT;
+  }
 
   size_t i = index + 1;
   const uint8_t* commands = self->_d->commands;
@@ -525,12 +530,16 @@ static Range FOG_CDECL PathT_getSubpathRange(const NumT_(Path)* self, size_t ind
   while (i < length)
   {
     uint8_t c = commands[i];
-    if (PathCmd::isMoveTo(c)) break;
-    if (PathCmd::isClose(c)) { i++; break; }
+    if (PathCmd::isMoveTo(c))
+      break;
+
     i++;
+    if (PathCmd::isClose(c))
+      break;
   }
 
-  return Range(index, i);
+  dst->setRange(index, i);
+  return ERR_OK;
 }
 
 // ============================================================================

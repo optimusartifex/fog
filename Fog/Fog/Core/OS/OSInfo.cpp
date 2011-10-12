@@ -9,12 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-#include <Fog/Core/OS/WinUtil.h>
+# include <Fog/Core/OS/WinUtil.h>
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies - Posix]
@@ -64,7 +65,7 @@ static err_t FOG_CDECL OSInfo_getName(StringW* dst)
   if (uname(&info) < 0)
   {
     dst->clear();
-    return ERR_UNKNOWN;
+    return OSUtil::getErrFromLibCErrno();
   }
 
   return dst->format("%s %s", info.sysname, info.release);

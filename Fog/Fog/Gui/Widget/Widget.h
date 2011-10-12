@@ -246,21 +246,7 @@ struct FOG_API Widget : public LayoutItem
   //! sending geometry event and scheduling repaint.
   void updateClientGeometry();
 
-  // WIDGET TODO: Move to .cpp
-  FOG_INLINE RectI getClientContentGeometry() const
-  {
-    RectI ret = _clientGeometry;
-
-    if (ret.getWidth() == 0 && ret.getHeight() == 0)
-      return RectI(0, 0, 0, 0);
-
-    ret.setLeft(getContentLeftMargin());
-    ret.setTop(getContentTopMargin());
-    ret.setWidth(_clientGeometry.getWidth() - getContentRightMargin());
-    ret.setHeight(_clientGeometry.getHeight() - getContentBottomMargin());
-
-    return ret;
-  }
+  RectI getClientContentGeometry() const;
 
   // --------------------------------------------------------------------------
   // [Client Origin]
@@ -364,27 +350,10 @@ struct FOG_API Widget : public LayoutItem
   void setMinimumSize(const SizeI& minSize);
   void setMaximumSize(const SizeI& minSize);
 
-  // WIDGET TODO: Move to .cpp
-  FOG_INLINE void setMinimumHeight(int height)
-  {
-    int width = hasMinimumHeight()? _extra->_minwidth : -1;
-    setMinimumSize(SizeI(width,height));
-  }
-  FOG_INLINE void setMinimumWidth(int width)
-  {
-    int height = hasMinimumHeight()? _extra->_maxheight : -1;
-    setMinimumSize(SizeI(width,height));
-  }
-  FOG_INLINE void setMaximumHeight(int height)
-  {
-    int width = hasMaximumHeight()? _extra->_minwidth : -1;
-    setMaximumSize(SizeI(width,height));
-  }
-  void setMaximumWidth(int width)
-  {
-    int height = hasMaximumHeight()? _extra->_maxheight : -1;
-    setMaximumSize(SizeI(width,height));
-  }
+  void setMinimumHeight(int height);
+  void setMinimumWidth(int width);
+  void setMaximumHeight(int height);
+  void setMaximumWidth(int width);
 
   FOG_INLINE bool hasMinimumHeight() const { return _minset & MIN_HEIGHT_IS_SET; }
   FOG_INLINE bool hasMaximumHeight() const { return _maxset & MAX_HEIGHT_IS_SET; }

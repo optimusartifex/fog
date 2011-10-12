@@ -2653,12 +2653,11 @@ _MultiplyAppend:
 }
 
 template<typename NumT>
-static NumT_(Transform) FOG_CDECL TransformT_transformed(const NumT_(Transform)* self,
-  uint32_t opType, const void* params)
+static err_t FOG_CDECL TransformT_transform2(NumT_(Transform)* dst,
+  const NumT_(Transform)* src, uint32_t opType, const void* params)
 {
-  NumT_(Transform) result(*self);
-  result._transform(opType, params);
-  return result;
+  *dst = *src;
+  return dst->_transform(opType, params);
 }
 
 // ============================================================================
@@ -3590,27 +3589,26 @@ static void FOG_CDECL TransformT_mapVectorT(const NumT_(Transform)* self,
 // sx, sy.
 
 template<typename NumT>
-static NumT_(Point) FOG_CDECL TransformT_getScaling(const NumT_(Transform)* self,
-  bool absolute)
+static err_t FOG_CDECL TransformT_getScaling(const NumT_(Transform)* self,
+  NumT_(Point)* dst, bool absolute)
 {
-  NumT_(Point) result;
-
   if (absolute)
   {
     // Absolute scaling.
-    result.x = Math::sqrt(self->_00 * self->_00 + self->_10 * self->_10);
-    result.y = Math::sqrt(self->_01 * self->_01 + self->_11 * self->_11);
+    dst->x = Math::sqrt(self->_00 * self->_00 + self->_10 * self->_10);
+    dst->y = Math::sqrt(self->_01 * self->_01 + self->_11 * self->_11);
   }
   else
   {
     // Average scaling.
     NumT_(Transform) t(self->rotated(-self->getRotation(), MATRIX_ORDER_APPEND));
 
-    result.set(NumT(1.0), NumT(1.0));
-    t.mapVector(result);
+    dst->x = NumT(1.0);
+    dst->y = NumT(1.0);
+    t.mapVector(*dst);
   }
 
-  return result;
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -3654,7 +3652,7 @@ FOG_NO_EXPORT void Transform_init(void)
   _api.transformf_create = TransformT_create<float>;
   _api.transformf_update = TransformT_update<float>;
   _api.transformf_transform = TransformF_transform;
-  _api.transformf_transformed = TransformT_transformed<float>;
+  _api.transformf_transform2 = TransformT_transform2<float>;
   _api.transformf_multiply = TransformT_multiply<float, float>;
   _api.transformf_invert = TransformT_invert<float>;
   _api.transformf_getScaling = TransformT_getScaling<float>;
@@ -3670,7 +3668,7 @@ FOG_NO_EXPORT void Transform_init(void)
   _api.transformd_create = TransformT_create<double>;
   _api.transformd_update = TransformT_update<double>;
   _api.transformd_transform = TransformD_transform;
-  _api.transformd_transformed = TransformT_transformed<double>;
+  _api.transformd_transform2 = TransformT_transform2<double>;
   _api.transformd_multiply = TransformT_multiply<double, double>;
   _api.transformd_invert = TransformT_invert<double>;
   _api.transformd_getScaling = TransformT_getScaling<double>;

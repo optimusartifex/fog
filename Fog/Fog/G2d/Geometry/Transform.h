@@ -956,38 +956,53 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE TransformF translated(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_TRANSLATEF | (order << 4), &p);
+    return result;
   }
 
   FOG_INLINE TransformF scaled(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_SCALEF | (order << 4), &p);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_SCALEF | (order << 4), &p);
+    return result;
   }
 
   FOG_INLINE TransformF skewed(const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_SKEWF | (order << 4), &p);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_SKEWF | (order << 4), &p);
+    return result;
   }
 
   FOG_INLINE TransformF rotated(float angle, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_ROTATEF | (order << 4), &angle);
+    return result;
   }
 
   FOG_INLINE TransformF rotated(float angle, const PointF& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
+    TransformF result(UNINITIALIZED);
     float params[3] = { angle, p.x, p.y };
-    return _api.transformf_transformed(this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
+    
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
+    return result;
   }
 
   FOG_INLINE TransformF fliped(uint32_t axis)
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_FLIP, &axis);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_FLIP, &axis);
+    return result;
   }
 
   FOG_INLINE TransformF transformed(const TransformF& other, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_MULTIPLYF | (order << 4), &other);
+    return result;
   }
 
   // --------------------------------------------------------------------------
@@ -1023,7 +1038,9 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE TransformF multipliedInv(const TransformF& m) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_APPEND << 4), &m);
+    return result;
   }
 
   FOG_INLINE TransformF premultiplied(const TransformF& m) const
@@ -1035,7 +1052,9 @@ struct FOG_NO_EXPORT TransformF
 
   FOG_INLINE TransformF premultipliedInv(const TransformF& m) const
   {
-    return _api.transformf_transformed(this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
+    TransformF result(UNINITIALIZED);
+    _api.transformf_transform2(&result, this, TRANSFORM_OP_MULTIPLY_INVF | (MATRIX_ORDER_PREPEND << 4), &m);
+    return result;
   }
 
   // --------------------------------------------------------------------------
@@ -1148,15 +1167,31 @@ struct FOG_NO_EXPORT TransformF
   }
 
   //! @brief Get translation part of transform.
-  FOG_INLINE PointF getTranslation() const { return PointF(_20, _21); }
-  FOG_INLINE PointF getScaling(bool absolute) const { return _api.transformf_getScaling(this, absolute); }
-  FOG_INLINE float getRotation() const { return _api.transformf_getRotation(this); }
+  FOG_INLINE PointF getTranslation() const
+  {
+    return PointF(_20, _21);
+  }
+  
+  FOG_INLINE PointF getScaling(bool absolute) const
+  {
+    PointF result;
+    _api.transformf_getScaling(this, &result, absolute);
+    return result;
+  }
+
+  FOG_INLINE float getRotation() const
+  {
+    return _api.transformf_getRotation(this);
+  }
 
   //! @brief Get the average scale (by X and Y).
   //!
   //! Basically used to calculate the approximation scale when decomposinting
   //! curves into line segments.
-  FOG_INLINE float getAverageScaling() const { return _api.transformf_getAverageScaling(this); }
+  FOG_INLINE float getAverageScaling() const
+  {
+    return _api.transformf_getAverageScaling(this);
+  }
 
   // --------------------------------------------------------------------------
   // [HashCode]
@@ -2149,38 +2184,53 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE TransformD translated(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_TRANSLATED | (order << 4), &p);
+    return result;
   }
 
   FOG_INLINE TransformD scaled(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_SCALED | (order << 4), &p);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_SCALED | (order << 4), &p);
+    return result;
   }
 
   FOG_INLINE TransformD skewed(const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_SKEWD | (order << 4), &p);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_SKEWD | (order << 4), &p);
+    return result;
   }
 
   FOG_INLINE TransformD rotated(double angle, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_ROTATED | (order << 4), &angle);
+    return result;
   }
 
   FOG_INLINE TransformD rotated(double angle, const PointD& p, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
+    TransformD result(UNINITIALIZED);
     double params[3] = { angle, p.x, p.y };
-    return _api.transformd_transformed(this, TRANSFORM_OP_ROTATED | (order << 4), params);
+    
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_ROTATED | (order << 4), params);
+    return result;
   }
 
   FOG_INLINE TransformD fliped(uint32_t axis)
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_FLIP, &axis);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_FLIP, &axis);
+    return result;
   }
 
   FOG_INLINE TransformD transformed(const TransformD& other, uint32_t order = MATRIX_ORDER_PREPEND) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_MULTIPLYD | (order << 4), &other);
+    return result;
   }
 
   // --------------------------------------------------------------------------
@@ -2216,7 +2266,9 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE TransformD multipliedInv(const TransformD& m) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_APPEND << 4), &m);
+    return result;
   }
 
   FOG_INLINE TransformD premultiplied(const TransformD& m) const
@@ -2228,7 +2280,9 @@ struct FOG_NO_EXPORT TransformD
 
   FOG_INLINE TransformD premultipliedInv(const TransformD& m) const
   {
-    return _api.transformd_transformed(this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
+    TransformD result(UNINITIALIZED);
+    _api.transformd_transform2(&result, this, TRANSFORM_OP_MULTIPLY_INVD | (MATRIX_ORDER_PREPEND << 4), &m);
+    return result;
   }
 
   // --------------------------------------------------------------------------
@@ -2362,15 +2416,31 @@ struct FOG_NO_EXPORT TransformD
   }
 
   //! @brief Get translation part of transform.
-  FOG_INLINE PointD getTranslation() const { return PointD(_20, _21); }
-  FOG_INLINE PointD getScaling(bool absolute) const { return _api.transformd_getScaling(this, absolute); }
-  FOG_INLINE double getRotation() const { return _api.transformd_getRotation(this); }
+  FOG_INLINE PointD getTranslation() const
+  {
+    return PointD(_20, _21);
+  }
+
+  FOG_INLINE PointD getScaling(bool absolute) const
+  {
+    PointD result;
+    _api.transformd_getScaling(this, &result, absolute);
+    return result;
+  }
+
+  FOG_INLINE double getRotation() const
+  {
+    return _api.transformd_getRotation(this);
+  }
 
   //! @brief Get the average scale (by X and Y).
   //!
   //! Basically used to calculate the approximation scale when decomposinting
   //! curves into line segments.
-  FOG_INLINE double getAverageScaling() const { return _api.transformd_getAverageScaling(this); }
+  FOG_INLINE double getAverageScaling() const
+  {
+    return _api.transformd_getAverageScaling(this);
+  }
 
   // --------------------------------------------------------------------------
   // [HashCode]

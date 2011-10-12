@@ -64,18 +64,18 @@ err_t SvgElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paint
 {
   // Should be reimplemented if SvgElement is SvgPattern, SvgLinearGradient or
   // SvgRadialGradient.
-  return ERR_RT_INVALID_OBJECT;
+  return ERR_RT_INVALID_STATE;
 }
 
 err_t SvgElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  return ERR_RT_INVALID_OBJECT;
+  return ERR_RT_INVALID_STATE;
 }
 
 err_t SvgElement::onStrokeBoundingBox(BoxF& box, const PathStrokerParamsF& stroke, const TransformF* tr) const
 {
   // TODO:
-  return ERR_RT_INVALID_OBJECT;
+  return ERR_RT_INVALID_STATE;
 }
 
 err_t SvgElement::_visitContainer(SvgVisitor* visitor) const
@@ -102,7 +102,7 @@ StringW SvgElement::getStyle(const StringW& name) const
 
 err_t SvgElement::setStyle(const StringW& name, const StringW& value)
 {
-  return ERR_RT_INVALID_OBJECT;
+  return ERR_RT_INVALID_STATE;
 }
 
 err_t SvgElement::getBoundingBox(BoxF& box) const

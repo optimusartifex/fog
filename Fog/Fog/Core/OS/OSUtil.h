@@ -21,6 +21,16 @@ namespace Fog {
 
 struct FOG_NO_EXPORT OSUtil
 {
+  static FOG_INLINE err_t getErrFromLibCErrorCode(int code)
+  {
+    return _api.osutil_getErrFromLibCErrorCode(code);
+  }
+
+  static FOG_INLINE err_t getErrFromLibCErrno()
+  {
+    return _api.osutil_getErrFromLibCErrno();
+  }
+
   static FOG_INLINE err_t getErrFromOSErrorCode(int code)
   {
     return _api.osutil_getErrFromOSErrorCode(code);

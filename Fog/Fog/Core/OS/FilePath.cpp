@@ -703,7 +703,7 @@ _Fail:
   return err;
   
 _BadSyntax:
-  err = ERR_IO_PATH_BAD_SYNTAX;
+  err = ERR_PATH_BAD_SYNTAX;
   goto _Fail;
 }
 

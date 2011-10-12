@@ -301,29 +301,19 @@ static bool FOG_CDECL FileUtil_findFile(StringW* dst, const StringW* fileName, c
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS)
-static uint FOG_CDECL createDirectoryHelper(const CharW* path, size_t len)
+static uint FOG_CDECL FileUtil_createDirectoryHelper(const CharW* path, size_t len)
 {
   if (len == 3 && path[0].isAsciiLetter() && path[1] == CharW(':') && path[2] == CharW('/'))
   {
     // TODO: Maybe we should return failure if disk is not mounted.
-    return ERR_IO_DIRECTORY_EXISTS;
+    return ERR_PATH_EXISTS;
   }
 
   StringTmpW<TEMPORARY_LENGTH> pathW(StubW(path, len));
   FOG_RETURN_ON_ERROR(WinUtil::makeWinPath(pathW, pathW));
 
   if (!CreateDirectoryW(reinterpret_cast<const wchar_t*>(pathW.getData()), NULL))
-  {
-    // We expect ERR_IO_DIRECTORY_EXISTS if failed, but WinAPI reports
-    // ERROR_ALREADY_EXISTS, so instead of using built-in error translator
-    // we remap it manually.
-    DWORD errorCode = ::GetLastError();
-
-    if (errorCode == ERROR_ALREADY_EXISTS)
-      return ERR_IO_DIRECTORY_EXISTS;
-    else
-      return OSUtil::getErrFromOSLastError();
-  }
+    return OSUtil::getErrFromOSLastError();
 
   return ERR_OK;
 }
@@ -337,7 +327,7 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
   FOG_RETURN_ON_ERROR(FilePath::toAbsolute(dirAbs, *dir));
 
   if (!recursive)
-    return createDirectoryHelper(dirAbs.getData(), dirAbs.getLength());
+    return FileUtil_createDirectoryHelper(dirAbs.getData(), dirAbs.getLength());
 
   // FilePath::toAbsolute() always normalize directory to 'X:/'; we can imagine
   // that dirAbs is absolute dir, thus it's needed to find first two occurences
@@ -355,9 +345,10 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
     i++;
     i = dirAbs.indexOf(Range(i, i + length), CharW('/'), CASE_SENSITIVE);
 
-    err_t err = createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
-    if (err != ERR_OK && err != ERR_IO_DIRECTORY_EXISTS)
+    err_t err = FileUtil_createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
+    if (err != ERR_OK && (err != ERR_PATH_EXISTS || !FileUtil::isDirectory(dirAbs)))
       return err;
+
   } while (i != INVALID_INDEX);
 
   return ERR_OK;
@@ -380,20 +371,18 @@ static err_t FOG_CDECL FileUtil_deleteDirectory(const StringW* path)
 // ============================================================================
 
 #if defined(FOG_OS_POSIX)
-static err_t FOG_CDECL createDirectoryHelper(const CharW* path, size_t len)
+static err_t FOG_CDECL FileUtil_createDirectoryHelper(const CharW* path, size_t len)
 {
   if (len == 1 && path[0] == CharW('/'))
-    return ERR_IO_DIRECTORY_EXISTS;
+    return ERR_PATH_EXISTS;
 
   StringTmpA<TEMPORARY_LENGTH> path8;
   FOG_RETURN_ON_ERROR(TextCodec::local8().encode(path8, StubW(path, len)));
 
-  if (::mkdir(path8.getData(), S_IRWXU | S_IXGRP | S_IXOTH) == 0) return ERR_OK;
-
-  if (errno == EEXIST)
-    return ERR_IO_DIRECTORY_EXISTS;
+  if (::mkdir(path8.getData(), S_IRWXU | S_IXGRP | S_IXOTH) == 0)
+    return ERR_OK;
   else
-    return errno;
+    return OSUtil::getErrFromLibCErrno();
 }
 
 static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursive)
@@ -402,7 +391,7 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
     return ERR_RT_INVALID_ARGUMENT;
 
   if (!recursive)
-    return createDirectoryHelper(dir->getData(), dir->getLength());
+    return FileUtil_createDirectoryHelper(dir->getData(), dir->getLength());
 
   StringTmpW<TEMPORARY_LENGTH> dirAbs;
   FOG_RETURN_ON_ERROR(FilePath::toAbsolute(dirAbs, *dir));
@@ -411,7 +400,7 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
   // that dirAbs is absolute dir, thus it's needed to find first two occurences
   // of '/' - second occurece can be at the end of string.
   if (dirAbs.getLength() == 1 && dirAbs.getAt(0) == '/')
-    return ERR_IO_DIRECTORY_EXISTS;
+    return ERR_PATH_EXISTS;
 
   size_t i = dirAbs.indexOf(CharW('/'));
   size_t length = dirAbs.getLength();
@@ -423,8 +412,8 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
     i++;
     i = dirAbs.indexOf(Range(i, i + length), CharW('/'), CASE_SENSITIVE);
 
-    err_t err = createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
-    if (err != ERR_OK && err != ERR_IO_DIRECTORY_EXISTS)
+    err_t err = FileUtil_createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
+    if (err != ERR_OK && (err != ERR_PATH_EXISTS || !FileUtil::isDirectory(dirAbs)))
       return err;
   } while (i != INVALID_INDEX);
 

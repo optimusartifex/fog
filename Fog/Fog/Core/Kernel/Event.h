@@ -130,16 +130,6 @@ public:
   friend struct Timer;
 };
 
-FOG_INLINE Event::Event(uint32_t code, uint32_t flags)
-{
-  _code = code;
-  _flags = flags;
-  _receiver = NULL;
-  _prev = NULL;
-  _next = NULL;
-  _wasDeleted = 0;
-}
-
 // ============================================================================
 // [Fog::CreateEvent]
 // ============================================================================

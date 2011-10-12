@@ -169,7 +169,7 @@ static err_t FOG_CDECL Locale_create(Locale* self, const StringW* name)
   }
   else
   {
-    err = ERR_LOCALE_NOT_MATCHED;
+    err = ERR_LOCALE_NOT_FOUND;
   }
 
 _End:

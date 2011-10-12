@@ -100,7 +100,7 @@ static err_t FOG_CDECL FileInfo_fromWinPath(FileInfoData* d, const StringW* path
     }
 
     if (sepIdx == INVALID_INDEX)
-      return ERR_IO_INVALID_NAME;
+      return ERR_PATH_NAME_INVALID;
 
     FOG_RETURN_ON_ERROR(d->filePath->setAndNormalizeSlashes(*path, Range(4, sepIdx), SLASH_FORM_UNIX));
     FOG_RETURN_ON_ERROR(d->fileName->set(*path, Range(sepIdx + 1, DETECT_LENGTH)));
@@ -162,7 +162,7 @@ static FOG_INLINE void FileInfo_fromWinFileAttributeDataPrivate(FileInfoData* d,
 static err_t FOG_CDECL FileInfo_fromFile(FileInfo* self, const StringW* path)
 {
   if (path->getLength() == 0)
-    return ERR_IO_INVALID_NAME;
+    return ERR_PATH_NAME_INVALID;
 
   StringTmpW<TEMPORARY_LENGTH> pathW;
   FOG_RETURN_ON_ERROR(WinUtil::makeWinPath(pathW, *path));
@@ -188,7 +188,7 @@ static err_t FOG_CDECL FileInfo_fromFile(FileInfo* self, const StringW* path)
 static err_t FOG_CDECL FileInfo_fromFileEx(FileInfo* self, const StringW* filePath, const StringW* fileName)
 {
   if (filePath->getLength() == 0)
-    return ERR_IO_INVALID_NAME;
+    return ERR_PATH_NAME_INVALID;
 
   StringTmpW<TEMPORARY_LENGTH> pathW;
 

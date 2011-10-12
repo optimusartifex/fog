@@ -170,7 +170,7 @@ static err_t FOG_CDECL FileMapping_open(FileMapping* self, const StringW* fileNa
 #if FOG_ARCH_BITS == 32
   if (szHigh)
   {
-    err = ERR_IO_FILE_TOO_BIG;
+    err = ERR_FILE_TOO_LARGE;
     goto _Fail;
   }
   size = szLow;
@@ -180,7 +180,7 @@ static err_t FOG_CDECL FileMapping_open(FileMapping* self, const StringW* fileNa
 
   if (size == 0)
   {
-    err = ERR_IO_FILE_IS_EMPTY;
+    err = ERR_FILE_IS_EMPTY;
     goto _Fail;
   }
 
@@ -363,7 +363,7 @@ static err_t FOG_CDECL FileMapping_open(FileMapping* self, const StringW* fileNa
 #if FOG_ARCH_BITS == 32
   if ((uint64_t)s.st_size >= (uint64_t)SIZE_MAX)
   {
-    err = ERR_IO_FILE_TOO_BIG;
+    err = ERR_FILE_TOO_LARGE;
     goto _Fail;
   }
 #endif // FOG_ARCH_BITS == 32
@@ -371,7 +371,7 @@ static err_t FOG_CDECL FileMapping_open(FileMapping* self, const StringW* fileNa
   size = (size_t)s.st_size;
   if (size == 0)
   {
-    err = ERR_IO_FILE_IS_EMPTY;
+    err = ERR_FILE_IS_EMPTY;
     goto _Fail;
   }
 

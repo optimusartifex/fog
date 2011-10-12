@@ -210,7 +210,8 @@ static err_t FOG_CDECL OSUtil_getErrFromLibCErrorCode(int code)
     case ENOMEDIUM: return ERR_DEVICE_NOT_READY;
 #endif // ENOMEDIUM
 
-    return (err_t)code;
+    default:
+      return (err_t)code;
   }
 }
 

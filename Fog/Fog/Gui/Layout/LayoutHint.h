@@ -53,9 +53,9 @@ struct FOG_NO_EXPORT LayoutHint
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE SizeI getSizeHint() const { return _sizeHint; }
-  FOG_INLINE SizeI getMinimumSize() const { return _minimumSize; }
-  FOG_INLINE SizeI getMaximumSize() const { return _maximumSize; }
+  FOG_INLINE const SizeI& getSizeHint() const { return _sizeHint; }
+  FOG_INLINE const SizeI& getMinimumSize() const { return _minimumSize; }
+  FOG_INLINE const SizeI& getMaximumSize() const { return _maximumSize; }
 
   FOG_INLINE void setSizeHint(const SizeI& sizeHint) { _sizeHint = sizeHint; }
   FOG_INLINE void setMinimumSize(const SizeI& minimumSize) { _minimumSize = minimumSize; }

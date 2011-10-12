@@ -277,10 +277,10 @@ struct BenchRandom
   FOG_INLINE Fog::RectF getRectF(const Fog::SizeI& screenSize, int maxW, int maxH)
   {
     Fog::RectF result(Fog::UNINITIALIZED);
-    result.w = getFloat(1, maxW);
-    result.h = getFloat(1, maxH);
-    result.x = getFloat(0, screenSize.w - result.w);
-    result.y = getFloat(0, screenSize.h - result.h);
+    result.w = getFloat(1.0f, float(maxW));
+    result.h = getFloat(1.0f, float(maxH));
+    result.x = getFloat(0.0f, float(screenSize.w - result.w));
+    result.y = getFloat(0.0f, float(screenSize.h - result.h));
     return result;
   }
 
@@ -295,16 +295,16 @@ struct BenchRandom
   FOG_INLINE Fog::PointF getPointF(const Fog::SizeI& screenSize)
   {
     Fog::PointF result(Fog::UNINITIALIZED);
-    result.x = getFloat(0, screenSize.w);
-    result.y = getFloat(0, screenSize.h);
+    result.x = getFloat(0.0f, float(screenSize.w));
+    result.y = getFloat(0.0f, float(screenSize.h));
     return result;
   }
 
   FOG_INLINE Fog::PointD getPointD(const Fog::SizeI& screenSize)
   {
     Fog::PointD result(Fog::UNINITIALIZED);
-    result.x = getDouble(0, screenSize.w);
-    result.y = getDouble(0, screenSize.h);
+    result.x = getDouble(0.0, double(screenSize.w));
+    result.y = getDouble(0.0, double(screenSize.h));
     return result;
   }
 

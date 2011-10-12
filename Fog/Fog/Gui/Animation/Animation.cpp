@@ -261,4 +261,151 @@ void WidgetAnimation::onFinished(AnimationEvent* e)
   _widget = NULL;
 }
 
+// ============================================================================
+// [Fog::WidgetOpacityAnimation]
+// ============================================================================
+
+WidgetOpacityAnimation::WidgetOpacityAnimation(Widget* widget) :
+  WidgetAnimation(widget)
+{
+}
+
+WidgetOpacityAnimation::~WidgetOpacityAnimation()
+{
+}
+
+void WidgetOpacityAnimation::onStart()
+{
+  if (_widget)
+  {
+    _widget->setTransparency(getDirection() == ANIMATION_FORWARD? _startOpacity : _endOpacity);
+  }
+
+  // Will show Widget if the flag is set.
+  WidgetAnimation::onStart();
+}
+
+void WidgetOpacityAnimation::onStep(AnimationEvent* e)
+{
+  float opacity = _startOpacity + (_endOpacity - _startOpacity) * _position;
+
+  if (_widget)
+  {
+    _widget->setTransparency(opacity);
+  }
+}
+
+// ============================================================================
+// [Fog::WidgetPositionAnimation]
+// ============================================================================
+
+WidgetPositionAnimation::WidgetPositionAnimation(Widget* widget) :
+  WidgetAnimation(widget)
+{
+}
+
+WidgetPositionAnimation::~WidgetPositionAnimation()
+{
+}
+
+void WidgetPositionAnimation::onStart()
+{
+  if (_widget)
+  {
+    _widget->setPosition(getDirection() == ANIMATION_FORWARD? _start : _end);
+  }
+
+  // Will show Widget if the flag is set.
+  WidgetAnimation::onStart();
+}
+
+void WidgetPositionAnimation::onStep(AnimationEvent* e)
+{
+  if (_widget)
+  {
+    PointI p;
+
+    p.setX((int)(double(_start.getX()) + double(_end.getX() - _start.getX()) * _position));
+    p.setY((int)(double(_start.getY()) + double(_end.getY() - _start.getY()) * _position));
+
+    _widget->setPosition(p);
+  }
+}
+
+// ============================================================================
+// [Fog::WidgetSizeAnimation]
+// ============================================================================
+
+WidgetSizeAnimation::WidgetSizeAnimation(Widget* widget) :
+  WidgetAnimation(widget)
+{
+}
+
+WidgetSizeAnimation::~WidgetSizeAnimation()
+{
+}
+
+void WidgetSizeAnimation::onStart()
+{
+  if (_widget)
+  {
+    _widget->setSize(getDirection() == ANIMATION_FORWARD? _start : _end);
+  }
+
+  // Will show Widget if the flag is set.
+  WidgetAnimation::onStart();
+}
+
+void WidgetSizeAnimation::onStep(AnimationEvent* e)
+{
+  if (_widget)
+  {
+    SizeI p;
+
+    p.setWidth((int)(double(_start.getWidth()) + double(_end.getWidth() - _start.getWidth()) * _position));
+    p.setHeight((int)(double(_start.getHeight()) + double(_end.getHeight() - _start.getHeight()) * _position));
+
+    _widget->setSize(p);
+  }
+}
+
+// ============================================================================
+// [Fog::WidgetGeometryAnimation]
+// ============================================================================
+
+WidgetGeometryAnimation::WidgetGeometryAnimation(Widget* widget) : WidgetAnimation(widget)
+{
+}
+
+WidgetGeometryAnimation::~WidgetGeometryAnimation()
+{
+}
+
+void WidgetGeometryAnimation::onStart()
+{
+  if (_widget)
+  {
+    _widget->setGeometry(getDirection() == ANIMATION_FORWARD? _start : _end);
+  }
+
+  //will show Widget if the flag is set.
+  WidgetAnimation::onStart();
+}
+
+void WidgetGeometryAnimation::onStep(AnimationEvent* e)
+{
+  if (_widget)
+  {
+    RectI p;
+
+    p.setX((int)(double(_start.getX()) + double(_end.getX() - _start.getX()) * _position));
+    p.setY((int)(double(_start.getY()) + double(_end.getY() - _start.getY()) * _position));
+
+    p.setWidth((int)(double(_start.getWidth()) + double(_end.getWidth() - _start.getWidth()) * _position));
+    p.setHeight((int)(double(_start.getHeight()) + double(_end.getHeight() - _start.getHeight()) * _position));
+
+    _widget->setGeometry(p);
+  }
+}
+
 } // Fog namespace

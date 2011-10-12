@@ -107,14 +107,12 @@ struct FOG_API ImageCodec : public Object
   // [Internal]
   // --------------------------------------------------------------------------
 
-protected:
   virtual void reset();
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   //! @brief Image provider.
   ImageCodecProvider* _provider;
 
@@ -154,9 +152,6 @@ protected:
   ImagePalette _palette;
   //! @brief Comment.
   StringA _comment;
-
-private:
-  friend struct IcoDecoder;
 };
 
 //! @}

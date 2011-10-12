@@ -50,14 +50,11 @@ struct FOG_NO_EXPORT SvgImageLinkAttribute : public XmlAttribute
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-protected:
 
   Image _image;
   bool _embedded;
 
 private:
-  friend struct SvgImageElement;
-
   _FOG_NO_COPY(SvgImageLinkAttribute)
 };
 

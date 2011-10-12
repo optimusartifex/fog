@@ -101,7 +101,6 @@ struct FOG_API XmlDocument : public XmlElement
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-protected:
 
   //! @brief Document root.
   XmlElement* _documentRoot;
@@ -116,10 +115,6 @@ protected:
   StringW _doctype;
 
 private:
-  friend struct XmlAttribute;
-  friend struct XmlIdAttribute;
-  friend struct XmlElement;
-
   _FOG_NO_COPY(XmlDocument)
 };
 

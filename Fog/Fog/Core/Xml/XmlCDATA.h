@@ -49,13 +49,9 @@ struct FOG_API XmlCDATA : public XmlNoText
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   StringW _data;
 
 private:
-  friend struct XmlElement;
-  friend struct XmlDocument;
-
   _FOG_NO_COPY(XmlCDATA)
 };
 

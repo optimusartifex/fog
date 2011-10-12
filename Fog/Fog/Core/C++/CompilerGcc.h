@@ -21,7 +21,12 @@
 #endif
 
 // Standard attributes.
-#define FOG_INLINE inline __attribute__((always_inline))
+#if defined(__MINGW32__)
+# define FOG_INLINE inline __attribute__((gnu_inline))
+#else
+# define FOG_INLINE inline __attribute__((always_inline))
+#endif
+
 #define FOG_NO_INLINE __attribute__((noinline))
 #define FOG_NO_RETURN __attribute__((noreturn))
 #define FOG_DEPRECATED __attribute__((deprecated))

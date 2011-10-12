@@ -183,15 +183,12 @@ struct FOG_API ManagedString
 
     // [Members]
 
-  private:
     //! @brief Cache name.
     StringW _name;
     //! @brief Count of strings in cache.
     size_t _count;
     //! @brief Continuous cache memory.
     Node* _data[1];
-
-    friend struct ManagedString;
   };
 
   //! @brief Create managed string cache (@c ManagedString::Cache).

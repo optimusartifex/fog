@@ -552,6 +552,11 @@ Layout* Widget::takeLayout()
   return lay;
 }
 
+bool Widget::isEmpty() const
+{
+  return !isVisible() || _guiWindow;
+}
+
 // ============================================================================
 // [Layout Policy]
 // ============================================================================
@@ -896,6 +901,22 @@ void Widget::setMaximumWidth(int width)
 {
   int height = hasMaximumHeight()? _extra->_maxheight : -1;
   setMaximumSize(SizeI(width,height));
+}
+
+SizeI Widget::getMinimumSize() const
+{
+  if (_extra)
+    return SizeI(_extra->_minwidth, _extra->_minheight);
+  else
+    return SizeI(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE);
+}
+
+SizeI Widget::getMaximumSize() const
+{
+  if (_extra)
+    return SizeI(_extra->_maxwidth, _extra->_maxheight);
+  else
+    return SizeI(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE);
 }
 
 // ============================================================================

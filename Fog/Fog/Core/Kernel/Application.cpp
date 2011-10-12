@@ -277,7 +277,7 @@ void Application::_init(const StringW& type)
   // Create EventLoop by type.
   _eventLoop = createEventLoop(type);
   if (_eventLoop)
-    Thread::_mainThread->_eventLoop = _eventLoop;
+    Thread::getMainThread()->_eventLoop = _eventLoop;
 
   // Set global application instance (singleton).
   if (_instance == NULL)
@@ -310,7 +310,7 @@ Application::~Application()
 
     // Unset main thread event loop (this is safe, we will destroy it later
     // if it exists).
-    Thread::_mainThread->_eventLoop = NULL;
+    Thread::getMainThread()->_eventLoop = NULL;
   }
 
   // Clear global application instance (singleton).

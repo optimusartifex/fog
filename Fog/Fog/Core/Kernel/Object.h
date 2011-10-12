@@ -595,7 +595,6 @@ struct FOG_API Object
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   //! @brief Variable type and flags.
   uint32_t _vType;
 

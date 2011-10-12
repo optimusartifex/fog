@@ -238,7 +238,6 @@ public:
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   uint8_t _type;
   uint8_t _reserved0;
   uint8_t _reserved1;
@@ -265,11 +264,6 @@ protected:
   XmlElement* _hashNextId;
 
 private:
-  friend struct XmlAttribute;
-  friend struct XmlIdAttribute;
-  friend struct XmlDocument;
-  friend struct XmlIdManager;
-
   _FOG_NO_COPY(XmlElement)
 };
 

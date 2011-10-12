@@ -1382,12 +1382,12 @@ void WinGuiWindow::setOwner(GuiWindow* w)
   _owner = w;
 
   // Always set owner to toplevel window.
+  //
+  // NOTE: To write code that is compatible with both 32-bit and 64-bit versions
+  // of Windows, use SetWindowLongPtr. When compiling for 32-bit Windows,
+	// SetWindowLongPtr is defined as a call to the SetWindowLong function. - MSDN
+	//   http://msdn.microsoft.com/en-us/library/windows/desktop/ms644898%28v=vs.85%29.aspx
   SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)_owner->getHandle());
-  /* NOTE: To write code that is compatible with both 32-bit and 64-bit versions
-     of Windows, use SetWindowLongPtr. When compiling for 32-bit Windows,
-	 SetWindowLongPtr is defined as a call to the SetWindowLong function. - MSDN
-	 http://msdn.microsoft.com/en-us/library/windows/desktop/ms644898%28v=vs.85%29.aspx
-   */
 }
 
 void WinGuiWindow::releaseOwner()
@@ -1403,7 +1403,8 @@ void WinGuiWindow::onMousePress(uint32_t button, bool repeated)
 {
   WinGuiEngine* guiEngine = GUI_ENGINE();
 
-  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
+  if (guiEngine->_systemMouseStatus.uiWindow != this)
+    return;
 
   if (guiEngine->_systemMouseStatus.buttons == 0 && !repeated)
   {
@@ -1417,7 +1418,8 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
 {
   WinGuiEngine* guiEngine = GUI_ENGINE();
 
-  if (guiEngine->_systemMouseStatus.uiWindow != this) return;
+  if (guiEngine->_systemMouseStatus.uiWindow != this)
+    return;
 
   if ((guiEngine->_systemMouseStatus.buttons & ~button) == 0)
   {
@@ -1430,35 +1432,37 @@ void WinGuiWindow::onMouseRelease(uint32_t button)
 LRESULT WinGuiWindow::KeyboardMessageHelper(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   WinGuiEngine* guiEngine = GUI_ENGINE();
-  //Keyboard messages
+
   switch (message)
   {
-  case WM_SYSKEYDOWN:
-  case WM_KEYDOWN:
-    {
-      uint32_t modifier = guiEngine->winKeyToModifier(&wParam, lParam);
-      bool used = onKeyPress(
-        guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
-        modifier,
-        (uint32_t)wParam,
-        CharW(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
-        );
+    case WM_SYSKEYDOWN:
+    case WM_KEYDOWN:
+      {
+        uint32_t modifier = guiEngine->winKeyToModifier(&wParam, lParam);
+        bool used = onKeyPress(
+          guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
+          modifier,
+          (uint32_t)wParam,
+          CharW(guiEngine->winKeyToUnicode((UINT)wParam, HIWORD(lParam)))
+          );
 
-      if (used) return 0;
-    }
-  case WM_SYSKEYUP:
-  case WM_KEYUP:
-    {
-      uint32_t modifier = guiEngine->winKeyToModifier(&wParam, lParam);
-      bool used = onKeyRelease(
-        guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
-        modifier,
-        (uint32_t)wParam,
-        CharW(guiEngine->winKeyToUnicode(wParam, HIWORD(lParam)))
-        );
+        if (used) return 0;
+        break;
+      }
+    case WM_SYSKEYUP:
+    case WM_KEYUP:
+      {
+        uint32_t modifier = guiEngine->winKeyToModifier(&wParam, lParam);
+        bool used = onKeyRelease(
+          guiEngine->winKeyToFogKey(wParam, HIWORD(lParam)),
+          modifier,
+          (uint32_t)wParam,
+          CharW(guiEngine->winKeyToUnicode((UINT)wParam, HIWORD(lParam)))
+          );
 
-      if (used) return 0;
-    }
+        if (used) return 0;
+      }
+      break;
   }
   return DefWindowProc(hwnd, message, wParam, lParam);
 }

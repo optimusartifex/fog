@@ -62,13 +62,9 @@ struct FOG_API XmlText : public XmlElement
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   StringW _data;
 
 private:
-  friend struct XmlElement;
-  friend struct XmlDocument;
-
   _FOG_NO_COPY(XmlText)
 };
 

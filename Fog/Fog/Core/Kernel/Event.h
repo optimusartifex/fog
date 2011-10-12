@@ -26,10 +26,16 @@ namespace Fog {
 //! Used together with Fog::Object event model.
 struct FOG_API Event : Task
 {
-  // [Event allocation]
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   //! @brief Event constructor.
   Event(uint32_t code = 0, uint32_t flags = 0);
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
 
   //! @brief Internal run method that's inherited from task. This method
   //! is only called when event is posted into task queue to call onEvent
@@ -90,19 +96,19 @@ struct FOG_API Event : Task
   //! @brief Generates uniue event id.
   static uint32_t uid();
 
-protected:
   FOG_INLINE Event* _cloned(Object* receiver)
   {
     _receiver = receiver;
     return this;
   }
 
-  FOG_INLINE void setCode(uint32_t code) { _code = code; }
-  FOG_INLINE void setReceiver(Object* receiver) { _receiver = receiver; }
+  FOG_INLINE void _setCode(uint32_t code) { _code = code; }
+  FOG_INLINE void _setReceiver(Object* receiver) { _receiver = receiver; }
 
-  // [Event members]
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-public:
   //! @brief Event code.
   uint32_t _code;
   //! @brief Event flags.
@@ -111,23 +117,16 @@ public:
   //! @brief Object that will receive the event.
   Object* _receiver;
 
-private:
   //! @brief Link to previous receiver event.
   Event* _prev;
   //! @brief Link to next receiver event in queue.
   Event* _next;
 
-protected:
   //! @brief Receiver was deleted.
   //!
   //! If this flag is true, the event will be discarded instead of dispatched.
   //! This flag is set by receiver object destructor.
   uint32_t _wasDeleted;
-
-public:
-  friend struct Object;
-  friend struct Thread;
-  friend struct Timer;
 };
 
 // ============================================================================
@@ -208,9 +207,6 @@ struct FOG_API TimerEvent : public Event
   // --------------------------------------------------------------------------
 
   Timer* _timer;
-
-private:
-  friend struct Timer;
 };
 
 // ============================================================================

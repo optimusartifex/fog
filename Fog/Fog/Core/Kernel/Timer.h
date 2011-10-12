@@ -68,12 +68,8 @@ struct FOG_API Timer : public Object
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   Task* _task;
   TimeDelta _interval;
-
-private:
-  friend struct TimerTask;
 };
 
 //! @}

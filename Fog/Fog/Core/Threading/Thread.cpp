@@ -51,6 +51,21 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::Thread - Globals]
+// ============================================================================
+
+static Thread* Thread_mainThread;
+static uint32_t Thread_mainThreadId;
+
+#if defined(FOG_OS_WINDOWS)
+static inline uint32_t Thread_getCurrentThreadId() { return ::GetCurrentThreadId(); }
+#elif defined(FOG_OS_MAC)
+static inline uint32_t Thread_getCurrentThreadId() { return (uint32_t)mach_thread_self(); }
+#else
+static inline uint32_t Thread_getCurrentThreadId() { return (uint32_t)syscall(__NR_gettid); }
+#endif // FOG_OS_...
+
+// ============================================================================
 // [Fog::Thread - Windows]
 // ============================================================================
 
@@ -87,7 +102,22 @@ Thread* Thread::getCurrentThread()
 
 uint32_t Thread::getCurrentThreadId()
 {
-  return GetCurrentThreadId();
+  return Thread_getCurrentThreadId();
+}
+
+Thread* Thread::getMainThread()
+{
+  return Thread_mainThread;
+}
+
+uint32_t Thread::getMainThreadId()
+{
+  return Thread_mainThreadId;
+}
+
+bool Thread::isMainThread()
+{
+  return Thread_getCurrentThreadId() == Thread_mainThreadId;
 }
 
 // ============================================================================
@@ -209,19 +239,22 @@ Thread* Thread::getCurrentThread()
 
 uint32_t Thread::getCurrentThreadId()
 {
-  // There is no thread-id concept in pthread API. To get OS specific thread
-  // ID the kernel must be called.
-  uint32_t id = 0;
+  return Thread_getCurrentThreadId();
+}
 
-#if defined(FOG_OS_MAC)
-  id = (uint32_t)mach_thread_self();
-#endif // FOG_OS_MAC
+Thread* Thread::getMainThread()
+{
+  return Thread_mainThread;
+}
 
-#if defined(FOG_OS_LINUX)
-  id = (uint32_t)syscall(__NR_gettid);
-#endif // FOG_OS_LINUX
+uint32_t Thread::getMainThreadId()
+{
+  return Thread_mainThreadId;
+}
 
-  return id;
+bool Thread::isMainThread()
+{
+  return Thread_getCurrentThreadId() == Thread_mainThreadId;
 }
 
 // ============================================================================
@@ -308,9 +341,9 @@ Thread::Thread() :
 
 Thread::~Thread()
 {
-  if (this == _mainThread)
+  if (this == Thread_mainThread)
   {
-    _mainThread = NULL;
+    Thread_mainThread = NULL;
     return;
   }
 
@@ -438,9 +471,6 @@ void Thread::finished()
 // [Fog::Thread - Main]
 // ============================================================================
 
-Thread* Thread::_mainThread;
-uint32_t Thread::_mainThreadId;
-
 struct FOG_NO_EXPORT MainThread : public Thread
 {
   MainThread();
@@ -485,8 +515,8 @@ FOG_NO_EXPORT void Thread_init(void)
   pthread_setspecific(_Thread_tls, thread);
 #endif // FOG_OS_POSIX
 
-  Thread::_mainThread = thread;
-  Thread::_mainThreadId = thread->getId();
+  Thread_mainThread = thread;
+  Thread_mainThreadId = thread->getId();
 }
 
 FOG_NO_EXPORT void Thread_fini(void)

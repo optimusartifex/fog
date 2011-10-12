@@ -301,8 +301,7 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Take widget layout manager (will not disconnect children).
   Layout* takeLayout();
 
-  // TODO GUI: Purpose? Move to .cpp.
-  FOG_INLINE virtual bool isEmpty() const { return !isVisible() || _guiWindow; }
+  virtual bool isEmpty() const;
 
   virtual uint32_t getLayoutExpandingDirections() const;
 
@@ -364,8 +363,8 @@ struct FOG_API Widget : public LayoutItem
   FOG_INLINE int getMinimumWidth() const { return getMinimumSize().getWidth(); }
   FOG_INLINE int getMaximumWidth() const { return getMaximumSize().getWidth(); }
 
-  FOG_INLINE SizeI getMinimumSize() const { return _extra ? SizeI(_extra->_minwidth, _extra->_minheight) : SizeI(WIDGET_MIN_SIZE, WIDGET_MIN_SIZE); }
-  FOG_INLINE SizeI getMaximumSize() const { return _extra ? SizeI(_extra->_maxwidth, _extra->_maxheight) : SizeI(WIDGET_MAX_SIZE, WIDGET_MAX_SIZE); }
+  SizeI getMinimumSize() const;
+  SizeI getMaximumSize() const;
 
   // --------------------------------------------------------------------------
   // [Layout State]
@@ -687,7 +686,6 @@ struct FOG_API Widget : public LayoutItem
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   //! @brief Widget parent link or @c NULL.
   Widget* _parentWidget;
 
@@ -776,12 +774,6 @@ protected:
   uint32_t _widgetflags;
 
 private:
-  friend struct Application;
-  friend struct Layout;
-  friend struct GuiEngine;
-  friend struct GuiWindow;
-  friend struct Window;
-
   _FOG_NO_COPY(Widget)
 };
 

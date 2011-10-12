@@ -99,7 +99,7 @@ struct FOG_API Animation : public Object
 
   FOG_INLINE float getStep() const { return _step; }
   FOG_INLINE float getFps() const { return _fps; }
-  FOG_INLINE uint getDirection() const { return _direction; }
+  FOG_INLINE uint32_t getDirection() const { return _direction; }
   FOG_INLINE TimeDelta getDuration() const { return _duration; }
 
   void setStep(float step) { _type = ANIMATION_FIXED_STEP; _step = step; }
@@ -126,7 +126,6 @@ struct FOG_API Animation : public Object
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   float _position;
   float _step;
   float _fps;
@@ -155,7 +154,6 @@ struct FOG_API WidgetAnimation : public Animation
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  // TODO: Move to .cpp
   WidgetAnimation(Widget* widget = NULL, uint32_t flags = ANIMATION_WIDGET_NO_FLAGS, uint32_t visibility = WIDGET_VISIBLE);
   virtual ~WidgetAnimation();
 
@@ -167,22 +165,21 @@ struct FOG_API WidgetAnimation : public Animation
   virtual void onFinished(AnimationEvent* e);
 
   FOG_INLINE Widget* getWidget() const { return _widget; }
-  void setWidget(Widget* widget) { _widget = widget; };
-  uint32_t getFlags() const { return _flags; }
-  void setFlags(uint32_t f) { _flags = f; }
+  FOG_INLINE void setWidget(Widget* widget) { _widget = widget; };
 
-protected:
+  FOG_INLINE uint32_t getFlags() const { return _flags; }
+  FOG_INLINE void setFlags(uint32_t flags) { _flags = flags; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   Widget* _widget;
   uint32_t _flags;
-  //! @brief To make possible to show widget in fullscreen/minimized/maximized
-  //! mode.
+
+  //! @brief To make possible to show widget in fullscreen/minimized/maximized mode.
   uint32_t _visibility;
 };
-
-// GUI TODO: Remove this hack.
-#ifdef FOG_OS_WINDOWS
-#pragma warning(disable: 4244) // float to int reduction
-#endif
 
 // ============================================================================
 // [Fog::WidgetOpacityAnimation]
@@ -198,35 +195,22 @@ struct FOG_API WidgetOpacityAnimation : public WidgetAnimation
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  WidgetOpacityAnimation(Widget* widget) : WidgetAnimation(widget) {
-  }
+  WidgetOpacityAnimation(Widget* widget);
+  virtual ~WidgetOpacityAnimation();
 
-  virtual ~WidgetOpacityAnimation() {
-  }
-
-  virtual void onStart() {
-    if (_widget) {
-      _widget->setTransparency(getDirection() == ANIMATION_FORWARD? _startOpacity : _endOpacity);
-    }
-
-    //will show Widget if the flag is set.
-    WidgetAnimation::onStart();
-  }
-
-  virtual void onStep(AnimationEvent* e) {
-    float opacity = _startOpacity + (_endOpacity - _startOpacity) * _position;
-    if (_widget) {
-      _widget->setTransparency(opacity);
-    }
-  }
+  virtual void onStart();
+  virtual void onStep(AnimationEvent* e);
 
   FOG_INLINE float getStartOpacity() const { return _startOpacity; }
   FOG_INLINE float getEndOpacity() const { return _endOpacity; }
 
-  void setStartOpacity(float startOpacity) { _startOpacity = startOpacity; }
-  void setEndOpacity(float endOpacity) { _endOpacity = endOpacity; }
+  FOG_INLINE void setStartOpacity(float startOpacity) { _startOpacity = startOpacity; }
+  FOG_INLINE void setEndOpacity(float endOpacity) { _endOpacity = endOpacity; }
 
-protected:
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   float _startOpacity;
   float _endOpacity;
 };
@@ -243,41 +227,22 @@ struct FOG_API WidgetPositionAnimation : public WidgetAnimation
 {
   FOG_DECLARE_OBJECT(WidgetPositionAnimation, WidgetAnimation)
 
-  WidgetPositionAnimation(Widget* widget) : WidgetAnimation(widget) {
+  WidgetPositionAnimation(Widget* widget);
+  ~WidgetPositionAnimation();
 
-  }
+  virtual void onStart();
+  virtual void onStep(AnimationEvent* e);
 
-  virtual ~WidgetPositionAnimation() {
+  FOG_INLINE const PointI& getStartPosition() const { return _start; }
+  FOG_INLINE const PointI& getEndPosition() const { return _end; }
 
-  }
+  FOG_INLINE void setStartPosition(const PointI& start) { _start = start; }
+  FOG_INLINE void setEndPosition(const PointI& end) { _end = end; }
 
-  virtual void onStart() {
-    if (_widget) {
-      _widget->setPosition(getDirection() == ANIMATION_FORWARD? _start : _end);
-    }
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-    //will show Widget if the flag is set.
-    WidgetAnimation::onStart();
-  }
-
-  virtual void onStep(AnimationEvent* e) {
-    if (_widget) {
-      PointI p;
-
-      p.setX((int)_start.getX() + (_end.getX() - _start.getX()) * _position);
-      p.setY((int)_start.getY() + (_end.getY() - _start.getY()) * _position);
-
-      _widget->setPosition(p);
-    }
-  }
-
-  FOG_INLINE PointI getStartPosition() const { return _start; }
-  FOG_INLINE PointI getEndPosition() const { return _end; }
-
-  void setStartPosition(const PointI& start) { _start = start; }
-  void setEndPosition(const PointI& end) { _end = end; }
-
-protected:
   PointI _start;
   PointI _end;
 };
@@ -290,41 +255,22 @@ struct FOG_API WidgetSizeAnimation : public WidgetAnimation
 {
   FOG_DECLARE_OBJECT(WidgetSizeAnimation, WidgetAnimation)
 
-    WidgetSizeAnimation(Widget* widget) : WidgetAnimation(widget) {
+  WidgetSizeAnimation(Widget* widget);
+  virtual ~WidgetSizeAnimation();
 
-  }
+  virtual void onStart();
+  virtual void onStep(AnimationEvent* e);
 
-  virtual ~WidgetSizeAnimation() {
+  FOG_INLINE const SizeI& getStartPosition() const { return _start; }
+  FOG_INLINE const SizeI& getEndPosition() const { return _end; }
 
-  }
+  FOG_INLINE void setStartPosition(const SizeI& start) { _start = start; }
+  FOG_INLINE void setEndPosition(const SizeI& end) { _end = end; }
 
-  virtual void onStart() {
-    if (_widget) {
-      _widget->setSize(getDirection() == ANIMATION_FORWARD? _start : _end);
-    }
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-    //will show Widget if the flag is set.
-    WidgetAnimation::onStart();
-  }
-
-  virtual void onStep(AnimationEvent* e) {
-    if (_widget) {
-      SizeI p;
-
-      p.setWidth((int)_start.getWidth() + (_end.getWidth() - _start.getWidth()) * _position);
-      p.setHeight((int)_start.getHeight() + (_end.getHeight() - _start.getHeight()) * _position);
-
-      _widget->setSize(p);
-    }
-  }
-
-  FOG_INLINE SizeI getStartPosition() const { return _start; }
-  FOG_INLINE SizeI getEndPosition() const { return _end; }
-
-  void setStartPosition(const SizeI& start) { _start = start; }
-  void setEndPosition(const SizeI& end) { _end = end; }
-
-protected:
   SizeI _start;
   SizeI _end;
 };
@@ -337,44 +283,22 @@ struct FOG_API WidgetGeometryAnimation : public WidgetAnimation
 {
   FOG_DECLARE_OBJECT(WidgetGeometryAnimation, WidgetAnimation)
 
-    WidgetGeometryAnimation(Widget* widget) : WidgetAnimation(widget) {
+  WidgetGeometryAnimation(Widget* widget);
+  virtual ~WidgetGeometryAnimation();
 
-  }
+  virtual void onStart();
+  virtual void onStep(AnimationEvent* e);
 
-  virtual ~WidgetGeometryAnimation() {
+  FOG_INLINE const RectI& getStartPosition() const { return _start; }
+  FOG_INLINE const RectI& getEndPosition() const { return _end; }
 
-  }
+  FOG_INLINE void setStartPosition(const RectI& start) { _start = start; }
+  FOG_INLINE void setEndPosition(const RectI& end) { _end = end; }
 
-  virtual void onStart() {
-    if (_widget) {
-      _widget->setGeometry(getDirection() == ANIMATION_FORWARD? _start : _end);
-    }
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-    //will show Widget if the flag is set.
-    WidgetAnimation::onStart();
-  }
-
-  virtual void onStep(AnimationEvent* e) {
-    if (_widget) {
-      RectI p;
-
-      p.setX((int)_start.getX() + (_end.getX() - _start.getX()) * _position);
-      p.setY((int)_start.getY() + (_end.getY() - _start.getY()) * _position);
-
-      p.setWidth((int)_start.getWidth() + (_end.getWidth() - _start.getWidth()) * _position);
-      p.setHeight((int)_start.getHeight() + (_end.getHeight() - _start.getHeight()) * _position);
-
-      _widget->setGeometry(p);
-    }
-  }
-
-  FOG_INLINE RectI getStartPosition() const { return _start; }
-  FOG_INLINE RectI getEndPosition() const { return _end; }
-
-  void setStartPosition(const RectI& start) { _start = start; }
-  void setEndPosition(const RectI& end) { _end = end; }
-
-protected:
   RectI _start;
   RectI _end;
 };

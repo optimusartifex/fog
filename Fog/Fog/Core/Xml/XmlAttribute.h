@@ -50,7 +50,6 @@ struct FOG_API XmlAttribute
   // [Internal]
   // --------------------------------------------------------------------------
 
-protected:
   virtual void destroy();
 
   // --------------------------------------------------------------------------
@@ -71,8 +70,6 @@ protected:
   int _offset;
 
 private:
-  friend struct XmlElement;
-
   _FOG_NO_COPY(XmlAttribute)
 };
 

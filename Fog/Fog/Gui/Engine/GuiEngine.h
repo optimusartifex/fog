@@ -201,8 +201,7 @@ struct FOG_API GuiEngine : public Object
 
   virtual void clearSystemMouseStatus();
 
-  virtual bool startButtonRepeat(uint32_t button,
-    bool reset, TimeDelta delay, TimeDelta interval);
+  virtual bool startButtonRepeat(uint32_t button, bool reset, TimeDelta delay, TimeDelta interval);
   virtual bool stopButtonRepeat(uint32_t button);
   virtual void clearButtonRepeat();
 
@@ -345,11 +344,6 @@ struct FOG_API GuiEngine : public Object
   TimeTicks _buttonTime[3];
 
   UpdateStatus _updateStatus;
-
-  friend struct GuiWindow;
-
-private:
-  friend struct Application;
 };
 
 // ============================================================================

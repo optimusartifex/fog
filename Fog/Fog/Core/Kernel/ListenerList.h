@@ -80,13 +80,10 @@ struct ListenerList : public ListenerListBase
       if (--_list._notifyDepth == 0) _list._compact();
     }
 
-  //private:
     const ListenerList<ListenerT>& _list;
   };
 
-//private:
-//  friend struct ListenerList<ListenerT>::Scope;
-
+private:
   _FOG_NO_COPY(ListenerList)
 };
 

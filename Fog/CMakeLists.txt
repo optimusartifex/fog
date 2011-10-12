@@ -154,9 +154,9 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   Set(FOG_CXX_FLAGS_MMX "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx")
   Set(FOG_CXX_FLAGS_3DNOW "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx -m3dnow")
   Set(FOG_CXX_FLAGS_SSE "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx -msse")
-  Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} -msse2")
-  Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -msse3")
-  Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -mssse3")
+  Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} -msse -msse2")
+  Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -msse -msse2 -msse3")
+  Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -msse -msse2 -msse3 -mssse3")
 EndIf()
 
 # =============================================================================

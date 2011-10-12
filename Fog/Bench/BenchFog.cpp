@@ -318,7 +318,7 @@ void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
   Fog::SizeI polyScreen(
     params.screenSize.w - params.shapeSize,
     params.screenSize.h - params.shapeSize);
-  float polySize = (int)params.shapeSize;
+  float polySize = (float)params.shapeSize;
 
   Fog::PointF points[10];
 

@@ -198,7 +198,7 @@ struct FOG_API Thread
   static void sleep(uint32_t ms);
 
   // --------------------------------------------------------------------------
-  // [Statics - Current]
+  // [Statics - Current Thread]
   // --------------------------------------------------------------------------
 
   //! @brief Get the current thread instance.
@@ -208,29 +208,17 @@ struct FOG_API Thread
   static uint32_t getCurrentThreadId();
 
   // --------------------------------------------------------------------------
-  // [Statics - Main]
+  // [Statics - Main Thread]
   // --------------------------------------------------------------------------
 
-  static Thread* _mainThread;
-  static uint32_t _mainThreadId;
-
   //! @brief Get main thread instance.
-  static FOG_INLINE Thread* getMainThread()
-  {
-    return _mainThread;
-  }
+  static Thread* getMainThread();
 
   //! @brief Get main thread id.
-  static FOG_INLINE uint32_t getMainThreadId()
-  {
-    return _mainThreadId;
-  }
+  static uint32_t getMainThreadId();
 
   //! @brief Get whether current thread is main.
-  static FOG_INLINE bool isMainThread()
-  {
-    return getCurrentThreadId() == _mainThreadId;
-  }
+  static bool isMainThread();
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -253,10 +241,6 @@ struct FOG_API Thread
   EventLoop* _eventLoop;
 
 private:
-  friend struct Application;
-  friend struct MainThread;
-  friend struct QuitTask;
-
   _FOG_NO_COPY(Thread)
 };
 

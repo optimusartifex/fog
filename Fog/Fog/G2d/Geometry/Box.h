@@ -26,7 +26,7 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Box (32-bit integer version).
-struct BoxI
+struct FOG_NO_EXPORT BoxI
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -294,7 +294,7 @@ struct BoxI
 // ============================================================================
 
 //! @brief Box (float).
-struct BoxF
+struct FOG_NO_EXPORT BoxF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

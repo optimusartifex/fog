@@ -25,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Rectangle (32-bit integer version).
-struct RectI
+struct FOG_NO_EXPORT RectI
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -334,7 +334,7 @@ struct RectI
 // ============================================================================
 
 //! @brief Rectangle (float).
-struct RectF
+struct FOG_NO_EXPORT RectF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -732,7 +732,7 @@ struct RectF
 // ============================================================================
 
 //! @brief Rectangle (64-bit integer version).
-struct RectD
+struct FOG_NO_EXPORT RectD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

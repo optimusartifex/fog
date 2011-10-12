@@ -23,7 +23,7 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Size (32-bit integer version).
-struct SizeI
+struct FOG_NO_EXPORT SizeI
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -172,7 +172,7 @@ struct SizeI
 // [Fog::SizeF]
 // ============================================================================
 
-struct SizeF
+struct FOG_NO_EXPORT SizeF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -352,7 +352,7 @@ struct SizeF
 // [Fog::SizeD]
 // ============================================================================
 
-struct SizeD
+struct FOG_NO_EXPORT SizeD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

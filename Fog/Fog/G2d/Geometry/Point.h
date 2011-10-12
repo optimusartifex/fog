@@ -163,7 +163,7 @@ struct FOG_NO_EXPORT PointI
 // ============================================================================
 
 //! @brief Point (float).
-struct PointF
+struct FOG_NO_EXPORT PointF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -352,7 +352,7 @@ struct PointF
 // ============================================================================
 
 //! @brief Point (double).
-struct PointD
+struct FOG_NO_EXPORT PointD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

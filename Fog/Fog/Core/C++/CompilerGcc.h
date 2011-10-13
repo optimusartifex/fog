@@ -22,7 +22,10 @@
 
 // Standard attributes.
 #if defined(__MINGW32__)
-# define FOG_INLINE inline __attribute__((gnu_inline))
+// MinGW has very strange problem that it can't inline some really trivial
+// functions. To workaround this bug we define FOG_INLINE to inline, but this
+// means that many blitters won't be inlined, degrading performance a lot.
+# define FOG_INLINE inline
 #else
 # define FOG_INLINE inline __attribute__((always_inline))
 #endif

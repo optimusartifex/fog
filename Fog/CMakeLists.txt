@@ -89,9 +89,10 @@ Set(FOG_CXX_FLAGS_SSSE3 "")
 
 If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Check for supported compiler flags.
+  Check_CXX_Compiler_Flag("-flto" FOG_CC_HAS_FLTO)
+  Check_CXX_Compiler_Flag("-finline-functions" FOG_CC_HAS_INLINE_FUNCTIONS)
   Check_CXX_Compiler_Flag("-fmerge-all-constants" FOG_CC_HAS_FMERGE_ALL_CONSTANTS)
   Check_CXX_Compiler_Flag("-fno-keep-static-consts" FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS)
-  Check_CXX_Compiler_Flag("-flto" FOG_CC_HAS_FLTO)
 
   Check_CXX_Compiler_Flag("-Winline" FOG_CC_HAS_WINLINE)
   Check_CXX_Compiler_Flag("-Wno-enum-compare" FOG_CC_HAS_WNO_ENUM_COMPARE)
@@ -116,6 +117,11 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-keep-static-consts")
   EndIf()
 
+  # Inline functions.
+  If(${FOG_CC_HAS_INLINE_FUNCTIONS})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finline-functions")
+  EndIf()
+
   # Strict aliasing, Fog-Framework should be well written.
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-aliasing")
 
@@ -133,8 +139,8 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
   # -Winline:
   #
-  # I want to see all functions which are not inlined. This could help when
-  # looking for non-inlined function in Fog::G2d inner loops.
+  # We want to see all functions which are not inlined. This could help
+  # when to identify critical functions in code that were't inlined.
   If (${FOG_CC_HAS_WINLINE})
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline")
   EndIf()
@@ -1769,7 +1775,7 @@ If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
     FogTestBezierOffset
     FogTestPolyOffset
     FogTestRegion
-    FogTestRle
+#   FogTestRle
   )
 
   ForEach(file ${FOG_EXAMPLE_SOURCES})

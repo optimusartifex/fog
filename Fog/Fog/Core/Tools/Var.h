@@ -484,6 +484,7 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE err_t setString(const StringA& src) { return _api.var_setType(this, VAR_TYPE_STRINGA, &src); }
   FOG_INLINE err_t setString(const StringW& src) { return _api.var_setType(this, VAR_TYPE_STRINGW, &src); }
+  FOG_INLINE err_t setString(const ManagedStringW& src) { return _api.var_setType(this, VAR_TYPE_STRINGW, &src); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

@@ -289,7 +289,7 @@ struct FOG_NO_EXPORT ManagedStringCacheW
 };
 
 // ============================================================================
-// [Fog::FOG_STR]
+// [Fog::FOG_STR_]
 // ============================================================================
 
 #define FOG_STR_(_Id_) (::Fog::ManagedStringCacheW::get()->getString(::Fog::STR_##_Id_))

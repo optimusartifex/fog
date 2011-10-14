@@ -778,7 +778,7 @@ static const char ManagedStringCacheW_data[] =
   "USERPROFILE\0"
 
   // --------------------------------------------------------------------------
-  // [Fog/G2d/G2d - Imaging - Image Codec]
+  // [Fog/G2d - Imaging - Image Codec]
   // --------------------------------------------------------------------------
 
   "width\0"
@@ -793,7 +793,7 @@ static const char ManagedStringCacheW_data[] =
   "skipFileHeader\0"
 
   // --------------------------------------------------------------------------
-  // [Fog/G2d/G2d - Imaging - Image Type]
+  // [Fog/G2d - Imaging - Image Type]
   // --------------------------------------------------------------------------
 
   "ANI\0"
@@ -815,7 +815,7 @@ static const char ManagedStringCacheW_data[] =
   "XPM\0"
 
   // --------------------------------------------------------------------------
-  // [Fog/G2d/G2d - Imaging - Image Extension]
+  // [Fog/G2d - Imaging - Image Extension]
   // --------------------------------------------------------------------------
 
   "ani\0"
@@ -842,7 +842,7 @@ static const char ManagedStringCacheW_data[] =
   "xpm\0"
 
   // --------------------------------------------------------------------------
-  // [Fog/G2d/Svg]
+  // [Fog/G2d - Svg]
   // --------------------------------------------------------------------------
 
   "none\0"

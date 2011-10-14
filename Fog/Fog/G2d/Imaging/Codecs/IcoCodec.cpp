@@ -15,7 +15,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
 #include <Fog/G2d/Imaging/Codecs/IcoCodec_p.h>
@@ -33,7 +32,7 @@ namespace Fog {
 IcoCodecProvider::IcoCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = fog_strings->getString(STR_G2D_STREAM_ICO);
+  _name = FOG_STR_(IMAGE_FILE_ICO);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -43,7 +42,7 @@ IcoCodecProvider::IcoCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(1);
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_ico));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_ico));
 }
 
 IcoCodecProvider::~IcoCodecProvider()
@@ -254,7 +253,7 @@ err_t IcoDecoder::readImage(Image& image)
   {
     // Here I used createDecoderByExtension(), becuase I don't care which decoder
     // will be used for this (for example it's possible to use GDI+ under Windows).
-    err = ImageCodecProvider::createDecoderByExtension(fog_strings->getString(STR_G2D_EXTENSION_png), &decoder);
+    err = ImageCodecProvider::createDecoderByExtension(FOG_STR_(IMAGE_EXT_png), &decoder);
     if (FOG_IS_ERROR(err)) goto _End;
 
     decoder->attachStream(_stream);
@@ -265,11 +264,11 @@ err_t IcoDecoder::readImage(Image& image)
     // Here I used createDecoderByName(), because I want exactly BMP Decoder
     // from Fog. Note the property skipFileHeader that configures this decoder
     // to skip reading the bmp file header.
-    err = ImageCodecProvider::createDecoderByName(fog_strings->getString(STR_G2D_STREAM_BMP), &decoder);
+    err = ImageCodecProvider::createDecoderByName(FOG_STR_(IMAGE_FILE_BMP), &decoder);
     if (FOG_IS_ERROR(err)) goto _End;
 
     decoder->attachStream(_stream);
-    decoder->setProperty(fog_strings->getString(STR_G2D_CODEC_skipFileHeader), Var::fromInteger(1));
+    decoder->setProperty(FOG_STR_(IMAGE_CODEC_skipFileHeader), Var::fromInteger(1));
 
     if ((err = decoder->readHeader()) == ERR_OK)
     {

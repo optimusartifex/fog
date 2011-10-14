@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgEllipseElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,11 +20,11 @@ namespace Fog {
 // ============================================================================
 
 SvgEllipseElement::SvgEllipseElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_ellipse), SVG_ELEMENT_ELLIPSE),
-  a_cx(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgEllipseElement, a_cx)),
-  a_cy(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgEllipseElement, a_cy)),
-  a_rx(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_rx), FOG_OFFSET_OF(SvgEllipseElement, a_rx)),
-  a_ry(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_ry), FOG_OFFSET_OF(SvgEllipseElement, a_ry))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_ellipse), SVG_ELEMENT_ELLIPSE),
+  a_cx(NULL, FOG_STR_(SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgEllipseElement, a_cx)),
+  a_cy(NULL, FOG_STR_(SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgEllipseElement, a_cy)),
+  a_rx(NULL, FOG_STR_(SVG_ATTRIBUTE_rx), FOG_OFFSET_OF(SvgEllipseElement, a_rx)),
+  a_ry(NULL, FOG_STR_(SVG_ATTRIBUTE_ry), FOG_OFFSET_OF(SvgEllipseElement, a_ry))
 {
 }
 
@@ -33,12 +33,12 @@ SvgEllipseElement::~SvgEllipseElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgEllipseElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgEllipseElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_rx)) return (XmlAttribute*)&a_rx;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_ry)) return (XmlAttribute*)&a_ry;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_rx)) return (XmlAttribute*)&a_rx;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_ry)) return (XmlAttribute*)&a_ry;
 
   return base::_createAttribute(name);
 }

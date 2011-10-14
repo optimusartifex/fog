@@ -20,7 +20,6 @@
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/Var.h>
 
@@ -262,25 +261,25 @@ err_t Object::_deleteChildren()
 
 err_t Object::getProperty(const StringW& name, Var& dst) const
 {
-  ManagedString m_name;
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
 
-  if (m_name.setIfManaged(name) == ERR_RT_OBJECT_NOT_FOUND)
+  if (m_name.isEmpty())
     return ERR_OBJECT_INVALID_PROPERTY;
 
-  return getProperty(m_name, dst);
+  return _getProperty(m_name, dst);
 }
 
 err_t Object::setProperty(const StringW& name, const Var& src)
 {
-  ManagedString m_name;
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
 
-  if (m_name.setIfManaged(name) == ERR_RT_OBJECT_NOT_FOUND)
+  if (m_name.isEmpty())
     return ERR_OBJECT_INVALID_PROPERTY;
 
-  return setProperty(m_name, src);
+  return _setProperty(m_name, src);
 }
 
-err_t Object::getProperty(const ManagedString& name, Var& dst) const
+err_t Object::_getProperty(const ManagedStringW& name, Var& dst) const
 {
   FOG_UNUSED(name);
   FOG_UNUSED(dst);
@@ -288,7 +287,7 @@ err_t Object::getProperty(const ManagedString& name, Var& dst) const
   return ERR_OBJECT_INVALID_PROPERTY;
 }
 
-err_t Object::setProperty(const ManagedString& name, const Var& src)
+err_t Object::_setProperty(const ManagedStringW& name, const Var& src)
 {
   FOG_UNUSED(name);
   FOG_UNUSED(src);

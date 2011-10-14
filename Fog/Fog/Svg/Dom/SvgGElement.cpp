@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgGElement_p.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 // ============================================================================
 
 SvgGElement::SvgGElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_g), SVG_ELEMENT_G)
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_g), SVG_ELEMENT_G)
 {
 }
 

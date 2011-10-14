@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   PRINT_TYPE(ListUntypedData);
   PRINT_TYPE(Locale);
   PRINT_TYPE(LocaleData);
-  PRINT_TYPE(ManagedString);
+  PRINT_TYPE(ManagedStringW);
   PRINT_TYPE(Range);
   PRINT_TYPE(RegExpA);
   PRINT_TYPE(RegExpW);
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
   PRINT_TYPE(Texture);
 
   // [G2d/Text]
-  PRINT_PART("G2d/Font");
+  PRINT_PART("G2d/Text");
   PRINT_TYPE(Font);
   PRINT_TYPE(FontData);
 

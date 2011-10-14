@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::SvgElement]
 // ============================================================================
 
-SvgElement::SvgElement(const ManagedString& tagName, uint32_t svgType) :
+SvgElement::SvgElement(const ManagedStringW& tagName, uint32_t svgType) :
   XmlElement(tagName),
   _svgType(svgType),
   _boundingBoxDirty(true),
@@ -43,7 +43,7 @@ SvgElement* SvgElement::clone() const
   return e;
 }
 
-XmlAttribute* SvgElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgElement::_createAttribute(const ManagedStringW& name) const
 {
   return base::_createAttribute(name);
 }

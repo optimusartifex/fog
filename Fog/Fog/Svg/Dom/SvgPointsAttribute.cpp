@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::SvgPointsAttribute]
 // ============================================================================
 
-SvgPointsAttribute::SvgPointsAttribute(XmlElement* element, const ManagedString& name, bool closePath, int offset) :
+SvgPointsAttribute::SvgPointsAttribute(XmlElement* element, const ManagedStringW& name, bool closePath, int offset) :
   XmlAttribute(element, name, offset),
   _closePath(closePath)
 {

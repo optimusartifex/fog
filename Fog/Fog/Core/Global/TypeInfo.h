@@ -370,7 +370,7 @@ _FOG_TYPE_DECLARE(Fog::Date                    , C(SIMPLE )               | F(OW
 _FOG_TYPE_DECLARE(Fog::FormatInt               , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::FormatReal              , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::Locale                  , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::ManagedString           , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::ManagedStringW          , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::Range                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::RegExpA                 , C(MOVABLE) | F(IMPLICIT)                         )
 _FOG_TYPE_DECLARE(Fog::RegExpW                 , C(MOVABLE) | F(IMPLICIT)                         )

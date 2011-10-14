@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 
@@ -81,35 +81,35 @@ _Fail:
   return NULL;
 }
 
-XmlElement* SvgDocument::createElement(const ManagedString& tagName)
+XmlElement* SvgDocument::createElement(const ManagedStringW& tagName)
 {
   return createElementStatic(tagName);
 }
 
-XmlElement* SvgDocument::createElementStatic(const ManagedString& tagName)
+XmlElement* SvgDocument::createElementStatic(const ManagedStringW& tagName)
 {
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_a             )) return fog_new SvgAElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_circle        )) return fog_new SvgCircleElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_defs          )) return fog_new SvgDefsElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_ellipse       )) return fog_new SvgEllipseElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_g             )) return fog_new SvgGElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_image         )) return fog_new SvgImageElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_line          )) return fog_new SvgLineElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_linearGradient)) return fog_new SvgLinearGradientElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_path          )) return fog_new SvgPathElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_pattern       )) return fog_new SvgPatternElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_polygon       )) return fog_new SvgPolygonElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_polyline      )) return fog_new SvgPolylineElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_radialGradient)) return fog_new SvgRadialGradientElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_rect          )) return fog_new SvgRectElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_solidColor    )) return fog_new SvgSolidColorElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_stop          )) return fog_new SvgStopElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_svg           )) return fog_new SvgRootElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_symbol        )) return fog_new SvgSymbolElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_text          )) return fog_new SvgTextElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_tspan         )) return fog_new SvgTSpanElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_use           )) return fog_new SvgUseElement();
-  if (tagName == fog_strings->getString(STR_SVG_ELEMENT_view          )) return fog_new SvgViewElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_a             )) return fog_new SvgAElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_circle        )) return fog_new SvgCircleElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_defs          )) return fog_new SvgDefsElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_ellipse       )) return fog_new SvgEllipseElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_g             )) return fog_new SvgGElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_image         )) return fog_new SvgImageElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_line          )) return fog_new SvgLineElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_linearGradient)) return fog_new SvgLinearGradientElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_path          )) return fog_new SvgPathElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_pattern       )) return fog_new SvgPatternElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_polygon       )) return fog_new SvgPolygonElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_polyline      )) return fog_new SvgPolylineElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_radialGradient)) return fog_new SvgRadialGradientElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_rect          )) return fog_new SvgRectElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_solidColor    )) return fog_new SvgSolidColorElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_stop          )) return fog_new SvgStopElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_svg           )) return fog_new SvgRootElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_symbol        )) return fog_new SvgSymbolElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_text          )) return fog_new SvgTextElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_tspan         )) return fog_new SvgTSpanElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_use           )) return fog_new SvgUseElement();
+  if (tagName == FOG_STR_(SVG_ELEMENT_view          )) return fog_new SvgViewElement();
 
   // If element is not SVG, use the base class to create a default element
   // for the given tagName. But remember, this element won't be processed.

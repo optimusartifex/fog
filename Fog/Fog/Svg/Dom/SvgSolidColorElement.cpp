@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgSolidColorElement_p.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 // ============================================================================
 
 SvgSolidColorElement::SvgSolidColorElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_solidColor), SVG_ELEMENT_SOLID_COLOR)
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_solidColor), SVG_ELEMENT_SOLID_COLOR)
 {
 }
 
@@ -28,7 +28,7 @@ SvgSolidColorElement::~SvgSolidColorElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgSolidColorElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgSolidColorElement::_createAttribute(const ManagedStringW& name) const
 {
   return base::_createAttribute(name);
 }

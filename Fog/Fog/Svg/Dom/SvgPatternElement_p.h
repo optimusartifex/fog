@@ -40,7 +40,7 @@ struct FOG_NO_EXPORT SvgPatternElement : public SvgElement
   // [SVG Attributes]
   // --------------------------------------------------------------------------
 
-  XmlAttribute* _createAttribute(const ManagedString& name) const;
+  XmlAttribute* _createAttribute(const ManagedStringW& name) const;
 
   // --------------------------------------------------------------------------
   // [SVG Interface]

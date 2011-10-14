@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgStyledElement_p.h>
@@ -26,13 +26,14 @@ namespace Fog {
 // [Helpers]
 // ============================================================================
 
-static int svgStyleToId(const ManagedString& name)
+static int svgStyleToId(const ManagedStringW& name)
 {
   int i;
 
   for (i = 0; i < SVG_STYLE_INVALID; i++)
   {
-    if (name == fog_strings->getString(i + STR_SVG_STYLE_NAMES)) break;
+    if (name == ManagedStringCacheW::get()->getString(i + STR_SVG_STYLE_NAMES))
+      break;
   }
 
   return i;
@@ -90,10 +91,10 @@ _Bail:
 // [Fog::SvgStyledElement]
 // ============================================================================
 
-SvgStyledElement::SvgStyledElement(const ManagedString& tagName, uint32_t svgType) :
+SvgStyledElement::SvgStyledElement(const ManagedStringW& tagName, uint32_t svgType) :
   SvgElement(tagName, svgType),
-  a_style    (this, fog_strings->getString(STR_XML_ATTRIBUTE_style), FOG_OFFSET_OF(SvgStyledElement, a_style)),
-  a_transform(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_transform), FOG_OFFSET_OF(SvgStyledElement, a_transform))
+  a_style    (this, FOG_STR_(XML_ATTRIBUTE_style), FOG_OFFSET_OF(SvgStyledElement, a_style)),
+  a_transform(NULL, FOG_STR_(SVG_ATTRIBUTE_transform), FOG_OFFSET_OF(SvgStyledElement, a_transform))
 {
   // Style attribute is always added as default and can't be removed.
   _attributes.append(&a_style);
@@ -106,15 +107,15 @@ SvgStyledElement::~SvgStyledElement()
   FOG_ASSERT(_attributes.isEmpty());
 }
 
-XmlAttribute* SvgStyledElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgStyledElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_XML_ATTRIBUTE_style)) return (XmlAttribute*)&a_style;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_transform)) return (XmlAttribute*)&a_transform;
+  if (name == FOG_STR_(XML_ATTRIBUTE_style)) return (XmlAttribute*)&a_style;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_transform)) return (XmlAttribute*)&a_transform;
 
   return base::_createAttribute(name);
 }
 
-err_t SvgStyledElement::_setAttribute(const ManagedString& name, const StringW& value)
+err_t SvgStyledElement::_setAttribute(const ManagedStringW& name, const StringW& value)
 {
   // Add css-style instead of attribute.
   int id = svgStyleToId(name);
@@ -130,9 +131,9 @@ err_t SvgStyledElement::_setAttribute(const ManagedString& name, const StringW& 
   return base::_setAttribute(name, value);
 }
 
-err_t SvgStyledElement::_removeAttribute(const ManagedString& name)
+err_t SvgStyledElement::_removeAttribute(const ManagedStringW& name)
 {
-  if (name == fog_strings->getString(STR_XML_ATTRIBUTE_style)) return ERR_XML_ATTRIBUTE_CANT_BE_REMOVED;
+  if (name == FOG_STR_(XML_ATTRIBUTE_style)) return ERR_XML_ATTRIBUTE_CANT_BE_REMOVED;
 
   return base::_removeAttribute(name);
 }
@@ -304,32 +305,31 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 
 StringW SvgStyledElement::getStyle(const StringW& name) const
 {
-  ManagedString managedName;
   StringW result;
-  int id;
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
 
-  if (managedName.setIfManaged(name) == ERR_OK &&
-      (uint)(id = svgStyleToId(managedName)) < SVG_STYLE_INVALID)
-  {
-    result = a_style.getStyle(id);
-  }
+  if (m_name.isEmpty())
+    return result;
 
-  return result;
+  int id = svgStyleToId(m_name);
+  if ((uint)id >= SVG_STYLE_INVALID)
+    return result;
+
+  return a_style.getStyle(id);
 }
 
 err_t SvgStyledElement::setStyle(const StringW& name, const StringW& value)
 {
-  ManagedString managedName;
-  err_t err = ERR_SVG_INVALID_STYLE_NAME;
-  int id;
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
 
-  if (managedName.setIfManaged(name) == ERR_OK &&
-      (uint)(id = svgStyleToId(managedName)) < SVG_STYLE_INVALID)
-  {
-    err = a_style.setStyle(id, value);
-  }
+  if (m_name.isEmpty())
+    return ERR_SVG_INVALID_STYLE_NAME;
 
-  return err;
+  int id = svgStyleToId(m_name);
+  if ((uint)id >= SVG_STYLE_INVALID)
+    return ERR_SVG_INVALID_STYLE_NAME;
+
+  return a_style.setStyle(id, value);
 }
 
 } // Fog namespace

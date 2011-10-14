@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 #include <Fog/Svg/Dom/SvgImageLinkAttribute_p.h>
@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::SvgImageLinkAttribute]
 // ============================================================================
 
-SvgImageLinkAttribute::SvgImageLinkAttribute(XmlElement* element, const ManagedString& name, int offset) :
+SvgImageLinkAttribute::SvgImageLinkAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
   XmlAttribute(element, name, offset),
   _embedded(false)
 {
@@ -75,11 +75,11 @@ err_t SvgImageLinkAttribute::setValue(const StringW& value)
 
       if (type == Ascii8("image/png"))
       {
-        extension = fog_strings->getString(STR_G2D_EXTENSION_png);
+        extension = FOG_STR_(IMAGE_EXT_png);
       }
       else if (type == Ascii8("image/jpeg"))
       {
-        extension = fog_strings->getString(STR_G2D_EXTENSION_jpeg);
+        extension = FOG_STR_(IMAGE_EXT_jpeg);
       }
       else
       {

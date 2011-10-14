@@ -9,7 +9,7 @@
 #endif
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlCDATA.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 // ============================================================================
 
 XmlCDATA::XmlCDATA(const StringW& data) :
-  XmlNoText(fog_strings->getString(STR_XML__cdata)),
+  XmlNoText(FOG_STR_(XML__cdata)),
   _data(data)
 {
   _type = XML_ELEMENT_CDATA;

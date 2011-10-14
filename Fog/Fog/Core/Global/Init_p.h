@@ -90,9 +90,7 @@ FOG_NO_EXPORT void Stream_fini(void);
 FOG_NO_EXPORT void String_init(void);
 FOG_NO_EXPORT void StringUtil_init(void);
 FOG_NO_EXPORT void StringUtil_init_dtoa(void);
-
 FOG_NO_EXPORT void RegExp_init(void);
-FOG_NO_EXPORT void Strings_init(void);
 
 FOG_NO_EXPORT void TextCodec_init(void);
 FOG_NO_EXPORT void TextCodec_fini(void);

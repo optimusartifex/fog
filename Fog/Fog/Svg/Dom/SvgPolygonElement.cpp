@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgPolygonElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,8 +20,8 @@ namespace Fog {
 // ============================================================================
 
 SvgPolygonElement::SvgPolygonElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_polygon), SVG_ELEMENT_POLYGON),
-  a_points(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_points), true, FOG_OFFSET_OF(SvgPolygonElement, a_points))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_polygon), SVG_ELEMENT_POLYGON),
+  a_points(NULL, FOG_STR_(SVG_ATTRIBUTE_points), true, FOG_OFFSET_OF(SvgPolygonElement, a_points))
 {
 }
 
@@ -30,9 +30,9 @@ SvgPolygonElement::~SvgPolygonElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgPolygonElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgPolygonElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_points)) return (XmlAttribute*)&a_points;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_points)) return (XmlAttribute*)&a_points;
 
   return base::_createAttribute(name);
 }

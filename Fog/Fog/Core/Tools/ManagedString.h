@@ -21,195 +21,278 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct ManagedStringCache;
+struct ManagedStringCacheW;
 
 // ============================================================================
-// [Fog::ManagedString]
+// [Fog::ManagedStringW]
 // ============================================================================
 
-//! @brief Managed string is memory effective string (managed).
+//! @brief Managed string is memory efficient string with some unique properties.
 //!
-//! Managed strings are used in Fog library mainly in hash tables and in areas
+//! Managed strings are used in Fog-Framework mainly in hash tables and in areas
 //! where string content will be probably shared across many string instances.
 //! The string data for all equal string are shared and it's guaranted that
 //! comparing pointer to data is comparing for string equality. So it's very
-//! fast to test whether two managed strings are equal or not. Another extension
-//! is that string hash code is calculated when creating managed string, so
-//! it's also only inlined getter (instead of another call in Fog::StringX class).
+//! fast to test whether two managed strings are equal. Another extension is that
+//! string hash code is calculated when creating managed string, so it's inlined
+//! instead of calling private method to get it.
 //!
 //! Why to introduce another string class?
 //!
 //! It's easy - performance and easy to use API. If you want to see the code that
-//! is using managed strings in detail, you should look at Fog-Xml API. For all
-//! XML tags and attributes are used managed strings. The idea is very simple -
-//! XML tag name and attribute names are very unlikely to change, but they can
-//! be processed many times. This means that we need very often to compare tag
-//! and attribute names, but we will never change them (in fact, there is no API
-//! to change attribute name, you can only add, read or remove it).
+//! is using managed strings in detail, you should look at Fog::Object and 
+//! Fog::Xml. For all XML tags and attributes managed strings are used. The 
+//! idea is very simple - XML tag names and attributes are very likely to be
+//! used in many XML elements, thus we can save memory and processing.
 //!
-//! Managed string's data are immutable.
-struct FOG_API ManagedString
+//! Managed string's data are immutable in contrast to the non-shared @c StringW
+//! data.
+struct FOG_NO_EXPORT ManagedStringW
 {
-  // [Node]
-
-  //! @brief Node in internal hash table.
-  struct FOG_NO_EXPORT Node
-  {
-    // [Construction / Destruction]
-
-    FOG_INLINE Node(const StringW& s) :
-      string(s),
-      next(NULL)
-    {
-      reference.init(1);
-
-      // This will calculate hash code. After this call we are not calling
-      // function for this, we just use the value stored in StringDataW.
-      string.getHashCode();
-    }
-
-    // Constructor used by @c ManagedString::Cache.
-    FOG_INLINE Node(StringDataW* s_d) :
-      string(s_d),
-      next(NULL)
-    {
-      reference.init(1);
-
-      // This will calculate hash code. After this call we are not calling
-      // function for this, we just use the value stored in StringDataW.
-      string.getHashCode();
-    }
-
-    FOG_INLINE ~Node()
-    {
-    }
-
-    // [Methods]
-
-    FOG_INLINE const StringW& getString() const { return string; }
-    FOG_INLINE uint32_t getHashCode() const { return string._d->hashCode; }
-
-    // [Ref]
-
-    FOG_INLINE Node* addRef() const { reference.inc(); return const_cast<Node*>(this); }
-
-    // [Members]
-
-    mutable Atomic<size_t> reference;
-    StringW string;
-    Node* next;
-
-  private:
-    _FOG_NO_COPY(Node)
-  };
-
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
-  ManagedString();
-  ManagedString(const ManagedString& other);
-  explicit ManagedString(const StringW& s);
-  explicit ManagedString(const StubW& s);
-  ~ManagedString();
-
-  // [Clear]
-
-  void clear();
-
-  // [Setters]
-
-  err_t set(const ManagedString& s);
-  err_t set(const StringW& s);
-  err_t set(const StubW& s);
-
-  FOG_INLINE err_t set(const CharW* s, size_t length = DETECT_LENGTH) { return set(StubW(s, length)); }
-
-  err_t setIfManaged(const StringW& s);
-  err_t setIfManaged(const StubW& s);
-
-  FOG_INLINE err_t setIfManaged(const CharW* s, size_t length = DETECT_LENGTH) { return setIfManaged(StubW(s, length)); }
-
-  // [Getters]
-
-  FOG_INLINE bool isEmpty() const { return _node == _dnull; }
-  FOG_INLINE size_t getReference() const { return _node->reference.get(); }
-  FOG_INLINE const StringW& getString() const { return _node->getString(); }
-  FOG_INLINE uint32_t getHashCode() const { return _node->getHashCode(); }
-
-  // [Operator Overload]
-
-  FOG_INLINE ManagedString& operator=(const ManagedString& str) { set(str); return *this; }
-  FOG_INLINE ManagedString& operator=(const StringW& str) { set(str); return *this; }
-  FOG_INLINE ManagedString& operator=(const StubW& str) { set(str); return *this; }
-
-  FOG_INLINE bool operator==(const ManagedString& other) { return _node == other._node; }
-  FOG_INLINE bool operator==(const StringW& other) { return _node->string == other; }
-  FOG_INLINE bool operator==(const Ascii8& other) { return _node->string == other; }
-  FOG_INLINE bool operator==(const StubW& other) { return _node->string == other; }
-
-  FOG_INLINE bool operator!=(const ManagedString& other) { return _node != other._node; }
-  FOG_INLINE bool operator!=(const StringW& other) { return _node->string != other; }
-  FOG_INLINE bool operator!=(const Ascii8& other) { return _node->string != other; }
-  FOG_INLINE bool operator!=(const StubW& other) { return _node->string != other; }
-
-  FOG_INLINE operator const StringW&() const { return _node->string; }
-
-  // [Cache]
-
-  struct FOG_NO_EXPORT Cache
+  FOG_INLINE ManagedStringW()
   {
-    //! @brief Private constructur used by @c ManagedString::createCache().
-    FOG_INLINE Cache(const StringW& name, size_t count) : _name(name), _count(count) {}
+    _api.managedstringw_ctor(this);
+  }
 
-    //! @brief Private destructur.
-    FOG_INLINE ~Cache() {}
+  FOG_INLINE ManagedStringW(const ManagedStringW& other)
+  {
+    _api.managedstringw_ctorCopy(this, &other);
+  }
 
-    //! @brief Returns cache name.
-    //!
-    //! @sa ManagedStringCache::getCacheByName().
-    FOG_INLINE const StringW& getName() const { return _name; }
+  explicit FOG_INLINE ManagedStringW(const Ascii8& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
+  {
+    _api.managedstringw_ctorStubA(this, &stub, options);
+  }
 
-    //! @brief Return count of managed strings in cache.
-    FOG_INLINE size_t getCount() const { return _count; }
+  explicit FOG_INLINE ManagedStringW(const StubW& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
+  {
+    _api.managedstringw_ctorStubW(this, &stub, options);
+  }
 
-    //! @brief Return list of all managed strings in cache.
-    FOG_INLINE const ManagedString* getList() const { return (ManagedString *)_data; }
+  explicit FOG_INLINE ManagedStringW(const StringW& str, uint32_t options = MANAGED_STRING_OPTION_NONE)
+  {
+    _api.managedstringw_ctorStringW(this, &str, options);
+  }
 
-    //! @brief Return reference to managed string at index @a i.
-    FOG_INLINE const ManagedString& getString(size_t i) const
-    {
-      FOG_ASSERT_X(i < _count, "Fog::ManagedString::Cache::getString() - Index out of bounds");
-      return ((ManagedString *)_data)[i];
-    }
+  FOG_INLINE ~ManagedStringW()
+  {
+    _api.managedstringw_dtor(this);
+  }
 
-    // [Members]
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
 
-    //! @brief Cache name.
-    StringW _name;
-    //! @brief Count of strings in cache.
-    size_t _count;
-    //! @brief Continuous cache memory.
-    Node* _data[1];
-  };
+  FOG_INLINE err_t set(const Ascii8& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
+  {
+    return _api.managedstringw_setStubA(this, &stub, options);
+  }
 
-  //! @brief Create managed string cache (@c ManagedString::Cache).
+  FOG_INLINE err_t set(const StubW& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
+  {
+    return _api.managedstringw_setStubW(this, &stub, options);
+  }
+
+  FOG_INLINE err_t set(const StringW& str, uint32_t options = MANAGED_STRING_OPTION_NONE)
+  {
+    return _api.managedstringw_setStringW(this, &str, options);
+  }
+
+  FOG_INLINE err_t set(const ManagedStringW& str)
+  {
+    return _api.managedstringw_setManaged(this, &str);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getReference() const { return _string->_d->reference.get(); }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    _api.managedstringw_reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getLength() const
+  {
+    return _string->_d->length;
+  }
+
+  FOG_INLINE bool isEmpty() const
+  {
+    return _string->_d->length == 0;
+  }
+
+  FOG_INLINE uint32_t getHashCode() const
+  {
+    return _string->_d->hashCode;
+  }
+
+  FOG_INLINE const CharW* getData() const
+  {
+    return _string->_d->data;
+  }
+
+  FOG_INLINE const StringW& getString() const
+  {
+    return _string;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const Ascii8& stub) const
+  {
+    return _api.stringw_eqStubA(&_string, &stub);
+  }
+
+  FOG_INLINE bool eq(const StubW& stub) const
+  {
+    return _api.stringw_eqStubW(&_string, &stub);
+  }
+
+  FOG_INLINE bool eq(const StringW& str) const
+  {
+    return _api.stringw_eqStringW(&_string, &str);
+  }
+
+  FOG_INLINE bool eq(const ManagedStringW& other) const
+  {
+    return _string->_d == other._string->_d;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Equality]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const ManagedStringW* a, const ManagedStringW* b)
+  {
+    return a->_string->_d == b->_string->_d;
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)_api.managedstringw_eq;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Cleanup]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void cleanup()
+  {
+    _api.managedstringw_cleanup();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ManagedStringW& operator=(const Ascii8& str) { set(str); return *this; }
+  FOG_INLINE ManagedStringW& operator=(const StubW& str) { set(str); return *this; }
+  FOG_INLINE ManagedStringW& operator=(const StringW& str) { set(str); return *this; }
+  FOG_INLINE ManagedStringW& operator=(const ManagedStringW& str) { set(str); return *this; }
+
+  FOG_INLINE bool operator==(const Ascii8& stub) const { return  eq(stub); }
+  FOG_INLINE bool operator!=(const Ascii8& stub) const { return !eq(stub); }
+
+  FOG_INLINE bool operator==(const StubW& stub) const { return  eq(stub); }
+  FOG_INLINE bool operator!=(const StubW& stub) const { return !eq(stub); }
+
+  FOG_INLINE bool operator==(const StringW& str) const { return  eq(str); }
+  FOG_INLINE bool operator!=(const StringW& str) const { return !eq(str); }
+
+  FOG_INLINE bool operator==(const ManagedStringW& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const ManagedStringW& other) const { return !eq(other); }
+
+  FOG_INLINE operator const StringW&() const { return _string; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<StringW> _string;
+};
+
+// ============================================================================
+// [Fog::ManagedStringCacheW]
+// ============================================================================
+
+struct FOG_NO_EXPORT ManagedStringCacheW
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get the cache length.
+  FOG_INLINE size_t getLength() const
+  {
+    return _length;
+  }
+
+  //! @brief Get the list of ManagedStringW instances in the cache.
+  FOG_INLINE const ManagedStringW* getData() const
+  {
+    return reinterpret_cast<const ManagedStringW *>(this + 1);
+  }
+
+  //! @brief Return reference to managed string at index @a i.
+  FOG_INLINE const ManagedStringW& getString(size_t i) const
+  {
+    FOG_ASSERT_X(i < _length,
+      "Fog::ManagedStringCacheW::getString() - Index out of bounds.");
+
+    return reinterpret_cast<const ManagedStringW *>(this + 1)[i];
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  //! @brief Create ref @c ManagedStringCacheW.
   //!
-  //! @param strings Array of strings to create. Each string ends with zero terminator.
+  //! @param strings Array of strings to create. Each string ends with a zero terminator.
   //! @param length Total length of @a strings with all zero terminators.
   //! @param count Count of zero terminated strings in @a strings.
   //! @param name Optional name of this collection for loadable libraries.
-  static Cache* createCache(const char* strings, size_t length, size_t count, const StringW& name);
+  static FOG_INLINE ManagedStringCacheW* create(const char* sData, size_t sLength, size_t listLength)
+  {
+    return _api.managedstringcachew_create(sData, sLength, listLength);
+  }
 
-  //! @brief Get managed string cache.
-  static Cache* getCacheByName(const StringW& name);
+  //! @brief Get global @ref ManagedStringCacheW.
+  static FOG_INLINE ManagedStringCacheW* get()
+  {
+    return _api.managedstringcachew_oInstance;
+  }
 
-  // [Statics]
-
-  static Node* _dnull;
-
+  // --------------------------------------------------------------------------
   // [Members]
+  // --------------------------------------------------------------------------
 
-  Node* _node;
+  //! @brief Cache length.
+  size_t _length;
 };
+
+// ============================================================================
+// [Fog::FOG_STR]
+// ============================================================================
+
+#define FOG_STR_(_Id_) (::Fog::ManagedStringCacheW::get()->getString(::Fog::STR_##_Id_))
 
 //! @}
 

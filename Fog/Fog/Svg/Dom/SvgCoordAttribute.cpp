@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::SvgCoordAttribute]
 // ============================================================================
 
-SvgCoordAttribute::SvgCoordAttribute(XmlElement* element, const ManagedString& name, int offset) :
+SvgCoordAttribute::SvgCoordAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
   XmlAttribute(element, name, offset)
 {
   _coord.value = 0.0;

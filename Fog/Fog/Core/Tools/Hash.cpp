@@ -47,138 +47,6 @@ static Static<HashUntypedVTable> Hash_StringW_Var_vTable;
 // [Fog::Hash - Primes]
 // ============================================================================
 
-static const uint32_t Hash_primeTable[] =
-{
-  7,
-  17,
-  31,
-  47,
-  83,
-  107,
-  157,
-  211,
-  353,
-  509,
-  769,
-  997,
-  1217,
-  1567,
-  2053,
-  3011,
-  4337,
-  5939,
-  7757,
-  9973,
-  13033,
-  17783,
-  23417,
-  31517,
-  37991,
-  45161,
-  50929,
-  60637,
-  71261,
-  85469,
-  95789,
-  110273,
-  131357,
-  152287,
-  175327,
-  202777,
-  238649,
-  274019,
-  310091,
-  327869,
-  354383,
-  384437,
-  410453,
-  444443,
-  488879,
-  522229,
-  555557,
-  589759,
-  626009,
-  666989,
-  708251,
-  752797,
-  802499,
-  855601,
-  939007,
-  1007497,
-  1155851,
-  1333357,
-  1553099,
-  1815361,
-  2554477,
-  3557441,
-  4981877,
-  6977491,
-  9854011,
-  13289083,
-  15289117,
-  19709071,
-  23025773,
-  26725759,
-  30534103,
-  37534097,
-  42555229,
-  48555223,
-  52555219,
-  61555237,
-  73698109,
-  85698133,
-  104395303,
-  114395317,
-  124395317,
-  134395351,
-  141650939,
-  151150943,
-  165150127,
-  179424691,
-  195424711,
-  217645177,
-  232645211,
-  259123471,
-  295075153,
-  335075159,
-  393342739,
-  452876863,
-  533910137,
-  663910123,
-  838041647,
-  982451653
-};
-
-static uint32_t Hash_getClosestPrimeIndex(size_t value)
-{
-  uint32_t i = 0;
-
-  // Optimize lookup in case that the value is too large.
-  if (Hash_primeTable[64] < value)
-    i = 64;
-  else if (Hash_primeTable[48] < value)
-    i = 48;
-  else if (Hash_primeTable[32] < value)
-    i = 32;
-  else if (Hash_primeTable[16] < value)
-    i = 16;
-
-  while (i < FOG_ARRAY_SIZE(Hash_primeTable))
-  {
-    if (Hash_primeTable[i] >= value)
-      return i;
-    i++;
-  }
-
-  // Return the last one.
-  return i - 1;
-}
-
-static size_t Hash_getClosestPrime(size_t value)
-{
-  return Hash_primeTable[Hash_getClosestPrimeIndex(value)];
-}
-
 static FOG_INLINE size_t Hash_alignNodeSize(size_t size)
 {
   return (size + sizeof(size_t) - 1) & ~((size_t)sizeof(size_t)-1);
@@ -197,8 +65,7 @@ static size_t FOG_CDECL Hash_calcExpandCapacity(size_t capacity)
   else
     capacity += threshold;
 
-  uint32_t index = Hash_getClosestPrimeIndex(capacity);
-  return Hash_primeTable[index];
+  return HashUtil::getClosestPrime(capacity);
 }
 
 static size_t FOG_CDECL Hash_calcShrinkCapacity(size_t capacity)
@@ -206,11 +73,7 @@ static size_t FOG_CDECL Hash_calcShrinkCapacity(size_t capacity)
   static const size_t threshold = 1024*1024*4;
 
   capacity /= 2;
-
-  uint32_t index = Hash_getClosestPrimeIndex(capacity);
-  if (index > 0) index--;
-
-  return Hash_primeTable[index];
+  return HashUtil::getClosestPrime(capacity, -1);
 }
 
 static HashUntypedData* Hash_Unknown_Unknown_getDEmptyForType(uint32_t vType)
@@ -405,7 +268,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehash(HashUntyped* self, const Hash
 static err_t FOG_CDECL Hash_Unknown_Unknown_reserve(HashUntyped* self, const HashUntypedVTable* v, size_t capacity)
 {
   HashUntypedData* d = self->_d;
-  capacity = Hash_getClosestPrime(capacity);
+  capacity = HashUtil::getClosestPrime(capacity);
 
   if (d->reference.get() != 1 || d->capacity < capacity)
     return _api.hash_unknown_unknown_rehash(self, v, capacity);
@@ -416,7 +279,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_reserve(HashUntyped* self, const Has
 static void FOG_CDECL Hash_Unknown_Unknown_squeeze(HashUntyped* self, const HashUntypedVTable* v)
 {
   HashUntypedData* d = self->_d;
-  size_t optimal = Hash_getClosestPrime(d->length);
+  size_t optimal = HashUtil::getClosestPrime(d->length);
 
   if (optimal < d->capacity)
     _api.hash_unknown_unknown_rehash(self, v, optimal);
@@ -554,7 +417,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_put(HashUntyped* self, const HashUnt
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, Hash_primeTable[0]));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
@@ -628,9 +491,9 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_remove(HashUntyped* self, const Hash
   return ERR_RT_OBJECT_NOT_FOUND;
 
 _Match:
-  if (d->reference.get() != 1 || d->length - 1<= d->shrinkLength)
+  if (d->reference.get() != 1 || d->length - 1 <= d->shrinkLength)
   {
-    size_t capacity = Hash_getClosestPrime(d->length - 1);
+    size_t capacity = HashUtil::getClosestPrime(d->length - 1);
     return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
   }
   else
@@ -1008,7 +871,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putStub(HashUntyped* self, const Has
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, Hash_primeTable[0]));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
@@ -1081,7 +944,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putString(HashUntyped* self, const H
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, Hash_primeTable[0]));
+    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
@@ -1164,7 +1027,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_removeStub(HashUntyped* self, const 
 _Match:
   if (d->reference.get() != 1 || d->length - 1<= d->shrinkLength)
   {
-    size_t capacity = Hash_getClosestPrime(d->length - 1);
+    size_t capacity = HashUtil::getClosestPrime(d->length - 1);
     return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
   }
   else
@@ -1209,7 +1072,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_removeString(HashUntyped* self, cons
 _Match:
   if (d->reference.get() != 1 || d->length - 1<= d->shrinkLength)
   {
-    size_t capacity = Hash_getClosestPrime(d->length - 1);
+    size_t capacity = HashUtil::getClosestPrime(d->length - 1);
     return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
   }
   else
@@ -1808,6 +1671,8 @@ _Match:
 
 FOG_NO_EXPORT void Hash_init(void)
 {
+  size_t firstPrime = HashUtil::getClosestPrime(0);
+
   // -------------------------------------------------------------------------
   // [Funcs]
   // -------------------------------------------------------------------------
@@ -1980,7 +1845,8 @@ FOG_NO_EXPORT void Hash_init(void)
   d->reference.init(1);
   d->vType = VAR_TYPE_UNKNOWN | VAR_FLAG_NONE;
   d->capacity = 1;
-  d->expandLength = Hash_primeTable[0];
+  d->expandCapacity = HashUtil::getClosestPrime(0);
+  d->expandLength = 1;
 
   Hash_Unknown_Unknown_oEmpty->_d = d;
   _api.hash_unknown_unknown_oEmpty = &Hash_Unknown_Unknown_oEmpty;
@@ -1990,7 +1856,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->reference.init(1);
   d->vType = VAR_TYPE_HASH_STRINGA_STRINGA | VAR_FLAG_NONE;
   d->capacity = 1;
-  d->expandCapacity = Hash_primeTable[0];
+  d->expandCapacity = firstPrime;
   d->expandLength = 1;
 
   Hash_StringA_StringA_oEmpty->_d = d;
@@ -2013,7 +1879,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->reference.init(1);
   d->vType = VAR_TYPE_HASH_STRINGA_VAR | VAR_FLAG_NONE;
   d->capacity = 1;
-  d->expandCapacity = Hash_primeTable[0];
+  d->expandCapacity = firstPrime;
   d->expandLength = 1;
 
   Hash_StringA_Var_oEmpty->_d = d;
@@ -2036,7 +1902,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->reference.init(1);
   d->vType = VAR_TYPE_HASH_STRINGW_STRINGW | VAR_FLAG_NONE;
   d->capacity = 1;
-  d->expandCapacity = Hash_primeTable[0];
+  d->expandCapacity = firstPrime;
   d->expandLength = 1;
 
   Hash_StringW_StringW_oEmpty->_d = d;
@@ -2059,7 +1925,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->reference.init(1);
   d->vType = VAR_TYPE_HASH_STRINGW_VAR | VAR_FLAG_NONE;
   d->capacity = 1;
-  d->expandCapacity = Hash_primeTable[0];
+  d->expandCapacity = firstPrime;
   d->expandLength = 1;
 
   Hash_StringW_Var_oEmpty->_d = d;

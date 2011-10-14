@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgRadialGradientElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,12 +20,12 @@ namespace Fog {
 // ============================================================================
 
 SvgRadialGradientElement::SvgRadialGradientElement() :
-  SvgAbstractGradientElement(fog_strings->getString(STR_SVG_ELEMENT_radialGradient), SVG_ELEMENT_RADIAL_GRADIENT),
-  a_cx(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgRadialGradientElement, a_cx)),
-  a_cy(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgRadialGradientElement, a_cy)),
-  a_fx(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_fx), FOG_OFFSET_OF(SvgRadialGradientElement, a_fx)),
-  a_fy(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_fy), FOG_OFFSET_OF(SvgRadialGradientElement, a_fx)),
-  a_r (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_r ), FOG_OFFSET_OF(SvgRadialGradientElement, a_r ))
+  SvgAbstractGradientElement(FOG_STR_(SVG_ELEMENT_radialGradient), SVG_ELEMENT_RADIAL_GRADIENT),
+  a_cx(NULL, FOG_STR_(SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgRadialGradientElement, a_cx)),
+  a_cy(NULL, FOG_STR_(SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgRadialGradientElement, a_cy)),
+  a_fx(NULL, FOG_STR_(SVG_ATTRIBUTE_fx), FOG_OFFSET_OF(SvgRadialGradientElement, a_fx)),
+  a_fy(NULL, FOG_STR_(SVG_ATTRIBUTE_fy), FOG_OFFSET_OF(SvgRadialGradientElement, a_fx)),
+  a_r (NULL, FOG_STR_(SVG_ATTRIBUTE_r ), FOG_OFFSET_OF(SvgRadialGradientElement, a_r ))
 {
 }
 
@@ -34,13 +34,13 @@ SvgRadialGradientElement::~SvgRadialGradientElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgRadialGradientElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgRadialGradientElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_fx)) return (XmlAttribute*)&a_fx;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_fy)) return (XmlAttribute*)&a_fy;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_r )) return (XmlAttribute*)&a_r;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_fx)) return (XmlAttribute*)&a_fx;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_fy)) return (XmlAttribute*)&a_fy;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_r )) return (XmlAttribute*)&a_r;
 
   return base::_createAttribute(name);
 }

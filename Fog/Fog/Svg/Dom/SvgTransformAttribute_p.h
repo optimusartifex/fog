@@ -30,7 +30,7 @@ struct FOG_NO_EXPORT SvgTransformAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgTransformAttribute(XmlElement* element, const ManagedString& name, int offset);
+  SvgTransformAttribute(XmlElement* element, const ManagedStringW& name, int offset);
   virtual ~SvgTransformAttribute();
 
   // --------------------------------------------------------------------------

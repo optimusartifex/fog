@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgPatternElement_p.h>
@@ -34,14 +34,14 @@ static const SvgEnumItem svgEnum_gradientUnits[3] =
 // ============================================================================
 
 SvgPatternElement::SvgPatternElement() :
-  SvgElement(fog_strings->getString(STR_SVG_ELEMENT_pattern), SVG_ELEMENT_PATTERN),
-  a_x               (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x               ), FOG_OFFSET_OF(SvgPatternElement, a_x               )),
-  a_y               (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y               ), FOG_OFFSET_OF(SvgPatternElement, a_y               )),
-  a_width           (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_width           ), FOG_OFFSET_OF(SvgPatternElement, a_width           )),
-  a_height          (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_height          ), FOG_OFFSET_OF(SvgPatternElement, a_height          )),
-  a_patternUnits    (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_patternUnits    ), FOG_OFFSET_OF(SvgPatternElement, a_patternUnits    ), svgEnum_gradientUnits),
-  a_patternTransform(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_patternTransform), FOG_OFFSET_OF(SvgPatternElement, a_patternTransform)),
-  a_viewBox         (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_viewBox         ), FOG_OFFSET_OF(SvgPatternElement, a_viewBox         ))
+  SvgElement(FOG_STR_(SVG_ELEMENT_pattern), SVG_ELEMENT_PATTERN),
+  a_x               (NULL, FOG_STR_(SVG_ATTRIBUTE_x               ), FOG_OFFSET_OF(SvgPatternElement, a_x               )),
+  a_y               (NULL, FOG_STR_(SVG_ATTRIBUTE_y               ), FOG_OFFSET_OF(SvgPatternElement, a_y               )),
+  a_width           (NULL, FOG_STR_(SVG_ATTRIBUTE_width           ), FOG_OFFSET_OF(SvgPatternElement, a_width           )),
+  a_height          (NULL, FOG_STR_(SVG_ATTRIBUTE_height          ), FOG_OFFSET_OF(SvgPatternElement, a_height          )),
+  a_patternUnits    (NULL, FOG_STR_(SVG_ATTRIBUTE_patternUnits    ), FOG_OFFSET_OF(SvgPatternElement, a_patternUnits    ), svgEnum_gradientUnits),
+  a_patternTransform(NULL, FOG_STR_(SVG_ATTRIBUTE_patternTransform), FOG_OFFSET_OF(SvgPatternElement, a_patternTransform)),
+  a_viewBox         (NULL, FOG_STR_(SVG_ATTRIBUTE_viewBox         ), FOG_OFFSET_OF(SvgPatternElement, a_viewBox         ))
 {
 }
 
@@ -50,15 +50,15 @@ SvgPatternElement::~SvgPatternElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgPatternElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgPatternElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x               )) return (XmlAttribute*)&a_x;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y               )) return (XmlAttribute*)&a_y;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_width           )) return (XmlAttribute*)&a_width;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_height          )) return (XmlAttribute*)&a_height;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_patternUnits    )) return (XmlAttribute*)&a_patternUnits;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_patternTransform)) return (XmlAttribute*)&a_patternTransform;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_viewBox         )) return (XmlAttribute*)&a_viewBox;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_x               )) return (XmlAttribute*)&a_x;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_y               )) return (XmlAttribute*)&a_y;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_width           )) return (XmlAttribute*)&a_width;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_height          )) return (XmlAttribute*)&a_height;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_patternUnits    )) return (XmlAttribute*)&a_patternUnits;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_patternTransform)) return (XmlAttribute*)&a_patternTransform;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_viewBox         )) return (XmlAttribute*)&a_viewBox;
 
   return base::_createAttribute(name);
 }
@@ -82,7 +82,7 @@ err_t SvgPatternElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_
 
 err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
 {
-  StringW link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+  StringW link = _getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
 
   if (!link.isEmpty() && link.getAt(0) == CharW('#'))
   {

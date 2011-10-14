@@ -70,8 +70,8 @@ enum SVG_PAINT_TYPE
 
 enum SVG_STYLE_ID
 {
-  // When adding value here, it's important to add value to Fog/Core/Tools/Strings.h
-  // and Fog/Core/Tools/Strings.cpp. There are static strings for style names.
+  // When adding value here, it's important to add value also to the 
+  // Fog/Core/Global/EnumCore.h and Fog/Core/Tools/ManagedString.cpp.
   SVG_STYLE_CLIP_PATH = 0,
   SVG_STYLE_CLIP_RULE,
   SVG_STYLE_ENABLE_BACKGROUND,

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlText.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 // ============================================================================
 
 XmlText::XmlText(const StringW& data) :
-  XmlElement(fog_strings->getString(STR_XML__text)),
+  XmlElement(FOG_STR_(XML__text)),
   _data(data)
 {
   _type = XML_ELEMENT_TEXT;

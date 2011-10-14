@@ -30,7 +30,7 @@ struct FOG_NO_EXPORT SvgEnumAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgEnumAttribute(XmlElement* element, const ManagedString& name, int offset, const SvgEnumItem* items);
+  SvgEnumAttribute(XmlElement* element, const ManagedStringW& name, int offset, const SvgEnumItem* items);
   virtual ~SvgEnumAttribute();
 
   // --------------------------------------------------------------------------

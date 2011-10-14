@@ -71,8 +71,8 @@ struct FOG_API XmlDocument : public XmlElement
   // [Document Extensions]
   // --------------------------------------------------------------------------
 
-  virtual XmlElement* createElement(const ManagedString& tagName);
-  static XmlElement* createElementStatic(const ManagedString& tagName);
+  virtual XmlElement* createElement(const ManagedStringW& tagName);
+  static XmlElement* createElementStatic(const ManagedStringW& tagName);
   virtual XmlDomReader* createDomReader();
 
   // --------------------------------------------------------------------------

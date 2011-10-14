@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgSymbolElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,7 +20,7 @@ namespace Fog {
 // ============================================================================
 
 SvgSymbolElement::SvgSymbolElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_symbol), SVG_ELEMENT_SYMBOL)
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_symbol), SVG_ELEMENT_SYMBOL)
 {
 }
 

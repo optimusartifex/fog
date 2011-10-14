@@ -19,6 +19,15 @@ namespace HashUtil {
 //! @{
 
 // ============================================================================
+// [Fog::HashFunc - GetClosestPrime]
+// ============================================================================
+
+static FOG_INLINE size_t getClosestPrime(size_t value, int adjustTable = 0)
+{
+  return _api.hashutil_getClosestPrime(value, adjustTable);
+}
+
+// ============================================================================
 // [Fog::HashFunc - Binary]
 // ============================================================================
 
@@ -189,8 +198,8 @@ FOG_DECLARE_HASHABLE(StubW         , { return hashStubW(k);      })
 
 //! @}
 
-} // Fog namespace
 } // HashUtil namespace
+} // Fog namespace
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_HASHUTIL_H

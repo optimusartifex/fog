@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::SvgOffsetAttribute]
 // ============================================================================
 
-SvgOffsetAttribute::SvgOffsetAttribute(XmlElement* element, const ManagedString& name, int offset) :
+SvgOffsetAttribute::SvgOffsetAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
   XmlAttribute(element, name, offset)
 {
   _offset = 0.0;

@@ -18,7 +18,7 @@ namespace Fog {
 // [Fog::SvgTransformAttribute]
 // ============================================================================
 
-SvgTransformAttribute::SvgTransformAttribute(XmlElement* element, const ManagedString& name, int offset) :
+SvgTransformAttribute::SvgTransformAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
     XmlAttribute(element, name, offset)
 {
 }

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlPI.h>
 
 namespace Fog {
@@ -19,7 +19,7 @@ namespace Fog {
 // ============================================================================
 
 XmlPI::XmlPI(const StringW& data) :
-  XmlNoText(fog_strings->getString(STR_XML__pi)),
+  XmlNoText(FOG_STR_(XML__pi)),
   _data(data)
 {
   _type = XML_ELEMENT_PI;

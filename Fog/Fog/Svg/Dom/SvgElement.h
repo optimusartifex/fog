@@ -39,7 +39,7 @@ struct FOG_API SvgElement : public XmlElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgElement(const ManagedString& tagName, uint32_t svgType);
+  SvgElement(const ManagedStringW& tagName, uint32_t svgType);
   virtual ~SvgElement();
 
   // --------------------------------------------------------------------------
@@ -58,7 +58,7 @@ struct FOG_API SvgElement : public XmlElement
   // [SVG Attributes]
   // --------------------------------------------------------------------------
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual XmlAttribute* _createAttribute(const ManagedStringW& name) const;
 
   // --------------------------------------------------------------------------
   // [SVG Interface]

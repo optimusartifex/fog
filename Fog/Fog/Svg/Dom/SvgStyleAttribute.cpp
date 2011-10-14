@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgElement.h>
 #include <Fog/Svg/Dom/SvgEnumItem_p.h>
 #include <Fog/Svg/Dom/SvgStyleAttribute_p.h>
@@ -48,7 +48,7 @@ static const SvgEnumItem svgEnum_strokeLineJoin[] =
 // [Fog::SvgStyleAttribute]
 // ============================================================================
 
-SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedString& name, int offset) :
+SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
   XmlAttribute(element, name, offset),
 
   _mask(0),
@@ -91,7 +91,7 @@ StringW SvgStyleAttribute::getValue() const
   {
     if (_mask & (1 << i))
     {
-      result.append(fog_strings->getString(i + STR_SVG_STYLE_NAMES));
+      result.append(ManagedStringCacheW::get()->getString(i + STR_SVG_STYLE_NAMES));
       result.append(CharW(':'));
       result.append(getStyle(i));
       result.append(CharW(';'));
@@ -107,7 +107,7 @@ err_t SvgStyleAttribute::setValue(const StringW& value)
   const CharW* strCur = value.getData();
   const CharW* strEnd = strCur + value.getLength();
 
-  ManagedString styleName;
+  ManagedStringW styleName;
   StringW styleValue;
 
   for (;;)
@@ -169,10 +169,10 @@ err_t SvgStyleAttribute::setValue(const StringW& value)
     // Skip ';'.
     if (strCur != strEnd) strCur++;
 
-    err = styleName.set(styleNameBegin, size_t(styleNameEnd - styleNameBegin));
+    err = styleName.set(StubW(styleNameBegin, size_t(styleNameEnd - styleNameBegin)));
     if (FOG_IS_ERROR(err)) continue;
 
-    err = styleValue.set(styleValueBegin, size_t(styleValueEnd - styleValueBegin));
+    err = styleValue.set(StubW(styleValueBegin, size_t(styleValueEnd - styleValueBegin)));
     if (FOG_IS_ERROR(err)) continue;
 
     reinterpret_cast<SvgElement*>(getElement())->setStyle(styleName, styleValue);

@@ -30,14 +30,14 @@ struct FOG_NO_EXPORT SvgAbstractGradientElement : public SvgStyledElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgAbstractGradientElement(const ManagedString& tagName, uint32_t svgType);
+  SvgAbstractGradientElement(const ManagedStringW& tagName, uint32_t svgType);
   virtual ~SvgAbstractGradientElement();
 
   // --------------------------------------------------------------------------
   // [SVG Attributes]
   // --------------------------------------------------------------------------
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual XmlAttribute* _createAttribute(const ManagedStringW& name) const;
 
   // --------------------------------------------------------------------------
   // [SVG Visiting]

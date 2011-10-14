@@ -19,7 +19,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Codecs/JpegCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -120,7 +119,7 @@ void JpegLibrary::close()
 JpegCodecProvider::JpegCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = fog_strings->getString(STR_G2D_STREAM_JPEG);
+  _name = FOG_STR_(IMAGE_FILE_JPEG);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -130,10 +129,10 @@ JpegCodecProvider::JpegCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(4);
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jpg));
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jpeg));
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jfi));
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jfif));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpg));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpeg));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfi));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfif));
 }
 
 JpegCodecProvider::~JpegCodecProvider()
@@ -786,20 +785,20 @@ _End:
 // [Fog::JpegEncoder - Properties]
 // ===========================================================================
 
-err_t JpegEncoder::getProperty(const ManagedString& name, Var& dst) const
+err_t JpegEncoder::_getProperty(const ManagedStringW& name, Var& dst) const
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_quality))
+  if (name == FOG_STR_(IMAGE_CODEC_quality))
     return dst.setInt(_quality);
 
-  return base::getProperty(name, dst);
+  return base::_getProperty(name, dst);
 }
 
-err_t JpegEncoder::setProperty(const ManagedString& name, const Var& src)
+err_t JpegEncoder::_setProperty(const ManagedStringW& name, const Var& src)
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_quality))
+  if (name == FOG_STR_(IMAGE_CODEC_quality))
     return src.getInt(_quality, 0, 100);
 
-  return base::setProperty(name, src);
+  return base::_setProperty(name, src);
 }
 
 // ============================================================================

@@ -35,7 +35,7 @@ struct FOG_NO_EXPORT SvgSolidColorElement : public SvgStyledElement
   // [SVG Attributes]
   // --------------------------------------------------------------------------
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual XmlAttribute* _createAttribute(const ManagedStringW& name) const;
 
   // --------------------------------------------------------------------------
   // [SVG Interface]

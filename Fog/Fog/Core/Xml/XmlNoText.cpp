@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::XmlNoText]
 // ============================================================================
 
-XmlNoText::XmlNoText(const ManagedString& tagName) :
+XmlNoText::XmlNoText(const ManagedStringW& tagName) :
   XmlElement(tagName)
 {
 }

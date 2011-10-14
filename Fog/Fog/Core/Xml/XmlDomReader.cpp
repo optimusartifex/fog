@@ -91,7 +91,7 @@ XmlDomReader::~XmlDomReader()
 
 err_t XmlDomReader::onAddElement(const StubW& tagName)
 {
-  XmlElement* e = _document->createElement(ManagedString(tagName));
+  XmlElement* e = _document->createElement(ManagedStringW(tagName));
   if (!e) return ERR_RT_OUT_OF_MEMORY;
 
   err_t err = _current->appendChild(e);
@@ -125,7 +125,7 @@ err_t XmlDomReader::onAddAttribute(const StubW& name, const StubW& value)
   StringW decodedValue;
   FOG_RETURN_ON_ERROR(xmlDecodeText(decodedValue, value));
 
-  return _current->_setAttribute(ManagedString(name), decodedValue);
+  return _current->_setAttribute(ManagedStringW(name), decodedValue);
 }
 
 err_t XmlDomReader::onAddText(const StubW& data, bool isWhiteSpace)

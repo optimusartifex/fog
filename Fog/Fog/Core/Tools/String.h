@@ -263,7 +263,7 @@ struct FOG_NO_EXPORT StringDataW
 
   static FOG_INLINE size_t getSizeOf(size_t capacity)
   {
-    return sizeof(StringDataW) + sizeof(CharW) * capacity;
+    return sizeof(StringDataW) - sizeof(CharW) + sizeof(CharW) * capacity;
   }
 
   // --------------------------------------------------------------------------

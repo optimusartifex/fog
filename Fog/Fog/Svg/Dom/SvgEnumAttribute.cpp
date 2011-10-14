@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::SvgEnumAttribute]
 // ============================================================================
 
-SvgEnumAttribute::SvgEnumAttribute(XmlElement* element, const ManagedString& name, int offset, const SvgEnumItem* items) :
+SvgEnumAttribute::SvgEnumAttribute(XmlElement* element, const ManagedStringW& name, int offset, const SvgEnumItem* items) :
   XmlAttribute(element, name, offset),
   _enumItems(items),
   _enumValue(-1)

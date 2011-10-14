@@ -30,7 +30,7 @@ struct FOG_NO_EXPORT SvgImageLinkAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgImageLinkAttribute(XmlElement* element, const ManagedString& name, int offset);
+  SvgImageLinkAttribute(XmlElement* element, const ManagedStringW& name, int offset);
   virtual ~SvgImageLinkAttribute();
 
   // --------------------------------------------------------------------------

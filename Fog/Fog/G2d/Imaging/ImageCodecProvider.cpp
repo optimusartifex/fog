@@ -17,7 +17,6 @@
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/TextCodec.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>

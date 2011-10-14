@@ -150,8 +150,8 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-compare")
   EndIf()
 
-  # Use -O2 as a standard optimization level when running release builds. The
   # -O3 doesn't improve the performance, because all inner loops used by Fog
+  # Use -O2 as a standard optimization level when running release builds. The
   # are already optimized - there is nothing compiler can do. Another argument
   # to use -O2 is that -O3 produces larger binaries without speed improvements.
   Set(FOG_CXX_FLAGS_OPTIMIZE "-O2")
@@ -627,7 +627,6 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/String.cpp
   Fog/Core/Tools/StringUtil.cpp
   Fog/Core/Tools/StringUtil_dtoa.cpp
-  Fog/Core/Tools/Strings.cpp
   Fog/Core/Tools/Stub.cpp
   Fog/Core/Tools/TextChunk.cpp
   Fog/Core/Tools/TextCodec.cpp
@@ -661,7 +660,6 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/StringTmp_p.h
   Fog/Core/Tools/StringUtil.h
   Fog/Core/Tools/StringUtil_dtoa_p.h
-  Fog/Core/Tools/Strings.h
   Fog/Core/Tools/Stub.h
   Fog/Core/Tools/Swap.h
   Fog/Core/Tools/TextChunk.h

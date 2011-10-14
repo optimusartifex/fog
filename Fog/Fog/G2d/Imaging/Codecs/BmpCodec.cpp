@@ -17,7 +17,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -34,7 +33,7 @@ namespace Fog {
 BmpCodecProvider::BmpCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = fog_strings->getString(STR_G2D_STREAM_BMP);
+  _name = FOG_STR_(IMAGE_FILE_BMP);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -44,8 +43,8 @@ BmpCodecProvider::BmpCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(2);
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_bmp));
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_ras));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_bmp));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_ras));
 }
 
 BmpCodecProvider::~BmpCodecProvider()
@@ -796,20 +795,20 @@ _End:
   return (_readerResult = err);
 }
 
-err_t BmpDecoder::getProperty(const ManagedString& name, Var& dst) const
+err_t BmpDecoder::_getProperty(const ManagedStringW& name, Var& dst) const
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_skipFileHeader))
+  if (name == FOG_STR_(IMAGE_CODEC_skipFileHeader))
     return dst.setInt(_skipFileHeader);
 
-  return base::getProperty(name, dst);
+  return base::_getProperty(name, dst);
 }
 
-err_t BmpDecoder::setProperty(const ManagedString& name, const Var& src)
+err_t BmpDecoder::_setProperty(const ManagedStringW& name, const Var& src)
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_skipFileHeader))
+  if (name == FOG_STR_(IMAGE_CODEC_skipFileHeader))
     return src.getInt(_skipFileHeader, 0, 1);
 
-  return base::setProperty(name, src);
+  return base::_setProperty(name, src);
 }
 
 // ============================================================================

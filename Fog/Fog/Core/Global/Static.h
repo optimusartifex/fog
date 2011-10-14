@@ -111,7 +111,7 @@ struct Static
   //! @brief Overridden operator&().
   FOG_INLINE Type* operator&() { return p(); }
   //! @brief Overridden operator&().
-  FOG_INLINE const Type* operator&() const { p(); }
+  FOG_INLINE const Type* operator&() const { return p(); }
 
   //! @brief Overridden -> operator.
   FOG_INLINE Type* operator->() { return p(); }

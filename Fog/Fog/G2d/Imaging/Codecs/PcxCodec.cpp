@@ -13,9 +13,9 @@
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/PcxCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -36,7 +36,7 @@ namespace Fog {
 PcxCodecProvider::PcxCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = fog_strings->getString(STR_G2D_STREAM_PCX);
+  _name = FOG_STR_(IMAGE_FILE_PCX);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -46,7 +46,7 @@ PcxCodecProvider::PcxCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(1);
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_pcx));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_pcx));
 }
 
 PcxCodecProvider::~PcxCodecProvider()

@@ -38,7 +38,7 @@ struct FOG_API XmlElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlElement(const ManagedString& tagName);
+  XmlElement(const ManagedStringW& tagName);
   virtual ~XmlElement();
 
   // --------------------------------------------------------------------------
@@ -226,12 +226,12 @@ public:
   virtual StringW getTextContent() const;
   virtual err_t setTextContent(const StringW& text);
 
-  virtual err_t _setAttribute(const ManagedString& name, const StringW& value);
-  virtual StringW _getAttribute(const ManagedString& name) const;
-  virtual err_t _removeAttribute(const ManagedString& name);
+  virtual err_t _setAttribute(const ManagedStringW& name, const StringW& value);
+  virtual StringW _getAttribute(const ManagedStringW& name) const;
+  virtual err_t _removeAttribute(const ManagedStringW& name);
   virtual err_t _removeAttributes();
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual XmlAttribute* _createAttribute(const ManagedStringW& name) const;
   static void _copyAttributes(XmlElement* dst, XmlElement* src);
 
   // --------------------------------------------------------------------------
@@ -257,7 +257,7 @@ public:
   List<XmlAttribute*> _attributes;
 
   //! @brief Element tag name.
-  ManagedString _tagName;
+  ManagedStringW _tagName;
   //! @brief Element id.
   StringW _id;
   //! @brief Element id chain managed by @c XmlIdManager.

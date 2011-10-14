@@ -28,7 +28,7 @@ struct FOG_API XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlAttribute(XmlElement* element, const ManagedString& name, int offset = -1);
+  XmlAttribute(XmlElement* element, const ManagedStringW& name, int offset = -1);
   virtual ~XmlAttribute();
 
   // --------------------------------------------------------------------------
@@ -59,7 +59,7 @@ struct FOG_API XmlAttribute
   //! @brief Link to element that owns this attribute.
   XmlElement* _element;
   //! @brief Attribute name (managed string).
-  ManagedString _name;
+  ManagedStringW _name;
   //! @brief Attribute value (or empty if value is provided by overriden class).
   StringW _value;
 

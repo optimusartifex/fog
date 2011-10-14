@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Gradient.h>
@@ -42,11 +42,11 @@ static const SvgEnumItem svgEnum_spreadMethod[4] =
 // [Fog::SvgAbstractGradientElement]
 // ============================================================================
 
-SvgAbstractGradientElement::SvgAbstractGradientElement(const ManagedString& tagName, uint32_t svgType) :
+SvgAbstractGradientElement::SvgAbstractGradientElement(const ManagedStringW& tagName, uint32_t svgType) :
   SvgStyledElement(tagName, svgType),
-  a_spreadMethod     (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_spreadMethod     ), FOG_OFFSET_OF(SvgAbstractGradientElement, a_spreadMethod     ), svgEnum_spreadMethod),
-  a_gradientUnits    (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_gradientUnits    ), FOG_OFFSET_OF(SvgAbstractGradientElement, a_gradientUnits    ), svgEnum_gradientUnits),
-  a_gradientTransform(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_gradientTransform), FOG_OFFSET_OF(SvgAbstractGradientElement, a_gradientTransform))
+  a_spreadMethod     (NULL, FOG_STR_(SVG_ATTRIBUTE_spreadMethod     ), FOG_OFFSET_OF(SvgAbstractGradientElement, a_spreadMethod     ), svgEnum_spreadMethod),
+  a_gradientUnits    (NULL, FOG_STR_(SVG_ATTRIBUTE_gradientUnits    ), FOG_OFFSET_OF(SvgAbstractGradientElement, a_gradientUnits    ), svgEnum_gradientUnits),
+  a_gradientTransform(NULL, FOG_STR_(SVG_ATTRIBUTE_gradientTransform), FOG_OFFSET_OF(SvgAbstractGradientElement, a_gradientTransform))
 {
 }
 
@@ -55,11 +55,11 @@ SvgAbstractGradientElement::~SvgAbstractGradientElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgAbstractGradientElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgAbstractGradientElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_spreadMethod     )) return (XmlAttribute*)&a_spreadMethod;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_gradientUnits    )) return (XmlAttribute*)&a_gradientUnits;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_gradientTransform)) return (XmlAttribute*)&a_gradientTransform;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_spreadMethod     )) return (XmlAttribute*)&a_spreadMethod;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_gradientUnits    )) return (XmlAttribute*)&a_gradientUnits;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_gradientTransform)) return (XmlAttribute*)&a_gradientTransform;
 
   return base::_createAttribute(name);
 }
@@ -101,7 +101,7 @@ _Start:
   if (!stopsParsed)
   {
     XmlElement* e;
-    StringW link = root->_getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+    StringW link = root->_getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
 
     if ((!link.isEmpty() && link.getAt(0) == CharW('#')) &&
         (e = root->getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1))))

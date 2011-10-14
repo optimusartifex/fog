@@ -30,7 +30,7 @@ struct FOG_NO_EXPORT SvgPointsAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgPointsAttribute(XmlElement* element, const ManagedString& name, bool closePath, int offset);
+  SvgPointsAttribute(XmlElement* element, const ManagedStringW& name, bool closePath, int offset);
   virtual ~SvgPointsAttribute();
 
   // --------------------------------------------------------------------------

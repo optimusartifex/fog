@@ -32,7 +32,7 @@ struct FOG_API XmlNoText : public XmlElement
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlNoText(const ManagedString& tagName);
+  XmlNoText(const ManagedStringW& tagName);
   virtual ~XmlNoText();
 
   // --------------------------------------------------------------------------

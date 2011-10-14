@@ -29,7 +29,7 @@ struct FOG_NO_EXPORT SvgOffsetAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgOffsetAttribute(XmlElement* element, const ManagedString& name, int offset);
+  SvgOffsetAttribute(XmlElement* element, const ManagedStringW& name, int offset);
   virtual ~SvgOffsetAttribute();
 
   // --------------------------------------------------------------------------

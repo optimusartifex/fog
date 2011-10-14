@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgRootElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,12 +20,12 @@ namespace Fog {
 // ============================================================================
 
 SvgRootElement::SvgRootElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_svg), SVG_ELEMENT_SVG),
-  a_x      (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x      ), FOG_OFFSET_OF(SvgRootElement, a_x      )),
-  a_y      (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y      ), FOG_OFFSET_OF(SvgRootElement, a_y      )),
-  a_width  (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_width  ), FOG_OFFSET_OF(SvgRootElement, a_width  )),
-  a_height (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_height ), FOG_OFFSET_OF(SvgRootElement, a_height )),
-  a_viewBox(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_viewBox), FOG_OFFSET_OF(SvgRootElement, a_viewBox))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_svg), SVG_ELEMENT_SVG),
+  a_x      (NULL, FOG_STR_(SVG_ATTRIBUTE_x      ), FOG_OFFSET_OF(SvgRootElement, a_x      )),
+  a_y      (NULL, FOG_STR_(SVG_ATTRIBUTE_y      ), FOG_OFFSET_OF(SvgRootElement, a_y      )),
+  a_width  (NULL, FOG_STR_(SVG_ATTRIBUTE_width  ), FOG_OFFSET_OF(SvgRootElement, a_width  )),
+  a_height (NULL, FOG_STR_(SVG_ATTRIBUTE_height ), FOG_OFFSET_OF(SvgRootElement, a_height )),
+  a_viewBox(NULL, FOG_STR_(SVG_ATTRIBUTE_viewBox), FOG_OFFSET_OF(SvgRootElement, a_viewBox))
 {
 }
 
@@ -34,13 +34,13 @@ SvgRootElement::~SvgRootElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgRootElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgRootElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x      )) return (XmlAttribute*)&a_x;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y      )) return (XmlAttribute*)&a_y;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_width  )) return (XmlAttribute*)&a_width;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_height )) return (XmlAttribute*)&a_height;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_viewBox)) return (XmlAttribute*)&a_viewBox;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_x      )) return (XmlAttribute*)&a_x;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_y      )) return (XmlAttribute*)&a_y;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_width  )) return (XmlAttribute*)&a_width;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_height )) return (XmlAttribute*)&a_height;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_viewBox)) return (XmlAttribute*)&a_viewBox;
 
   return base::_createAttribute(name);
 }

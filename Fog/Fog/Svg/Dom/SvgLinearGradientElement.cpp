@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgLinearGradientElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,11 +20,11 @@ namespace Fog {
 // ============================================================================
 
 SvgLinearGradientElement::SvgLinearGradientElement() :
-  SvgAbstractGradientElement(fog_strings->getString(STR_SVG_ELEMENT_linearGradient), SVG_ELEMENT_LINEAR_GRADIENT),
-  a_x1(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x1), FOG_OFFSET_OF(SvgLinearGradientElement, a_x1)),
-  a_y1(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y1), FOG_OFFSET_OF(SvgLinearGradientElement, a_y1)),
-  a_x2(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x2), FOG_OFFSET_OF(SvgLinearGradientElement, a_x2)),
-  a_y2(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y2), FOG_OFFSET_OF(SvgLinearGradientElement, a_y2))
+  SvgAbstractGradientElement(FOG_STR_(SVG_ELEMENT_linearGradient), SVG_ELEMENT_LINEAR_GRADIENT),
+  a_x1(NULL, FOG_STR_(SVG_ATTRIBUTE_x1), FOG_OFFSET_OF(SvgLinearGradientElement, a_x1)),
+  a_y1(NULL, FOG_STR_(SVG_ATTRIBUTE_y1), FOG_OFFSET_OF(SvgLinearGradientElement, a_y1)),
+  a_x2(NULL, FOG_STR_(SVG_ATTRIBUTE_x2), FOG_OFFSET_OF(SvgLinearGradientElement, a_x2)),
+  a_y2(NULL, FOG_STR_(SVG_ATTRIBUTE_y2), FOG_OFFSET_OF(SvgLinearGradientElement, a_y2))
 {
 }
 
@@ -33,12 +33,12 @@ SvgLinearGradientElement::~SvgLinearGradientElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgLinearGradientElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgLinearGradientElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x1)) return (XmlAttribute*)&a_x1;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y1)) return (XmlAttribute*)&a_y1;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x2)) return (XmlAttribute*)&a_x2;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y2)) return (XmlAttribute*)&a_y2;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_x1)) return (XmlAttribute*)&a_x1;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_y1)) return (XmlAttribute*)&a_y1;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_x2)) return (XmlAttribute*)&a_x2;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_y2)) return (XmlAttribute*)&a_y2;
 
   return base::_createAttribute(name);
 }

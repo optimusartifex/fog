@@ -31,17 +31,17 @@ struct FOG_NO_EXPORT SvgStyledElement : public SvgElement
 
   typedef SvgElement base;
 
-  SvgStyledElement(const ManagedString& tagName, uint32_t svgType);
+  SvgStyledElement(const ManagedStringW& tagName, uint32_t svgType);
   virtual ~SvgStyledElement();
 
   // --------------------------------------------------------------------------
   // [SVG Attributes]
   // --------------------------------------------------------------------------
 
-  virtual XmlAttribute* _createAttribute(const ManagedString& name) const;
+  virtual XmlAttribute* _createAttribute(const ManagedStringW& name) const;
 
-  virtual err_t _setAttribute(const ManagedString& name, const StringW& value);
-  virtual err_t _removeAttribute(const ManagedString& name);
+  virtual err_t _setAttribute(const ManagedStringW& name, const StringW& value);
+  virtual err_t _removeAttribute(const ManagedStringW& name);
 
   // --------------------------------------------------------------------------
   // [SVG Interface]

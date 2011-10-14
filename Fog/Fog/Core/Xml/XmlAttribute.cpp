@@ -17,7 +17,7 @@ namespace Fog {
 // [Fog::XmlAttribute]
 // ============================================================================
 
-XmlAttribute::XmlAttribute(XmlElement* element, const ManagedString& name, int offset) :
+XmlAttribute::XmlAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
   _element(element),
   _name(name),
   _offset(offset)

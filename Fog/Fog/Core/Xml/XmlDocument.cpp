@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Core/Xml/XmlDomReader.h>
@@ -22,7 +22,7 @@ namespace Fog {
 // ============================================================================
 
 XmlDocument::XmlDocument() :
-  XmlElement(fog_strings->getString(STR_XML__document)),
+  XmlElement(FOG_STR_(XML__document)),
   _documentRoot(NULL)
 {
   _type = XML_ELEMENT_DOCUMENT;
@@ -58,12 +58,12 @@ XmlElement* XmlDocument::clone() const
   return doc;
 }
 
-XmlElement* XmlDocument::createElement(const ManagedString& tagName)
+XmlElement* XmlDocument::createElement(const ManagedStringW& tagName)
 {
   return createElementStatic(tagName);
 }
 
-XmlElement* XmlDocument::createElementStatic(const ManagedString& tagName)
+XmlElement* XmlDocument::createElementStatic(const ManagedStringW& tagName)
 {
   return fog_new XmlElement(tagName);
 }

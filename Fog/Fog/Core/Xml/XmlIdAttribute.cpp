@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::XmlIdAttribute]
 // ============================================================================
 
-XmlIdAttribute::XmlIdAttribute(XmlElement* element, const ManagedString& name)
+XmlIdAttribute::XmlIdAttribute(XmlElement* element, const ManagedStringW& name)
   : XmlAttribute(element, name)
 {
 }

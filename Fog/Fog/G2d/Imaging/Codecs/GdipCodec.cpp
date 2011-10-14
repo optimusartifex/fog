@@ -20,7 +20,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/G2d/Imaging/Codecs/GdipCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
@@ -100,7 +99,7 @@ static void _GdipCodec_clearCommonParams(GdipCommonParams* params, uint32_t stre
   }
 }
 
-static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t streamType, const ManagedString& name, Var& dst)
+static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t streamType, const ManagedStringW& name, Var& dst)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -108,7 +107,7 @@ static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t 
   switch (streamType)
   {
     case IMAGE_STREAM_JPEG:
-      if (name == fog_strings->getString(STR_G2D_CODEC_quality))
+      if (name == FOG_STR_(IMAGE_CODEC_quality))
       {
         return dst.setInt(params->jpeg.quality);
       }
@@ -122,7 +121,7 @@ static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t 
   return err;
 }
 
-static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t streamType, const ManagedString& name, const Var& src)
+static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t streamType, const ManagedStringW& name, const Var& src)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -130,7 +129,7 @@ static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t stream
   switch (streamType)
   {
     case IMAGE_STREAM_JPEG:
-      if (name == fog_strings->getString(STR_G2D_CODEC_quality))
+      if (name == FOG_STR_(IMAGE_CODEC_quality))
         return src.getInt(params->jpeg.quality, 0, 100);
       break;
     case IMAGE_STREAM_PNG:
@@ -209,15 +208,15 @@ GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
   switch (_streamType)
   {
     case IMAGE_STREAM_JPEG:
-      _name = fog_strings->getString(STR_G2D_STREAM_JPEG);
+      _name = FOG_STR_(IMAGE_FILE_JPEG);
       _gdipMime = L"image/jpeg";
       break;
     case IMAGE_STREAM_PNG:
-      _name = fog_strings->getString(STR_G2D_STREAM_PNG);
+      _name = FOG_STR_(IMAGE_FILE_PNG);
       _gdipMime = L"image/png";
       break;
     case IMAGE_STREAM_TIFF:
-      _name = fog_strings->getString(STR_G2D_STREAM_TIFF);
+      _name = FOG_STR_(IMAGE_FILE_TIFF);
       _gdipMime = L"image/tiff";
       break;
   }
@@ -230,19 +229,19 @@ GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
   {
     case IMAGE_STREAM_JPEG:
       _imageExtensions.reserve(4);
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jpg));
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jpeg));
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jfi));
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_jfif));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpg));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpeg));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfi));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfif));
       break;
     case IMAGE_STREAM_PNG:
       _imageExtensions.reserve(1);
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_png));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_png));
       break;
     case IMAGE_STREAM_TIFF:
       _imageExtensions.reserve(2);
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_tif));
-      _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_tiff));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_tif));
+      _imageExtensions.append(FOG_STR_(IMAGE_EXT_tiff));
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -470,20 +469,20 @@ _End:
 // [Fog::GdipDecoder - Properties]
 // ===========================================================================
 
-err_t GdipDecoder::getProperty(const ManagedString& name, Var& dst) const
+err_t GdipDecoder::_getProperty(const ManagedStringW& name, Var& dst) const
 {
   err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::getProperty(name, dst);
+  return base::_getProperty(name, dst);
 }
 
-err_t GdipDecoder::setProperty(const ManagedString& name, const Var& src)
+err_t GdipDecoder::_setProperty(const ManagedStringW& name, const Var& src)
 {
   err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::setProperty(name, src);
+  return base::_setProperty(name, src);
 }
 
 // ===========================================================================
@@ -624,20 +623,20 @@ _End:
 // [Fog::GdipEncoder - Properties]
 // ===========================================================================
 
-err_t GdipEncoder::getProperty(const ManagedString& name, Var& dst) const
+err_t GdipEncoder::_getProperty(const ManagedStringW& name, Var& dst) const
 {
   err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::getProperty(name, dst);
+  return base::_getProperty(name, dst);
 }
 
-err_t GdipEncoder::setProperty(const ManagedString& name, const Var& src)
+err_t GdipEncoder::_setProperty(const ManagedStringW& name, const Var& src)
 {
   err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::setProperty(name, src);
+  return base::_setProperty(name, src);
 }
 
 // ===========================================================================

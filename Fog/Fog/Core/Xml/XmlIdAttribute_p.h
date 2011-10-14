@@ -30,7 +30,7 @@ struct FOG_NO_EXPORT XmlIdAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  XmlIdAttribute(XmlElement* element, const ManagedString& name);
+  XmlIdAttribute(XmlElement* element, const ManagedStringW& name);
   virtual ~XmlIdAttribute();
 
   // --------------------------------------------------------------------------

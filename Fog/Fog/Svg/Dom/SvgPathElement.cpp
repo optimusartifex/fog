@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgPathElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,8 +20,8 @@ namespace Fog {
 // ============================================================================
 
 SvgPathElement::SvgPathElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_path), SVG_ELEMENT_PATH),
-  a_d(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_d), FOG_OFFSET_OF(SvgPathElement, a_d))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_path), SVG_ELEMENT_PATH),
+  a_d(NULL, FOG_STR_(SVG_ATTRIBUTE_d), FOG_OFFSET_OF(SvgPathElement, a_d))
 {
 }
 
@@ -30,9 +30,9 @@ SvgPathElement::~SvgPathElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgPathElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgPathElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_d)) return (XmlAttribute*)&a_d;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_d)) return (XmlAttribute*)&a_d;
 
   return base::_createAttribute(name);
 }

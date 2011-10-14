@@ -863,7 +863,7 @@ static err_t StringT_appendNTOA(CharT_(String)* self, uint32_t cntOp, uint64_t n
     *prefix++ = '-';
   else if (flags & STRING_FORMAT_SIGN)
     *prefix++ = '+';
-  else if (flags & FORMAT_FORMAT_BLANK)
+  else if (flags & STRING_FORMAT_BLANK)
     *prefix++ = ' ';
 
   if (flags & STRING_FORMAT_ALTERNATE)
@@ -955,7 +955,7 @@ static err_t StringW_appendNTOA(StringW* self, uint32_t cntOp, uint64_t n, const
     *prefix++ = locale->getChar(LOCALE_CHAR_MINUS);
   else if (flags & STRING_FORMAT_SIGN)
     *prefix++ = locale->getChar(LOCALE_CHAR_PLUS);
-  else if (flags & FORMAT_FORMAT_BLANK)
+  else if (flags & STRING_FORMAT_BLANK)
     *prefix++ = CharW(' ');
 
   if (flags & STRING_FORMAT_ALTERNATE)
@@ -1252,7 +1252,7 @@ err_t StringA::appendDouble(double d, int doubleForm, const FormatParams& ff)
     { sign = '-'; d = -d; }
   else if (fmt & STRING_FORMAT_SIGN)
     sign = '+';
-  else if (fmt & FORMAT_FORMAT_BLANK)
+  else if (fmt & STRING_FORMAT_BLANK)
     sign = ' ';
 
   if (sign != 0) append(sign);
@@ -1451,7 +1451,7 @@ err_t StringW::appendDouble(double d, int doubleForm, const FormatParams& ff, co
     { sign = l.getChar(LOCALE_CHAR_MINUS); d = -d; }
   else if (fmt & STRING_FORMAT_SIGN)
     sign = l.getChar(LOCALE_CHAR_PLUS);
-  else if (fmt & FORMAT_FORMAT_BLANK)
+  else if (fmt & STRING_FORMAT_BLANK)
     sign = l.getChar(LOCALE_CHAR_SPACE);
 
   if (sign) append(sign);
@@ -1735,7 +1735,7 @@ static err_t FOG_CDECL StringT_opVFormatPrivate(CharT_(String)* self, uint32_t c
         else if (c == CharT('-'))
           flags |= STRING_FORMAT_LEFT;
         else if (c == CharT(' '))
-          flags |= FORMAT_FORMAT_BLANK;
+          flags |= STRING_FORMAT_BLANK;
         else if (c == CharT('+'))
           flags |= STRING_FORMAT_SIGN;
         else if (c == CharT('\''))
@@ -4318,13 +4318,22 @@ static bool FOG_CDECL StringT_eqStub(const CharT_(String)* a, const SrcT_(Stub)*
 template<typename CharT, typename SrcT>
 static bool FOG_CDECL StringT_eqString(const CharT_(String)* a, const SrcT_(String)* b)
 {
-  size_t aLength = a->getLength();
-  size_t bLength = b->getLength();
+  const CharT_(StringData)* a_d = a->_d;
+  const SrcT_(StringData)* b_d = b->_d;
+
+  size_t aLength = a_d->length;
+  size_t bLength = b_d->length;
+
+  if (a_d == b_d)
+    return true;
 
   if (aLength != bLength)
     return false;
 
-  return StringUtil::eq(a->getData(), b->getData(), aLength, CASE_SENSITIVE);
+  if (sizeof(CharT) == sizeof(SrcT) && ((a_d->vType & b_d->vType) & STRING_FLAG_MANAGED) == 1)
+    return false;
+
+  return StringUtil::eq(a_d->data, b_d->data, aLength, CASE_SENSITIVE);
 }
 
 template<typename CharT, typename SrcT>
@@ -4366,8 +4375,14 @@ static bool FOG_CDECL StringT_eqStubEx(const CharT_(String)* a, const SrcT_(Stub
 template<typename CharT, typename SrcT>
 static bool FOG_CDECL StringT_eqStringEx(const CharT_(String)* a, const SrcT_(String)* b, uint32_t cs)
 {
-  size_t aLength = a->getLength();
-  size_t bLength = b->getLength();
+  const CharT_(StringData)* a_d = a->_d;
+  const SrcT_(StringData)* b_d = b->_d;
+
+  size_t aLength = a_d->length;
+  size_t bLength = b_d->length;
+
+  if (a_d == b_d)
+    return true;
 
   if (aLength != bLength)
     return false;
@@ -4375,7 +4390,7 @@ static bool FOG_CDECL StringT_eqStringEx(const CharT_(String)* a, const SrcT_(St
   if (cs >= CASE_SENSITIVITY_COUNT)
     cs = CASE_INSENSITIVE;
 
-  return StringUtil::eq(a->getData(), b->getData(), aLength, cs);
+  return StringUtil::eq(a_d->data, b_d->data, aLength, cs);
 }
 
 // ============================================================================
@@ -5378,10 +5393,10 @@ FOG_NO_EXPORT void String_init(void)
   StringDataW* dw = &StringW_dEmpty;
 
   da->reference.init(1);
-  da->vType = VAR_TYPE_STRINGA | VAR_FLAG_NONE;
+  da->vType = VAR_TYPE_STRINGA | STRING_FLAG_MANAGED;
 
   dw->reference.init(1);
-  dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_NONE;
+  dw->vType = VAR_TYPE_STRINGW | STRING_FLAG_MANAGED;
 
   _api.stringa_oEmpty = StringA_oEmpty.initCustom1(da);
   _api.stringw_oEmpty = StringW_oEmpty.initCustom1(dw);

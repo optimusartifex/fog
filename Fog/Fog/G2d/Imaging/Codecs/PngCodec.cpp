@@ -20,7 +20,6 @@
 #include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/Strings.h>
 #include <Fog/Core/Tools/Var.h>
 #include <Fog/G2d/Imaging/Codecs/PngCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -142,7 +141,7 @@ PngCodecProvider::PngCodecProvider()
   pngProvider = this;
 
   // Name of ImageCodecProvider.
-  _name = fog_strings->getString(STR_G2D_STREAM_PNG);
+  _name = FOG_STR_(IMAGE_FILE_PNG);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -152,7 +151,7 @@ PngCodecProvider::PngCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(1);
-  _imageExtensions.append(fog_strings->getString(STR_G2D_EXTENSION_png));
+  _imageExtensions.append(FOG_STR_(IMAGE_EXT_png));
 }
 
 PngCodecProvider::~PngCodecProvider()
@@ -694,20 +693,20 @@ _End:
 // [Fog::PngEncoder - Properties]
 // ===========================================================================
 
-err_t PngEncoder::getProperty(const ManagedString& name, Var& dst) const
+err_t PngEncoder::_getProperty(const ManagedStringW& name, Var& dst) const
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_compression))
+  if (name == FOG_STR_(IMAGE_CODEC_compression))
     return dst.setInt(_compression);
 
-  return base::getProperty(name, dst);
+  return base::_getProperty(name, dst);
 }
 
-err_t PngEncoder::setProperty(const ManagedString& name, const Var& src)
+err_t PngEncoder::_setProperty(const ManagedStringW& name, const Var& src)
 {
-  if (name == fog_strings->getString(STR_G2D_CODEC_compression))
+  if (name == FOG_STR_(IMAGE_CODEC_compression))
     return src.getInt(_compression, 0, 9);
 
-  return base::setProperty(name, src);
+  return base::_setProperty(name, src);
 }
 
 // ============================================================================

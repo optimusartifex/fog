@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Svg/Dom/SvgViewElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
@@ -20,8 +20,8 @@ namespace Fog {
 // ============================================================================
 
 SvgViewElement::SvgViewElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_svg), SVG_ELEMENT_VIEW),
-  a_viewBox(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_viewBox), FOG_OFFSET_OF(SvgViewElement, a_viewBox))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_svg), SVG_ELEMENT_VIEW),
+  a_viewBox(NULL, FOG_STR_(SVG_ATTRIBUTE_viewBox), FOG_OFFSET_OF(SvgViewElement, a_viewBox))
 {
 }
 
@@ -30,9 +30,9 @@ SvgViewElement::~SvgViewElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgViewElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgViewElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_viewBox)) return (XmlAttribute*)&a_viewBox;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_viewBox)) return (XmlAttribute*)&a_viewBox;
 
   return base::_createAttribute(name);
 }

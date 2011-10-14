@@ -32,7 +32,7 @@ struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgViewBoxAttribute(XmlElement* element, const ManagedString& name, int offset);
+  SvgViewBoxAttribute(XmlElement* element, const ManagedStringW& name, int offset);
   virtual ~SvgViewBoxAttribute();
 
   // --------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Svg/Dom/SvgUseElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
@@ -56,9 +56,9 @@ bail:
 // ============================================================================
 
 SvgUseElement::SvgUseElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_use), SVG_ELEMENT_USE),
-  a_x(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x), FOG_OFFSET_OF(SvgUseElement, a_x)),
-  a_y(NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y), FOG_OFFSET_OF(SvgUseElement, a_y))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_use), SVG_ELEMENT_USE),
+  a_x(NULL, FOG_STR_(SVG_ATTRIBUTE_x), FOG_OFFSET_OF(SvgUseElement, a_x)),
+  a_y(NULL, FOG_STR_(SVG_ATTRIBUTE_y), FOG_OFFSET_OF(SvgUseElement, a_y))
 {
 }
 
@@ -67,10 +67,10 @@ SvgUseElement::~SvgUseElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgUseElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgUseElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x)) return (XmlAttribute*)&a_x;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y)) return (XmlAttribute*)&a_y;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_x)) return (XmlAttribute*)&a_x;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_y)) return (XmlAttribute*)&a_y;
 
   return base::_createAttribute(name);
 }
@@ -96,7 +96,7 @@ err_t SvgUseElement::onProcess(SvgVisitor* visitor) const
 {
   err_t err = ERR_OK;
 
-  StringW link = _getAttribute(fog_strings->getString(STR_SVG_ATTRIBUTE_xlink_href));
+  StringW link = _getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
   XmlElement* ref = getDocument()->getElementById(parseHtmlLinkId(link));
 
   if (ref && ref->isSvgElement())

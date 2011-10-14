@@ -1478,6 +1478,16 @@ enum MATH_INTEGRATION_METHOD
 };
 
 // ============================================================================
+// [Fog::MANAGED_STRING_OPTION]
+// ============================================================================
+
+enum MANAGED_STRING_OPTION
+{
+  MANAGED_STRING_OPTION_NONE = 0x00000000,
+  MANAGED_STRING_OPTION_LOOKUP = 0x00000001
+};
+
+// ============================================================================
 // [Fog::MATH_SOLVE]
 // ============================================================================
 
@@ -1576,6 +1586,7 @@ enum REGEXP_TYPE
 
   REGEXP_TYPE_COUNT = 4
 };
+
 // ============================================================================
 // [Fog::SLASH_FORM]
 // ============================================================================
@@ -1667,6 +1678,210 @@ enum STREAM_SEEK_MODE
 };
 
 // ============================================================================
+// [Fog::STRID]
+// ============================================================================
+
+//! @brief Cached strings IDs used in @c fog_strings array.
+enum STRID
+{
+  // --------------------------------------------------------------------------
+  // [Fog/Core - Object / Property System]
+  // --------------------------------------------------------------------------
+
+  STR_OBJECT_id = 0,
+  STR_OBJECT_name,
+
+  // --------------------------------------------------------------------------
+  // [Fog/Core - Xml]
+  // --------------------------------------------------------------------------
+
+  STR_XML_unnamed,
+  STR_XML_ATTRIBUTE_id,
+  STR_XML_ATTRIBUTE_style,
+
+  STR_XML__text,
+  STR_XML__cdata,
+  STR_XML__pi,
+  STR_XML__comment,
+  STR_XML__document,
+
+  // --------------------------------------------------------------------------
+  // [Fog/Core/OS]
+  // --------------------------------------------------------------------------
+
+  STR_OSUTIL_USERPROFILE,
+
+  // --------------------------------------------------------------------------
+  // [Fog/G2d/Imaging - Device Properties]
+  // --------------------------------------------------------------------------
+
+  STR_IMAGE_CODEC_width,
+  STR_IMAGE_CODEC_height,
+  STR_IMAGE_CODEC_depth,
+  STR_IMAGE_CODEC_planes,
+  STR_IMAGE_CODEC_actualFrame,
+  STR_IMAGE_CODEC_framesCount,
+  STR_IMAGE_CODEC_progress,
+  STR_IMAGE_CODEC_quality,
+  STR_IMAGE_CODEC_compression,
+  STR_IMAGE_CODEC_skipFileHeader,
+
+  // --------------------------------------------------------------------------
+  // [Fog/G2d/Imaging - Stream Types]
+  // --------------------------------------------------------------------------
+
+  STR_IMAGE_FILE_ANI,
+  STR_IMAGE_FILE_APNG,
+  STR_IMAGE_FILE_BMP,
+  STR_IMAGE_FILE_FLI,
+  STR_IMAGE_FILE_FLC,
+  STR_IMAGE_FILE_GIF,
+  STR_IMAGE_FILE_ICO,
+  STR_IMAGE_FILE_JPEG,
+  STR_IMAGE_FILE_LBM,
+  STR_IMAGE_FILE_MNG,
+  STR_IMAGE_FILE_PCX,
+  STR_IMAGE_FILE_PNG,
+  STR_IMAGE_FILE_PNM,
+  STR_IMAGE_FILE_TGA,
+  STR_IMAGE_FILE_TIFF,
+  STR_IMAGE_FILE_XBM,
+  STR_IMAGE_FILE_XPM,
+
+  // --------------------------------------------------------------------------
+  // [Fog/G2d/Imaging - Stream Extensions]
+  // --------------------------------------------------------------------------
+
+  STR_IMAGE_EXT_ani,
+  STR_IMAGE_EXT_apng,
+  STR_IMAGE_EXT_bmp,
+  STR_IMAGE_EXT_fli,
+  STR_IMAGE_EXT_flc,
+  STR_IMAGE_EXT_gif,
+  STR_IMAGE_EXT_ico,
+  STR_IMAGE_EXT_jfi,
+  STR_IMAGE_EXT_jfif,
+  STR_IMAGE_EXT_jpg,
+  STR_IMAGE_EXT_jpeg,
+  STR_IMAGE_EXT_lbm,
+  STR_IMAGE_EXT_mng,
+  STR_IMAGE_EXT_pcx,
+  STR_IMAGE_EXT_png,
+  STR_IMAGE_EXT_pnm,
+  STR_IMAGE_EXT_ras,
+  STR_IMAGE_EXT_tga,
+  STR_IMAGE_EXT_tif,
+  STR_IMAGE_EXT_tiff,
+  STR_IMAGE_EXT_xbm,
+  STR_IMAGE_EXT_xpm,
+
+  // --------------------------------------------------------------------------
+  // [Fog/Svg - Elements]
+  // --------------------------------------------------------------------------
+
+  STR_SVG_ELEMENT_none,
+  STR_SVG_ELEMENT_a,
+  STR_SVG_ELEMENT_circle,
+  STR_SVG_ELEMENT_clipPath,
+  STR_SVG_ELEMENT_defs,
+  STR_SVG_ELEMENT_ellipse,
+  STR_SVG_ELEMENT_g,
+  STR_SVG_ELEMENT_image,
+  STR_SVG_ELEMENT_line,
+  STR_SVG_ELEMENT_linearGradient,
+  STR_SVG_ELEMENT_marker,
+  STR_SVG_ELEMENT_mask,
+  STR_SVG_ELEMENT_path,
+  STR_SVG_ELEMENT_pattern,
+  STR_SVG_ELEMENT_polygon,
+  STR_SVG_ELEMENT_polyline,
+  STR_SVG_ELEMENT_radialGradient,
+  STR_SVG_ELEMENT_rect,
+  STR_SVG_ELEMENT_solidColor,
+  STR_SVG_ELEMENT_stop,
+  STR_SVG_ELEMENT_svg,
+  STR_SVG_ELEMENT_symbol,
+  STR_SVG_ELEMENT_text,
+  STR_SVG_ELEMENT_textPath,
+  STR_SVG_ELEMENT_tref,
+  STR_SVG_ELEMENT_tspan,
+  STR_SVG_ELEMENT_use,
+  STR_SVG_ELEMENT_view,
+
+  // --------------------------------------------------------------------------
+  // [Fog/Svg - Attributes]
+  // --------------------------------------------------------------------------
+
+  STR_SVG_ATTRIBUTE_angle,
+  STR_SVG_ATTRIBUTE_cx,
+  STR_SVG_ATTRIBUTE_cy,
+  STR_SVG_ATTRIBUTE_d,
+  STR_SVG_ATTRIBUTE_dx,
+  STR_SVG_ATTRIBUTE_dy,
+  STR_SVG_ATTRIBUTE_fx,
+  STR_SVG_ATTRIBUTE_fy,
+  STR_SVG_ATTRIBUTE_gradientTransform,
+  STR_SVG_ATTRIBUTE_gradientUnits,
+  STR_SVG_ATTRIBUTE_height,
+  STR_SVG_ATTRIBUTE_lengthAdjust,
+  STR_SVG_ATTRIBUTE_offset,
+  STR_SVG_ATTRIBUTE_patternTransform,
+  STR_SVG_ATTRIBUTE_patternUnits,
+  STR_SVG_ATTRIBUTE_points,
+  STR_SVG_ATTRIBUTE_preserveAspectRatio,
+  STR_SVG_ATTRIBUTE_r,
+  STR_SVG_ATTRIBUTE_rotate,
+  STR_SVG_ATTRIBUTE_rx,
+  STR_SVG_ATTRIBUTE_ry,
+  STR_SVG_ATTRIBUTE_spreadMethod,
+  STR_SVG_ATTRIBUTE_textLength,
+  STR_SVG_ATTRIBUTE_transform,
+  STR_SVG_ATTRIBUTE_viewBox,
+  STR_SVG_ATTRIBUTE_width,
+  STR_SVG_ATTRIBUTE_x,
+  STR_SVG_ATTRIBUTE_x1,
+  STR_SVG_ATTRIBUTE_x2,
+  STR_SVG_ATTRIBUTE_xlink_href,
+  STR_SVG_ATTRIBUTE_y,
+  STR_SVG_ATTRIBUTE_y1,
+  STR_SVG_ATTRIBUTE_y2,
+
+  // --------------------------------------------------------------------------
+  // [Fog/Svg - Attributes / Styles]
+  // --------------------------------------------------------------------------
+
+  STR_SVG_STYLE_NAMES,
+  STR_SVG_STYLE_clip_path = STR_SVG_STYLE_NAMES,
+  STR_SVG_STYLE_clip_rule,
+  STR_SVG_STYLE_enable_background,
+  STR_SVG_STYLE_fill,
+  STR_SVG_STYLE_fill_opacity,
+  STR_SVG_STYLE_fill_rule,
+  STR_SVG_STYLE_filter,
+  STR_SVG_STYLE_font_family,
+  STR_SVG_STYLE_font_size,
+  STR_SVG_STYLE_letter_spacing,
+  STR_SVG_STYLE_mask,
+  STR_SVG_STYLE_opacity,
+  STR_SVG_STYLE_stop_color,
+  STR_SVG_STYLE_stop_opacity,
+  STR_SVG_STYLE_stroke,
+  STR_SVG_STYLE_stroke_dasharray,
+  STR_SVG_STYLE_stroke_dashoffset,
+  STR_SVG_STYLE_stroke_linecap,
+  STR_SVG_STYLE_stroke_linejoin,
+  STR_SVG_STYLE_stroke_miterlimit,
+  STR_SVG_STYLE_stroke_opacity,
+  STR_SVG_STYLE_stroke_width,
+
+  // --------------------------------------------------------------------------
+  // [...]
+  // --------------------------------------------------------------------------
+
+  STR_COUNT
+};
+
+// ============================================================================
 // [Fog::STRING_FORMAT]
 // ============================================================================
 
@@ -1683,7 +1898,7 @@ enum STRING_FORMAT
   STRING_FORMAT_LEFT = 0x0004,
 
   //! @brief Blank character instead of positive sign (sprintf ' ' flag).
-  FORMAT_FORMAT_BLANK = 0x0008,
+  STRING_FORMAT_BLANK = 0x0008,
 
   //! @brief Always show sign (sprintf '+' flag).
   STRING_FORMAT_SIGN = 0x0010,
@@ -2417,6 +2632,16 @@ enum OBJECT_FLAG
   OBJECT_FLAG_IS_WIDGET = VAR_FLAG_RESERVED_5,
   //! @brief The @ref Object instance is @ref Layout.
   OBJECT_FLAG_IS_LAYOUT = VAR_FLAG_RESERVED_6
+};
+
+// ============================================================================
+// [Fog::STRING_FLAG]
+// ============================================================================
+
+enum STRING_FLAG
+{
+  STRING_FLAG_MANAGED = VAR_FLAG_RESERVED_1,
+  STRING_FLAG_CACHED = VAR_FLAG_RESERVED_2
 };
 
 // ============================================================================

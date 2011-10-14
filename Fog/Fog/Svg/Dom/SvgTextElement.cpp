@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlText.h>
 #include <Fog/Svg/Dom/SvgTextElement_p.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
@@ -21,12 +21,12 @@ namespace Fog {
 // ============================================================================
 
 SvgTextElement::SvgTextElement() :
-  SvgStyledElement(fog_strings->getString(STR_SVG_ELEMENT_text), SVG_ELEMENT_TEXT),
-  a_x           (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_x         ), FOG_OFFSET_OF(SvgTextElement, a_x           )),
-  a_y           (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_y         ), FOG_OFFSET_OF(SvgTextElement, a_y           )),
-  a_dx          (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_dx        ), FOG_OFFSET_OF(SvgTextElement, a_dx          )),
-  a_dy          (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_dy        ), FOG_OFFSET_OF(SvgTextElement, a_dy          )),
-  a_textLength  (NULL, fog_strings->getString(STR_SVG_ATTRIBUTE_textLength), FOG_OFFSET_OF(SvgTextElement, a_textLength  ))
+  SvgStyledElement(FOG_STR_(SVG_ELEMENT_text), SVG_ELEMENT_TEXT),
+  a_x           (NULL, FOG_STR_(SVG_ATTRIBUTE_x         ), FOG_OFFSET_OF(SvgTextElement, a_x           )),
+  a_y           (NULL, FOG_STR_(SVG_ATTRIBUTE_y         ), FOG_OFFSET_OF(SvgTextElement, a_y           )),
+  a_dx          (NULL, FOG_STR_(SVG_ATTRIBUTE_dx        ), FOG_OFFSET_OF(SvgTextElement, a_dx          )),
+  a_dy          (NULL, FOG_STR_(SVG_ATTRIBUTE_dy        ), FOG_OFFSET_OF(SvgTextElement, a_dy          )),
+  a_textLength  (NULL, FOG_STR_(SVG_ATTRIBUTE_textLength), FOG_OFFSET_OF(SvgTextElement, a_textLength  ))
 {
 }
 
@@ -35,13 +35,13 @@ SvgTextElement::~SvgTextElement()
   _removeAttributes();
 }
 
-XmlAttribute* SvgTextElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* SvgTextElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_x           )) return (XmlAttribute*)&a_x;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_y           )) return (XmlAttribute*)&a_y;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_dx          )) return (XmlAttribute*)&a_dx;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_dy          )) return (XmlAttribute*)&a_dy;
-  if (name == fog_strings->getString(STR_SVG_ATTRIBUTE_textLength  )) return (XmlAttribute*)&a_textLength;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_x           )) return (XmlAttribute*)&a_x;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_y           )) return (XmlAttribute*)&a_y;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_dx          )) return (XmlAttribute*)&a_dx;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_dy          )) return (XmlAttribute*)&a_dy;
+  if (name == FOG_STR_(SVG_ATTRIBUTE_textLength  )) return (XmlAttribute*)&a_textLength;
 
   return base::_createAttribute(name);
 }

@@ -34,7 +34,7 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgStyleAttribute(XmlElement* element, const ManagedString& name, int offset);
+  SvgStyleAttribute(XmlElement* element, const ManagedStringW& name, int offset);
   virtual ~SvgStyleAttribute();
 
   // --------------------------------------------------------------------------
@@ -55,13 +55,13 @@ struct FOG_NO_EXPORT SvgStyleAttribute : public XmlAttribute
   // [Style]
   // --------------------------------------------------------------------------
 
-  StringW getStyle(const ManagedString& name) const;
-  err_t setStyle(const ManagedString& name, const StringW& value);
+  StringW getStyle(const ManagedStringW& name) const;
+  err_t setStyle(const ManagedStringW& name, const StringW& value);
 
   StringW getStyle(int styleId) const;
   err_t setStyle(int styleId, const StringW& value);
 
-  static int styleToId(const ManagedString& name);
+  static int styleToId(const ManagedStringW& name);
 
   // --------------------------------------------------------------------------
   // [Members]

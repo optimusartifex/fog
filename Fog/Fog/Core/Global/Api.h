@@ -22,6 +22,7 @@
 // ============================================================================
 
 #define FOG_CAPI_CTOR(_Name_) void (FOG_CDECL* _Name_)
+#define FOG_CAPI_CRET(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 #define FOG_CAPI_DTOR(_Name_) void (FOG_CDECL* _Name_)
 #define FOG_CAPI_METHOD(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 #define FOG_CAPI_STATIC(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
@@ -565,6 +566,8 @@ struct FOG_NO_EXPORT Api
   // [Core/Tools - HashUtil]
   // --------------------------------------------------------------------------
 
+  FOG_CAPI_STATIC(size_t, hashutil_getClosestPrime)(size_t value, int adjustTable);
+
   FOG_CAPI_STATIC(uint32_t, hashutil_hashBinary)(const void* src, size_t length);
   FOG_CAPI_STATIC(uint32_t, hashutil_hashVectorD)(const void* src, size_t length);
   FOG_CAPI_STATIC(uint32_t, hashutil_hashVectorQ)(const void* src, size_t length);
@@ -804,6 +807,37 @@ struct FOG_NO_EXPORT Api
 
   Locale* locale_oPosix;
   Locale* locale_oUser;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - ManagedStringW]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(managedstringw_ctor)(ManagedStringW* self);
+  FOG_CAPI_CTOR(managedstringw_ctorCopy)(ManagedStringW* self, const ManagedStringW* other);
+  FOG_CAPI_CRET(err_t, managedstringw_ctorStubA)(ManagedStringW* self, const StubA* stub, uint32_t options);
+  FOG_CAPI_CRET(err_t, managedstringw_ctorStubW)(ManagedStringW* self, const StubW* stub, uint32_t options);
+  FOG_CAPI_CRET(err_t, managedstringw_ctorStringW)(ManagedStringW* self, const StringW* str, uint32_t options);
+  FOG_CAPI_DTOR(managedstringw_dtor)(ManagedStringW* self);
+
+  FOG_CAPI_METHOD(err_t, managedstringw_setStubA)(ManagedStringW* self, const StubA* stub, uint32_t options);
+  FOG_CAPI_METHOD(err_t, managedstringw_setStubW)(ManagedStringW* self, const StubW* stub, uint32_t options);
+  FOG_CAPI_METHOD(err_t, managedstringw_setStringW)(ManagedStringW* self, const StringW* str, uint32_t options);
+  FOG_CAPI_METHOD(err_t, managedstringw_setManaged)(ManagedStringW* self, const ManagedStringW* str);
+
+  FOG_CAPI_METHOD(void, managedstringw_reset)(ManagedStringW* self);
+
+  FOG_CAPI_STATIC(bool, managedstringw_eq)(const ManagedStringW* a, const ManagedStringW* b);
+  FOG_CAPI_STATIC(void, managedstringw_cleanup)(void);
+
+  ManagedStringW* managedstringw_oEmpty;
+
+  // --------------------------------------------------------------------------
+  // [Core/Tools - ManagedStringCacheW]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_STATIC(ManagedStringCacheW*, managedstringcachew_create)(const char* sData, size_t sLength, size_t listLength);
+
+  ManagedStringCacheW* managedstringcachew_oInstance;
 
   // --------------------------------------------------------------------------
   // [Core/Tools - RegExpA]

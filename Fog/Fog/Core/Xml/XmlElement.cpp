@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/Strings.h>
+#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Xml/XmlDocument.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/Core/Xml/XmlIdAttribute_p.h>
@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::XmlElement]
 // ============================================================================
 
-XmlElement::XmlElement(const ManagedString& tagName) :
+XmlElement::XmlElement(const ManagedStringW& tagName) :
   _type(XML_ELEMENT_BASE),
   _dirty(0),
   _reserved0(0),
@@ -36,7 +36,7 @@ XmlElement::XmlElement(const ManagedString& tagName) :
   _tagName(tagName),
   _hashNextId(NULL)
 {
-  if (_tagName.isEmpty()) _tagName = fog_strings->getString(STR_XML_unnamed);
+  if (_tagName.isEmpty()) _tagName = FOG_STR_(XML_unnamed);
 }
 
 XmlElement::~XmlElement()
@@ -352,9 +352,10 @@ List<XmlElement*> XmlElement::getChildNodes() const
 List<XmlElement*> XmlElement::getChildNodesByTagName(const StringW& tagName) const
 {
   List<XmlElement*> elms;
+  ManagedStringW tagNameM(tagName, MANAGED_STRING_OPTION_LOOKUP);
 
-  ManagedString tagNameM;
-  if (tagNameM.setIfManaged(tagName) != ERR_OK) return elms;
+  if (tagNameM.isEmpty())
+    return elms;
 
   for (XmlElement* e = getFirstChild(); e; e = e->getNextSibling())
   {
@@ -395,16 +396,19 @@ List<XmlAttribute*> XmlElement::attributes() const
 
 bool XmlElement::hasAttribute(const StringW& name) const
 {
-  size_t i, len = _attributes.getLength();
-  if (!len) return false;
+  size_t length = _attributes.getLength();
+  if (length == 0)
+    return false;
 
-  ManagedString managedName;
-  if (managedName.setIfManaged(name) != ERR_OK) return false;
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
+  if (m_name.isEmpty())
+    return false;
 
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
-  for (i = 0; i < len; i++)
+  for (size_t i = 0; i < length; i++)
   {
-    if (attrs[i]->_name == managedName) return true;
+    if (attrs[i]->_name == m_name)
+      return true;
   }
 
   return false;
@@ -412,37 +416,46 @@ bool XmlElement::hasAttribute(const StringW& name) const
 
 err_t XmlElement::setAttribute(const StringW& name, const StringW& value)
 {
-  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0) return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
-  if (name.isEmpty()) return ERR_XML_INVALID_ATTRIBUTE;
+  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0)
+    return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
-  ManagedString managedName;
-  err_t err = managedName.set(name);
-  if (FOG_IS_ERROR(err)) return err;
+  if (name.isEmpty())
+    return ERR_XML_INVALID_ATTRIBUTE;
 
-  return _setAttribute(managedName, value);
+  ManagedStringW m_name(name);
+  if (m_name.isEmpty())
+    return ERR_RT_OUT_OF_MEMORY;
+
+  return _setAttribute(m_name, value);
 }
 
 StringW XmlElement::getAttribute(const StringW& name) const
 {
-  ManagedString managedName;
-  if (managedName.setIfManaged(name) != ERR_OK) return StringW();
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
 
-  return _getAttribute(managedName);
+  if (m_name.isEmpty())
+    return StringW();
+
+  return _getAttribute(m_name);
 }
 
 err_t XmlElement::removeAttribute(const StringW& name)
 {
-  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0) return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
+  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0)
+    return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
-  ManagedString managedName;
-  if (managedName.setIfManaged(name) != ERR_OK) return ERR_XML_ATTRIBUTE_NOT_EXISTS;
+  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
 
-  return _removeAttribute(managedName);
+  if (m_name.isEmpty())
+    return ERR_XML_ATTRIBUTE_NOT_EXISTS;
+
+  return _removeAttribute(m_name);
 }
 
 err_t XmlElement::removeAttributes()
 {
-  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0) return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
+  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0)
+    return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
   size_t i = 0;
   while (i < _attributes.getLength())
@@ -455,13 +468,16 @@ err_t XmlElement::removeAttributes()
 
 err_t XmlElement::setId(const StringW& id)
 {
-  return setAttribute(fog_strings->getString(STR_XML_ATTRIBUTE_id), id);
+  return setAttribute(FOG_STR_(XML_ATTRIBUTE_id), id);
 }
 
 err_t XmlElement::setTagName(const StringW& name)
 {
-  if ((_flags & XML_ALLOWED_TAG) == 0) return ERR_XML_TAG_CHANGE_NOT_ALLOWED;
-  if (name.isEmpty()) return ERR_XML_INVALID_TAG_NAME;
+  if ((_flags & XML_ALLOWED_TAG) == 0)
+    return ERR_XML_TAG_CHANGE_NOT_ALLOWED;
+
+  if (name.isEmpty())
+    return ERR_XML_INVALID_TAG_NAME;
 
   return _tagName.set(name);
 }
@@ -502,7 +518,7 @@ err_t XmlElement::setTextContent(const StringW& text)
   }
 }
 
-err_t XmlElement::_setAttribute(const ManagedString& name, const StringW& value)
+err_t XmlElement::_setAttribute(const ManagedStringW& name, const StringW& value)
 {
   size_t i, len = _attributes.getLength();
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
@@ -528,7 +544,7 @@ err_t XmlElement::_setAttribute(const ManagedString& name, const StringW& value)
   return a->setValue(value);
 }
 
-StringW XmlElement::_getAttribute(const ManagedString& name) const
+StringW XmlElement::_getAttribute(const ManagedStringW& name) const
 {
   size_t i, len = _attributes.getLength();
 
@@ -541,7 +557,7 @@ StringW XmlElement::_getAttribute(const ManagedString& name) const
   return StringW();
 }
 
-err_t XmlElement::_removeAttribute(const ManagedString& name)
+err_t XmlElement::_removeAttribute(const ManagedStringW& name)
 {
   size_t i, len = _attributes.getLength();
   XmlAttribute** attrs = (XmlAttribute**)_attributes.getData();
@@ -578,9 +594,9 @@ err_t XmlElement::_removeAttributes()
   return ERR_OK;
 }
 
-XmlAttribute* XmlElement::_createAttribute(const ManagedString& name) const
+XmlAttribute* XmlElement::_createAttribute(const ManagedStringW& name) const
 {
-  if (name == fog_strings->getString(STR_XML_ATTRIBUTE_id))
+  if (name == FOG_STR_(XML_ATTRIBUTE_id))
     return fog_new XmlIdAttribute(const_cast<XmlElement*>(this), name);
   else
     return fog_new XmlAttribute(const_cast<XmlElement*>(this), name);

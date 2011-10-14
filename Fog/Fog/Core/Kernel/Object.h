@@ -27,7 +27,6 @@ namespace Fog {
 // TODO: These should be defined by Global/TypeDefs.h, so remove from here.
 // Fog-Core.
 struct Event;
-struct ManagedString;
 struct MetaClass;
 
 // Fog-Gui (object_cast specialization).
@@ -501,13 +500,25 @@ struct FOG_API Object
   err_t setProperty(const StringW& name, const Var& src);
 
   //! @brief Get property @a name to a given @a value.
+  FOG_INLINE err_t getProperty(const ManagedStringW& name, Var& dst) const
+  {
+    return _getProperty(name, dst);
+  }
+
+  //! @brief Set property @a name to a given @a value.
+  FOG_INLINE err_t setProperty(const ManagedStringW& name, const Var& src)
+  {
+    return _setProperty(name, src);
+  }
+
+  //! @brief Get property @a name to a given @a value.
   //!
   //! This is virtual version that can be overrided to implement own properties.
-  virtual err_t getProperty(const ManagedString& name, Var& dst) const;
+  virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
   //! @brief Set property @a name to a given @a value.
   //!
   //! This is virtual version that can be overrided to implement own properties.
-  virtual err_t setProperty(const ManagedString& name, const Var& src);
+  virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Event Handling]

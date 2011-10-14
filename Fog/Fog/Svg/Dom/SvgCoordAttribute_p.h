@@ -31,7 +31,7 @@ struct FOG_NO_EXPORT SvgCoordAttribute : public XmlAttribute
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  SvgCoordAttribute(XmlElement* element, const ManagedString& name, int offset);
+  SvgCoordAttribute(XmlElement* element, const ManagedStringW& name, int offset);
   virtual ~SvgCoordAttribute();
 
   // --------------------------------------------------------------------------

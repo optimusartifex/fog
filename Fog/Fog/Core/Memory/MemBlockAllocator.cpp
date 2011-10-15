@@ -118,10 +118,10 @@ static void FOG_CDECL MemBlockAllocator_reset(MemBlockAllocator* self)
 
 FOG_NO_EXPORT void MemBlockAllocator_init(void)
 {
-  _api.memblockallocator_ctor = MemBlockAllocator_ctor;
-  _api.memblockallocator_dtor = MemBlockAllocator_reset;
-  _api.memblockallocator_alloc = MemBlockAllocator_alloc;
-  _api.memblockallocator_reset = MemBlockAllocator_reset;
+  fog_api.memblockallocator_ctor = MemBlockAllocator_ctor;
+  fog_api.memblockallocator_dtor = MemBlockAllocator_reset;
+  fog_api.memblockallocator_alloc = MemBlockAllocator_alloc;
+  fog_api.memblockallocator_reset = MemBlockAllocator_reset;
 }
 
 } // Fog namespace

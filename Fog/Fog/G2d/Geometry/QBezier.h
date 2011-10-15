@@ -78,7 +78,7 @@ struct FOG_NO_EXPORT QBezierF
   FOG_INLINE float getLength() const
   {
     float length;
-    _api.qbezierf_getLength(p, &length);
+    fog_api.qbezierf_getLength(p, &length);
     return length;
   }
 
@@ -108,12 +108,12 @@ struct FOG_NO_EXPORT QBezierF
 
   FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    return _api.qbezierf_getBoundingBox(p, &dst);
+    return fog_api.qbezierf_getBoundingBox(p, &dst);
   }
 
   FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    err_t err = _api.qbezierf_getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
+    err_t err = fog_api.qbezierf_getBoundingBox(p, reinterpret_cast<BoxF*>(&dst));
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -136,7 +136,7 @@ struct FOG_NO_EXPORT QBezierF
 
   FOG_INLINE err_t flatten(PathF& dst, uint8_t initialCommand, float flatness) const
   {
-    return _api.qbezierf_flatten(p, &dst, initialCommand, flatness);
+    return fog_api.qbezierf_flatten(p, &dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -177,17 +177,17 @@ struct FOG_NO_EXPORT QBezierF
 
   static FOG_INLINE err_t getBoundingBox(const QBezierF* self, BoxF* dst)
   {
-    return _api.qbezierf_getBoundingBox(self->p, dst);
+    return fog_api.qbezierf_getBoundingBox(self->p, dst);
   }
 
   static FOG_INLINE err_t getBoundingBox(const PointF* self, BoxF* dst)
   {
-    return _api.qbezierf_getBoundingBox(self, dst);
+    return fog_api.qbezierf_getBoundingBox(self, dst);
   }
 
   static FOG_INLINE err_t getSplineBBox(const PointF* self, size_t length, BoxF* dst)
   {
-    return _api.qbezierf_getSplineBBox(self, length, dst);
+    return fog_api.qbezierf_getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void splitHalf(const PointF* self, PointF* left, PointF* rght)
@@ -232,12 +232,12 @@ struct FOG_NO_EXPORT QBezierF
 
   static FOG_INLINE err_t flatten(const QBezierF* self, PathF& dst, uint8_t initialCommand, float flatness)
   {
-    return _api.qbezierf_flatten(self->p, &dst, initialCommand, flatness);
+    return fog_api.qbezierf_flatten(self->p, &dst, initialCommand, flatness);
   }
 
   static FOG_INLINE err_t flatten(const PointF* self, PathF& dst, uint8_t initialCommand, float flatness)
   {
-    return _api.qbezierf_flatten(self, &dst, initialCommand, flatness);
+    return fog_api.qbezierf_flatten(self, &dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -303,7 +303,7 @@ struct FOG_NO_EXPORT QBezierD
   FOG_INLINE double getLength() const
   {
     double length;
-    _api.qbezierd_getLength(p, &length);
+    fog_api.qbezierd_getLength(p, &length);
     return length;
   }
 
@@ -333,12 +333,12 @@ struct FOG_NO_EXPORT QBezierD
 
   FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    return _api.qbezierd_getBoundingBox(p, &dst);
+    return fog_api.qbezierd_getBoundingBox(p, &dst);
   }
 
   FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    err_t err = _api.qbezierd_getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
+    err_t err = fog_api.qbezierd_getBoundingBox(p, reinterpret_cast<BoxD*>(&dst));
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -361,7 +361,7 @@ struct FOG_NO_EXPORT QBezierD
 
   FOG_INLINE err_t flatten(PathD& dst, uint8_t initialCommand, double flatness) const
   {
-    return _api.qbezierd_flatten(p, &dst, initialCommand, flatness);
+    return fog_api.qbezierd_flatten(p, &dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------
@@ -402,17 +402,17 @@ struct FOG_NO_EXPORT QBezierD
 
   static FOG_INLINE err_t getBoundingBox(const QBezierD* self, BoxD* dst)
   {
-    return _api.qbezierd_getBoundingBox(self->p, dst);
+    return fog_api.qbezierd_getBoundingBox(self->p, dst);
   }
 
   static FOG_INLINE err_t getBoundingBox(const PointD* self, BoxD* dst)
   {
-    return _api.qbezierd_getBoundingBox(self, dst);
+    return fog_api.qbezierd_getBoundingBox(self, dst);
   }
 
   static FOG_INLINE err_t getSplineBBox(const PointD* self, size_t length, BoxD* dst)
   {
-    return _api.qbezierd_getSplineBBox(self, length, dst);
+    return fog_api.qbezierd_getSplineBBox(self, length, dst);
   }
 
   static FOG_INLINE void splitHalf(const PointD* self, PointD* left, PointD* rght)
@@ -457,12 +457,12 @@ struct FOG_NO_EXPORT QBezierD
 
   static FOG_INLINE err_t flatten(const QBezierD* self, PathD& dst, uint8_t initialCommand, double flatness)
   {
-    return _api.qbezierd_flatten(self->p, &dst, initialCommand, flatness);
+    return fog_api.qbezierd_flatten(self->p, &dst, initialCommand, flatness);
   }
 
   static FOG_INLINE err_t flatten(const PointD* self, PathD& dst, uint8_t initialCommand, double flatness)
   {
-    return _api.qbezierd_flatten(self, &dst, initialCommand, flatness);
+    return fog_api.qbezierd_flatten(self, &dst, initialCommand, flatness);
   }
 
   // --------------------------------------------------------------------------

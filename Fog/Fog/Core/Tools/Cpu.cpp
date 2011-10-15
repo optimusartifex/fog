@@ -324,8 +324,8 @@ static void Cpu_detect(Cpu* cpu)
 
 FOG_NO_EXPORT void Cpu_init(void)
 {
-  _api.cpu_oInstance = &Cpu_instance;
-  Cpu_detect(_api.cpu_oInstance);
+  fog_api.cpu_oInstance = &Cpu_instance;
+  Cpu_detect(fog_api.cpu_oInstance);
 }
 
 } // Fog namespace

@@ -29,17 +29,17 @@ struct FOG_NO_EXPORT FeColorLut : public FeBase
 
   FOG_INLINE FeColorLut()
   {
-    _api.fecolorlut_ctor(this);
+    fog_api.fecolorlut_ctor(this);
   }
 
   FOG_INLINE FeColorLut(const FeColorLut& other)
   {
-    _api.fecolorlut_ctorCopy(this, &other);
+    fog_api.fecolorlut_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~FeColorLut()
   {
-    _api.fecolorlut_dtor(this);
+    fog_api.fecolorlut_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -76,7 +76,7 @@ struct FOG_NO_EXPORT FeColorLut : public FeBase
 
   FOG_INLINE void reset()
   {
-    _api.fecolorlut_reset(this);
+    fog_api.fecolorlut_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -85,7 +85,7 @@ struct FOG_NO_EXPORT FeColorLut : public FeBase
 
   FOG_INLINE bool eq(const FeColorLut& other) const
   {
-    return _api.fecolorlut_eq(this, &other);
+    return fog_api.fecolorlut_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -95,7 +95,7 @@ struct FOG_NO_EXPORT FeColorLut : public FeBase
   //! @brief Assignment operator.
   FOG_INLINE FeColorLut& operator=(const FeColorLut& other)
   {
-    _api.fecolorlut_copy(this, &other);
+    fog_api.fecolorlut_copy(this, &other);
     return *this;
   }
 
@@ -120,12 +120,12 @@ struct FOG_NO_EXPORT FeColorLut : public FeBase
 
   static FOG_INLINE bool eq(const FeColorLut* a, const FeColorLut* b)
   {
-    return _api.fecolorlut_eq(a, b);
+    return fog_api.fecolorlut_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.fecolorlut_eq;
+    return (EqFunc)fog_api.fecolorlut_eq;
   }
 
   // --------------------------------------------------------------------------

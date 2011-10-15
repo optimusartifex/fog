@@ -65,6 +65,7 @@ struct ThreadCondition;
 struct ThreadEvent;
 struct ThreadLocal;
 struct ThreadPool;
+struct ThreadPoolEntry;
 
 // Core/Tools.
 struct Ascii8;

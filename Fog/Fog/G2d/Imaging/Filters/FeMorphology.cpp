@@ -82,12 +82,12 @@ FOG_NO_EXPORT void FeMorphology_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.femorphology_ctor = FeMorphology_ctor;
-  _api.femorphology_ctorCopy = FeMorphology_ctorCopy;
+  fog_api.femorphology_ctor = FeMorphology_ctor;
+  fog_api.femorphology_ctorCopy = FeMorphology_ctorCopy;
 
-  _api.femorphology_reset = FeMorphology_reset;
-  _api.femorphology_copy = FeMorphology_copy;
-  _api.femorphology_eq = FeMorphology_eq;
+  fog_api.femorphology_reset = FeMorphology_reset;
+  fog_api.femorphology_copy = FeMorphology_copy;
+  fog_api.femorphology_eq = FeMorphology_eq;
 }
 
 } // Fog namespace

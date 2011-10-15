@@ -94,7 +94,7 @@ struct FOG_NO_EXPORT ImageConverterData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.imageconverter_dFree(this);
+      fog_api.imageconverter_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -142,12 +142,12 @@ struct FOG_NO_EXPORT ImageConverter
 
   FOG_INLINE ImageConverter()
   {
-    _api.imageconverter_ctor(this);
+    fog_api.imageconverter_ctor(this);
   }
 
   FOG_INLINE ImageConverter(const ImageConverter& other)
   {
-    _api.imageconverter_ctorCopy(this, &other);
+    fog_api.imageconverter_ctorCopy(this, &other);
   }
 
   FOG_INLINE ImageConverter(
@@ -157,7 +157,7 @@ struct FOG_NO_EXPORT ImageConverter
     const ImagePalette* dstPalette = NULL,
     const ImagePalette* srcPalette = NULL)
   {
-    _api.imageconverter_ctorCreate(this,
+    fog_api.imageconverter_ctorCreate(this,
       &dstFormatDescription,
       &srcFormatDescription,
       dither,
@@ -172,7 +172,7 @@ struct FOG_NO_EXPORT ImageConverter
 
   FOG_INLINE ~ImageConverter()
   {
-    _api.imageconverter_dtor(this);
+    fog_api.imageconverter_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -181,7 +181,7 @@ struct FOG_NO_EXPORT ImageConverter
 
   FOG_INLINE bool isValid() const
   {
-    return _d != _api.imageconverter_oNull->_d;
+    return _d != fog_api.imageconverter_oNull->_d;
   }
 
   // --------------------------------------------------------------------------
@@ -195,7 +195,7 @@ struct FOG_NO_EXPORT ImageConverter
     const ImagePalette* dstPalette = NULL,
     const ImagePalette* srcPalette = NULL)
   {
-    return _api.imageconverter_create(this,
+    return fog_api.imageconverter_create(this,
       &dstFormatDescription,
       &srcFormatDescription,
       dither,
@@ -211,7 +211,7 @@ struct FOG_NO_EXPORT ImageConverter
     const ImagePalette* dstPalette = NULL,
     const ImagePalette* srcPalette = NULL)
   {
-    return _api.imageconverter_createDithered8(this,
+    return fog_api.imageconverter_createDithered8(this,
       &dstParams,
       &srcFormatDescription,
       dstPalette,
@@ -224,7 +224,7 @@ struct FOG_NO_EXPORT ImageConverter
 
   FOG_INLINE void reset()
   {
-    _api.imageconverter_reset(this);
+    fog_api.imageconverter_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -253,12 +253,12 @@ struct FOG_NO_EXPORT ImageConverter
 
   FOG_INLINE void blitLine(void* dst, const void* src, int w) const
   {
-    return _api.imageconverter_blitLine(this, dst, src, w, NULL);
+    return fog_api.imageconverter_blitLine(this, dst, src, w, NULL);
   }
 
   FOG_INLINE void blitLine(void* dst, const void* src, int w, const PointI& ditherOrigin) const
   {
-    return _api.imageconverter_blitLine(this, dst, src, w, &ditherOrigin);
+    return fog_api.imageconverter_blitLine(this, dst, src, w, &ditherOrigin);
   }
 
   // --------------------------------------------------------------------------
@@ -267,12 +267,12 @@ struct FOG_NO_EXPORT ImageConverter
 
   FOG_INLINE void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h) const
   {
-    return _api.imageconverter_blitRect(this, dst, dstStride, src, srcStride, w, h, NULL);
+    return fog_api.imageconverter_blitRect(this, dst, dstStride, src, srcStride, w, h, NULL);
   }
 
   FOG_INLINE void blitRect(void* dst, size_t dstStride, const void* src, size_t srcStride, int w, int h, const PointI& ditherOrigin) const
   {
-    return _api.imageconverter_blitRect(this, dst, dstStride, src, srcStride, w, h, &ditherOrigin);
+    return fog_api.imageconverter_blitRect(this, dst, dstStride, src, srcStride, w, h, &ditherOrigin);
   }
 
   // --------------------------------------------------------------------------

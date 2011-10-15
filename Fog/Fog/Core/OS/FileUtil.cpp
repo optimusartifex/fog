@@ -454,14 +454,14 @@ static int FOG_CDECL FileUtil_stat(void* dst, const StringW* fileName)
 
 FOG_NO_EXPORT void FileUtil_init(void)
 {
-  _api.fileutil_test = FileUtil_test;
-  _api.fileutil_testLocalName = FileUtil_testLocalName;
-  _api.fileutil_findFile = FileUtil_findFile;
-  _api.fileutil_createDirectory = FileUtil_createDirectory;
-  _api.fileutil_deleteDirectory = FileUtil_deleteDirectory;
+  fog_api.fileutil_test = FileUtil_test;
+  fog_api.fileutil_testLocalName = FileUtil_testLocalName;
+  fog_api.fileutil_findFile = FileUtil_findFile;
+  fog_api.fileutil_createDirectory = FileUtil_createDirectory;
+  fog_api.fileutil_deleteDirectory = FileUtil_deleteDirectory;
 
 #if defined(FOG_OS_POSIX)
-  _api.fileutil_stat = FileUtil_stat;
+  fog_api.fileutil_stat = FileUtil_stat;
 #endif // FOG_OS_POSIX
 }
 

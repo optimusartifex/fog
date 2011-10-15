@@ -24,7 +24,7 @@ namespace Fog {
 //! @internal
 //!
 //! @brief One larger memory block.
-struct MemBlockNode
+struct FOG_NO_EXPORT MemBlockNode
 {
   // --------------------------------------------------------------------------
   // [Statics]
@@ -97,13 +97,13 @@ struct FOG_NO_EXPORT MemBlockAllocator
   //! @brief Block allocator constructor.
   FOG_INLINE MemBlockAllocator()
   {
-    _api.memblockallocator_ctor(this);
+    fog_api.memblockallocator_ctor(this);
   }
 
   //! @brief Block allocator destructor, will check if all blocks are freed.
   FOG_INLINE ~MemBlockAllocator()
   {
-    _api.memblockallocator_dtor(this);
+    fog_api.memblockallocator_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -115,7 +115,7 @@ struct FOG_NO_EXPORT MemBlockAllocator
   //! This method is reentrant, never call it from other than engine thread.
   FOG_INLINE void* alloc(size_t size)
   {
-    return _api.memblockallocator_alloc(this, size);
+    return fog_api.memblockallocator_alloc(this, size);
   }
 
   //! @brief Free @a ptr allocated by @c alloc();
@@ -132,7 +132,7 @@ struct FOG_NO_EXPORT MemBlockAllocator
   //! @brief Reset, will check if all blocks are freed.
   FOG_INLINE void reset()
   {
-    _api.memblockallocator_reset(this);
+    fog_api.memblockallocator_reset(this);
   }
 
   // --------------------------------------------------------------------------

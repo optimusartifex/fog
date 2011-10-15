@@ -11,12 +11,9 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Threading/Atomic.h>
 
+/// [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
-#include <pthread.h>
-#endif // FOG_OS_POSIX
-
-#if defined(FOG_OS_POSIX)
-FOG_CVAR_EXTERN pthread_mutexattr_t fog_lock_recursive_attrs;
+# include <pthread.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
@@ -32,71 +29,49 @@ namespace Fog {
 struct FOG_NO_EXPORT Lock
 {
   // --------------------------------------------------------------------------
-  // [Windows Support]
+  // [Typedefs]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_WINDOWS)
   typedef CRITICAL_SECTION Handle;
-
-  FOG_INLINE Lock()
-  {
-    InitializeCriticalSection(&_handle);
-    // InitializeCriticalSectionAndSpinCount(&_handle, 2000);
-  }
-
-  FOG_INLINE ~Lock()
-  {
-    DeleteCriticalSection(&_handle);
-  }
-
-  FOG_INLINE void lock()
-  {
-    EnterCriticalSection(&_handle);
-  }
-
-  FOG_INLINE void unlock()
-  {
-    LeaveCriticalSection(&_handle);
-  }
-
-  FOG_INLINE bool tryLock()
-  {
-    return TryEnterCriticalSection(&_handle) != 0;
-  }
 #endif // FOG_OS_WINDOWS
-
-  // --------------------------------------------------------------------------
-  // [Posix Support]
-  // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_POSIX)
   typedef pthread_mutex_t Handle;
+#endif // FOG_OS_POSIX
+
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE Lock()
   {
-    pthread_mutex_init(&_handle, &fog_lock_recursive_attrs);
+    fog_api.lock_ctor(this);
   }
 
   FOG_INLINE ~Lock()
   {
-    pthread_mutex_destroy(&_handle);
+    fog_api.lock_dtor(this);
   }
+
+  // --------------------------------------------------------------------------
+  // [Lock / Unlock]
+  // --------------------------------------------------------------------------
 
   FOG_INLINE void lock()
   {
-    pthread_mutex_lock(&_handle);
-  }
-
-  FOG_INLINE void unlock()
-  {
-    pthread_mutex_unlock(&_handle);
+    fog_api.lock_lock(this);
   }
 
   FOG_INLINE bool tryLock()
   {
-    return pthread_mutex_trylock(&_handle) != 0;
+    return fog_api.lock_tryLock(this);
   }
-#endif // FOG_OS_POSIX
+
+  FOG_INLINE void unlock()
+  {
+    return fog_api.lock_unlock(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -181,8 +156,7 @@ struct FOG_NO_EXPORT AutoLock
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
-  //! @brief Pointer to a locked mutex.
+  //! @brief Pointer to a lock.
   Lock* _target;
 
 private:
@@ -226,8 +200,7 @@ struct FOG_NO_EXPORT AutoUnlock
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
-  //! @brief Pointer to a unlocked mutex.
+  //! @brief Pointer to a lock.
   Lock* _target;
 
 private:

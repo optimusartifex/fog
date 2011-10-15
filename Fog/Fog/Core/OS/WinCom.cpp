@@ -236,7 +236,7 @@ static err_t FOG_CDECL WinCOM_makeIStream(IStream** dst, Stream* src)
 
 FOG_NO_EXPORT void WinCOM_init(void)
 {
-  _api.wincom_makeIStream = WinCOM_makeIStream;
+  fog_api.wincom_makeIStream = WinCOM_makeIStream;
 }
 
 } // Fog namespace

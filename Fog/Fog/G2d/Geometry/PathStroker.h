@@ -254,27 +254,27 @@ struct FOG_NO_EXPORT PathStrokerF
 
   FOG_INLINE PathStrokerF()
   {
-    _api.pathstrokerf_ctor(this);
+    fog_api.pathstrokerf_ctor(this);
   }
 
   FOG_INLINE PathStrokerF(const PathStrokerParamsF& params)
   {
-    _api.pathstrokerf_ctorParams(this, &params, NULL, NULL);
+    fog_api.pathstrokerf_ctorParams(this, &params, NULL, NULL);
   }
 
   FOG_INLINE PathStrokerF(const PathStrokerParamsF& params, const TransformF& transform)
   {
-    _api.pathstrokerf_ctorParams(this, &params, &transform, NULL);
+    fog_api.pathstrokerf_ctorParams(this, &params, &transform, NULL);
   }
 
   FOG_INLINE PathStrokerF(const PathStrokerParamsF& params, const TransformF& transform, const BoxF& clipBox)
   {
-    _api.pathstrokerf_ctorParams(this, &params, &transform, &clipBox);
+    fog_api.pathstrokerf_ctorParams(this, &params, &transform, &clipBox);
   }
 
   FOG_INLINE ~PathStrokerF()
   {
-    _api.pathstrokerf_dtor(this);
+    fog_api.pathstrokerf_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -288,7 +288,7 @@ struct FOG_NO_EXPORT PathStrokerF
 
   FOG_INLINE void setParams(const PathStrokerParamsF& params)
   {
-    _api.pathstrokerf_setParams(this, &params);
+    fog_api.pathstrokerf_setParams(this, &params);
   }
 
   // --------------------------------------------------------------------------
@@ -374,17 +374,17 @@ struct FOG_NO_EXPORT PathStrokerF
 
   FOG_INLINE err_t strokeShape(PathF& dst, uint32_t shapeType, const void* shapeData) const
   {
-    return _api.pathstrokerf_strokeShape(this, &dst, shapeType, shapeData);
+    return fog_api.pathstrokerf_strokeShape(this, &dst, shapeType, shapeData);
   }
 
   FOG_INLINE err_t strokeRect(PathF& dst, const RectF& rect) const
   {
-    return _api.pathstrokerf_strokeShape(this, &dst, SHAPE_TYPE_RECT, &rect);
+    return fog_api.pathstrokerf_strokeShape(this, &dst, SHAPE_TYPE_RECT, &rect);
   }
 
   FOG_INLINE err_t strokePath(PathF& dst, const PathF& src) const
   {
-    return _api.pathstrokerf_strokePath(this, &dst, &src);
+    return fog_api.pathstrokerf_strokePath(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -393,13 +393,13 @@ struct FOG_NO_EXPORT PathStrokerF
 
   FOG_INLINE void _update()
   {
-    _api.pathstrokerf_update(this);
+    fog_api.pathstrokerf_update(this);
   }
 
   FOG_INLINE void update() const
   {
     if (_isDirty)
-      _api.pathstrokerf_update(const_cast<PathStrokerF*>(this));
+      fog_api.pathstrokerf_update(const_cast<PathStrokerF*>(this));
   }
 
   // --------------------------------------------------------------------------
@@ -408,7 +408,7 @@ struct FOG_NO_EXPORT PathStrokerF
 
   FOG_INLINE PathStrokerF& operator=(const PathStrokerF& other)
   {
-    _api.pathstrokerf_setOther(this, &other);
+    fog_api.pathstrokerf_setOther(this, &other);
     return *this;
   }
 
@@ -450,27 +450,27 @@ struct FOG_NO_EXPORT PathStrokerD
 
   FOG_INLINE PathStrokerD()
   {
-    _api.pathstrokerd_ctor(this);
+    fog_api.pathstrokerd_ctor(this);
   }
 
   FOG_INLINE PathStrokerD(const PathStrokerParamsD& params)
   {
-    _api.pathstrokerd_ctorParams(this, &params, NULL, NULL);
+    fog_api.pathstrokerd_ctorParams(this, &params, NULL, NULL);
   }
 
   FOG_INLINE PathStrokerD(const PathStrokerParamsD& params, const TransformD& transform)
   {
-    _api.pathstrokerd_ctorParams(this, &params, &transform, NULL);
+    fog_api.pathstrokerd_ctorParams(this, &params, &transform, NULL);
   }
 
   FOG_INLINE PathStrokerD(const PathStrokerParamsD& params, const TransformD& transform, const BoxD& clipBox)
   {
-    _api.pathstrokerd_ctorParams(this, &params, &transform, &clipBox);
+    fog_api.pathstrokerd_ctorParams(this, &params, &transform, &clipBox);
   }
 
   FOG_INLINE ~PathStrokerD()
   {
-    _api.pathstrokerd_dtor(this);
+    fog_api.pathstrokerd_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -484,7 +484,7 @@ struct FOG_NO_EXPORT PathStrokerD
 
   FOG_INLINE void setParams(const PathStrokerParamsD& params)
   {
-    _api.pathstrokerd_setParams(this, &params);
+    fog_api.pathstrokerd_setParams(this, &params);
   }
 
   // --------------------------------------------------------------------------
@@ -570,17 +570,17 @@ struct FOG_NO_EXPORT PathStrokerD
 
   FOG_INLINE err_t strokeShape(PathD& dst, uint32_t shapeType, const void* shapeData) const
   {
-    return _api.pathstrokerd_strokeShape(this, &dst, shapeType, shapeData);
+    return fog_api.pathstrokerd_strokeShape(this, &dst, shapeType, shapeData);
   }
 
   FOG_INLINE err_t strokeRect(PathD& dst, const RectD& rect) const
   {
-    return _api.pathstrokerd_strokeShape(this, &dst, SHAPE_TYPE_RECT, &rect);
+    return fog_api.pathstrokerd_strokeShape(this, &dst, SHAPE_TYPE_RECT, &rect);
   }
 
   FOG_INLINE err_t strokePath(PathD& dst, const PathD& src) const
   {
-    return _api.pathstrokerd_strokePath(this, &dst, &src);
+    return fog_api.pathstrokerd_strokePath(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -589,13 +589,13 @@ struct FOG_NO_EXPORT PathStrokerD
 
   FOG_INLINE void _update()
   {
-    _api.pathstrokerd_update(this);
+    fog_api.pathstrokerd_update(this);
   }
 
   FOG_INLINE void update() const
   {
     if (_isDirty)
-      _api.pathstrokerd_update(const_cast<PathStrokerD*>(this));
+      fog_api.pathstrokerd_update(const_cast<PathStrokerD*>(this));
   }
 
   // --------------------------------------------------------------------------
@@ -604,7 +604,7 @@ struct FOG_NO_EXPORT PathStrokerD
 
   FOG_INLINE PathStrokerD& operator=(const PathStrokerD& other)
   {
-    _api.pathstrokerd_setOther(this, &other);
+    fog_api.pathstrokerd_setOther(this, &other);
     return *this;
   }
 

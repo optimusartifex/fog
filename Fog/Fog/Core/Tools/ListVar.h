@@ -36,17 +36,17 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE List()
   {
-    _api.list_var_ctor(this);
+    fog_api.list_var_ctor(this);
   }
 
   FOG_INLINE List(const List& other)
   {
-    _api.list_untyped_ctorCopy(this, &other);
+    fog_api.list_untyped_ctorCopy(this, &other);
   }
 
   FOG_INLINE List(const List& other, const Range& range)
   {
-    _api.list_var_ctorSlice(this, &other, &range);
+    fog_api.list_var_ctorSlice(this, &other, &range);
   }
 
   explicit FOG_INLINE List(ListUntypedData* d)
@@ -56,7 +56,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE ~List()
   {
-    _api.list_var_dtor(this);
+    fog_api.list_var_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -74,7 +74,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.list_var_detach(this);
+    return fog_api.list_var_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -87,22 +87,22 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.list_var_reserve(this, capacity);
+    return fog_api.list_var_reserve(this, capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.list_var_squeeze(this);
+    fog_api.list_var_squeeze(this);
   }
 
   FOG_INLINE err_t _growLeft(size_t length)
   {
-    return _api.list_var_growLeft(this, length);
+    return fog_api.list_var_growLeft(this, length);
   }
 
   FOG_INLINE err_t _growRight(size_t length)
   {
-    return _api.list_var_growRight(this, length);
+    return fog_api.list_var_growRight(this, length);
   }
 
   // --------------------------------------------------------------------------
@@ -135,7 +135,7 @@ struct List<Var> : public ListUntyped
     FOG_ASSERT_X(index < _d->length,
       "Fog::List<Fog::Var>::setAt() - Index out of range.");
 
-    return _api.list_var_setAt(this, index, &item);
+    return fog_api.list_var_setAt(this, index, &item);
   }
 
   FOG_INLINE err_t setAtX(size_t index, const Var& item)
@@ -155,12 +155,12 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE void clear()
   {
-    _api.list_var_clear(this);
+    fog_api.list_var_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.list_var_reset(this);
+    fog_api.list_var_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -169,12 +169,12 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t setList(List<Var>& other)
   {
-    return _api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
+    return fog_api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
   FOG_INLINE err_t setList(List<Var>& other, const Range& range)
   {
-    return _api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, &range);
+    return fog_api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -183,17 +183,17 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t append(const Var& item)
   {
-    return _api.list_var_append(this, &item);
+    return fog_api.list_var_append(this, &item);
   }
 
   FOG_INLINE err_t concat(const List<Var>& other)
   {
-    return _api.list_var_opList(this, CONTAINER_OP_APPEND, &other, NULL);
+    return fog_api.list_var_opList(this, CONTAINER_OP_APPEND, &other, NULL);
   }
 
   FOG_INLINE err_t concat(const List<Var>& other, const Range& range)
   {
-    return _api.list_var_opList(this, CONTAINER_OP_APPEND, &other, &range);
+    return fog_api.list_var_opList(this, CONTAINER_OP_APPEND, &other, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -202,7 +202,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t prepend(const Var& item)
   {
-    return _api.list_var_insert(this, 0, &item);
+    return fog_api.list_var_insert(this, 0, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -211,7 +211,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t insert(size_t index, const Var& item)
   {
-    return _api.list_var_insert(this, index, &item);
+    return fog_api.list_var_insert(this, index, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -220,7 +220,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.list_var_remove(this, &range);
+    return fog_api.list_var_remove(this, &range);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
@@ -245,12 +245,12 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t replace(const Range& range, const List<Var>& src)
   {
-    return _api.list_var_replace(this, &range, &src, NULL);
+    return fog_api.list_var_replace(this, &range, &src, NULL);
   }
 
   FOG_INLINE err_t replace(const Range& range, const List<Var>& src, const Range& srcRange)
   {
-    return _api.list_var_replace(this, &range, &src, &srcRange);
+    return fog_api.list_var_replace(this, &range, &src, &srcRange);
   }
 
   // --------------------------------------------------------------------------
@@ -259,7 +259,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t slice(const Range& range)
   {
-    return _api.list_var_slice(this, &range);
+    return fog_api.list_var_slice(this, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -268,12 +268,12 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE bool contains(const Var& item) const
   {
-    return _api.list_var_indexOf(this, NULL, &item) != INVALID_INDEX;
+    return fog_api.list_var_indexOf(this, NULL, &item) != INVALID_INDEX;
   }
 
   FOG_INLINE bool contains(const Range& range, const Var& item) const
   {
-    return _api.list_var_indexOf(this, &range, &item) != INVALID_INDEX;
+    return fog_api.list_var_indexOf(this, &range, &item) != INVALID_INDEX;
   }
 
   // --------------------------------------------------------------------------
@@ -282,12 +282,12 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE size_t indexOf(const Var& item) const
   {
-    return _api.list_var_indexOf(this, NULL, &item);
+    return fog_api.list_var_indexOf(this, NULL, &item);
   }
 
   FOG_INLINE size_t indexOf(const Range& range, const Var& item) const
   {
-    return _api.list_var_indexOf(this, &range, &item);
+    return fog_api.list_var_indexOf(this, &range, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -296,12 +296,12 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE size_t lastIndexOf(const Var& item) const
   {
-    return _api.list_var_lastIndexOf(this, NULL, &item);
+    return fog_api.list_var_lastIndexOf(this, NULL, &item);
   }
 
   FOG_INLINE size_t lastIndexOf(const Range& range, const Var& item) const
   {
-    return _api.list_var_lastIndexOf(this, &range, &item);
+    return fog_api.list_var_lastIndexOf(this, &range, &item);
   }
 
   // --------------------------------------------------------------------------
@@ -310,17 +310,17 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE err_t sort(uint32_t sortOrder)
   {
-    return _api.list_var_sort(this, sortOrder, Var::getCompareFunc());
+    return fog_api.list_var_sort(this, sortOrder, Var::getCompareFunc());
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareFunc compareFunc)
   {
-    return _api.list_var_sort(this, sortOrder, compareFunc);
+    return fog_api.list_var_sort(this, sortOrder, compareFunc);
   }
 
   FOG_INLINE err_t sort(uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
   {
-    return _api.list_var_sortEx(this, sortOrder, compareFunc, data);
+    return fog_api.list_var_sortEx(this, sortOrder, compareFunc, data);
   }
 
   // --------------------------------------------------------------------------
@@ -334,7 +334,7 @@ struct List<Var> : public ListUntyped
     FOG_ASSERT_X(index2 < _d->length,
       "Fog::List<Fog::Var>::swapItems() - Index2 out of range.");
 
-    return _api.list_var_swapItems(this, index1, index2);
+    return fog_api.list_var_swapItems(this, index1, index2);
   }
 
   // --------------------------------------------------------------------------
@@ -343,7 +343,7 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE bool eq(const List<Var>& other) const
   {
-    return _api.list_untyped_customEq(this, &other, sizeof(Var), Var::getEqFunc());
+    return fog_api.list_untyped_customEq(this, &other, sizeof(Var), Var::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -352,13 +352,13 @@ struct List<Var> : public ListUntyped
 
   FOG_INLINE List<Var>& operator=(const List<Var>& other)
   {
-    _api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
+    fog_api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
     return *this;
   }
 
   FOG_INLINE List<Var>& operator+=(const Var& item)
   {
-    _api.list_var_append(this, &item);
+    fog_api.list_var_append(this, &item);
     return *this;
   }
 
@@ -379,7 +379,7 @@ struct List<Var> : public ListUntyped
 
   static FOG_INLINE bool eq(const List<Var>* a, const List<Var>* b)
   {
-    return _api.list_untyped_customEq(a, b, sizeof(Var), Var::getEqFunc());
+    return fog_api.list_untyped_customEq(a, b, sizeof(Var), Var::getEqFunc());
   }
 };
 

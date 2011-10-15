@@ -74,12 +74,12 @@ static void* FOG_CDECL Memory_realloc(void* p, size_t size)
 
   if (FOG_IS_NULL(p))
   {
-    return _api.memmgr_alloc(size);
+    return fog_api.memmgr_alloc(size);
   }
 
   if (FOG_UNLIKELY(size == 0))
   {
-    _api.memmgr_free(p);
+    fog_api.memmgr_free(p);
     return NULL;
   }
 
@@ -381,17 +381,17 @@ static uint32_t FOG_CDECL MemMgr_getAmountOfPhysicalMemoryMB(void)
 
 FOG_NO_EXPORT void MemMgr_init(void)
 {
-  _api.memmgr_alloc = Memory_alloc;
-  _api.memmgr_calloc = Memory_calloc;
-  _api.memmgr_realloc = Memory_realloc;
-  _api.memmgr_free = Memory_free;
+  fog_api.memmgr_alloc = Memory_alloc;
+  fog_api.memmgr_calloc = Memory_calloc;
+  fog_api.memmgr_realloc = Memory_realloc;
+  fog_api.memmgr_free = Memory_free;
 
-  _api.memmgr_cleanup = MemMgr_cleanup;
-  _api.memmgr_registerCleanupFunc = MemMgr_registerCleanupFunc;
-  _api.memmgr_unregisterCleanupFunc = MemMgr_unregisterCleanupFunc;
+  fog_api.memmgr_cleanup = MemMgr_cleanup;
+  fog_api.memmgr_registerCleanupFunc = MemMgr_registerCleanupFunc;
+  fog_api.memmgr_unregisterCleanupFunc = MemMgr_unregisterCleanupFunc;
 
-  _api.memmgr_getAmountOfPhysicalMemory = MemMgr_getAmountOfPhysicalMemory;
-  _api.memmgr_getAmountOfPhysicalMemoryMB = MemMgr_getAmountOfPhysicalMemoryMB;
+  fog_api.memmgr_getAmountOfPhysicalMemory = MemMgr_getAmountOfPhysicalMemory;
+  fog_api.memmgr_getAmountOfPhysicalMemoryMB = MemMgr_getAmountOfPhysicalMemoryMB;
 
   if (FOG_DEBUG_MEMORY)
     MemDebug_init();

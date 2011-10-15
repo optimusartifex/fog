@@ -176,7 +176,7 @@ struct FOG_NO_EXPORT PathDataF
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.pathf_dFree(this);
+      fog_api.pathf_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -265,7 +265,7 @@ struct FOG_NO_EXPORT PathDataD
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.pathd_dFree(this);
+      fog_api.pathd_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -312,19 +312,19 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE PathF()
   {
-    _api.pathf_ctor(this);
+    fog_api.pathf_ctor(this);
   }
 
   FOG_INLINE PathF(const PathF& other)
   {
-    _api.pathf_ctorCopyF(this, &other);
+    fog_api.pathf_ctorCopyF(this, &other);
   }
 
   explicit FOG_INLINE PathF(PathDataF* d) : _d(d) {}
 
   FOG_INLINE ~PathF()
   {
-    _api.pathf_dtor(this);
+    fog_api.pathf_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -339,7 +339,7 @@ struct FOG_NO_EXPORT PathF
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach()
   {
-    return isDetached() ? (err_t)ERR_OK : _api.pathf_detach(this);
+    return isDetached() ? (err_t)ERR_OK : fog_api.pathf_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -355,22 +355,22 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.pathf_reserve(this, capacity);
+    return fog_api.pathf_reserve(this, capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    return _api.pathf_squeeze(this);
+    return fog_api.pathf_squeeze(this);
   }
 
   FOG_INLINE size_t _prepare(uint32_t cntOp, size_t count)
   {
-    return _api.pathf_prepare(this, cntOp, count);
+    return fog_api.pathf_prepare(this, cntOp, count);
   }
 
   FOG_INLINE size_t _add(size_t count)
   {
-    return _api.pathf_add(this, count);
+    return fog_api.pathf_add(this, count);
   }
 
   // --------------------------------------------------------------------------
@@ -412,14 +412,14 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE PointF getLastVertex() const
   {
     PointF result(UNINITIALIZED);
-    _api.pathf_getLastVertex(this, &result);
+    fog_api.pathf_getLastVertex(this, &result);
     return result;
   }
 
   FOG_INLINE err_t setVertex(size_t index, const PointF& pt)
   {
     FOG_ASSERT_X(index < _d->length, "Fog::PathF::setVertex() - Index out of range.");
-    return _api.pathf_setVertex(this, index, &pt);
+    return fog_api.pathf_setVertex(this, index, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -428,12 +428,12 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE void clear()
   {
-    _api.pathf_clear(this);
+    fog_api.pathf_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.pathf_reset(this);
+    fog_api.pathf_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -442,12 +442,12 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t setPath(const PathF& other)
   {
-    return _api.pathf_setPathF(this, &other);
+    return fog_api.pathf_setPathF(this, &other);
   }
 
   FOG_INLINE err_t setDeep(const PathF& other)
   {
-    return _api.pathf_setDeepF(this, &other);
+    return fog_api.pathf_setDeepF(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -458,7 +458,7 @@ struct FOG_NO_EXPORT PathF
   //! to next 'move-to' command or to the end of the path).
   FOG_INLINE err_t getSubpathRange(Range& dst, size_t index) const
   {
-    return _api.pathf_getSubpathRange(this, &dst, index);
+    return fog_api.pathf_getSubpathRange(this, &dst, index);
   }
 
   // --------------------------------------------------------------------------
@@ -468,13 +468,13 @@ struct FOG_NO_EXPORT PathF
   //! @brief Move to @a pt0 (absolute).
   FOG_INLINE err_t moveTo(const PointF& pt0)
   {
-    return _api.pathf_moveTo(this, &pt0);
+    return fog_api.pathf_moveTo(this, &pt0);
   }
 
   //! @brief Move to @a pt0 (relative).
   FOG_INLINE err_t moveToRel(const PointF& pt0)
   {
-    return _api.pathf_moveToRel(this, &pt0);
+    return fog_api.pathf_moveToRel(this, &pt0);
   }
 
   // --------------------------------------------------------------------------
@@ -484,37 +484,37 @@ struct FOG_NO_EXPORT PathF
   //! @brief Line to @a pt1 (absolute).
   FOG_INLINE err_t lineTo(const PointF& pt1)
   {
-    return _api.pathf_lineTo(this, &pt1);
+    return fog_api.pathf_lineTo(this, &pt1);
   }
 
   //! @brief Line to @a pt1 (relative).
   FOG_INLINE err_t lineToRel(const PointF& pt1)
   {
-    return _api.pathf_lineToRel(this, &pt1);
+    return fog_api.pathf_lineToRel(this, &pt1);
   }
 
   //! @brief Horizontal line to @a x (absolute).
   FOG_INLINE err_t hlineTo(float x)
   {
-    return _api.pathf_hlineTo(this, x);
+    return fog_api.pathf_hlineTo(this, x);
   }
 
   //! @brief Horizontal line to @a x (relative).
   FOG_INLINE err_t hlineToRel(float x)
   {
-    return _api.pathf_hlineToRel(this, x);
+    return fog_api.pathf_hlineToRel(this, x);
   }
 
   //! @brief Horizontal line to @a y (absolute).
   FOG_INLINE err_t vlineTo(float y)
   {
-    return _api.pathf_vlineTo(this, y);
+    return fog_api.pathf_vlineTo(this, y);
   }
 
   //! @brief Horizontal line to @a y (relative).
   FOG_INLINE err_t vlineToRel(float y)
   {
-    return _api.pathf_vlineToRel(this, y);
+    return fog_api.pathf_vlineToRel(this, y);
   }
 
   // --------------------------------------------------------------------------
@@ -524,13 +524,13 @@ struct FOG_NO_EXPORT PathF
   //! @brief Polyline to @a pts (absolute).
   FOG_INLINE err_t polyTo(const PointF* pts, size_t count)
   {
-    return _api.pathf_polyTo(this, pts, count);
+    return fog_api.pathf_polyTo(this, pts, count);
   }
 
   //! @brief Polyline to @a pts (relative).
   FOG_INLINE err_t polyToRel(const PointF* pts, size_t count)
   {
-    return _api.pathf_polyToRel(this, pts, count);
+    return fog_api.pathf_polyToRel(this, pts, count);
   }
 
   // --------------------------------------------------------------------------
@@ -540,25 +540,25 @@ struct FOG_NO_EXPORT PathF
   //! @brief Quadratic curve to @a pt1, and @a pt2 (absolute).
   FOG_INLINE err_t quadTo(const PointF& pt1, const PointF& pt2)
   {
-    return _api.pathf_quadTo(this, &pt1, &pt2);
+    return fog_api.pathf_quadTo(this, &pt1, &pt2);
   }
 
   //! @brief Quadratic curve to @a pt1, and @a pt2 (relative).
   FOG_INLINE err_t quadToRel(const PointF& pt1, const PointF& pt2)
   {
-    return _api.pathf_quadToRel(this, &pt1, &pt2);
+    return fog_api.pathf_quadToRel(this, &pt1, &pt2);
   }
 
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothQuadTo(const PointF& pt2)
   {
-    return _api.pathf_smoothQuadTo(this, &pt2);
+    return fog_api.pathf_smoothQuadTo(this, &pt2);
   }
 
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (relative).
   FOG_INLINE err_t smoothQuadToRel(const PointF& pt2)
   {
-    return _api.pathf_smoothQuadToRel(this, &pt2);
+    return fog_api.pathf_smoothQuadToRel(this, &pt2);
   }
 
   // --------------------------------------------------------------------------
@@ -568,25 +568,25 @@ struct FOG_NO_EXPORT PathF
   //! @brief Cubic curve to @a pt1, @a pt2, and @a pt3 (absolute).
   FOG_INLINE err_t cubicTo(const PointF& pt1, const PointF& pt2, const PointF& pt3)
   {
-    return _api.pathf_cubicTo(this, &pt1, &pt2, &pt3);
+    return fog_api.pathf_cubicTo(this, &pt1, &pt2, &pt3);
   }
 
   //! @brief Cubic curve to @a pt1, @a pt2, and @a pt3 (relative).
   FOG_INLINE err_t cubicToRel(const PointF& pt1, const PointF& pt2, const PointF& pt3)
   {
-    return _api.pathf_cubicToRel(this, &pt1, &pt2, &pt3);
+    return fog_api.pathf_cubicToRel(this, &pt1, &pt2, &pt3);
   }
 
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothCubicTo(const PointF& pt2, const PointF& pt3)
   {
-    return _api.pathf_smoothCubicTo(this, &pt2, &pt3);
+    return fog_api.pathf_smoothCubicTo(this, &pt2, &pt3);
   }
 
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (relative).
   FOG_INLINE err_t smoothCubicToRel(const PointF& pt2, const PointF& pt3)
   {
-    return _api.pathf_smoothCubicToRel(this, &pt2, &pt3);
+    return fog_api.pathf_smoothCubicToRel(this, &pt2, &pt3);
   }
 
   // --------------------------------------------------------------------------
@@ -595,22 +595,22 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t arcTo(const PointF& cp, const PointF& rp, float start, float sweep, bool startPath = false)
   {
-    return _api.pathf_arcTo(this, &cp, &rp, start, sweep, startPath);
+    return fog_api.pathf_arcTo(this, &cp, &rp, start, sweep, startPath);
   }
 
   FOG_INLINE err_t arcToRel(const PointF& cp, const PointF& rp, float start, float sweep, bool startPath = false)
   {
-    return _api.pathf_arcToRel(this, &cp, &rp, start, sweep, startPath);
+    return fog_api.pathf_arcToRel(this, &cp, &rp, start, sweep, startPath);
   }
 
   FOG_INLINE err_t svgArcTo(const PointF& rp, float angle, bool largeArcFlag, bool sweepFlag, const PointF& pt)
   {
-    return _api.pathf_svgArcTo(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
+    return fog_api.pathf_svgArcTo(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
   }
 
   FOG_INLINE err_t svgArcToRel(const PointF& rp, float angle, bool largeArcFlag, bool sweepFlag, const PointF& pt)
   {
-    return _api.pathf_svgArcToRel(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
+    return fog_api.pathf_svgArcToRel(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -619,7 +619,7 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t close()
   {
-    return _api.pathf_close(this);
+    return fog_api.pathf_close(this);
   }
 
   // --------------------------------------------------------------------------
@@ -629,49 +629,49 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t box(const BoxI& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_boxI(this, &r, direction);
+    return fog_api.pathf_boxI(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t box(const BoxF& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_boxF(this, &r, direction);
+    return fog_api.pathf_boxF(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectI& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_rectI(this, &r, direction);
+    return fog_api.pathf_rectI(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectF& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_rectF(this, &r, direction);
+    return fog_api.pathf_rectF(this, &r, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t boxes(const BoxI* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_boxesI(this, b, count, direction);
+    return fog_api.pathf_boxesI(this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t boxes(const BoxF* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_boxesF(this, b, count, direction);
+    return fog_api.pathf_boxesF(this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t rects(const RectI* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_rectsI(this, r, count, direction);
+    return fog_api.pathf_rectsI(this, r, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t rects(const RectF* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_rectsF(this, r, count, direction);
+    return fog_api.pathf_rectsF(this, r, count, direction);
   }
 
   // --------------------------------------------------------------------------
@@ -681,7 +681,7 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add a closed region (converted to set of rectangles).
   FOG_INLINE err_t region(const Region& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_region(this, &r, direction);
+    return fog_api.pathf_region(this, &r, direction);
   }
 
   // --------------------------------------------------------------------------
@@ -691,25 +691,25 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add a polyline to the path.
   FOG_INLINE err_t polyline(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_polylineI(this, pts, count, direction);
+    return fog_api.pathf_polylineI(this, pts, count, direction);
   }
 
   //! @brief Add a polyline to the path.
   FOG_INLINE err_t polyline(const PointF* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_polylineF(this, pts, count, direction);
+    return fog_api.pathf_polylineF(this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
   FOG_INLINE err_t polygon(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_polygonI(this, pts, count, direction);
+    return fog_api.pathf_polygonI(this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
   FOG_INLINE err_t polygon(const PointF* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathf_polygonF(this, pts, count, direction);
+    return fog_api.pathf_polygonF(this, pts, count, direction);
   }
 
   // --------------------------------------------------------------------------
@@ -718,7 +718,7 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t _shape(uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformF* tr = NULL)
   {
-    return _api.pathf_shape(this, shapeType, shapeData, direction, tr);
+    return fog_api.pathf_shape(this, shapeType, shapeData, direction, tr);
   }
 
   //! @brief Add a shape object to the path.
@@ -860,37 +860,37 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathF& path)
   {
-    return _api.pathf_appendPathF(this, &path, NULL);
+    return fog_api.pathf_appendPathF(this, &path, NULL);
   }
 
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathF& path, const Range& range)
   {
-    return _api.pathf_appendPathF(this, &path, &range);
+    return fog_api.pathf_appendPathF(this, &path, &range);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathF& path, const PointF& pt)
   {
-    return _api.pathf_appendTranslatedPathF(this, &path, &pt, NULL);
+    return fog_api.pathf_appendTranslatedPathF(this, &path, &pt, NULL);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathF& path, const PointF& pt, const Range& range)
   {
-    return _api.pathf_appendTranslatedPathF(this, &path, &pt, &range);
+    return fog_api.pathf_appendTranslatedPathF(this, &path, &pt, &range);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathF& path, const TransformF& tr)
   {
-    return _api.pathf_appendTransformedPathF(this, &path, &tr, NULL);
+    return fog_api.pathf_appendTransformedPathF(this, &path, &tr, NULL);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathF& path, const TransformF& tr, const Range& range)
   {
-    return _api.pathf_appendTransformedPathF(this, &path, &tr, &range);
+    return fog_api.pathf_appendTransformedPathF(this, &path, &tr, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -901,7 +901,7 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE bool hasBeziers() const
   {
     if (_d->vType & PATH_FLAG_DIRTY_CMD)
-      _api.pathf_updateFlat(this);
+      fog_api.pathf_updateFlat(this);
 
     return (_d->vType & (PATH_FLAG_HAS_QBEZIER | PATH_FLAG_HAS_CBEZIER)) != 0;
   }
@@ -909,7 +909,7 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE bool hasQBeziers() const
   {
     if (_d->vType & PATH_FLAG_DIRTY_CMD)
-      _api.pathf_updateFlat(this);
+      fog_api.pathf_updateFlat(this);
 
     return (_d->vType & PATH_FLAG_HAS_QBEZIER) != 0;
   }
@@ -917,24 +917,24 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE bool hasCBeziers() const
   {
     if (_d->vType & PATH_FLAG_DIRTY_CMD)
-      _api.pathf_updateFlat(this);
+      fog_api.pathf_updateFlat(this);
 
     return (_d->vType & PATH_FLAG_HAS_CBEZIER) != 0;
   }
 
   FOG_INLINE err_t flatten(const PathFlattenParamsF& params)
   {
-    return _api.pathf_flatten(this, this, &params, NULL);
+    return fog_api.pathf_flatten(this, this, &params, NULL);
   }
 
   static FOG_INLINE err_t flatten(PathF& dst, const PathF& src, const PathFlattenParamsF& params)
   {
-    return _api.pathf_flatten(&dst, &src, &params, NULL);
+    return fog_api.pathf_flatten(&dst, &src, &params, NULL);
   }
 
   static FOG_INLINE err_t flatten(PathF& dst, const PathF& src, const Range& range, const PathFlattenParamsF& params)
   {
-    return _api.pathf_flatten(&dst, &src, &params, &range);
+    return fog_api.pathf_flatten(&dst, &src, &params, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -968,12 +968,12 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.pathf_getBoundingBox(this, &dst, tr);
+    return fog_api.pathf_getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.pathf_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = fog_api.pathf_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -985,7 +985,7 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE bool hitTest(const PointF& pt, uint32_t fillRule) const
   {
-    return _api.pathf_hitTest(this, &pt, fillRule);
+    return fog_api.pathf_hitTest(this, &pt, fillRule);
   }
 
   // --------------------------------------------------------------------------
@@ -994,7 +994,7 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE size_t getClosestVertex(const PointF& pt, float maxDistance, float* distance = NULL) const
   {
-    return _api.pathf_getClosestVertex(this, &pt, maxDistance, distance);
+    return fog_api.pathf_getClosestVertex(this, &pt, maxDistance, distance);
   }
 
   // --------------------------------------------------------------------------
@@ -1004,37 +1004,37 @@ struct FOG_NO_EXPORT PathF
   //! @brief Translate all vertices by @a pt.
   FOG_INLINE err_t translate(const PointF& pt)
   {
-    return _api.pathf_translate(this, &pt, NULL);
+    return fog_api.pathf_translate(this, &pt, NULL);
   }
 
   //! @brief Translate all vertices in range @a range by @a pt.
   FOG_INLINE err_t translate(const PointF& pt, const Range& range)
   {
-    return _api.pathf_translate(this, &pt, &range);
+    return fog_api.pathf_translate(this, &pt, &range);
   }
 
   //! @brief Transform all vertices by @a tr.
   FOG_INLINE err_t transform(const TransformF& tr)
   {
-    return _api.pathf_transform(this, &tr, NULL);
+    return fog_api.pathf_transform(this, &tr, NULL);
   }
 
   //! @brief Transform all vertices in range @a range by @a tr.
   FOG_INLINE err_t transform(const TransformF& tr, const Range& range)
   {
-    return _api.pathf_transform(this, &tr, &range);
+    return fog_api.pathf_transform(this, &tr, &range);
   }
 
   //! @brief Fit path into the given rectangle @a r.
   FOG_INLINE err_t fitTo(const RectF& r)
   {
-    return _api.pathf_fitTo(this, &r);
+    return fog_api.pathf_fitTo(this, &r);
   }
 
   //! @brief Scale each vertex by @a pt.
   FOG_INLINE err_t scale(const PointF& pt, bool keepStartPos = false)
   {
-    return _api.pathf_scale(this, &pt, keepStartPos);
+    return fog_api.pathf_scale(this, &pt, keepStartPos);
   }
 
   // --------------------------------------------------------------------------
@@ -1043,12 +1043,12 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE err_t flipX(float x0, float x1)
   {
-    return _api.pathf_flipX(this, x0, x1);
+    return fog_api.pathf_flipX(this, x0, x1);
   }
 
   FOG_INLINE err_t flipY(float y0, float y1)
   {
-    return _api.pathf_flipY(this, y0, y1);
+    return fog_api.pathf_flipY(this, y0, y1);
   }
 
   // --------------------------------------------------------------------------
@@ -1062,12 +1062,12 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE void buildPathInfo() const
   {
-    (void)_api.pathf_getPathInfo(this);
+    (void)fog_api.pathf_getPathInfo(this);
   }
 
   FOG_INLINE const PathInfoF* getPathInfo() const
   {
-    return _api.pathf_getPathInfo(this);
+    return fog_api.pathf_getPathInfo(this);
   }
 
   // --------------------------------------------------------------------------
@@ -1076,7 +1076,7 @@ struct FOG_NO_EXPORT PathF
 
   FOG_INLINE bool eq(const PathF& other) const
   {
-    return _api.pathf_eq(this, &other);
+    return fog_api.pathf_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -1115,7 +1115,7 @@ struct FOG_NO_EXPORT PathF
 
   static FOG_INLINE const PathF& empty()
   {
-    return *_api.pathf_oEmpty;
+    return *fog_api.pathf_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -1124,12 +1124,12 @@ struct FOG_NO_EXPORT PathF
 
   static FOG_INLINE bool eq(const PathF* a, const PathF* b)
   {
-    return _api.pathf_eq(a, b);
+    return fog_api.pathf_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.pathf_eq;
+    return (EqFunc)fog_api.pathf_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -1152,19 +1152,19 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE PathD()
   {
-    _api.pathd_ctor(this);
+    fog_api.pathd_ctor(this);
   }
 
   FOG_INLINE PathD(const PathD& other)
   {
-    _api.pathd_ctorCopyD(this, &other);
+    fog_api.pathd_ctorCopyD(this, &other);
   }
 
   explicit FOG_INLINE PathD(PathDataD* d) : _d(d) {}
 
   FOG_INLINE ~PathD()
   {
-    _api.pathd_dtor(this);
+    fog_api.pathd_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -1176,7 +1176,7 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t detach()
   {
-    return isDetached() ? (err_t)ERR_OK : _api.pathd_detach(this);
+    return isDetached() ? (err_t)ERR_OK : fog_api.pathd_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -1192,22 +1192,22 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.pathd_reserve(this, capacity);
+    return fog_api.pathd_reserve(this, capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    return _api.pathd_squeeze(this);
+    return fog_api.pathd_squeeze(this);
   }
 
   FOG_INLINE size_t _prepare(uint32_t cntOp, size_t count)
   {
-    return _api.pathd_prepare(this, cntOp, count);
+    return fog_api.pathd_prepare(this, cntOp, count);
   }
 
   FOG_INLINE size_t _add(size_t count)
   {
-    return _api.pathd_add(this, count);
+    return fog_api.pathd_add(this, count);
   }
 
   // --------------------------------------------------------------------------
@@ -1249,14 +1249,14 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE PointD getLastVertex() const
   {
     PointD result(UNINITIALIZED);
-    _api.pathd_getLastVertex(this, &result);
+    fog_api.pathd_getLastVertex(this, &result);
     return result;
   }
 
   FOG_INLINE err_t setVertex(size_t index, const PointD& pt)
   {
     FOG_ASSERT_X(index < _d->length, "Fog::PathD::setVertex() - Index out of range.");
-    return _api.pathd_setVertex(this, index, &pt);
+    return fog_api.pathd_setVertex(this, index, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -1265,12 +1265,12 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE void clear()
   {
-    _api.pathd_clear(this);
+    fog_api.pathd_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.pathd_reset(this);
+    fog_api.pathd_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -1279,17 +1279,17 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t setPath(const PathD& other)
   {
-    return _api.pathd_setPathD(this, &other);
+    return fog_api.pathd_setPathD(this, &other);
   }
 
   FOG_INLINE err_t setPath(const PathF& other)
   {
-    return _api.pathd_setPathF(this, &other);
+    return fog_api.pathd_setPathF(this, &other);
   }
 
   FOG_INLINE err_t setDeep(const PathD& other)
   {
-    return _api.pathd_setDeepD(this, &other);
+    return fog_api.pathd_setDeepD(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -1300,7 +1300,7 @@ struct FOG_NO_EXPORT PathD
   //! to next 'move-to' command or to the end of the path).
   FOG_INLINE err_t getSubpathRange(Range& dst, size_t index) const
   {
-    return _api.pathd_getSubpathRange(this, &dst, index);
+    return fog_api.pathd_getSubpathRange(this, &dst, index);
   }
 
   // --------------------------------------------------------------------------
@@ -1310,13 +1310,13 @@ struct FOG_NO_EXPORT PathD
   //! @brief Move to @a pt0 (absolute).
   FOG_INLINE err_t moveTo(const PointD& pt0)
   {
-    return _api.pathd_moveTo(this, &pt0);
+    return fog_api.pathd_moveTo(this, &pt0);
   }
 
   //! @brief Move to @a pt0 (relative).
   FOG_INLINE err_t moveToRel(const PointD& pt0)
   {
-    return _api.pathd_moveToRel(this, &pt0);
+    return fog_api.pathd_moveToRel(this, &pt0);
   }
 
   // --------------------------------------------------------------------------
@@ -1326,37 +1326,37 @@ struct FOG_NO_EXPORT PathD
   //! @brief Line to @a pt1 (absolute).
   FOG_INLINE err_t lineTo(const PointD& pt1)
   {
-    return _api.pathd_lineTo(this, &pt1);
+    return fog_api.pathd_lineTo(this, &pt1);
   }
 
   //! @brief Line to @a pt1 (relative).
   FOG_INLINE err_t lineToRel(const PointD& pt1)
   {
-    return _api.pathd_lineToRel(this, &pt1);
+    return fog_api.pathd_lineToRel(this, &pt1);
   }
 
   //! @brief Horizontal line to @a x (absolute).
   FOG_INLINE err_t hlineTo(double x)
   {
-    return _api.pathd_hlineTo(this, x);
+    return fog_api.pathd_hlineTo(this, x);
   }
 
   //! @brief Horizontal line to @a x (relative).
   FOG_INLINE err_t hlineToRel(double x)
   {
-    return _api.pathd_hlineToRel(this, x);
+    return fog_api.pathd_hlineToRel(this, x);
   }
 
   //! @brief Horizontal line to @a y (absolute).
   FOG_INLINE err_t vlineTo(double y)
   {
-    return _api.pathd_vlineTo(this, y);
+    return fog_api.pathd_vlineTo(this, y);
   }
 
   //! @brief Horizontal line to @a y (relative).
   FOG_INLINE err_t vlineToRel(double y)
   {
-    return _api.pathd_vlineToRel(this, y);
+    return fog_api.pathd_vlineToRel(this, y);
   }
 
   // --------------------------------------------------------------------------
@@ -1366,13 +1366,13 @@ struct FOG_NO_EXPORT PathD
   //! @brief Polyline to @a pts (absolute).
   FOG_INLINE err_t polyTo(const PointD* pts, size_t count)
   {
-    return _api.pathd_polyTo(this, pts, count);
+    return fog_api.pathd_polyTo(this, pts, count);
   }
 
   //! @brief Polyline to @a pts (relative).
   FOG_INLINE err_t polyToRel(const PointD* pts, size_t count)
   {
-    return _api.pathd_polyToRel(this, pts, count);
+    return fog_api.pathd_polyToRel(this, pts, count);
   }
 
   // --------------------------------------------------------------------------
@@ -1382,25 +1382,25 @@ struct FOG_NO_EXPORT PathD
   //! @brief Quadratic curve to @a pt1, and @a pt2 (absolute).
   FOG_INLINE err_t quadTo(const PointD& pt1, const PointD& pt2)
   {
-    return _api.pathd_quadTo(this, &pt1, &pt2);
+    return fog_api.pathd_quadTo(this, &pt1, &pt2);
   }
 
   //! @brief Quadratic curve to @a pt1, and @a pt2 (relative).
   FOG_INLINE err_t quadToRel(const PointD& pt1, const PointD& pt2)
   {
-    return _api.pathd_quadToRel(this, &pt1, &pt2);
+    return fog_api.pathd_quadToRel(this, &pt1, &pt2);
   }
 
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothQuadTo(const PointD& pt2)
   {
-    return _api.pathd_smoothQuadTo(this, &pt2);
+    return fog_api.pathd_smoothQuadTo(this, &pt2);
   }
 
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (relative).
   FOG_INLINE err_t smoothQuadToRel(const PointD& pt2)
   {
-    return _api.pathd_smoothQuadToRel(this, &pt2);
+    return fog_api.pathd_smoothQuadToRel(this, &pt2);
   }
 
   // --------------------------------------------------------------------------
@@ -1410,25 +1410,25 @@ struct FOG_NO_EXPORT PathD
   //! @brief Cubic curve to @a pt1, @a pt2, and @a pt3 (absolute).
   FOG_INLINE err_t cubicTo(const PointD& pt1, const PointD& pt2, const PointD& pt3)
   {
-    return _api.pathd_cubicTo(this, &pt1, &pt2, &pt3);
+    return fog_api.pathd_cubicTo(this, &pt1, &pt2, &pt3);
   }
 
   //! @brief Cubic curve to @a pt1, @a pt2, and @a pt3 (relative).
   FOG_INLINE err_t cubicToRel(const PointD& pt1, const PointD& pt2, const PointD& pt3)
   {
-    return _api.pathd_cubicToRel(this, &pt1, &pt2, &pt3);
+    return fog_api.pathd_cubicToRel(this, &pt1, &pt2, &pt3);
   }
 
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothCubicTo(const PointD& pt2, const PointD& pt3)
   {
-    return _api.pathd_smoothCubicTo(this, &pt2, &pt3);
+    return fog_api.pathd_smoothCubicTo(this, &pt2, &pt3);
   }
 
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (relative).
   FOG_INLINE err_t smoothCubicToRel(const PointD& pt2, const PointD& pt3)
   {
-    return _api.pathd_smoothCubicToRel(this, &pt2, &pt3);
+    return fog_api.pathd_smoothCubicToRel(this, &pt2, &pt3);
   }
 
   // --------------------------------------------------------------------------
@@ -1437,22 +1437,22 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t arcTo(const PointD& cp, const PointD& rp, double start, double sweep, bool startPath = false)
   {
-    return _api.pathd_arcTo(this, &cp, &rp, start, sweep, startPath);
+    return fog_api.pathd_arcTo(this, &cp, &rp, start, sweep, startPath);
   }
 
   FOG_INLINE err_t arcToRel(const PointD& cp, const PointD& rp, double start, double sweep, bool startPath = false)
   {
-    return _api.pathd_arcToRel(this, &cp, &rp, start, sweep, startPath);
+    return fog_api.pathd_arcToRel(this, &cp, &rp, start, sweep, startPath);
   }
 
   FOG_INLINE err_t svgArcTo(const PointD& rp, double angle, bool largeArcFlag, bool sweepFlag, const PointD& pt)
   {
-    return _api.pathd_svgArcTo(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
+    return fog_api.pathd_svgArcTo(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
   }
 
   FOG_INLINE err_t svgArcToRel(const PointD& rp, double angle, bool largeArcFlag, bool sweepFlag, const PointD& pt)
   {
-    return _api.pathd_svgArcToRel(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
+    return fog_api.pathd_svgArcToRel(this, &rp, angle, largeArcFlag, sweepFlag, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -1461,7 +1461,7 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t close()
   {
-    return _api.pathd_close(this);
+    return fog_api.pathd_close(this);
   }
 
   // --------------------------------------------------------------------------
@@ -1471,73 +1471,73 @@ struct FOG_NO_EXPORT PathD
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t box(const BoxI& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_boxI(this, &r, direction);
+    return fog_api.pathd_boxI(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t box(const BoxF& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_boxF(this, &r, direction);
+    return fog_api.pathd_boxF(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t box(const BoxD& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_boxD(this, &r, direction);
+    return fog_api.pathd_boxD(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectI& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_rectI(this, &r, direction);
+    return fog_api.pathd_rectI(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectF& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_rectF(this, &r, direction);
+    return fog_api.pathd_rectF(this, &r, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectD& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_rectD(this, &r, direction);
+    return fog_api.pathd_rectD(this, &r, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t boxes(const BoxI* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_boxesI(this, b, count, direction);
+    return fog_api.pathd_boxesI(this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t boxes(const BoxF* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_boxesF(this, b, count, direction);
+    return fog_api.pathd_boxesF(this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t boxes(const BoxD* b, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_boxesD(this, b, count, direction);
+    return fog_api.pathd_boxesD(this, b, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t rects(const RectI* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_rectsI(this, r, count, direction);
+    return fog_api.pathd_rectsI(this, r, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t rects(const RectF* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_rectsF(this, r, count, direction);
+    return fog_api.pathd_rectsF(this, r, count, direction);
   }
 
   //! @brief Add a set of rectangles to the path.
   FOG_INLINE err_t rects(const RectD* r, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_rectsD(this, r, count, direction);
+    return fog_api.pathd_rectsD(this, r, count, direction);
   }
 
   // --------------------------------------------------------------------------
@@ -1547,7 +1547,7 @@ struct FOG_NO_EXPORT PathD
   //! @brief Add a closed region (converted to set of rectangles).
   FOG_INLINE err_t region(const Region& r, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_region(this, &r, direction);
+    return fog_api.pathd_region(this, &r, direction);
   }
 
   // --------------------------------------------------------------------------
@@ -1557,25 +1557,25 @@ struct FOG_NO_EXPORT PathD
   //! @brief Add a polyline to the path.
   FOG_INLINE err_t polyline(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_polylineI(this, pts, count, direction);
+    return fog_api.pathd_polylineI(this, pts, count, direction);
   }
 
   //! @brief Add a polyline to the path.
   FOG_INLINE err_t polyline(const PointD* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_polylineD(this, pts, count, direction);
+    return fog_api.pathd_polylineD(this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
   FOG_INLINE err_t polygon(const PointI* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_polygonI(this, pts, count, direction);
+    return fog_api.pathd_polygonI(this, pts, count, direction);
   }
 
   //! @brief Add a closed polygon to the path.
   FOG_INLINE err_t polygon(const PointD* pts, size_t count, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _api.pathd_polygonD(this, pts, count, direction);
+    return fog_api.pathd_polygonD(this, pts, count, direction);
   }
 
   // --------------------------------------------------------------------------
@@ -1584,7 +1584,7 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t _shape(uint32_t shapeType, const void* shapeData, uint32_t direction, const TransformD* tr = NULL)
   {
-    return _api.pathd_shape(this, shapeType, shapeData, direction, tr);
+    return fog_api.pathd_shape(this, shapeType, shapeData, direction, tr);
   }
 
   //! @brief Add a shape object to the path.
@@ -1726,73 +1726,73 @@ struct FOG_NO_EXPORT PathD
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathD& path)
   {
-    return _api.pathd_appendPathD(this, &path, NULL);
+    return fog_api.pathd_appendPathD(this, &path, NULL);
   }
 
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathF& path)
   {
-    return _api.pathd_appendPathF(this, &path, NULL);
+    return fog_api.pathd_appendPathF(this, &path, NULL);
   }
 
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathD& path, const Range& range)
   {
-    return _api.pathd_appendPathD(this, &path, &range);
+    return fog_api.pathd_appendPathD(this, &path, &range);
   }
 
   //! @brief Add another @a path to the path.
   FOG_INLINE err_t append(const PathF& path, const Range& range)
   {
-    return _api.pathd_appendPathF(this, &path, &range);
+    return fog_api.pathd_appendPathF(this, &path, &range);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathF& path, const PointD& pt)
   {
-    return _api.pathd_appendTranslatedPathF(this, &path, &pt, NULL);
+    return fog_api.pathd_appendTranslatedPathF(this, &path, &pt, NULL);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathD& path, const PointD& pt)
   {
-    return _api.pathd_appendTranslatedPathD(this, &path, &pt, NULL);
+    return fog_api.pathd_appendTranslatedPathD(this, &path, &pt, NULL);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathF& path, const PointD& pt, const Range& range)
   {
-    return _api.pathd_appendTranslatedPathF(this, &path, &pt, &range);
+    return fog_api.pathd_appendTranslatedPathF(this, &path, &pt, &range);
   }
 
   //! @brief Add another @a path (translated by the @a pt) to the path.
   FOG_INLINE err_t appendTranslated(const PathD& path, const PointD& pt, const Range& range)
   {
-    return _api.pathd_appendTranslatedPathD(this, &path, &pt, &range);
+    return fog_api.pathd_appendTranslatedPathD(this, &path, &pt, &range);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathF& path, const TransformD& tr)
   {
-    return _api.pathd_appendTransformedPathF(this, &path, &tr, NULL);
+    return fog_api.pathd_appendTransformedPathF(this, &path, &tr, NULL);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathD& path, const TransformD& tr)
   {
-    return _api.pathd_appendTransformedPathD(this, &path, &tr, NULL);
+    return fog_api.pathd_appendTransformedPathD(this, &path, &tr, NULL);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathF& path, const TransformD& tr, const Range& range)
   {
-    return _api.pathd_appendTransformedPathF(this, &path, &tr, &range);
+    return fog_api.pathd_appendTransformedPathF(this, &path, &tr, &range);
   }
 
   //! @brief Add another @a path (transformed by the @a tr) to the path.
   FOG_INLINE err_t appendTransformed(const PathD& path, const TransformD& tr, const Range& range)
   {
-    return _api.pathd_appendTransformedPathD(this, &path, &tr, &range);
+    return fog_api.pathd_appendTransformedPathD(this, &path, &tr, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -1803,7 +1803,7 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE bool hasBeziers() const
   {
     if (_d->vType & PATH_FLAG_DIRTY_CMD)
-      _api.pathd_updateFlat(this);
+      fog_api.pathd_updateFlat(this);
 
     return (_d->vType & (PATH_FLAG_HAS_QBEZIER | PATH_FLAG_HAS_CBEZIER)) != 0;
   }
@@ -1811,7 +1811,7 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE bool hasQBeziers() const
   {
     if (_d->vType & PATH_FLAG_DIRTY_CMD)
-      _api.pathd_updateFlat(this);
+      fog_api.pathd_updateFlat(this);
 
     return (_d->vType & PATH_FLAG_HAS_QBEZIER) != 0;
   }
@@ -1819,24 +1819,24 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE bool hasCBeziers() const
   {
     if (_d->vType & PATH_FLAG_DIRTY_CMD)
-      _api.pathd_updateFlat(this);
+      fog_api.pathd_updateFlat(this);
 
     return (_d->vType & PATH_FLAG_HAS_CBEZIER) != 0;
   }
 
   FOG_INLINE err_t flatten(const PathFlattenParamsD& params)
   {
-    return _api.pathd_flatten(this, this, &params, NULL);
+    return fog_api.pathd_flatten(this, this, &params, NULL);
   }
 
   static FOG_INLINE err_t flatten(PathD& dst, const PathD& src, const PathFlattenParamsD& params)
   {
-    return _api.pathd_flatten(&dst, &src, &params, NULL);
+    return fog_api.pathd_flatten(&dst, &src, &params, NULL);
   }
 
   static FOG_INLINE err_t flatten(PathD& dst, const PathD& src, const Range& range, const PathFlattenParamsD& params)
   {
-    return _api.pathd_flatten(&dst, &src, &params, &range);
+    return fog_api.pathd_flatten(&dst, &src, &params, &range);
   }
 
   // --------------------------------------------------------------------------
@@ -1870,12 +1870,12 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.pathd_getBoundingBox(this, &dst, tr);
+    return fog_api.pathd_getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.pathd_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = fog_api.pathd_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -1887,7 +1887,7 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE bool hitTest(const PointD& pt, uint32_t fillRule) const
   {
-    return _api.pathd_hitTest(this, &pt, fillRule);
+    return fog_api.pathd_hitTest(this, &pt, fillRule);
   }
 
   // --------------------------------------------------------------------------
@@ -1896,7 +1896,7 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE size_t getClosestVertex(const PointD& pt, double maxDistance, double* distance = NULL) const
   {
-    return _api.pathd_getClosestVertex(this, &pt, maxDistance, distance);
+    return fog_api.pathd_getClosestVertex(this, &pt, maxDistance, distance);
   }
 
   // --------------------------------------------------------------------------
@@ -1906,37 +1906,37 @@ struct FOG_NO_EXPORT PathD
   //! @brief Translate all vertices by @a pt.
   FOG_INLINE err_t translate(const PointD& pt)
   {
-    return _api.pathd_translate(this, &pt, NULL);
+    return fog_api.pathd_translate(this, &pt, NULL);
   }
 
   //! @brief Translate all vertices in range @a range by @a pt.
   FOG_INLINE err_t translate(const PointD& pt, const Range& range)
   {
-    return _api.pathd_translate(this, &pt, &range);
+    return fog_api.pathd_translate(this, &pt, &range);
   }
 
   //! @brief Transform all vertices by @a tr.
   FOG_INLINE err_t transform(const TransformD& tr)
   {
-    return _api.pathd_transform(this, &tr, NULL);
+    return fog_api.pathd_transform(this, &tr, NULL);
   }
 
   //! @brief Transform all vertices in range @a range by @a tr.
   FOG_INLINE err_t transform(const TransformD& tr, const Range& range)
   {
-    return _api.pathd_transform(this, &tr, &range);
+    return fog_api.pathd_transform(this, &tr, &range);
   }
 
   //! @brief Fit path into the given rectangle @a r.
   FOG_INLINE err_t fitTo(const RectD& r)
   {
-    return _api.pathd_fitTo(this, &r);
+    return fog_api.pathd_fitTo(this, &r);
   }
 
   //! @brief Scale each vertex by @a pt.
   FOG_INLINE err_t scale(const PointD& pt, bool keepStartPos = false)
   {
-    return _api.pathd_scale(this, &pt, keepStartPos);
+    return fog_api.pathd_scale(this, &pt, keepStartPos);
   }
 
   // --------------------------------------------------------------------------
@@ -1945,12 +1945,12 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE err_t flipX(double x0, double x1)
   {
-    return _api.pathd_flipX(this, x0, x1);
+    return fog_api.pathd_flipX(this, x0, x1);
   }
 
   FOG_INLINE err_t flipY(double y0, double y1)
   {
-    return _api.pathd_flipY(this, y0, y1);
+    return fog_api.pathd_flipY(this, y0, y1);
   }
 
   // --------------------------------------------------------------------------
@@ -1964,12 +1964,12 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE void buildPathInfo() const
   {
-    (void)_api.pathd_getPathInfo(this);
+    (void)fog_api.pathd_getPathInfo(this);
   }
 
   FOG_INLINE const PathInfoD* getPathInfo() const
   {
-    return _api.pathd_getPathInfo(this);
+    return fog_api.pathd_getPathInfo(this);
   }
 
   // --------------------------------------------------------------------------
@@ -1978,7 +1978,7 @@ struct FOG_NO_EXPORT PathD
 
   FOG_INLINE bool eq(const PathD& other) const
   {
-    return _api.pathd_eq(this, &other);
+    return fog_api.pathd_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -2026,7 +2026,7 @@ struct FOG_NO_EXPORT PathD
 
   static FOG_INLINE const PathD& empty()
   {
-    return *_api.pathd_oEmpty;
+    return *fog_api.pathd_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -2035,12 +2035,12 @@ struct FOG_NO_EXPORT PathD
 
   static FOG_INLINE bool eq(const PathD* a, const PathD* b)
   {
-    return _api.pathd_eq(a, b);
+    return fog_api.pathd_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.pathd_eq;
+    return (EqFunc)fog_api.pathd_eq;
   }
 
   // --------------------------------------------------------------------------

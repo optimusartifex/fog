@@ -184,12 +184,12 @@ struct FOG_NO_EXPORT RegExpA
 
   FOG_INLINE RegExpA()
   {
-    _api.regexpa_ctor(this);
+    fog_api.regexpa_ctor(this);
   }
 
   FOG_INLINE RegExpA(const RegExpA& other)
   {
-    _api.regexpa_ctorCopy(this, &other);
+    fog_api.regexpa_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE RegExpA(RegExpDataA* d) : _d(d)
@@ -198,7 +198,7 @@ struct FOG_NO_EXPORT RegExpA
 
   FOG_INLINE ~RegExpA()
   {
-    _api.regexpa_dtor(this);
+    fog_api.regexpa_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -226,7 +226,7 @@ struct FOG_NO_EXPORT RegExpA
 
   FOG_INLINE void reset()
   {
-    _api.regexpa_reset(this);
+    fog_api.regexpa_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -235,12 +235,12 @@ struct FOG_NO_EXPORT RegExpA
 
   FOG_INLINE err_t create(const StubA& pattern, uint32_t type, uint32_t cs = CASE_SENSITIVE)
   {
-    return _api.regexpa_createStubA(this, &pattern, type, cs);
+    return fog_api.regexpa_createStubA(this, &pattern, type, cs);
   }
 
   FOG_INLINE err_t create(const StringA& pattern, uint32_t type, uint32_t cs = CASE_SENSITIVE)
   {
-    return _api.regexpa_createStringA(this, &pattern, type, cs);
+    return fog_api.regexpa_createStringA(this, &pattern, type, cs);
   }
 
   // --------------------------------------------------------------------------
@@ -250,42 +250,42 @@ struct FOG_NO_EXPORT RegExpA
   FOG_INLINE Range indexIn(const char* sData, size_t sLength) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_indexIn(this, sData, sLength, NULL, &result);
+    fog_api.regexpa_indexIn(this, sData, sLength, NULL, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const char* sData, size_t sLength, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_indexIn(this, sData, sLength, &range, &result);
+    fog_api.regexpa_indexIn(this, sData, sLength, &range, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StubA& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_indexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpa_indexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StubA& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_indexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpa_indexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StringA& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_indexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpa_indexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StringA& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_indexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpa_indexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
@@ -296,42 +296,42 @@ struct FOG_NO_EXPORT RegExpA
   FOG_INLINE Range lastIndexIn(const char* sData, size_t sLength) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_lastIndexIn(this, sData, sLength, NULL, &result);
+    fog_api.regexpa_lastIndexIn(this, sData, sLength, NULL, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const char* sData, size_t sLength, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_lastIndexIn(this, sData, sLength, &range, &result);
+    fog_api.regexpa_lastIndexIn(this, sData, sLength, &range, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StubA& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StubA& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StringA& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StringA& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpa_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
@@ -341,7 +341,7 @@ struct FOG_NO_EXPORT RegExpA
 
   FOG_INLINE RegExpA& operator=(const RegExpA& other)
   {
-    _api.regexpa_copy(this, &other);
+    fog_api.regexpa_copy(this, &other);
     return *this;
   }
 
@@ -364,12 +364,12 @@ struct FOG_NO_EXPORT RegExpW
 
   FOG_INLINE RegExpW()
   {
-    _api.regexpw_ctor(this);
+    fog_api.regexpw_ctor(this);
   }
 
   FOG_INLINE RegExpW(const RegExpW& other)
   {
-    _api.regexpw_ctorCopy(this, &other);
+    fog_api.regexpw_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE RegExpW(RegExpDataW* d) : _d(d)
@@ -378,7 +378,7 @@ struct FOG_NO_EXPORT RegExpW
 
   FOG_INLINE ~RegExpW()
   {
-    _api.regexpw_dtor(this);
+    fog_api.regexpw_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -406,7 +406,7 @@ struct FOG_NO_EXPORT RegExpW
 
   FOG_INLINE void reset()
   {
-    _api.regexpw_reset(this);
+    fog_api.regexpw_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -415,17 +415,17 @@ struct FOG_NO_EXPORT RegExpW
 
   FOG_INLINE err_t create(const Ascii8& pattern, uint32_t type, uint32_t cs = CASE_SENSITIVE)
   {
-    return _api.regexpw_createStubA(this, &pattern, type, cs);
+    return fog_api.regexpw_createStubA(this, &pattern, type, cs);
   }
 
   FOG_INLINE err_t create(const StubW& pattern, uint32_t type, uint32_t cs = CASE_SENSITIVE)
   {
-    return _api.regexpw_createStubW(this, &pattern, type, cs);
+    return fog_api.regexpw_createStubW(this, &pattern, type, cs);
   }
 
   FOG_INLINE err_t create(const StringW& pattern, uint32_t type, uint32_t cs = CASE_SENSITIVE)
   {
-    return _api.regexpw_createStringW(this, &pattern, type, cs);
+    return fog_api.regexpw_createStringW(this, &pattern, type, cs);
   }
 
   // --------------------------------------------------------------------------
@@ -435,42 +435,42 @@ struct FOG_NO_EXPORT RegExpW
   FOG_INLINE Range indexIn(const CharW* sData, size_t sLength) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_indexIn(this, sData, sLength, NULL, &result);
+    fog_api.regexpw_indexIn(this, sData, sLength, NULL, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const CharW* sData, size_t sLength, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_indexIn(this, sData, sLength, &range, &result);
+    fog_api.regexpw_indexIn(this, sData, sLength, &range, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StubW& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_indexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpw_indexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StubW& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_indexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpw_indexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StringW& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_indexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpw_indexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range indexIn(const StringW& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_indexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpw_indexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
@@ -481,42 +481,42 @@ struct FOG_NO_EXPORT RegExpW
   FOG_INLINE Range lastIndexIn(const CharW* sData, size_t sLength) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_lastIndexIn(this, sData, sLength, NULL, &result);
+    fog_api.regexpw_lastIndexIn(this, sData, sLength, NULL, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const CharW* sData, size_t sLength, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_lastIndexIn(this, sData, sLength, &range, &result);
+    fog_api.regexpw_lastIndexIn(this, sData, sLength, &range, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StubW& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StubW& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StringW& src) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
+    fog_api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), NULL, &result);
     return result;
   }
 
   FOG_INLINE Range lastIndexIn(const StringW& src, const Range& range) const
   {
     Range result(UNINITIALIZED);
-    _api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
+    fog_api.regexpw_lastIndexIn(this, src.getData(), src.getLength(), &range, &result);
     return result;
   }
 
@@ -526,7 +526,7 @@ struct FOG_NO_EXPORT RegExpW
 
   FOG_INLINE RegExpW& operator=(const RegExpW& other)
   {
-    _api.regexpw_copy(this, &other);
+    fog_api.regexpw_copy(this, &other);
     return *this;
   }
 

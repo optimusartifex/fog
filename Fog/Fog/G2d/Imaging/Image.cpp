@@ -71,7 +71,7 @@ static const ImageVTable Image_Buffer_vTable =
 static err_t FOG_CDECL Image_Buffer_create(ImageData** pd, const SizeI* size, uint32_t format)
 {
   const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(format);
-  ssize_t stride = (size_t)_api.image_getStrideFromWidth(size->w, desc.getDepth());
+  ssize_t stride = (size_t)fog_api.image_getStrideFromWidth(size->w, desc.getDepth());
 
   if (stride == 0)
     return ERR_RT_INVALID_ARGUMENT;
@@ -150,7 +150,7 @@ static void FOG_CDECL Image_ctorCreate(Image* self, const SizeI* size, uint32_t 
   dEmpty->reference.inc();
 
   self->_d = dEmpty;
-  _api.image_create(self, size, format, type);
+  fog_api.image_create(self, size, format, type);
 }
 
 static void FOG_CDECL Image_dtor(Image* self)
@@ -179,7 +179,7 @@ static err_t FOG_CDECL Image_detach(Image* self)
   uint32_t type = d->type;
   ImageData* newd;
 
-  FOG_RETURN_ON_ERROR(_api.image_vTable[type]->create(&newd, &d->size, d->format));
+  FOG_RETURN_ON_ERROR(fog_api.image_vTable[type]->create(&newd, &d->size, d->format));
 
   newd->colorKey = d->colorKey;
   newd->palette->setData(d->palette);
@@ -265,13 +265,13 @@ static err_t FOG_CDECL Image_create(Image* self, const SizeI* size, uint32_t for
   if (type == IMAGE_TYPE_IGNORE)
     type = IMAGE_TYPE_BUFFER;
 
-  if (_api.image_vTable[type] == NULL)
+  if (fog_api.image_vTable[type] == NULL)
   {
     err = ERR_IMAGE_INVALID_TYPE;
     goto _Fail;
   }
 
-  err = _api.image_vTable[type]->create(&d, size, format);
+  err = fog_api.image_vTable[type]->create(&d, size, format);
   if (FOG_IS_ERROR(err))
     goto _Fail;
 
@@ -484,7 +484,7 @@ static err_t FOG_CDECL Image_setImage(Image* self, const Image* other, const Rec
   }
 
   if (x0 == 0 && y0 == 0 && x1 == s_d->size.w && y1 == s_d->size.h)
-    return _api.image_copy(self, other);
+    return fog_api.image_copy(self, other);
 
   int w = x1 - x0;
   int h = y1 - y0;
@@ -570,7 +570,7 @@ static err_t FOG_CDECL Image_convert(Image* self, uint32_t format)
   else
   {
     ImageData* newd;
-    FOG_RETURN_ON_ERROR(_api.image_vTable[IMAGE_TYPE_BUFFER]->create(&newd, &d->size, targetFormat));
+    FOG_RETURN_ON_ERROR(fog_api.image_vTable[IMAGE_TYPE_BUFFER]->create(&newd, &d->size, targetFormat));
 
     uint8_t* dData = newd->first;
     uint8_t* sData = d->first;
@@ -663,7 +663,7 @@ static err_t FOG_CDECL Image_convertTo8BitDepth(Image* self)
   d = self->_d;
 
   ImageData* newd;
-  FOG_RETURN_ON_ERROR(_api.image_vTable[IMAGE_TYPE_BUFFER]->create(&newd, &d->size, IMAGE_FORMAT_I8));
+  FOG_RETURN_ON_ERROR(fog_api.image_vTable[IMAGE_TYPE_BUFFER]->create(&newd, &d->size, IMAGE_FORMAT_I8));
 
   ssize_t dStride = newd->stride;
   uint8_t* dPtr = newd->first;
@@ -763,7 +763,7 @@ static err_t FOG_CDECL Image_convertTo8BitDepthPalette(Image* self, const ImageP
   d = self->_d;
 
   ImageData* newd;
-  FOG_RETURN_ON_ERROR(_api.image_vTable[IMAGE_TYPE_BUFFER]->create(&newd, &d->size, IMAGE_FORMAT_I8));
+  FOG_RETURN_ON_ERROR(fog_api.image_vTable[IMAGE_TYPE_BUFFER]->create(&newd, &d->size, IMAGE_FORMAT_I8));
   newd->palette->setData(*palette);
 
   int w = d->size.w;
@@ -916,7 +916,7 @@ static err_t FOG_CDECL Image_clearArgb32(Image* self, const Argb32* c0)
   }
 
   RectI screen(0, 0, d->size.w, d->size.h);
-  return _api.image_fillRectArgb32(self, &screen, c0, COMPOSITE_SRC, 1.0f);
+  return fog_api.image_fillRectArgb32(self, &screen, c0, COMPOSITE_SRC, 1.0f);
 }
 
 static err_t FOG_CDECL Image_clearColor(Image* self, const Color* c0)
@@ -936,7 +936,7 @@ static err_t FOG_CDECL Image_clearColor(Image* self, const Color* c0)
   }
 
   RectI screen(0, 0, d->size.w, d->size.h);
-  return _api.image_fillRectColor(self, &screen, c0, COMPOSITE_SRC, 1.0f);
+  return fog_api.image_fillRectColor(self, &screen, c0, COMPOSITE_SRC, 1.0f);
 }
 
 // ============================================================================
@@ -1498,7 +1498,7 @@ static err_t FOG_CDECL Image_readFromFile(Image* self, const StringW* fileName)
 static err_t FOG_CDECL Image_readFromStream(Image* self, Stream* stream, const StringW* ext)
 {
   if (ext == NULL)
-    ext = _api.stringw_oEmpty;
+    ext = fog_api.stringw_oEmpty;
 
   ImageDecoder* decoder = NULL;
   FOG_RETURN_ON_ERROR(ImageCodecProvider::createDecoderForStream(*stream, *ext, &decoder));
@@ -1510,14 +1510,14 @@ static err_t FOG_CDECL Image_readFromStream(Image* self, Stream* stream, const S
 
 static err_t FOG_CDECL Image_readFromBufferStringA(Image* self, const StringA* buffer, const StringW* ext)
 {
-  return _api.image_readFromBufferRaw(self, buffer->getData(), buffer->getLength(), ext);
+  return fog_api.image_readFromBufferRaw(self, buffer->getData(), buffer->getLength(), ext);
 }
 
 static err_t FOG_CDECL Image_readFromBufferRaw(Image* self, const void* buffer, size_t size, const StringW* ext)
 {
   Stream stream;
   stream.openBuffer((void*)buffer, size, STREAM_OPEN_READ);
-  return _api.image_readFromStream(self, &stream, ext);
+  return fog_api.image_readFromStream(self, &stream, ext);
 }
 
 // ============================================================================
@@ -1540,7 +1540,7 @@ static err_t FOG_CDECL Image_writeToFile(const Image* self, const StringW* fileN
       STREAM_OPEN_TRUNCATE    )
   );
 
-  FOG_RETURN_ON_ERROR(_api.image_writeToStream(self, &stream, &ext, options));
+  FOG_RETURN_ON_ERROR(fog_api.image_writeToStream(self, &stream, &ext, options));
   return ERR_OK;
 }
 
@@ -1582,7 +1582,7 @@ static err_t FOG_CDECL Image_writeToBuffer(const Image* self, StringA* buffer, u
   if (cntOp != CONTAINER_OP_REPLACE)
     stream.seek(buffer->getLength(), STREAM_SEEK_SET);
 
-  return _api.image_writeToStream(self, &stream, ext, options);
+  return fog_api.image_writeToStream(self, &stream, ext, options);
 }
 
 // ============================================================================
@@ -2944,7 +2944,7 @@ static err_t FOG_CDECL Image_rotate(Image* dst, const Image* src, const RectI* a
 
   // Rotation by 180 degrees has the same effect as MIRROR_BOTH.
   if (rotateMode == IMAGE_ROTATE_180)
-    return _api.image_mirror(dst, src, area, IMAGE_MIRROR_BOTH);
+    return fog_api.image_mirror(dst, src, area, IMAGE_MIRROR_BOTH);
 
   if (src_d->stride == 0)
   {
@@ -3113,78 +3113,78 @@ FOG_NO_EXPORT void Image_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.image_ctor = Image_ctor;
-  _api.image_ctorCopy = Image_ctorCopy;
-  _api.image_ctorCreate = Image_ctorCreate;
-  _api.image_dtor = Image_dtor;
+  fog_api.image_ctor = Image_ctor;
+  fog_api.image_ctorCopy = Image_ctorCopy;
+  fog_api.image_ctorCreate = Image_ctorCreate;
+  fog_api.image_dtor = Image_dtor;
 
-  _api.image_detach = Image_detach;
+  fog_api.image_detach = Image_detach;
 
-  _api.image_getAlphaDistribution = Image_getAlphaDistribution;
-  _api.image_modified = Image_modified;
+  fog_api.image_getAlphaDistribution = Image_getAlphaDistribution;
+  fog_api.image_modified = Image_modified;
 
-  _api.image_reset = Image_reset;
-  _api.image_create = Image_create;
-  _api.image_adopt = Image_adopt;
+  fog_api.image_reset = Image_reset;
+  fog_api.image_create = Image_create;
+  fog_api.image_adopt = Image_adopt;
 
-  _api.image_copy = Image_copy;
-  _api.image_copyDeep = Image_copyDeep;
-  _api.image_setImage = Image_setImage;
+  fog_api.image_copy = Image_copy;
+  fog_api.image_copyDeep = Image_copyDeep;
+  fog_api.image_setImage = Image_setImage;
 
-  _api.image_convert = Image_convert;
-  _api.image_forceFormat = Image_forceFormat;
+  fog_api.image_convert = Image_convert;
+  fog_api.image_forceFormat = Image_forceFormat;
 
-  _api.image_convertTo8BitDepth = Image_convertTo8BitDepth;
-  _api.image_convertTo8BitDepthPalette = Image_convertTo8BitDepthPalette;
+  fog_api.image_convertTo8BitDepth = Image_convertTo8BitDepth;
+  fog_api.image_convertTo8BitDepthPalette = Image_convertTo8BitDepthPalette;
 
-  _api.image_setPalette = Image_setPalette;
-  _api.image_setPaletteData = Image_setPaletteData;
+  fog_api.image_setPalette = Image_setPalette;
+  fog_api.image_setPaletteData = Image_setPaletteData;
 
-  _api.image_clearArgb32 = Image_clearArgb32;
-  _api.image_clearColor = Image_clearColor;
+  fog_api.image_clearArgb32 = Image_clearArgb32;
+  fog_api.image_clearColor = Image_clearColor;
 
-  _api.image_fillRectArgb32 = Image_fillRectArgb32;
-  _api.image_fillRectColor = Image_fillRectColor;
+  fog_api.image_fillRectArgb32 = Image_fillRectArgb32;
+  fog_api.image_fillRectColor = Image_fillRectColor;
 
-  _api.image_blitImageAt = Image_blitImageAt;
+  fog_api.image_blitImageAt = Image_blitImageAt;
 
-  _api.image_scroll = Image_scroll;
+  fog_api.image_scroll = Image_scroll;
 
-  _api.image_readFromFile = Image_readFromFile;
-  _api.image_readFromStream = Image_readFromStream;
-  _api.image_readFromBufferStringA = Image_readFromBufferStringA;
-  _api.image_readFromBufferRaw = Image_readFromBufferRaw;
+  fog_api.image_readFromFile = Image_readFromFile;
+  fog_api.image_readFromStream = Image_readFromStream;
+  fog_api.image_readFromBufferStringA = Image_readFromBufferStringA;
+  fog_api.image_readFromBufferRaw = Image_readFromBufferRaw;
 
-  _api.image_writeToFile = Image_writeToFile;
-  _api.image_writeToStream = Image_writeToStream;
-  _api.image_writeToBuffer = Image_writeToBuffer;
+  fog_api.image_writeToFile = Image_writeToFile;
+  fog_api.image_writeToStream = Image_writeToStream;
+  fog_api.image_writeToBuffer = Image_writeToBuffer;
 
 #if defined(FOG_OS_WINDOWS)
-  _api.image_toWinBitmap = Image_toWinBitmap;
-  _api.image_fromWinBitmap = Image_fromWinBitmap;
-  _api.image_getDC = Image_getDC;
-  _api.image_releaseDC = Image_releaseDC;
+  fog_api.image_toWinBitmap = Image_toWinBitmap;
+  fog_api.image_fromWinBitmap = Image_fromWinBitmap;
+  fog_api.image_getDC = Image_getDC;
+  fog_api.image_releaseDC = Image_releaseDC;
 #endif // FOG_OS_WINDOWS
   
-  _api.image_eq = Image_eq;
+  fog_api.image_eq = Image_eq;
 
-  _api.image_getStrideFromWidth = Image_getStrideFromWidth;
+  fog_api.image_getStrideFromWidth = Image_getStrideFromWidth;
 
-  _api.image_glyphFromPathF = Image_glyphFromPath<float>;
-  _api.image_glyphFromPathD = Image_glyphFromPath<double>;
+  fog_api.image_glyphFromPathF = Image_glyphFromPath<float>;
+  fog_api.image_glyphFromPathD = Image_glyphFromPath<double>;
 
-  _api.image_invert = Image_invert;
-  _api.image_mirror = Image_mirror;
-  _api.image_rotate = Image_rotate;
+  fog_api.image_invert = Image_invert;
+  fog_api.image_mirror = Image_mirror;
+  fog_api.image_rotate = Image_rotate;
 
-  _api.image_dAddRef = Image_dAddRef;
-  _api.image_dRelease = Image_dRelease;
+  fog_api.image_dAddRef = Image_dAddRef;
+  fog_api.image_dRelease = Image_dRelease;
 
   // Virtual tables.
-  _api.image_vTable[IMAGE_TYPE_BUFFER] = &Image_Buffer_vTable;
+  fog_api.image_vTable[IMAGE_TYPE_BUFFER] = &Image_Buffer_vTable;
 
 #if defined(FOG_OS_WINDOWS)
-  _api.image_vTable[IMAGE_TYPE_WIN_DIB] = &Image_WinDib_vTable;
+  fog_api.image_vTable[IMAGE_TYPE_WIN_DIB] = &Image_WinDib_vTable;
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
@@ -3202,9 +3202,9 @@ FOG_NO_EXPORT void Image_init(void)
   d->adopted = 0;
   d->colorKey = IMAGE_COLOR_KEY_NONE;
   d->bytesPerPixel = 0;
-  d->palette.initCustom1(_api.imagepalette_oEmpty->_d);
+  d->palette.initCustom1(fog_api.imagepalette_oEmpty->_d);
 
-  _api.image_oEmpty = Image_oEmpty.initCustom1(d);
+  fog_api.image_oEmpty = Image_oEmpty.initCustom1(d);
 }
 
 } // Fog namespace

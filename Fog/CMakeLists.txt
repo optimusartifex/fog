@@ -128,6 +128,10 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # We are not interested in math-errno.
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 
+  # Disabled by default for binary compatibility with projects which
+  # use Fog-Framework. Enabled only for testing.
+  # Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
+
   # -flto
   #
   # Use link-time optimization.

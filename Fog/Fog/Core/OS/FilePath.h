@@ -59,7 +59,7 @@ struct FOG_NO_EXPORT FilePath
 
   static FOG_INLINE err_t join(StringW& dst, const StringW& base, const StringW& part)
   {
-    return _api.filepath_join(&dst, &base, &part);
+    return fog_api.filepath_join(&dst, &base, &part);
   }
 
   // --------------------------------------------------------------------------
@@ -68,32 +68,32 @@ struct FOG_NO_EXPORT FilePath
 
   static FOG_INLINE err_t extractFile(StringW& dst, const StringW& path)
   {
-    return _api.filepath_extractFile(&dst, &path);
+    return fog_api.filepath_extractFile(&dst, &path);
   }
 
   static FOG_INLINE err_t extractExtension(StringW& dst, const StringW& path)
   {
-    return _api.filepath_extractExtension(&dst, &path);
+    return fog_api.filepath_extractExtension(&dst, &path);
   }
 
   static FOG_INLINE err_t extractDirectory(StringW& dst, const StringW& path)
   {
-    return _api.filepath_extractDirectory(&dst, &path);
+    return fog_api.filepath_extractDirectory(&dst, &path);
   }
 
   static FOG_INLINE bool containsFile(const StringW& path, const StringW& file, uint cs = CASE_SENSITIVE)
   {
-    return _api.filepath_containsFile(&path, &file, cs);
+    return fog_api.filepath_containsFile(&path, &file, cs);
   }
 
   static FOG_INLINE bool containsExtension(const StringW& path, const StringW& extension, uint cs = CASE_SENSITIVE)
   {
-    return _api.filepath_containsExtension(&path, &extension, cs);
+    return fog_api.filepath_containsExtension(&path, &extension, cs);
   }
 
   static FOG_INLINE bool containsDirectory(const StringW& path, const StringW& directory, uint cs = CASE_SENSITIVE)
   {
-    return _api.filepath_containsDirectory(&path, &directory, cs);
+    return fog_api.filepath_containsDirectory(&path, &directory, cs);
   }
 
   // --------------------------------------------------------------------------
@@ -102,12 +102,12 @@ struct FOG_NO_EXPORT FilePath
 
   static FOG_INLINE err_t normalize(StringW& dst, const StringW& path)
   {
-    return _api.filepath_normalize(&dst, &path);
+    return fog_api.filepath_normalize(&dst, &path);
   }
 
   static FOG_INLINE bool isNormalized(const StringW& path)
   {
-    return _api.filepath_isNormalized(&path);
+    return fog_api.filepath_isNormalized(&path);
   }
 
   // --------------------------------------------------------------------------
@@ -116,7 +116,7 @@ struct FOG_NO_EXPORT FilePath
 
   static FOG_INLINE bool isRoot(const StringW& path)
   {
-    return _api.filepath_isRoot(&path);
+    return fog_api.filepath_isRoot(&path);
   }
 
   // --------------------------------------------------------------------------
@@ -125,17 +125,17 @@ struct FOG_NO_EXPORT FilePath
 
   static FOG_INLINE err_t toAbsolute(StringW& dst, const StringW& path)
   {
-    return _api.filepath_toAbsolute(&dst, &path, NULL);
+    return fog_api.filepath_toAbsolute(&dst, &path, NULL);
   }
 
   static FOG_INLINE err_t toAbsolute(StringW& dst, const StringW& path, const StringW& base)
   {
-    return _api.filepath_toAbsolute(&dst, &path, &base);
+    return fog_api.filepath_toAbsolute(&dst, &path, &base);
   }
 
   static FOG_INLINE bool isAbsolute(const StringW& path)
   {
-    return _api.filepath_isAbsolute(&path);
+    return fog_api.filepath_isAbsolute(&path);
   }
 
   // --------------------------------------------------------------------------
@@ -150,7 +150,7 @@ struct FOG_NO_EXPORT FilePath
   static FOG_INLINE err_t substituteEnvironmentVars(StringW& dst, const StringW& path,
     uint32_t format = FILE_PATH_SUBSTITUTE_FORMAT_DEFAULT)
   {
-    return _api.filepath_substituteEnvironmentVars(&dst, &path, format);
+    return fog_api.filepath_substituteEnvironmentVars(&dst, &path, format);
   }
 };
 

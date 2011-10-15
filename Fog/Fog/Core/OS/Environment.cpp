@@ -34,7 +34,7 @@ static err_t FOG_CDECL Environment_getValueStubA(const StubA* key, StringW* valu
   StringTmpW<TEMPORARY_LENGTH> keyW;
   FOG_RETURN_ON_ERROR(keyW.setAscii8(*key));
 
-  return _api.environment_getValueStringW(&keyW, value);
+  return fog_api.environment_getValueStringW(&keyW, value);
 }
 
 static err_t FOG_CDECL Environment_getValueStringW(const StringW* key, StringW* value)
@@ -76,7 +76,7 @@ static err_t FOG_CDECL Environment_setValueStubA(const StubA* key, const StringW
   StringTmpW<TEMPORARY_LENGTH> keyW;
   FOG_RETURN_ON_ERROR(keyW.setAscii8(*key));
 
-  return _api.environment_setValueStringW(&keyW, value);
+  return fog_api.environment_setValueStringW(&keyW, value);
 }
 
 static err_t FOG_CDECL Environment_setValueStringW(const StringW* key, const StringW* value)
@@ -192,11 +192,11 @@ static err_t FOG_CDECL Environment_setValueStringW(const StringW* key, const Str
 
 FOG_NO_EXPORT void Environment_init(void)
 {
-  _api.environment_getValueStubA = Environment_getValueStubA;
-  _api.environment_getValueStringW = Environment_getValueStringW;
+  fog_api.environment_getValueStubA = Environment_getValueStubA;
+  fog_api.environment_getValueStringW = Environment_getValueStringW;
 
-  _api.environment_setValueStubA = Environment_setValueStubA;
-  _api.environment_setValueStringW = Environment_setValueStringW;
+  fog_api.environment_setValueStubA = Environment_setValueStubA;
+  fog_api.environment_setValueStringW = Environment_setValueStringW;
 }
 
 } // Fog namespace

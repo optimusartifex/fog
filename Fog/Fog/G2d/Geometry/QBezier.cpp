@@ -386,17 +386,17 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void QBezier_init(void)
 {
-  _api.qbezierf_getBoundingBox = QBezierT_getBoundingBox<float>;
-  _api.qbezierd_getBoundingBox = QBezierT_getBoundingBox<double>;
+  fog_api.qbezierf_getBoundingBox = QBezierT_getBoundingBox<float>;
+  fog_api.qbezierd_getBoundingBox = QBezierT_getBoundingBox<double>;
 
-  _api.qbezierf_getSplineBBox = QBezierT_getSplineBBox<float>;
-  _api.qbezierd_getSplineBBox = QBezierT_getSplineBBox<double>;
+  fog_api.qbezierf_getSplineBBox = QBezierT_getSplineBBox<float>;
+  fog_api.qbezierd_getSplineBBox = QBezierT_getSplineBBox<double>;
 
-  _api.qbezierf_getLength = QBezierT_getLength<float>;
-  _api.qbezierd_getLength = QBezierT_getLength<double>;
+  fog_api.qbezierf_getLength = QBezierT_getLength<float>;
+  fog_api.qbezierd_getLength = QBezierT_getLength<double>;
 
-  _api.qbezierf_flatten = QBezierT_flatten<float>;
-  _api.qbezierd_flatten = QBezierT_flatten<double>;
+  fog_api.qbezierf_flatten = QBezierT_flatten<float>;
+  fog_api.qbezierd_flatten = QBezierT_flatten<double>;
 }
 
 } // Fog namespace

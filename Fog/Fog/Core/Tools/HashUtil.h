@@ -24,7 +24,7 @@ namespace HashUtil {
 
 static FOG_INLINE size_t getClosestPrime(size_t value, int adjustTable = 0)
 {
-  return _api.hashutil_getClosestPrime(value, adjustTable);
+  return fog_api.hashutil_getClosestPrime(value, adjustTable);
 }
 
 // ============================================================================
@@ -37,7 +37,7 @@ static FOG_INLINE size_t getClosestPrime(size_t value, int adjustTable = 0)
 //! @param size Size of data. You cant use DETECT_LENGTH here.
 static FOG_INLINE uint32_t hashBinary(const void* data, size_t length)
 {
-  return _api.hashutil_hashBinary(data, length);
+  return fog_api.hashutil_hashBinary(data, length);
 }
 
 // ============================================================================
@@ -47,13 +47,13 @@ static FOG_INLINE uint32_t hashBinary(const void* data, size_t length)
 //! @brief Hash 8-bit string (LATIN1).
 static FOG_INLINE uint32_t hashStubA(const StubA& k)
 {
-  return _api.hashutil_hashStubA(&k);
+  return fog_api.hashutil_hashStubA(&k);
 }
 
 //! @brief Hash 16-bit string (UTF-16).
 static FOG_INLINE uint32_t hashStubW(const StubW& k)
 {
-  return _api.hashutil_hashStubW(&k);
+  return fog_api.hashutil_hashStubW(&k);
 }
 
 // ============================================================================
@@ -77,8 +77,8 @@ static FOG_INLINE uint32_t hashPtr(const void* k)
 // [Fog::HashFunc - Vector]
 // ============================================================================
 
-static FOG_INLINE uint32_t hashVectorD(const void* data, size_t length) { return _api.hashutil_hashVectorD(data, length); }
-static FOG_INLINE uint32_t hashVectorQ(const void* data, size_t length) { return _api.hashutil_hashVectorQ(data, length); }
+static FOG_INLINE uint32_t hashVectorD(const void* data, size_t length) { return fog_api.hashutil_hashVectorD(data, length); }
+static FOG_INLINE uint32_t hashVectorQ(const void* data, size_t length) { return fog_api.hashutil_hashVectorQ(data, length); }
 
 // ============================================================================
 // [Fog::HashFunc - Combine]

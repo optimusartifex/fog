@@ -175,7 +175,7 @@ static err_t FOG_CDECL Library_openLibrary(Library* self, const StringW* fileNam
       break;
     }
 
-    LibraryData* newd = _api.library_dCreate(handle);
+    LibraryData* newd = fog_api.library_dCreate(handle);
     if (FOG_IS_NULL(newd))
     {
       LibraryHandle_close(handle);
@@ -403,27 +403,27 @@ FOG_NO_EXPORT void Library_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.library_ctor = Library_ctor;
-  _api.library_ctorCopy = Library_ctorCopy;
-  _api.library_dtor = Library_dtor;
+  fog_api.library_ctor = Library_ctor;
+  fog_api.library_ctorCopy = Library_ctorCopy;
+  fog_api.library_dtor = Library_dtor;
 
-  _api.library_setLibrary = Library_setLibrary;
-  _api.library_openLibrary = Library_openLibrary;
-  _api.library_openPlugin = Library_openPlugin;
-  _api.library_close = Library_close;
-  _api.library_getSymbolStubA = Library_getSymbolStubA;
-  _api.library_getSymbolStringW = Library_getSymbolStringW;
-  _api.library_getSymbols = Library_getSymbols;
+  fog_api.library_setLibrary = Library_setLibrary;
+  fog_api.library_openLibrary = Library_openLibrary;
+  fog_api.library_openPlugin = Library_openPlugin;
+  fog_api.library_close = Library_close;
+  fog_api.library_getSymbolStubA = Library_getSymbolStubA;
+  fog_api.library_getSymbolStringW = Library_getSymbolStringW;
+  fog_api.library_getSymbols = Library_getSymbols;
 
-  _api.library_dCreate = Library_dCreate;
-  _api.library_dFree = Library_dFree;
+  fog_api.library_dCreate = Library_dCreate;
+  fog_api.library_dFree = Library_dFree;
 
-  _api.library_getSystemPrefix = Library_getSystemPrefix;
-  _api.library_getSystemExtensions = Library_getSystemExtensions;
-  _api.library_getLibraryPaths = Library_getLibraryPaths;
-  _api.library_addLibraryPath = Library_addLibraryPath;
-  _api.library_removeLibraryPath = Library_removeLibraryPath;
-  _api.library_hasLibraryPath = Library_hasLibraryPath;
+  fog_api.library_getSystemPrefix = Library_getSystemPrefix;
+  fog_api.library_getSystemExtensions = Library_getSystemExtensions;
+  fog_api.library_getLibraryPaths = Library_getLibraryPaths;
+  fog_api.library_addLibraryPath = Library_addLibraryPath;
+  fog_api.library_removeLibraryPath = Library_removeLibraryPath;
+  fog_api.library_hasLibraryPath = Library_hasLibraryPath;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -433,7 +433,7 @@ FOG_NO_EXPORT void Library_init(void)
   d->reference.init(1);
   d->handle = NULL;
 
-  _api.library_dNone = d;
+  fog_api.library_dNone = d;
 
   // --------------------------------------------------------------------------
   // [Windows Support]

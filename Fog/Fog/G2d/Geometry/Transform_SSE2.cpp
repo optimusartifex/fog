@@ -1244,25 +1244,25 @@ static void FOG_CDECL TransformD_mapVectorD_SSE2(const TransformD* self, PointD*
 
 FOG_NO_EXPORT void Transform_init_SSE2(void)
 {
-  _api.transformd_mapPointD = TransformD_mapPointD_SSE2;
-  _api.transformd_mapVectorD = TransformD_mapVectorD_SSE2;
+  fog_api.transformd_mapPointD = TransformD_mapPointD_SSE2;
+  fog_api.transformd_mapVectorD = TransformD_mapVectorD_SSE2;
 
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformD_mapPointsF_Identity_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = TransformD_mapPointsD_Identity_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformD_mapPointsF_Translation_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_TRANSLATION] = TransformD_mapPointsD_Translation_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformD_mapPointsF_Scaling_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_SCALING    ] = TransformD_mapPointsD_Scaling_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformD_mapPointsF_Swap_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_SWAP       ] = TransformD_mapPointsD_Swap_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformD_mapPointsF_Affine_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_ROTATION   ] = TransformD_mapPointsD_Affine_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformD_mapPointsF_Affine_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_AFFINE     ] = TransformD_mapPointsD_Affine_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformD_mapPointsF_Projection_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_PROJECTION ] = TransformD_mapPointsD_Projection_SSE2;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = (Api::TransformD_MapPointsF)TransformD_mapPointsT_Degenerate_SSE2;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = (Api::TransformD_MapPointsD)TransformD_mapPointsT_Degenerate_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformD_mapPointsF_Identity_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = TransformD_mapPointsD_Identity_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformD_mapPointsF_Translation_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_TRANSLATION] = TransformD_mapPointsD_Translation_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformD_mapPointsF_Scaling_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_SCALING    ] = TransformD_mapPointsD_Scaling_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformD_mapPointsF_Swap_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_SWAP       ] = TransformD_mapPointsD_Swap_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformD_mapPointsF_Affine_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_ROTATION   ] = TransformD_mapPointsD_Affine_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformD_mapPointsF_Affine_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_AFFINE     ] = TransformD_mapPointsD_Affine_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformD_mapPointsF_Projection_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_PROJECTION ] = TransformD_mapPointsD_Projection_SSE2;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = (Api::TransformD_MapPointsF)TransformD_mapPointsT_Degenerate_SSE2;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = (Api::TransformD_MapPointsD)TransformD_mapPointsT_Degenerate_SSE2;
 }
 
 } // Fog namespace

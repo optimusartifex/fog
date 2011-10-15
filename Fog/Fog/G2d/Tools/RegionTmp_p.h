@@ -39,22 +39,22 @@ struct RegionTmp : public Region
   // --------------------------------------------------------------------------
 
   FOG_INLINE RegionTmp() :
-    Region(_api.region_dAdopt((void*)&_storage, N))
+    Region(fog_api.region_dAdopt((void*)&_storage, N))
   {
   }
 
   FOG_INLINE RegionTmp(const RegionTmp<N>& other) :
-    Region(_api.region_dAdoptRegion((void*)&_storage, N, other._d->data, other._d->length, &other._d->boundingBox))
+    Region(fog_api.region_dAdoptRegion((void*)&_storage, N, other._d->data, other._d->length, &other._d->boundingBox))
   {
   }
 
   FOG_INLINE RegionTmp(const Region& other) :
-    Region(_api.region_dAdoptRegion((void*)&_storage, N, other._d->data, other._d->length, &other._d->boundingBox))
+    Region(fog_api.region_dAdoptRegion((void*)&_storage, N, other._d->data, other._d->length, &other._d->boundingBox))
   {
   }
 
   explicit FOG_INLINE RegionTmp(const BoxI& box) :
-    Region(_api.region_dAdoptBox((void*)&_storage, N, &box))
+    Region(fog_api.region_dAdoptBox((void*)&_storage, N, &box))
   {
   }
 
@@ -72,9 +72,9 @@ struct RegionTmp : public Region
     _d->release();
 
     if (_storage.d.reference.get() == 0)
-      _d = _api.region_dAdopt((void*)&_storage, N);
+      _d = fog_api.region_dAdopt((void*)&_storage, N);
     else
-      _d = _api.region_oEmpty->_d->addRef();
+      _d = fog_api.region_oEmpty->_d->addRef();
   }
 
   // --------------------------------------------------------------------------
@@ -105,7 +105,7 @@ struct RegionTmp : public Region
   static FOG_INLINE RegionData* _adoptRect(void* storage, const RectI& rect)
   {
     BoxI box(rect);
-    return _api.region_dAdoptBox(storage, N, &box);
+    return fog_api.region_dAdoptBox(storage, N, &box);
   }
 };
 

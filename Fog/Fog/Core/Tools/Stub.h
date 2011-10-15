@@ -159,7 +159,7 @@ struct FOG_NO_EXPORT StubW
   FOG_INLINE size_t getLength() const { return _length; }
   FOG_INLINE void setLength(size_t length) { _length = length; }
 
-  FOG_INLINE size_t getComputedLength() const { return _length == DETECT_LENGTH ? _api.stringutil_lenW(_data) : _length; }
+  FOG_INLINE size_t getComputedLength() const { return _length == DETECT_LENGTH ? fog_api.stringutil_lenW(_data) : _length; }
 
   // --------------------------------------------------------------------------
   // [Operator overload]

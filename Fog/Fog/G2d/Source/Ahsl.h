@@ -115,35 +115,35 @@ struct FOG_NO_EXPORT AhslF : public AhslBaseF
   static FOG_INLINE AhslF fromArgb(const ArgbBase32& argb32)
   {
     AhslF ahslf(UNINITIALIZED);
-    _api.color_convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB32](&ahslf, &argb32);
+    fog_api.color_convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB32](&ahslf, &argb32);
     return ahslf;
   }
 
   static FOG_INLINE AhslF fromArgb(const ArgbBase64& argb64)
   {
     AhslF ahslf(UNINITIALIZED);
-    _api.color_convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB64](&ahslf, &argb64);
+    fog_api.color_convert[COLOR_MODEL_AHSL][_COLOR_MODEL_ARGB64](&ahslf, &argb64);
     return ahslf;
   }
 
   static FOG_INLINE AhslF fromArgb(const ArgbBaseF& argbf)
   {
     AhslF ahslf(UNINITIALIZED);
-    _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](&ahslf, &argbf);
+    fog_api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ARGB](&ahslf, &argbf);
     return ahslf;
   }
 
   static FOG_INLINE AhslF fromAhsv(const AhsvBaseF& ahsvf)
   {
     AhslF ahslf(UNINITIALIZED);
-    _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_AHSV](&ahslf, &ahsvf);
+    fog_api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_AHSV](&ahslf, &ahsvf);
     return ahslf;
   }
 
   static FOG_INLINE AhslF fromAcmyk(const AcmykBaseF& acmykf)
   {
     AhslF ahslf(UNINITIALIZED);
-    _api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ACMYK](&ahslf, &acmykf);
+    fog_api.color_convert[COLOR_MODEL_AHSL][COLOR_MODEL_ACMYK](&ahslf, &acmykf);
     return ahslf;
   }
 };

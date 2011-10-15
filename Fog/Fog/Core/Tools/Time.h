@@ -142,12 +142,12 @@ struct FOG_NO_EXPORT Time
   //! @brief Get time converted to @c time_t.
   FOG_INLINE err_t toTimeT(time_t& dst) const
   {
-    return _api.time_toTimeT(_us, &dst);
+    return fog_api.time_toTimeT(_us, &dst);
   }
 
   FOG_INLINE err_t fromTimeT(const time_t& src)
   {
-    return _api.time_fromTimeT(&_us, &src);
+    return fog_api.time_fromTimeT(&_us, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -157,12 +157,12 @@ struct FOG_NO_EXPORT Time
 #if defined(FOG_OS_WINDOWS)
   FOG_INLINE err_t toFILETIME(FILETIME& dst) const
   {
-    return _api.time_toFILETIME(_us, &dst);
+    return fog_api.time_toFILETIME(_us, &dst);
   }
 
   FOG_INLINE err_t fromFILETIME(const FILETIME& src)
   {
-    return _api.time_fromFILETIME(&_us, &src);
+    return fog_api.time_fromFILETIME(&_us, &src);
   }
 #endif // FOG_OS_WINDOWS
 
@@ -206,7 +206,7 @@ struct FOG_NO_EXPORT Time
   //! successive calls will be increasing.
   static FOG_INLINE Time now()
   {
-    return Time(_api.time_now());
+    return Time(fog_api.time_now());
   }
 
   // --------------------------------------------------------------------------
@@ -289,7 +289,7 @@ struct FOG_NO_EXPORT TimeTicks
   //! used only when it is really needed (benchmarking, for example)
   static FOG_INLINE TimeTicks now(uint32_t ticksPrecision = TICKS_PRECISION_LOW)
   {
-    return TimeTicks(_api.timeticks_now(ticksPrecision));
+    return TimeTicks(fog_api.timeticks_now(ticksPrecision));
   }
 
   // --------------------------------------------------------------------------

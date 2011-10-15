@@ -75,17 +75,17 @@ typedef void* (FOG_CDECL *MemOps_Eq)(const void* a, const void* b, size_t size);
 
 FOG_NO_EXPORT void MemOps_init(void)
 {
-  _api.memops_copy = (MemOps_Copy)::memcpy;
-  _api.memops_move = (MemOps_Move)::memmove;
-  _api.memops_zero = (MemOps_Zero)MemOps_zero;
-  _api.memops_set = (MemOps_Set)::memset;
+  fog_api.memops_copy = (MemOps_Copy)::memcpy;
+  fog_api.memops_move = (MemOps_Move)::memmove;
+  fog_api.memops_zero = (MemOps_Zero)MemOps_zero;
+  fog_api.memops_set = (MemOps_Set)::memset;
 
-  _api.memops_copynt = _api.memops_copy;
-  _api.memops_zeront = _api.memops_zero;
-  _api.memops_setnt = _api.memops_set;
+  fog_api.memops_copynt = fog_api.memops_copy;
+  fog_api.memops_zeront = fog_api.memops_zero;
+  fog_api.memops_setnt = fog_api.memops_set;
 
-  _api.memops_xchg = (MemOps_Xchg)MemOps_xchg;
-  _api.memops_eq = (MemOps_Eq)MemOps_eq;
+  fog_api.memops_xchg = (MemOps_Xchg)MemOps_xchg;
+  fog_api.memops_eq = (MemOps_Eq)MemOps_eq;
 }
 
 } // Fog namespace

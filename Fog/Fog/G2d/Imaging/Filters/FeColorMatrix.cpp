@@ -111,7 +111,7 @@ static bool FeColorMatrix_fitRect(uint& x0, uint& y0, uint& x1, uint& y1, const 
 static void FOG_CDECL FeColorMatrix_ctor(FeColorMatrix* self)
 {
   self->_filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
-  _api.fecolormatrix_copy(self->m, FeColorMatrix_oIdentity.m);
+  fog_api.fecolormatrix_copy(self->m, FeColorMatrix_oIdentity.m);
 }
 
 // ============================================================================
@@ -340,9 +340,9 @@ static err_t FOG_CDECL FeColorMatrix_subtractScalar(FeColorMatrix* dst, const Fe
 static err_t FOG_CDECL FeColorMatrix_multiplyOther(FeColorMatrix* dst, const FeColorMatrix* other, uint32_t order)
 {
   if (order == MATRIX_ORDER_PREPEND)
-    return _api.fecolormatrix_multiplyMatrix(dst, other, dst);
+    return fog_api.fecolormatrix_multiplyMatrix(dst, other, dst);
   else
-    return _api.fecolormatrix_multiplyMatrix(dst, dst, other);
+    return fog_api.fecolormatrix_multiplyMatrix(dst, dst, other);
 }
 
 static err_t FOG_CDECL FeColorMatrix_multiplyMatrix(FeColorMatrix* dst, const FeColorMatrix* a, const FeColorMatrix* b)
@@ -355,7 +355,7 @@ static err_t FOG_CDECL FeColorMatrix_multiplyMatrix(FeColorMatrix* dst, const Fe
 
   if (a == dst || b == dst)
   {
-    _api.fecolormatrix_copy(tmp, dst->m);
+    fog_api.fecolormatrix_copy(tmp, dst->m);
     if (a == dst) am = tmp;
     if (b == dst) bm = tmp;
   }
@@ -718,12 +718,12 @@ static err_t FOG_CDECL FeColorMatrix_saturate(FeColorMatrix* self, float s, uint
 static err_t FOG_CDECL FeColorMatrix_rotateHue(FeColorMatrix* self, float phi)
 {
   // Rotate the gray vector to the blue axis and rotate around the blue axis.
-  _api.fecolormatrix_simplifiedPremultiply(self,
+  fog_api.fecolormatrix_simplifiedPremultiply(self,
     reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue));
 
   self->rotateBlue(phi);
 
-  _api.fecolormatrix_simplifiedPremultiply(self,
+  fog_api.fecolormatrix_simplifiedPremultiply(self,
     reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue));
 
   return ERR_OK;
@@ -746,9 +746,9 @@ static err_t FOG_CDECL FeColorMatrix_rotateColor(FeColorMatrix* self, int x, int
   rot[y][y] = phiCos;
 
   if (Math::max(x, y) < 3 && order == MATRIX_ORDER_PREPEND)
-    return _api.fecolormatrix_simplifiedPremultiply(self, &rot);
+    return fog_api.fecolormatrix_simplifiedPremultiply(self, &rot);
   else
-    return _api.fecolormatrix_multiplyOther(self, &rot, order);
+    return fog_api.fecolormatrix_multiplyOther(self, &rot, order);
 }
 
 static err_t FOG_CDECL FeColorMatrix_shearColor(FeColorMatrix* self, int x, int y0, float c0, int y1, float c1, uint32_t order)
@@ -762,9 +762,9 @@ static err_t FOG_CDECL FeColorMatrix_shearColor(FeColorMatrix* self, int x, int 
   shear[y1][x] = c1;
 
   if (Math::max(x, y0, y1) < 3 && order == MATRIX_ORDER_PREPEND)
-    return _api.fecolormatrix_simplifiedPremultiply(self, &shear);
+    return fog_api.fecolormatrix_simplifiedPremultiply(self, &shear);
   else
-    return _api.fecolormatrix_multiplyOther(self, &shear, order);
+    return fog_api.fecolormatrix_multiplyOther(self, &shear, order);
 }
 
 // ============================================================================
@@ -921,42 +921,42 @@ FOG_NO_EXPORT void FeColorMatrix_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fecolormatrix_ctor = FeColorMatrix_ctor;
-  _api.fecolormatrix_getType = FeColorMatrix_getType;
+  fog_api.fecolormatrix_ctor = FeColorMatrix_ctor;
+  fog_api.fecolormatrix_getType = FeColorMatrix_getType;
 
-  _api.fecolormatrix_addMatrix = FeColorMatrix_addMatrix;
-  _api.fecolormatrix_addScalar = FeColorMatrix_addScalar;
-  _api.fecolormatrix_subtractMatrix = FeColorMatrix_subtractMatrix;
-  _api.fecolormatrix_subtractScalar = FeColorMatrix_subtractScalar;
-  _api.fecolormatrix_multiplyOther = FeColorMatrix_multiplyOther;
-  _api.fecolormatrix_multiplyMatrix = FeColorMatrix_multiplyMatrix;
-  _api.fecolormatrix_multiplyScalar = FeColorMatrix_multiplyScalar;
-  _api.fecolormatrix_simplifiedPremultiply = FeColorMatrix_simplifiedPremultiply;
+  fog_api.fecolormatrix_addMatrix = FeColorMatrix_addMatrix;
+  fog_api.fecolormatrix_addScalar = FeColorMatrix_addScalar;
+  fog_api.fecolormatrix_subtractMatrix = FeColorMatrix_subtractMatrix;
+  fog_api.fecolormatrix_subtractScalar = FeColorMatrix_subtractScalar;
+  fog_api.fecolormatrix_multiplyOther = FeColorMatrix_multiplyOther;
+  fog_api.fecolormatrix_multiplyMatrix = FeColorMatrix_multiplyMatrix;
+  fog_api.fecolormatrix_multiplyScalar = FeColorMatrix_multiplyScalar;
+  fog_api.fecolormatrix_simplifiedPremultiply = FeColorMatrix_simplifiedPremultiply;
 
-  _api.fecolormatrix_translateArgb = FeColorMatrix_translateArgb;
-  _api.fecolormatrix_scaleArgb = FeColorMatrix_scaleArgb;
-  _api.fecolormatrix_scaleTint = FeColorMatrix_scaleTint;
-  _api.fecolormatrix_saturate = FeColorMatrix_saturate;
-  _api.fecolormatrix_rotateHue = FeColorMatrix_rotateHue;
-  _api.fecolormatrix_rotateColor = FeColorMatrix_rotateColor;
-  _api.fecolormatrix_shearColor = FeColorMatrix_shearColor;
+  fog_api.fecolormatrix_translateArgb = FeColorMatrix_translateArgb;
+  fog_api.fecolormatrix_scaleArgb = FeColorMatrix_scaleArgb;
+  fog_api.fecolormatrix_scaleTint = FeColorMatrix_scaleTint;
+  fog_api.fecolormatrix_saturate = FeColorMatrix_saturate;
+  fog_api.fecolormatrix_rotateHue = FeColorMatrix_rotateHue;
+  fog_api.fecolormatrix_rotateColor = FeColorMatrix_rotateColor;
+  fog_api.fecolormatrix_shearColor = FeColorMatrix_shearColor;
 
-  _api.fecolormatrix_mapArgb32 = FeColorMatrix_mapArgb32;
-  _api.fecolormatrix_mapArgb64 = FeColorMatrix_mapArgb64;
-  _api.fecolormatrix_mapArgbF = FeColorMatrix_mapArgbF;
+  fog_api.fecolormatrix_mapArgb32 = FeColorMatrix_mapArgb32;
+  fog_api.fecolormatrix_mapArgb64 = FeColorMatrix_mapArgb64;
+  fog_api.fecolormatrix_mapArgbF = FeColorMatrix_mapArgbF;
 
-  _api.fecolormatrix_copy = FeColorMatrix_copy;
-  _api.fecolormatrix_eq = FeColorMatrix_eq;
+  fog_api.fecolormatrix_copy = FeColorMatrix_copy;
+  fog_api.fecolormatrix_eq = FeColorMatrix_eq;
 
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
 
-  _api.fecolormatrix_oIdentity = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oIdentity);
-  _api.fecolormatrix_oZero = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oZero);
-  _api.fecolormatrix_oGreyscale = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oGreyscale);
-  _api.fecolormatrix_oPreHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue);
-  _api.fecolormatrix_oPostHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue);
+  fog_api.fecolormatrix_oIdentity = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oIdentity);
+  fog_api.fecolormatrix_oZero = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oZero);
+  fog_api.fecolormatrix_oGreyscale = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oGreyscale);
+  fog_api.fecolormatrix_oPreHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue);
+  fog_api.fecolormatrix_oPostHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue);
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

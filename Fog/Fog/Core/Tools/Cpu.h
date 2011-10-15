@@ -73,7 +73,7 @@ struct FOG_NO_EXPORT Cpu
   //! @brief Get the global @c Cpu instance.
   static FOG_INLINE const Cpu* get()
   {
-    return _api.cpu_oInstance;
+    return fog_api.cpu_oInstance;
   }
 
   // --------------------------------------------------------------------------

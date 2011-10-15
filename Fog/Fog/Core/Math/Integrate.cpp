@@ -98,8 +98,8 @@ static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Func
 
 FOG_NO_EXPORT void Math_init_integrate(void)
 {
-  _api.mathf_integrate[MATH_INTEGRATION_METHOD_GAUSS] = MathT_integrate_GaussLegendre<float>;
-  _api.mathd_integrate[MATH_INTEGRATION_METHOD_GAUSS] = MathT_integrate_GaussLegendre<double>;
+  fog_api.mathf_integrate[MATH_INTEGRATION_METHOD_GAUSS] = MathT_integrate_GaussLegendre<float>;
+  fog_api.mathd_integrate[MATH_INTEGRATION_METHOD_GAUSS] = MathT_integrate_GaussLegendre<double>;
 }
 
 } // Fog namespace

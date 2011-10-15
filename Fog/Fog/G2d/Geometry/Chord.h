@@ -46,7 +46,7 @@ struct FOG_NO_EXPORT ChordF : ArcF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _api.chordf_hitTest(this, &pt);
+    return fog_api.chordf_hitTest(this, &pt);
   }
 };
 
@@ -77,7 +77,7 @@ struct FOG_NO_EXPORT ChordD : ArcD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _api.chordd_hitTest(this, &pt);
+    return fog_api.chordd_hitTest(this, &pt);
   }
 };
 

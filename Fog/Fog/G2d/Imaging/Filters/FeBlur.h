@@ -30,17 +30,17 @@ struct FOG_NO_EXPORT FeBlur : public FeBorder
 
   FOG_INLINE FeBlur()
   {
-    _api.feblur_ctor(this);
+    fog_api.feblur_ctor(this);
   }
 
   FOG_INLINE FeBlur(const FeBlur& other)
   {
-    _api.feblur_ctorCopy(this, &other);
+    fog_api.feblur_ctorCopy(this, &other);
   }
 
   FOG_INLINE FeBlur(uint32_t blurType, float radius)
   {
-    _api.feblur_ctor(this);
+    fog_api.feblur_ctor(this);
 
     _blurType = blurType;
     _hRadius = radius;
@@ -49,7 +49,7 @@ struct FOG_NO_EXPORT FeBlur : public FeBorder
 
   FOG_INLINE FeBlur(uint32_t blurType, float hRadius, float vRadius)
   {
-    _api.feblur_ctor(this);
+    fog_api.feblur_ctor(this);
 
     _blurType = blurType;
     _hRadius = hRadius;
@@ -88,7 +88,7 @@ struct FOG_NO_EXPORT FeBlur : public FeBorder
 
   FOG_INLINE bool eq(const FeBlur& other) const
   {
-    return _api.feblur_eq(this, &other);
+    return fog_api.feblur_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT FeBlur : public FeBorder
 
   FOG_INLINE FeBlur& operator=(const FeBlur& other)
   {
-    _api.feblur_copy(this, &other);
+    fog_api.feblur_copy(this, &other);
     return *this;
   }
 
@@ -110,12 +110,12 @@ struct FOG_NO_EXPORT FeBlur : public FeBorder
 
   static FOG_INLINE bool eq(const FeBlur* a, const FeBlur* b)
   {
-    return _api.feblur_eq(a, b);
+    return fog_api.feblur_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.feblur_eq;
+    return (EqFunc)fog_api.feblur_eq;
   }
 
   // --------------------------------------------------------------------------

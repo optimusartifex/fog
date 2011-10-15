@@ -713,20 +713,20 @@ _BadSyntax:
 
 FOG_NO_EXPORT void FilePath_init(void)
 {
-  _api.filepath_join = FilePath_join;
+  fog_api.filepath_join = FilePath_join;
 
-  _api.filepath_extractFile = FilePath_extractFile;
-  _api.filepath_extractExtension = FilePath_extractExtension;
-  _api.filepath_extractDirectory = FilePath_extractDirectory;
-  _api.filepath_containsFile = FilePath_containsFile;
-  _api.filepath_containsExtension = FilePath_containsExtension;
-  _api.filepath_containsDirectory = FilePath_containsDirectory;
-  _api.filepath_normalize = FilePath_normalize;
-  _api.filepath_isNormalized = FilePath_isNormalized;
-  _api.filepath_isRoot = FilePath_isRoot;
-  _api.filepath_toAbsolute = FilePath_toAbsolute;
-  _api.filepath_isAbsolute = FilePath_isAbsolute;
-  _api.filepath_substituteEnvironmentVars = FilePath_substituteEnvironmentVars;
+  fog_api.filepath_extractFile = FilePath_extractFile;
+  fog_api.filepath_extractExtension = FilePath_extractExtension;
+  fog_api.filepath_extractDirectory = FilePath_extractDirectory;
+  fog_api.filepath_containsFile = FilePath_containsFile;
+  fog_api.filepath_containsExtension = FilePath_containsExtension;
+  fog_api.filepath_containsDirectory = FilePath_containsDirectory;
+  fog_api.filepath_normalize = FilePath_normalize;
+  fog_api.filepath_isNormalized = FilePath_isNormalized;
+  fog_api.filepath_isRoot = FilePath_isRoot;
+  fog_api.filepath_toAbsolute = FilePath_toAbsolute;
+  fog_api.filepath_isAbsolute = FilePath_isAbsolute;
+  fog_api.filepath_substituteEnvironmentVars = FilePath_substituteEnvironmentVars;
 }
 
 } // Fog namespace

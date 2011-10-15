@@ -1520,15 +1520,15 @@ FOG_CPU_DECLARE_INITIALIZER_SSE2(PathClipper_init_SSE2)
 
 FOG_NO_EXPORT void PathClipper_init(void)
 {
-  _api.pathclipperf_measurePath = PathClipperT_measurePath<float>;
-  _api.pathclipperf_continuePath = PathClipperT_continuePath<float>;
-  _api.pathclipperf_continuePathData = PathClipperT_continuePathData<float>;
-  _api.pathclipperf_clipPath = PathClipperT_clipPath<float>;
+  fog_api.pathclipperf_measurePath = PathClipperT_measurePath<float>;
+  fog_api.pathclipperf_continuePath = PathClipperT_continuePath<float>;
+  fog_api.pathclipperf_continuePathData = PathClipperT_continuePathData<float>;
+  fog_api.pathclipperf_clipPath = PathClipperT_clipPath<float>;
 
-  _api.pathclipperd_measurePath = PathClipperT_measurePath<double>;
-  _api.pathclipperd_continuePath = PathClipperT_continuePath<double>;
-  _api.pathclipperd_continuePathData = PathClipperT_continuePathData<double>;
-  _api.pathclipperd_clipPath = PathClipperT_clipPath<double>;
+  fog_api.pathclipperd_measurePath = PathClipperT_measurePath<double>;
+  fog_api.pathclipperd_continuePath = PathClipperT_continuePath<double>;
+  fog_api.pathclipperd_continuePathData = PathClipperT_continuePathData<double>;
+  fog_api.pathclipperd_clipPath = PathClipperT_clipPath<double>;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

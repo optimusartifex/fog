@@ -25,7 +25,7 @@ namespace Fog {
 // [Typedefs]
 // ============================================================================
 
-// Prototype for the TLS destructor, which can be optionally used to cleanup
+// ThreadLocalDestructor prototyle which can be optionally used to cleanup
 // thread local storage on thread exit. The @c value argument is the data
 // stored by thread local.
 typedef void (*ThreadLocalDestructorFunc)(void* value);
@@ -45,7 +45,7 @@ struct FOG_NO_EXPORT ThreadLocal
 
   FOG_INLINE ~ThreadLocal()
   {
-    _api.threadlocal_destroy(_slot);
+    fog_api.threadlocal_destroy(_slot);
   }
 
   // --------------------------------------------------------------------------
@@ -59,7 +59,7 @@ struct FOG_NO_EXPORT ThreadLocal
 
   FOG_INLINE err_t create(ThreadLocalDestructorFunc dtor = NULL)
   {
-    return _api.threadlocal_create(&_slot, (void*)dtor);
+    return fog_api.threadlocal_create(&_slot, (void*)dtor);
   }
 
   // --------------------------------------------------------------------------
@@ -68,12 +68,12 @@ struct FOG_NO_EXPORT ThreadLocal
 
   FOG_INLINE void* get() const
   {
-    return _api.threadlocal_get(_slot);
+    return fog_api.threadlocal_get(_slot);
   }
 
   FOG_INLINE err_t set(void* p)
   {
-    return _api.threadlocal_set(_slot, p);
+    return fog_api.threadlocal_set(_slot, p);
   }
 
   // --------------------------------------------------------------------------

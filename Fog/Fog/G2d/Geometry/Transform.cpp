@@ -3649,68 +3649,68 @@ FOG_NO_EXPORT void Transform_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.transformf_create = TransformT_create<float>;
-  _api.transformf_update = TransformT_update<float>;
-  _api.transformf_transform = TransformF_transform;
-  _api.transformf_transform2 = TransformT_transform2<float>;
-  _api.transformf_multiply = TransformT_multiply<float, float>;
-  _api.transformf_invert = TransformT_invert<float>;
-  _api.transformf_getScaling = TransformT_getScaling<float>;
-  _api.transformf_getRotation = TransformT_getRotation<float>;
-  _api.transformf_getAverageScaling = TransformT_getAverageScaling<float>;
+  fog_api.transformf_create = TransformT_create<float>;
+  fog_api.transformf_update = TransformT_update<float>;
+  fog_api.transformf_transform = TransformF_transform;
+  fog_api.transformf_transform2 = TransformT_transform2<float>;
+  fog_api.transformf_multiply = TransformT_multiply<float, float>;
+  fog_api.transformf_invert = TransformT_invert<float>;
+  fog_api.transformf_getScaling = TransformT_getScaling<float>;
+  fog_api.transformf_getRotation = TransformT_getRotation<float>;
+  fog_api.transformf_getAverageScaling = TransformT_getAverageScaling<float>;
 
-  _api.transformf_mapPointF = TransformT_mapPointT<float, float>;
-  _api.transformf_mapPathF = TransformT_mapPathT<float, float>;
-  _api.transformf_mapPathDataF = TransformT_mapPathDataT<float, float>;
-  _api.transformf_mapBoxF = TransformT_mapBoxT<float, float>;
-  _api.transformf_mapVectorF = TransformT_mapVectorT<float, float>;
+  fog_api.transformf_mapPointF = TransformT_mapPointT<float, float>;
+  fog_api.transformf_mapPathF = TransformT_mapPathT<float, float>;
+  fog_api.transformf_mapPathDataF = TransformT_mapPathDataT<float, float>;
+  fog_api.transformf_mapBoxF = TransformT_mapBoxT<float, float>;
+  fog_api.transformf_mapVectorF = TransformT_mapVectorT<float, float>;
 
-  _api.transformd_create = TransformT_create<double>;
-  _api.transformd_update = TransformT_update<double>;
-  _api.transformd_transform = TransformD_transform;
-  _api.transformd_transform2 = TransformT_transform2<double>;
-  _api.transformd_multiply = TransformT_multiply<double, double>;
-  _api.transformd_invert = TransformT_invert<double>;
-  _api.transformd_getScaling = TransformT_getScaling<double>;
-  _api.transformd_getRotation = TransformT_getRotation<double>;
-  _api.transformd_getAverageScaling = TransformT_getAverageScaling<double>;
+  fog_api.transformd_create = TransformT_create<double>;
+  fog_api.transformd_update = TransformT_update<double>;
+  fog_api.transformd_transform = TransformD_transform;
+  fog_api.transformd_transform2 = TransformT_transform2<double>;
+  fog_api.transformd_multiply = TransformT_multiply<double, double>;
+  fog_api.transformd_invert = TransformT_invert<double>;
+  fog_api.transformd_getScaling = TransformT_getScaling<double>;
+  fog_api.transformd_getRotation = TransformT_getRotation<double>;
+  fog_api.transformd_getAverageScaling = TransformT_getAverageScaling<double>;
 
-  _api.transformd_mapPathF = TransformT_mapPathT<double, float>;
-  _api.transformd_mapPathD = TransformT_mapPathT<double, double>;
-  _api.transformd_mapPathDataF = TransformT_mapPathDataT<double, float>;
-  _api.transformd_mapPathDataD = TransformT_mapPathDataT<double, double>;
-  _api.transformd_mapBoxD = TransformT_mapBoxT<double, double>;
+  fog_api.transformd_mapPathF = TransformT_mapPathT<double, float>;
+  fog_api.transformd_mapPathD = TransformT_mapPathT<double, double>;
+  fog_api.transformd_mapPathDataF = TransformT_mapPathDataT<double, float>;
+  fog_api.transformd_mapPathDataD = TransformT_mapPathDataT<double, double>;
+  fog_api.transformd_mapBoxD = TransformT_mapBoxT<double, double>;
 
 #if defined(FOG_TRANSFORM_INIT_C)
-  _api.transformd_mapPointD = TransformT_mapPointT<double, double>;
-  _api.transformd_mapVectorD = TransformT_mapVectorT<double, double>;
+  fog_api.transformd_mapPointD = TransformT_mapPointT<double, double>;
+  fog_api.transformd_mapVectorD = TransformT_mapVectorT<double, double>;
 
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <float, float>;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <float, float>;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <float, float>;
 
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, float>;
-  _api.transformd_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, float>;
+  fog_api.transformd_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, float>;
 
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, double>;
-  _api.transformd_mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_IDENTITY   ] = TransformT_mapPointsT_Identity   <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_TRANSLATION] = TransformT_mapPointsT_Translation<double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_SCALING    ] = TransformT_mapPointsT_Scaling    <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_SWAP       ] = TransformT_mapPointsT_Swap       <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_ROTATION   ] = TransformT_mapPointsT_Affine     <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_AFFINE     ] = TransformT_mapPointsT_Affine     <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_PROJECTION ] = TransformT_mapPointsT_Projection <double, double>;
+  fog_api.transformd_mapPointsD[TRANSFORM_TYPE_DEGENERATE ] = TransformT_mapPointsT_Degenerate <double, double>;
 #endif // FOG_TRANSFORM_INIT_C
 
   // --------------------------------------------------------------------------
@@ -3725,8 +3725,8 @@ FOG_NO_EXPORT void Transform_init(void)
                                0.0f, 1.0f, 0.0f,
                                0.0f, 0.0f, 1.0f);
 
-  _api.transformf_oIdentity = &TransformF_identity;
-  _api.transformd_oIdentity = &TransformD_identity;
+  fog_api.transformf_oIdentity = &TransformF_identity;
+  fog_api.transformd_oIdentity = &TransformD_identity;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

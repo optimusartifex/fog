@@ -359,39 +359,39 @@ FOG_NO_EXPORT void Matrix_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.matrixf_ctor = MatrixT_ctor<float>;
-  _api.matrixf_ctorCopy = MatrixT_ctorCopy<float>;
-  _api.matrixf_ctorCreate = MatrixT_ctorCreate<float>;
-  _api.matrixf_dtor = MatrixT_dtor<float>;
-  _api.matrixf_detach = MatrixT_detach<float>;
-  _api.matrixf_create = MatrixT_create<float>;
-  _api.matrixf_resize = MatrixT_resize<float>;
-  _api.matrixf_getCell = MatrixT_getCell<float>;
-  _api.matrixf_setCell = MatrixT_setCell<float>;
-  _api.matrixf_fill = MatrixT_fill<float>;
-  _api.matrixf_reset = MatrixT_reset<float>;
-  _api.matrixf_copy = MatrixT_copy<float>;
-  _api.matrixf_eq = MatrixT_eq<float>;
+  fog_api.matrixf_ctor = MatrixT_ctor<float>;
+  fog_api.matrixf_ctorCopy = MatrixT_ctorCopy<float>;
+  fog_api.matrixf_ctorCreate = MatrixT_ctorCreate<float>;
+  fog_api.matrixf_dtor = MatrixT_dtor<float>;
+  fog_api.matrixf_detach = MatrixT_detach<float>;
+  fog_api.matrixf_create = MatrixT_create<float>;
+  fog_api.matrixf_resize = MatrixT_resize<float>;
+  fog_api.matrixf_getCell = MatrixT_getCell<float>;
+  fog_api.matrixf_setCell = MatrixT_setCell<float>;
+  fog_api.matrixf_fill = MatrixT_fill<float>;
+  fog_api.matrixf_reset = MatrixT_reset<float>;
+  fog_api.matrixf_copy = MatrixT_copy<float>;
+  fog_api.matrixf_eq = MatrixT_eq<float>;
 
-  _api.matrixf_dCreate = MatrixT_dCreate<float>;
-  _api.matrixf_dFree = MatrixT_dFree<float>;
+  fog_api.matrixf_dCreate = MatrixT_dCreate<float>;
+  fog_api.matrixf_dFree = MatrixT_dFree<float>;
 
-  _api.matrixd_ctor = MatrixT_ctor<double>;
-  _api.matrixd_ctorCopy = MatrixT_ctorCopy<double>;
-  _api.matrixd_ctorCreate = MatrixT_ctorCreate<double>;
-  _api.matrixd_dtor = MatrixT_dtor<double>;
-  _api.matrixd_detach = MatrixT_detach<double>;
-  _api.matrixd_create = MatrixT_create<double>;
-  _api.matrixd_resize = MatrixT_resize<double>;
-  _api.matrixd_getCell = MatrixT_getCell<double>;
-  _api.matrixd_setCell = MatrixT_setCell<double>;
-  _api.matrixd_fill = MatrixT_fill<double>;
-  _api.matrixd_reset = MatrixT_reset<double>;
-  _api.matrixd_copy = MatrixT_copy<double>;
-  _api.matrixd_eq = MatrixT_eq<double>;
+  fog_api.matrixd_ctor = MatrixT_ctor<double>;
+  fog_api.matrixd_ctorCopy = MatrixT_ctorCopy<double>;
+  fog_api.matrixd_ctorCreate = MatrixT_ctorCreate<double>;
+  fog_api.matrixd_dtor = MatrixT_dtor<double>;
+  fog_api.matrixd_detach = MatrixT_detach<double>;
+  fog_api.matrixd_create = MatrixT_create<double>;
+  fog_api.matrixd_resize = MatrixT_resize<double>;
+  fog_api.matrixd_getCell = MatrixT_getCell<double>;
+  fog_api.matrixd_setCell = MatrixT_setCell<double>;
+  fog_api.matrixd_fill = MatrixT_fill<double>;
+  fog_api.matrixd_reset = MatrixT_reset<double>;
+  fog_api.matrixd_copy = MatrixT_copy<double>;
+  fog_api.matrixd_eq = MatrixT_eq<double>;
 
-  _api.matrixd_dCreate = MatrixT_dCreate<double>;
-  _api.matrixd_dFree = MatrixT_dFree<double>;
+  fog_api.matrixd_dCreate = MatrixT_dCreate<double>;
+  fog_api.matrixd_dFree = MatrixT_dFree<double>;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -406,8 +406,8 @@ FOG_NO_EXPORT void Matrix_init(void)
   dd->reference.init(1);
   dd->vType = VAR_TYPE_MATRIXF | VAR_FLAG_NONE;
 
-  _api.matrixf_oEmpty = MatrixF_oEmpty.initCustom1(df);
-  _api.matrixd_oEmpty = MatrixD_oEmpty.initCustom1(dd);
+  fog_api.matrixf_oEmpty = MatrixF_oEmpty.initCustom1(df);
+  fog_api.matrixd_oEmpty = MatrixD_oEmpty.initCustom1(dd);
 }
 
 } // Fog namespace

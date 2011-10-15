@@ -55,32 +55,32 @@ struct FOG_NO_EXPORT ManagedStringW
 
   FOG_INLINE ManagedStringW()
   {
-    _api.managedstringw_ctor(this);
+    fog_api.managedstringw_ctor(this);
   }
 
   FOG_INLINE ManagedStringW(const ManagedStringW& other)
   {
-    _api.managedstringw_ctorCopy(this, &other);
+    fog_api.managedstringw_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE ManagedStringW(const Ascii8& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
-    _api.managedstringw_ctorStubA(this, &stub, options);
+    fog_api.managedstringw_ctorStubA(this, &stub, options);
   }
 
   explicit FOG_INLINE ManagedStringW(const StubW& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
-    _api.managedstringw_ctorStubW(this, &stub, options);
+    fog_api.managedstringw_ctorStubW(this, &stub, options);
   }
 
   explicit FOG_INLINE ManagedStringW(const StringW& str, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
-    _api.managedstringw_ctorStringW(this, &str, options);
+    fog_api.managedstringw_ctorStringW(this, &str, options);
   }
 
   FOG_INLINE ~ManagedStringW()
   {
-    _api.managedstringw_dtor(this);
+    fog_api.managedstringw_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -89,22 +89,22 @@ struct FOG_NO_EXPORT ManagedStringW
 
   FOG_INLINE err_t set(const Ascii8& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
-    return _api.managedstringw_setStubA(this, &stub, options);
+    return fog_api.managedstringw_setStubA(this, &stub, options);
   }
 
   FOG_INLINE err_t set(const StubW& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
-    return _api.managedstringw_setStubW(this, &stub, options);
+    return fog_api.managedstringw_setStubW(this, &stub, options);
   }
 
   FOG_INLINE err_t set(const StringW& str, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
-    return _api.managedstringw_setStringW(this, &str, options);
+    return fog_api.managedstringw_setStringW(this, &str, options);
   }
 
   FOG_INLINE err_t set(const ManagedStringW& str)
   {
-    return _api.managedstringw_setManaged(this, &str);
+    return fog_api.managedstringw_setManaged(this, &str);
   }
 
   // --------------------------------------------------------------------------
@@ -119,7 +119,7 @@ struct FOG_NO_EXPORT ManagedStringW
 
   FOG_INLINE void reset()
   {
-    _api.managedstringw_reset(this);
+    fog_api.managedstringw_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -157,17 +157,17 @@ struct FOG_NO_EXPORT ManagedStringW
 
   FOG_INLINE bool eq(const Ascii8& stub) const
   {
-    return _api.stringw_eqStubA(&_string, &stub);
+    return fog_api.stringw_eqStubA(&_string, &stub);
   }
 
   FOG_INLINE bool eq(const StubW& stub) const
   {
-    return _api.stringw_eqStubW(&_string, &stub);
+    return fog_api.stringw_eqStubW(&_string, &stub);
   }
 
   FOG_INLINE bool eq(const StringW& str) const
   {
-    return _api.stringw_eqStringW(&_string, &str);
+    return fog_api.stringw_eqStringW(&_string, &str);
   }
 
   FOG_INLINE bool eq(const ManagedStringW& other) const
@@ -186,7 +186,7 @@ struct FOG_NO_EXPORT ManagedStringW
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.managedstringw_eq;
+    return (EqFunc)fog_api.managedstringw_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -195,7 +195,7 @@ struct FOG_NO_EXPORT ManagedStringW
 
   static FOG_INLINE void cleanup()
   {
-    _api.managedstringw_cleanup();
+    fog_api.managedstringw_cleanup();
   }
 
   // --------------------------------------------------------------------------
@@ -271,13 +271,13 @@ struct FOG_NO_EXPORT ManagedStringCacheW
   //! @param name Optional name of this collection for loadable libraries.
   static FOG_INLINE ManagedStringCacheW* create(const char* sData, size_t sLength, size_t listLength)
   {
-    return _api.managedstringcachew_create(sData, sLength, listLength);
+    return fog_api.managedstringcachew_create(sData, sLength, listLength);
   }
 
   //! @brief Get global @ref ManagedStringCacheW.
   static FOG_INLINE ManagedStringCacheW* get()
   {
-    return _api.managedstringcachew_oInstance;
+    return fog_api.managedstringcachew_oInstance;
   }
 
   // --------------------------------------------------------------------------

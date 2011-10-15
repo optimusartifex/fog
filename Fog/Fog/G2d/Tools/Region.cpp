@@ -208,7 +208,7 @@ static void FOG_CDECL Region_ctorBox(Region* self, const BoxI* box)
   if (FOG_UNLIKELY(!box->isValid()))
     goto _Fail;
 
-  if (FOG_IS_NULL(d = _api.region_dCreateBox(1, box)))
+  if (FOG_IS_NULL(d = fog_api.region_dCreateBox(1, box)))
     goto _Fail;
 
   self->_d = d;
@@ -227,7 +227,7 @@ static void FOG_CDECL Region_ctorRect(Region* self, const RectI* rect)
     goto _Fail;
 
   box = *rect;
-  if (FOG_IS_NULL(d = _api.region_dCreateBox(1, &box)))
+  if (FOG_IS_NULL(d = fog_api.region_dCreateBox(1, &box)))
     goto _Fail;
 
   self->_d = d;
@@ -255,13 +255,13 @@ static err_t FOG_CDECL Region_detach(Region* self)
 
   if (d->length > 0)
   {
-    d = _api.region_dCreateRegion(d->length, d->data, d->length, &d->boundingBox);
+    d = fog_api.region_dCreateRegion(d->length, d->data, d->length, &d->boundingBox);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
   }
   else
   {
-    d = _api.region_dCreate(d->capacity);
+    d = fog_api.region_dCreate(d->capacity);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
@@ -283,14 +283,14 @@ static err_t FOG_CDECL Region_reserve(Region* self, size_t capacity)
   if (d->reference.get() > 1)
   {
 _Create:
-    RegionData* newd = _api.region_dCreateRegion(capacity, d->data, d->length, &d->boundingBox);
+    RegionData* newd = fog_api.region_dCreateRegion(capacity, d->data, d->length, &d->boundingBox);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&self->_d, newd)->release();
   }
   else if (d->capacity < capacity)
   {
-    RegionData* newd = _api.region_dRealloc(d, capacity);
+    RegionData* newd = fog_api.region_dRealloc(d, capacity);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
     self->_d = newd;
   }
@@ -311,7 +311,7 @@ static void FOG_CDECL Region_squeeze(Region* self)
 
   if (d->reference.get() > 1)
   {
-    RegionData* newd = _api.region_dCreate(length);
+    RegionData* newd = fog_api.region_dCreate(length);
     if (FOG_IS_NULL(newd)) return;
 
     newd->length = length;
@@ -322,7 +322,7 @@ static void FOG_CDECL Region_squeeze(Region* self)
   }
   else
   {
-    RegionData* newd = _api.region_dRealloc(d, length);
+    RegionData* newd = fog_api.region_dRealloc(d, length);
     if (FOG_IS_NULL(newd)) return;
     self->_d = newd;
   }
@@ -335,7 +335,7 @@ static err_t FOG_CDECL Region_prepare(Region* self, size_t count)
   if (d->reference.get() > 1 || d->capacity < count)
   {
 _Create:
-    RegionData* newd = _api.region_dCreate(count);
+    RegionData* newd = fog_api.region_dCreate(count);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
     atomicPtrXchg(&self->_d, newd)->release();
@@ -778,7 +778,7 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
 
   if (d->reference.get() != 1 || d->capacity < length)
   {
-    d = _api.region_dCreate(length);
+    d = fog_api.region_dCreate(length);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
   }
@@ -953,7 +953,7 @@ static err_t FOG_CDECL Region_combineAB(Region* dst,
 
   if (memOverlap || d->capacity < estimatedSize || d->reference.get() != 1)
   {
-    d = _api.region_dCreate(estimatedSize);
+    d = fog_api.region_dCreate(estimatedSize);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
@@ -985,7 +985,7 @@ static err_t FOG_CDECL Region_combineAB(Region* dst,
         newCapacity = Math::max<size_t>(64, newCapacity * 2); \
       \
       d->length = currentLength; \
-      RegionData* newd = _api.region_dRealloc(d, newCapacity); \
+      RegionData* newd = fog_api.region_dRealloc(d, newCapacity); \
       \
       if (FOG_IS_NULL(newd)) \
         goto _OutOfMemory; \
@@ -1728,7 +1728,7 @@ static err_t FOG_CDECL Region_combineRegionRegion(Region* dst, const Region* a, 
     }
 
     BoxI aBox(a_d->boundingBox);
-    return _api.region_combineBoxRegion(dst, &aBox, b, combineOp);
+    return fog_api.region_combineBoxRegion(dst, &aBox, b, combineOp);
   }
 
   if (bLength <= 1)
@@ -1751,7 +1751,7 @@ static err_t FOG_CDECL Region_combineRegionRegion(Region* dst, const Region* a, 
     }
 
     BoxI bBox(b_d->boundingBox);
-    return _api.region_combineRegionBox(dst, a, &bBox, combineOp);
+    return fog_api.region_combineRegionBox(dst, a, &bBox, combineOp);
   }
 
   FOG_ASSERT(aLength > 1);
@@ -1914,7 +1914,7 @@ static err_t FOG_CDECL Region_combineRegionBox(Region* dst, const Region* a, con
 
   // Run fast-paths when possible. The empty regions are handled too.
   if (a_d->length <= 1)
-    return _api.region_combineBoxBox(dst, &a_d->boundingBox, b, combineOp);
+    return fog_api.region_combineBoxBox(dst, &a_d->boundingBox, b, combineOp);
 
   switch (combineOp)
   {
@@ -2043,7 +2043,7 @@ static err_t FOG_CDECL Region_combineBoxRegion(Region* dst, const BoxI* a, const
 
   // Run fast-paths when possible. The empty regions are handled too.
   if (b_d->length <= 1)
-    return _api.region_combineBoxBox(dst, a, &b_d->boundingBox, combineOp);
+    return fog_api.region_combineBoxBox(dst, a, &b_d->boundingBox, combineOp);
 
   switch (combineOp)
   {
@@ -2510,12 +2510,12 @@ static err_t FOG_CDECL Region_translate(Region* dst, const Region* src, const Po
   if (saturate)
   {
     BoxI clipBox(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
-    return _api.region_translateAndClip(dst, src, pt, &clipBox);
+    return fog_api.region_translateAndClip(dst, src, pt, &clipBox);
   }
 
   if (d->reference.get() != 1 || d->capacity < length)
   {
-    d = _api.region_dCreate(length);
+    d = fog_api.region_dCreate(length);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
   }
@@ -2604,7 +2604,7 @@ static err_t FOG_CDECL Region_translateAndClip(Region* dst, const Region* src, c
 
   if (d->reference.get() != 1 || d->capacity < length)
   {
-    d = _api.region_dCreate(length);
+    d = fog_api.region_dCreate(length);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
   }
@@ -2860,7 +2860,7 @@ _Clear:
   requireNewData |= d->capacity < estimatedSize;
   if (requireNewData)
   {
-    d = _api.region_dCreate(estimatedSize);
+    d = fog_api.region_dCreate(estimatedSize);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
   }
@@ -3184,7 +3184,7 @@ static uint32_t FOG_CDECL Region_hitTestRect(const Region* self, const RectI* re
     return REGION_HIT_OUT;
 
   BoxI box(*rect);
-  return _api.region_hitTestBox(self, &box);
+  return fog_api.region_hitTestBox(self, &box);
 }
 
 // ============================================================================
@@ -3243,7 +3243,7 @@ static RegionData* FOG_CDECL Region_dCreate(size_t capacity)
 
 static RegionData* FOG_CDECL Region_dCreateBox(size_t capacity, const BoxI* box)
 {
-  RegionData* d = _api.region_dCreate(capacity);
+  RegionData* d = fog_api.region_dCreate(capacity);
   if (FOG_IS_NULL(d))
     return NULL;
 
@@ -3259,7 +3259,7 @@ static RegionData* FOG_CDECL Region_dCreateRegion(size_t capacity, const BoxI* d
   if (FOG_UNLIKELY(capacity < length))
     capacity = length;
 
-  RegionData* d = _api.region_dCreate(capacity);
+  RegionData* d = fog_api.region_dCreate(capacity);
   if (FOG_IS_NULL(d))
     return NULL;
 
@@ -3302,7 +3302,7 @@ static RegionData* FOG_CDECL Region_dAdopt(void* address, size_t capacity)
 static RegionData* FOG_CDECL Region_dAdoptBox(void* address, size_t capacity, const BoxI* box)
 {
   if (!box->isValid() || capacity == 0)
-    return _api.region_dAdopt(address, capacity);
+    return fog_api.region_dAdopt(address, capacity);
 
   RegionData* d = (RegionData*)address;
 
@@ -3322,7 +3322,7 @@ static RegionData* FOG_CDECL Region_dAdoptBox(void* address, size_t capacity, co
 static RegionData* FOG_CDECL Region_dAdoptRegion(void* address, size_t capacity, const BoxI* data, size_t length, const BoxI* bbox)
 {
   if (capacity < length)
-    return _api.region_dCreateRegion(length, data, length, bbox);
+    return fog_api.region_dCreateRegion(length, data, length, bbox);
 
   RegionData* d = (RegionData*)address;
 
@@ -3357,7 +3357,7 @@ static RegionData* FOG_CDECL Region_dRealloc(RegionData* d, size_t capacity)
   }
   else
   {
-    RegionData* newd = _api.region_dCreateRegion(capacity, d->data, d->length, &d->boundingBox);
+    RegionData* newd = fog_api.region_dCreateRegion(capacity, d->data, d->length, &d->boundingBox);
     if (FOG_IS_NULL(newd)) return newd;
 
     d->release();
@@ -3372,7 +3372,7 @@ static RegionData* FOG_CDECL Region_dCopy(const RegionData* d)
   if (!length)
     return Region_dEmpty->addRef();
 
-  RegionData* newd = _api.region_dCreate(length);
+  RegionData* newd = fog_api.region_dCreate(length);
   if (FOG_IS_NULL(newd)) return NULL;
 
   newd->length = length;
@@ -3521,50 +3521,50 @@ FOG_NO_EXPORT void Region_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.region_ctor = Region_ctor;
-  _api.region_ctorRegion = Region_ctorRegion;
-  _api.region_ctorBox = Region_ctorBox;
-  _api.region_ctorRect = Region_ctorRect;
-  _api.region_dtor = Region_dtor;
-  _api.region_detach = Region_detach;
-  _api.region_reserve = Region_reserve;
-  _api.region_squeeze = Region_squeeze;
-  _api.region_prepare = Region_prepare;
-  _api.region_getType = Region_getType;
-  _api.region_clear = Region_clear;
-  _api.region_reset = Region_reset;
-  _api.region_setRegion = Region_setRegion;
-  _api.region_setDeep = Region_setDeep;
-  _api.region_setBox = Region_setBox;
-  _api.region_setRect = Region_setRect;
-  _api.region_setBoxList = Region_setBoxList;
-  _api.region_setRectList = Region_setRectList;
-  _api.region_combineRegionRegion = Region_combineRegionRegion;
-  _api.region_combineRegionBox = Region_combineRegionBox;
-  _api.region_combineBoxRegion = Region_combineBoxRegion;
-  _api.region_combineBoxBox = Region_combineBoxBox;
-  _api.region_translate = Region_translate;
-  _api.region_translateAndClip = Region_translateAndClip;
-  _api.region_intersectAndClip = Region_intersectAndClip;
-  _api.region_hitTestPoint = Region_hitTestPoint;
-  _api.region_hitTestBox = Region_hitTestBox;
-  _api.region_hitTestRect = Region_hitTestRect;
-  _api.region_eq = Region_eq;
+  fog_api.region_ctor = Region_ctor;
+  fog_api.region_ctorRegion = Region_ctorRegion;
+  fog_api.region_ctorBox = Region_ctorBox;
+  fog_api.region_ctorRect = Region_ctorRect;
+  fog_api.region_dtor = Region_dtor;
+  fog_api.region_detach = Region_detach;
+  fog_api.region_reserve = Region_reserve;
+  fog_api.region_squeeze = Region_squeeze;
+  fog_api.region_prepare = Region_prepare;
+  fog_api.region_getType = Region_getType;
+  fog_api.region_clear = Region_clear;
+  fog_api.region_reset = Region_reset;
+  fog_api.region_setRegion = Region_setRegion;
+  fog_api.region_setDeep = Region_setDeep;
+  fog_api.region_setBox = Region_setBox;
+  fog_api.region_setRect = Region_setRect;
+  fog_api.region_setBoxList = Region_setBoxList;
+  fog_api.region_setRectList = Region_setRectList;
+  fog_api.region_combineRegionRegion = Region_combineRegionRegion;
+  fog_api.region_combineRegionBox = Region_combineRegionBox;
+  fog_api.region_combineBoxRegion = Region_combineBoxRegion;
+  fog_api.region_combineBoxBox = Region_combineBoxBox;
+  fog_api.region_translate = Region_translate;
+  fog_api.region_translateAndClip = Region_translateAndClip;
+  fog_api.region_intersectAndClip = Region_intersectAndClip;
+  fog_api.region_hitTestPoint = Region_hitTestPoint;
+  fog_api.region_hitTestBox = Region_hitTestBox;
+  fog_api.region_hitTestRect = Region_hitTestRect;
+  fog_api.region_eq = Region_eq;
 
 #if defined(FOG_OS_WINDOWS)
-  _api.region_hrgnFromRegion = Region_hrgnFromRegion;
-  _api.region_regionFromHRGN = Region_regionFromHRGN;
+  fog_api.region_hrgnFromRegion = Region_hrgnFromRegion;
+  fog_api.region_regionFromHRGN = Region_regionFromHRGN;
 #endif // FOG_OS_WINDOWS
 
-  _api.region_dCreate = Region_dCreate;
-  _api.region_dCreateBox = Region_dCreateBox;
-  _api.region_dCreateRegion = Region_dCreateRegion;
-  _api.region_dAdopt = Region_dAdopt;
-  _api.region_dAdoptBox = Region_dAdoptBox;
-  _api.region_dAdoptRegion = Region_dAdoptRegion;
-  _api.region_dRealloc = Region_dRealloc;
-  _api.region_dCopy = Region_dCopy;
-  _api.region_dFree = Region_dFree;
+  fog_api.region_dCreate = Region_dCreate;
+  fog_api.region_dCreateBox = Region_dCreateBox;
+  fog_api.region_dCreateRegion = Region_dCreateRegion;
+  fog_api.region_dAdopt = Region_dAdopt;
+  fog_api.region_dAdoptBox = Region_dAdoptBox;
+  fog_api.region_dAdoptRegion = Region_dAdoptRegion;
+  fog_api.region_dRealloc = Region_dRealloc;
+  fog_api.region_dCopy = Region_dCopy;
+  fog_api.region_dFree = Region_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -3575,7 +3575,7 @@ FOG_NO_EXPORT void Region_init(void)
   d = &Region_dEmpty;
   d->reference.init(1);
 
-  _api.region_oEmpty = Region_oEmpty.initCustom1(d);
+  fog_api.region_oEmpty = Region_oEmpty.initCustom1(d);
 
   d = &Region_dInfinite;
   d->reference.init(1);
@@ -3586,7 +3586,7 @@ FOG_NO_EXPORT void Region_init(void)
   d->boundingBox.setBox(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
   d->data[0].setBox(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 
-  _api.region_oInfinite = Region_oInfinite.initCustom1(d);
+  fog_api.region_oInfinite = Region_oInfinite.initCustom1(d);
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

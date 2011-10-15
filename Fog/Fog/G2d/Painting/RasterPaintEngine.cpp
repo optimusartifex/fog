@@ -150,7 +150,7 @@ static err_t FOG_CDECL RasterPaintEngine_release(Painter* self)
   engine->finalizing = true;
   fog_delete(engine);
 
-  self->_engine = _api.painter_getNullEngine();
+  self->_engine = fog_api.painter_getNullEngine();
   self->_vtable = self->_engine->vtable;
 
   return ERR_OK;
@@ -2073,7 +2073,7 @@ static err_t FOG_CDECL RasterPaintEngine_applyTransform(Painter* self, uint32_t 
   if ((engine->savedStateFlags & RASTER_STATE_TRANSFORM) == 0)
     engine->saveTransform();
 
-  err = _api.transformd_transform(&engine->userTransformD, transformOp, params);
+  err = fog_api.transformd_transform(&engine->userTransformD, transformOp, params);
 
   if (FOG_IS_ERROR(err))
     engine->userTransformD.reset();
@@ -4357,7 +4357,7 @@ static err_t FOG_CDECL RasterPaintEngine_beginImage(Painter* self, Image* image,
   return ERR_OK;
 
 _Fail:
-  self->_engine = _api.painter_getNullEngine();
+  self->_engine = fog_api.painter_getNullEngine();
   self->_vtable = self->_engine->vtable;
   return err;
 }
@@ -4393,7 +4393,7 @@ static err_t FOG_CDECL RasterPaintEngine_beginIBits(Painter* self, const ImageBi
   return ERR_OK;
 
 _Fail:
-  self->_engine = _api.painter_getNullEngine();
+  self->_engine = fog_api.painter_getNullEngine();
   self->_vtable = self->_engine->vtable;
   return err;
 }
@@ -4415,7 +4415,7 @@ static err_t FOG_CDECL RasterPaintEngine_switchToImage(Painter* self, Image* ima
   }
   else
   {
-    return _api.painter_beginImage(self, image, rect, NO_FLAGS);
+    return fog_api.painter_beginImage(self, image, rect, NO_FLAGS);
   }
 
 _Fail:
@@ -4437,7 +4437,7 @@ static err_t FOG_CDECL RasterPaintEngine_switchToIBits(Painter* self, const Imag
   if (deviceId == PAINT_DEVICE_RASTER)
     return reinterpret_cast<RasterPaintEngine*>(self->_engine)->switchTo(imageBits, NULL);
   else
-    return _api.painter_beginIBits(self, _imageBits, rect, NO_FLAGS);
+    return fog_api.painter_beginIBits(self, _imageBits, rect, NO_FLAGS);
 
 _Fail:
   self->end();
@@ -5769,11 +5769,11 @@ FOG_NO_EXPORT void RasterPaintEngine_init(void)
   // [Painter - API]
   // --------------------------------------------------------------------------
 
-  _api.painter_beginImage = RasterPaintEngine_beginImage;
-  _api.painter_beginIBits = RasterPaintEngine_beginIBits;
+  fog_api.painter_beginImage = RasterPaintEngine_beginImage;
+  fog_api.painter_beginIBits = RasterPaintEngine_beginIBits;
 
-  _api.painter_switchToImage = RasterPaintEngine_switchToImage;
-  _api.painter_switchToIBits = RasterPaintEngine_switchToIBits;
+  fog_api.painter_switchToImage = RasterPaintEngine_switchToImage;
+  fog_api.painter_switchToIBits = RasterPaintEngine_switchToIBits;
 
   // --------------------------------------------------------------------------
   // [RasterPaintEngine - VTable]

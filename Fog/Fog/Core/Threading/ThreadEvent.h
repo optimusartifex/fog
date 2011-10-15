@@ -13,9 +13,9 @@
 
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
-#include <Fog/Core/Threading/Lock.h>
-#include <Fog/Core/Threading/ThreadCondition.h>
-#include <pthread.h>
+# include <Fog/Core/Threading/Lock.h>
+# include <Fog/Core/Threading/ThreadCondition.h>
+# include <pthread.h>
 #endif // FOG_OS_POSIX
 
 namespace Fog {
@@ -27,50 +27,72 @@ namespace Fog {
 // [Fog::ThreadEvent]
 // ============================================================================
 
-//! @brief A ThreadEvent can be a useful thread synchronization tool when you
-//! want to allow one thread to wait for another thread to finish some work.
+//! @brief An event based synchronization.
 //!
-//! Use a @c ThreadEvent when you would otherwise use a @c Lock + @c ThreadCondition
-//! to protect a simple boolean value. However, if you find yourself using a
-//! ThreadEvent in conjunction with a Lock to wait for a more complex state
-//! change (e.g., for an item to be added to a queue), then you should probably
-//! be using a @c ThreadCondition instead of a @c ThreadEvent.
-//!
-//! NOTE: On Windows, this class provides a subset of the functionality afforded
-//! by a Windows event object.  This is intentional.  If you are writing Windows
-//! specific code and you need other features of a Windows event, then you might
-//! be better off just using an Windows event directly.
-struct FOG_API ThreadEvent
+//! @note There is slight difference betweens Windows threading implementation
+//! and POSIX one. The implementation of @c ThreadEvent and other threading
+//! classes were inspired by http://www.cs.wustl.edu/~schmidt/win32-cv-1.html
+//! and http://www.cs.wustl.edu/~schmidt/win32-cv-2.html articles. These cover
+//! the problematic and suggest default implementation for emulating Win32
+//! functionality on POSIX and vice versa. This implementation doesn't support
+//! @c PulseEvent(), the deprecated Win32 function.
+struct FOG_NO_EXPORT ThreadEvent
 {
-  //! If manual_reset is true, then to set the event state to non-signaled,
-  //! a consumer must call the @c reset() method.  If this parameter is false,
-  //! then the system automatically resets the event state to non-signaled after
-  //! a single waiting thread has been released.
-  ThreadEvent(bool manualReset = false, bool initiallySignaled = false);
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
-  //! WARNING: Destroying a ThreadEvent while threads are waiting on it is not
-  //! supported.  Doing so will cause crashes or other instability.
-  ~ThreadEvent();
+  //! @brief Create @c ThreadEvent.
+  FOG_INLINE ThreadEvent(bool manualReset = false, bool initialState = false)
+  {
+    fog_api.threadevent_ctor(this, manualReset, initialState);
+  }
 
-  //! Put the event in the un-signaled state.
-  void reset();
+  //! @brief Destroy @c ThreadEvent.
+  //!
+  //! @note Make sure that there is no object waiting for that event.
+  FOG_INLINE ~ThreadEvent()
+  {
+    fog_api.threadevent_dtor(this);
+  }
 
-  //! Put the event in the signaled state.  Causing any thread blocked on wait()
-  //! to be woken up.
-  void signal();
+  // --------------------------------------------------------------------------
+  // [Signal / Reset]
+  // --------------------------------------------------------------------------
 
-  //! Returns true if the event is in the signaled state, else false.  If this
-  //! is not a manual reset event, then this test will cause a reset.
-  bool isSignaled();
+  //! @brief Put the event in the signaled state.
+  FOG_INLINE void signal()
+  {
+    fog_api.threadevent_signal(this);
+  }
 
-  //! Wait indefinitely for the event to be signaled.  Returns true if the event
-  //! was signaled, else false is returned to indicate that waiting failed.
-  bool wait();
+  //! @brief Put the event in the un-signaled state.
+  FOG_INLINE void reset()
+  {
+    fog_api.threadevent_reset(this);
+  }
 
-  //! Wait up until max_time has passed for the event to be signaled.  Returns
-  //! true if the event was signaled.  If this method returns false, then it
-  //! does not necessarily mean that max_time was exceeded.
-  bool timedWait(const TimeDelta& maxTime);
+  // --------------------------------------------------------------------------
+  // [Wait]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get whether the event is in the signaled state.
+  FOG_INLINE bool isSignaled()
+  {
+    return fog_api.threadevent_isSignaled(this);
+  }
+
+  //! @brief Wait until the thread is signaled.
+  FOG_INLINE bool wait()
+  {
+    return fog_api.threadevent_wait(this, NULL);
+  }
+
+  //! @brief Wait max @a maxTime time until the thread is signaled.
+  FOG_INLINE bool wait(const TimeDelta& maxTime)
+  {
+    return fog_api.threadevent_wait(this, &maxTime);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -81,11 +103,15 @@ struct FOG_API ThreadEvent
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
-  // Needs to be listed first so it will be constructed first.
-  Lock _lock;
-  ThreadCondition _cvar;
-  bool _signaled;
-  bool _manualReset;
+  // We emulate the Windows EVENT functionality by using condition variable,
+  // lock, and two boolean state members.
+
+  Static<ThreadCondition> _cvar;
+  Static<Lock> _lock;
+
+  uint32_t _manualReset;
+  uint32_t _signaled;
+  size_t _waitingThreads;
 #endif // FOG_OS_POSIX
 
 private:

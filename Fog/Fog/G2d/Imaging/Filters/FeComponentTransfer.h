@@ -30,17 +30,17 @@ struct FOG_NO_EXPORT FeComponentTransfer : public FeBase
 
   FOG_INLINE FeComponentTransfer()
   {
-    _api.fecomponenttransfer_ctor(this);
+    fog_api.fecomponenttransfer_ctor(this);
   }
 
   FOG_INLINE FeComponentTransfer(const FeComponentTransfer& other)
   {
-    _api.fecomponenttransfer_ctorCopy(this, &other);
+    fog_api.fecomponenttransfer_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~FeComponentTransfer()
   {
-    _api.fecomponenttransfer_dtor(this);
+    fog_api.fecomponenttransfer_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -77,7 +77,7 @@ struct FOG_NO_EXPORT FeComponentTransfer : public FeBase
 
   FOG_INLINE void reset()
   {
-    _api.fecomponenttransfer_reset(this);
+    fog_api.fecomponenttransfer_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -86,7 +86,7 @@ struct FOG_NO_EXPORT FeComponentTransfer : public FeBase
 
   FOG_INLINE bool eq(const FeComponentTransfer& other) const
   {
-    return _api.fecomponenttransfer_eq(this, &other);
+    return fog_api.fecomponenttransfer_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -96,7 +96,7 @@ struct FOG_NO_EXPORT FeComponentTransfer : public FeBase
   //! @brief Assignment operator.
   FOG_INLINE FeComponentTransfer& operator=(const FeComponentTransfer& other)
   {
-    _api.fecomponenttransfer_copy(this, &other);
+    fog_api.fecomponenttransfer_copy(this, &other);
     return *this;
   }
 
@@ -121,12 +121,12 @@ struct FOG_NO_EXPORT FeComponentTransfer : public FeBase
 
   static FOG_INLINE bool eq(const FeComponentTransfer* a, const FeComponentTransfer* b)
   {
-    return _api.fecomponenttransfer_eq(a, b);
+    return fog_api.fecomponenttransfer_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.fecomponenttransfer_eq;
+    return (EqFunc)fog_api.fecomponenttransfer_eq;
   }
 
   // --------------------------------------------------------------------------

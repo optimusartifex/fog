@@ -91,25 +91,25 @@ const HashUntypedVTable HashVTable<KeyT, ItemT>::vtable =
 template<>
 struct HashVTable<StringA, StringA>
 {
-  static FOG_INLINE const HashUntypedVTable* getVTable() { return _api.hash_stringa_stringa_vTable; }
+  static FOG_INLINE const HashUntypedVTable* getVTable() { return fog_api.hash_stringa_stringa_vTable; }
 };
 
 template<>
 struct HashVTable<StringA, Var>
 {
-  static FOG_INLINE const HashUntypedVTable* getVTable() { return _api.hash_stringa_var_vTable; }
+  static FOG_INLINE const HashUntypedVTable* getVTable() { return fog_api.hash_stringa_var_vTable; }
 };
 
 template<>
 struct HashVTable<StringW, StringW>
 {
-  static FOG_INLINE const HashUntypedVTable* getVTable() { return _api.hash_stringw_stringw_vTable; }
+  static FOG_INLINE const HashUntypedVTable* getVTable() { return fog_api.hash_stringw_stringw_vTable; }
 };
 
 template<>
 struct HashVTable<StringW, Var>
 {
-  static FOG_INLINE const HashUntypedVTable* getVTable() { return _api.hash_stringw_var_vTable; }
+  static FOG_INLINE const HashUntypedVTable* getVTable() { return fog_api.hash_stringw_var_vTable; }
 };
 
 // ============================================================================
@@ -128,17 +128,17 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE void _ctor()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE void _ctorCopy(const HashUntyped& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE void _dtor()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<KeyT, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<KeyT, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -156,7 +156,7 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<KeyT, ItemT>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<KeyT, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -169,12 +169,12 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<KeyT, ItemT>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<KeyT, ItemT>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<KeyT, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<KeyT, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -183,12 +183,12 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<KeyT, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<KeyT, ItemT>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<KeyT, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<KeyT, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -197,13 +197,13 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE bool contains(const KeyT& key) const
   {
-    return _api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key) != NULL;
+    return fog_api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key) != NULL;
   }
 
   FOG_INLINE const ItemT& get(const KeyT& key, const ItemT& notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
+      fog_api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return *item;
@@ -214,7 +214,7 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const KeyT& key) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
+      fog_api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -222,7 +222,7 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const KeyT& key, const ItemT* notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
+      fog_api.hash_unknown_unknown_get(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -233,7 +233,7 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const KeyT& key)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_unknown_unknown_use(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
+      fog_api.hash_unknown_unknown_use(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -241,7 +241,7 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const KeyT& key, ItemT* notFound)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_unknown_unknown_use(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
+      fog_api.hash_unknown_unknown_use(this, HashVTable<KeyT, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -251,12 +251,12 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t put(const KeyT& key, const ItemT& item, bool replace = true)
   {
-    return _api.hash_unknown_unknown_put(this, HashVTable<KeyT, ItemT>::getVTable(), &key, &item, replace);
+    return fog_api.hash_unknown_unknown_put(this, HashVTable<KeyT, ItemT>::getVTable(), &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const KeyT& key)
   {
-    return _api.hash_unknown_unknown_remove(this, HashVTable<KeyT, ItemT>::getVTable(), &key);
+    return fog_api.hash_unknown_unknown_remove(this, HashVTable<KeyT, ItemT>::getVTable(), &key);
   }
 
   // --------------------------------------------------------------------------
@@ -265,7 +265,7 @@ struct HashImpl<KeyT, ItemT, 0> : public HashUntyped
 
   FOG_INLINE void _copy(const HashUntyped& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<KeyT, ItemT>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<KeyT, ItemT>::getVTable(), &other);
   }
 };
 
@@ -278,7 +278,7 @@ struct HashImpl<KeyT, ItemT, 1> : public HashImpl<KeyT, ItemT, 0>
 
   FOG_INLINE bool eq(const Hash<KeyT, ItemT>& other) const
   {
-    return _api.hash_unknown_unknown_eq(this, &other,
+    return fog_api.hash_unknown_unknown_eq(this, &other,
       HashVTable<KeyT, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
   }
 
@@ -295,7 +295,7 @@ struct HashImpl<KeyT, ItemT, 1> : public HashImpl<KeyT, ItemT, 0>
 
   static FOG_INLINE bool eq(const Hash<KeyT, ItemT>* a, const Hash<KeyT, ItemT>* b)
   {
-    return _api.hash_unknown_unknown_eq(a, b,
+    return fog_api.hash_unknown_unknown_eq(a, b,
       HashVTable<KeyT, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
   }
 };
@@ -398,12 +398,12 @@ struct HashIterator : public HashUntypedIterator
 
   FOG_INLINE bool start()
   {
-    return _api.hashiterator_start(this);
+    return fog_api.hashiterator_start(this);
   }
 
   FOG_INLINE bool next()
   {
-    return _api.hashiterator_next(this);
+    return fog_api.hashiterator_next(this);
   }
 };
 

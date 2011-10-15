@@ -46,7 +46,7 @@ static void FOG_CDECL ImageConverter_ctorCreate(ImageConverter* self,
   const ImagePalette* srcPalette)
 {
   self->_d = NULL;
-  _api.imageconverter_create(self, dstFormatDescription, srcFormatDescription, dither, dstPalette, srcPalette);
+  fog_api.imageconverter_create(self, dstFormatDescription, srcFormatDescription, dither, dstPalette, srcPalette);
 }
 
 static void FOG_CDECL ImageConverter_dtor(ImageConverter* self)
@@ -85,7 +85,7 @@ static err_t FOG_CDECL ImageConverter_create(ImageConverter* self,
 
   if (d == NULL || !d->reference.deref())
   {
-    d = _api.imageconverter_dCreate();
+    d = fog_api.imageconverter_dCreate();
     self->_d = d;
 
     if (FOG_IS_NULL(d))
@@ -195,7 +195,7 @@ static err_t FOG_CDECL ImageConverter_create(ImageConverter* self,
 
 _Fail:
   if (d != NULL && d->reference.deref())
-    _api.imageconverter_dFree(d);
+    fog_api.imageconverter_dFree(d);
 
   self->_d = ImageConverter_dNull->addRef();
   return err;
@@ -320,20 +320,20 @@ FOG_NO_EXPORT void ImageConverter_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.imageconverter_ctor = ImageConverter_ctor;
-  _api.imageconverter_ctorCopy = ImageConverter_ctorCopy;
-  _api.imageconverter_ctorCreate = ImageConverter_ctorCreate;
-  _api.imageconverter_dtor = ImageConverter_dtor;
+  fog_api.imageconverter_ctor = ImageConverter_ctor;
+  fog_api.imageconverter_ctorCopy = ImageConverter_ctorCopy;
+  fog_api.imageconverter_ctorCreate = ImageConverter_ctorCreate;
+  fog_api.imageconverter_dtor = ImageConverter_dtor;
 
-  _api.imageconverter_create = ImageConverter_create;
-  _api.imageconverter_createDithered8 = ImageConverter_createDithered8;
-  _api.imageconverter_reset = ImageConverter_reset;
+  fog_api.imageconverter_create = ImageConverter_create;
+  fog_api.imageconverter_createDithered8 = ImageConverter_createDithered8;
+  fog_api.imageconverter_reset = ImageConverter_reset;
 
-  _api.imageconverter_blitLine = ImageConverter_blitLine;
-  _api.imageconverter_blitRect = ImageConverter_blitRect;
+  fog_api.imageconverter_blitLine = ImageConverter_blitLine;
+  fog_api.imageconverter_blitRect = ImageConverter_blitRect;
 
-  _api.imageconverter_dCreate = ImageConverter_dCreate;
-  _api.imageconverter_dFree = ImageConverter_dFree;
+  fog_api.imageconverter_dCreate = ImageConverter_dCreate;
+  fog_api.imageconverter_dFree = ImageConverter_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -348,7 +348,7 @@ FOG_NO_EXPORT void ImageConverter_init(void)
   d->dstPalette->_d = NULL;
   d->srcPalette->_d = NULL;
 
-  _api.imageconverter_oNull = ImageConverter_oNull.initCustom1(d);
+  fog_api.imageconverter_oNull = ImageConverter_oNull.initCustom1(d);
 }
 
 } // Fog namespace

@@ -37,7 +37,7 @@ struct FOG_NO_EXPORT MatrixDataF
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.matrixf_dFree(this);
+      fog_api.matrixf_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT MatrixDataD
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.matrixd_dFree(this);
+      fog_api.matrixd_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -151,17 +151,17 @@ struct FOG_NO_EXPORT MatrixF
 
   FOG_INLINE MatrixF()
   {
-    _api.matrixf_ctor(this);
+    fog_api.matrixf_ctor(this);
   }
 
   FOG_NO_EXPORT MatrixF(const MatrixF& other)
   {
-    _api.matrixf_ctorCopy(this, &other);
+    fog_api.matrixf_ctorCopy(this, &other);
   }
 
   FOG_NO_EXPORT MatrixF(const SizeI& size, const float* data = NULL)
   {
-    _api.matrixf_ctorCreate(this, &size, data);
+    fog_api.matrixf_ctorCreate(this, &size, data);
   }
 
   explicit FOG_INLINE MatrixF(MatrixDataF* d)
@@ -171,7 +171,7 @@ struct FOG_NO_EXPORT MatrixF
 
   FOG_NO_EXPORT ~MatrixF()
   {
-    _api.matrixf_dtor(this);
+    fog_api.matrixf_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -186,7 +186,7 @@ struct FOG_NO_EXPORT MatrixF
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
-  FOG_INLINE err_t _detach() { return _api.matrixf_detach(this); }
+  FOG_INLINE err_t _detach() { return fog_api.matrixf_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -234,32 +234,32 @@ struct FOG_NO_EXPORT MatrixF
 
   FOG_INLINE err_t create(const SizeI& size, const float* data = NULL)
   {
-    return _api.matrixf_create(this, &size, data);
+    return fog_api.matrixf_create(this, &size, data);
   }
 
   FOG_INLINE err_t resize(const SizeI& size, float value = 0.0f)
   {
-    return _api.matrixf_resize(this, &size, value);
+    return fog_api.matrixf_resize(this, &size, value);
   }
 
   FOG_INLINE void reset()
   {
-    _api.matrixf_reset(this);
+    fog_api.matrixf_reset(this);
   }
 
   FOG_INLINE float getCell(int x, int y) const
   {
-    return _api.matrixf_getCell(this, x, y);
+    return fog_api.matrixf_getCell(this, x, y);
   }
 
   FOG_INLINE err_t setCell(int x, int y, float value)
   {
-    return _api.matrixf_setCell(this, x, y, value);
+    return fog_api.matrixf_setCell(this, x, y, value);
   }
 
   FOG_INLINE err_t fill(const RectI& rect, float value)
   {
-    return _api.matrixf_fill(this, &rect, value);
+    return fog_api.matrixf_fill(this, &rect, value);
   }
 
   // --------------------------------------------------------------------------
@@ -268,12 +268,12 @@ struct FOG_NO_EXPORT MatrixF
 
   FOG_INLINE MatrixF& operator=(const MatrixF& other)
   {
-    _api.matrixf_copy(this, &other);
+    fog_api.matrixf_copy(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const MatrixF& other) const { return  _api.matrixf_eq(this, &other); }
-  FOG_INLINE bool operator!=(const MatrixF& other) const { return !_api.matrixf_eq(this, &other); }
+  FOG_INLINE bool operator==(const MatrixF& other) const { return  fog_api.matrixf_eq(this, &other); }
+  FOG_INLINE bool operator!=(const MatrixF& other) const { return !fog_api.matrixf_eq(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Instance]
@@ -281,7 +281,7 @@ struct FOG_NO_EXPORT MatrixF
 
   static FOG_INLINE const MatrixF& empty()
   {
-    return *_api.matrixf_oEmpty;
+    return *fog_api.matrixf_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -290,12 +290,12 @@ struct FOG_NO_EXPORT MatrixF
 
   static FOG_INLINE bool eq(const MatrixF* a, const MatrixF* b)
   {
-    return _api.matrixf_eq(a, b);
+    return fog_api.matrixf_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.matrixf_eq;
+    return (EqFunc)fog_api.matrixf_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -304,12 +304,12 @@ struct FOG_NO_EXPORT MatrixF
 
   static FOG_INLINE MatrixDataF* _dCreate(const SizeI& size, const float* data = NULL)
   {
-    return _api.matrixf_dCreate(&size, data);
+    return fog_api.matrixf_dCreate(&size, data);
   }
 
   static FOG_INLINE void _dFree(MatrixDataF* d)
   {
-    _api.matrixf_dFree(d);
+    fog_api.matrixf_dFree(d);
   }
 
   // --------------------------------------------------------------------------
@@ -332,17 +332,17 @@ struct FOG_NO_EXPORT MatrixD
 
   FOG_INLINE MatrixD()
   {
-    _api.matrixd_ctor(this);
+    fog_api.matrixd_ctor(this);
   }
 
   FOG_NO_EXPORT MatrixD(const MatrixD& other)
   {
-    _api.matrixd_ctorCopy(this, &other);
+    fog_api.matrixd_ctorCopy(this, &other);
   }
 
   FOG_NO_EXPORT MatrixD(const SizeI& size, const double* data = NULL)
   {
-    _api.matrixd_ctorCreate(this, &size, data);
+    fog_api.matrixd_ctorCreate(this, &size, data);
   }
 
   explicit FOG_INLINE MatrixD(MatrixDataD* d)
@@ -352,7 +352,7 @@ struct FOG_NO_EXPORT MatrixD
 
   FOG_NO_EXPORT ~MatrixD()
   {
-    _api.matrixd_dtor(this);
+    fog_api.matrixd_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -367,7 +367,7 @@ struct FOG_NO_EXPORT MatrixD
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
   //! @copydoc Doxygen::Implicit::_detach().
-  FOG_INLINE err_t _detach() { return _api.matrixd_detach(this); }
+  FOG_INLINE err_t _detach() { return fog_api.matrixd_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -415,32 +415,32 @@ struct FOG_NO_EXPORT MatrixD
 
   FOG_INLINE err_t create(const SizeI& size, const double* data = NULL)
   {
-    return _api.matrixd_create(this, &size, data);
+    return fog_api.matrixd_create(this, &size, data);
   }
 
   FOG_INLINE err_t resize(const SizeI& size, double value = 0.0f)
   {
-    return _api.matrixd_resize(this, &size, value);
+    return fog_api.matrixd_resize(this, &size, value);
   }
 
   FOG_INLINE void reset()
   {
-    _api.matrixd_reset(this);
+    fog_api.matrixd_reset(this);
   }
 
   FOG_INLINE double getCell(int x, int y) const
   {
-    return _api.matrixd_getCell(this, x, y);
+    return fog_api.matrixd_getCell(this, x, y);
   }
 
   FOG_INLINE err_t setCell(int x, int y, double value)
   {
-    return _api.matrixd_setCell(this, x, y, value);
+    return fog_api.matrixd_setCell(this, x, y, value);
   }
 
   FOG_INLINE err_t fill(const RectI& rect, double value)
   {
-    return _api.matrixd_fill(this, &rect, value);
+    return fog_api.matrixd_fill(this, &rect, value);
   }
 
   // --------------------------------------------------------------------------
@@ -449,12 +449,12 @@ struct FOG_NO_EXPORT MatrixD
 
   FOG_INLINE MatrixD& operator=(const MatrixD& other)
   {
-    _api.matrixd_copy(this, &other);
+    fog_api.matrixd_copy(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const MatrixD& other) const { return  _api.matrixd_eq(this, &other); }
-  FOG_INLINE bool operator!=(const MatrixD& other) const { return !_api.matrixd_eq(this, &other); }
+  FOG_INLINE bool operator==(const MatrixD& other) const { return  fog_api.matrixd_eq(this, &other); }
+  FOG_INLINE bool operator!=(const MatrixD& other) const { return !fog_api.matrixd_eq(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Instance]
@@ -462,7 +462,7 @@ struct FOG_NO_EXPORT MatrixD
 
   static FOG_INLINE const MatrixD& empty()
   {
-    return *_api.matrixd_oEmpty;
+    return *fog_api.matrixd_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -471,12 +471,12 @@ struct FOG_NO_EXPORT MatrixD
 
   static FOG_INLINE bool eq(const MatrixD* a, const MatrixD* b)
   {
-    return _api.matrixd_eq(a, b);
+    return fog_api.matrixd_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.matrixd_eq;
+    return (EqFunc)fog_api.matrixd_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -485,12 +485,12 @@ struct FOG_NO_EXPORT MatrixD
 
   static FOG_INLINE MatrixDataD* _dCreate(const SizeI& size, const double* data = NULL)
   {
-    return _api.matrixd_dCreate(&size, data);
+    return fog_api.matrixd_dCreate(&size, data);
   }
 
   static FOG_INLINE void _dFree(MatrixDataD* d)
   {
-    _api.matrixd_dFree(d);
+    fog_api.matrixd_dFree(d);
   }
 
   // --------------------------------------------------------------------------

@@ -490,13 +490,13 @@ FOG_NO_EXPORT void FileMapping_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.filemapping_ctor = FileMapping_ctor;
-  _api.filemapping_ctorCopy = FileMapping_ctorCopy;
-  _api.filemapping_dtor = FileMapping_dtor;
-  _api.filemapping_open = FileMapping_open;
-  _api.filemapping_close = FileMapping_close;
-  _api.filemapping_copy = FileMapping_copy;
-  _api.filemapping_dRelease = FileMapping_dRelease;
+  fog_api.filemapping_ctor = FileMapping_ctor;
+  fog_api.filemapping_ctorCopy = FileMapping_ctorCopy;
+  fog_api.filemapping_dtor = FileMapping_dtor;
+  fog_api.filemapping_open = FileMapping_open;
+  fog_api.filemapping_close = FileMapping_close;
+  fog_api.filemapping_copy = FileMapping_copy;
+  fog_api.filemapping_dRelease = FileMapping_dRelease;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -504,7 +504,7 @@ FOG_NO_EXPORT void FileMapping_init(void)
 
   FileMappingData* d = &FileMapping_dNull;
   d->reference.init(1);
-  d->fileName.initCustom1(_api.stringw_oEmpty->_d);
+  d->fileName.initCustom1(fog_api.stringw_oEmpty->_d);
 }
 
 } // Fog namespace

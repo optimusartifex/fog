@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT ColorStopListData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.colorstoplist_dFree(this);
+      fog_api.colorstoplist_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -123,12 +123,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE ColorStopList()
   {
-    _api.colorstoplist_ctor(this);
+    fog_api.colorstoplist_ctor(this);
   }
 
   FOG_INLINE ColorStopList(const ColorStopList& other)
   {
-    _api.colorstoplist_ctorCopy(this, &other);
+    fog_api.colorstoplist_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE ColorStopList(ColorStopListData* d) :
@@ -138,7 +138,7 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE ~ColorStopList()
   {
-    _api.colorstoplist_dtor(this);
+    fog_api.colorstoplist_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -158,12 +158,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE err_t reserve(size_t n)
   {
-    return _api.colorstoplist_reserve(this, n);
+    return fog_api.colorstoplist_reserve(this, n);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.colorstoplist_squeeze(this);
+    fog_api.colorstoplist_squeeze(this);
   }
 
   // --------------------------------------------------------------------------
@@ -185,17 +185,17 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE err_t setList(const ColorStopList& other)
   {
-    return _api.colorstoplist_copy(this, &other);
+    return fog_api.colorstoplist_copy(this, &other);
   }
 
   FOG_INLINE err_t setList(const List<ColorStop>& stops)
   {
-    return _api.colorstoplist_setData(this, stops.getData(), stops.getLength());
+    return fog_api.colorstoplist_setData(this, stops.getData(), stops.getLength());
   }
 
   FOG_INLINE err_t setList(const ColorStop* stops, size_t length)
   {
-    return _api.colorstoplist_setData(this, stops, length);
+    return fog_api.colorstoplist_setData(this, stops, length);
   }
 
   // --------------------------------------------------------------------------
@@ -204,12 +204,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE bool isOpaque() const
   {
-    return _api.colorstoplist_isOpaque(this);
+    return fog_api.colorstoplist_isOpaque(this);
   }
 
   FOG_INLINE bool isOpaqueARGB32() const
   {
-    return _api.colorstoplist_isOpaqueARGB32(this);
+    return fog_api.colorstoplist_isOpaqueARGB32(this);
   }
 
   // --------------------------------------------------------------------------
@@ -218,12 +218,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE void clear()
   {
-    _api.colorstoplist_clear(this);
+    fog_api.colorstoplist_clear(this);
   }
 
   FOG_INLINE void reset()
   {
-    _api.colorstoplist_reset(this);
+    fog_api.colorstoplist_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -232,47 +232,47 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE err_t add(float offset, const Argb32& argb32)
   {
-    return _api.colorstoplist_addArgb32(this, offset, &argb32);
+    return fog_api.colorstoplist_addArgb32(this, offset, &argb32);
   }
 
   FOG_INLINE err_t add(float offset, const Color& color)
   {
-    return _api.colorstoplist_addColor(this, offset, &color);
+    return fog_api.colorstoplist_addColor(this, offset, &color);
   }
 
   FOG_INLINE err_t add(const ColorStop& stop)
   {
-    return _api.colorstoplist_addColorStop(this, &stop);
+    return fog_api.colorstoplist_addColorStop(this, &stop);
   }
 
   FOG_INLINE err_t remove(float offset)
   {
-    return _api.colorstoplist_removeOffset(this, offset);
+    return fog_api.colorstoplist_removeOffset(this, offset);
   }
 
   FOG_INLINE err_t remove(const ColorStop& stop)
   {
-    return _api.colorstoplist_removeStop(this, &stop);
+    return fog_api.colorstoplist_removeStop(this, &stop);
   }
 
   FOG_INLINE err_t removeAt(size_t index)
   {
-    return _api.colorstoplist_removeAt(this, index);
+    return fog_api.colorstoplist_removeAt(this, index);
   }
 
   FOG_INLINE err_t removeRange(const Range& range)
   {
-    return _api.colorstoplist_removeRange(this, &range);
+    return fog_api.colorstoplist_removeRange(this, &range);
   }
 
   FOG_INLINE err_t removeRange(const IntervalF& interval)
   {
-    return _api.colorstoplist_removeInterval(this, &interval);
+    return fog_api.colorstoplist_removeInterval(this, &interval);
   }
 
   FOG_INLINE size_t indexOf(float offset) const
   {
-    return _api.colorstoplist_indexOfOffset(this, offset);
+    return fog_api.colorstoplist_indexOfOffset(this, offset);
   }
 
   // --------------------------------------------------------------------------
@@ -281,7 +281,7 @@ struct FOG_NO_EXPORT ColorStopList
 
   FOG_INLINE bool eq(const ColorStopList& other) const
   {
-    return _api.colorstoplist_eq(this, &other);
+    return fog_api.colorstoplist_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -300,7 +300,7 @@ struct FOG_NO_EXPORT ColorStopList
 
   static FOG_INLINE const ColorStopList& empty()
   {
-    return *_api.colorstoplist_oEmpty;
+    return *fog_api.colorstoplist_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -309,12 +309,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   static FOG_INLINE bool eq(const ColorStopList* a, const ColorStopList* b)
   {
-    return _api.colorstoplist_eq(a, b);
+    return fog_api.colorstoplist_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.colorstoplist_eq;
+    return (EqFunc)fog_api.colorstoplist_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -323,12 +323,12 @@ struct FOG_NO_EXPORT ColorStopList
 
   static FOG_INLINE ColorStopListData* _dCreate(size_t capacity)
   {
-    return _api.colorstoplist_dCreate(capacity);
+    return fog_api.colorstoplist_dCreate(capacity);
   }
 
   static FOG_INLINE void _dFree(ColorStopListData* d)
   {
-    return _api.colorstoplist_dFree(d);
+    return fog_api.colorstoplist_dFree(d);
   }
 
   // --------------------------------------------------------------------------

@@ -248,10 +248,10 @@ FOG_NO_EXPORT void ThreadLocal_init(void)
   for (uint i = 1; i < THREAD_LOCAL_SIZE; i++)
     ThreadLocal_dtorList[i] = dummy;
 
-  _api.threadlocal_create = ThreadLocal_create;
-  _api.threadlocal_destroy = ThreadLocal_destroy;
-  _api.threadlocal_get = ThreadLocal_get;
-  _api.threadlocal_set = ThreadLocal_set;
+  fog_api.threadlocal_create = ThreadLocal_create;
+  fog_api.threadlocal_destroy = ThreadLocal_destroy;
+  fog_api.threadlocal_get = ThreadLocal_get;
+  fog_api.threadlocal_set = ThreadLocal_set;
 }
 
 FOG_NO_EXPORT void ThreadLocal_fini(void)
@@ -288,10 +288,10 @@ FOG_NO_EXPORT void ThreadLocal_init(void)
   for (uint i = 1; i < THREAD_LOCAL_SIZE; i++)
     ThreadLocal_dtorList[i] = dummy;
 
-  _api.threadlocal_create = ThreadLocal_create;
-  _api.threadlocal_destroy = ThreadLocal_destroy;
-  _api.threadlocal_get = ThreadLocal_get;
-  _api.threadlocal_set = ThreadLocal_set;
+  fog_api.threadlocal_create = ThreadLocal_create;
+  fog_api.threadlocal_destroy = ThreadLocal_destroy;
+  fog_api.threadlocal_get = ThreadLocal_get;
+  fog_api.threadlocal_set = ThreadLocal_set;
 }
 
 FOG_NO_EXPORT void ThreadLocal_fini(void)

@@ -484,7 +484,7 @@ static err_t FOG_CDECL List_Simple_detach(ListUntyped* self, size_t szItemT)
     return ERR_OK;
 
   size_t length = d->length;
-  ListUntypedData* newd = (ListUntypedData*)_api.list_untyped_dCreate(szItemT, length);
+  ListUntypedData* newd = (ListUntypedData*)fog_api.list_untyped_dCreate(szItemT, length);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -530,7 +530,7 @@ static err_t FOG_CDECL List_Simple_reserve(ListUntyped* self, size_t szItemT, si
     }
   }
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(szItemT, capacity);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(szItemT, capacity);
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -551,7 +551,7 @@ static void* FOG_CDECL List_Simple_prepare(ListUntyped* self, size_t szItemT, ui
   {
     if (length == 0)
     {
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
       return self->_d->data;
     }
 
@@ -592,7 +592,7 @@ static void* FOG_CDECL List_Simple_prepare(ListUntyped* self, size_t szItemT, ui
 
     if (d->reference.get() > 1 || d->capacity - d->end < length)
     {
-      if (_api.list_simple_growRight(self, szItemT, length) != ERR_OK)
+      if (fog_api.list_simple_growRight(self, szItemT, length) != ERR_OK)
         return NULL;
 
       d = self->_d;
@@ -626,7 +626,7 @@ static err_t FOG_CDECL List_Simple_growLeft(ListUntyped* self, size_t szItemT, s
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(szItemT, optimal);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(szItemT, optimal);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -665,7 +665,7 @@ static err_t FOG_CDECL List_Simple_growRight(ListUntyped* self, size_t szItemT, 
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(szItemT, optimal);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(szItemT, optimal);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -692,7 +692,7 @@ static void FOG_CDECL List_Simple_squeeze(ListUntyped* self, size_t szItemT)
   if (capacity - length == 0 || (capacity - length) * szItemT < 64)
     return;
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(szItemT, length);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(szItemT, length);
   if (FOG_IS_NULL(newd))
     return;
 
@@ -720,7 +720,7 @@ static err_t FOG_CDECL List_Simple_setAt(ListUntyped* self, size_t szItemT, size
 
   if (d->reference.get() > 1)
   {
-    FOG_RETURN_ON_ERROR(_api.list_simple_detach(self, szItemT));
+    FOG_RETURN_ON_ERROR(fog_api.list_simple_detach(self, szItemT));
     d = self->_d;
   }
 
@@ -773,14 +773,14 @@ static err_t FOG_CDECL List_Simple_opList(ListUntyped* self, size_t szItemT, uin
   if (!Range::fit(rStart, rEnd, sLength, srcRange))
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
   if (self == src)
-    return _api.list_simple_slice(self, szItemT, srcRange);
+    return fog_api.list_simple_slice(self, szItemT, srcRange);
 
-  char* p = reinterpret_cast<char*>(_api.list_simple_prepare(self, szItemT, cntOp, sLength));
+  char* p = reinterpret_cast<char*>(fog_api.list_simple_prepare(self, szItemT, cntOp, sLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -795,11 +795,11 @@ static err_t FOG_CDECL List_Simple_opData(ListUntyped* self, size_t szItemT, uin
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
-  char* p = reinterpret_cast<char*>(_api.list_simple_prepare(self, szItemT, cntOp, dataLength));
+  char* p = reinterpret_cast<char*>(fog_api.list_simple_prepare(self, szItemT, cntOp, dataLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -819,7 +819,7 @@ static err_t FOG_CDECL List_Simple_appendItem(ListUntyped* self, size_t szItemT,
 
   if (d->reference.get() > 1 || d->end == d->capacity)
   {
-    FOG_RETURN_ON_ERROR(_api.list_simple_growRight(self, szItemT, 1));
+    FOG_RETURN_ON_ERROR(fog_api.list_simple_growRight(self, szItemT, 1));
     d = self->_d;
   }
 
@@ -844,7 +844,7 @@ static err_t FOG_CDECL List_Simple_insertItem(ListUntyped* self, size_t szItemT,
 
   size_t length = d->length;
   if (index >= d->length)
-    return _api.list_simple_appendItem(self, szItemT, item);
+    return fog_api.list_simple_appendItem(self, szItemT, item);
 
   if (d->reference.get() == 1)
   {
@@ -937,7 +937,7 @@ static err_t FOG_CDECL List_Simple_remove(ListUntyped* self, size_t szItemT, con
 
   if (rLength == length)
   {
-    _api.list_simple_clear(self);
+    fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
@@ -1001,7 +1001,7 @@ static err_t FOG_CDECL List_Simple_replace(ListUntyped* self, size_t szItemT, co
   size_t dStart, dEnd;
 
   if (!Range::fit(dStart, dEnd, before, range) && dStart >= before)
-    return _api.list_simple_opList(self, szItemT, CONTAINER_OP_APPEND, src, srcRange);
+    return fog_api.list_simple_opList(self, szItemT, CONTAINER_OP_APPEND, src, srcRange);
 
   size_t sLength = sEnd - sStart;
 
@@ -1145,7 +1145,7 @@ static err_t FOG_CDECL List_Simple_slice(ListUntyped* self, size_t szItemT, cons
 
   if (!Range::fit(sStart, sEnd, length, range))
   {
-    _api.list_simple_clear(self);
+    fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
@@ -1188,13 +1188,13 @@ static err_t FOG_CDECL List_Simple_slice(ListUntyped* self, size_t szItemT, cons
 
 static err_t FOG_CDECL List_Simple_sort(ListUntyped* self, size_t szItemT, uint32_t sortOrder, CompareFunc compareFunc)
 {
-  FOG_RETURN_ON_ERROR(_api.list_simple_detach(self, szItemT));
+  FOG_RETURN_ON_ERROR(fog_api.list_simple_detach(self, szItemT));
   return ListDetached_sort(self, szItemT, sortOrder, compareFunc);
 }
 
 static err_t FOG_CDECL List_Simple_sortEx(ListUntyped* self, size_t szItemT, uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
 {
-  FOG_RETURN_ON_ERROR(_api.list_simple_detach(self, szItemT));
+  FOG_RETURN_ON_ERROR(fog_api.list_simple_detach(self, szItemT));
   return ListDetached_sortEx(self, szItemT, sortOrder, compareFunc, data);
 }
 
@@ -1213,7 +1213,7 @@ static err_t FOG_CDECL List_Simple_swapItems(ListUntyped* self, size_t szItemT, 
 
   if (d->reference.get() > 1)
   {
-    FOG_RETURN_ON_ERROR(_api.list_simple_detach(self, szItemT));
+    FOG_RETURN_ON_ERROR(fog_api.list_simple_detach(self, szItemT));
     d = self->_d;
   }
 
@@ -1329,7 +1329,7 @@ static err_t FOG_CDECL List_Unknown_detach(ListUntyped* self, const ListUntypedV
     return ERR_OK;
 
   size_t length = d->length;
-  ListUntypedData* newd = (ListUntypedData*)_api.list_untyped_dCreate(v->szItemT, length);
+  ListUntypedData* newd = (ListUntypedData*)fog_api.list_untyped_dCreate(v->szItemT, length);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -1385,7 +1385,7 @@ static err_t FOG_CDECL List_Unknown_reserve(ListUntyped* self, const ListUntyped
     }
   }
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(v->szItemT, capacity);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(v->szItemT, capacity);
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -1416,7 +1416,7 @@ static void* FOG_CDECL List_Unknown_prepare(ListUntyped* self, const ListUntyped
   {
     if (length == 0)
     {
-      _api.list_unknown_clear(self, v);
+      fog_api.list_unknown_clear(self, v);
       return self->_d->data;
     }
 
@@ -1458,7 +1458,7 @@ static void* FOG_CDECL List_Unknown_prepare(ListUntyped* self, const ListUntyped
 
     if (d->reference.get() > 1 || d->capacity - d->end < length)
     {
-      if (_api.list_unknown_growRight(self, v, length) != ERR_OK)
+      if (fog_api.list_unknown_growRight(self, v, length) != ERR_OK)
         return NULL;
 
       d = self->_d;
@@ -1479,7 +1479,7 @@ static void* FOG_CDECL List_Unknown_prepareAppendItem(ListUntyped* self, const L
 
   if (d->reference.get() > 1 || d->end == d->capacity)
   {
-    if (_api.list_unknown_growRight(self, v, 1) != ERR_OK)
+    if (fog_api.list_unknown_growRight(self, v, 1) != ERR_OK)
       return NULL;
     d = self->_d;
   }
@@ -1500,7 +1500,7 @@ static void* FOG_CDECL List_Unknown_prepareInsertItem(ListUntyped* self, const L
 
   size_t length = d->length;
   if (index >= d->length)
-    return _api.list_unknown_prepareAppendItem(self, v);
+    return fog_api.list_unknown_prepareAppendItem(self, v);
 
   if (d->reference.get() == 1)
   {
@@ -1600,7 +1600,7 @@ static err_t FOG_CDECL List_Unknown_growLeft(ListUntyped* self, const ListUntype
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(v->szItemT, optimal);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(v->szItemT, optimal);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -1649,7 +1649,7 @@ static err_t FOG_CDECL List_Unknown_growRight(ListUntyped* self, const ListUntyp
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(v->szItemT, optimal);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(v->szItemT, optimal);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -1686,7 +1686,7 @@ static void FOG_CDECL List_Unknown_squeeze(ListUntyped* self, const ListUntypedV
   if (capacity - length == 0 || (capacity - length) * v->szItemT < 64)
     return;
 
-  ListUntypedData* newd = _api.list_untyped_dCreate(v->szItemT, length);
+  ListUntypedData* newd = fog_api.list_untyped_dCreate(v->szItemT, length);
   if (FOG_IS_NULL(newd))
     return;
 
@@ -1755,14 +1755,14 @@ static err_t FOG_CDECL List_Unknown_opList(ListUntyped* self, const ListUntypedV
   if (!Range::fit(rStart, rEnd, sLength, srcRange))
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_unknown_clear(self, v);
+      fog_api.list_unknown_clear(self, v);
     return ERR_OK;
   }
 
   if (self == src)
-    return _api.list_unknown_slice(self, v, srcRange);
+    return fog_api.list_unknown_slice(self, v, srcRange);
 
-  char* p = reinterpret_cast<char*>(_api.list_unknown_prepare(self, v, cntOp, sLength));
+  char* p = reinterpret_cast<char*>(fog_api.list_unknown_prepare(self, v, cntOp, sLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -1777,11 +1777,11 @@ static err_t FOG_CDECL List_Unknown_opData(ListUntyped* self, const ListUntypedV
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_unknown_clear(self, v);
+      fog_api.list_unknown_clear(self, v);
     return ERR_OK;
   }
 
-  char* p = reinterpret_cast<char*>(_api.list_unknown_prepare(self, v, cntOp, dataLength));
+  char* p = reinterpret_cast<char*>(fog_api.list_unknown_prepare(self, v, cntOp, dataLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -1807,7 +1807,7 @@ static err_t FOG_CDECL List_Unknown_remove(ListUntyped* self, const ListUntypedV
   size_t rLength = rEnd - rStart;
   if (rLength == length)
   {
-    _api.list_unknown_clear(self, v);
+    fog_api.list_unknown_clear(self, v);
     return ERR_OK;
   }
 
@@ -1872,7 +1872,7 @@ static err_t FOG_CDECL List_Unknown_replace(ListUntyped* self, const ListUntyped
   size_t dStart, dEnd;
 
   if (!Range::fit(dStart, dEnd, before, range) && dStart >= before)
-    return _api.list_unknown_opList(self, v, CONTAINER_OP_APPEND, src, srcRange);
+    return fog_api.list_unknown_opList(self, v, CONTAINER_OP_APPEND, src, srcRange);
 
   size_t sLength = sEnd - sStart;
 
@@ -2035,7 +2035,7 @@ static err_t FOG_CDECL List_Unknown_slice(ListUntyped* self, const ListUntypedVT
 
   if (!Range::fit(rStart, rEnd, length, range))
   {
-    _api.list_unknown_clear(self, v);
+    fog_api.list_unknown_clear(self, v);
     return ERR_OK;
   }
 
@@ -2081,13 +2081,13 @@ static err_t FOG_CDECL List_Unknown_slice(ListUntyped* self, const ListUntypedVT
 
 static err_t FOG_CDECL List_Unknown_sort(ListUntyped* self, const ListUntypedVTable* v, uint32_t sortOrder, CompareFunc compareFunc)
 {
-  FOG_RETURN_ON_ERROR(_api.list_unknown_detach(self, v));
+  FOG_RETURN_ON_ERROR(fog_api.list_unknown_detach(self, v));
   return ListDetached_sort(self, v->szItemT, sortOrder, compareFunc);
 }
 
 static err_t FOG_CDECL List_Unknown_sortEx(ListUntyped* self, const ListUntypedVTable* v, uint32_t sortOrder, CompareExFunc compareFunc, const void* data)
 {
-  FOG_RETURN_ON_ERROR(_api.list_unknown_detach(self, v));
+  FOG_RETURN_ON_ERROR(fog_api.list_unknown_detach(self, v));
   return ListDetached_sortEx(self, v->szItemT, sortOrder, compareFunc, data);
 }
 
@@ -2117,11 +2117,11 @@ static err_t FOG_CDECL List_Float_opListD(ListUntyped* self, uint32_t cntOp, con
   if (!Range::fit(rStart, rEnd, sLength, srcRange))
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
-  float* p = reinterpret_cast<float*>(_api.list_simple_prepare(self, sizeof(float), cntOp, sLength));
+  float* p = reinterpret_cast<float*>(fog_api.list_simple_prepare(self, sizeof(float), cntOp, sLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -2136,11 +2136,11 @@ static err_t FOG_CDECL List_Float_opDataD(ListUntyped* self, uint32_t cntOp, con
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
-  float* p = reinterpret_cast<float*>(_api.list_simple_prepare(self, sizeof(float), cntOp, dataLength));
+  float* p = reinterpret_cast<float*>(fog_api.list_simple_prepare(self, sizeof(float), cntOp, dataLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -2165,11 +2165,11 @@ static err_t FOG_CDECL List_Double_opListF(ListUntyped* self, uint32_t cntOp, co
   if (!Range::fit(rStart, rEnd, sLength, srcRange))
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
-  double* p = reinterpret_cast<double*>(_api.list_simple_prepare(self, sizeof(double), cntOp, sLength));
+  double* p = reinterpret_cast<double*>(fog_api.list_simple_prepare(self, sizeof(double), cntOp, sLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -2184,11 +2184,11 @@ static err_t FOG_CDECL List_Double_opDataF(ListUntyped* self, uint32_t cntOp, co
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
-      _api.list_simple_clear(self);
+      fog_api.list_simple_clear(self);
     return ERR_OK;
   }
 
-  double* p = reinterpret_cast<double*>(_api.list_simple_prepare(self, sizeof(double), cntOp, dataLength));
+  double* p = reinterpret_cast<double*>(fog_api.list_simple_prepare(self, sizeof(double), cntOp, dataLength));
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -3025,208 +3025,208 @@ FOG_NO_EXPORT void List_init(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.list_untyped_ctor = List_ctor;
-  _api.list_untyped_ctorCopy = List_ctorCopy;
+  fog_api.list_untyped_ctor = List_ctor;
+  fog_api.list_untyped_ctorCopy = List_ctorCopy;
 
-  _api.list_untyped_indexOf_4B = List_indexOf_4B<1>;
-  _api.list_untyped_indexOf_8B = List_indexOf_8B<1>;
-  _api.list_untyped_indexOf_16B = List_indexOf_16B<1>;
+  fog_api.list_untyped_indexOf_4B = List_indexOf_4B<1>;
+  fog_api.list_untyped_indexOf_8B = List_indexOf_8B<1>;
+  fog_api.list_untyped_indexOf_16B = List_indexOf_16B<1>;
 
-  _api.list_untyped_lastIndexOf_4B = List_indexOf_4B<-1>;
-  _api.list_untyped_lastIndexOf_8B = List_indexOf_8B<-1>;
-  _api.list_untyped_lastIndexOf_16B = List_indexOf_16B<-1>;
+  fog_api.list_untyped_lastIndexOf_4B = List_indexOf_4B<-1>;
+  fog_api.list_untyped_lastIndexOf_8B = List_indexOf_8B<-1>;
+  fog_api.list_untyped_lastIndexOf_16B = List_indexOf_16B<-1>;
 
-  _api.list_untyped_binaryEq = List_Untyped_binaryEq;
-  _api.list_untyped_customEq = List_Untyped_customEq;
+  fog_api.list_untyped_binaryEq = List_Untyped_binaryEq;
+  fog_api.list_untyped_customEq = List_Untyped_customEq;
 
-  _api.list_untyped_dCreate = List_dCreate;
+  fog_api.list_untyped_dCreate = List_dCreate;
 
-  _api.list_simple_ctorSlice = List_Simple_ctorSlice;
-  _api.list_simple_dtor = List_Simple_dtor;
+  fog_api.list_simple_ctorSlice = List_Simple_ctorSlice;
+  fog_api.list_simple_dtor = List_Simple_dtor;
 
-  _api.list_simple_detach = List_Simple_detach;
-  _api.list_simple_reserve = List_Simple_reserve;
-  _api.list_simple_prepare = List_Simple_prepare;
-  _api.list_simple_growLeft = List_Simple_growLeft;
-  _api.list_simple_growRight = List_Simple_growRight;
-  _api.list_simple_squeeze = List_Simple_squeeze;
+  fog_api.list_simple_detach = List_Simple_detach;
+  fog_api.list_simple_reserve = List_Simple_reserve;
+  fog_api.list_simple_prepare = List_Simple_prepare;
+  fog_api.list_simple_growLeft = List_Simple_growLeft;
+  fog_api.list_simple_growRight = List_Simple_growRight;
+  fog_api.list_simple_squeeze = List_Simple_squeeze;
 
-  _api.list_simple_setAt    = List_Simple_setAt<1>;
-  _api.list_simple_setAt_4x = List_Simple_setAt<4>;
+  fog_api.list_simple_setAt    = List_Simple_setAt<1>;
+  fog_api.list_simple_setAt_4x = List_Simple_setAt<4>;
 
-  _api.list_simple_clear = List_Simple_clear;
-  _api.list_simple_reset = List_Simple_reset;
+  fog_api.list_simple_clear = List_Simple_clear;
+  fog_api.list_simple_reset = List_Simple_reset;
 
-  _api.list_simple_opList = List_Simple_opList;
-  _api.list_simple_opData = List_Simple_opData;
+  fog_api.list_simple_opList = List_Simple_opList;
+  fog_api.list_simple_opData = List_Simple_opData;
 
-  _api.list_simple_appendItem    = List_Simple_appendItem<1>;
-  _api.list_simple_appendItem_4x = List_Simple_appendItem<4>;
+  fog_api.list_simple_appendItem    = List_Simple_appendItem<1>;
+  fog_api.list_simple_appendItem_4x = List_Simple_appendItem<4>;
 
-  _api.list_simple_insertItem    = List_Simple_insertItem<1>;
-  _api.list_simple_insertItem_4x = List_Simple_insertItem<4>;
+  fog_api.list_simple_insertItem    = List_Simple_insertItem<1>;
+  fog_api.list_simple_insertItem_4x = List_Simple_insertItem<4>;
 
-  _api.list_simple_remove = List_Simple_remove;
-  _api.list_simple_replace = List_Simple_replace;
-  _api.list_simple_slice = List_Simple_slice;
+  fog_api.list_simple_remove = List_Simple_remove;
+  fog_api.list_simple_replace = List_Simple_replace;
+  fog_api.list_simple_slice = List_Simple_slice;
 
-  _api.list_simple_sort = List_Simple_sort;
-  _api.list_simple_sortEx = List_Simple_sortEx;
-  _api.list_simple_swapItems    = List_Simple_swapItems<1>;
-  _api.list_simple_swapItems_4x = List_Simple_swapItems<4>;
+  fog_api.list_simple_sort = List_Simple_sort;
+  fog_api.list_simple_sortEx = List_Simple_sortEx;
+  fog_api.list_simple_swapItems    = List_Simple_swapItems<1>;
+  fog_api.list_simple_swapItems_4x = List_Simple_swapItems<4>;
 
-  _api.list_simple_copy = List_Simple_copy;
+  fog_api.list_simple_copy = List_Simple_copy;
 
-  _api.list_simple_dRelease = List_Simple_dRelease;
-  _api.list_simple_dFree = List_Simple_dFree;
+  fog_api.list_simple_dRelease = List_Simple_dRelease;
+  fog_api.list_simple_dFree = List_Simple_dFree;
 
-  _api.list_unknown_ctorSlice = List_Unknown_ctorSlice;
-  _api.list_unknown_dtor = List_Unknown_dtor;
+  fog_api.list_unknown_ctorSlice = List_Unknown_ctorSlice;
+  fog_api.list_unknown_dtor = List_Unknown_dtor;
 
-  _api.list_unknown_detach = List_Unknown_detach;
-  _api.list_unknown_reserve = List_Unknown_reserve;
-  _api.list_unknown_prepare = List_Unknown_prepare;
-  _api.list_unknown_prepareAppendItem = List_Unknown_prepareAppendItem;
-  _api.list_unknown_prepareInsertItem = List_Unknown_prepareInsertItem;
-  _api.list_unknown_growLeft = List_Unknown_growLeft;
-  _api.list_unknown_growRight = List_Unknown_growRight;
-  _api.list_unknown_squeeze = List_Unknown_squeeze;
+  fog_api.list_unknown_detach = List_Unknown_detach;
+  fog_api.list_unknown_reserve = List_Unknown_reserve;
+  fog_api.list_unknown_prepare = List_Unknown_prepare;
+  fog_api.list_unknown_prepareAppendItem = List_Unknown_prepareAppendItem;
+  fog_api.list_unknown_prepareInsertItem = List_Unknown_prepareInsertItem;
+  fog_api.list_unknown_growLeft = List_Unknown_growLeft;
+  fog_api.list_unknown_growRight = List_Unknown_growRight;
+  fog_api.list_unknown_squeeze = List_Unknown_squeeze;
 
-  _api.list_unknown_clear = List_Unknown_clear;
-  _api.list_unknown_reset = List_Unknown_reset;
+  fog_api.list_unknown_clear = List_Unknown_clear;
+  fog_api.list_unknown_reset = List_Unknown_reset;
 
-  _api.list_unknown_opList = List_Unknown_opList;
-  _api.list_unknown_opData = List_Unknown_opData;
+  fog_api.list_unknown_opList = List_Unknown_opList;
+  fog_api.list_unknown_opData = List_Unknown_opData;
 
-  _api.list_unknown_remove = List_Unknown_remove;
-  _api.list_unknown_replace = List_Unknown_replace;
-  _api.list_unknown_slice = List_Unknown_slice;
+  fog_api.list_unknown_remove = List_Unknown_remove;
+  fog_api.list_unknown_replace = List_Unknown_replace;
+  fog_api.list_unknown_slice = List_Unknown_slice;
 
-  _api.list_unknown_sort = List_Unknown_sort;
-  _api.list_unknown_sortEx = List_Unknown_sortEx;
+  fog_api.list_unknown_sort = List_Unknown_sort;
+  fog_api.list_unknown_sortEx = List_Unknown_sortEx;
 
-  _api.list_unknown_copy = List_Unknown_copy;
+  fog_api.list_unknown_copy = List_Unknown_copy;
 
-  _api.list_unknown_dRelease = List_Unknown_dRelease;
-  _api.list_unknown_dFree = List_Unknown_dFree;
+  fog_api.list_unknown_dRelease = List_Unknown_dRelease;
+  fog_api.list_unknown_dFree = List_Unknown_dFree;
 
-  _api.list_float_opListD = List_Float_opListD;
-  _api.list_float_opDataD = List_Float_opDataD;
+  fog_api.list_float_opListD = List_Float_opListD;
+  fog_api.list_float_opDataD = List_Float_opDataD;
 
-  _api.list_double_opListF = List_Double_opListF;
-  _api.list_double_opDataF = List_Double_opDataF;
+  fog_api.list_double_opListF = List_Double_opListF;
+  fog_api.list_double_opDataF = List_Double_opDataF;
 
-  _api.list_stringa_ctor = List_StringT_ctor<char>;
-  _api.list_stringa_ctorSlice = List_StringT_ctorSlice<char>;
-  _api.list_stringa_dtor = List_StringT_dtor<char>;
+  fog_api.list_stringa_ctor = List_StringT_ctor<char>;
+  fog_api.list_stringa_ctorSlice = List_StringT_ctorSlice<char>;
+  fog_api.list_stringa_dtor = List_StringT_dtor<char>;
 
-  _api.list_stringa_detach = List_StringT_detach<char>;
-  _api.list_stringa_reserve = List_StringT_reserve<char>;
-  _api.list_stringa_growLeft = List_StringT_growLeft<char>;
-  _api.list_stringa_growRight = List_StringT_growRight<char>;
-  _api.list_stringa_squeeze = List_StringT_squeeze<char>;
+  fog_api.list_stringa_detach = List_StringT_detach<char>;
+  fog_api.list_stringa_reserve = List_StringT_reserve<char>;
+  fog_api.list_stringa_growLeft = List_StringT_growLeft<char>;
+  fog_api.list_stringa_growRight = List_StringT_growRight<char>;
+  fog_api.list_stringa_squeeze = List_StringT_squeeze<char>;
 
-  _api.list_stringa_setAtStubA = List_StringA_setAtStubA;
-  _api.list_stringa_setAtStringA = List_StringA_setAtStringA;
+  fog_api.list_stringa_setAtStubA = List_StringA_setAtStubA;
+  fog_api.list_stringa_setAtStringA = List_StringA_setAtStringA;
 
-  _api.list_stringa_clear = List_StringT_clear<char>;
-  _api.list_stringa_reset = List_StringT_reset<char>;
+  fog_api.list_stringa_clear = List_StringT_clear<char>;
+  fog_api.list_stringa_reset = List_StringT_reset<char>;
 
-  _api.list_stringa_opList = List_StringT_opList<char>;
+  fog_api.list_stringa_opList = List_StringT_opList<char>;
 
-  _api.list_stringa_appendStubA = List_StringA_appendStubA;
-  _api.list_stringa_appendStringA = List_StringA_appendStringA;
+  fog_api.list_stringa_appendStubA = List_StringA_appendStubA;
+  fog_api.list_stringa_appendStringA = List_StringA_appendStringA;
 
-  _api.list_stringa_insertStubA = List_StringA_insertStubA;
-  _api.list_stringa_insertStringA = List_StringA_insertStringA;
+  fog_api.list_stringa_insertStubA = List_StringA_insertStubA;
+  fog_api.list_stringa_insertStringA = List_StringA_insertStringA;
 
-  _api.list_stringa_remove = List_StringT_remove<char>;
-  _api.list_stringa_replace = List_StringT_replace<char>;
-  _api.list_stringa_slice = List_StringT_slice<char>;
+  fog_api.list_stringa_remove = List_StringT_remove<char>;
+  fog_api.list_stringa_replace = List_StringT_replace<char>;
+  fog_api.list_stringa_slice = List_StringT_slice<char>;
 
-  _api.list_stringa_indexOfStubA = List_StringT_indexOfStub<char, char>;
-  _api.list_stringa_indexOfStringA = List_StringT_indexOfString<char, char>;
+  fog_api.list_stringa_indexOfStubA = List_StringT_indexOfStub<char, char>;
+  fog_api.list_stringa_indexOfStringA = List_StringT_indexOfString<char, char>;
 
-  _api.list_stringa_lastIndexOfStubA = List_StringT_lastIndexOfStub<char, char>;
-  _api.list_stringa_lastIndexOfStringA = List_StringT_lastIndexOfString<char, char>;
+  fog_api.list_stringa_lastIndexOfStubA = List_StringT_lastIndexOfStub<char, char>;
+  fog_api.list_stringa_lastIndexOfStringA = List_StringT_lastIndexOfString<char, char>;
 
-  _api.list_stringa_sort = List_StringT_sort<char>;
-  _api.list_stringa_sortEx = List_StringT_sortEx<char>;
-  _api.list_stringa_swapItems = List_StringT_swapItems<char>;
+  fog_api.list_stringa_sort = List_StringT_sort<char>;
+  fog_api.list_stringa_sortEx = List_StringT_sortEx<char>;
+  fog_api.list_stringa_swapItems = List_StringT_swapItems<char>;
 
-  _api.list_stringw_ctor = List_StringT_ctor<CharW>;
-  _api.list_stringw_ctorSlice = List_StringT_ctorSlice<CharW>;
-  _api.list_stringw_dtor = List_StringT_dtor<CharW>;
+  fog_api.list_stringw_ctor = List_StringT_ctor<CharW>;
+  fog_api.list_stringw_ctorSlice = List_StringT_ctorSlice<CharW>;
+  fog_api.list_stringw_dtor = List_StringT_dtor<CharW>;
 
-  _api.list_stringw_detach = List_StringT_detach<CharW>;
-  _api.list_stringw_reserve = List_StringT_reserve<CharW>;
-  _api.list_stringw_growLeft = List_StringT_growLeft<CharW>;
-  _api.list_stringw_growRight = List_StringT_growRight<CharW>;
-  _api.list_stringw_squeeze = List_StringT_squeeze<CharW>;
+  fog_api.list_stringw_detach = List_StringT_detach<CharW>;
+  fog_api.list_stringw_reserve = List_StringT_reserve<CharW>;
+  fog_api.list_stringw_growLeft = List_StringT_growLeft<CharW>;
+  fog_api.list_stringw_growRight = List_StringT_growRight<CharW>;
+  fog_api.list_stringw_squeeze = List_StringT_squeeze<CharW>;
 
-  _api.list_stringw_setAtStubA = List_StringW_setAtStubA;
-  _api.list_stringw_setAtStubW = List_StringW_setAtStubW;
-  _api.list_stringw_setAtStringW = List_StringW_setAtStringW;
+  fog_api.list_stringw_setAtStubA = List_StringW_setAtStubA;
+  fog_api.list_stringw_setAtStubW = List_StringW_setAtStubW;
+  fog_api.list_stringw_setAtStringW = List_StringW_setAtStringW;
 
-  _api.list_stringw_clear = List_StringT_clear<CharW>;
-  _api.list_stringw_reset = List_StringT_reset<CharW>;
+  fog_api.list_stringw_clear = List_StringT_clear<CharW>;
+  fog_api.list_stringw_reset = List_StringT_reset<CharW>;
 
-  _api.list_stringw_opList = List_StringT_opList<CharW>;
+  fog_api.list_stringw_opList = List_StringT_opList<CharW>;
 
-  _api.list_stringw_appendStubA = List_StringW_appendStubA;
-  _api.list_stringw_appendStubW = List_StringW_appendStubW;
-  _api.list_stringw_appendStringW = List_StringW_appendStringW;
+  fog_api.list_stringw_appendStubA = List_StringW_appendStubA;
+  fog_api.list_stringw_appendStubW = List_StringW_appendStubW;
+  fog_api.list_stringw_appendStringW = List_StringW_appendStringW;
 
-  _api.list_stringw_insertStubA = List_StringW_insertStubA;
-  _api.list_stringw_insertStubW = List_StringW_insertStubW;
-  _api.list_stringw_insertStringW = List_StringW_insertStringW;
+  fog_api.list_stringw_insertStubA = List_StringW_insertStubA;
+  fog_api.list_stringw_insertStubW = List_StringW_insertStubW;
+  fog_api.list_stringw_insertStringW = List_StringW_insertStringW;
 
-  _api.list_stringw_remove = List_StringT_remove<CharW>;
-  _api.list_stringw_replace = List_StringT_replace<CharW>;
-  _api.list_stringw_slice = List_StringT_slice<CharW>;
+  fog_api.list_stringw_remove = List_StringT_remove<CharW>;
+  fog_api.list_stringw_replace = List_StringT_replace<CharW>;
+  fog_api.list_stringw_slice = List_StringT_slice<CharW>;
 
-  _api.list_stringw_indexOfStubA = List_StringT_indexOfStub<CharW, char>;
-  _api.list_stringw_indexOfStubW = List_StringT_indexOfStub<CharW, CharW>;
-  _api.list_stringw_indexOfStringW = List_StringT_indexOfString<CharW, CharW>;
+  fog_api.list_stringw_indexOfStubA = List_StringT_indexOfStub<CharW, char>;
+  fog_api.list_stringw_indexOfStubW = List_StringT_indexOfStub<CharW, CharW>;
+  fog_api.list_stringw_indexOfStringW = List_StringT_indexOfString<CharW, CharW>;
 
-  _api.list_stringw_lastIndexOfStubA = List_StringT_lastIndexOfStub<CharW, char>;
-  _api.list_stringw_lastIndexOfStubW = List_StringT_lastIndexOfStub<CharW, CharW>;
-  _api.list_stringw_lastIndexOfStringW = List_StringT_lastIndexOfString<CharW, CharW>;
+  fog_api.list_stringw_lastIndexOfStubA = List_StringT_lastIndexOfStub<CharW, char>;
+  fog_api.list_stringw_lastIndexOfStubW = List_StringT_lastIndexOfStub<CharW, CharW>;
+  fog_api.list_stringw_lastIndexOfStringW = List_StringT_lastIndexOfString<CharW, CharW>;
 
-  _api.list_stringw_sort = List_StringT_sort<CharW>;
-  _api.list_stringw_sortEx = List_StringT_sortEx<CharW>;
-  _api.list_stringw_swapItems = List_StringT_swapItems<CharW>;
+  fog_api.list_stringw_sort = List_StringT_sort<CharW>;
+  fog_api.list_stringw_sortEx = List_StringT_sortEx<CharW>;
+  fog_api.list_stringw_swapItems = List_StringT_swapItems<CharW>;
 
-  _api.list_var_ctor = List_Var_ctor;
-  _api.list_var_ctorSlice = List_Var_ctorSlice;
-  _api.list_var_dtor = List_Var_dtor;
+  fog_api.list_var_ctor = List_Var_ctor;
+  fog_api.list_var_ctorSlice = List_Var_ctorSlice;
+  fog_api.list_var_dtor = List_Var_dtor;
 
-  _api.list_var_detach = List_Var_detach;
-  _api.list_var_reserve = List_Var_reserve;
-  _api.list_var_growLeft = List_Var_growLeft;
-  _api.list_var_growRight = List_Var_growRight;
-  _api.list_var_squeeze = List_Var_squeeze;
+  fog_api.list_var_detach = List_Var_detach;
+  fog_api.list_var_reserve = List_Var_reserve;
+  fog_api.list_var_growLeft = List_Var_growLeft;
+  fog_api.list_var_growRight = List_Var_growRight;
+  fog_api.list_var_squeeze = List_Var_squeeze;
 
-  _api.list_var_setAt = List_Var_setAt;
+  fog_api.list_var_setAt = List_Var_setAt;
 
-  _api.list_var_clear = List_Var_clear;
-  _api.list_var_reset = List_Var_reset;
+  fog_api.list_var_clear = List_Var_clear;
+  fog_api.list_var_reset = List_Var_reset;
 
-  _api.list_var_opList = List_Var_opList;
+  fog_api.list_var_opList = List_Var_opList;
 
-  _api.list_var_append = List_Var_append;
-  _api.list_var_insert = List_Var_insert;
+  fog_api.list_var_append = List_Var_append;
+  fog_api.list_var_insert = List_Var_insert;
 
-  _api.list_var_remove = List_Var_remove;
-  _api.list_var_replace = List_Var_replace;
-  _api.list_var_slice = List_Var_slice;
+  fog_api.list_var_remove = List_Var_remove;
+  fog_api.list_var_replace = List_Var_replace;
+  fog_api.list_var_slice = List_Var_slice;
 
-  _api.list_var_indexOf = List_Var_indexOf;
-  _api.list_var_lastIndexOf = List_Var_lastIndexOf;
+  fog_api.list_var_indexOf = List_Var_indexOf;
+  fog_api.list_var_lastIndexOf = List_Var_lastIndexOf;
 
-  _api.list_var_sort = List_Var_sort;
-  _api.list_var_sortEx = List_Var_sortEx;
-  _api.list_var_swapItems = List_Var_swapItems;
+  fog_api.list_var_sort = List_Var_sort;
+  fog_api.list_var_sortEx = List_Var_sortEx;
+  fog_api.list_var_swapItems = List_Var_swapItems;
 
   // -------------------------------------------------------------------------
   // [Data]
@@ -3241,7 +3241,7 @@ FOG_NO_EXPORT void List_init(void)
   d->data = d->getArray();
 
   List_Unknown_oEmpty->_d = d;
-  _api.list_untyped_oEmpty = &List_Unknown_oEmpty;
+  fog_api.list_untyped_oEmpty = &List_Unknown_oEmpty;
 
   // List<StringA>
   d = &List_StringA_dEmpty;
@@ -3250,12 +3250,12 @@ FOG_NO_EXPORT void List_init(void)
   d->data = d->getArray();
 
   List_StringA_oEmpty->_d = d;
-  _api.list_stringa_oEmpty = &List_StringA_oEmpty;
+  fog_api.list_stringa_oEmpty = &List_StringA_oEmpty;
 
   List_StringA_vTable.szItemT = sizeof(StringA);
   List_StringA_vTable.ctor = List_StringA_vTable_ctor;
   List_StringA_vTable.dtor = List_StringA_vTable_dtor;
-  _api.list_stringa_vTable = &List_StringA_vTable;
+  fog_api.list_stringa_vTable = &List_StringA_vTable;
 
   // List<StringW>
   d = &List_StringW_dEmpty;
@@ -3264,12 +3264,12 @@ FOG_NO_EXPORT void List_init(void)
   d->data = d->getArray();
 
   List_StringW_oEmpty->_d = d;
-  _api.list_stringw_oEmpty = &List_StringW_oEmpty;
+  fog_api.list_stringw_oEmpty = &List_StringW_oEmpty;
 
   List_StringW_vTable.szItemT = sizeof(StringW);
   List_StringW_vTable.ctor = List_StringW_vTable_ctor;
   List_StringW_vTable.dtor = List_StringW_vTable_dtor;
-  _api.list_stringw_vTable = &List_StringW_vTable;
+  fog_api.list_stringw_vTable = &List_StringW_vTable;
 
   // List<Var>
   d = &List_Var_dEmpty;
@@ -3278,12 +3278,12 @@ FOG_NO_EXPORT void List_init(void)
   d->data = d->getArray();
 
   List_Var_oEmpty->_d = d;
-  _api.list_var_oEmpty = &List_Var_oEmpty;
+  fog_api.list_var_oEmpty = &List_Var_oEmpty;
 
   List_Var_vTable.szItemT = sizeof(Var);
   List_Var_vTable.ctor = List_Var_vTable_ctor;
   List_Var_vTable.dtor = List_Var_vTable_dtor;
-  _api.list_var_vTable = &List_Var_vTable;
+  fog_api.list_var_vTable = &List_Var_vTable;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

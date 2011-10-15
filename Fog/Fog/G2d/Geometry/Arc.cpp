@@ -365,11 +365,11 @@ _Skip:
 
 FOG_NO_EXPORT void Arc_init(void)
 {
-  _api.arcf_getBoundingBox = ArcT_getBoundingBox<float>;
-  _api.arcd_getBoundingBox = ArcT_getBoundingBox<double>;
+  fog_api.arcf_getBoundingBox = ArcT_getBoundingBox<float>;
+  fog_api.arcd_getBoundingBox = ArcT_getBoundingBox<double>;
 
-  _api.arcf_toCSpline = ArcT_toCSpline<float>;
-  _api.arcd_toCSpline = ArcT_toCSpline<double>;
+  fog_api.arcf_toCSpline = ArcT_toCSpline<float>;
+  fog_api.arcd_toCSpline = ArcT_toCSpline<double>;
 }
 
 } // Fog namespace

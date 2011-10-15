@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT WinCOM
 {
   static FOG_INLINE err_t makeIStream(IStream** dst, Stream& src)
   {
-    return _api.wincom_makeIStream(dst, &src);
+    return fog_api.wincom_makeIStream(dst, &src);
   }
 };
 

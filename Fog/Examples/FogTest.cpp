@@ -398,7 +398,7 @@ static void stdlog(const StringW& s)
 
 FOG_UI_MAIN()
 {
-  //Api* api = &_api;
+  //Api* api = &fog_api;
   //printf("%p", api);
 
   Application app(StringW::fromAscii8("UI"));

@@ -119,7 +119,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_dtor(HashUntyped* self, const HashUnt
   HashUntypedData* d = self->_d;
 
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, v);
+    fog_api.hash_unknown_unknown_dFree(d, v);
 }
 
 // ============================================================================
@@ -134,7 +134,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
   size_t oldCapacity = d->capacity;
   size_t newCapacity = capacity;
 
-  HashUntypedData* newd = _api.hash_unknown_unknown_dCreate(newCapacity);
+  HashUntypedData* newd = fog_api.hash_unknown_unknown_dCreate(newCapacity);
   if (FOG_IS_NULL(newd))
   {
     return ERR_RT_OUT_OF_MEMORY;
@@ -145,7 +145,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
 
   if (FOG_IS_ERROR(err))
   {
-    _api.hash_unknown_unknown_dFree(newd, v);
+    fog_api.hash_unknown_unknown_dFree(newd, v);
     return err;
   }
 
@@ -241,7 +241,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
 
   d = atomicPtrXchg(&self->_d, newd);
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, v);
+    fog_api.hash_unknown_unknown_dFree(d, v);
 
   return ERR_OK;
 }
@@ -271,7 +271,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_reserve(HashUntyped* self, const Has
   capacity = HashUtil::getClosestPrime(capacity);
 
   if (d->reference.get() != 1 || d->capacity < capacity)
-    return _api.hash_unknown_unknown_rehash(self, v, capacity);
+    return fog_api.hash_unknown_unknown_rehash(self, v, capacity);
   else
     return ERR_OK;
 }
@@ -282,7 +282,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_squeeze(HashUntyped* self, const Hash
   size_t optimal = HashUtil::getClosestPrime(d->length);
 
   if (optimal < d->capacity)
-    _api.hash_unknown_unknown_rehash(self, v, optimal);
+    fog_api.hash_unknown_unknown_rehash(self, v, optimal);
 }
 
 // ============================================================================
@@ -297,7 +297,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_clear(HashUntyped* self, const HashUn
 
   if (d->reference.get() != 1)
   {
-    _api.hash_unknown_unknown_reset(self, v);
+    fog_api.hash_unknown_unknown_reset(self, v);
     return;
   }
 
@@ -331,7 +331,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_reset(HashUntyped* self, const HashUn
     Hash_Unknown_Unknown_getDEmptyForType(self->_d->vType & VAR_TYPE_MASK)->addRef());
 
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, v);
+    fog_api.hash_unknown_unknown_dFree(d, v);
 }
 
 // ============================================================================
@@ -401,7 +401,7 @@ _Match:
   if (d->reference.get() == 1)
     return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
 
-  if (_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
+  if (fog_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
     return NULL;
 
   d = self->_d;
@@ -417,12 +417,12 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_put(HashUntyped* self, const HashUnt
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_detach(self, v));
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_detach(self, v));
     d = self->_d;
   }
 
@@ -454,7 +454,7 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_put(HashUntyped* self, const HashUnt
   *pPrev = node;
 
   if (++d->length >= d->expandLength)
-    _api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
+    fog_api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
   return ERR_OK;
 
 _Match:
@@ -514,7 +514,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_copy(HashUntyped* self, const HashUnt
 {
   HashUntypedData* d = atomicPtrXchg(&self->_d, other->_d->addRef());
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, v);
+    fog_api.hash_unknown_unknown_dFree(d, v);
 }
 
 // ============================================================================
@@ -667,8 +667,8 @@ static HashUntypedData* FOG_CDECL Hash_Unknown_Unknown_dCreate(size_t capacity)
   d->capacity = capacity;
   d->length = 0;
 
-  size_t expand = _api.hashhelper_calcExpandCapacity(capacity);
-  size_t shrink = _api.hashhelper_calcShrinkCapacity(capacity);
+  size_t expand = fog_api.hashhelper_calcExpandCapacity(capacity);
+  size_t shrink = fog_api.hashhelper_calcShrinkCapacity(capacity);
 
   d->expandCapacity = expand;
   d->shrinkCapacity = shrink;
@@ -811,7 +811,7 @@ _Match:
   if (d->reference.get() == 1)
     return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
 
-  if (_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
+  if (fog_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
     return NULL;
 
   d = self->_d;
@@ -854,7 +854,7 @@ _Match:
   if (d->reference.get() == 1)
     return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
 
-  if (_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
+  if (fog_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
     return NULL;
 
   d = self->_d;
@@ -871,12 +871,12 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putStub(HashUntyped* self, const Has
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_detach(self, v));
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_detach(self, v));
     d = self->_d;
   }
 
@@ -923,7 +923,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putStub(HashUntyped* self, const Has
 
 
   if (++d->length >= d->expandLength)
-    _api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
+    fog_api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
   return ERR_OK;
 
 _Match:
@@ -944,12 +944,12 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putString(HashUntyped* self, const H
   // the hash table).
   if (d->length == 0)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
     d = self->_d;
   }
   else if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(_api.hash_unknown_unknown_detach(self, v));
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_detach(self, v));
     d = self->_d;
   }
 
@@ -984,7 +984,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putString(HashUntyped* self, const H
   *pPrev = node;
 
   if (++d->length >= d->expandLength)
-    _api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
+    fog_api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
   return ERR_OK;
 
 _Match:
@@ -1236,56 +1236,56 @@ static void FOG_CDECL Hash_StringA_StringA_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
+    fog_api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
 }
 
 static const StringA* FOG_CDECL Hash_StringA_StringA_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const StringA*>(
-    _api.hash_stringa_unknown_getStubA(self, &Hash_StringA_StringA_vTable, key));
+    fog_api.hash_stringa_unknown_getStubA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static const StringA* FOG_CDECL Hash_StringA_StringA_getStringA(const HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<const StringA*>(
-    _api.hash_stringa_unknown_getStringA(self, &Hash_StringA_StringA_vTable, key));
+    fog_api.hash_stringa_unknown_getStringA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static StringA* FOG_CDECL Hash_StringA_StringA_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<StringA*>(
-    _api.hash_stringa_unknown_useStubA(self, &Hash_StringA_StringA_vTable, key));
+    fog_api.hash_stringa_unknown_useStubA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static StringA* FOG_CDECL Hash_StringA_StringA_useStringA(HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<StringA*>(
-    _api.hash_stringa_unknown_useStringA(self, &Hash_StringA_StringA_vTable, key));
+    fog_api.hash_stringa_unknown_useStringA(self, &Hash_StringA_StringA_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_putStubA(HashUntyped* self, const StubA* key, const StringA* item, bool replace)
 {
-  return _api.hash_stringa_unknown_putStubA(self, &Hash_StringA_StringA_vTable, key, item, replace);
+  return fog_api.hash_stringa_unknown_putStubA(self, &Hash_StringA_StringA_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_putStringA(HashUntyped* self, const StringA* key, const StringA* item, bool replace)
 {
-  return _api.hash_stringa_unknown_putStringA(self, &Hash_StringA_StringA_vTable, key, item, replace);
+  return fog_api.hash_stringa_unknown_putStringA(self, &Hash_StringA_StringA_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash_stringa_unknown_removeStubA(self, &Hash_StringA_StringA_vTable, key);
+  return fog_api.hash_stringa_unknown_removeStubA(self, &Hash_StringA_StringA_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringA_StringA_removeStringA(HashUntyped* self, const StringA* key)
 {
-  return _api.hash_stringa_unknown_removeStringA(self, &Hash_StringA_StringA_vTable, key);
+  return fog_api.hash_stringa_unknown_removeStringA(self, &Hash_StringA_StringA_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringA_StringA_dFree(HashUntypedData* d)
 {
-  _api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
+  fog_api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
 }
 
 // ============================================================================
@@ -1319,56 +1319,56 @@ static void FOG_CDECL Hash_StringA_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
+    fog_api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
 }
 
 static const Var* FOG_CDECL Hash_StringA_Var_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash_stringa_unknown_getStubA(self, &Hash_StringA_Var_vTable, key));
+    fog_api.hash_stringa_unknown_getStubA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static const Var* FOG_CDECL Hash_StringA_Var_getStringA(const HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash_stringa_unknown_getStringA(self, &Hash_StringA_Var_vTable, key));
+    fog_api.hash_stringa_unknown_getStringA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringA_Var_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash_stringa_unknown_useStubA(self, &Hash_StringA_Var_vTable, key));
+    fog_api.hash_stringa_unknown_useStubA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringA_Var_useStringA(HashUntyped* self, const StringA* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash_stringa_unknown_useStringA(self, &Hash_StringA_Var_vTable, key));
+    fog_api.hash_stringa_unknown_useStringA(self, &Hash_StringA_Var_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_putStubA(HashUntyped* self, const StubA* key, const Var* item, bool replace)
 {
-  return _api.hash_stringa_unknown_putStubA(self, &Hash_StringA_Var_vTable, key, item, replace);
+  return fog_api.hash_stringa_unknown_putStubA(self, &Hash_StringA_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_putStringA(HashUntyped* self, const StringA* key, const Var* item, bool replace)
 {
-  return _api.hash_stringa_unknown_putStringA(self, &Hash_StringA_Var_vTable, key, item, replace);
+  return fog_api.hash_stringa_unknown_putStringA(self, &Hash_StringA_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash_stringa_unknown_removeStubA(self, &Hash_StringA_Var_vTable, key);
+  return fog_api.hash_stringa_unknown_removeStubA(self, &Hash_StringA_Var_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringA_Var_removeStringA(HashUntyped* self, const StringA* key)
 {
-  return _api.hash_stringa_unknown_removeStringA(self, &Hash_StringA_Var_vTable, key);
+  return fog_api.hash_stringa_unknown_removeStringA(self, &Hash_StringA_Var_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringA_Var_dFree(HashUntypedData* d)
 {
-  _api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
+  fog_api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
 }
 
 // ============================================================================
@@ -1402,78 +1402,78 @@ static void FOG_CDECL Hash_StringW_StringW_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
+    fog_api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const StringW*>(
-    _api.hash_stringw_unknown_getStubA(self, &Hash_StringW_StringW_vTable, key));
+    fog_api.hash_stringw_unknown_getStubA(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStubW(const HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<const StringW*>(
-    _api.hash_stringw_unknown_getStubW(self, &Hash_StringW_StringW_vTable, key));
+    fog_api.hash_stringw_unknown_getStubW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static const StringW* FOG_CDECL Hash_StringW_StringW_getStringW(const HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<const StringW*>(
-    _api.hash_stringw_unknown_getStringW(self, &Hash_StringW_StringW_vTable, key));
+    fog_api.hash_stringw_unknown_getStringW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static StringW* FOG_CDECL Hash_StringW_StringW_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<StringW*>(
-    _api.hash_stringw_unknown_useStubA(self, &Hash_StringW_StringW_vTable, key));
+    fog_api.hash_stringw_unknown_useStubA(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static StringW* FOG_CDECL Hash_StringW_StringW_useStubW(HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<StringW*>(
-    _api.hash_stringw_unknown_useStubW(self, &Hash_StringW_StringW_vTable, key));
+    fog_api.hash_stringw_unknown_useStubW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static StringW* FOG_CDECL Hash_StringW_StringW_useStringW(HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<StringW*>(
-    _api.hash_stringw_unknown_useStringW(self, &Hash_StringW_StringW_vTable, key));
+    fog_api.hash_stringw_unknown_useStringW(self, &Hash_StringW_StringW_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_putStubA(HashUntyped* self, const StubA* key, const StringW* item, bool replace)
 {
-  return _api.hash_stringw_unknown_putStubA(self, &Hash_StringW_StringW_vTable, key, item, replace);
+  return fog_api.hash_stringw_unknown_putStubA(self, &Hash_StringW_StringW_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_putStubW(HashUntyped* self, const StubW* key, const StringW* item, bool replace)
 {
-  return _api.hash_stringw_unknown_putStubW(self, &Hash_StringW_StringW_vTable, key, item, replace);
+  return fog_api.hash_stringw_unknown_putStubW(self, &Hash_StringW_StringW_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_putStringW(HashUntyped* self, const StringW* key, const StringW* item, bool replace)
 {
-  return _api.hash_stringw_unknown_putStringW(self, &Hash_StringW_StringW_vTable, key, item, replace);
+  return fog_api.hash_stringw_unknown_putStringW(self, &Hash_StringW_StringW_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash_stringw_unknown_removeStubA(self, &Hash_StringW_StringW_vTable, key);
+  return fog_api.hash_stringw_unknown_removeStubA(self, &Hash_StringW_StringW_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_removeStubW(HashUntyped* self, const StubW* key)
 {
-  return _api.hash_stringw_unknown_removeStubW(self, &Hash_StringW_StringW_vTable, key);
+  return fog_api.hash_stringw_unknown_removeStubW(self, &Hash_StringW_StringW_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_StringW_removeStringW(HashUntyped* self, const StringW* key)
 {
-  return _api.hash_stringw_unknown_removeStringW(self, &Hash_StringW_StringW_vTable, key);
+  return fog_api.hash_stringw_unknown_removeStringW(self, &Hash_StringW_StringW_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringW_StringW_dFree(HashUntypedData* d)
 {
-  _api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
+  fog_api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
 }
 
 // ============================================================================
@@ -1507,78 +1507,78 @@ static void FOG_CDECL Hash_StringW_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
   if (d->reference.deref())
-    _api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
+    fog_api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStubA(const HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash_stringw_unknown_getStubA(self, &Hash_StringW_Var_vTable, key));
+    fog_api.hash_stringw_unknown_getStubA(self, &Hash_StringW_Var_vTable, key));
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStubW(const HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash_stringw_unknown_getStubW(self, &Hash_StringW_Var_vTable, key));
+    fog_api.hash_stringw_unknown_getStubW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static const Var* FOG_CDECL Hash_StringW_Var_getStringW(const HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<const Var*>(
-    _api.hash_stringw_unknown_getStringW(self, &Hash_StringW_Var_vTable, key));
+    fog_api.hash_stringw_unknown_getStringW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringW_Var_useStubA(HashUntyped* self, const StubA* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash_stringw_unknown_useStubA(self, &Hash_StringW_Var_vTable, key));
+    fog_api.hash_stringw_unknown_useStubA(self, &Hash_StringW_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringW_Var_useStubW(HashUntyped* self, const StubW* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash_stringw_unknown_useStubW(self, &Hash_StringW_Var_vTable, key));
+    fog_api.hash_stringw_unknown_useStubW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static Var* FOG_CDECL Hash_StringW_Var_useStringW(HashUntyped* self, const StringW* key)
 {
   return reinterpret_cast<Var*>(
-    _api.hash_stringw_unknown_useStringW(self, &Hash_StringW_Var_vTable, key));
+    fog_api.hash_stringw_unknown_useStringW(self, &Hash_StringW_Var_vTable, key));
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_putStubA(HashUntyped* self, const StubA* key, const Var* item, bool replace)
 {
-  return _api.hash_stringw_unknown_putStubA(self, &Hash_StringW_Var_vTable, key, item, replace);
+  return fog_api.hash_stringw_unknown_putStubA(self, &Hash_StringW_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_putStubW(HashUntyped* self, const StubW* key, const Var* item, bool replace)
 {
-  return _api.hash_stringw_unknown_putStubW(self, &Hash_StringW_Var_vTable, key, item, replace);
+  return fog_api.hash_stringw_unknown_putStubW(self, &Hash_StringW_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_putStringW(HashUntyped* self, const StringW* key, const Var* item, bool replace)
 {
-  return _api.hash_stringw_unknown_putStringW(self, &Hash_StringW_Var_vTable, key, item, replace);
+  return fog_api.hash_stringw_unknown_putStringW(self, &Hash_StringW_Var_vTable, key, item, replace);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_removeStubA(HashUntyped* self, const StubA* key)
 {
-  return _api.hash_stringw_unknown_removeStubA(self, &Hash_StringW_Var_vTable, key);
+  return fog_api.hash_stringw_unknown_removeStubA(self, &Hash_StringW_Var_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_removeStubW(HashUntyped* self, const StubW* key)
 {
-  return _api.hash_stringw_unknown_removeStubW(self, &Hash_StringW_Var_vTable, key);
+  return fog_api.hash_stringw_unknown_removeStubW(self, &Hash_StringW_Var_vTable, key);
 }
 
 static err_t FOG_CDECL Hash_StringW_Var_removeStringW(HashUntyped* self, const StringW* key)
 {
-  return _api.hash_stringw_unknown_removeStringW(self, &Hash_StringW_Var_vTable, key);
+  return fog_api.hash_stringw_unknown_removeStringW(self, &Hash_StringW_Var_vTable, key);
 }
 
 static void FOG_CDECL Hash_StringW_Var_dFree(HashUntypedData* d)
 {
-  _api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
+  fog_api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
 }
 
 // ============================================================================
@@ -1677,162 +1677,162 @@ FOG_NO_EXPORT void Hash_init(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.hashhelper_calcExpandCapacity = Hash_calcExpandCapacity;
-  _api.hashhelper_calcShrinkCapacity = Hash_calcShrinkCapacity;
+  fog_api.hashhelper_calcExpandCapacity = Hash_calcExpandCapacity;
+  fog_api.hashhelper_calcShrinkCapacity = Hash_calcShrinkCapacity;
 
   // Hash<?, ?>
-  _api.hash_unknown_unknown_ctor = Hash_Unknown_Unknown_ctor;
-  _api.hash_unknown_unknown_ctorCopy = Hash_Unknown_Unknown_ctorCopy;
-  _api.hash_unknown_unknown_dtor = Hash_Unknown_Unknown_dtor;
+  fog_api.hash_unknown_unknown_ctor = Hash_Unknown_Unknown_ctor;
+  fog_api.hash_unknown_unknown_ctorCopy = Hash_Unknown_Unknown_ctorCopy;
+  fog_api.hash_unknown_unknown_dtor = Hash_Unknown_Unknown_dtor;
 
-  _api.hash_unknown_unknown_detach = Hash_Unknown_Unknown_detach;
-  _api.hash_unknown_unknown_rehash = Hash_Unknown_Unknown_rehash;
-  _api.hash_unknown_unknown_reserve = Hash_Unknown_Unknown_reserve;
-  _api.hash_unknown_unknown_squeeze = Hash_Unknown_Unknown_squeeze;
+  fog_api.hash_unknown_unknown_detach = Hash_Unknown_Unknown_detach;
+  fog_api.hash_unknown_unknown_rehash = Hash_Unknown_Unknown_rehash;
+  fog_api.hash_unknown_unknown_reserve = Hash_Unknown_Unknown_reserve;
+  fog_api.hash_unknown_unknown_squeeze = Hash_Unknown_Unknown_squeeze;
 
-  _api.hash_unknown_unknown_clear = Hash_Unknown_Unknown_clear;
-  _api.hash_unknown_unknown_reset = Hash_Unknown_Unknown_reset;
+  fog_api.hash_unknown_unknown_clear = Hash_Unknown_Unknown_clear;
+  fog_api.hash_unknown_unknown_reset = Hash_Unknown_Unknown_reset;
 
-  _api.hash_unknown_unknown_get = Hash_Unknown_Unknown_get;
-  _api.hash_unknown_unknown_use = Hash_Unknown_Unknown_use;
-  _api.hash_unknown_unknown_put = Hash_Unknown_Unknown_put;
-  _api.hash_unknown_unknown_remove = Hash_Unknown_Unknown_remove;
+  fog_api.hash_unknown_unknown_get = Hash_Unknown_Unknown_get;
+  fog_api.hash_unknown_unknown_use = Hash_Unknown_Unknown_use;
+  fog_api.hash_unknown_unknown_put = Hash_Unknown_Unknown_put;
+  fog_api.hash_unknown_unknown_remove = Hash_Unknown_Unknown_remove;
 
-  _api.hash_unknown_unknown_copy = Hash_Unknown_Unknown_copy;
-  _api.hash_unknown_unknown_eq = Hash_Unknown_Unknown_eq;
+  fog_api.hash_unknown_unknown_copy = Hash_Unknown_Unknown_copy;
+  fog_api.hash_unknown_unknown_eq = Hash_Unknown_Unknown_eq;
 
-  _api.hash_unknown_unknown_dCreate = Hash_Unknown_Unknown_dCreate;
-  _api.hash_unknown_unknown_dFree = Hash_Unknown_Unknown_dFree;
+  fog_api.hash_unknown_unknown_dCreate = Hash_Unknown_Unknown_dCreate;
+  fog_api.hash_unknown_unknown_dFree = Hash_Unknown_Unknown_dFree;
 
   // Hash<int32_t, ?>
-  _api.hash_int32_unknown_get;
-  _api.hash_int32_unknown_use;
-  _api.hash_int32_unknown_put;
-  _api.hash_int32_unknown_remove;
+  fog_api.hash_int32_unknown_get;
+  fog_api.hash_int32_unknown_use;
+  fog_api.hash_int32_unknown_put;
+  fog_api.hash_int32_unknown_remove;
 
   // Hash<int64_t, ?>
-  _api.hash_int64_unknown_get;
-  _api.hash_int64_unknown_use;
-  _api.hash_int64_unknown_put;
-  _api.hash_int64_unknown_remove;
+  fog_api.hash_int64_unknown_get;
+  fog_api.hash_int64_unknown_use;
+  fog_api.hash_int64_unknown_put;
+  fog_api.hash_int64_unknown_remove;
 
   // Hash<StringA, ?>
-  _api.hash_stringa_unknown_getStubA = Hash_StringT_Unknown_getStub<char, char>;
-  _api.hash_stringa_unknown_getStringA = Hash_StringT_Unknown_getString<char, char>;
+  fog_api.hash_stringa_unknown_getStubA = Hash_StringT_Unknown_getStub<char, char>;
+  fog_api.hash_stringa_unknown_getStringA = Hash_StringT_Unknown_getString<char, char>;
 
-  _api.hash_stringa_unknown_useStubA = Hash_StringT_Unknown_useStub<char, char>;
-  _api.hash_stringa_unknown_useStringA = Hash_StringT_Unknown_useString<char, char>;
+  fog_api.hash_stringa_unknown_useStubA = Hash_StringT_Unknown_useStub<char, char>;
+  fog_api.hash_stringa_unknown_useStringA = Hash_StringT_Unknown_useString<char, char>;
 
-  _api.hash_stringa_unknown_putStubA = Hash_StringT_Unknown_putStub<char, char>;
-  _api.hash_stringa_unknown_putStringA = Hash_StringT_Unknown_putString<char, char>;
+  fog_api.hash_stringa_unknown_putStubA = Hash_StringT_Unknown_putStub<char, char>;
+  fog_api.hash_stringa_unknown_putStringA = Hash_StringT_Unknown_putString<char, char>;
 
-  _api.hash_stringa_unknown_removeStubA = Hash_StringT_Unknown_removeStub<char, char>;
-  _api.hash_stringa_unknown_removeStringA = Hash_StringT_Unknown_removeString<char, char>;
+  fog_api.hash_stringa_unknown_removeStubA = Hash_StringT_Unknown_removeStub<char, char>;
+  fog_api.hash_stringa_unknown_removeStringA = Hash_StringT_Unknown_removeString<char, char>;
 
-  _api.hash_stringa_unknown_eq = Hash_StringT_Unknown_eq<char>;
+  fog_api.hash_stringa_unknown_eq = Hash_StringT_Unknown_eq<char>;
 
   // Hash<StringA, StringA>
-  _api.hash_stringa_stringa_ctor = Hash_StringA_StringA_ctor;
-  _api.hash_stringa_stringa_dtor = Hash_StringA_StringA_dtor;
+  fog_api.hash_stringa_stringa_ctor = Hash_StringA_StringA_ctor;
+  fog_api.hash_stringa_stringa_dtor = Hash_StringA_StringA_dtor;
 
-  _api.hash_stringa_stringa_getStubA = Hash_StringA_StringA_getStubA;
-  _api.hash_stringa_stringa_getStringA = Hash_StringA_StringA_getStringA;
+  fog_api.hash_stringa_stringa_getStubA = Hash_StringA_StringA_getStubA;
+  fog_api.hash_stringa_stringa_getStringA = Hash_StringA_StringA_getStringA;
 
-  _api.hash_stringa_stringa_useStubA = Hash_StringA_StringA_useStubA;
-  _api.hash_stringa_stringa_useStringA = Hash_StringA_StringA_useStringA;
+  fog_api.hash_stringa_stringa_useStubA = Hash_StringA_StringA_useStubA;
+  fog_api.hash_stringa_stringa_useStringA = Hash_StringA_StringA_useStringA;
 
-  _api.hash_stringa_stringa_putStubA = Hash_StringA_StringA_putStubA;
-  _api.hash_stringa_stringa_putStringA = Hash_StringA_StringA_putStringA;
+  fog_api.hash_stringa_stringa_putStubA = Hash_StringA_StringA_putStubA;
+  fog_api.hash_stringa_stringa_putStringA = Hash_StringA_StringA_putStringA;
 
-  _api.hash_stringa_stringa_removeStubA = Hash_StringA_StringA_removeStubA;
-  _api.hash_stringa_stringa_removeStringA = Hash_StringA_StringA_removeStringA;
+  fog_api.hash_stringa_stringa_removeStubA = Hash_StringA_StringA_removeStubA;
+  fog_api.hash_stringa_stringa_removeStringA = Hash_StringA_StringA_removeStringA;
 
-  _api.hash_stringa_stringa_dFree = Hash_StringA_StringA_dFree;
+  fog_api.hash_stringa_stringa_dFree = Hash_StringA_StringA_dFree;
 
   // Hash<StringA, Var>
-  _api.hash_stringa_var_ctor = Hash_StringA_Var_ctor;
-  _api.hash_stringa_var_dtor = Hash_StringA_Var_dtor;
+  fog_api.hash_stringa_var_ctor = Hash_StringA_Var_ctor;
+  fog_api.hash_stringa_var_dtor = Hash_StringA_Var_dtor;
 
-  _api.hash_stringa_var_getStubA = Hash_StringA_Var_getStubA;
-  _api.hash_stringa_var_getStringA = Hash_StringA_Var_getStringA;
+  fog_api.hash_stringa_var_getStubA = Hash_StringA_Var_getStubA;
+  fog_api.hash_stringa_var_getStringA = Hash_StringA_Var_getStringA;
 
-  _api.hash_stringa_var_useStubA = Hash_StringA_Var_useStubA;
-  _api.hash_stringa_var_useStringA = Hash_StringA_Var_useStringA;
+  fog_api.hash_stringa_var_useStubA = Hash_StringA_Var_useStubA;
+  fog_api.hash_stringa_var_useStringA = Hash_StringA_Var_useStringA;
 
-  _api.hash_stringa_var_putStubA = Hash_StringA_Var_putStubA;
-  _api.hash_stringa_var_putStringA = Hash_StringA_Var_putStringA;
+  fog_api.hash_stringa_var_putStubA = Hash_StringA_Var_putStubA;
+  fog_api.hash_stringa_var_putStringA = Hash_StringA_Var_putStringA;
 
-  _api.hash_stringa_var_removeStubA = Hash_StringA_Var_removeStubA;
-  _api.hash_stringa_var_removeStringA = Hash_StringA_Var_removeStringA;
+  fog_api.hash_stringa_var_removeStubA = Hash_StringA_Var_removeStubA;
+  fog_api.hash_stringa_var_removeStringA = Hash_StringA_Var_removeStringA;
 
-  _api.hash_stringa_var_dFree = Hash_StringA_Var_dFree;
+  fog_api.hash_stringa_var_dFree = Hash_StringA_Var_dFree;
 
   // Hash<StringW, ?>
-  _api.hash_stringw_unknown_getStubA = Hash_StringT_Unknown_getStub<CharW, char>;
-  _api.hash_stringw_unknown_getStubW = Hash_StringT_Unknown_getStub<CharW, CharW>;
-  _api.hash_stringw_unknown_getStringW = Hash_StringT_Unknown_getString<CharW, CharW>;
+  fog_api.hash_stringw_unknown_getStubA = Hash_StringT_Unknown_getStub<CharW, char>;
+  fog_api.hash_stringw_unknown_getStubW = Hash_StringT_Unknown_getStub<CharW, CharW>;
+  fog_api.hash_stringw_unknown_getStringW = Hash_StringT_Unknown_getString<CharW, CharW>;
 
-  _api.hash_stringw_unknown_useStubA = Hash_StringT_Unknown_useStub<CharW, char>;
-  _api.hash_stringw_unknown_useStubW = Hash_StringT_Unknown_useStub<CharW, CharW>;
-  _api.hash_stringw_unknown_useStringW = Hash_StringT_Unknown_useString<CharW, CharW>;
+  fog_api.hash_stringw_unknown_useStubA = Hash_StringT_Unknown_useStub<CharW, char>;
+  fog_api.hash_stringw_unknown_useStubW = Hash_StringT_Unknown_useStub<CharW, CharW>;
+  fog_api.hash_stringw_unknown_useStringW = Hash_StringT_Unknown_useString<CharW, CharW>;
 
-  _api.hash_stringw_unknown_putStubA = Hash_StringT_Unknown_putStub<CharW, char>;
-  _api.hash_stringw_unknown_putStubW = Hash_StringT_Unknown_putStub<CharW, CharW>;
-  _api.hash_stringw_unknown_putStringW = Hash_StringT_Unknown_putString<CharW, CharW>;
+  fog_api.hash_stringw_unknown_putStubA = Hash_StringT_Unknown_putStub<CharW, char>;
+  fog_api.hash_stringw_unknown_putStubW = Hash_StringT_Unknown_putStub<CharW, CharW>;
+  fog_api.hash_stringw_unknown_putStringW = Hash_StringT_Unknown_putString<CharW, CharW>;
 
-  _api.hash_stringw_unknown_removeStubA = Hash_StringT_Unknown_removeStub<CharW, char>;
-  _api.hash_stringw_unknown_removeStubW = Hash_StringT_Unknown_removeStub<CharW, CharW>;
-  _api.hash_stringw_unknown_removeStringW = Hash_StringT_Unknown_removeString<CharW, CharW>;
+  fog_api.hash_stringw_unknown_removeStubA = Hash_StringT_Unknown_removeStub<CharW, char>;
+  fog_api.hash_stringw_unknown_removeStubW = Hash_StringT_Unknown_removeStub<CharW, CharW>;
+  fog_api.hash_stringw_unknown_removeStringW = Hash_StringT_Unknown_removeString<CharW, CharW>;
 
-  _api.hash_stringw_unknown_eq = Hash_StringT_Unknown_eq<CharW>;
+  fog_api.hash_stringw_unknown_eq = Hash_StringT_Unknown_eq<CharW>;
 
   // Hash<StringW, StringW>
-  _api.hash_stringw_stringw_ctor = Hash_StringW_StringW_ctor;
-  _api.hash_stringw_stringw_dtor = Hash_StringW_StringW_dtor;
+  fog_api.hash_stringw_stringw_ctor = Hash_StringW_StringW_ctor;
+  fog_api.hash_stringw_stringw_dtor = Hash_StringW_StringW_dtor;
 
-  _api.hash_stringw_stringw_getStubA = Hash_StringW_StringW_getStubA;
-  _api.hash_stringw_stringw_getStubW = Hash_StringW_StringW_getStubW;
-  _api.hash_stringw_stringw_getStringW = Hash_StringW_StringW_getStringW;
+  fog_api.hash_stringw_stringw_getStubA = Hash_StringW_StringW_getStubA;
+  fog_api.hash_stringw_stringw_getStubW = Hash_StringW_StringW_getStubW;
+  fog_api.hash_stringw_stringw_getStringW = Hash_StringW_StringW_getStringW;
 
-  _api.hash_stringw_stringw_useStubA = Hash_StringW_StringW_useStubA;
-  _api.hash_stringw_stringw_useStubW = Hash_StringW_StringW_useStubW;
-  _api.hash_stringw_stringw_useStringW = Hash_StringW_StringW_useStringW;
+  fog_api.hash_stringw_stringw_useStubA = Hash_StringW_StringW_useStubA;
+  fog_api.hash_stringw_stringw_useStubW = Hash_StringW_StringW_useStubW;
+  fog_api.hash_stringw_stringw_useStringW = Hash_StringW_StringW_useStringW;
 
-  _api.hash_stringw_stringw_putStubA = Hash_StringW_StringW_putStubA;
-  _api.hash_stringw_stringw_putStubW = Hash_StringW_StringW_putStubW;
-  _api.hash_stringw_stringw_putStringW = Hash_StringW_StringW_putStringW;
+  fog_api.hash_stringw_stringw_putStubA = Hash_StringW_StringW_putStubA;
+  fog_api.hash_stringw_stringw_putStubW = Hash_StringW_StringW_putStubW;
+  fog_api.hash_stringw_stringw_putStringW = Hash_StringW_StringW_putStringW;
 
-  _api.hash_stringw_stringw_removeStubA = Hash_StringW_StringW_removeStubA;
-  _api.hash_stringw_stringw_removeStubW = Hash_StringW_StringW_removeStubW;
-  _api.hash_stringw_stringw_removeStringW = Hash_StringW_StringW_removeStringW;
+  fog_api.hash_stringw_stringw_removeStubA = Hash_StringW_StringW_removeStubA;
+  fog_api.hash_stringw_stringw_removeStubW = Hash_StringW_StringW_removeStubW;
+  fog_api.hash_stringw_stringw_removeStringW = Hash_StringW_StringW_removeStringW;
 
-  _api.hash_stringw_stringw_dFree = Hash_StringW_StringW_dFree;
+  fog_api.hash_stringw_stringw_dFree = Hash_StringW_StringW_dFree;
 
   // Hash<StringW, Var>
-  _api.hash_stringw_var_ctor = Hash_StringW_Var_ctor;
-  _api.hash_stringw_var_dtor = Hash_StringW_Var_dtor;
+  fog_api.hash_stringw_var_ctor = Hash_StringW_Var_ctor;
+  fog_api.hash_stringw_var_dtor = Hash_StringW_Var_dtor;
 
-  _api.hash_stringw_var_getStubA = Hash_StringW_Var_getStubA;
-  _api.hash_stringw_var_getStubW = Hash_StringW_Var_getStubW;
-  _api.hash_stringw_var_getStringW = Hash_StringW_Var_getStringW;
+  fog_api.hash_stringw_var_getStubA = Hash_StringW_Var_getStubA;
+  fog_api.hash_stringw_var_getStubW = Hash_StringW_Var_getStubW;
+  fog_api.hash_stringw_var_getStringW = Hash_StringW_Var_getStringW;
 
-  _api.hash_stringw_var_useStubA = Hash_StringW_Var_useStubA;
-  _api.hash_stringw_var_useStubW = Hash_StringW_Var_useStubW;
-  _api.hash_stringw_var_useStringW = Hash_StringW_Var_useStringW;
+  fog_api.hash_stringw_var_useStubA = Hash_StringW_Var_useStubA;
+  fog_api.hash_stringw_var_useStubW = Hash_StringW_Var_useStubW;
+  fog_api.hash_stringw_var_useStringW = Hash_StringW_Var_useStringW;
 
-  _api.hash_stringw_var_putStubA = Hash_StringW_Var_putStubA;
-  _api.hash_stringw_var_putStubW = Hash_StringW_Var_putStubW;
-  _api.hash_stringw_var_putStringW = Hash_StringW_Var_putStringW;
+  fog_api.hash_stringw_var_putStubA = Hash_StringW_Var_putStubA;
+  fog_api.hash_stringw_var_putStubW = Hash_StringW_Var_putStubW;
+  fog_api.hash_stringw_var_putStringW = Hash_StringW_Var_putStringW;
 
-  _api.hash_stringw_var_removeStubA = Hash_StringW_Var_removeStubA;
-  _api.hash_stringw_var_removeStubW = Hash_StringW_Var_removeStubW;
-  _api.hash_stringw_var_removeStringW = Hash_StringW_Var_removeStringW;
+  fog_api.hash_stringw_var_removeStubA = Hash_StringW_Var_removeStubA;
+  fog_api.hash_stringw_var_removeStubW = Hash_StringW_Var_removeStubW;
+  fog_api.hash_stringw_var_removeStringW = Hash_StringW_Var_removeStringW;
 
-  _api.hash_stringw_var_dFree = Hash_StringW_Var_dFree;
+  fog_api.hash_stringw_var_dFree = Hash_StringW_Var_dFree;
 
   // HashIterator<?, ?>
-  _api.hashiterator_start = HashIterator_start;
-  _api.hashiterator_next = HashIterator_next;
+  fog_api.hashiterator_start = HashIterator_start;
+  fog_api.hashiterator_next = HashIterator_next;
 
   // -------------------------------------------------------------------------
   // [Data]
@@ -1849,7 +1849,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_Unknown_Unknown_oEmpty->_d = d;
-  _api.hash_unknown_unknown_oEmpty = &Hash_Unknown_Unknown_oEmpty;
+  fog_api.hash_unknown_unknown_oEmpty = &Hash_Unknown_Unknown_oEmpty;
 
   // Hash<StringA, StringA>
   d = &Hash_StringA_StringA_dEmpty;
@@ -1860,7 +1860,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringA_StringA_oEmpty->_d = d;
-  _api.hash_stringa_stringa_oEmpty = &Hash_StringA_StringA_oEmpty;
+  fog_api.hash_stringa_stringa_oEmpty = &Hash_StringA_StringA_oEmpty;
 
   // HashVTable<StringA, StringA>
   Hash_StringA_StringA_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringA>, key);
@@ -1869,10 +1869,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringA_StringA_vTable->szItemT = sizeof(StringA);
   Hash_StringA_StringA_vTable->ctor = Hash_StringA_StringA_Node_ctor;
   Hash_StringA_StringA_vTable->dtor = Hash_StringA_StringA_Node_dtor;
-  Hash_StringA_StringA_vTable->setItem = (HashUntypedVTable::SetItem)_api.stringa_setStringA;
-  Hash_StringA_StringA_vTable->hashKey = (HashFunc)_api.stringa_getHashCode;
-  Hash_StringA_StringA_vTable->eqKey = (EqFunc)_api.stringa_eqStringA;
-  _api.hash_stringa_stringa_vTable = &Hash_StringA_StringA_vTable;
+  Hash_StringA_StringA_vTable->setItem = (HashUntypedVTable::SetItem)fog_api.stringa_setStringA;
+  Hash_StringA_StringA_vTable->hashKey = (HashFunc)fog_api.stringa_getHashCode;
+  Hash_StringA_StringA_vTable->eqKey = (EqFunc)fog_api.stringa_eqStringA;
+  fog_api.hash_stringa_stringa_vTable = &Hash_StringA_StringA_vTable;
 
   // Hash<StringA, Var>
   d = &Hash_StringW_Var_dEmpty;
@@ -1883,7 +1883,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringA_Var_oEmpty->_d = d;
-  _api.hash_stringa_var_oEmpty = &Hash_StringA_Var_oEmpty;
+  fog_api.hash_stringa_var_oEmpty = &Hash_StringA_Var_oEmpty;
 
   // HashVTable<StringA, Var>
   Hash_StringA_Var_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringA>, key);
@@ -1892,10 +1892,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringA_Var_vTable->szItemT = sizeof(Var);
   Hash_StringA_Var_vTable->ctor = Hash_StringA_Var_Node_ctor;
   Hash_StringA_Var_vTable->dtor = Hash_StringA_Var_Node_dtor;
-  Hash_StringA_Var_vTable->setItem = (HashUntypedVTable::SetItem)_api.var_copy;
-  Hash_StringA_Var_vTable->hashKey = (HashFunc)_api.stringa_getHashCode;
-  Hash_StringA_Var_vTable->eqKey = (EqFunc)_api.stringa_eqStringA;
-  _api.hash_stringa_var_vTable = &Hash_StringA_Var_vTable;
+  Hash_StringA_Var_vTable->setItem = (HashUntypedVTable::SetItem)fog_api.var_copy;
+  Hash_StringA_Var_vTable->hashKey = (HashFunc)fog_api.stringa_getHashCode;
+  Hash_StringA_Var_vTable->eqKey = (EqFunc)fog_api.stringa_eqStringA;
+  fog_api.hash_stringa_var_vTable = &Hash_StringA_Var_vTable;
 
   // Hash<StringW, StringW>
   d = &Hash_StringW_StringW_dEmpty;
@@ -1906,7 +1906,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringW_StringW_oEmpty->_d = d;
-  _api.hash_stringw_stringw_oEmpty = &Hash_StringW_StringW_oEmpty;
+  fog_api.hash_stringw_stringw_oEmpty = &Hash_StringW_StringW_oEmpty;
 
   // HashVTable<StringW, StringW>
   Hash_StringW_StringW_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringW>, key);
@@ -1915,10 +1915,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringW_StringW_vTable->szItemT = sizeof(StringW);
   Hash_StringW_StringW_vTable->ctor = Hash_StringW_StringW_Node_ctor;
   Hash_StringW_StringW_vTable->dtor = Hash_StringW_StringW_Node_dtor;
-  Hash_StringW_StringW_vTable->setItem = (HashUntypedVTable::SetItem)_api.stringw_setStringW;
-  Hash_StringW_StringW_vTable->hashKey = (HashFunc)_api.stringw_getHashCode;
-  Hash_StringW_StringW_vTable->eqKey = (EqFunc)_api.stringw_eqStringW;
-  _api.hash_stringw_stringw_vTable = &Hash_StringW_StringW_vTable;
+  Hash_StringW_StringW_vTable->setItem = (HashUntypedVTable::SetItem)fog_api.stringw_setStringW;
+  Hash_StringW_StringW_vTable->hashKey = (HashFunc)fog_api.stringw_getHashCode;
+  Hash_StringW_StringW_vTable->eqKey = (EqFunc)fog_api.stringw_eqStringW;
+  fog_api.hash_stringw_stringw_vTable = &Hash_StringW_StringW_vTable;
 
   // Hash<StringW, Var>
   d = &Hash_StringW_Var_dEmpty;
@@ -1929,7 +1929,7 @@ FOG_NO_EXPORT void Hash_init(void)
   d->expandLength = 1;
 
   Hash_StringW_Var_oEmpty->_d = d;
-  _api.hash_stringw_var_oEmpty = &Hash_StringW_Var_oEmpty;
+  fog_api.hash_stringw_var_oEmpty = &Hash_StringW_Var_oEmpty;
 
   // HashVTable<StringW, Var>
   Hash_StringW_Var_vTable->idxKeyT = FOG_OFFSET_OF(HashKeyNode<StringW>, key);
@@ -1938,10 +1938,10 @@ FOG_NO_EXPORT void Hash_init(void)
   Hash_StringW_Var_vTable->szItemT = sizeof(Var);
   Hash_StringW_Var_vTable->ctor = Hash_StringW_Var_Node_ctor;
   Hash_StringW_Var_vTable->dtor = Hash_StringW_Var_Node_dtor;
-  Hash_StringW_Var_vTable->setItem = (HashUntypedVTable::SetItem)_api.var_copy;
-  Hash_StringW_Var_vTable->hashKey = (HashFunc)_api.stringw_getHashCode;
-  Hash_StringW_Var_vTable->eqKey = (EqFunc)_api.stringw_eqStringW;
-  _api.hash_stringa_var_vTable = &Hash_StringW_Var_vTable;
+  Hash_StringW_Var_vTable->setItem = (HashUntypedVTable::SetItem)fog_api.var_copy;
+  Hash_StringW_Var_vTable->hashKey = (HashFunc)fog_api.stringw_getHashCode;
+  Hash_StringW_Var_vTable->eqKey = (EqFunc)fog_api.stringw_eqStringW;
+  fog_api.hash_stringa_var_vTable = &Hash_StringW_Var_vTable;
 }
 
 } // Fog namespace

@@ -24,22 +24,22 @@ struct FOG_NO_EXPORT Environment
 {
   static FOG_INLINE err_t getValue(const Ascii8& key, StringW& value)
   {
-    return _api.environment_getValueStubA(&key, &value);
+    return fog_api.environment_getValueStubA(&key, &value);
   }
 
   static FOG_INLINE err_t getValue(const StringW& key, StringW& value)
   {
-    return _api.environment_getValueStringW(&key, &value);
+    return fog_api.environment_getValueStringW(&key, &value);
   }
 
   static FOG_INLINE err_t setValue(const Ascii8& key, const StringW& value)
   {
-    return _api.environment_setValueStubA(&key, &value);
+    return fog_api.environment_setValueStubA(&key, &value);
   }
 
   static FOG_INLINE err_t setValue(const StringW& key, const StringW& value)
   {
-    return _api.environment_setValueStringW(&key, &value);
+    return fog_api.environment_setValueStringW(&key, &value);
   }
 };
 

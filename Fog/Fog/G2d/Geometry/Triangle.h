@@ -124,12 +124,12 @@ struct FOG_NO_EXPORT TriangleF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.trianglef_getBoundingBox(this->p, &dst, tr);
+    return fog_api.trianglef_getBoundingBox(this->p, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.trianglef_getBoundingBox(this->p, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = fog_api.trianglef_getBoundingBox(this->p, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -141,7 +141,7 @@ struct FOG_NO_EXPORT TriangleF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _api.trianglef_hitTest(this->p, &pt);
+    return fog_api.trianglef_hitTest(this->p, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -272,12 +272,12 @@ struct FOG_NO_EXPORT TriangleD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.triangled_getBoundingBox(this->p, &dst, tr);
+    return fog_api.triangled_getBoundingBox(this->p, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.triangled_getBoundingBox(this->p, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = fog_api.triangled_getBoundingBox(this->p, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -289,7 +289,7 @@ struct FOG_NO_EXPORT TriangleD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _api.triangled_hitTest(this->p, &pt);
+    return fog_api.triangled_hitTest(this->p, &pt);
   }
 
   // --------------------------------------------------------------------------

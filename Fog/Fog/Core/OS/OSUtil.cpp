@@ -217,7 +217,7 @@ static err_t FOG_CDECL OSUtil_getErrFromLibCErrorCode(int code)
 
 static err_t FOG_CDECL OSUtil_getErrFromLibCErrno(void)
 {
-  return _api.osutil_getErrFromLibCErrorCode(errno);
+  return fog_api.osutil_getErrFromLibCErrorCode(errno);
 }
 
 // ============================================================================
@@ -226,25 +226,25 @@ static err_t FOG_CDECL OSUtil_getErrFromLibCErrno(void)
 
 FOG_NO_EXPORT void OSUtil_init(void)
 {
-  _api.osutil_getErrFromLibCErrorCode = OSUtil_getErrFromLibCErrorCode;
-  _api.osutil_getErrFromLibCErrno = OSUtil_getErrFromLibCErrno;
+  fog_api.osutil_getErrFromLibCErrorCode = OSUtil_getErrFromLibCErrorCode;
+  fog_api.osutil_getErrFromLibCErrno = OSUtil_getErrFromLibCErrno;
 
 #if defined(FOG_OS_WINDOWS)
   // Must be initialized before OSUtil_init() is called.
-  FOG_ASSERT(_api.winutil_getErrFromWinErrorCode != NULL);
-  FOG_ASSERT(_api.winutil_getErrFromWinLastError != NULL);
+  FOG_ASSERT(fog_api.winutil_getErrFromWinErrorCode != NULL);
+  FOG_ASSERT(fog_api.winutil_getErrFromWinLastError != NULL);
 
   typedef err_t (FOG_CDECL* GetErrFromOSErrorCodeFunc)(int code);
 
   // Map WinUtil error management to OSUtil.
-  _api.osutil_getErrFromOSErrorCode = (GetErrFromOSErrorCodeFunc)_api.winutil_getErrFromWinErrorCode;
-  _api.osutil_getErrFromOSLastError = _api.winutil_getErrFromWinLastError;
+  fog_api.osutil_getErrFromOSErrorCode = (GetErrFromOSErrorCodeFunc)fog_api.winutil_getErrFromWinErrorCode;
+  fog_api.osutil_getErrFromOSLastError = fog_api.winutil_getErrFromWinLastError;
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
   // Map LibC error management to OSUtil.
-  _api.osutil_getErrFromOSErrorCode = OSUtil_getErrFromLibCErrorCode;
-  _api.osutil_getErrFromOSLastError = OSUtil_getErrFromLibCErrno;
+  fog_api.osutil_getErrFromOSErrorCode = OSUtil_getErrFromLibCErrorCode;
+  fog_api.osutil_getErrFromOSLastError = OSUtil_getErrFromLibCErrno;
 #endif // FOG_OS_POSIX
 }
 

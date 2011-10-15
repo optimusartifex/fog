@@ -35,7 +35,7 @@ static err_t FOG_CDECL Region_translate_SSE2(Region* dst, const Region* src, con
   int tx = pt->x;
   int ty = pt->y;
 
-  if (src_d == _api.region_oInfinite->_d || (tx | ty) == 0)
+  if (src_d == fog_api.region_oInfinite->_d || (tx | ty) == 0)
   {
     return dst->setRegion(*src);
   }
@@ -57,12 +57,12 @@ static err_t FOG_CDECL Region_translate_SSE2(Region* dst, const Region* src, con
   if (saturate)
   {
     BoxI clipBox(INT_MIN, INT_MIN, INT_MAX, INT_MAX);
-    return _api.region_translateAndClip(dst, src, pt, &clipBox);
+    return fog_api.region_translateAndClip(dst, src, pt, &clipBox);
   }
 
   if (d->reference.get() != 1 || d->capacity < length)
   {
-    d = _api.region_dCreate(length);
+    d = fog_api.region_dCreate(length);
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
   }
@@ -288,8 +288,8 @@ FOG_NO_EXPORT void Region_init_SSE2(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.region_translate = Region_translate_SSE2;
-  _api.region_eq = Region_eq_SSE2;
+  fog_api.region_translate = Region_translate_SSE2;
+  fog_api.region_eq = Region_eq_SSE2;
 }
 
 } // Fog namespace

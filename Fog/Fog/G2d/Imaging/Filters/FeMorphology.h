@@ -30,12 +30,12 @@ struct FOG_NO_EXPORT FeMorphology : public FeBorder
 
   FOG_INLINE FeMorphology()
   {
-    _api.femorphology_ctor(this);
+    fog_api.femorphology_ctor(this);
   }
 
   FOG_INLINE FeMorphology(const FeMorphology& other)
   {
-    _api.femorphology_ctorCopy(this, &other);
+    fog_api.femorphology_ctorCopy(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -77,7 +77,7 @@ struct FOG_NO_EXPORT FeMorphology : public FeBorder
 
   FOG_INLINE bool eq(const FeMorphology& other) const
   {
-    return _api.femorphology_eq(this, &other);
+    return fog_api.femorphology_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -86,7 +86,7 @@ struct FOG_NO_EXPORT FeMorphology : public FeBorder
 
   FOG_INLINE FeMorphology& operator=(const FeMorphology& other)
   {
-    _api.femorphology_copy(this, &other);
+    fog_api.femorphology_copy(this, &other);
     return *this;
   }
 
@@ -99,12 +99,12 @@ struct FOG_NO_EXPORT FeMorphology : public FeBorder
 
   static FOG_INLINE bool eq(const FeMorphology* a, const FeMorphology* b)
   {
-    return _api.femorphology_eq(a, b);
+    return fog_api.femorphology_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.femorphology_eq;
+    return (EqFunc)fog_api.femorphology_eq;
   }
 
   // --------------------------------------------------------------------------

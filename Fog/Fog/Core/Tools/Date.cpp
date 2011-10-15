@@ -500,22 +500,22 @@ static int FOG_CDECL Date_compare(const Date* a, const Date* b)
 
 FOG_NO_EXPORT void Date_init(void)
 {
-  _api.date_getValue = Date_getValue;
-  _api.date_setValue = Date_setValue;
-  _api.date_addValue = Date_addValue;
+  fog_api.date_getValue = Date_getValue;
+  fog_api.date_setValue = Date_setValue;
+  fog_api.date_addValue = Date_addValue;
 
-  _api.date_setYMD = Date_setYMD;
-  _api.date_setHMS = Date_setHMS;
+  fog_api.date_setYMD = Date_setYMD;
+  fog_api.date_setHMS = Date_setHMS;
 
-  _api.date_fromTime = Date_fromTime;
+  fog_api.date_fromTime = Date_fromTime;
 
-  _api.date_isLeapYear = Date_isLeapYear;
-  _api.date_getNumberOfDaysInYear = Date_getNumberOfDaysInYear;
-  _api.date_getNumberOfDaysInMonth = Date_getNumberOfDaysInMonth;
+  fog_api.date_isLeapYear = Date_isLeapYear;
+  fog_api.date_getNumberOfDaysInYear = Date_getNumberOfDaysInYear;
+  fog_api.date_getNumberOfDaysInMonth = Date_getNumberOfDaysInMonth;
 
-  _api.date_convert = Date_convert;
-  _api.date_eq = Date_eq;
-  _api.date_compare = Date_compare;
+  fog_api.date_convert = Date_convert;
+  fog_api.date_eq = Date_eq;
+  fog_api.date_compare = Date_compare;
 }
 
 } // Fog namespace

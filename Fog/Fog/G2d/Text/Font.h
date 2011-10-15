@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT FontData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.font_dFree(this);
+      fog_api.font_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -126,12 +126,12 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE Font()
   {
-    _api.font_ctor(this);
+    fog_api.font_ctor(this);
   }
 
   FOG_INLINE Font(const Font& other)
   {
-    _api.font_ctorCopy(this, &other);
+    fog_api.font_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE Font(FontData* d) :
@@ -141,7 +141,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE ~Font()
   {
-    _api.font_dtor(this);
+    fog_api.font_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -152,7 +152,7 @@ struct FOG_NO_EXPORT Font
   FOG_INLINE bool isDetached() const { return _d->reference.get() == 1; }
 
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
-  FOG_INLINE err_t _detach() { return _api.font_detach(this); }
+  FOG_INLINE err_t _detach() { return fog_api.font_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Flags]
@@ -171,7 +171,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t setFont(const Font& other)
   {
-    return _api.font_copy(this, &other);
+    return fog_api.font_copy(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -201,7 +201,7 @@ struct FOG_NO_EXPORT Font
   //! @brief Set font-height to @a height and font-units to @a unit.
   FOG_INLINE err_t setHeight(float height, uint32_t unit)
   {
-    return _api.font_setHeight(this, height, unit);
+    return fog_api.font_setHeight(this, height, unit);
   }
 
   // --------------------------------------------------------------------------
@@ -216,12 +216,12 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t setLetterSpacing(float spacing, uint32_t spacingMode)
   {
-    return _api.font_setLetterSpacing(this, spacing, spacingMode);
+    return fog_api.font_setLetterSpacing(this, spacing, spacingMode);
   }
 
   FOG_INLINE err_t setWordSpacing(float spacing, uint32_t spacingMode)
   {
-    return _api.font_setWordSpacing(this, spacing, spacingMode);
+    return fog_api.font_setWordSpacing(this, spacing, spacingMode);
   }
 
   // --------------------------------------------------------------------------
@@ -239,42 +239,42 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t setHints(const FontHints& hints)
   {
-    return _api.font_setHints(this, &hints);
+    return fog_api.font_setHints(this, &hints);
   }
 
   FOG_INLINE err_t setStyle(uint32_t style)
   {
-    return _api.font_setStyle(this, style);
+    return fog_api.font_setStyle(this, style);
   }
 
   FOG_INLINE err_t setWeight(uint32_t weight)
   {
-    return _api.font_setWeight(this, weight);
+    return fog_api.font_setWeight(this, weight);
   }
 
   FOG_INLINE err_t setVariant(uint32_t variant)
   {
-    return _api.font_setVariant(this, variant);
+    return fog_api.font_setVariant(this, variant);
   }
 
   FOG_INLINE err_t setDecoration(uint32_t decoration)
   {
-    return _api.font_setDecoration(this, decoration);
+    return fog_api.font_setDecoration(this, decoration);
   }
 
   FOG_INLINE err_t setKerning(uint32_t kerning)
   {
-    return _api.font_setKerning(this, kerning);
+    return fog_api.font_setKerning(this, kerning);
   }
 
   FOG_INLINE err_t setHinting(uint32_t hinting)
   {
-    return _api.font_setHinting(this, hinting);
+    return fog_api.font_setHinting(this, hinting);
   }
 
   FOG_INLINE err_t setAlignMode(uint32_t alignMode)
   {
-    return _api.font_setAlignMode(this, alignMode);
+    return fog_api.font_setAlignMode(this, alignMode);
   }
 
   // --------------------------------------------------------------------------
@@ -288,7 +288,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t setTransform(const TransformF& transform)
   {
-    return _api.font_setTransform(this, &transform);
+    return fog_api.font_setTransform(this, &transform);
   }
 
   // --------------------------------------------------------------------------
@@ -311,7 +311,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t setForceCaching(bool val)
   {
-    return _api.font_setForceCaching(this, val);
+    return fog_api.font_setForceCaching(this, val);
   }
 
   // --------------------------------------------------------------------------
@@ -320,7 +320,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE void reset()
   {
-    _api.font_reset(this);
+    fog_api.font_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -329,18 +329,18 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t create(const StringW& family, float height, uint32_t unit)
   {
-    return _api.font_create(this, &family, height, unit);
+    return fog_api.font_create(this, &family, height, unit);
   }
 
   FOG_INLINE err_t create(const StringW& family, float height, uint32_t unit,
     const FontHints& hints, const TransformF& transform)
   {
-    return _api.font_createEx(this, &family, height, unit, &hints, &transform);
+    return fog_api.font_createEx(this, &family, height, unit, &hints, &transform);
   }
 
   FOG_INLINE err_t _fromFace(FontFace* face, float height, uint32_t unit)
   {
-    return _api.font_fromFace(this, face, height, unit);
+    return fog_api.font_fromFace(this, face, height, unit);
   }
 
   // --------------------------------------------------------------------------
@@ -349,42 +349,42 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE err_t getTextOutline(PathF& dst, uint32_t cntOp, const PointF& pt, const StubW& str) const
   {
-    return _api.font_getTextOutlineFStubW(this, &dst, cntOp, &pt, &str);
+    return fog_api.font_getTextOutlineFStubW(this, &dst, cntOp, &pt, &str);
   }
 
   FOG_INLINE err_t getTextOutline(PathF& dst, uint32_t cntOp, const PointF& pt, const StringW& str) const
   {
-    return _api.font_getTextOutlineFStringW(this, &dst, cntOp, &pt, &str);
+    return fog_api.font_getTextOutlineFStringW(this, &dst, cntOp, &pt, &str);
   }
 
   FOG_INLINE err_t getTextOutline(PathD& dst, uint32_t cntOp, const PointD& pt, const StubW& str) const
   {
-    return _api.font_getTextOutlineDStubW(this, &dst, cntOp, &pt, &str);
+    return fog_api.font_getTextOutlineDStubW(this, &dst, cntOp, &pt, &str);
   }
 
   FOG_INLINE err_t getTextOutline(PathD& dst, uint32_t cntOp, const PointD& pt, const StringW& str) const
   {
-    return _api.font_getTextOutlineDStringW(this, &dst, cntOp, &pt, &str);
+    return fog_api.font_getTextOutlineDStringW(this, &dst, cntOp, &pt, &str);
   }
 
   FOG_INLINE err_t getTextExtents(TextExtentsF& extents, const StubW& str) const
   {
-    return _api.font_getTextExtentsFStubW(this, &extents, &str);
+    return fog_api.font_getTextExtentsFStubW(this, &extents, &str);
   }
 
   FOG_INLINE err_t getTextExtents(TextExtentsF& extents, const StringW& str) const
   {
-    return _api.font_getTextExtentsFStringW(this, &extents, &str);
+    return fog_api.font_getTextExtentsFStringW(this, &extents, &str);
   }
 
   FOG_INLINE err_t getTextExtents(TextExtentsD& extents, const StubW& str) const
   {
-    return _api.font_getTextExtentsDStubW(this, &extents, &str);
+    return fog_api.font_getTextExtentsDStubW(this, &extents, &str);
   }
 
   FOG_INLINE err_t getTextExtents(TextExtentsD& extents, const StringW& str) const
   {
-    return _api.font_getTextExtentsDStringW(this, &extents, &str);
+    return fog_api.font_getTextExtentsDStringW(this, &extents, &str);
   }
 
   // --------------------------------------------------------------------------
@@ -393,7 +393,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE bool eq(const Font& other) const
   {
-    return _api.font_eq(this, &other);
+    return fog_api.font_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -402,7 +402,7 @@ struct FOG_NO_EXPORT Font
 
   FOG_INLINE Font& operator=(const Font& other)
   {
-    _api.font_copy(this, &other);
+    fog_api.font_copy(this, &other);
     return *this;
   }
 
@@ -415,12 +415,12 @@ struct FOG_NO_EXPORT Font
 
   static FOG_INLINE bool eq(const Font* a, const Font* b)
   {
-    return _api.font_eq(a, b);
+    return fog_api.font_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.font_eq;
+    return (EqFunc)fog_api.font_eq;
   }
 
   // --------------------------------------------------------------------------

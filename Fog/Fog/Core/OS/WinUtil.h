@@ -36,37 +36,37 @@ struct FOG_NO_EXPORT WinUtil
 {
   static FOG_INLINE err_t getErrFromWinErrorCode(DWORD code)
   {
-    return _api.winutil_getErrFromWinErrorCode(code);
+    return fog_api.winutil_getErrFromWinErrorCode(code);
   }
 
   static FOG_INLINE err_t getErrFromWinLastError()
   {
-    return _api.winutil_getErrFromWinLastError();
+    return fog_api.winutil_getErrFromWinLastError();
   }
 
   static FOG_INLINE uint32_t getWinVersion()
   {
-    return _api.winutil_getWinVersion(NULL);
+    return fog_api.winutil_getWinVersion(NULL);
   }
 
   static FOG_INLINE uint32_t getWinVersion(WinVersion& version)
   {
-    return _api.winutil_getWinVersion(&version);
+    return fog_api.winutil_getWinVersion(&version);
   }
 
   static FOG_INLINE err_t getWinDirectory(StringW& dst)
   {
-    return _api.winutil_getWinDirectory(&dst);
+    return fog_api.winutil_getWinDirectory(&dst);
   }
 
   static FOG_INLINE err_t getModuleFileName(StringW& dst, HMODULE hModule)
   {
-    return _api.winutil_getModuleFileName(&dst, hModule);
+    return fog_api.winutil_getModuleFileName(&dst, hModule);
   }
 
   static FOG_INLINE err_t makeWinPath(StringW& dst, const StringW& src)
   {
-    return _api.winutil_makeWinPath(&dst, &src);
+    return fog_api.winutil_makeWinPath(&dst, &src);
   }
 };
 

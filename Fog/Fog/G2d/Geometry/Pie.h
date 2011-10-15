@@ -66,12 +66,12 @@ struct FOG_NO_EXPORT PieF : ArcF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.arcf_getBoundingBox(this, &dst, tr, true);
+    return fog_api.arcf_getBoundingBox(this, &dst, tr, true);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.arcf_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, true);
+    err_t err = fog_api.arcf_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr, true);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT PieF : ArcF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _api.pief_hitTest(this, &pt);
+    return fog_api.pief_hitTest(this, &pt);
   }
 };
 
@@ -134,12 +134,12 @@ struct FOG_NO_EXPORT PieD : ArcD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.arcd_getBoundingBox(this, &dst, tr, true);
+    return fog_api.arcd_getBoundingBox(this, &dst, tr, true);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.arcd_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, true);
+    err_t err = fog_api.arcd_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr, true);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -151,7 +151,7 @@ struct FOG_NO_EXPORT PieD : ArcD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _api.pied_hitTest(this, &pt);
+    return fog_api.pied_hitTest(this, &pt);
   }
 };
 

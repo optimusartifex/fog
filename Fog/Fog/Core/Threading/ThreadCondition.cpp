@@ -13,6 +13,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadCondition.h>
 #include <Fog/Core/Tools/List.h>
@@ -24,18 +25,13 @@
 # include <sys/time.h>
 #endif // FOG_OS_POSIX
 
-namespace Fog {
-
-// ============================================================================
-// [Fog::ThreadCondition]
-// ============================================================================
-
 /*
 FAQ On subtle implementation details:
 
 1) What makes this problem subtle? Please take a look at "Strategies for
 implementing POSIX Condition Variables on Win32" by Douglas C. Schmidt and
 Irfan Pyarali:
+
   http://www.cs.wustl.edu/~schmidt/win32-cv-1.html
 
 It includes discussions of numerous flawed strategies for implementing this
@@ -68,11 +64,11 @@ signal() or broadcast().  The series of actions leading to this are:
   b) That thread (in (a)) is randomly pre-empted after the above line, leaving
      the waitingEvent reset (unsignaled) and still in the _waitingList.
 
-  c) A call to Signal() (or broadcast()) on a second thread proceeds, and
+  c) A call to signal() (or broadcast()) on a second thread proceeds, and
      selects the waiting cv_event (identified in step (b)) as the event to
      revive via a call to SetEvent().
 
-  d) The Signal() method (step c) calls SetEvent() on waitingEvent (step b).
+  d) The signal() method (step c) calls SetEvent() on waitingEvent (step b).
 
   e) The waiting cv_event (step b) is now signaled, but no thread is waiting on
      it.
@@ -85,7 +81,7 @@ spurious events are very rare. They can only (I think) appear when the race
 described in FAQ-question-3 takes place. This should be very rare.  Most(?)
 uses will involve only timer expiration, or only signal/broadcast() actions.
 When both are used, it will be rare that the race will appear, and it would
-require MANY Wait() and signaling activities.  If this implementation did not
+require MANY wait() and signaling activities.  If this implementation did not
 recycle events, then it would have to create and destroy events for every call
 to wait(). That allocation/deallocation and associated construction/destruction
 would be costly (per wait), and would only be a rare benefit (when the race was
@@ -103,7 +99,7 @@ significantly.
 
 6) How is it that the callers lock is released atomically with the entry into a
 wait state? We commit to the wait activity when we allocate the wait_event for
-use in a given call to Wait(). This allocation takes place before the caller's
+use in a given call to wait(). This allocation takes place before the caller's
 lock is released (and actually before our _internalLock is released). That
 allocation is the defining moment when "the wait state has been entered," as
 that thread *can* now be signaled by a call to broadcast() or signal(). Hence
@@ -139,7 +135,7 @@ broadcast() is done so outside the protection of the internal lock. As a result,
 other threads, such as the thread wherein a related event is waiting, could
 asynchronously manipulate the links around a cv_event. As a result, the link
 structure cannot be used outside a lock. broadcast() could iterate over waiting
-events by cycling in-and-out of the protection of the internal_lock, but that
+events by cycling in-and-out of the protection of the _internalLock, but that
 appears more expensive than copying the list into an STL stack.
 
 11) Why did the lock.h file need to be modified so much for this change? Central
@@ -154,55 +150,234 @@ sure no one release()s a Lock more than they Acquire()ed it, and there is
 ifdef'ed functionality that can detect nested locks (legal under Windows, but
 not under Posix).
 
-12) Why is it that the cv_events removed from list in broadcast() and signal()
-are not leaked? How are they recovered? The cv_events that appear to leak are
+12) Why is it that the WinCvEvent`s removed from list in broadcast() and signal()
+are not leaked? How are they recovered? The WinCvEvent`s that appear to leak are
 taken from the _waitingList.  For each element in that list, there is currently
-a thread in or around the WaitForSingleObject() call of Wait(), and those
+a thread in or around the WaitForSingleObject() call of wait(), and those
 threads have references to these otherwise leaked events. They are passed as
 arguments to be recycled just aftre returning from WaitForSingleObject().
-
-13) Why did you use a custom container class (the linked list), when STL has
-perfectly good containers, such as an STL list? The STL list, as with any
-container, does not guarantee the utility of an iterator across manipulation
-(such as insertions and deletions) of the underlying container. The custom
-double-linked-list container provided that assurance. I don't believe any
-combination of STL containers provided the services that were needed at the same
-O(1) efficiency as the custom linked list. The unusual requirement for the
-container class is that a reference to an item within a container (an iterator)
-needed to be maintained across an arbitrary manipulation of the container. This
-requirement exposes itself in the Wait() method, where a waitingEvent must be
-selected prior to the WaitForSingleObject(), and then it must be used as part of
-recycling to remove the related instance from the waiting_list. A hash table
-(STL map) could be used, but I was embarrased to use a complex and relatively
-low efficiency container when a doubly linked list provided O(1) performance in
-all required operations. Since other operations to provide performance-and/or-
-fairness required queue (FIFO) and list (LIFO) containers, I would also have
-needed to use an STL list/queue as well as an STL map. In the end I decided it
-would be "fun" to just do it right, and I put so many assertions into the
-container class that it is trivial to code review and validate its correctness.
 */
 
+namespace Fog {
+
+// ============================================================================
+// [Fog::ThreadCondition (Windows 2000/XP)]
+// ============================================================================
+
 #if defined(FOG_OS_WINDOWS)
-ThreadCondition::ThreadCondition(Lock* userLock) :
-  _userLock(*userLock),
-  _runState(RUNNING),
-  _allocationCounter(0),
-  _recyclingListSize(0)
+
+//! @internal
+//!
+//! @brief Define WinCvEvent class that is used to form circularly linked lists.
+//!
+//! The list container is an element with NULL as its handle_ value.
+//! The actual list elements have a non-zero handle_ value.
+//! All calls to methods MUST be done under protection of a lock so that links
+//! can be validated.  Without the lock, some links might asynchronously
+//! change, and the assertions would fail (as would list change operations).
+struct FOG_NO_EXPORT WinCvEvent
 {
-  FOG_ASSERT(userLock);
+  // --------------------------------------------------------------------------
+  // [Methods called on cvar->_waitingList and cvar->_recyclingList]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isEmpty() const
+  {
+    return this == next;
+  }
+
+  FOG_INLINE void pushBack(WinCvEvent* other)
+  {
+    // Prepare other for insertion.
+    other->prev = prev;
+    other->next = this;
+
+    // Cut into list.
+    prev->next = other;
+    prev = other;
+  }
+
+  FOG_INLINE WinCvEvent* popFront()
+  {
+    FOG_ASSERT(!isEmpty());
+    return next->extract();
+  }
+
+  FOG_INLINE WinCvEvent* popBack()
+  {
+    FOG_ASSERT(!isEmpty());
+    return prev->extract();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Methods called on elements (items which contain HANDLE)]
+  // --------------------------------------------------------------------------
+
+  //! @brief Accessor method.
+  FOG_INLINE HANDLE getHandle() const
+  {
+    FOG_ASSERT(handle != NULL);
+    return handle;
+  }
+
+  //! @brief Pull an element from a list (if it's in one).
+  FOG_INLINE WinCvEvent* extract()
+  {
+    if (!isEmpty())
+    {
+      // Stitch neighbors together.
+      next->prev = prev;
+      prev->next = next;
+
+      // Set to empty.
+      prev = next = this;
+    }
+
+    FOG_ASSERT(isEmpty());
+    return this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  WinCvEvent* next;
+  WinCvEvent* prev;
+  HANDLE handle;
+};
+
+struct FOG_NO_EXPORT WinCvImpl
+{
+  //! @brief Run state enumeration.
+  //!
+  //! Note that RUNNING is an unlikely number to have in RAM by accident.
+  //! This helps with defensive destructor coding in the face of user error.
+  enum RunState { SHUTDOWN = 0, RUNNING = 64213 };
+
+  //! @brief Private critical section for access to member data.
+  Static<Lock> _internalLock;
+
+  //! @brief Events that threads are blocked on.
+  WinCvEvent _waitingList;
+  //! @brief Free list for old events.
+  WinCvEvent _recyclingList;
+
+  //! @brief Count of old events in recyclingList.
+  uint _recyclingListSize;
+  //! @brief The number of allocated, but not yet deleted events.
+  uint _allocationCounter;
+  //! @brief Run state.
+  uint _runState;
+};
+
+// GetEventForWaiting() provides a unique cv_event for any caller that needs to
+// wait.  This means that (worst case) we may over time create as many cv_event
+// objects as there are threads simultaneously using this instance's wait()
+// functionality.
+static WinCvEvent* ThreadCondition_getEventForWaiting(ThreadCondition* self)
+{
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(MemMgr::alloc(sizeof(WinCvImpl)));
+  FOG_ASSERT(cvar != NULL);
+
+  // We hold cvar->_internalLock, courtesy of wait().
+  WinCvEvent* e;
+
+  if (cvar->_recyclingListSize == 0)
+  {
+    FOG_ASSERT(_recyclingList.isEmpty());
+
+    e = reinterpret_cast<WinCvEvent*>(MemMgr::alloc(sizeof(WinCvEvent)));
+    if (FOG_IS_NULL(e))
+      return NULL;
+
+    e->next = e;
+    e->prev = e;
+    e->handle = ::CreateEventW(NULL, false, false, NULL);
+
+    if (e->handle == NULL)
+    {
+      MemMgr::free(e);
+      return NULL;
+    }
+
+    cvar->_allocationCounter++;
+  }
+  else
+  {
+    e = cvar->_recyclingList.popFront();
+    cvar->_recyclingListSize--;
+  }
+
+  cvar->_waitingList.pushBack(e);
+  return e;
 }
 
-ThreadCondition::~ThreadCondition()
+// ThreadCondition::recycleEvent() takes a WinCvEvent that was previously used 
+// for wait()ing, and recycles it for use in future wait() calls for this or 
+// other threads. Note that there is a tiny chance that the WinCvEvent is still
+// signaled when we obtain it, and that can cause spurious signals (if/when we
+// re-use the WinCvEvent), but such is quite rare (see FAQ-question-5).
+static void FOG_CDECL ThreadCondition_recycleEvent(ThreadCondition* self, WinCvEvent* e)
 {
-  AutoLock locked(_internalLock);
-  _runState = SHUTDOWN; // Prevent any more waiting.
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(self->_cvar);
+  FOG_ASSERT(cvar != NULL);
 
-  FOG_ASSERT(_recyclingListSize == _allocationCounter);
+  // We hold cvar->_internalLock, courtesy of wait(). If the WinCvEvent timed
+  // out, then it is necessary to remove it from cvar->_waitingList. If it was
+  // selected by broadcast() or signal(), then it is already gone.
+
+  // Possibly redundant
+  e->extract();
+
+  cvar->_recyclingList.pushBack(e);
+  cvar->_recyclingListSize++;
+}
+
+static err_t FOG_CDECL ThreadCondition_ctor(ThreadCondition* self, Lock* lock)
+{
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(MemMgr::alloc(sizeof(WinCvImpl)));
+  if (FOG_IS_NULL(cvar))
+  {
+    self->_cvar = NULL;
+    self->_lock = NULL;
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  cvar->_internalLock.init();
+  cvar->_runState = WinCvImpl::RUNNING;
+  cvar->_allocationCounter = 0;
+  cvar->_recyclingListSize = 0;
+
+  cvar->_waitingList.next = &cvar->_waitingList;
+  cvar->_waitingList.prev = &cvar->_waitingList;
+  cvar->_waitingList.handle = NULL;
+
+  cvar->_recyclingList.next = &cvar->_recyclingList;
+  cvar->_recyclingList.prev = &cvar->_recyclingList;
+  cvar->_recyclingList.handle = NULL;
+
+  self->_cvar = cvar;
+  self->_lock = lock;
+
+  return ERR_OK;
+}
+
+static void FOG_CDECL ThreadCondition_dtor(ThreadCondition* self)
+{
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(self->_cvar);
+  if (FOG_IS_NULL(cvar))
+    return;
+
+  AutoLock locked(cvar->_internalLock);
+
+  // Prevent any more waiting.
+  cvar->_runState = WinCvImpl::SHUTDOWN;
+  FOG_ASSERT(cvar->_recyclingListSize == cvar->_allocationCounter);
 
   // Rare shutdown problem.
-  if (_recyclingListSize != _allocationCounter)
+  if (cvar->_recyclingListSize != cvar->_allocationCounter)
   {
-    // There are threads of execution still in this->timedWait() and yet the
+    // There are threads of execution still in this->wait(time) and yet the
     // caller has instigated the destruction of this instance :-/.
     // A common reason for such "overly hasty" destruction is that the caller
     // was not willing to wait for all the threads to terminate.  Such hasty
@@ -210,66 +385,85 @@ ThreadCondition::~ThreadCondition()
     // waiting thread(s) one last chance to exit gracefully (prior to our
     // destruction).
     // Note: _waitingList *might* be empty, but recycling is still pending.
-    AutoUnlock autoUnlock(_internalLock);
-    broadcast(); // Make sure all waiting threads have been signaled.
-    ::Sleep(10); // Give threads a chance to grab _internalLock.
-    // All contained threads should be blocked on _userLock by now :-).
-  }  // Reacquire _internalLock.
+    AutoUnlock autoUnlock(cvar->_internalLock);
 
-  FOG_ASSERT(_recyclingListSize == _allocationCounter);
-}
+    // Make sure all waiting threads have been signaled.
+    self->broadcast();
 
-void ThreadCondition::wait()
-{
-  // Default to "wait forever" timing, which means have to get a signal()
-  // or broadcast() to come out of this wait state.
-  timedWait(TimeDelta::fromMilliseconds(INFINITE));
-}
+    // Give threads a chance to grab _internalLock.
+    ::Sleep(10);
+    // All contained threads should be blocked on self->_lock by now.
+  } // Reacquire _internalLock.
 
-void ThreadCondition::timedWait(const TimeDelta& maxTime)
-{
-  CVEvent* waitingEvent;
-  HANDLE handle;
+  // Free WinCvEvent instances, including HANDLEs.
   {
-    AutoLock locked(_internalLock);
-    // Destruction in progress.
-    if (RUNNING != _runState) return;
-    waitingEvent = getEventForWaiting();
-    handle = waitingEvent->handle();
-    FOG_ASSERT(handle);
-  }  // Release internal_lock.
+    FOG_ASSERT(cvar->_recyclingListSize == cvar->_allocationCounter);
+    WinCvEvent* e = cvar->_recyclingList.next;
 
-  {
-    // Release caller's lock
-    AutoUnlock autoUnlock(_userLock);
-    WaitForSingleObject(handle, static_cast<DWORD>(maxTime.getMilliseconds()));
-    // Minimize spurious signal creation window by recycling asap.
-    AutoLock locked(_internalLock);
-    recycleEvent(waitingEvent);
-    // Release _internalLock
-    // Reacquire callers lock to depth at entry.
+    while (e != &cvar->_recyclingList)
+    {
+      WinCvEvent* next = e->next;
+
+      int retVal = ::CloseHandle(e->handle);
+      FOG_ASSERT(retVal);
+      MemMgr::free(e);
+
+      e = next;
+    }
   }
+
+  cvar->_internalLock.destroy();
+  MemMgr::free(cvar);
 }
 
-// Broadcast() is guaranteed to signal all threads that were waiting (i.e., had
-// a cv_event internally allocated for them) before Broadcast() was called.
-void ThreadCondition::broadcast()
+// ThreadCondition::signal() will select one of the waiting threads, and signal
+// it (signal its WinCvEvent). For better performance we signal the thread that
+// went to sleep most recently (LIFO). If we want fairness, then we wake the 
+// thread that has been sleeping the longest (FIFO).
+static void FOG_CDECL ThreadCondition_signal(ThreadCondition* self)
 {
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(self->_cvar);
+  if (FOG_IS_NULL(cvar))
+    return;
+
+  HANDLE handle;
+
+  {
+    AutoLock locked(cvar->_internalLock);
+    if (cvar->_waitingList.isEmpty())
+      return;  // No one to signal.
+
+    // Only performance option should be used. This is not a leak from 
+    // cvar->_waitingList. See FAQ-question 12.
+    handle = cvar->_waitingList.popBack()->getHandle();  // LIFO.
+  } // Release cvar->_internalLock.
+
+  ::SetEvent(handle);
+}
+
+// broadcast() is guaranteed to signal all threads that were waiting (i.e., had
+// a cv_event internally allocated for them) before broadcast() was called.
+static void FOG_CDECL ThreadCondition_broadcast(ThreadCondition* self)
+{
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(self->_cvar);
+  if (FOG_IS_NULL(cvar))
+    return;
+
   // See FAQ-question-10.
   List<HANDLE> handleList;
-  {
-    AutoLock locked(_internalLock);
 
-    if (_waitingList.isEmpty())
+  {
+    AutoLock locked(cvar->_internalLock);
+
+    if (cvar->_waitingList.isEmpty())
       return;
 
-    while (!_waitingList.isEmpty())
+    while (!cvar->_waitingList.isEmpty())
     {
-      // This is not a leak from _waitingList.  See FAQ-question 12.
-      handleList.append(_waitingList.popBack()->handle());
+      // This is not a leak from _waitingList. See FAQ-question 12.
+      handleList.append(cvar->_waitingList.popBack()->getHandle());
     }
-    // Release _internalLock.
-  }
+  } // Release cvar->_internalLock.
 
   while (!handleList.isEmpty())
   {
@@ -278,279 +472,211 @@ void ThreadCondition::broadcast()
   }
 }
 
-// Signal() will select one of the waiting threads, and signal it (signal its
-// cv_event).  For better performance we signal the thread that went to sleep
-// most recently (LIFO).  If we want fairness, then we wake the thread that has
-// been sleeping the longest (FIFO).
-void ThreadCondition::signal()
+static void FOG_CDECL ThreadCondition_wait(ThreadCondition* self, const TimeDelta* maxTime)
 {
+  WinCvImpl* cvar = reinterpret_cast<WinCvImpl*>(self->_cvar);
+  if (FOG_IS_NULL(cvar))
+    return;
+
+  DWORD ms = INFINITE;
+
+  if (maxTime != NULL)
+    ms = static_cast<DWORD>(maxTime->getMilliseconds());
+
+  WinCvEvent* waitingEvent;
   HANDLE handle;
+
   {
-    AutoLock locked(_internalLock);
-    if (_waitingList.isEmpty())
-      return;  // No one to signal.
-    // Only performance option should be used.
-    // This is not a leak from waiting_list.  See FAQ-question 12.
-    handle = _waitingList.popBack()->handle();  // LIFO.
-    // Release _internalLock.
-  }
-  ::SetEvent(handle);
-}
+    AutoLock locked(cvar->_internalLock);
 
-// GetEventForWaiting() provides a unique cv_event for any caller that needs to
-// wait.  This means that (worst case) we may over time create as many cv_event
-// objects as there are threads simultaneously using this instance's Wait()
-// functionality.
-ThreadCondition::CVEvent* ThreadCondition::getEventForWaiting()
-{
-  // We hold internal_lock, courtesy of Wait().
-  CVEvent* cv_event;
-  if (0 == _recyclingListSize)
+    // Destruction in progress.
+    if (cvar->_runState != WinCvImpl::RUNNING)
+      return;
+
+    waitingEvent = ThreadCondition_getEventForWaiting(self);
+    handle = waitingEvent->getHandle();
+    FOG_ASSERT(handle);
+  } // Release _internalLock.
+
   {
-    FOG_ASSERT(_recyclingList.isEmpty());
-    cv_event = fog_new CVEvent();
-    // TODO: if (cv_event == NULL) ???
-    cv_event->initListElement();
-    _allocationCounter++;
-    FOG_ASSERT(cv_event->handle());
-  }
-  else
-  {
-    cv_event = _recyclingList.popFront();
-    _recyclingListSize--;
-  }
-  _waitingList.pushBack(cv_event);
-  return cv_event;
-}
+    // Release caller's lock
+    AutoUnlock autoUnlock(*self->_lock);
+    ::WaitForSingleObject(handle, ms);
 
-// RecycleEvent() takes a cv_event that was previously used for Wait()ing, and
-// recycles it for use in future Wait() calls for this or other threads.
-// Note that there is a tiny chance that the cv_event is still signaled when we
-// obtain it, and that can cause spurious signals (if/when we re-use the
-// cv_event), but such is quite rare (see FAQ-question-5).
-void ThreadCondition::recycleEvent(ThreadCondition::CVEvent* usedEvent)
-{
-  // We hold internal_lock, courtesy of Wait().
-  // If the cv_event timed out, then it is necessary to remove it from
-  // _waitingList.  If it was selected by Broadcast() or Signal(), then it is
-  // already gone.
-  usedEvent->extract();  // Possibly redundant
-  _recyclingList.pushBack(usedEvent);
-  _recyclingListSize++;
-}
+    // Minimize spurious signal creation window by recycling asap.
+    AutoLock locked(cvar->_internalLock);
+    ThreadCondition_recycleEvent(self, waitingEvent);
 
-//------------------------------------------------------------------------------
-// The next section provides the implementation for the private CVEvent class.
-//------------------------------------------------------------------------------
-
-// CVEvent provides a doubly-linked-list of events for use exclusively by the
-// ThreadCondition class.
-
-// This custom container was crafted because no simple combination of STL
-// classes appeared to support the functionality required.  The specific
-// unusual requirement for a linked-list-class is support for the Extract()
-// method, which can remove an element from a list, potentially for insertion
-// into a second list.  Most critically, the Extract() method is idempotent,
-// turning the indicated element into an extracted singleton whether it was
-// contained in a list or not.  This functionality allows one (or more) of
-// threads to do the extraction.  The iterator that identifies this extractable
-// element (in this case, a pointer to the list element) can be used after
-// arbitrary manipulation of the (possibly) enclosing list container.  In
-// general, STL containers do not provide iterators that can be used across
-// modifications (insertions/extractions) of the enclosing containers, and
-// certainly don't provide iterators that can be used if the identified
-// element is *deleted* (removed) from the container.
-
-// It is possible to use multiple redundant containers, such as an STL list,
-// and an STL map, to achieve similar container semantics.  This container has
-// only O(1) methods, while the corresponding (multiple) STL container approach
-// would have more complex O(log(N)) methods (yeah... N isn't that large).
-// Multiple containers also makes correctness more difficult to assert, as
-// data is redundantly stored and maintained, which is generally evil.
-
-ThreadCondition::CVEvent::CVEvent() : _handle(0)
-{
-  // Self referencing circular.
-  _next = _prev = this;
-}
-
-ThreadCondition::CVEvent::~CVEvent()
-{
-  if (_handle == 0)
-  {
-    // This is the list holder
-    while (!isEmpty())
-    {
-      CVEvent* cv_event = popFront();
-      FOG_ASSERT(cv_event->validateAsItem());
-      fog_delete(cv_event);
-    }
-  }
-
-  FOG_ASSERT(isSingleton());
-
-  if (_handle != 0)
-  {
-    int retVal = ::CloseHandle(_handle);
-    FOG_ASSERT(retVal);
-  }
-}
-
-// Change a container instance permanently into an element of a list.
-void ThreadCondition::CVEvent::initListElement()
-{
-  FOG_ASSERT(!_handle);
-  _handle = ::CreateEvent(NULL, false, false, NULL);
-  FOG_ASSERT(_handle);
-}
-
-// Methods for use on lists.
-bool ThreadCondition::CVEvent::isEmpty() const
-{
-  FOG_ASSERT(validateAsList());
-  return isSingleton();
-}
-
-void ThreadCondition::CVEvent::pushBack(CVEvent* other)
-{
-  FOG_ASSERT(validateAsList());
-  FOG_ASSERT(other->validateAsItem());
-  FOG_ASSERT(other->isSingleton());
-
-  // Prepare other for insertion.
-  other->_prev = _prev;
-  other->_next = this;
-
-  // Cut into list.
-  _prev->_next = other;
-  _prev = other;
-
-  FOG_ASSERT(validateAsDistinct(other));
-}
-
-ThreadCondition::CVEvent* ThreadCondition::CVEvent::popFront()
-{
-  FOG_ASSERT(validateAsList());
-  FOG_ASSERT(!isSingleton());
-  return _next->extract();
-}
-
-ThreadCondition::CVEvent* ThreadCondition::CVEvent::popBack()
-{
-  FOG_ASSERT(validateAsList());
-  FOG_ASSERT(!isSingleton());
-  return _prev->extract();
-}
-
-// Methods for use on list elements.
-// Accessor method.
-HANDLE ThreadCondition::CVEvent::handle() const
-{
-  FOG_ASSERT(validateAsItem());
-  return _handle;
-}
-
-// Pull an element from a list (if it's in one).
-ThreadCondition::CVEvent* ThreadCondition::CVEvent::extract()
-{
-  FOG_ASSERT(validateAsItem());
-  if (!isSingleton())
-  {
-    // Stitch neighbors together.
-    _next->_prev = _prev;
-    _prev->_next = _next;
-    // Make extractee into a singleton.
-    _prev = _next = this;
-  }
-  FOG_ASSERT(isSingleton());
-  return this;
-}
-
-// Method for use on a list element or on a list.
-bool ThreadCondition::CVEvent::isSingleton() const
-{
-  FOG_ASSERT(validateLinks());
-  return _next == this;
-}
-
-// Provide pre/post conditions to validate correct manipulations.
-bool ThreadCondition::CVEvent::validateAsDistinct(ThreadCondition::CVEvent* other) const
-{
-  return validateLinks() && other->validateLinks() && (this != other);
-}
-
-bool ThreadCondition::CVEvent::validateAsItem() const
-{
-  return (0 != _handle) && validateLinks();
-}
-
-bool ThreadCondition::CVEvent::validateAsList() const
-{
-  return (0 == _handle) && validateLinks();
-}
-
-bool ThreadCondition::CVEvent::validateLinks() const
-{
-  // Make sure both of our neighbors have links that point back to us.
-  // We don't do the O(n) check and traverse the whole loop, and instead only
-  // do a local check to (and returning from) our immediate neighbors.
-  return (_next->_prev == this) && (_prev->_next == this);
+    // Release _internalLock
+  } // Reacquire callers lock to depth at entry.
 }
 #endif // FOG_OS_WINDOWS
 
+// ============================================================================
+// [Fog::ThreadCondition (Windows Vista and newer)]
+// ============================================================================
+
+#if defined(FOG_OS_WINDOWS)
+
+typedef void (FOG_STDCALL* InitializeConditionVariableFunc)(void* ConditionVariable);
+typedef BOOL (FOG_STDCALL* SleepConditionVariableCSFunc)(void* ConditionVariable, PCRITICAL_SECTION CriticalSection, DWORD dwMilliseconds);
+typedef void (FOG_STDCALL* WakeConditionVariableFunc)(void* ConditionVariable);
+typedef void (FOG_STDCALL* WakeAllConditionVariableFunc)(void* ConditionVariable);
+
+struct FOG_NO_EXPORT ThreadConditionFuncsVista
+{
+  HMODULE kernel32;
+
+  InitializeConditionVariableFunc _InitializeConditionVariable;
+  SleepConditionVariableCSFunc _SleepConditionVariableCS;
+  WakeConditionVariableFunc _WakeConditionVariable;
+  WakeAllConditionVariableFunc _WakeAllConditionVariable;
+};
+static ThreadConditionFuncsVista ThreadCondition_funcs_vista;
+
+static err_t FOG_CDECL ThreadCondition_ctor_vista(ThreadCondition* self, Lock* lock)
+{
+  ThreadCondition_funcs_vista._InitializeConditionVariable(&self->_cvar);
+  self->_lock = lock;
+
+  return ERR_OK;
+}
+
+static void FOG_CDECL ThreadCondition_dtor_vista(ThreadCondition* self)
+{
+  // The documentation says that there is no API to destroy the condition
+  // variable, because the implementation doesn't need that. We only null
+  // the pointers.
+  self->_cvar = NULL;
+  self->_lock = NULL;
+}
+
+static void FOG_CDECL ThreadCondition_signal_vista(ThreadCondition* self)
+{
+  ThreadCondition_funcs_vista._WakeConditionVariable(&self->_cvar);
+}
+
+static void FOG_CDECL ThreadCondition_broadcast_vista(ThreadCondition* self)
+{
+  ThreadCondition_funcs_vista._WakeAllConditionVariable(&self->_cvar);
+}
+
+static void FOG_CDECL ThreadCondition_wait_vista(ThreadCondition* self, const TimeDelta* maxTime)
+{
+  DWORD ms = INFINITE;
+
+  if (maxTime != NULL)
+    ms = (DWORD)Math::min<int64_t>(maxTime->getMilliseconds(), INFINITE);
+
+  ThreadCondition_funcs_vista._SleepConditionVariableCS(&self->_cvar, &self->_lock->_handle, ms);
+}
+
+static void ThreadCondition_init_vista(void)
+{
+  ThreadConditionFuncsVista& funcs = ThreadCondition_funcs_vista;
+
+  funcs.kernel32 = ::LoadLibraryW(L"Kernel32.dll");
+  FOG_ASSERT(api.kernel32 != NULLL);
+
+  funcs._InitializeConditionVariable = (InitializeConditionVariableFunc)::GetProcAddress(funcs.kernel32, "InitializeConditionVariable");
+  if (funcs._InitializeConditionVariable == NULL) return;
+
+  funcs._SleepConditionVariableCS = (SleepConditionVariableCSFunc)::GetProcAddress(funcs.kernel32, "SleepConditionVariableCS");
+  funcs._WakeConditionVariable    = (WakeConditionVariableFunc   )::GetProcAddress(funcs.kernel32, "WakeConditionVariable"   );
+  funcs._WakeAllConditionVariable = (WakeAllConditionVariableFunc)::GetProcAddress(funcs.kernel32, "WakeAllConditionVariable");
+
+  fog_api.threadcondition_ctor = ThreadCondition_ctor_vista;
+  fog_api.threadcondition_dtor = ThreadCondition_dtor_vista;
+  fog_api.threadcondition_signal = ThreadCondition_signal_vista;
+  fog_api.threadcondition_broadcast = ThreadCondition_broadcast_vista;
+  fog_api.threadcondition_wait = ThreadCondition_wait_vista;
+}
+
+#endif // FOG_OS_WINDOWS
+
+// ============================================================================
+// [Fog::ThreadCondition (Posix)]
+// ============================================================================
+
 #if defined(FOG_OS_POSIX)
-ThreadCondition::ThreadCondition(Lock* userLock) :
-  _userMutex(&userLock->_handle)
+static err_t FOG_CDECL ThreadCondition_ctor(ThreadCondition* self, Lock* lock)
 {
-  int rv = pthread_cond_init(&_condition, NULL);
+  int rv = pthread_cond_init(&self->_cvar, NULL);
+
+  if (rv != 0)
+  {
+    self->_lock = NULL;
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  self->_lock = lock;
+  return ERR_OK;
+}
+
+static void ThreadCondition_dtor(ThreadCondition* self)
+{
+  int rv = pthread_cond_destroy(&self->_cvar);
   FOG_ASSERT(rv == 0);
 }
 
-ThreadCondition::~ThreadCondition()
+static void FOG_CDECL ThreadCondition_signal(ThreadCondition* self)
 {
-  int rv = pthread_cond_destroy(&_condition);
+  int rv = pthread_cond_signal(&self->_cvar);
   FOG_ASSERT(rv == 0);
 }
 
-void ThreadCondition::wait()
+static void FOG_CDECL ThreadCondition_broadcast(ThreadCondition* self)
 {
-  int rv = pthread_cond_wait(&_condition, _userMutex);
+  int rv = pthread_cond_broadcast(&self->_cvar);
   FOG_ASSERT(rv == 0);
 }
 
-void ThreadCondition::timedWait(const TimeDelta& maxTime)
+static void FOG_CDECL ThreadCondition_wait(ThreadCondition* self, const TimeDelta* maxTime)
 {
-  int64_t us = maxTime.getMicroseconds();
+  if (maxTime == NULL)
+  {
+    int rv = pthread_cond_wait(&self->_cvar, &self->_lock->_handle);
+    FOG_ASSERT(rv == 0);
+  }
+  else
+  {
+    int64_t us = maxTime->getMicroseconds();
 
-  // The timeout argument to pthread_cond_timedwait is in absolute time.
-  struct timeval now;
-  struct timespec atm;
+    // The timeout argument to pthread_cond_timedwait is in absolute time.
+    struct timeval now;
+    struct timespec atm;
 
-  gettimeofday(&now, NULL);
+    ::gettimeofday(&now, NULL);
 
-  atm.tv_sec   = (now.tv_sec  + (us / TIME_US_PER_SECOND));
-  atm.tv_nsec  = (now.tv_usec + (us % TIME_US_PER_SECOND)) * 1000;
-  atm.tv_sec  += atm.tv_nsec / FOG_INT64_C(1000000000);
-  atm.tv_nsec %= FOG_INT64_C(1000000000);
+    atm.tv_sec   = (now.tv_sec  + (us / TIME_US_PER_SECOND));
+    atm.tv_nsec  = (now.tv_usec + (us % TIME_US_PER_SECOND)) * 1000;
+    atm.tv_sec  += atm.tv_nsec / FOG_INT64_C(1000000000);
+    atm.tv_nsec %= FOG_INT64_C(1000000000);
 
-  // Overflow paranoia.
-  FOG_ASSERT(atm.tv_sec >= now.tv_sec);
+    // Overflow paranoia.
+    FOG_ASSERT(atm.tv_sec >= now.tv_sec);
 
-  int rv = pthread_cond_timedwait(&_condition, _userMutex, &atm);
-  FOG_ASSERT(rv == 0 || rv == ETIMEDOUT);
-}
-
-void ThreadCondition::broadcast()
-{
-  int rv = pthread_cond_broadcast(&_condition);
-  FOG_ASSERT(rv == 0);
-}
-
-void ThreadCondition::signal()
-{
-  int rv = pthread_cond_signal(&_condition);
-  FOG_ASSERT(rv == 0);
+    int rv = pthread_cond_timedwait(&self->_cvar, &self->_lock->_handle, &atm);
+    FOG_ASSERT(rv == 0 || rv == ETIMEDOUT);
+  }
 }
 #endif // FOG_OS_POSIX
+
+// ============================================================================
+// [Init / Fini]
+// ============================================================================
+
+FOG_NO_EXPORT void ThreadCondition_init(void)
+{
+  fog_api.threadcondition_ctor = ThreadCondition_ctor;
+  fog_api.threadcondition_dtor = ThreadCondition_dtor;
+  fog_api.threadcondition_signal = ThreadCondition_signal;
+  fog_api.threadcondition_broadcast = ThreadCondition_broadcast;
+  fog_api.threadcondition_wait = ThreadCondition_wait;
+
+#if defined(FOG_OS_WINDOWS)
+  ThreadCondition_init_vista();
+#endif // FOG_OS_WINDOWS
+}
 
 } // Fog namespace

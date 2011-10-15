@@ -18,13 +18,19 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::ThreadPool - Global]
+// ============================================================================
+
+static Static<ThreadPool> ThreadPool_oInstance;
+
+// ============================================================================
 // [Fog::ThreadPool - Helpers]
 // ============================================================================
 
-static bool ThreadPool_releaseThread(ThreadPool* self, Thread* thread, int workId)
+static bool ThreadPool_releaseThreadInternal(ThreadPool* self, Thread* thread, int workerId)
 {
-  ThreadPool::PoolEntry* cur = self->_usedThreads;
-  ThreadPool::PoolEntry* prev = NULL;
+  ThreadPoolEntry* cur = self->_usedThreads;
+  ThreadPoolEntry* prev = NULL;
 
   while (cur)
   {
@@ -36,7 +42,7 @@ static bool ThreadPool_releaseThread(ThreadPool* self, Thread* thread, int workI
         self->_usedThreads = cur->next;
 
       cur->next = self->_unusedThreads;
-      if (workId != -1) cur->workId = workId;
+      if (workerId != -1) cur->workerId = workerId;
       self->_unusedThreads = cur;
 
       return true;
@@ -49,56 +55,80 @@ static bool ThreadPool_releaseThread(ThreadPool* self, Thread* thread, int workI
   return false;
 }
 
-// ============================================================================
-// [Fog::ThreadPool - Local]
-// ============================================================================
+static Thread* FOG_CDECL ThreadPool_createThread(ThreadPool* self)
+{
+  Thread* thread = fog_new Thread();
 
-static Static<ThreadPool> _core_threadpool_global;
+  if (FOG_IS_NULL(thread))
+    return NULL;
 
+  self->_numThreads++;
+  return thread;
+}
+
+static void FOG_CDECL ThreadPool_releaseAllAvailable(ThreadPool* self)
+{
+  AutoLock locked(self->_lock);
+  ThreadPoolEntry* cur = self->_unusedThreads;
+
+  while (cur)
+  {
+    ThreadPoolEntry* next = cur->next;
+    Thread* thread = cur->thread;
+
+    MemMgr::free(cur);
+    fog_delete(thread);
+
+    cur = next;
+    self->_numThreads--;
+  }
+
+  self->_unusedThreads = NULL;
+}
 // ============================================================================
 // [Fog::ThreadPool - Construction / Destruction]
 // ============================================================================
 
-ThreadPool::ThreadPool() :
-  // Safe defaults...
-  _minThreads(1),
-  _maxThreads(32),
-  _numThreads(0),
-  _usedThreads(NULL),
-  _unusedThreads(NULL)
+static void FOG_CDECL ThreadPool_ctor(ThreadPool* self)
 {
+  self->_lock.init();
+
+  self->_minThreads = 1;
+  self->_maxThreads = 32;
+  self->_numThreads = 0;
+  self->_usedThreads = NULL;
+  self->_unusedThreads = NULL;
 }
 
-ThreadPool::~ThreadPool()
+static void FOG_CDECL ThreadPool_dtor(ThreadPool* self)
 {
-  {
-    bool used;
-    _lock.lock();
-    used = _usedThreads != NULL;
-    _lock.unlock();
+  self->_lock->lock();
+  bool used = self->_usedThreads != NULL;
+  self->_lock->unlock();
 
-    if (used)
-    {
-      Debug::dbgFunc("Fog::ThreadPool", "~ThreadPool()", "Destroying instance, but some threads are still used, waiting...\n");
-      while (_usedThreads != NULL) Thread::yield();
-    }
+  if (used)
+  {
+    Debug::dbgFunc("Fog::ThreadPool", "~ThreadPool()", "Destroying instance, but some threads are still used, waiting...\n");
+    while (self->_usedThreads != NULL)
+      Thread::yield();
   }
 
-  releaseAllAvailable();
+  ThreadPool_releaseAllAvailable(self);
+  self->_lock.destroy();
 }
 
 // ============================================================================
 // [Fog::ThreadPool - Thread Management]
 // ============================================================================
 
-err_t ThreadPool::getThread(Thread** threads, int workId)
+static err_t FOG_CDECL ThreadPool_getThread(ThreadPool* self, Thread** threads, int workerId)
 {
-  return getThreads(threads, 1, workId);
+  return self->getThreads(threads, 1, workerId);
 }
 
-err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
+static err_t FOG_CDECL ThreadPool_getThreads(ThreadPool* self, Thread** threads, size_t _count, int workerId)
 {
-  AutoLock locked(_lock);
+  AutoLock locked(self->_lock);
 
   err_t err = ERR_OK;
   uint i;
@@ -106,24 +136,24 @@ err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
 
   for (i = 0; i < count; i++)
   {
-    PoolEntry* pe = NULL;
+    ThreadPoolEntry* pe = NULL;
 
-    if (_unusedThreads)
+    if (self->_unusedThreads)
     {
-      // First try to find workId if specified.
-      if (workId >= 0)
+      // First try to find workerId if specified.
+      if (workerId >= 0)
       {
-        PoolEntry* cur = _unusedThreads;
-        PoolEntry* prev = NULL;
+        ThreadPoolEntry* cur = self->_unusedThreads;
+        ThreadPoolEntry* prev = NULL;
 
         while (cur)
         {
-          if (cur->workId == workId)
+          if (cur->workerId == workerId)
           {
             if (prev)
               prev->next = cur->next;
             else
-              _unusedThreads = cur->next;
+              self->_unusedThreads = cur->next;
             pe = cur;
             break;
           }
@@ -135,17 +165,17 @@ err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
 
       if (pe == NULL)
       {
-        pe = _unusedThreads;
-        pe->workId = workId;
-        _unusedThreads = pe->next;
+        pe = self->_unusedThreads;
+        pe->workerId = workerId;
+        self->_unusedThreads = pe->next;
       }
     }
-    else if (_numThreads < _maxThreads)
+    else if (self->_numThreads < self->_maxThreads)
     {
-      pe = (PoolEntry*)MemMgr::alloc(sizeof(PoolEntry));
+      pe = (ThreadPoolEntry*)MemMgr::alloc(sizeof(ThreadPoolEntry));
       if (FOG_IS_NULL(pe)) return ERR_RT_OUT_OF_MEMORY;
 
-      Thread* thread = _createThread();
+      Thread* thread = ThreadPool_createThread(self);
       if (FOG_IS_NULL(thread))
       {
         MemMgr::free(pe);
@@ -162,7 +192,7 @@ err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
       }
 
       pe->thread = thread;
-      pe->workId = -1;
+      pe->workerId = -1;
     }
     else
     {
@@ -170,10 +200,10 @@ err_t ThreadPool::getThreads(Thread** threads, size_t _count, int workId)
       goto _Fail;
     }
 
-    pe->next = _usedThreads;
-    _usedThreads = pe;
+    pe->next = self->_usedThreads;
+    self->_usedThreads = pe;
 
-    if (workId >= 0) workId++;
+    if (workerId >= 0) workerId++;
     threads[i] = pe->thread;
   }
   return ERR_OK;
@@ -183,21 +213,21 @@ _Fail:
   {
     do {
       i--;
-      ThreadPool_releaseThread(this, threads[i], workId == -1 ? -1 : workId + i);
+      ThreadPool_releaseThreadInternal(self, threads[i], workerId == -1 ? -1 : workerId + i);
     } while (i > 0);
   }
 
   return err;
 }
 
-err_t ThreadPool::releaseThread(Thread* thread, int workId)
+static err_t FOG_CDECL ThreadPool_releaseThread(ThreadPool* self, Thread* thread, int workerId)
 {
-  return releaseThreads(&thread, 1, workId);
+  return self->releaseThreads(&thread, 1, workerId);
 }
 
-err_t ThreadPool::releaseThreads(Thread** threads, size_t count, int workId)
+static err_t FOG_CDECL ThreadPool_releaseThreads(ThreadPool* self, Thread** threads, size_t count, int workerId)
 {
-  AutoLock locked(_lock);
+  AutoLock locked(self->_lock);
 
   err_t err = ERR_OK;
   size_t i;
@@ -205,7 +235,8 @@ err_t ThreadPool::releaseThreads(Thread** threads, size_t count, int workId)
   for (i = 0; i < count; i++)
   {
     Thread* t = threads[i];
-    if (ThreadPool_releaseThread(this, t, workId))
+
+    if (ThreadPool_releaseThreadInternal(self, t, workerId))
     {
       threads[i] = NULL;
     }
@@ -220,69 +251,30 @@ err_t ThreadPool::releaseThreads(Thread** threads, size_t count, int workId)
   return err;
 }
 
-int ThreadPool::getMinThreads() const
+static int ThreadPool_getMinThreads(const ThreadPool* self)
 {
-  return _minThreads;
+  AutoLock locked(self->_lock);
+  return self->_minThreads;
 }
 
-int ThreadPool::getMaxThreads() const
+static int ThreadPool_getMaxThreads(const ThreadPool* self)
 {
-  return _maxThreads;
+  AutoLock locked(self->_lock);
+  return self->_maxThreads;
 }
 
-int ThreadPool::getNumThreads() const
+static int ThreadPool_getNumThreads(const ThreadPool* self)
 {
-  return _numThreads;
+  AutoLock locked(self->_lock);
+  return self->_numThreads;
 }
 
-err_t ThreadPool::setMaxThreads(int maxThreads)
+static err_t ThreadPool_setMaxThreads(ThreadPool* self, int maxThreads)
 {
-  _maxThreads = maxThreads;
+  AutoLock locked(self->_lock);
+
+  self->_maxThreads = maxThreads;
   return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::ThreadPool - Statics]
-// ============================================================================
-
-ThreadPool* ThreadPool::getInstance()
-{
-  return &_core_threadpool_global;
-}
-
-// ============================================================================
-// [Fog::ThreadPool - Internal]
-// ============================================================================
-
-Thread* ThreadPool::_createThread()
-{
-  Thread* thread = fog_new Thread();
-  if (FOG_IS_NULL(thread)) return NULL;
-
-  // Update statistics.
-  _numThreads++;
-
-  return thread;
-}
-
-void ThreadPool::releaseAllAvailable()
-{
-  AutoLock locked(_lock);
-
-  PoolEntry* cur = _unusedThreads;
-  while (cur)
-  {
-    PoolEntry* next = cur->next;
-    Thread* thread = cur->thread;
-
-    MemMgr::free(cur);
-    fog_delete(thread);
-
-    cur = next;
-    _numThreads--;
-  }
-
-  _unusedThreads = NULL;
 }
 
 // ============================================================================
@@ -291,12 +283,34 @@ void ThreadPool::releaseAllAvailable()
 
 FOG_NO_EXPORT void ThreadPool_init(void)
 {
-  _core_threadpool_global.init();
+  // --------------------------------------------------------------------------
+  // [Funcs]
+  // --------------------------------------------------------------------------
+
+  fog_api.threadpool_ctor = ThreadPool_ctor;
+  fog_api.threadpool_dtor = ThreadPool_dtor;
+
+  fog_api.threadpool_getThread = ThreadPool_getThread;
+  fog_api.threadpool_getThreads = ThreadPool_getThreads;
+
+  fog_api.threadpool_releaseThread = ThreadPool_releaseThread;
+  fog_api.threadpool_releaseThreads = ThreadPool_releaseThreads;
+
+  fog_api.threadpool_getMinThreads = ThreadPool_getMinThreads;
+  fog_api.threadpool_getMaxThreads = ThreadPool_getMaxThreads;
+  fog_api.threadpool_getNumThreads = ThreadPool_getNumThreads;
+  fog_api.threadpool_setMaxThreads = ThreadPool_setMaxThreads;
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  fog_api.threadpool_oInstance = ThreadPool_oInstance.init();
 }
 
 FOG_NO_EXPORT void ThreadPool_fini(void)
 {
-  _core_threadpool_global.destroy();
+  ThreadPool_oInstance.destroy();
 }
 
 } // Fog namespace

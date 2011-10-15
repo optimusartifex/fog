@@ -78,7 +78,7 @@ static err_t FOG_CDECL OSInfo_getName(StringW* dst)
 
 FOG_NO_EXPORT void OSInfo_init(void)
 {
-  _api.osinfo_getName = OSInfo_getName;
+  fog_api.osinfo_getName = OSInfo_getName;
 }
 
 } // Fog namespace

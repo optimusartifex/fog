@@ -663,14 +663,14 @@ static void FOG_CDECL TransformF_mapPointsF_Degenerate_SSE(const TransformF* sel
 
 FOG_NO_EXPORT void Transform_init_SSE(void)
 {
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformF_mapPointsF_Identity_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformF_mapPointsF_Translation_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformF_mapPointsF_Scaling_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformF_mapPointsF_Swap_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformF_mapPointsF_Affine_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformF_mapPointsF_Affine_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformF_mapPointsF_Projection_SSE;
-  _api.transformf_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformF_mapPointsF_Degenerate_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_IDENTITY   ] = TransformF_mapPointsF_Identity_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_TRANSLATION] = TransformF_mapPointsF_Translation_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_SCALING    ] = TransformF_mapPointsF_Scaling_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_SWAP       ] = TransformF_mapPointsF_Swap_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_ROTATION   ] = TransformF_mapPointsF_Affine_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_AFFINE     ] = TransformF_mapPointsF_Affine_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_PROJECTION ] = TransformF_mapPointsF_Projection_SSE;
+  fog_api.transformf_mapPointsF[TRANSFORM_TYPE_DEGENERATE ] = TransformF_mapPointsF_Degenerate_SSE;
 }
 
 } // Fog namespace

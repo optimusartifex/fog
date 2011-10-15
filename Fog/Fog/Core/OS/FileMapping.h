@@ -36,7 +36,7 @@ struct FOG_NO_EXPORT FileMappingData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.filemapping_dRelease(this);
+      fog_api.filemapping_dRelease(this);
   }
 
   // --------------------------------------------------------------------------
@@ -90,17 +90,17 @@ struct FOG_NO_EXPORT FileMapping
 
   FOG_INLINE FileMapping()
   {
-    _api.filemapping_ctor(this);
+    fog_api.filemapping_ctor(this);
   }
 
   FOG_INLINE FileMapping(const FileMapping& other)
   {
-    _api.filemapping_ctorCopy(this, &other);
+    fog_api.filemapping_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~FileMapping()
   {
-    _api.filemapping_dtor(this);
+    fog_api.filemapping_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -127,13 +127,13 @@ struct FOG_NO_EXPORT FileMapping
   //! @brief Create a file-mapping.
   FOG_INLINE err_t open(const StringW& fileName, uint32_t flags)
   {
-    return _api.filemapping_open(this, &fileName, flags);
+    return fog_api.filemapping_open(this, &fileName, flags);
   }
 
   //! @brief Close the file-mapping.
   FOG_INLINE void close()
   {
-    _api.filemapping_close(this);
+    fog_api.filemapping_close(this);
   }
 
   // --------------------------------------------------------------------------
@@ -181,7 +181,7 @@ struct FOG_NO_EXPORT FileMapping
 
   FOG_INLINE FileMapping& operator=(const FileMapping& other)
   {
-    _api.filemapping_copy(this, &other);
+    fog_api.filemapping_copy(this, &other);
     return *this;
   }
 

@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT FileInfoData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.fileinfo_dFree(this);
+      fog_api.fileinfo_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -91,12 +91,12 @@ struct FOG_NO_EXPORT FileInfo
 
   FOG_INLINE FileInfo()
   {
-    _api.fileinfo_ctor(this);
+    fog_api.fileinfo_ctor(this);
   }
 
   FOG_INLINE FileInfo(const FileInfo& other)
   {
-    _api.fileinfo_ctorCopy(this, &other);
+    fog_api.fileinfo_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE FileInfo(FileInfoData* d) :
@@ -106,7 +106,7 @@ struct FOG_NO_EXPORT FileInfo
 
   FOG_INLINE ~FileInfo()
   {
-    _api.fileinfo_dtor(this);
+    fog_api.fileinfo_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -118,12 +118,12 @@ struct FOG_NO_EXPORT FileInfo
 
   FOG_INLINE err_t detach()
   {
-    return isDetached() ? (err_t)ERR_OK : _api.fileinfo_detach(this);
+    return isDetached() ? (err_t)ERR_OK : fog_api.fileinfo_detach(this);
   }
 
   FOG_INLINE err_t _detach()
   {
-    return _api.fileinfo_detach(this);
+    return fog_api.fileinfo_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -142,30 +142,30 @@ struct FOG_NO_EXPORT FileInfo
 
   FOG_INLINE err_t fromFile(const StringW& path)
   {
-    return _api.fileinfo_fromFile(this, &path);
+    return fog_api.fileinfo_fromFile(this, &path);
   }
 
   FOG_INLINE err_t fromFile(const StringW& filePath, const StringW& fileName)
   {
-    return _api.fileinfo_fromFileEx(this, &filePath, &fileName);
+    return fog_api.fileinfo_fromFileEx(this, &filePath, &fileName);
   }
 
 #if defined(FOG_OS_WINDOWS)
   FOG_INLINE err_t fromWinFileAttributeData(const StringW& filePath, const StringW& fileName, const WIN32_FILE_ATTRIBUTE_DATA* wfad)
   {
-    return _api.fileinfo_fromWinFileAttributeData(this, &filePath, &fileName, wfad);
+    return fog_api.fileinfo_fromWinFileAttributeData(this, &filePath, &fileName, wfad);
   }
 
   FOG_INLINE err_t fromWinFindData(const StringW& filePath, const WIN32_FIND_DATAW* wfd)
   {
-    return _api.fileinfo_fromWinFindData(this, &filePath, wfd);
+    return fog_api.fileinfo_fromWinFindData(this, &filePath, wfd);
   }
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
   FOG_INLINE err_t fromStat(const StringW& filePath, const StringW& fileName, const struct stat* s)
   {
-    return _api.fileinfo_fromStat(this, &filePath, &fileName, s);
+    return fog_api.fileinfo_fromStat(this, &filePath, &fileName, s);
   }
 #endif // FOG_OS_POSIX
 
@@ -175,7 +175,7 @@ struct FOG_NO_EXPORT FileInfo
 
   FOG_INLINE const FileInfo& operator=(const FileInfo& other)
   {
-    _api.fileinfo_copy(this, &other);
+    fog_api.fileinfo_copy(this, &other);
     return *this;
   }
 

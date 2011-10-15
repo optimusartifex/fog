@@ -66,17 +66,17 @@ struct FOG_NO_EXPORT DirIterator
 
   FOG_NO_EXPORT DirIterator()
   {
-    _api.diriterator_ctor(this);
+    fog_api.diriterator_ctor(this);
   }
 
   FOG_NO_EXPORT DirIterator(const StringW& path, bool skipParent = true)
   {
-    _api.diriterator_ctorString(this, &path, skipParent);
+    fog_api.diriterator_ctorString(this, &path, skipParent);
   }
 
   FOG_NO_EXPORT ~DirIterator()
   {
-    _api.diriterator_dtor(this);
+    fog_api.diriterator_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -94,12 +94,12 @@ struct FOG_NO_EXPORT DirIterator
 
   FOG_INLINE err_t open(const StringW& path, bool skipParent = true)
   {
-    return _api.diriterator_open(this, &path, skipParent);
+    return fog_api.diriterator_open(this, &path, skipParent);
   }
 
   FOG_INLINE void close()
   {
-    _api.diriterator_close(this);
+    fog_api.diriterator_close(this);
   }
 
   // --------------------------------------------------------------------------
@@ -108,12 +108,12 @@ struct FOG_NO_EXPORT DirIterator
 
   FOG_INLINE bool read(FileInfo& fileInfo)
   {
-    return _api.diriterator_readFileInfo(this, &fileInfo);
+    return fog_api.diriterator_readFileInfo(this, &fileInfo);
   }
 
   FOG_INLINE bool read(StringW& fileName)
   {
-    return _api.diriterator_readFileName(this, &fileName);
+    return fog_api.diriterator_readFileName(this, &fileName);
   }
 
   // --------------------------------------------------------------------------
@@ -122,12 +122,12 @@ struct FOG_NO_EXPORT DirIterator
 
   FOG_INLINE err_t rewind()
   {
-    return _api.diriterator_rewind(this);
+    return fog_api.diriterator_rewind(this);
   }
 
   FOG_INLINE int64_t tell()
   {
-    return _api.diriterator_tell(this);
+    return fog_api.diriterator_tell(this);
   }
 
   // --------------------------------------------------------------------------

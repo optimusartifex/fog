@@ -376,7 +376,7 @@ void DefaultEventLoop::_runInternal()
     {
       TimeDelta delay = _delayedWorkTime - Time::now();
       if (delay > TimeDelta())
-        _event.timedWait(delay);
+        _event.wait(delay);
       else
         // It looks like _delayedWorkTime indicates a time in the past, so we
         // need to call _doDelayedWork() now.
@@ -451,36 +451,38 @@ void WinEventLoop::pumpOutPendingPaintMessages()
 {
   // If we are being called outside of the context of run(), then don't try to
   // do any work.
-  if (!_depth) return;
+  if (!_depth)
+    return;
 
   // Create a mini-message-loop to force immediate processing of only Windows
   // WM_PAINT messages. Don't provide an infinite loop, but do enough peeking
   // to get the job done. Actual common max is 4 peeks, but we'll be a little
   // safe here.
   static const int PAINT_MAX_PEEK_COUNT = 20;
-  bool win2k = WinUtil::getWinVersion() <= WIN_VERSION_2000;
+
+  UINT msgFilter = 0;
+  UINT removeMsg = PM_REMOVE | PM_QS_PAINT;
+
+  if (WinUtil::getWinVersion() <= WIN_VERSION_2000)
+  {
+    msgFilter = WM_PAINT;
+    removeMsg &= ~PM_QS_PAINT;
+  }
+
   int peekCount;
   MSG msg;
 
   for (peekCount = 0; peekCount < PAINT_MAX_PEEK_COUNT; peekCount++)
   {
-    if (win2k)
-    {
-      if (!::PeekMessageW(&msg, NULL, WM_PAINT, WM_PAINT, PM_REMOVE)) break;
-    }
-    else
-    {
-      if (!::PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE | PM_QS_PAINT)) break;
-    }
-
-    _processMessageHelper(msg);
+    if (!::PeekMessageW(&msg, NULL, msgFilter, msgFilter, removeMsg))
+      break;
 
     // Handle WM_QUIT.
+    _processMessageHelper(msg);
     if (_quitting) break;
   }
 }
 
-// static
 LRESULT CALLBACK WinEventLoop::WndProcThunk(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
   switch (message)

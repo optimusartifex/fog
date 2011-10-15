@@ -100,12 +100,12 @@ struct FOG_NO_EXPORT EllipseF
 
   FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
   {
-    return _api.ellipsef_getBoundingBox(this, &dst, tr);
+    return fog_api.ellipsef_getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
   {
-    err_t err = _api.ellipsef_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
+    err_t err = fog_api.ellipsef_getBoundingBox(this, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -117,7 +117,7 @@ struct FOG_NO_EXPORT EllipseF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return _api.ellipsef_hitTest(this, &pt);
+    return fog_api.ellipsef_hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -135,7 +135,7 @@ struct FOG_NO_EXPORT EllipseF
 
   FOG_INLINE uint toCSpline(PointF* dst) const
   {
-    return _api.ellipsef_toCSpline(this, dst);
+    return fog_api.ellipsef_toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------
@@ -236,12 +236,12 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
   {
-    return _api.ellipsed_getBoundingBox(this, &dst, tr);
+    return fog_api.ellipsed_getBoundingBox(this, &dst, tr);
   }
 
   FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
   {
-    err_t err = _api.ellipsed_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
+    err_t err = fog_api.ellipsed_getBoundingBox(this, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
     dst.h -= dst.y;
     return err;
@@ -253,7 +253,7 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return _api.ellipsed_hitTest(this, &pt);
+    return fog_api.ellipsed_hitTest(this, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -271,7 +271,7 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE uint toCSpline(PointD* dst) const
   {
-    return _api.ellipsed_toCSpline(this, dst);
+    return fog_api.ellipsed_toCSpline(this, dst);
   }
 
   // --------------------------------------------------------------------------

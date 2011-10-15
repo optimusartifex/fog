@@ -624,23 +624,23 @@ _InvalidNumber:
 
 FOG_NO_EXPORT void CBezier_init(void)
 {
-  _api.cbezierf_getBoundingBox = CBezierT_getBoundingBox<float>;
-  _api.cbezierd_getBoundingBox = CBezierT_getBoundingBox<double>;
+  fog_api.cbezierf_getBoundingBox = CBezierT_getBoundingBox<float>;
+  fog_api.cbezierd_getBoundingBox = CBezierT_getBoundingBox<double>;
 
-  _api.cbezierf_getSplineBBox = CBezierT_getSplineBBox<float>;
-  _api.cbezierd_getSplineBBox = CBezierT_getSplineBBox<double>;
+  fog_api.cbezierf_getSplineBBox = CBezierT_getSplineBBox<float>;
+  fog_api.cbezierd_getSplineBBox = CBezierT_getSplineBBox<double>;
 
-  _api.cbezierf_getLength = CBezierT_getLength<float>;
-  _api.cbezierd_getLength = CBezierT_getLength<double>;
+  fog_api.cbezierf_getLength = CBezierT_getLength<float>;
+  fog_api.cbezierd_getLength = CBezierT_getLength<double>;
 
-  _api.cbezierf_getInflectionPoints = CBezierT_getInflectionPoints<float>;
-  _api.cbezierd_getInflectionPoints = CBezierT_getInflectionPoints<double>;
+  fog_api.cbezierf_getInflectionPoints = CBezierT_getInflectionPoints<float>;
+  fog_api.cbezierd_getInflectionPoints = CBezierT_getInflectionPoints<double>;
 
-  _api.cbezierf_simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
-  _api.cbezierd_simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
+  fog_api.cbezierf_simplifyForProcessing = CBezierT_simplifyForProcessing<float>;
+  fog_api.cbezierd_simplifyForProcessing = CBezierT_simplifyForProcessing<double>;
 
-  _api.cbezierf_flatten = CBezierT_flatten<float>;
-  _api.cbezierd_flatten = CBezierT_flatten<double>;
+  fog_api.cbezierf_flatten = CBezierT_flatten<float>;
+  fog_api.cbezierd_flatten = CBezierT_flatten<double>;
 }
 
 } // Fog namespace

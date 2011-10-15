@@ -58,7 +58,7 @@ static err_t FOG_CDECL Color_setData_SSE2(Color* self, uint32_t modelExtended, c
       self->_model = modelExtended;
       self->_hints = NO_FLAGS;
 
-      _api.color_convert[_COLOR_MODEL_ARGB32][modelExtended](&self->_argb32, self->_data);
+      fog_api.color_convert[_COLOR_MODEL_ARGB32][modelExtended](&self->_argb32, self->_data);
       return ERR_OK;
 
     case COLOR_MODEL_ARGB:
@@ -111,7 +111,7 @@ _SetARGB:
 
 FOG_NO_EXPORT void Color_init_SSE2(void)
 {
-  _api.color_setData = Color_setData_SSE2;
+  fog_api.color_setData = Color_setData_SSE2;
 }
 
 } // Fog namespace

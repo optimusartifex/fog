@@ -227,9 +227,8 @@ struct FOG_API Thread
   //! @brief Thread's handle.
   Handle _handle;
 
-  //! @brief Thread id. Used for debugging purposes.
+  //! @brief Thread id.
   uint32_t _id;
-
   //! @brief Stack size.
   uint32_t _stackSize;
 

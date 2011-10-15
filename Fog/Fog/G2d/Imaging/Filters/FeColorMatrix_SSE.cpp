@@ -188,9 +188,9 @@ FOG_NO_EXPORT void FeColorMatrix_init_SSE(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fecolormatrix_addMatrix = FeColorMatrix_addMatrix_SSE;
-  _api.fecolormatrix_subtractMatrix = FeColorMatrix_subtractMatrix_SSE;
-  _api.fecolormatrix_mapArgbF = FeColorMatrix_mapArgbF_SSE;
+  fog_api.fecolormatrix_addMatrix = FeColorMatrix_addMatrix_SSE;
+  fog_api.fecolormatrix_subtractMatrix = FeColorMatrix_subtractMatrix_SSE;
+  fog_api.fecolormatrix_mapArgbF = FeColorMatrix_mapArgbF_SSE;
 }
 
 } // Fog namespace

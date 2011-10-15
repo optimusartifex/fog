@@ -382,16 +382,16 @@ static err_t FOG_CDECL Time_toTimeT(int64_t us, time_t* dst)
 
 FOG_NO_EXPORT void Time_init(void)
 {
-  _api.time_now = Time_now;
-  _api.timeticks_now = TimeTicks_now;
+  fog_api.time_now = Time_now;
+  fog_api.timeticks_now = TimeTicks_now;
 
-  _api.time_fromTimeT = Time_fromTimeT;
-  _api.time_toTimeT = Time_toTimeT;
+  fog_api.time_fromTimeT = Time_fromTimeT;
+  fog_api.time_toTimeT = Time_toTimeT;
 
 #if defined(FOG_OS_WINDOWS)
   Time_global.init();
-  _api.time_fromFILETIME = Time_fromFILETIME;
-  _api.time_toFILETIME = Time_toFILETIME;
+  fog_api.time_fromFILETIME = Time_fromFILETIME;
+  fog_api.time_toFILETIME = Time_toFILETIME;
 #endif // FOG_OS_WINDOWS
 }
 

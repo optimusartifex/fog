@@ -49,12 +49,12 @@ struct FOG_NO_EXPORT ImageData
 
   FOG_INLINE ImageData* addRef() const
   {
-    return _api.image_dAddRef(const_cast<ImageData*>(this));
+    return fog_api.image_dAddRef(const_cast<ImageData*>(this));
   }
 
   FOG_INLINE void release()
   {
-    _api.image_dRelease(this);
+    fog_api.image_dRelease(this);
   }
 
   // --------------------------------------------------------------------------
@@ -163,17 +163,17 @@ struct FOG_NO_EXPORT Image
 
   FOG_INLINE Image()
   {
-    _api.image_ctor(this);
+    fog_api.image_ctor(this);
   }
 
   FOG_INLINE Image(const Image& other)
   {
-    _api.image_ctorCopy(this, &other);
+    fog_api.image_ctorCopy(this, &other);
   }
 
   FOG_INLINE Image(const SizeI& size, uint32_t format, uint32_t type = IMAGE_TYPE_BUFFER)
   {
-    _api.image_ctorCreate(this, &size, format, type);
+    fog_api.image_ctorCreate(this, &size, format, type);
   }
 
   explicit FOG_INLINE Image(ImageData* d) :
@@ -183,7 +183,7 @@ struct FOG_NO_EXPORT Image
   
   FOG_INLINE ~Image()
   {
-    _api.image_dtor(this);
+    fog_api.image_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -198,13 +198,13 @@ struct FOG_NO_EXPORT Image
   //! @copydoc Doxygen::Implicit::detach().
   FOG_INLINE err_t detach()
   {
-    return isDetached() ? (err_t)ERR_OK : _api.image_detach(this);
+    return isDetached() ? (err_t)ERR_OK : fog_api.image_detach(this);
   }
 
   //! @copydoc Doxygen::Implicit::_detach().
   FOG_INLINE err_t _detach()
   {
-    return _api.image_detach(this);
+    return fog_api.image_detach(this);
   }
 
   // --------------------------------------------------------------------------
@@ -328,13 +328,13 @@ struct FOG_NO_EXPORT Image
   //! @brief Get the alpha distribution.
   FOG_INLINE uint32_t getAlphaDistribution() const
   {
-    return _api.image_getAlphaDistribution(this);
+    return fog_api.image_getAlphaDistribution(this);
   }
 
   //! @brief Called after image data was modified.
   FOG_INLINE void _modified()
   {
-    return _api.image_modified(this);
+    return fog_api.image_modified(this);
   }
 
   // --------------------------------------------------------------------------
@@ -348,13 +348,13 @@ struct FOG_NO_EXPORT Image
   //! @c ERR_RT_INVALID_ARGUMENT will be returned.
   FOG_INLINE err_t create(const SizeI& size, uint32_t format, uint32_t type = IMAGE_TYPE_BUFFER)
   {
-    return _api.image_create(this, &size, format, type);
+    return fog_api.image_create(this, &size, format, type);
   }
 
   //! @brief Adopt memory buffer to the image.
   FOG_INLINE err_t adopt(const ImageBits& imageBits, uint32_t adoptFlags = IMAGE_ADOPT_DEFAULT)
   {
-    return _api.image_adopt(this, &imageBits, adoptFlags);
+    return fog_api.image_adopt(this, &imageBits, adoptFlags);
   }
 
   // --------------------------------------------------------------------------
@@ -364,7 +364,7 @@ struct FOG_NO_EXPORT Image
   //! @copydoc Doxygen::Implicit::reset().
   FOG_INLINE void reset()
   {
-    _api.image_reset(this);
+    fog_api.image_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -374,19 +374,19 @@ struct FOG_NO_EXPORT Image
   //! @brief Set other image to this image creating reference to it if possible.
   FOG_INLINE err_t setImage(const Image& other)
   {
-    return _api.image_copy(this, &other);
+    return fog_api.image_copy(this, &other);
   }
 
   //! @brief Copy part of other image to the image.
   FOG_INLINE err_t setImage(const Image& other, const RectI& area)
   {
-    return _api.image_setImage(this, &other, &area);
+    return fog_api.image_setImage(this, &other, &area);
   }
 
   //! @brief Set other image to this image making deep copy of it.
   FOG_INLINE err_t setDeep(const Image& other)
   {
-    return _api.image_copyDeep(this, &other);
+    return fog_api.image_copyDeep(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -396,7 +396,7 @@ struct FOG_NO_EXPORT Image
   //! @brief Convert image to @a format.
   FOG_INLINE err_t convert(uint32_t format)
   {
-    return _api.image_convert(this, format);
+    return fog_api.image_convert(this, format);
   }
 
   //! @brief Sets image format without doing any conversion. This can be only
@@ -406,7 +406,7 @@ struct FOG_NO_EXPORT Image
   //! or demultiplication on 32 bit images.
   FOG_INLINE err_t forceFormat(uint32_t format)
   {
-    return _api.image_forceFormat(this, format);
+    return fog_api.image_forceFormat(this, format);
   }
 
   // --------------------------------------------------------------------------
@@ -416,13 +416,13 @@ struct FOG_NO_EXPORT Image
   //! @brief Convert image to 8 bit using optimized palette or using dithering.
   FOG_INLINE err_t convertTo8BitDepth()
   {
-    return _api.image_convertTo8BitDepth(this);
+    return fog_api.image_convertTo8BitDepth(this);
   }
 
   //! @brief Convert image to 8 bit using custom palette @a pal.
   FOG_INLINE err_t convertTo8BitDepth(const ImagePalette& palette)
   {
-    return _api.image_convertTo8BitDepthPalette(this, &palette);
+    return fog_api.image_convertTo8BitDepthPalette(this, &palette);
   }
 
   // --------------------------------------------------------------------------
@@ -438,13 +438,13 @@ struct FOG_NO_EXPORT Image
   //! @brief Set image palette.
   FOG_INLINE err_t setPalette(const ImagePalette& palette)
   {
-    return _api.image_setPalette(this, &palette);
+    return fog_api.image_setPalette(this, &palette);
   }
 
   //! @brief Set image palette data.
   FOG_INLINE err_t setPalette(const Range& range, const Argb32* data)
   {
-    return _api.image_setPaletteData(this, &range, data);
+    return fog_api.image_setPaletteData(this, &range, data);
   }
 
   // --------------------------------------------------------------------------
@@ -453,24 +453,24 @@ struct FOG_NO_EXPORT Image
 
   FOG_INLINE err_t clear(const Argb32& argb32)
   {
-    return _api.image_clearArgb32(this, &argb32);
+    return fog_api.image_clearArgb32(this, &argb32);
   }
 
   FOG_INLINE err_t clear(const Color& color)
   {
-    return _api.image_clearColor(this, &color);
+    return fog_api.image_clearColor(this, &color);
   }
 
   FOG_INLINE err_t fillRect(const RectI& r, const Argb32& argb32,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f)
   {
-    return _api.image_fillRectArgb32(this, &r, &argb32, compositingOperator, opacity);
+    return fog_api.image_fillRectArgb32(this, &r, &argb32, compositingOperator, opacity);
   }
 
   FOG_INLINE err_t fillRect(const RectI& r, const Color& color,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f)
   {
-    return _api.image_fillRectColor(this, &r, &color, compositingOperator, opacity);
+    return fog_api.image_fillRectColor(this, &r, &color, compositingOperator, opacity);
   }
 
   // --------------------------------------------------------------------------
@@ -480,13 +480,13 @@ struct FOG_NO_EXPORT Image
   FOG_INLINE err_t blitImage(const PointI& pt, const Image& i,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f)
   {
-    return _api.image_blitImageAt(this, &pt, &i, NULL, compositingOperator, opacity);
+    return fog_api.image_blitImageAt(this, &pt, &i, NULL, compositingOperator, opacity);
   }
 
   FOG_INLINE err_t blitImage(const PointI& pt, const Image& i, const RectI& iFragment,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f)
   {
-    return _api.image_blitImageAt(this, &pt, &i, &iFragment, compositingOperator, opacity);
+    return fog_api.image_blitImageAt(this, &pt, &i, &iFragment, compositingOperator, opacity);
   }
 
   // --------------------------------------------------------------------------
@@ -498,14 +498,14 @@ struct FOG_NO_EXPORT Image
   //! @note Data that was scrolled out are unchanged.
   FOG_INLINE err_t scroll(const PointI& pt)
   {
-    return _api.image_scroll(this, &pt, NULL);
+    return fog_api.image_scroll(this, &pt, NULL);
   }
 
   //! @overload.
   FOG_INLINE err_t scroll(int x, int y)
   {
     PointI pt(x, y);
-    return _api.image_scroll(this, &pt, NULL);
+    return fog_api.image_scroll(this, &pt, NULL);
   }
 
   //! @brief Scroll data in image only in @a rect.
@@ -513,14 +513,14 @@ struct FOG_NO_EXPORT Image
   //! @note Data that was scrolled out are unchanged.
   FOG_INLINE err_t scroll(const PointI& pt, const RectI& rect)
   {
-    return _api.image_scroll(this, &pt, &rect);
+    return fog_api.image_scroll(this, &pt, &rect);
   }
 
   //! @overload.
   FOG_INLINE err_t scroll(int x, int y, const RectI& rect)
   {
     PointI pt(x, y);
-    return _api.image_scroll(this, &pt, &rect);
+    return fog_api.image_scroll(this, &pt, &rect);
   }
 
   // --------------------------------------------------------------------------
@@ -530,19 +530,19 @@ struct FOG_NO_EXPORT Image
   //! @brief Invert color channels.
   FOG_INLINE err_t invert(uint32_t channels)
   {
-    return _api.image_invert(this, this, NULL, channels);
+    return fog_api.image_invert(this, this, NULL, channels);
   }
 
   //! @brief Mirror.
   FOG_INLINE err_t mirror(uint32_t mirrorMode)
   {
-    return _api.image_mirror(this, this, NULL, mirrorMode);
+    return fog_api.image_mirror(this, this, NULL, mirrorMode);
   }
   
   //! @brief Rotate image by 0, 90, 180 or 270 degrees, see @c IMAGE_ROTATE_MODE.
   FOG_INLINE err_t rotate(uint32_t rotateMode)
   {
-    return _api.image_rotate(this, this, NULL, rotateMode);
+    return fog_api.image_rotate(this, this, NULL, rotateMode);
   }
 
   // --------------------------------------------------------------------------
@@ -594,37 +594,37 @@ struct FOG_NO_EXPORT Image
 
   FOG_INLINE err_t readFromFile(const StringW& fileName)
   {
-    return _api.image_readFromFile(this, &fileName);
+    return fog_api.image_readFromFile(this, &fileName);
   }
 
   FOG_INLINE err_t readFromStream(Stream& stream)
   {
-    return _api.image_readFromStream(this, &stream, NULL);
+    return fog_api.image_readFromStream(this, &stream, NULL);
   }
 
   FOG_INLINE err_t readFromStream(Stream& stream, const StringW& extension)
   {
-    return _api.image_readFromStream(this, &stream, &extension);
+    return fog_api.image_readFromStream(this, &stream, &extension);
   }
 
   FOG_INLINE err_t readFromBuffer(const StringA& buffer)
   {
-    return _api.image_readFromBufferStringA(this, &buffer, NULL);
+    return fog_api.image_readFromBufferStringA(this, &buffer, NULL);
   }
 
   FOG_INLINE err_t readFromBuffer(const StringA& buffer, const StringW& extension)
   {
-    return _api.image_readFromBufferStringA(this, &buffer, &extension);
+    return fog_api.image_readFromBufferStringA(this, &buffer, &extension);
   }
 
   FOG_INLINE err_t readFromBuffer(const void* buffer, size_t size)
   {
-    return _api.image_readFromBufferRaw(this, buffer, size, NULL);
+    return fog_api.image_readFromBufferRaw(this, buffer, size, NULL);
   }
 
   FOG_INLINE err_t readFromBuffer(const void* buffer, size_t size, const StringW& extension)
   {
-    return _api.image_readFromBufferRaw(this, buffer, size, &extension);
+    return fog_api.image_readFromBufferRaw(this, buffer, size, &extension);
   }
 
   // --------------------------------------------------------------------------
@@ -633,32 +633,32 @@ struct FOG_NO_EXPORT Image
 
   FOG_INLINE err_t writeToFile(const StringW& fileName) const
   {
-    return _api.image_writeToFile(this, &fileName, NULL);
+    return fog_api.image_writeToFile(this, &fileName, NULL);
   }
 
   FOG_INLINE err_t writeToFile(const StringW& fileName, const Hash<StringW, Var>& options) const
   {
-    return _api.image_writeToFile(this, &fileName, &options);
+    return fog_api.image_writeToFile(this, &fileName, &options);
   }
 
   FOG_INLINE err_t writeToStream(Stream& stream, const StringW& extension) const
   {
-    return _api.image_writeToStream(this, &stream, &extension, NULL);
+    return fog_api.image_writeToStream(this, &stream, &extension, NULL);
   }
 
   FOG_INLINE err_t writeToStream(Stream& stream, const StringW& extension, const Hash<StringW, Var>& options) const
   {
-    return _api.image_writeToStream(this, &stream, &extension, &options);
+    return fog_api.image_writeToStream(this, &stream, &extension, &options);
   }
 
   FOG_INLINE err_t writeToBuffer(StringA& buffer, uint32_t cntOp, const StringW& extension) const
   {
-    return _api.image_writeToBuffer(this, &buffer, cntOp, &extension, NULL);
+    return fog_api.image_writeToBuffer(this, &buffer, cntOp, &extension, NULL);
   }
 
   FOG_INLINE err_t writeToBuffer(StringA& buffer, uint32_t cntOp, const StringW& extension, const Hash<StringW, Var>& options) const
   {
-    return _api.image_writeToBuffer(this, &buffer, cntOp, &extension, &options);
+    return fog_api.image_writeToBuffer(this, &buffer, cntOp, &extension, &options);
   }
 
   // --------------------------------------------------------------------------
@@ -671,7 +671,7 @@ struct FOG_NO_EXPORT Image
   //! @note This function is for Windows-only.
   FOG_INLINE err_t toWinBitmap(HBITMAP& hBitmap)
   {
-    return _api.image_toWinBitmap(this, &hBitmap);
+    return fog_api.image_toWinBitmap(this, &hBitmap);
   }
 
   //! @brief Convert image from Windows @c HBITMAP.
@@ -679,17 +679,17 @@ struct FOG_NO_EXPORT Image
   //! @note This function is for Windows-only.
   FOG_INLINE err_t fromWinBitmap(HBITMAP hBitmap)
   {
-    return _api.image_fromWinBitmap(this, hBitmap);
+    return fog_api.image_fromWinBitmap(this, hBitmap);
   }
 
   FOG_INLINE err_t getDC(HDC* hDC)
   {
-    return _api.image_getDC(this, hDC);
+    return fog_api.image_getDC(this, hDC);
   }
 
   FOG_INLINE err_t releaseDC(HDC hDC)
   {
-    return _api.image_releaseDC(this, hDC);
+    return fog_api.image_releaseDC(this, hDC);
   }
 #endif // FOG_OS_WINDOWS
 
@@ -699,7 +699,7 @@ struct FOG_NO_EXPORT Image
 
   FOG_INLINE bool eq(const Image& other) const
   {
-    return _api.image_eq(this, &other);
+    return fog_api.image_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -708,7 +708,7 @@ struct FOG_NO_EXPORT Image
 
   FOG_INLINE Image& operator=(const Image& other)
   {
-    _api.image_copy(this, &other);
+    fog_api.image_copy(this, &other);
     return *this;
   }
 
@@ -721,7 +721,7 @@ struct FOG_NO_EXPORT Image
 
   static FOG_INLINE const Image& empty()
   {
-    return *_api.image_oEmpty;
+    return *fog_api.image_oEmpty;
   }
 
   // --------------------------------------------------------------------------
@@ -730,12 +730,12 @@ struct FOG_NO_EXPORT Image
 
   static FOG_INLINE bool eq(const Image* a, const Image* b)
   {
-    return _api.image_eq(a, b);
+    return fog_api.image_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.image_eq;
+    return (EqFunc)fog_api.image_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -749,7 +749,7 @@ struct FOG_NO_EXPORT Image
   //! image formats.
   static FOG_INLINE ssize_t getStrideFromWidth(int width, uint32_t depth)
   {
-    return _api.image_getStrideFromWidth(width, depth);
+    return fog_api.image_getStrideFromWidth(width, depth);
   }
 
   // --------------------------------------------------------------------------
@@ -758,12 +758,12 @@ struct FOG_NO_EXPORT Image
 
   static FOG_INLINE err_t glyphFromPath(Image& dst, PointI& dstOffset, const PathF& path, uint32_t fillRule, uint32_t precision)
   {
-    return _api.image_glyphFromPathF(&dst, &dstOffset, &path, fillRule, precision);
+    return fog_api.image_glyphFromPathF(&dst, &dstOffset, &path, fillRule, precision);
   }
 
   static FOG_INLINE err_t glyphFromPath(Image& dst, PointI& dstOffset, const PathD& path, uint32_t fillRule, uint32_t precision)
   {
-    return _api.image_glyphFromPathD(&dst, &dstOffset, &path, fillRule, precision);
+    return fog_api.image_glyphFromPathD(&dst, &dstOffset, &path, fillRule, precision);
   }
 
   // --------------------------------------------------------------------------
@@ -773,36 +773,36 @@ struct FOG_NO_EXPORT Image
   //! @brief Invert color channels.
   static FOG_INLINE err_t invert(Image& dst, const Image& src, uint32_t channels)
   {
-    return _api.image_invert(&dst, &src, NULL, channels);
+    return fog_api.image_invert(&dst, &src, NULL, channels);
   }
 
   //! @overload.
   static FOG_INLINE err_t invert(Image& dst, const Image& src, const RectI& area, uint32_t channels)
   {
-    return _api.image_invert(&dst, &src, &area, channels);
+    return fog_api.image_invert(&dst, &src, &area, channels);
   }
 
   //! @brief Mirror.
   static FOG_INLINE err_t mirror(Image& dst, const Image& src, uint32_t mirrorMode)
   {
-    return _api.image_mirror(&dst, &src, NULL, mirrorMode);
+    return fog_api.image_mirror(&dst, &src, NULL, mirrorMode);
   }
 
   //! @overload.
   static FOG_INLINE err_t mirror(Image& dst, const Image& src, const RectI& area, uint32_t mirrorMode)
   {
-    return _api.image_mirror(&dst, &src, &area, mirrorMode);
+    return fog_api.image_mirror(&dst, &src, &area, mirrorMode);
   }
 
   //! @brief Rotate image by 0, 90, 180 or 270 degrees, see @c IMAGE_ROTATE_MODE.
   static FOG_INLINE err_t rotate(Image& dst, const Image& src, uint32_t rotateMode)
   {
-    return _api.image_rotate(&dst, &src, NULL, rotateMode);
+    return fog_api.image_rotate(&dst, &src, NULL, rotateMode);
   }
 
   static FOG_INLINE err_t rotate(Image& dst, const Image& src, const RectI& area, uint32_t rotateMode)
   {
-    return _api.image_rotate(&dst, &src, &area, rotateMode);
+    return fog_api.image_rotate(&dst, &src, &area, rotateMode);
   }
 
   // --------------------------------------------------------------------------

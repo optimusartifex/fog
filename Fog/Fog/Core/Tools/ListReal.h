@@ -42,12 +42,12 @@ struct List<float> : public ListImpl< float, TypeInfo<float>::TYPE, 1, 1 >
 
   FOG_INLINE List()
   {
-    _api.list_untyped_ctor(this);
+    fog_api.list_untyped_ctor(this);
   }
 
   FOG_INLINE List(const List& other)
   {
-    _api.list_untyped_ctorCopy(this, &other);
+    fog_api.list_untyped_ctorCopy(this, &other);
   }
 
   FOG_INLINE List(const List& other, const Range& range)
@@ -74,7 +74,7 @@ struct List<float> : public ListImpl< float, TypeInfo<float>::TYPE, 1, 1 >
 
   FOG_INLINE err_t setList(const double* data, size_t dataLength)
   {
-    return _api.list_float_opDataD(this, CONTAINER_OP_REPLACE, data, dataLength);
+    return fog_api.list_float_opDataD(this, CONTAINER_OP_REPLACE, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -86,7 +86,7 @@ struct List<float> : public ListImpl< float, TypeInfo<float>::TYPE, 1, 1 >
 
   FOG_INLINE err_t concat(const double* data, size_t dataLength)
   {
-    return _api.list_float_opDataD(this, CONTAINER_OP_APPEND, data, dataLength);
+    return fog_api.list_float_opDataD(this, CONTAINER_OP_APPEND, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -136,12 +136,12 @@ struct List<double> : public ListImpl< double, TypeInfo<double>::TYPE, 1, 1 >
 
   FOG_INLINE List()
   {
-    _api.list_untyped_ctor(this);
+    fog_api.list_untyped_ctor(this);
   }
 
   FOG_INLINE List(const List& other)
   {
-    _api.list_untyped_ctorCopy(this, &other);
+    fog_api.list_untyped_ctorCopy(this, &other);
   }
 
   FOG_INLINE List(const List& other, const Range& range)
@@ -165,17 +165,17 @@ struct List<double> : public ListImpl< double, TypeInfo<double>::TYPE, 1, 1 >
 
   FOG_INLINE err_t setList(const List<float>& other)
   {
-    return _api.list_double_opListF(this, CONTAINER_OP_REPLACE, &other, NULL);
+    return fog_api.list_double_opListF(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
   FOG_INLINE err_t setList(const List<float>& other, const Range& range)
   {
-    return _api.list_double_opListF(this, CONTAINER_OP_REPLACE, &other, &range);
+    return fog_api.list_double_opListF(this, CONTAINER_OP_REPLACE, &other, &range);
   }
 
   FOG_INLINE err_t setList(const float* data, size_t dataLength)
   {
-    return _api.list_double_opDataF(this, CONTAINER_OP_REPLACE, data, dataLength);
+    return fog_api.list_double_opDataF(this, CONTAINER_OP_REPLACE, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -184,17 +184,17 @@ struct List<double> : public ListImpl< double, TypeInfo<double>::TYPE, 1, 1 >
 
   FOG_INLINE err_t concat(const List<float>& other)
   {
-    return _api.list_double_opListF(this, CONTAINER_OP_APPEND, &other, NULL);
+    return fog_api.list_double_opListF(this, CONTAINER_OP_APPEND, &other, NULL);
   }
 
   FOG_INLINE err_t concat(const List<float>& other, const Range& range)
   {
-    return _api.list_double_opListF(this, CONTAINER_OP_APPEND, &other, &range);
+    return fog_api.list_double_opListF(this, CONTAINER_OP_APPEND, &other, &range);
   }
 
   FOG_INLINE err_t concat(const float* data, size_t dataLength)
   {
-    return _api.list_double_opDataF(this, CONTAINER_OP_APPEND, data, dataLength);
+    return fog_api.list_double_opDataF(this, CONTAINER_OP_APPEND, data, dataLength);
   }
 
   // --------------------------------------------------------------------------
@@ -231,12 +231,12 @@ struct List<double> : public ListImpl< double, TypeInfo<double>::TYPE, 1, 1 >
 
 FOG_INLINE err_t List<float>::setList(const List<double>& other)
 {
-  return _api.list_float_opListD(this, CONTAINER_OP_REPLACE, &other, NULL);
+  return fog_api.list_float_opListD(this, CONTAINER_OP_REPLACE, &other, NULL);
 }
 
 FOG_INLINE err_t List<float>::setList(const List<double>& other, const Range& range)
 {
-  return _api.list_float_opListD(this, CONTAINER_OP_REPLACE, &other, &range);
+  return fog_api.list_float_opListD(this, CONTAINER_OP_REPLACE, &other, &range);
 }
 
 // --------------------------------------------------------------------------
@@ -245,12 +245,12 @@ FOG_INLINE err_t List<float>::setList(const List<double>& other, const Range& ra
 
 FOG_INLINE err_t List<float>::concat(const List<double>& other)
 {
-  return _api.list_float_opListD(this, CONTAINER_OP_APPEND, &other, NULL);
+  return fog_api.list_float_opListD(this, CONTAINER_OP_APPEND, &other, NULL);
 }
 
 FOG_INLINE err_t List<float>::concat(const List<double>& other, const Range& range)
 {
-  return _api.list_float_opListD(this, CONTAINER_OP_APPEND, &other, &range);
+  return fog_api.list_float_opListD(this, CONTAINER_OP_APPEND, &other, &range);
 }
 
 // ============================================================================

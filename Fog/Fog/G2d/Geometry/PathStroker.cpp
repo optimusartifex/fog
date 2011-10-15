@@ -1306,25 +1306,25 @@ static void FOG_CDECL PathStrokerT_update(NumT_(PathStroker)* self)
 
 FOG_NO_EXPORT void PathStroker_init(void)
 {
-  _api.pathstrokerf_ctor = PathStrokerT_ctor<float>;
-  _api.pathstrokerf_ctorCopy = PathStrokerT_ctorCopy<float>;
-  _api.pathstrokerf_ctorParams = PathStrokerT_ctorParams<float>;
-  _api.pathstrokerf_dtor = PathStrokerT_dtor<float>;
-  _api.pathstrokerf_setParams = PathStrokerT_setParams<float>;
-  _api.pathstrokerf_setOther = PathStrokerT_setOther<float>;
-  _api.pathstrokerf_strokeShape = PathStrokerT_strokeShape<float>;
-  _api.pathstrokerf_strokePath = PathStrokerT_strokePath<float>;
-  _api.pathstrokerf_update = PathStrokerT_update<float>;
+  fog_api.pathstrokerf_ctor = PathStrokerT_ctor<float>;
+  fog_api.pathstrokerf_ctorCopy = PathStrokerT_ctorCopy<float>;
+  fog_api.pathstrokerf_ctorParams = PathStrokerT_ctorParams<float>;
+  fog_api.pathstrokerf_dtor = PathStrokerT_dtor<float>;
+  fog_api.pathstrokerf_setParams = PathStrokerT_setParams<float>;
+  fog_api.pathstrokerf_setOther = PathStrokerT_setOther<float>;
+  fog_api.pathstrokerf_strokeShape = PathStrokerT_strokeShape<float>;
+  fog_api.pathstrokerf_strokePath = PathStrokerT_strokePath<float>;
+  fog_api.pathstrokerf_update = PathStrokerT_update<float>;
 
-  _api.pathstrokerd_ctor = PathStrokerT_ctor<double>;
-  _api.pathstrokerd_ctorCopy = PathStrokerT_ctorCopy<double>;
-  _api.pathstrokerd_ctorParams = PathStrokerT_ctorParams<double>;
-  _api.pathstrokerd_dtor = PathStrokerT_dtor<double>;
-  _api.pathstrokerd_setParams = PathStrokerT_setParams<double>;
-  _api.pathstrokerd_setOther = PathStrokerT_setOther<double>;
-  _api.pathstrokerd_strokeShape = PathStrokerT_strokeShape<double>;
-  _api.pathstrokerd_strokePath = PathStrokerT_strokePath<double>;
-  _api.pathstrokerd_update = PathStrokerT_update<double>;
+  fog_api.pathstrokerd_ctor = PathStrokerT_ctor<double>;
+  fog_api.pathstrokerd_ctorCopy = PathStrokerT_ctorCopy<double>;
+  fog_api.pathstrokerd_ctorParams = PathStrokerT_ctorParams<double>;
+  fog_api.pathstrokerd_dtor = PathStrokerT_dtor<double>;
+  fog_api.pathstrokerd_setParams = PathStrokerT_setParams<double>;
+  fog_api.pathstrokerd_setOther = PathStrokerT_setOther<double>;
+  fog_api.pathstrokerd_strokeShape = PathStrokerT_strokeShape<double>;
+  fog_api.pathstrokerd_strokePath = PathStrokerT_strokePath<double>;
+  fog_api.pathstrokerd_update = PathStrokerT_update<double>;
 }
 
 } // Fog namespace

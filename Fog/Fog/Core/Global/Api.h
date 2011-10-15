@@ -316,10 +316,48 @@ struct FOG_NO_EXPORT Api
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
+  // [Core/Threading - Lock]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(lock_ctor)(Lock* self);
+  FOG_CAPI_DTOR(lock_dtor)(Lock* self);
+
+  // Mapped directly to the CriticalSection functions under Windows that use
+  // STDCALL calling convention (as the rest of Win32-API).
+#if defined(FOG_OS_WINDOWS)
+  void (FOG_STDCALL* lock_lock)(Lock* self);
+  bool (FOG_STDCALL* lock_tryLock)(Lock* self);
+  void (FOG_STDCALL* lock_unlock)(Lock* self);
+#else
+  void (FOG_CDECL* lock_lock)(Lock* self);
+  bool (FOG_CDECL* lock_tryLock)(Lock* self);
+  void (FOG_CDECL* lock_unlock)(Lock* self);
+#endif // FOG_OS_WINDOWS
+
+  // --------------------------------------------------------------------------
+  // [Core/Threading - ThreadCondition]
+  // --------------------------------------------------------------------------
+
+  //! @brief Construct a condition variable for use with ONLY one user lock.
+  FOG_CAPI_CRET(err_t, threadcondition_ctor)(ThreadCondition* self, Lock* lock);
+  FOG_CAPI_DTOR(threadcondition_dtor)(ThreadCondition* self);
+
+  FOG_CAPI_METHOD(void, threadcondition_signal)(ThreadCondition* self);
+  FOG_CAPI_METHOD(void, threadcondition_broadcast)(ThreadCondition* self);
+  FOG_CAPI_METHOD(void, threadcondition_wait)(ThreadCondition* self, const TimeDelta* maxTime);
+
+  // --------------------------------------------------------------------------
   // [Core/Threading - ThreadEvent]
   // --------------------------------------------------------------------------
 
-  // TODO:
+  FOG_CAPI_CRET(err_t, threadevent_ctor)(ThreadEvent* self, bool manualReset, bool initialState);
+  FOG_CAPI_DTOR(threadevent_dtor)(ThreadEvent* self);
+
+  FOG_CAPI_METHOD(void, threadevent_signal)(ThreadEvent* self);
+  FOG_CAPI_METHOD(void, threadevent_reset)(ThreadEvent* self);
+
+  FOG_CAPI_METHOD(bool, threadevent_isSignaled)(ThreadEvent* self);
+  FOG_CAPI_METHOD(bool, threadevent_wait)(ThreadEvent* self, const TimeDelta* maxTime);
 
   // --------------------------------------------------------------------------
   // [Core/Threading - ThreadLocal]
@@ -329,6 +367,24 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(err_t, threadlocal_destroy)(uint32_t slot);
   FOG_CAPI_STATIC(void*, threadlocal_get)(uint32_t slot);
   FOG_CAPI_STATIC(err_t, threadlocal_set)(uint32_t slot, void* val);
+
+  // --------------------------------------------------------------------------
+  // [Core/Threading - ThreadPool]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(threadpool_ctor)(ThreadPool* self);
+  FOG_CAPI_DTOR(threadpool_dtor)(ThreadPool* self);
+
+  FOG_CAPI_METHOD(err_t, threadpool_getThread)(ThreadPool* self, Thread** threads, int workerId);
+  FOG_CAPI_METHOD(err_t, threadpool_getThreads)(ThreadPool* self, Thread** threads, size_t count, int workerId);
+  FOG_CAPI_METHOD(err_t, threadpool_releaseThread)(ThreadPool* self, Thread* thread, int workerId);
+  FOG_CAPI_METHOD(err_t, threadpool_releaseThreads)(ThreadPool* self, Thread** threads, size_t count, int workerId);
+  FOG_CAPI_METHOD(int, threadpool_getMinThreads)(const ThreadPool* self);
+  FOG_CAPI_METHOD(int, threadpool_getMaxThreads)(const ThreadPool* self);
+  FOG_CAPI_METHOD(int, threadpool_getNumThreads)(const ThreadPool* self);
+  FOG_CAPI_METHOD(err_t, threadpool_setMaxThreads)(ThreadPool* self, int maxThreads);
+
+  ThreadPool* threadpool_oInstance;
 
   // --------------------------------------------------------------------------
   // [Core/Tools - Cpu]
@@ -2412,11 +2468,12 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(bool, regionutil_isRectListSorted)(const RectI* data, size_t length);
 };
 
-extern FOG_API Api _api;
-
 //! @}
 
 } // Fog namespace
+
+//! @brief Fog-CAPI interface.
+FOG_CVAR_EXTERN Fog::Api fog_api;
 
 // [Guard]
 #endif // _FOG_CORE_GLOBAL_API_H

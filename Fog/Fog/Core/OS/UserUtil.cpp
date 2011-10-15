@@ -472,9 +472,9 @@ static err_t FOG_CDECL UserUtil_getUserDirectory(StringW* dst, uint32_t userDire
 
 FOG_NO_EXPORT void UserUtil_init(void)
 {
-  _api.userutil_getUid = UserUtil_getUid;
-  _api.userutil_getGid = UserUtil_getGid;
-  _api.userutil_getUserDirectory = UserUtil_getUserDirectory;
+  fog_api.userutil_getUid = UserUtil_getUid;
+  fog_api.userutil_getGid = UserUtil_getGid;
+  fog_api.userutil_getUserDirectory = UserUtil_getUserDirectory;
 }
 
 } // Fog namespace

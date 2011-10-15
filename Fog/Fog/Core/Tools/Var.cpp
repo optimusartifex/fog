@@ -310,29 +310,29 @@ _CreateNull:
       return;
 
     case VAR_TYPE_COLOR:
-      _api.pattern_ctorColor(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Color*>(vData));
+      fog_api.pattern_ctorColor(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Color*>(vData));
       return;
 
     case VAR_TYPE_TEXTUREF:
-      _api.pattern_ctorTextureF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
+      fog_api.pattern_ctorTextureF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
       return;
 
     case VAR_TYPE_TEXTURED:
-      _api.pattern_ctorTextureD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
+      fog_api.pattern_ctorTextureD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
       return;
 
     case VAR_TYPE_LINEAR_GRADIENTF:
     case VAR_TYPE_RADIAL_GRADIENTF:
     case VAR_TYPE_CONICAL_GRADIENTF:
     case VAR_TYPE_RECTANGULAR_GRADIENTF:
-      _api.pattern_ctorGradientF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientF*>(vData), NULL);
+      fog_api.pattern_ctorGradientF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientF*>(vData), NULL);
       return;
 
     case VAR_TYPE_LINEAR_GRADIENTD:
     case VAR_TYPE_RADIAL_GRADIENTD:
     case VAR_TYPE_CONICAL_GRADIENTD:
     case VAR_TYPE_RECTANGULAR_GRADIENTD:
-      _api.pattern_ctorGradientD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientD*>(vData), NULL);
+      fog_api.pattern_ctorGradientD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientD*>(vData), NULL);
       return;
 
     case VAR_TYPE_COLOR_STOP:
@@ -362,7 +362,7 @@ _CreateSimple:
   {
     size_t vSize = Var_getDataSize(vType);
 
-    VarData* d = _api.var_dCreate(vSize);
+    VarData* d = fog_api.var_dCreate(vSize);
     if (FOG_IS_NULL(d))
       goto _CreateNull;
 
@@ -417,7 +417,7 @@ static uint32_t FOG_CDECL Var_getVarType(const Var* self)
 
 static void FOG_CDECL Var_reset(Var* self)
 {
-  _api.var_dRelease(atomicPtrXchg(&self->_d, reinterpret_cast<VarData*>(&Var_dNull)));
+  fog_api.var_dRelease(atomicPtrXchg(&self->_d, reinterpret_cast<VarData*>(&Var_dNull)));
 }
 
 // ============================================================================
@@ -575,7 +575,7 @@ static err_t FOG_CDECL Var_getI32Bound(const Var* self, int32_t* dst, int32_t mi
     return ERR_RT_INVALID_ARGUMENT;
 
   int32_t value;
-  FOG_RETURN_ON_ERROR(_api.var_getI32(self, &value));
+  FOG_RETURN_ON_ERROR(fog_api.var_getI32(self, &value));
 
   if (value < min || value > max)
   {
@@ -731,7 +731,7 @@ static err_t FOG_CDECL Var_getU32Bound(const Var* self, uint32_t* dst, uint32_t 
     return ERR_RT_INVALID_ARGUMENT;
 
   uint32_t value;
-  FOG_RETURN_ON_ERROR(_api.var_getU32(self, &value));
+  FOG_RETURN_ON_ERROR(fog_api.var_getU32(self, &value));
 
   if (value < min || value > max)
   {
@@ -865,7 +865,7 @@ static err_t FOG_CDECL Var_getI64Bound(const Var* self, int64_t* dst, int64_t mi
     return ERR_RT_INVALID_ARGUMENT;
 
   int64_t value;
-  FOG_RETURN_ON_ERROR(_api.var_getI64(self, &value));
+  FOG_RETURN_ON_ERROR(fog_api.var_getI64(self, &value));
 
   if (value < min || value > max)
   {
@@ -1007,7 +1007,7 @@ static err_t FOG_CDECL Var_getU64Bound(const Var* self, uint64_t* dst, uint64_t 
     return ERR_RT_INVALID_ARGUMENT;
 
   uint64_t value;
-  FOG_RETURN_ON_ERROR(_api.var_getU64(self, &value));
+  FOG_RETURN_ON_ERROR(fog_api.var_getU64(self, &value));
 
   if (value < min || value > max)
   {
@@ -1113,7 +1113,7 @@ static err_t FOG_CDECL Var_getFloatBound(const Var* self, float* dst, float min,
     return ERR_RT_INVALID_ARGUMENT;
 
   float value;
-  FOG_RETURN_ON_ERROR(_api.var_getFloat(self, &value));
+  FOG_RETURN_ON_ERROR(fog_api.var_getFloat(self, &value));
 
   if (!Math::isFinite(value) || value < min || value > max)
   {
@@ -1205,7 +1205,7 @@ static err_t FOG_CDECL Var_getDoubleBound(const Var* self, double* dst, double m
     return ERR_RT_INVALID_ARGUMENT;
 
   double value;
-  FOG_RETURN_ON_ERROR(_api.var_getDouble(self, &value));
+  FOG_RETURN_ON_ERROR(fog_api.var_getDouble(self, &value));
 
   if (!Math::isFinite(value) || value < min || value > max)
   {
@@ -1827,37 +1827,37 @@ static void FOG_CDECL Var_dRelease(VarData* d)
 
     case VAR_TYPE_LIST_STRINGA:
       if (reinterpret_cast<ListUntypedData*>(d)->reference.deref())
-        _api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), _api.list_stringa_vTable);
+        fog_api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), fog_api.list_stringa_vTable);
       return;
 
     case VAR_TYPE_LIST_STRINGW:
       if (reinterpret_cast<ListUntypedData*>(d)->reference.deref())
-        _api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), _api.list_stringw_vTable);
+        fog_api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), fog_api.list_stringw_vTable);
       return;
 
     case VAR_TYPE_LIST_VAR:
       if (reinterpret_cast<ListUntypedData*>(d)->reference.deref())
-        _api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), _api.list_var_vTable);
+        fog_api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), fog_api.list_var_vTable);
       return;
 
     case VAR_TYPE_HASH_STRINGA_STRINGA:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
-        _api.hash_stringa_stringa_dFree(reinterpret_cast<HashUntypedData*>(d));
+        fog_api.hash_stringa_stringa_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
     case VAR_TYPE_HASH_STRINGA_VAR:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
-        _api.hash_stringa_var_dFree(reinterpret_cast<HashUntypedData*>(d));
+        fog_api.hash_stringa_var_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
     case VAR_TYPE_HASH_STRINGW_STRINGW:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
-        _api.hash_stringw_stringw_dFree(reinterpret_cast<HashUntypedData*>(d));
+        fog_api.hash_stringw_stringw_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
     case VAR_TYPE_HASH_STRINGW_VAR:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
-        _api.hash_stringw_var_dFree(reinterpret_cast<HashUntypedData*>(d));
+        fog_api.hash_stringw_var_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
     case VAR_TYPE_REGEXPA:
@@ -1999,44 +1999,44 @@ FOG_NO_EXPORT void Var_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.var_ctor = Var_ctor;
-  _api.var_ctorCopy = Var_ctorCopy;
-  _api.var_ctorType = Var_ctorType;
-  _api.var_dtor = Var_dtor;
+  fog_api.var_ctor = Var_ctor;
+  fog_api.var_ctorCopy = Var_ctorCopy;
+  fog_api.var_ctorType = Var_ctorType;
+  fog_api.var_dtor = Var_dtor;
 
-  _api.var_getReference = Var_getReference;
-  _api.var_getVarType = Var_getVarType;
+  fog_api.var_getReference = Var_getReference;
+  fog_api.var_getVarType = Var_getVarType;
 
-  _api.var_reset = Var_reset;
-  _api.var_copy = Var_copy;
+  fog_api.var_reset = Var_reset;
+  fog_api.var_copy = Var_copy;
 
-  _api.var_getI32 = Var_getI32;
-  _api.var_getI32Bound = Var_getI32Bound;
+  fog_api.var_getI32 = Var_getI32;
+  fog_api.var_getI32Bound = Var_getI32Bound;
 
-  _api.var_getU32 = Var_getU32;
-  _api.var_getU32Bound = Var_getU32Bound;
+  fog_api.var_getU32 = Var_getU32;
+  fog_api.var_getU32Bound = Var_getU32Bound;
 
-  _api.var_getI64 = Var_getI64;
-  _api.var_getI64Bound = Var_getI64Bound;
+  fog_api.var_getI64 = Var_getI64;
+  fog_api.var_getI64Bound = Var_getI64Bound;
 
-  _api.var_getU64 = Var_getU64;
-  _api.var_getU64Bound = Var_getU64Bound;
+  fog_api.var_getU64 = Var_getU64;
+  fog_api.var_getU64Bound = Var_getU64Bound;
 
-  _api.var_getFloat = Var_getFloat;
-  _api.var_getFloatBound = Var_getFloatBound;
+  fog_api.var_getFloat = Var_getFloat;
+  fog_api.var_getFloatBound = Var_getFloatBound;
 
-  _api.var_getDouble = Var_getDouble;
-  _api.var_getDoubleBound = Var_getDoubleBound;
+  fog_api.var_getDouble = Var_getDouble;
+  fog_api.var_getDoubleBound = Var_getDoubleBound;
 
-  _api.var_getType = Var_getType;
-  _api.var_setType = Var_setType;
+  fog_api.var_getType = Var_getType;
+  fog_api.var_setType = Var_setType;
 
-  _api.var_eq = Var_eq;
-  _api.var_compare = Var_compare;
+  fog_api.var_eq = Var_eq;
+  fog_api.var_compare = Var_compare;
 
-  _api.var_dCreate = Var_dCreate;
-  _api.var_dAddRef = Var_dAddRef;
-  _api.var_dRelease = Var_dRelease;
+  fog_api.var_dCreate = Var_dCreate;
+  fog_api.var_dAddRef = Var_dAddRef;
+  fog_api.var_dRelease = Var_dRelease;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -2047,7 +2047,7 @@ FOG_NO_EXPORT void Var_init(void)
   d->unknown.reference = 1;
   d->vType = VAR_TYPE_NULL;
 
-  _api.var_oNull = Var_oNull.initCustom1(d);
+  fog_api.var_oNull = Var_oNull.initCustom1(d);
 }
 
 } // Fog namespace

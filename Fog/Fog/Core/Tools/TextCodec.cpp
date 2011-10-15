@@ -1813,23 +1813,23 @@ FOG_NO_EXPORT void TextCodec_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.textcodec_ctor = TextCodec_ctor;
-  _api.textcodec_ctorCopy = TextCodec_ctorCopy;
-  _api.textcodec_dtor = TextCodec_dtor;
+  fog_api.textcodec_ctor = TextCodec_ctor;
+  fog_api.textcodec_ctorCopy = TextCodec_ctorCopy;
+  fog_api.textcodec_dtor = TextCodec_dtor;
 
-  _api.textcodec_createFromCode = TextCodec_createFromCode;
-  _api.textcodec_createFromMimeStubA = TextCodec_createFromMimeStubA;
-  _api.textcodec_createFromMimeStringW = TextCodec_createFromMimeStringW;
-  _api.textcodec_createFromBom = TextCodec_createFromBom;
+  fog_api.textcodec_createFromCode = TextCodec_createFromCode;
+  fog_api.textcodec_createFromMimeStubA = TextCodec_createFromMimeStubA;
+  fog_api.textcodec_createFromMimeStringW = TextCodec_createFromMimeStringW;
+  fog_api.textcodec_createFromBom = TextCodec_createFromBom;
 
-  _api.textcodec_reset = TextCodec_reset;
-  _api.textcodec_copy = TextCodec_copy;
+  fog_api.textcodec_reset = TextCodec_reset;
+  fog_api.textcodec_copy = TextCodec_copy;
 
-  _api.textcodec_encodeStubW = TextCodec_encodeStubW;
-  _api.textcodec_encodeStringW = TextCodec_encodeStringW;
+  fog_api.textcodec_encodeStubW = TextCodec_encodeStubW;
+  fog_api.textcodec_encodeStringW = TextCodec_encodeStringW;
 
-  _api.textcodec_decodeStubA = TextCodec_decodeStubA;
-  _api.textcodec_decodeStringA = TextCodec_decodeStringA;
+  fog_api.textcodec_decodeStubA = TextCodec_decodeStubA;
+  fog_api.textcodec_decodeStringA = TextCodec_decodeStringA;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -1840,7 +1840,7 @@ FOG_NO_EXPORT void TextCodec_init(void)
 
   // Initialize the oCache pointers.
   for (i = 0; i < TEXT_CODEC_CACHE_COUNT; i++)
-    _api.textcodec_oCache[i] = &TextCodec_oCache[i];
+    fog_api.textcodec_oCache[i] = &TextCodec_oCache[i];
 
   // LOCAL codec is initially initialized to LATIN-1.
   TextCodec_oCache[TEXT_CODEC_CACHE_NONE ]->_d = TextCodec_create(TEXT_ENCODING_NONE     );

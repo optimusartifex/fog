@@ -34,22 +34,22 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE GradientF(uint32_t gradientType = GRADIENT_TYPE_INVALID)
   {
-    _api.gradientf_ctor(this, gradientType);
+    fog_api.gradientf_ctor(this, gradientType);
   }
 
   FOG_INLINE GradientF(const GradientF& other)
   {
-    _api.gradientf_ctorCopyF(this, &other);
+    fog_api.gradientf_ctorCopyF(this, &other);
   }
 
   explicit FOG_INLINE GradientF(const GradientD& other)
   {
-    _api.gradientf_ctorCopyD(this, &other);
+    fog_api.gradientf_ctorCopyD(this, &other);
   }
 
   FOG_INLINE ~GradientF()
   {
-    _api.gradientf_dtor(this);
+    fog_api.gradientf_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -126,12 +126,12 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE err_t setGradient(const GradientF& other)
   {
-    return _api.gradientf_copyF(this, &other);
+    return fog_api.gradientf_copyF(this, &other);
   }
 
   FOG_INLINE err_t setGradient(const GradientD& other)
   {
-    return _api.gradientf_copyD(this, &other);
+    return fog_api.gradientf_copyD(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -140,7 +140,7 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE void reset()
   {
-    return _api.gradientf_reset(this);
+    return fog_api.gradientf_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -149,7 +149,7 @@ struct FOG_NO_EXPORT GradientF
 
   FOG_INLINE bool eq(const GradientF& other) const
   {
-    return _api.gradientf_eq(this, &other);
+    return fog_api.gradientf_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -168,12 +168,12 @@ struct FOG_NO_EXPORT GradientF
 
   static FOG_INLINE bool eq(const GradientF* a, const GradientF* b)
   {
-    return _api.gradientf_eq(a, b);
+    return fog_api.gradientf_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.gradientf_eq;
+    return (EqFunc)fog_api.gradientf_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -223,22 +223,22 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE GradientD(uint32_t gradientType = GRADIENT_TYPE_INVALID)
   {
-    _api.gradientd_ctor(this, gradientType);
+    fog_api.gradientd_ctor(this, gradientType);
   }
 
   FOG_INLINE GradientD(const GradientD& other)
   {
-    _api.gradientd_ctorCopyD(this, &other);
+    fog_api.gradientd_ctorCopyD(this, &other);
   }
 
   explicit FOG_INLINE GradientD(const GradientF& other)
   {
-    _api.gradientd_ctorCopyF(this, &other);
+    fog_api.gradientd_ctorCopyF(this, &other);
   }
 
   FOG_INLINE ~GradientD()
   {
-    _api.gradientd_dtor(this);
+    fog_api.gradientd_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -315,12 +315,12 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE err_t setGradient(const GradientF& other)
   {
-    return _api.gradientd_copyF(this, &other);
+    return fog_api.gradientd_copyF(this, &other);
   }
 
   FOG_INLINE err_t setGradient(const GradientD& other)
   {
-    return _api.gradientd_copyD(this, &other);
+    return fog_api.gradientd_copyD(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -329,7 +329,7 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE void reset()
   {
-    return _api.gradientd_reset(this);
+    return fog_api.gradientd_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -338,7 +338,7 @@ struct FOG_NO_EXPORT GradientD
 
   FOG_INLINE bool eq(const GradientD& other) const
   {
-    return _api.gradientd_eq(this, &other);
+    return fog_api.gradientd_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -357,12 +357,12 @@ struct FOG_NO_EXPORT GradientD
 
   static FOG_INLINE bool eq(const GradientD* a, const GradientD* b)
   {
-    return _api.gradientd_eq(a, b);
+    return fog_api.gradientd_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.gradientd_eq;
+    return (EqFunc)fog_api.gradientd_eq;
   }
 
   // --------------------------------------------------------------------------

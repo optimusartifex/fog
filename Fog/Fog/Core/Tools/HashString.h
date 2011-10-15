@@ -41,7 +41,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<StringA, ItemT>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<StringA, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -54,12 +54,12 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<StringA, ItemT>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<StringA, ItemT>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<StringA, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<StringA, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -68,12 +68,12 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<StringA, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<StringA, ItemT>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<StringA, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<StringA, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -82,18 +82,18 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE bool contains(const StubA& key) const
   {
-    return _api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key) != NULL;
+    return fog_api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StringA& key) const
   {
-    return _api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key) != NULL;
+    return fog_api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key) != NULL;
   }
 
   FOG_INLINE const ItemT& get(const StubA& key, const ItemT& notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return *item;
@@ -104,7 +104,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT& get(const StringA& key, const ItemT& notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return *item;
@@ -115,7 +115,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StubA& key) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -123,7 +123,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StubA& key, const ItemT* notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_getStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -134,7 +134,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StringA& key) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -142,7 +142,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StringA& key, const ItemT* notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_getStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -153,7 +153,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StubA& key)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringa_unknown_useStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_useStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -161,7 +161,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StubA& key, ItemT* notFound)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringa_unknown_useStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_useStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -172,7 +172,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StringA& key)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringa_unknown_useStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_useStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -180,7 +180,7 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StringA& key, ItemT* notFound)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringa_unknown_useStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
+      fog_api.hash_stringa_unknown_useStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -190,22 +190,22 @@ struct HashStringAImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t put(const StubA& key, const ItemT& item, bool replace = true)
   {
-    return _api.hash_stringa_unknown_putStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key, &item, replace);
+    return fog_api.hash_stringa_unknown_putStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StringA& key, const ItemT& item, bool replace = true)
   {
-    return _api.hash_stringa_unknown_putStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key, &item, replace);
+    return fog_api.hash_stringa_unknown_putStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const StubA& key)
   {
-    return _api.hash_stringa_unknown_removeStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key);
+    return fog_api.hash_stringa_unknown_removeStubA(this, HashVTable<StringA, ItemT>::getVTable(), &key);
   }
 
   FOG_INLINE err_t remove(const StringA& key)
   {
-    return _api.hash_stringa_unknown_removeStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key);
+    return fog_api.hash_stringa_unknown_removeStringA(this, HashVTable<StringA, ItemT>::getVTable(), &key);
   }
 };
 
@@ -218,7 +218,7 @@ struct HashStringAImpl<ItemT, 1> : public HashStringAImpl<ItemT, 0>
 
   FOG_INLINE bool eq(const Hash<StringA, ItemT>& other) const
   {
-    return _api.hash_stringa_unknown_eq(this, &other,
+    return fog_api.hash_stringa_unknown_eq(this, &other,
       HashVTable<StringA, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
   }
 
@@ -243,17 +243,17 @@ struct Hash<StringA, ItemT> : public HashStringAImpl<ItemT, !TypeInfo<ItemT>::NO
 
   FOG_INLINE Hash()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE Hash(const Hash<StringA, ItemT>& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Hash()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<StringA, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringA, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -262,7 +262,7 @@ struct Hash<StringA, ItemT> : public HashStringAImpl<ItemT, !TypeInfo<ItemT>::NO
 
   FOG_INLINE const Hash<StringA, ItemT>& operator=(const Hash<StringA, ItemT>& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<StringA, ItemT>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringA, ItemT>::getVTable(), &other);
     return *this;
   }
 };
@@ -280,17 +280,17 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE Hash()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE Hash(const Hash<StringA, StringA>& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Hash()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<StringA, StringA>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringA, StringA>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -308,7 +308,7 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<StringA, StringA>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<StringA, StringA>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -321,12 +321,12 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<StringA, StringA>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<StringA, StringA>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<StringA, StringA>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<StringA, StringA>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -335,12 +335,12 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<StringA, StringA>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<StringA, StringA>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<StringA, StringA>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<StringA, StringA>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -349,17 +349,17 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE bool contains(const StubA& key) const
   {
-    return _api.hash_stringa_stringa_getStubA(this, &key) != NULL;
+    return fog_api.hash_stringa_stringa_getStubA(this, &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StringA& key) const
   {
-    return _api.hash_stringa_stringa_getStringA(this, &key) != NULL;
+    return fog_api.hash_stringa_stringa_getStringA(this, &key) != NULL;
   }
 
   FOG_INLINE const StringA& get(const StubA& key, const StringA& notFound) const
   {
-    const StringA* item = _api.hash_stringa_stringa_getStubA(this, &key);
+    const StringA* item = fog_api.hash_stringa_stringa_getStubA(this, &key);
 
     if (item != NULL)
       return *item;
@@ -369,7 +369,7 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE const StringA& get(const StringA& key, const StringA& notFound) const
   {
-    const StringA* item = _api.hash_stringa_stringa_getStringA(this, &key);
+    const StringA* item = fog_api.hash_stringa_stringa_getStringA(this, &key);
 
     if (item != NULL)
       return *item;
@@ -379,14 +379,14 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE const StringA* getPtr(const StubA& key) const
   {
-    const StringA* item = _api.hash_stringa_stringa_getStubA(this, &key);
+    const StringA* item = fog_api.hash_stringa_stringa_getStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE const StringA* getPtr(const StubA& key, const StringA* notFound) const
   {
-    const StringA* item = _api.hash_stringa_stringa_getStubA(this, &key);
+    const StringA* item = fog_api.hash_stringa_stringa_getStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -396,14 +396,14 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE const StringA* getPtr(const StringA& key) const
   {
-    const StringA* item = _api.hash_stringa_stringa_getStringA(this, &key);
+    const StringA* item = fog_api.hash_stringa_stringa_getStringA(this, &key);
 
     return item;
   }
 
   FOG_INLINE const StringA* getPtr(const StringA& key, const StringA* notFound) const
   {
-    const StringA* item = _api.hash_stringa_stringa_getStringA(this, &key);
+    const StringA* item = fog_api.hash_stringa_stringa_getStringA(this, &key);
 
     if (item != NULL)
       return item;
@@ -413,14 +413,14 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE StringA* usePtr(const StubA& key)
   {
-    StringA* item = _api.hash_stringa_stringa_useStubA(this, &key);
+    StringA* item = fog_api.hash_stringa_stringa_useStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE StringA* usePtr(const StubA& key, StringA* notFound)
   {
-    StringA* item = _api.hash_stringa_stringa_useStubA(this, &key);
+    StringA* item = fog_api.hash_stringa_stringa_useStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -430,14 +430,14 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE StringA* usePtr(const StringA& key)
   {
-    StringA* item = _api.hash_stringa_stringa_useStringA(this, &key);
+    StringA* item = fog_api.hash_stringa_stringa_useStringA(this, &key);
 
     return item;
   }
 
   FOG_INLINE StringA* usePtr(const StringA& key, StringA* notFound)
   {
-    StringA* item = _api.hash_stringa_stringa_useStringA(this, &key);
+    StringA* item = fog_api.hash_stringa_stringa_useStringA(this, &key);
 
     if (item != NULL)
       return item;
@@ -447,22 +447,22 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE err_t put(const StubA& key, const StringA& item, bool replace = true)
   {
-    return _api.hash_stringa_stringa_putStubA(this, &key, &item, replace);
+    return fog_api.hash_stringa_stringa_putStubA(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StringA& key, const StringA& item, bool replace = true)
   {
-    return _api.hash_stringa_stringa_putStringA(this, &key, &item, replace);
+    return fog_api.hash_stringa_stringa_putStringA(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const StubA& key)
   {
-    return _api.hash_stringa_stringa_removeStubA(this, &key);
+    return fog_api.hash_stringa_stringa_removeStubA(this, &key);
   }
 
   FOG_INLINE err_t remove(const StringA& key)
   {
-    return _api.hash_stringa_stringa_removeStringA(this, &key);
+    return fog_api.hash_stringa_stringa_removeStringA(this, &key);
   }
 
   // --------------------------------------------------------------------------
@@ -471,7 +471,7 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE bool eq(const Hash<StringA, StringA>& other) const
   {
-    return _api.hash_stringa_unknown_eq(this, &other, HashVTable<StringA, StringA>::getVTable(), StringA::getEqFunc());
+    return fog_api.hash_stringa_unknown_eq(this, &other, HashVTable<StringA, StringA>::getVTable(), StringA::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -480,7 +480,7 @@ struct Hash<StringA, StringA> : public HashUntyped
 
   FOG_INLINE const Hash<StringA, StringA>& operator=(const Hash<StringA, StringA>& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<StringA, StringA>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringA, StringA>::getVTable(), &other);
     return *this;
   }
 
@@ -501,17 +501,17 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE Hash()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE Hash(const Hash<StringA, Var>& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Hash()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<StringA, Var>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringA, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -529,7 +529,7 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<StringA, Var>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<StringA, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -542,12 +542,12 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<StringA, Var>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<StringA, Var>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<StringA, Var>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<StringA, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -556,12 +556,12 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<StringA, Var>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<StringA, Var>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<StringA, Var>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<StringA, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -570,17 +570,17 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE bool contains(const StubA& key) const
   {
-    return _api.hash_stringa_stringa_getStubA(this, &key) != NULL;
+    return fog_api.hash_stringa_stringa_getStubA(this, &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StringA& key) const
   {
-    return _api.hash_stringa_stringa_getStringA(this, &key) != NULL;
+    return fog_api.hash_stringa_stringa_getStringA(this, &key) != NULL;
   }
 
   FOG_INLINE const Var& get(const StubA& key, const Var& notFound) const
   {
-    const Var* item = _api.hash_stringa_var_getStubA(this, &key);
+    const Var* item = fog_api.hash_stringa_var_getStubA(this, &key);
 
     if (item != NULL)
       return *item;
@@ -590,7 +590,7 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE const Var& get(const StringA& key, const Var& notFound) const
   {
-    const Var* item = _api.hash_stringa_var_getStringA(this, &key);
+    const Var* item = fog_api.hash_stringa_var_getStringA(this, &key);
 
     if (item != NULL)
       return *item;
@@ -600,14 +600,14 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE const Var* getPtr(const StubA& key) const
   {
-    const Var* item = _api.hash_stringa_var_getStubA(this, &key);
+    const Var* item = fog_api.hash_stringa_var_getStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE const Var* getPtr(const StubA& key, const Var* notFound) const
   {
-    const Var* item = _api.hash_stringa_var_getStubA(this, &key);
+    const Var* item = fog_api.hash_stringa_var_getStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -617,14 +617,14 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE const Var* getPtr(const StringA& key) const
   {
-    const Var* item = _api.hash_stringa_var_getStringA(this, &key);
+    const Var* item = fog_api.hash_stringa_var_getStringA(this, &key);
 
     return item;
   }
 
   FOG_INLINE const Var* getPtr(const StringA& key, const Var* notFound) const
   {
-    const Var* item = _api.hash_stringa_var_getStringA(this, &key);
+    const Var* item = fog_api.hash_stringa_var_getStringA(this, &key);
 
     if (item != NULL)
       return item;
@@ -634,14 +634,14 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE Var* usePtr(const StubA& key)
   {
-    Var* item = _api.hash_stringa_var_useStubA(this, &key);
+    Var* item = fog_api.hash_stringa_var_useStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE Var* usePtr(const StubA& key, Var* notFound)
   {
-    Var* item = _api.hash_stringa_var_useStubA(this, &key);
+    Var* item = fog_api.hash_stringa_var_useStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -651,14 +651,14 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE Var* usePtr(const StringA& key)
   {
-    Var* item = _api.hash_stringa_var_useStringA(this, &key);
+    Var* item = fog_api.hash_stringa_var_useStringA(this, &key);
 
     return item;
   }
 
   FOG_INLINE Var* usePtr(const StringA& key, Var* notFound)
   {
-    Var* item = _api.hash_stringa_var_useStringA(this, &key);
+    Var* item = fog_api.hash_stringa_var_useStringA(this, &key);
 
     if (item != NULL)
       return item;
@@ -668,22 +668,22 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE err_t put(const StubA& key, const Var& item, bool replace = true)
   {
-    return _api.hash_stringa_var_putStubA(this, &key, &item, replace);
+    return fog_api.hash_stringa_var_putStubA(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StringA& key, const Var& item, bool replace = true)
   {
-    return _api.hash_stringa_var_putStringA(this, &key, &item, replace);
+    return fog_api.hash_stringa_var_putStringA(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const StubA& key)
   {
-    return _api.hash_stringa_var_removeStubA(this, &key);
+    return fog_api.hash_stringa_var_removeStubA(this, &key);
   }
 
   FOG_INLINE err_t remove(const StringA& key)
   {
-    return _api.hash_stringa_var_removeStringA(this, &key);
+    return fog_api.hash_stringa_var_removeStringA(this, &key);
   }
 
   // --------------------------------------------------------------------------
@@ -692,7 +692,7 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE bool eq(const Hash<StringA, Var>& other) const
   {
-    return _api.hash_stringa_unknown_eq(this, &other, HashVTable<StringA, Var>::getVTable(), (EqFunc)_api.var_eq);
+    return fog_api.hash_stringa_unknown_eq(this, &other, HashVTable<StringA, Var>::getVTable(), (EqFunc)fog_api.var_eq);
   }
 
   // --------------------------------------------------------------------------
@@ -701,7 +701,7 @@ struct Hash<StringA, Var> : public HashUntyped
 
   FOG_INLINE const Hash<StringA, Var>& operator=(const Hash<StringA, Var>& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<StringA, Var>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringA, Var>::getVTable(), &other);
     return *this;
   }
 
@@ -734,7 +734,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<StringW, ItemT>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<StringW, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -747,12 +747,12 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<StringW, ItemT>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<StringW, ItemT>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<StringW, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<StringW, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -761,12 +761,12 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<StringW, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<StringW, ItemT>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<StringW, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<StringW, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -775,23 +775,23 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE bool contains(const Ascii8& key) const
   {
-    return _api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key) != NULL;
+    return fog_api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StubW& key) const
   {
-    return _api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key) != NULL;
+    return fog_api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StringW& key) const
   {
-    return _api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key) != NULL;
+    return fog_api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key) != NULL;
   }
 
   FOG_INLINE const ItemT& get(const Ascii8& key, const ItemT& notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return *item;
@@ -802,7 +802,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT& get(const StubW& key, const ItemT& notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return *item;
@@ -813,7 +813,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT& get(const StringW& key, const ItemT& notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return *item;
@@ -824,7 +824,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const Ascii8& key) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -832,7 +832,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const Ascii8& key, const ItemT* notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -843,7 +843,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StubW& key) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -851,7 +851,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StubW& key, const ItemT* notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -862,7 +862,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StringW& key) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -870,7 +870,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE const ItemT* getPtr(const StringW& key, const ItemT* notFound) const
   {
     const ItemT* item = reinterpret_cast<const ItemT*>(
-      _api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_getStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -881,7 +881,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const Ascii8& key)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringw_unknown_useStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_useStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -889,7 +889,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const Ascii8& key, ItemT* notFound)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringw_unknown_useStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_useStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -900,7 +900,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StubW& key)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringw_unknown_useStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_useStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -908,7 +908,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StubW& key, ItemT* notFound)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringw_unknown_useStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_useStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -919,7 +919,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StringW& key)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringw_unknown_useStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_useStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     return item;
   }
@@ -927,7 +927,7 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
   FOG_INLINE ItemT* usePtr(const StringW& key, ItemT* notFound)
   {
     ItemT* item = reinterpret_cast<ItemT*>(
-      _api.hash_stringw_unknown_useStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
+      fog_api.hash_stringw_unknown_useStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key));
 
     if (item != NULL)
       return item;
@@ -937,32 +937,32 @@ struct HashStringWImpl<ItemT, 0> : public HashUntyped
 
   FOG_INLINE err_t put(const Ascii8& key, const ItemT& item, bool replace = true)
   {
-    return _api.hash_stringw_unknown_putStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key, &item, replace);
+    return fog_api.hash_stringw_unknown_putStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StubW& key, const ItemT& item, bool replace = true)
   {
-    return _api.hash_stringw_unknown_putStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key, &item, replace);
+    return fog_api.hash_stringw_unknown_putStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StringW& key, const ItemT& item, bool replace = true)
   {
-    return _api.hash_stringw_unknown_putStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key, &item, replace);
+    return fog_api.hash_stringw_unknown_putStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const Ascii8& key)
   {
-    return _api.hash_stringw_unknown_removeStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key);
+    return fog_api.hash_stringw_unknown_removeStubA(this, HashVTable<StringW, ItemT>::getVTable(), &key);
   }
 
   FOG_INLINE err_t remove(const StubW& key)
   {
-    return _api.hash_stringw_unknown_removeStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key);
+    return fog_api.hash_stringw_unknown_removeStubW(this, HashVTable<StringW, ItemT>::getVTable(), &key);
   }
 
   FOG_INLINE err_t remove(const StringW& key)
   {
-    return _api.hash_stringw_unknown_removeStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key);
+    return fog_api.hash_stringw_unknown_removeStringW(this, HashVTable<StringW, ItemT>::getVTable(), &key);
   }
 };
 
@@ -975,7 +975,7 @@ struct HashStringWImpl<ItemT, 1> : public HashStringWImpl<ItemT, 0>
 
   FOG_INLINE bool eq(const Hash<StringW, ItemT>& other) const
   {
-    return _api.hash_stringw_unknown_eq(this, &other,
+    return fog_api.hash_stringw_unknown_eq(this, &other,
       HashVTable<StringW, ItemT>::getVTable(), TypeFunc<ItemT>::getEqFunc());
   }
 
@@ -1000,17 +1000,17 @@ struct Hash<StringW, ItemT> : public HashStringWImpl<ItemT, !TypeInfo<ItemT>::NO
 
   FOG_INLINE Hash()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE Hash(const Hash<StringW, ItemT>& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Hash()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<StringW, ItemT>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringW, ItemT>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1019,7 +1019,7 @@ struct Hash<StringW, ItemT> : public HashStringWImpl<ItemT, !TypeInfo<ItemT>::NO
 
   FOG_INLINE const Hash<StringW, ItemT>& operator=(const Hash<StringW, ItemT>& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<StringW, ItemT>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringW, ItemT>::getVTable(), &other);
     return *this;
   }
 };
@@ -1037,17 +1037,17 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE Hash()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE Hash(const Hash<StringW, StringW>& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Hash()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<StringW, StringW>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringW, StringW>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1065,7 +1065,7 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<StringW, StringW>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<StringW, StringW>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1078,12 +1078,12 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<StringW, StringW>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<StringW, StringW>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<StringW, StringW>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<StringW, StringW>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1092,12 +1092,12 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<StringW, StringW>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<StringW, StringW>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<StringW, StringW>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<StringW, StringW>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1106,22 +1106,22 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE bool contains(const Ascii8& key) const
   {
-    return _api.hash_stringw_stringw_getStubA(this, &key) != NULL;
+    return fog_api.hash_stringw_stringw_getStubA(this, &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StubW& key) const
   {
-    return _api.hash_stringw_stringw_getStubW(this, &key) != NULL;
+    return fog_api.hash_stringw_stringw_getStubW(this, &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StringW& key) const
   {
-    return _api.hash_stringw_stringw_getStringW(this, &key) != NULL;
+    return fog_api.hash_stringw_stringw_getStringW(this, &key) != NULL;
   }
 
   FOG_INLINE const StringW& get(const Ascii8& key, const StringW& notFound) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStubA(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStubA(this, &key);
 
     if (item != NULL)
       return *item;
@@ -1131,7 +1131,7 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE const StringW& get(const StubW& key, const StringW& notFound) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStubW(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStubW(this, &key);
 
     if (item != NULL)
       return *item;
@@ -1141,7 +1141,7 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE const StringW& get(const StringW& key, const StringW& notFound) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStringW(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStringW(this, &key);
 
     if (item != NULL)
       return *item;
@@ -1151,14 +1151,14 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE const StringW* getPtr(const Ascii8& key) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStubA(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE const StringW* getPtr(const Ascii8& key, const StringW* notFound) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStubA(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -1168,14 +1168,14 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE const StringW* getPtr(const StubW& key) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStubW(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStubW(this, &key);
 
     return item;
   }
 
   FOG_INLINE const StringW* getPtr(const StubW& key, const StringW* notFound) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStubW(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStubW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1185,14 +1185,14 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE const StringW* getPtr(const StringW& key) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStringW(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStringW(this, &key);
 
     return item;
   }
 
   FOG_INLINE const StringW* getPtr(const StringW& key, const StringW* notFound) const
   {
-    const StringW* item = _api.hash_stringw_stringw_getStringW(this, &key);
+    const StringW* item = fog_api.hash_stringw_stringw_getStringW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1202,14 +1202,14 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE StringW* usePtr(const Ascii8& key)
   {
-    StringW* item = _api.hash_stringw_stringw_useStubA(this, &key);
+    StringW* item = fog_api.hash_stringw_stringw_useStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE StringW* usePtr(const Ascii8& key, StringW* notFound)
   {
-    StringW* item = _api.hash_stringw_stringw_useStubA(this, &key);
+    StringW* item = fog_api.hash_stringw_stringw_useStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -1219,14 +1219,14 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE StringW* usePtr(const StubW& key)
   {
-    StringW* item = _api.hash_stringw_stringw_useStubW(this, &key);
+    StringW* item = fog_api.hash_stringw_stringw_useStubW(this, &key);
 
     return item;
   }
 
   FOG_INLINE StringW* usePtr(const StubW& key, StringW* notFound)
   {
-    StringW* item = _api.hash_stringw_stringw_useStubW(this, &key);
+    StringW* item = fog_api.hash_stringw_stringw_useStubW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1236,14 +1236,14 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE StringW* usePtr(const StringW& key)
   {
-    StringW* item = _api.hash_stringw_stringw_useStringW(this, &key);
+    StringW* item = fog_api.hash_stringw_stringw_useStringW(this, &key);
 
     return item;
   }
 
   FOG_INLINE StringW* usePtr(const StringW& key, StringW* notFound)
   {
-    StringW* item = _api.hash_stringw_stringw_useStringW(this, &key);
+    StringW* item = fog_api.hash_stringw_stringw_useStringW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1253,32 +1253,32 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE err_t put(const Ascii8& key, const StringW& item, bool replace = true)
   {
-    return _api.hash_stringw_stringw_putStubA(this, &key, &item, replace);
+    return fog_api.hash_stringw_stringw_putStubA(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StubW& key, const StringW& item, bool replace = true)
   {
-    return _api.hash_stringw_stringw_putStubW(this, &key, &item, replace);
+    return fog_api.hash_stringw_stringw_putStubW(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StringW& key, const StringW& item, bool replace = true)
   {
-    return _api.hash_stringw_stringw_putStringW(this, &key, &item, replace);
+    return fog_api.hash_stringw_stringw_putStringW(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const Ascii8& key)
   {
-    return _api.hash_stringw_stringw_removeStubA(this, &key);
+    return fog_api.hash_stringw_stringw_removeStubA(this, &key);
   }
 
   FOG_INLINE err_t remove(const StubW& key)
   {
-    return _api.hash_stringw_stringw_removeStubW(this, &key);
+    return fog_api.hash_stringw_stringw_removeStubW(this, &key);
   }
 
   FOG_INLINE err_t remove(const StringW& key)
   {
-    return _api.hash_stringw_stringw_removeStringW(this, &key);
+    return fog_api.hash_stringw_stringw_removeStringW(this, &key);
   }
 
   // --------------------------------------------------------------------------
@@ -1287,7 +1287,7 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE bool eq(const Hash<StringW, StringW>& other) const
   {
-    return _api.hash_stringw_unknown_eq(this, &other, HashVTable<StringW, StringW>::getVTable(), StringW::getEqFunc());
+    return fog_api.hash_stringw_unknown_eq(this, &other, HashVTable<StringW, StringW>::getVTable(), StringW::getEqFunc());
   }
 
   // --------------------------------------------------------------------------
@@ -1296,7 +1296,7 @@ struct Hash<StringW, StringW> : public HashUntyped
 
   FOG_INLINE const Hash<StringW, StringW>& operator=(const Hash<StringW, StringW>& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<StringW, StringW>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringW, StringW>::getVTable(), &other);
     return *this;
   }
 
@@ -1317,17 +1317,17 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE Hash()
   {
-    _api.hash_unknown_unknown_ctor(this);
+    fog_api.hash_unknown_unknown_ctor(this);
   }
 
   FOG_INLINE Hash(const Hash<StringW, Var>& other)
   {
-    _api.hash_unknown_unknown_ctorCopy(this, &other);
+    fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~Hash()
   {
-    _api.hash_unknown_unknown_dtor(this, HashVTable<StringW, Var>::getVTable());
+    fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringW, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1345,7 +1345,7 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE err_t _detach()
   {
-    return _api.hash_unknown_unknown_detach(this, HashVTable<StringW, Var>::getVTable());
+    return fog_api.hash_unknown_unknown_detach(this, HashVTable<StringW, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1358,12 +1358,12 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE err_t reserve(size_t capacity)
   {
-    return _api.hash_unknown_unknown_reserve(this, HashVTable<StringW, Var>::getVTable(), capacity);
+    return fog_api.hash_unknown_unknown_reserve(this, HashVTable<StringW, Var>::getVTable(), capacity);
   }
 
   FOG_INLINE void squeeze()
   {
-    _api.hash_unknown_unknown_squeeze(this, HashVTable<StringW, Var>::getVTable());
+    fog_api.hash_unknown_unknown_squeeze(this, HashVTable<StringW, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1372,12 +1372,12 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE void clear()
   {
-    _api.hash_unknown_unknown_clear(this, HashVTable<StringW, Var>::getVTable());
+    fog_api.hash_unknown_unknown_clear(this, HashVTable<StringW, Var>::getVTable());
   }
 
   FOG_INLINE void reset()
   {
-    _api.hash_unknown_unknown_reset(this, HashVTable<StringW, Var>::getVTable());
+    fog_api.hash_unknown_unknown_reset(this, HashVTable<StringW, Var>::getVTable());
   }
 
   // --------------------------------------------------------------------------
@@ -1386,22 +1386,22 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE bool contains(const Ascii8& key) const
   {
-    return _api.hash_stringw_stringw_getStubA(this, &key) != NULL;
+    return fog_api.hash_stringw_stringw_getStubA(this, &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StubW& key) const
   {
-    return _api.hash_stringw_stringw_getStubW(this, &key) != NULL;
+    return fog_api.hash_stringw_stringw_getStubW(this, &key) != NULL;
   }
 
   FOG_INLINE bool contains(const StringW& key) const
   {
-    return _api.hash_stringw_stringw_getStringW(this, &key) != NULL;
+    return fog_api.hash_stringw_stringw_getStringW(this, &key) != NULL;
   }
 
   FOG_INLINE const Var& get(const Ascii8& key, const Var& notFound) const
   {
-    const Var* item = _api.hash_stringw_var_getStubA(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStubA(this, &key);
 
     if (item != NULL)
       return *item;
@@ -1411,7 +1411,7 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE const Var& get(const StubW& key, const Var& notFound) const
   {
-    const Var* item = _api.hash_stringw_var_getStubW(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStubW(this, &key);
 
     if (item != NULL)
       return *item;
@@ -1421,7 +1421,7 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE const Var& get(const StringW& key, const Var& notFound) const
   {
-    const Var* item = _api.hash_stringw_var_getStringW(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStringW(this, &key);
 
     if (item != NULL)
       return *item;
@@ -1431,14 +1431,14 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE const Var* getPtr(const Ascii8& key) const
   {
-    const Var* item = _api.hash_stringw_var_getStubA(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE const Var* getPtr(const Ascii8& key, const Var* notFound) const
   {
-    const Var* item = _api.hash_stringw_var_getStubA(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -1448,14 +1448,14 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE const Var* getPtr(const StubW& key) const
   {
-    const Var* item = _api.hash_stringw_var_getStubW(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStubW(this, &key);
 
     return item;
   }
 
   FOG_INLINE const Var* getPtr(const StubW& key, const Var* notFound) const
   {
-    const Var* item = _api.hash_stringw_var_getStubW(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStubW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1465,14 +1465,14 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE const Var* getPtr(const StringW& key) const
   {
-    const Var* item = _api.hash_stringw_var_getStringW(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStringW(this, &key);
 
     return item;
   }
 
   FOG_INLINE const Var* getPtr(const StringW& key, const Var* notFound) const
   {
-    const Var* item = _api.hash_stringw_var_getStringW(this, &key);
+    const Var* item = fog_api.hash_stringw_var_getStringW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1482,14 +1482,14 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE Var* usePtr(const Ascii8& key)
   {
-    Var* item = _api.hash_stringw_var_useStubA(this, &key);
+    Var* item = fog_api.hash_stringw_var_useStubA(this, &key);
 
     return item;
   }
 
   FOG_INLINE Var* usePtr(const Ascii8& key, Var* notFound)
   {
-    Var* item = _api.hash_stringw_var_useStubA(this, &key);
+    Var* item = fog_api.hash_stringw_var_useStubA(this, &key);
 
     if (item != NULL)
       return item;
@@ -1499,14 +1499,14 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE Var* usePtr(const StubW& key)
   {
-    Var* item = _api.hash_stringw_var_useStubW(this, &key);
+    Var* item = fog_api.hash_stringw_var_useStubW(this, &key);
 
     return item;
   }
 
   FOG_INLINE Var* usePtr(const StubW& key, Var* notFound)
   {
-    Var* item = _api.hash_stringw_var_useStubW(this, &key);
+    Var* item = fog_api.hash_stringw_var_useStubW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1516,14 +1516,14 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE Var* usePtr(const StringW& key)
   {
-    Var* item = _api.hash_stringw_var_useStringW(this, &key);
+    Var* item = fog_api.hash_stringw_var_useStringW(this, &key);
 
     return item;
   }
 
   FOG_INLINE Var* usePtr(const StringW& key, Var* notFound)
   {
-    Var* item = _api.hash_stringw_var_useStringW(this, &key);
+    Var* item = fog_api.hash_stringw_var_useStringW(this, &key);
 
     if (item != NULL)
       return item;
@@ -1533,32 +1533,32 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE err_t put(const Ascii8& key, const Var& item, bool replace = true)
   {
-    return _api.hash_stringw_var_putStubA(this, &key, &item, replace);
+    return fog_api.hash_stringw_var_putStubA(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StubW& key, const Var& item, bool replace = true)
   {
-    return _api.hash_stringw_var_putStubW(this, &key, &item, replace);
+    return fog_api.hash_stringw_var_putStubW(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t put(const StringW& key, const Var& item, bool replace = true)
   {
-    return _api.hash_stringw_var_putStringW(this, &key, &item, replace);
+    return fog_api.hash_stringw_var_putStringW(this, &key, &item, replace);
   }
 
   FOG_INLINE err_t remove(const Ascii8& key)
   {
-    return _api.hash_stringw_var_removeStubA(this, &key);
+    return fog_api.hash_stringw_var_removeStubA(this, &key);
   }
 
   FOG_INLINE err_t remove(const StubW& key)
   {
-    return _api.hash_stringw_var_removeStubW(this, &key);
+    return fog_api.hash_stringw_var_removeStubW(this, &key);
   }
 
   FOG_INLINE err_t remove(const StringW& key)
   {
-    return _api.hash_stringw_var_removeStringW(this, &key);
+    return fog_api.hash_stringw_var_removeStringW(this, &key);
   }
 
   // --------------------------------------------------------------------------
@@ -1567,7 +1567,7 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE bool eq(const Hash<StringW, Var>& other) const
   {
-    return _api.hash_stringw_unknown_eq(this, &other, HashVTable<StringW, Var>::getVTable(), (EqFunc)_api.var_eq);
+    return fog_api.hash_stringw_unknown_eq(this, &other, HashVTable<StringW, Var>::getVTable(), (EqFunc)fog_api.var_eq);
   }
 
   // --------------------------------------------------------------------------
@@ -1576,7 +1576,7 @@ struct Hash<StringW, Var> : public HashUntyped
 
   FOG_INLINE const Hash<StringW, Var>& operator=(const Hash<StringW, Var>& other)
   {
-    _api.hash_unknown_unknown_copy(this, HashVTable<StringW, Var>::getVTable(), &other);
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringW, Var>::getVTable(), &other);
     return *this;
   }
 

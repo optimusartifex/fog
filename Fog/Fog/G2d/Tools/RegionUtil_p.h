@@ -37,19 +37,19 @@ namespace RegionUtil {
 //! instance, but can be constructed manually.
 static FOG_INLINE const BoxI* getClosestBox(const BoxI* data, size_t length, int y)
 {
-  return _api.regionutil_getClosestBox(data, length, y);
+  return fog_api.regionutil_getClosestBox(data, length, y);
 }
 
 //! @internal
 static FOG_INLINE bool isBoxListSorted(const BoxI* data, size_t length)
 {
-  return _api.regionutil_isBoxListSorted(data, length);
+  return fog_api.regionutil_isBoxListSorted(data, length);
 }
 
 //! @internal
 static FOG_INLINE bool isRectListSorted(const RectI* data, size_t length)
 {
-  return _api.regionutil_isRectListSorted(data, length);
+  return fog_api.regionutil_isRectListSorted(data, length);
 }
 
 //! @internal

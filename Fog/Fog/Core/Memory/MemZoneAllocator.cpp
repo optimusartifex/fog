@@ -119,13 +119,13 @@ static void FOG_CDECL MemZoneAllocator_revert(MemZoneAllocator* self, MemZoneRec
 
 FOG_NO_EXPORT void MemZoneAllocator_init(void)
 {
-  _api.memzoneallocator_ctor = MemZoneAllocator_ctor;
-  _api.memzoneallocator_dtor = MemZoneAllocator_reset;
-  _api.memzoneallocator_alloc = MemZoneAllocator_alloc;
-  _api.memzoneallocator_clear = MemZoneAllocator_clear;
-  _api.memzoneallocator_reset = MemZoneAllocator_reset;
-  _api.memzoneallocator_record = MemZoneAllocator_record;
-  _api.memzoneallocator_revert = MemZoneAllocator_revert;
+  fog_api.memzoneallocator_ctor = MemZoneAllocator_ctor;
+  fog_api.memzoneallocator_dtor = MemZoneAllocator_reset;
+  fog_api.memzoneallocator_alloc = MemZoneAllocator_alloc;
+  fog_api.memzoneallocator_clear = MemZoneAllocator_clear;
+  fog_api.memzoneallocator_reset = MemZoneAllocator_reset;
+  fog_api.memzoneallocator_record = MemZoneAllocator_record;
+  fog_api.memzoneallocator_revert = MemZoneAllocator_revert;
 }
 
 } // Fog namespace

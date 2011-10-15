@@ -25,7 +25,7 @@ struct FOG_NO_EXPORT OSInfo
   static FOG_INLINE StringW getName()
   {
     StringW result;
-    _api.osinfo_getName(&result);
+    fog_api.osinfo_getName(&result);
     return result;
   }
 };

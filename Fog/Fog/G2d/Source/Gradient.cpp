@@ -192,23 +192,23 @@ FOG_NO_EXPORT void Gradient_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.gradientf_ctor = GradientF_ctor;
-  _api.gradientf_ctorCopyF = GradientF_ctorCopyF;
-  _api.gradientf_ctorCopyD = GradientF_ctorCopyD;
-  _api.gradientf_dtor = GradientF_dtor;
-  _api.gradientf_copyF = GradientF_copyF;
-  _api.gradientf_copyD = GradientF_copyD;
-  _api.gradientf_reset = GradientF_reset;
-  _api.gradientf_eq = GradientF_eq;
+  fog_api.gradientf_ctor = GradientF_ctor;
+  fog_api.gradientf_ctorCopyF = GradientF_ctorCopyF;
+  fog_api.gradientf_ctorCopyD = GradientF_ctorCopyD;
+  fog_api.gradientf_dtor = GradientF_dtor;
+  fog_api.gradientf_copyF = GradientF_copyF;
+  fog_api.gradientf_copyD = GradientF_copyD;
+  fog_api.gradientf_reset = GradientF_reset;
+  fog_api.gradientf_eq = GradientF_eq;
 
-  _api.gradientd_ctor = GradientD_ctor;
-  _api.gradientd_ctorCopyF = GradientD_ctorCopyF;
-  _api.gradientd_ctorCopyD = GradientD_ctorCopyD;
-  _api.gradientd_dtor = GradientD_dtor;
-  _api.gradientd_copyF = GradientD_copyF;
-  _api.gradientd_copyD = GradientD_copyD;
-  _api.gradientd_reset = GradientD_reset;
-  _api.gradientd_eq = GradientD_eq;
+  fog_api.gradientd_ctor = GradientD_ctor;
+  fog_api.gradientd_ctorCopyF = GradientD_ctorCopyF;
+  fog_api.gradientd_ctorCopyD = GradientD_ctorCopyD;
+  fog_api.gradientd_dtor = GradientD_dtor;
+  fog_api.gradientd_copyF = GradientD_copyF;
+  fog_api.gradientd_copyD = GradientD_copyD;
+  fog_api.gradientd_reset = GradientD_reset;
+  fog_api.gradientd_eq = GradientD_eq;
 }
 
 } // Fog namespace

@@ -139,12 +139,12 @@ struct FOG_NO_EXPORT LineF
 
   static FOG_INLINE uint32_t intersect(PointF& dst, const LineF& a, const LineF& b)
   {
-    return _api.linef_intersect(&dst, a.p, b.p);
+    return fog_api.linef_intersect(&dst, a.p, b.p);
   }
 
   static FOG_INLINE float polyAngle(const PointF pts[3])
   {
-    return _api.linef_polyAngle(pts);
+    return fog_api.linef_polyAngle(pts);
   }
 
   static FOG_INLINE float polyAngle(const PointF& a, const PointF& b, const PointF& c)
@@ -153,7 +153,7 @@ struct FOG_NO_EXPORT LineF
     pts[0] = a;
     pts[1] = b;
     pts[2] = c;
-    return _api.linef_polyAngle(pts);
+    return fog_api.linef_polyAngle(pts);
   }
 
   // --------------------------------------------------------------------------
@@ -280,12 +280,12 @@ struct FOG_NO_EXPORT LineD
 
   static FOG_INLINE uint32_t intersect(PointD& dst, const LineD& a, const LineD& b)
   {
-    return _api.lined_intersect(&dst, a.p, b.p);
+    return fog_api.lined_intersect(&dst, a.p, b.p);
   }
 
   static FOG_INLINE double polyAngle(const PointD pts[3])
   {
-    return _api.lined_polyAngle(pts);
+    return fog_api.lined_polyAngle(pts);
   }
 
   static FOG_INLINE double polyAngle(const PointD& a, const PointD& b, const PointD& c)
@@ -294,7 +294,7 @@ struct FOG_NO_EXPORT LineD
     pts[0] = a;
     pts[1] = b;
     pts[2] = c;
-    return _api.lined_polyAngle(pts);
+    return fog_api.lined_polyAngle(pts);
   }
 
   // --------------------------------------------------------------------------

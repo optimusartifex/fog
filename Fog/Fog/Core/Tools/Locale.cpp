@@ -86,7 +86,7 @@ static void FOG_CDECL Locale_ctorCopy(Locale* self, const Locale* other)
 static void FOG_CDECL Locale_ctorString(Locale* self, const StringW* name)
 {
   self->_d = Locale_dPosix->addRef();
-  _api.locale_create(self, name);
+  fog_api.locale_create(self, name);
 }
 
 static void FOG_CDECL Locale_dtor(Locale* self)
@@ -104,7 +104,7 @@ static err_t FOG_CDECL Locale_detach(Locale* self)
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  LocaleData* newd = _api.locale_dCreate();
+  LocaleData* newd = fog_api.locale_dCreate();
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -247,20 +247,20 @@ FOG_NO_EXPORT void Locale_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.locale_ctor = Locale_ctor;
-  _api.locale_ctorCopy = Locale_ctorCopy;
-  _api.locale_ctorString = Locale_ctorString;
-  _api.locale_dtor = Locale_dtor;
-  _api.locale_detach = Locale_detach;
-  _api.locale_reset = Locale_reset;
-  _api.locale_create = Locale_create;
-  _api.locale_setChar = Locale_setChar;
+  fog_api.locale_ctor = Locale_ctor;
+  fog_api.locale_ctorCopy = Locale_ctorCopy;
+  fog_api.locale_ctorString = Locale_ctorString;
+  fog_api.locale_dtor = Locale_dtor;
+  fog_api.locale_detach = Locale_detach;
+  fog_api.locale_reset = Locale_reset;
+  fog_api.locale_create = Locale_create;
+  fog_api.locale_setChar = Locale_setChar;
 
-  _api.locale_copy = Locale_copy;
-  _api.locale_eq = Locale_eq;
+  fog_api.locale_copy = Locale_copy;
+  fog_api.locale_eq = Locale_eq;
 
-  _api.locale_dCreate = Locale_dCreate;
-  _api.locale_dFree = Locale_dFree;
+  fog_api.locale_dCreate = Locale_dCreate;
+  fog_api.locale_dFree = Locale_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -273,7 +273,7 @@ FOG_NO_EXPORT void Locale_init(void)
   d->vType = VAR_TYPE_LOCALE;
   d->name.initCustom1(Ascii8("POSIX"));
 
-  _api.locale_oPosix = Locale_oPosix.initCustom1(d);
+  fog_api.locale_oPosix = Locale_oPosix.initCustom1(d);
   Locale_setPosix(d);
 
   d = &Locale_dUser;
@@ -281,7 +281,7 @@ FOG_NO_EXPORT void Locale_init(void)
   d->vType = VAR_TYPE_LOCALE;
   d->name.init();
 
-  _api.locale_oUser = Locale_oPosix.initCustom1(d);
+  fog_api.locale_oUser = Locale_oPosix.initCustom1(d);
   Locale_setLConv(d, localeconv());
 }
 

@@ -55,14 +55,14 @@ static void FOG_CDECL DirIterator_ctor(DirIterator* self)
 static void FOG_CDECL DirIterator_ctorString(DirIterator* self, const StringW* path, bool skipParent)
 {
   self->_d = &DirIterator_dEmpty;
-  _api.diriterator_open(self, path, skipParent);
+  fog_api.diriterator_open(self, path, skipParent);
 }
 
 static void FOG_CDECL DirIterator_dtor(DirIterator* self)
 {
   if (self->_d == &DirIterator_dEmpty)
     return;
-  _api.diriterator_close(self);
+  fog_api.diriterator_close(self);
 }
 
 // ============================================================================
@@ -499,18 +499,18 @@ FOG_NO_EXPORT void DirIterator_init(void)
   DirIterator_dEmpty->handle = NULL;
   DirIterator_dEmpty->pathAbs.init();
 
-  _api.diriterator_ctor = DirIterator_ctor;
-  _api.diriterator_ctorString = DirIterator_ctorString;
-  _api.diriterator_dtor = DirIterator_dtor;
+  fog_api.diriterator_ctor = DirIterator_ctor;
+  fog_api.diriterator_ctorString = DirIterator_ctorString;
+  fog_api.diriterator_dtor = DirIterator_dtor;
 
-  _api.diriterator_open = DirIterator_open;
-  _api.diriterator_close = DirIterator_close;
+  fog_api.diriterator_open = DirIterator_open;
+  fog_api.diriterator_close = DirIterator_close;
 
-  _api.diriterator_readFileInfo = DirIterator_readFileInfo;
-  _api.diriterator_readFileName = DirIterator_readFileName;
+  fog_api.diriterator_readFileInfo = DirIterator_readFileInfo;
+  fog_api.diriterator_readFileName = DirIterator_readFileName;
 
-  _api.diriterator_rewind = DirIterator_rewind;
-  _api.diriterator_tell = DirIterator_tell;
+  fog_api.diriterator_rewind = DirIterator_rewind;
+  fog_api.diriterator_tell = DirIterator_tell;
 }
 
 } // Fog namespace

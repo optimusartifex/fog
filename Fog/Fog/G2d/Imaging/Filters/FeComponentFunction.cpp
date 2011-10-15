@@ -161,7 +161,7 @@ static err_t FOG_CDECL FeComponentFunction_setData(FeComponentFunction* self, ui
 
   if (functionType == FE_COMPONENT_FUNCTION_IDENTITY)
   {
-    _api.fecomponentfunction_reset(self);
+    fog_api.fecomponentfunction_reset(self);
     return ERR_OK;
   }
 
@@ -169,7 +169,7 @@ static err_t FOG_CDECL FeComponentFunction_setData(FeComponentFunction* self, ui
 
   if (d->reference.get() != 1)
   {
-    FeComponentFunctionData* newd = _api.fecomponentfunction_dCreate(functionType, functionData);
+    FeComponentFunctionData* newd = fog_api.fecomponentfunction_dCreate(functionType, functionData);
     if (FOG_IS_NULL(newd))
       return ERR_RT_OUT_OF_MEMORY;
 
@@ -332,20 +332,20 @@ FOG_NO_EXPORT void FeComponentFunction_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fecomponentfunction_ctor = FeComponentFunction_ctor;
-  _api.fecomponentfunction_ctorCopy = FeComponentFunction_ctorCopy;
-  _api.fecomponentfunction_dtor = FeComponentFunction_dtor;
+  fog_api.fecomponentfunction_ctor = FeComponentFunction_ctor;
+  fog_api.fecomponentfunction_ctorCopy = FeComponentFunction_ctorCopy;
+  fog_api.fecomponentfunction_dtor = FeComponentFunction_dtor;
 
-  _api.fecomponentfunction_resultsInIdentity = FeComponentFunction_resultsInIdentity;
-  _api.fecomponentfunction_getData = FeComponentFunction_getData;
-  _api.fecomponentfunction_setData = FeComponentFunction_setData;
-  _api.fecomponentfunction_reset = FeComponentFunction_reset;
+  fog_api.fecomponentfunction_resultsInIdentity = FeComponentFunction_resultsInIdentity;
+  fog_api.fecomponentfunction_getData = FeComponentFunction_getData;
+  fog_api.fecomponentfunction_setData = FeComponentFunction_setData;
+  fog_api.fecomponentfunction_reset = FeComponentFunction_reset;
 
-  _api.fecomponentfunction_copy = FeComponentFunction_copy;
-  _api.fecomponentfunction_eq = FeComponentFunction_eq;
+  fog_api.fecomponentfunction_copy = FeComponentFunction_copy;
+  fog_api.fecomponentfunction_eq = FeComponentFunction_eq;
 
-  _api.fecomponentfunction_dCreate = FeComponentFunction_dCreate;
-  _api.fecomponentfunction_dFree = FeComponentFunction_dFree;
+  fog_api.fecomponentfunction_dCreate = FeComponentFunction_dCreate;
+  fog_api.fecomponentfunction_dFree = FeComponentFunction_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -357,7 +357,7 @@ FOG_NO_EXPORT void FeComponentFunction_init(void)
   d->vType = 0; // TODO: Var
   d->functionType = FE_COMPONENT_FUNCTION_IDENTITY;
 
-  _api.fecomponentfunction_oIdentity = FeComponentFunction_oIdentity.initCustom1(d);
+  fog_api.fecomponentfunction_oIdentity = FeComponentFunction_oIdentity.initCustom1(d);
 }
 
 } // Fog namespace

@@ -334,13 +334,13 @@ FOG_NO_EXPORT void HashUtil_init(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.hashutil_getClosestPrime = HashUtil_getClosestPrime;
+  fog_api.hashutil_getClosestPrime = HashUtil_getClosestPrime;
 
-  _api.hashutil_hashBinary = HashUtil_hashBinary;
-  _api.hashutil_hashVectorD = HashUtil_hashVectorD;
-  _api.hashutil_hashVectorQ = HashUtil_hashVectorQ;
-  _api.hashutil_hashStubA = HashUtil_hashStubA;
-  _api.hashutil_hashStubW = HashUtil_hashStubW;
+  fog_api.hashutil_hashBinary = HashUtil_hashBinary;
+  fog_api.hashutil_hashVectorD = HashUtil_hashVectorD;
+  fog_api.hashutil_hashVectorQ = HashUtil_hashVectorQ;
+  fog_api.hashutil_hashStubA = HashUtil_hashStubA;
+  fog_api.hashutil_hashStubW = HashUtil_hashStubW;
 }
 
 } // Fog namespace

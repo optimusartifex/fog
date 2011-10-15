@@ -19,6 +19,19 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::ThreadPoolEntry]
+// ============================================================================
+
+//! @brief Allocated or pooled thread record.
+struct FOG_NO_EXPORT ThreadPoolEntry
+{
+  ThreadPoolEntry* next;
+  Thread* thread;
+  int workerId;
+};
+
+
+// ============================================================================
 // [Fog::ThreadPool]
 // ============================================================================
 
@@ -32,16 +45,23 @@ namespace Fog {
 //! - @c RasterPaintEngine.
 //!
 //! All methods in @c ThreadPool are thread safe.
-struct FOG_API ThreadPool
+struct FOG_NO_EXPORT ThreadPool
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   //! @brief Create thread pool.
-  ThreadPool();
+  FOG_INLINE ThreadPool()
+  {
+    fog_api.threadpool_ctor(this);
+  }
+
   //! @brief Destroy thread pool.
-  virtual ~ThreadPool();
+  FOG_INLINE ~ThreadPool()
+  {
+    fog_api.threadpool_dtor(this);
+  }
 
   // --------------------------------------------------------------------------
   // [Thread Management]
@@ -55,58 +75,78 @@ struct FOG_API ThreadPool
   //! [0, 1, 2, 3]. Thread allocator tries return thread where the id was last
   //! used. Using workId may or may not improve your code efficiency (if some
   //! data remains in cpu-cache and os-cpu scheduler can use the cpu again).
-  err_t getThread(Thread** threads, int workId = -1);
+  FOG_INLINE err_t getThread(Thread** threads, int workerId = -1)
+  {
+    return fog_api.threadpool_getThread(this, threads, workerId);
+  }
+
   //! @brief Get @a count of threads.
-  err_t getThreads(Thread** threads, size_t count, int workId = -1);
+  FOG_INLINE err_t getThreads(Thread** threads, size_t count, int workerId = -1)
+  {
+    return fog_api.threadpool_getThreads(this, threads, count, workerId);
+  }
 
   //! @brief Release @a thread previously returned by @c getThread().
   //!
   //! Use @a workId optionally to set thread workId (it not remembers the
   //! @a workId passed to the @c getThread() method).
-  err_t releaseThread(Thread* thread, int workId = -1);
+  FOG_INLINE err_t releaseThread(Thread* thread, int workerId = -1)
+  {
+    return fog_api.threadpool_releaseThread(this, thread, workerId);
+  }
+
   //! @brief Release @a count of threads.
-  err_t releaseThreads(Thread** threads, size_t count, int workId = -1);
+  FOG_INLINE err_t releaseThreads(Thread** threads, size_t count, int workerId = -1)
+  {
+    return fog_api.threadpool_releaseThreads(this, threads, count, workerId);
+  }
 
   //! @brief Get minimum count of threads that can be used by the thread pool.
-  int getMinThreads() const;
+  FOG_INLINE int getMinThreads() const
+  {
+    return fog_api.threadpool_getMinThreads(this);
+  }
+
   //! @brief Get maximum count of threads that can be used by the thread pool.
-  int getMaxThreads() const;
+  FOG_INLINE int getMaxThreads() const
+  {
+    return fog_api.threadpool_getMaxThreads(this);
+  }
+
   //! @brief Get number of threads used by the thread pool.
-  int getNumThreads() const;
+  FOG_INLINE int getNumThreads() const
+  {
+    return fog_api.threadpool_getNumThreads(this);
+  }
 
   //! @brief Set maximum threads that can be created and used by the thread
   //! pool. If all threads are used then @c getThread() or @c getThreads() will
   //! return @c NULL.
-  err_t setMaxThreads(int maxThreads);
-
-  // --------------------------------------------------------------------------
-  // [Internal]
-  // --------------------------------------------------------------------------
-
-  //! @brief Allocated or pooled thread record.
-  struct PoolEntry
+  FOG_INLINE err_t setMaxThreads(int maxThreads)
   {
-    PoolEntry* next;
-    Thread* thread;
-    int workId;
-  };
-
-protected:
-  //! @brief Create new thread using operating-system call.
-  virtual Thread* _createThread();
-  //! @brief Release all unused (pooled) threads.
-  void releaseAllAvailable();
+    return fog_api.threadpool_setMaxThreads(this, maxThreads);
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
-public:
 
-  static ThreadPool* getInstance();
+  static FOG_INLINE ThreadPool* getInstance()
+  {
+    return fog_api.threadpool_oInstance;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
+
+  //! @brief Lock to protect members.
+  mutable Static<Lock> _lock;
+
+  //! @brief List of used threads.
+  ThreadPoolEntry* _usedThreads;
+  //! @brief List of unused (pooled) threads.
+  ThreadPoolEntry* _unusedThreads;
 
   //! @brief Minimum threads count.
   int _minThreads;
@@ -114,13 +154,6 @@ public:
   int _maxThreads;
   //! @brief Number of threads.
   int _numThreads;
-
-  //! @brief Lock used to access internal structures.
-  Lock _lock;
-  //! @brief List of used threads.
-  PoolEntry* _usedThreads;
-  //! @brief List of unused (pooled) threads.
-  PoolEntry* _unusedThreads;
 
 private:
   _FOG_NO_COPY(ThreadPool)

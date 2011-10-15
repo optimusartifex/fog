@@ -23,22 +23,22 @@ struct FOG_NO_EXPORT MemMgr
 {
   static FOG_INLINE void* alloc(size_t size)
   {
-    return _api.memmgr_alloc(size);
+    return fog_api.memmgr_alloc(size);
   }
 
   static FOG_INLINE void* calloc(size_t size)
   {
-    return _api.memmgr_calloc(size);
+    return fog_api.memmgr_calloc(size);
   }
 
   static FOG_INLINE void* realloc(void* addr, size_t size)
   {
-    return _api.memmgr_realloc(addr, size);
+    return fog_api.memmgr_realloc(addr, size);
   }
 
   static FOG_INLINE void free(void* addr)
   {
-    return _api.memmgr_free(addr);
+    return fog_api.memmgr_free(addr);
   }
 
   // ============================================================================
@@ -47,17 +47,17 @@ struct FOG_NO_EXPORT MemMgr
 
   static FOG_INLINE void cleanup(uint32_t reason)
   {
-    _api.memmgr_cleanup(reason);
+    fog_api.memmgr_cleanup(reason);
   }
 
   static FOG_INLINE err_t registerCleanupFunc(MemCleanupFunc func, void* closure)
   {
-    return _api.memmgr_registerCleanupFunc(func, closure);
+    return fog_api.memmgr_registerCleanupFunc(func, closure);
   }
 
   static FOG_INLINE err_t unregisterCleanupFunc(MemCleanupFunc func, void* closure)
   {
-    return _api.memmgr_unregisterCleanupFunc(func, closure);
+    return fog_api.memmgr_unregisterCleanupFunc(func, closure);
   }
 
   // ============================================================================
@@ -66,12 +66,12 @@ struct FOG_NO_EXPORT MemMgr
 
   static FOG_INLINE uint64_t getAmountOfPhysicalMemory()
   {
-    return _api.memmgr_getAmountOfPhysicalMemory();
+    return fog_api.memmgr_getAmountOfPhysicalMemory();
   }
 
   static FOG_INLINE uint64_t getAmountOfPhysicalMemoryMB()
   {
-    return _api.memmgr_getAmountOfPhysicalMemoryMB();
+    return fog_api.memmgr_getAmountOfPhysicalMemoryMB();
   }
 };
 

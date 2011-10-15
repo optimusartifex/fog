@@ -3096,13 +3096,13 @@ _Ret:
 
 FOG_NO_EXPORT void StringUtil_init_dtoa(void)
 {
-  _api.stringutil_dtoa = StringUtil_dtoa;
+  fog_api.stringutil_dtoa = StringUtil_dtoa;
 
-  _api.stringutil_parseFloatA = StringUtil_parseFloat<char>;
-  _api.stringutil_parseFloatW = StringUtil_parseFloat<CharW>;
+  fog_api.stringutil_parseFloatA = StringUtil_parseFloat<char>;
+  fog_api.stringutil_parseFloatW = StringUtil_parseFloat<CharW>;
 
-  _api.stringutil_parseDoubleA = StringUtil_parseDouble<char>;
-  _api.stringutil_parseDoubleW = StringUtil_parseDouble<CharW>;
+  fog_api.stringutil_parseDoubleA = StringUtil_parseDouble<char>;
+  fog_api.stringutil_parseDoubleW = StringUtil_parseDouble<CharW>;
 }
 
 } // Fog namespace

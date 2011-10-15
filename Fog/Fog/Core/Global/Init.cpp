@@ -40,6 +40,8 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   // [Core/Threading]
   ThreadLocal_init();
+  ThreadEvent_init();
+  ThreadCondition_init();
 
   // [Core/Math]
   Math_init();                   // Depends on Cpu.

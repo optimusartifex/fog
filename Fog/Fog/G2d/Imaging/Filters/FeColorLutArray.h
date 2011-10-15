@@ -35,7 +35,7 @@ struct FOG_NO_EXPORT FeColorLutArrayData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.fecolorlutarray_dFree(this);
+      fog_api.fecolorlutarray_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -61,12 +61,12 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   FOG_INLINE FeColorLutArray()
   {
-    _api.fecolorlutarray_ctor(this);
+    fog_api.fecolorlutarray_ctor(this);
   }
 
   FOG_INLINE FeColorLutArray(const FeColorLutArray& other)
   {
-    _api.fecolorlutarray_ctorCopy(this, &other);
+    fog_api.fecolorlutarray_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE FeColorLutArray(FeColorLutArrayData* d) :
@@ -76,7 +76,7 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   FOG_INLINE ~FeColorLutArray()
   {
-    _api.fecolorlutarray_dtor(this);
+    fog_api.fecolorlutarray_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -87,7 +87,7 @@ struct FOG_NO_EXPORT FeColorLutArray
   FOG_INLINE bool isDetached() const { return _d->reference.get() == 1; }
 
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
-  FOG_INLINE err_t _detach() { return _api.fecolorlutarray_detach(this); }
+  FOG_INLINE err_t _detach() { return fog_api.fecolorlutarray_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -106,7 +106,7 @@ struct FOG_NO_EXPORT FeColorLutArray
     FOG_ASSERT_X(index < 256,
       "Fog::FeColorLutArray::setAt() - Index out of range.");
 
-    return _api.fecolorlutarray_setAt(this, index, value);
+    return fog_api.fecolorlutarray_setAt(this, index, value);
   }
 
   FOG_INLINE const uint8_t* getData() const
@@ -124,12 +124,12 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   FOG_INLINE err_t setFromFunction(FeColorLutArray* self, const FeComponentFunction& func)
   {
-    return _api.fecolorlutarray_setFromComponentFunction(self, &func);
+    return fog_api.fecolorlutarray_setFromComponentFunction(self, &func);
   }
 
   FOG_INLINE bool isIdentity() const
   {
-    return _api.fecolorlutarray_isIdentity(_d->data);
+    return fog_api.fecolorlutarray_isIdentity(_d->data);
   }
 
   // --------------------------------------------------------------------------
@@ -138,7 +138,7 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   FOG_INLINE void reset()
   {
-    _api.fecolorlutarray_reset(this);
+    fog_api.fecolorlutarray_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -147,7 +147,7 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   FOG_INLINE bool eq(const FeColorLutArray& other) const
   {
-    return _api.fecolorlutarray_eq(this, &other);
+    return fog_api.fecolorlutarray_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -157,7 +157,7 @@ struct FOG_NO_EXPORT FeColorLutArray
   //! @brief Assignment operator.
   FOG_INLINE FeColorLutArray& operator=(const FeColorLutArray& other)
   {
-    _api.fecolorlutarray_copy(this, &other);
+    fog_api.fecolorlutarray_copy(this, &other);
     return *this;
   }
 
@@ -178,7 +178,7 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   static FOG_INLINE const FeColorLutArray& identity()
   {
-    return *_api.fecolorlutarray_oIdentity;
+    return *fog_api.fecolorlutarray_oIdentity;
   }
 
   // --------------------------------------------------------------------------
@@ -187,12 +187,12 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   static FOG_INLINE bool eq(const FeColorLutArray* a, const FeColorLutArray* b)
   {
-    return _api.fecolorlutarray_eq(a, b);
+    return fog_api.fecolorlutarray_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.fecolorlutarray_eq;
+    return (EqFunc)fog_api.fecolorlutarray_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -201,12 +201,12 @@ struct FOG_NO_EXPORT FeColorLutArray
 
   static FOG_INLINE void setIdentity(uint8_t* data)
   {
-    _api.fecolorlutarray_setIdentity(data);
+    fog_api.fecolorlutarray_setIdentity(data);
   }
 
   static FOG_INLINE bool isIdentity(const uint8_t* data)
   {
-    return _api.fecolorlutarray_isIdentity(data);
+    return fog_api.fecolorlutarray_isIdentity(data);
   }
 
   // --------------------------------------------------------------------------

@@ -31,7 +31,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
   FOG_INLINE uint32_t getBytesPerPixel() const { return _bytesPerPixel; }
   FOG_INLINE uint32_t getPrecision() const { return _precision; }
 
-  FOG_INLINE uint32_t getCompatibleFormat() const { return _api.imageformatdescription_getCompatibleFormat(this); }
+  FOG_INLINE uint32_t getCompatibleFormat() const { return fog_api.imageformatdescription_getCompatibleFormat(this); }
 
   FOG_INLINE uint32_t getComponentMask() const { return _componentMask; }
 
@@ -108,7 +108,7 @@ struct FOG_NO_EXPORT ImageFormatDescription
     uint32_t depth, uint32_t flags,
     uint64_t aMask, uint64_t rMask, uint64_t gMask, uint64_t bMask)
   {
-    return _api.imageformatdescription_createArgb(this,
+    return fog_api.imageformatdescription_createArgb(this,
       depth, flags, aMask, rMask, gMask, bMask);
   }
 

@@ -1292,7 +1292,7 @@ static PaintEngine* FOG_CDECL NullPaintEngine_getNullEngine()
 
 FOG_NO_EXPORT void NullPaintEngine_init()
 {
-  _api.painter_getNullEngine = NullPaintEngine_getNullEngine;
+  fog_api.painter_getNullEngine = NullPaintEngine_getNullEngine;
   NullPaintEngine_instance.vtable = &NullPaintEngine_vtable;
 
   PaintEngineVTable& v = NullPaintEngine_vtable;

@@ -82,12 +82,12 @@ FOG_NO_EXPORT void FeBlur_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.feblur_ctor = FeBlur_ctor;
-  _api.feblur_ctorCopy = FeBlur_ctorCopy;
+  fog_api.feblur_ctor = FeBlur_ctor;
+  fog_api.feblur_ctorCopy = FeBlur_ctorCopy;
 
-  _api.feblur_reset = FeBlur_reset;
-  _api.feblur_copy = FeBlur_copy;
-  _api.feblur_eq = FeBlur_eq;
+  fog_api.feblur_reset = FeBlur_reset;
+  fog_api.feblur_copy = FeBlur_copy;
+  fog_api.feblur_eq = FeBlur_eq;
 }
 
 } // Fog namespace

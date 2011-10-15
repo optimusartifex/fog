@@ -285,11 +285,11 @@ FOG_NO_EXPORT void List_init_SSE2(void)
   // [Funcs]
   // -------------------------------------------------------------------------
 
-  _api.list_untyped_indexOf_4B = List_indexOf_4B_SSE2<1>;
-  _api.list_untyped_indexOf_16B = List_indexOf_16B_SSE2<1>;
+  fog_api.list_untyped_indexOf_4B = List_indexOf_4B_SSE2<1>;
+  fog_api.list_untyped_indexOf_16B = List_indexOf_16B_SSE2<1>;
 
-  _api.list_untyped_lastIndexOf_4B = List_indexOf_4B_SSE2<-1>;
-  _api.list_untyped_lastIndexOf_16B = List_indexOf_16B_SSE2<-1>;
+  fog_api.list_untyped_lastIndexOf_4B = List_indexOf_4B_SSE2<-1>;
+  fog_api.list_untyped_lastIndexOf_16B = List_indexOf_16B_SSE2<-1>;
 }
 
 } // Fog namespace

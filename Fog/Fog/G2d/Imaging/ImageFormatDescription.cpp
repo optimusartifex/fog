@@ -434,8 +434,8 @@ const ImageFormatDescription ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1]
 
 FOG_NO_EXPORT void ImageFormatDescription_init(void)
 {
-  _api.imageformatdescription_getCompatibleFormat = ImageFormatDescription_getCompatibleFormat;
-  _api.imageformatdescription_createArgb = ImageFormatDescription_createArgb;
+  fog_api.imageformatdescription_getCompatibleFormat = ImageFormatDescription_getCompatibleFormat;
+  fog_api.imageformatdescription_createArgb = ImageFormatDescription_createArgb;
 }
 
 } // Fog namespace

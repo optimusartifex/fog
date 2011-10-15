@@ -23,7 +23,7 @@ namespace Fog {
 
 static void FOG_CDECL FeComponentTransfer_ctor(FeComponentTransfer* self)
 {
-  FeComponentFunctionData* identity = _api.fecomponentfunction_oIdentity->_d;
+  FeComponentFunctionData* identity = fog_api.fecomponentfunction_oIdentity->_d;
   identity->reference.add(4);
 
   self->_filterType = IMAGE_FILTER_TYPE_COMPONENT_TRANSFER;
@@ -56,7 +56,7 @@ static void FOG_CDECL FeComponentTransfer_dtor(FeComponentTransfer* self)
 
 static void FOG_CDECL FeComponentTransfer_reset(FeComponentTransfer* self)
 {
-  FeComponentFunctionData* identity = _api.fecomponentfunction_oIdentity->_d;
+  FeComponentFunctionData* identity = fog_api.fecomponentfunction_oIdentity->_d;
   identity->reference.add(4);
 
   atomicPtrXchg(&self->c[0]->_d, identity)->release();
@@ -101,13 +101,13 @@ FOG_NO_EXPORT void FeComponentTransfer_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fecomponenttransfer_ctor = FeComponentTransfer_ctor;
-  _api.fecomponenttransfer_ctorCopy = FeComponentTransfer_ctorCopy;
-  _api.fecomponenttransfer_dtor = FeComponentTransfer_dtor;
+  fog_api.fecomponenttransfer_ctor = FeComponentTransfer_ctor;
+  fog_api.fecomponenttransfer_ctorCopy = FeComponentTransfer_ctorCopy;
+  fog_api.fecomponenttransfer_dtor = FeComponentTransfer_dtor;
 
-  _api.fecomponenttransfer_reset = FeComponentTransfer_reset;
-  _api.fecomponenttransfer_copy = FeComponentTransfer_copy;
-  _api.fecomponenttransfer_eq = FeComponentTransfer_eq;
+  fog_api.fecomponenttransfer_reset = FeComponentTransfer_reset;
+  fog_api.fecomponenttransfer_copy = FeComponentTransfer_copy;
+  fog_api.fecomponenttransfer_eq = FeComponentTransfer_eq;
 }
 
 } // Fog namespace

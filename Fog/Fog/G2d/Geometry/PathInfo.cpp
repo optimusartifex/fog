@@ -373,8 +373,8 @@ _Invalid:
 
 FOG_NO_EXPORT void PathInfo_init(void)
 {
-  _api.pathinfof_generate = PathInfoT_generate<float>;
-  _api.pathinfod_generate = PathInfoT_generate<double>;
+  fog_api.pathinfof_generate = PathInfoT_generate<float>;
+  fog_api.pathinfod_generate = PathInfoT_generate<double>;
 }
 
 } // Fog namespace

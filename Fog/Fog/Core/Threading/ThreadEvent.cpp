@@ -3,10 +3,6 @@
 // [License]
 // MIT, See COPYING file in package
 
-// Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 // [Precompiled Headers]
 #if defined(FOG_PRECOMP)
 #include FOG_PRECOMP
@@ -18,6 +14,11 @@
 #include <Fog/Core/Threading/ThreadEvent.h>
 #include <Fog/Core/Tools/Time.h>
 
+// [Dependencies - Windows]
+#if defined(FOG_OS_WINDOWS)
+# include <Fog/Core/OS/WinUtil.h>
+#endif // FOG_OS_WINDOWS
+
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 # include <errno.h>
@@ -26,57 +27,64 @@
 
 namespace Fog {
 
-// ============================================================================
-// [Fog::ThreadEvent]
-// ============================================================================
-
 #if defined(FOG_OS_WINDOWS)
-ThreadEvent::ThreadEvent(bool manualReset, bool signaled)
-  : _event(::CreateEventW(NULL, manualReset, signaled, NULL))
+
+// ============================================================================
+// [Fog::ThreadEvent - Construction / Destruction (Windows)]
+// ============================================================================
+
+static err_t FOG_CDECL ThreadEvent_ctor(ThreadEvent* self, bool manualReset, bool initialState)
 {
-  // We're probably going to crash anyways if this is ever NULL, so we might
-  // as well make our stack reports more informative by crashing here.
-  FOG_ASSERT(_event);
+  self->_event = ::CreateEventW(NULL, manualReset, initialState, NULL);
+  if (self->_event == NULL)
+    return ERR_OK;
+  else
+    return WinUtil::getErrFromWinLastError();
 }
 
-ThreadEvent::~ThreadEvent()
+static void FOG_CDECL ThreadEvent_dtor(ThreadEvent* self)
 {
-  ::CloseHandle(_event);
+  ::CloseHandle(self->_event);
 }
 
-void ThreadEvent::reset()
+// ============================================================================
+// [Fog::ThreadEvent - Signal / Reset (Windows)]
+// ============================================================================
+
+static void FOG_CDECL ThreadEvent_signal(ThreadEvent* self)
 {
-  ::ResetEvent(_event);
+  ::SetEvent(self->_event);
 }
 
-void ThreadEvent::signal()
+static void FOG_CDECL ThreadEvent_reset(ThreadEvent* self)
 {
-  ::SetEvent(_event);
+  ::ResetEvent(self->_event);
 }
 
-bool ThreadEvent::isSignaled()
+// ============================================================================
+// [Fog::ThreadEvent - Wait]
+// ============================================================================
+
+static bool FOG_CDECL ThreadEvent_isSignaled(ThreadEvent* self)
 {
-  return ::WaitForSingleObject(_event, 0) == WAIT_OBJECT_0;
+  return ::WaitForSingleObject(self->_event, 0) == WAIT_OBJECT_0;
 }
 
-bool ThreadEvent::wait()
+static bool FOG_CDECL ThreadEvent_wait(ThreadEvent* self, const TimeDelta* maxTime)
 {
-  return ::WaitForSingleObject(_event, INFINITE) == WAIT_OBJECT_0;
-}
+  if (maxTime == NULL)
+    return ::WaitForSingleObject(self->_event, INFINITE) == WAIT_OBJECT_0;
 
-bool ThreadEvent::timedWait(const TimeDelta& maxTime)
-{
-  if (maxTime < TimeDelta::fromMicroseconds(0))
+  TimeDelta t = *maxTime;
+  if (t < TimeDelta::fromMicroseconds(0))
     return false;
 
-  // Be careful here. TimeDelta has a precision of microseconds, but this API
-  // is in milliseconds. If there are 5.5ms left, should the delay be 5 or 6?
-  // It should be 6 to avoid returning too early.
-  DWORD timeout = (DWORD)maxTime.getMilliseconds();
-  if ((maxTime.getDelta() % 1000) > 0)
+  // WaitForSingleObject() has only milliseconds precision, so ceil maxTime.
+  DWORD timeout = (DWORD)t.getMilliseconds();
+  if ((t.getDelta() % 1000) > 0)
     timeout++;
 
-  DWORD result = ::WaitForSingleObject(_event, timeout);
+  DWORD result = ::WaitForSingleObject(self->_event, timeout);
   switch (result)
   {
     case WAIT_OBJECT_0:
@@ -92,80 +100,114 @@ bool ThreadEvent::timedWait(const TimeDelta& maxTime)
 #endif
 
 #if defined(FOG_OS_POSIX)
-ThreadEvent::ThreadEvent(bool manualReset, bool signaled) :
-  _lock(),
-  _cvar(&_lock),
-  _signaled(signaled),
-  _manualReset(manualReset)
+
+// ============================================================================
+// [Fog::ThreadEvent - Construction / Destruction (Posix)]
+// ============================================================================
+
+static err_t FOG_CDECL ThreadEvent_ctor(ThreadEvent* self, bool manualReset, bool initialState)
 {
+  self->_lock.init();
+  self->_cvar.initCustom1(&self->_lock);
+
+  self->_manualReset = manualReset;
+  self->_signaled = initialState;
 }
 
-ThreadEvent::~ThreadEvent()
+static void FOG_CDECL ThreadEvent_dtor(ThreadEvent* self)
 {
-  // Members are destroyed in the reverse of their initialization order, so we
-  // should not have to worry about _lock being destroyed before _cvar.
+  self->_cvar.destroy();
+  self->_lock.destroy();
 }
 
-void ThreadEvent::reset()
-{
-  AutoLock locked(_lock);
-  _signaled = false;
-}
+// ============================================================================
+// [Fog::ThreadEvent - Signal / Reset (Posix)]
+// ============================================================================
 
-void ThreadEvent::signal()
+static void FOG_CDECL ThreadEvent_signal(ThreadEvent* self)
 {
-  AutoLock locked(_lock);
+  AutoLock locked(self->_lock);
 
-  if (!_signaled)
+  if (!self->_signaled)
   {
-    _signaled = true;
-    if (_manualReset)
-      _cvar.broadcast();
+    self->_signaled = true;
+
+    if (self->_manualReset)
+      self->_cvar->broadcast();
     else
-      _cvar.signal();
+      self->_cvar->signal();
   }
 }
 
-bool ThreadEvent::isSignaled()
+static void FOG_CDECL ThreadEvent_reset(ThreadEvent* self)
 {
-  return timedWait(TimeDelta());
+  AutoLock locked(self->_lock);
+  self->_signaled = false;
 }
 
-bool ThreadEvent::wait()
-{
-  AutoLock locked(_lock);
+// ============================================================================
+// [Fog::ThreadEvent - Wait (Posix)]
+// ============================================================================
 
-  while (!_signaled) _cvar.wait();
-  if (!_manualReset) _signaled = false;
-  return true;
+static bool FOG_CDECL ThreadEvent_isSignaled(ThreadEvent* self)
+{
+  return self->wait(TimeDelta());
 }
 
-bool ThreadEvent::timedWait(const TimeDelta& maxTime)
+static bool FOG_CDECL ThreadEvent_wait(ThreadEvent* self, const TimeDelta* maxTime)
 {
-  AutoLock locked(_lock);
+  AutoLock locked(self->_lock);
 
-  // In case of spurious wake-ups, we need to adjust the amount of time that we
-  // spend sleeping.
-  TimeDelta totalTime;
-
-  for (;;)
+  if (maxTime == NULL)
   {
-    TimeTicks start = TimeTicks::now();
-    _cvar.timedWait(maxTime - totalTime);
+    while (!self->_signaled)
+      self->_cvar->wait();
     
-    if (_signaled)
-      break;
-
-    totalTime += TimeTicks::now() - start;
-    if (totalTime >= maxTime)
-      break;
+    if (!self->_manualReset)
+      self->_signaled = false;
+    return true;
   }
+  else
+  {
+    TimeDelta t = *maxTime;
+    TimeDelta total;
 
-  bool result = _signaled;
-  if (!_manualReset)
-    _signaled = false;
-  return result;
+    for (;;)
+    {
+      TimeTicks start = TimeTicks::now();
+      self->_cvar->wait(t - total);
+    
+      if (self->_signaled)
+        break;
+
+      total += TimeTicks::now() - start;
+      if (total >= t)
+        break;
+    }
+
+    bool result = self->_signaled;
+
+    if (!self->_manualReset)
+      self->_signaled = false;
+    return result;
+  }
 }
+
 #endif // FOG_OS_POSIX
+
+// ============================================================================
+// [Init / Fini]
+// ============================================================================
+
+FOG_NO_EXPORT void ThreadEvent_init(void)
+{
+  fog_api.threadevent_ctor = ThreadEvent_ctor;
+  fog_api.threadevent_dtor = ThreadEvent_dtor;
+
+  fog_api.threadevent_signal = ThreadEvent_signal;
+  fog_api.threadevent_reset = ThreadEvent_reset;
+  fog_api.threadevent_isSignaled = ThreadEvent_isSignaled;
+  fog_api.threadevent_wait = ThreadEvent_wait;
+}
 
 } // Fog namespace

@@ -63,7 +63,7 @@ static err_t FOG_CDECL FileInfo_detach(FileInfo* self)
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  FileInfoData* newd = _api.fileinfo_dCreate(&d->fileName);
+  FileInfoData* newd = fog_api.fileinfo_dCreate(&d->fileName);
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -373,26 +373,26 @@ FOG_NO_EXPORT void FileInfo_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fileinfo_ctor = FileInfo_ctor;
-  _api.fileinfo_ctorCopy = FileInfo_ctorCopy;
-  _api.fileinfo_dtor = FileInfo_dtor;
-  _api.fileinfo_detach = FileInfo_detach;
-  _api.fileinfo_fromFile = FileInfo_fromFile;
-  _api.fileinfo_fromFileEx = FileInfo_fromFileEx;
+  fog_api.fileinfo_ctor = FileInfo_ctor;
+  fog_api.fileinfo_ctorCopy = FileInfo_ctorCopy;
+  fog_api.fileinfo_dtor = FileInfo_dtor;
+  fog_api.fileinfo_detach = FileInfo_detach;
+  fog_api.fileinfo_fromFile = FileInfo_fromFile;
+  fog_api.fileinfo_fromFileEx = FileInfo_fromFileEx;
   
 #if defined(FOG_OS_WINDOWS)
-  _api.fileinfo_fromWinFileAttributeData = FileInfo_fromWinFileAttributeData;
-  _api.fileinfo_fromWinFindData = FileInfo_fromWinFindData;
+  fog_api.fileinfo_fromWinFileAttributeData = FileInfo_fromWinFileAttributeData;
+  fog_api.fileinfo_fromWinFindData = FileInfo_fromWinFindData;
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
-  _api.fileinfo_fromStat = FileInfo_fromStat;
+  fog_api.fileinfo_fromStat = FileInfo_fromStat;
 #endif // FOG_OS_POSIX
 
-  _api.fileinfo_copy = FileInfo_copy;
+  fog_api.fileinfo_copy = FileInfo_copy;
 
-  _api.fileinfo_dCreate = FileInfo_dCreate;
-  _api.fileinfo_dFree = FileInfo_dFree;
+  fog_api.fileinfo_dCreate = FileInfo_dCreate;
+  fog_api.fileinfo_dFree = FileInfo_dFree;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -400,10 +400,10 @@ FOG_NO_EXPORT void FileInfo_init(void)
 
   FileInfoData* d = &FileInfo_dNull;
   d->reference.init(1);
-  d->filePath.initCustom1(_api.stringw_oEmpty->_d);
-  d->fileName.initCustom1(_api.stringw_oEmpty->_d);
+  d->filePath.initCustom1(fog_api.stringw_oEmpty->_d);
+  d->fileName.initCustom1(fog_api.stringw_oEmpty->_d);
 
-  _api.fileinfo_oNull = FileInfo_oNull.initCustom1(d);
+  fog_api.fileinfo_oNull = FileInfo_oNull.initCustom1(d);
 }
 
 } // Fog namespace

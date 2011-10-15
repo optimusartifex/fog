@@ -95,13 +95,13 @@ FOG_NO_EXPORT void FeConvolveMatrix_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.feconvolvematrix_ctor = FeConvolveMatrix_ctor;
-  _api.feconvolvematrix_ctorCopy = FeConvolveMatrix_ctorCopy;
-  _api.feconvolvematrix_dtor = FeConvolveMatrix_dtor;
+  fog_api.feconvolvematrix_ctor = FeConvolveMatrix_ctor;
+  fog_api.feconvolvematrix_ctorCopy = FeConvolveMatrix_ctorCopy;
+  fog_api.feconvolvematrix_dtor = FeConvolveMatrix_dtor;
 
-  _api.feconvolvematrix_reset = FeConvolveMatrix_reset;
-  _api.feconvolvematrix_copy = FeConvolveMatrix_copy;
-  _api.feconvolvematrix_eq = FeConvolveMatrix_eq;
+  fog_api.feconvolvematrix_reset = FeConvolveMatrix_reset;
+  fog_api.feconvolvematrix_copy = FeConvolveMatrix_copy;
+  fog_api.feconvolvematrix_eq = FeConvolveMatrix_eq;
 }
 
 } // Fog namespace

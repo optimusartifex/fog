@@ -146,10 +146,10 @@ void XmlIdManager::_rehash(size_t capacity)
 
   _capacity = capacity;
 
-  _expandCapacity = _api.hashhelper_calcExpandCapacity(capacity);
+  _expandCapacity = fog_api.hashhelper_calcExpandCapacity(capacity);
   _expandLength = (size_t)((ssize_t)_capacity * 0.92);
 
-  _shrinkCapacity = _api.hashhelper_calcShrinkCapacity(capacity);
+  _shrinkCapacity = fog_api.hashhelper_calcShrinkCapacity(capacity);
   _shrinkLength = (size_t)((ssize_t)_shrinkCapacity * 0.70);
 
   atomicPtrXchg(&_buckets, newBuckets);

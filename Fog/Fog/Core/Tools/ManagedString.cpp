@@ -378,7 +378,7 @@ static Static<ManagedStringW> ManagedStringW_oEmpty;
 
 static void FOG_CDECL ManagedStringW_ctor(ManagedStringW* self)
 {
-  self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+  self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
 }
 
 static void FOG_CDECL ManagedStringW_ctorCopy(ManagedStringW* self, const ManagedStringW* other)
@@ -393,7 +393,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubA(ManagedStringW* self, const Stub
 
   if (!sLength)
   {
-    _api.managedstringw_ctor(self);
+    fog_api.managedstringw_ctor(self);
     return ERR_OK;
   }
 
@@ -407,7 +407,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubA(ManagedStringW* self, const Stub
     d = ManagedStringW_hash->lookupStubA(sData, sLength, hashCode);
     if (FOG_IS_NULL(d))
     {
-      self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+      self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
       return ERR_RT_OBJECT_NOT_FOUND;
     }
   }
@@ -416,7 +416,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubA(ManagedStringW* self, const Stub
     d = ManagedStringW_hash->addStubA(sData, sLength, hashCode);
     if (FOG_IS_NULL(d))
     {
-      self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+      self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
       return ERR_RT_OUT_OF_MEMORY;
     }
   }
@@ -431,7 +431,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubW(ManagedStringW* self, const Stub
 
   if (!sLength)
   {
-    _api.managedstringw_ctor(self);
+    fog_api.managedstringw_ctor(self);
     return ERR_OK;
   }
 
@@ -445,7 +445,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubW(ManagedStringW* self, const Stub
     d = ManagedStringW_hash->lookupStubW(sData, sLength, hashCode);
     if (FOG_IS_NULL(d))
     {
-      self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+      self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
       return ERR_RT_OBJECT_NOT_FOUND;
     }
   }
@@ -454,7 +454,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubW(ManagedStringW* self, const Stub
     d = ManagedStringW_hash->addStubW(sData, sLength, hashCode);
     if (FOG_IS_NULL(d))
     {
-      self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+      self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
       return ERR_RT_OUT_OF_MEMORY;
     }
   }
@@ -481,7 +481,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStringW(ManagedStringW* self, const St
     d = ManagedStringW_hash->lookupStubW(d->data, d->length, hashCode);
     if (FOG_IS_NULL(d))
     {
-      self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+      self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
       return ERR_RT_OBJECT_NOT_FOUND;
     }
   }
@@ -490,7 +490,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStringW(ManagedStringW* self, const St
     d = ManagedStringW_hash->addStubW(d->data, d->length, hashCode);
     if (FOG_IS_NULL(d))
     {
-      self->_string->_d = _api.stringw_oEmpty->_d->addRef();
+      self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
       return ERR_RT_OUT_OF_MEMORY;
     }
   }
@@ -515,7 +515,7 @@ static err_t FOG_CDECL ManagedStringW_setStubA(ManagedStringW* self, const StubA
 
   if (!sLength)
   {
-    atomicPtrXchg(&self->_string->_d, _api.stringw_oEmpty->_d->addRef())->reference.dec();
+    atomicPtrXchg(&self->_string->_d, fog_api.stringw_oEmpty->_d->addRef())->reference.dec();
     return ERR_OK;
   }
 
@@ -548,7 +548,7 @@ static err_t FOG_CDECL ManagedStringW_setStubW(ManagedStringW* self, const StubW
 
   if (!sLength)
   {
-    atomicPtrXchg(&self->_string->_d, _api.stringw_oEmpty->_d->addRef())->reference.dec();
+    atomicPtrXchg(&self->_string->_d, fog_api.stringw_oEmpty->_d->addRef())->reference.dec();
     return ERR_OK;
   }
 
@@ -616,7 +616,7 @@ static err_t FOG_CDECL ManagedStringW_setManaged(ManagedStringW* self, const Man
 
 static void FOG_CDECL ManagedStringW_reset(ManagedStringW* self)
 {
-  atomicPtrXchg(&self->_string->_d, _api.stringw_oEmpty->_d->addRef())->reference.dec();
+  atomicPtrXchg(&self->_string->_d, fog_api.stringw_oEmpty->_d->addRef())->reference.dec();
 }
 
 // ============================================================================
@@ -942,37 +942,37 @@ FOG_NO_EXPORT void ManagedString_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.managedstringw_ctor = ManagedStringW_ctor;
-  _api.managedstringw_ctorCopy = ManagedStringW_ctorCopy;
-  _api.managedstringw_ctorStubA = ManagedStringW_ctorStubA;
-  _api.managedstringw_ctorStubW = ManagedStringW_ctorStubW;
-  _api.managedstringw_ctorStringW = ManagedStringW_ctorStringW;
-  _api.managedstringw_dtor = ManagedStringW_dtor;
+  fog_api.managedstringw_ctor = ManagedStringW_ctor;
+  fog_api.managedstringw_ctorCopy = ManagedStringW_ctorCopy;
+  fog_api.managedstringw_ctorStubA = ManagedStringW_ctorStubA;
+  fog_api.managedstringw_ctorStubW = ManagedStringW_ctorStubW;
+  fog_api.managedstringw_ctorStringW = ManagedStringW_ctorStringW;
+  fog_api.managedstringw_dtor = ManagedStringW_dtor;
 
-  _api.managedstringw_setStubA = ManagedStringW_setStubA;
-  _api.managedstringw_setStubW = ManagedStringW_setStubW;
-  _api.managedstringw_setStringW = ManagedStringW_setStringW;
-  _api.managedstringw_setManaged = ManagedStringW_setManaged;
+  fog_api.managedstringw_setStubA = ManagedStringW_setStubA;
+  fog_api.managedstringw_setStubW = ManagedStringW_setStubW;
+  fog_api.managedstringw_setStringW = ManagedStringW_setStringW;
+  fog_api.managedstringw_setManaged = ManagedStringW_setManaged;
 
-  _api.managedstringw_reset = ManagedStringW_reset;
-  _api.managedstringw_eq = ManagedStringW_eq;
-  _api.managedstringw_cleanup = ManagedStringW_cleanup;
+  fog_api.managedstringw_reset = ManagedStringW_reset;
+  fog_api.managedstringw_eq = ManagedStringW_eq;
+  fog_api.managedstringw_cleanup = ManagedStringW_cleanup;
 
-  _api.managedstringcachew_create = ManagedStringCacheW_create;
+  fog_api.managedstringcachew_create = ManagedStringCacheW_create;
 
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------
 
-  ManagedStringW_oEmpty->_string->_d = _api.stringw_oEmpty->_d;
-  _api.managedstringw_oEmpty = &ManagedStringW_oEmpty;
+  ManagedStringW_oEmpty->_string->_d = fog_api.stringw_oEmpty->_d;
+  fog_api.managedstringw_oEmpty = &ManagedStringW_oEmpty;
 
   ManagedStringW_lock.init();
   ManagedStringW_hash.init();
 
   MemMgr::registerCleanupFunc(ManagedStringW_cleanupFunc, NULL);
 
-  _api.managedstringcachew_oInstance = ManagedStringCacheW::create(
+  fog_api.managedstringcachew_oInstance = ManagedStringCacheW::create(
     ManagedStringCacheW_data,
     FOG_ARRAY_SIZE(ManagedStringCacheW_data),
     STR_COUNT);
@@ -985,7 +985,7 @@ FOG_NO_EXPORT void ManagedString_fini(void)
   ManagedStringW_hash.destroy();
   ManagedStringW_lock.destroy();
 
-  _api.managedstringcachew_oInstance = NULL;
+  fog_api.managedstringcachew_oInstance = NULL;
 }
 
 } // Fog namespace

@@ -107,11 +107,11 @@ static NumT FOG_CDECL LineT_polyAngle(const NumT_(Point)* pts)
 
 FOG_NO_EXPORT void Line_init(void)
 {
-  _api.linef_intersect = LineT_intersect<float>;
-  _api.linef_polyAngle = LineT_polyAngle<float>;
+  fog_api.linef_intersect = LineT_intersect<float>;
+  fog_api.linef_polyAngle = LineT_polyAngle<float>;
 
-  _api.lined_intersect = LineT_intersect<double>;
-  _api.lined_polyAngle = LineT_polyAngle<double>;
+  fog_api.lined_intersect = LineT_intersect<double>;
+  fog_api.lined_polyAngle = LineT_polyAngle<double>;
 }
 
 } // Fog namespace

@@ -32,12 +32,12 @@ struct FOG_NO_EXPORT VarData
 
   FOG_INLINE VarData* addRef() const
   {
-    return _api.var_dAddRef(const_cast<VarData*>(this));
+    return fog_api.var_dAddRef(const_cast<VarData*>(this));
   }
 
   FOG_INLINE void release()
   {
-    return _api.var_dRelease(this);
+    return fog_api.var_dRelease(this);
   }
 
   // --------------------------------------------------------------------------
@@ -119,17 +119,17 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE Var()
   {
-    _api.var_ctor(this);
+    fog_api.var_ctor(this);
   }
 
   FOG_INLINE Var(const Var& other)
   {
-    _api.var_ctorCopy(this, &other);
+    fog_api.var_ctorCopy(this, &other);
   }
 
   FOG_INLINE Var(uint32_t vType, const void* vData)
   {
-    _api.var_ctorType(this, vType, vData);
+    fog_api.var_ctorType(this, vType, vData);
   }
 
   explicit FOG_INLINE Var(VarData* d) : _d(d) {}
@@ -137,7 +137,7 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE ~Var()
   {
-    _api.var_dtor(this);
+    fog_api.var_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -146,7 +146,7 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE size_t getReference() const
   {
-    return _api.var_getReference(this);
+    return fog_api.var_getReference(this);
   }
 
   // --------------------------------------------------------------------------
@@ -155,7 +155,7 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE void reset()
   {
-    return _api.var_reset(this);
+    return fog_api.var_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -223,7 +223,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getI8(int8_t& dst) const
   {
     int32_t t;
-    err_t err = _api.var_getI32Bound(this, &t, INT8_MIN, INT8_MAX);
+    err_t err = fog_api.var_getI32Bound(this, &t, INT8_MIN, INT8_MAX);
 
     dst =  (int8_t)t;
     return err;
@@ -232,7 +232,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getI8(int8_t& dst, int8_t min, int8_t max) const
   {
     int32_t t;
-    err_t err = _api.var_getI32Bound(this, &t, min, max);
+    err_t err = fog_api.var_getI32Bound(this, &t, min, max);
 
     dst =  (int8_t)t;
     return err;
@@ -241,7 +241,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getU8(uint8_t& dst) const
   {
     uint32_t t;
-    err_t err = _api.var_getU32Bound(this, &t, 0, UINT8_MAX);
+    err_t err = fog_api.var_getU32Bound(this, &t, 0, UINT8_MAX);
 
     dst =  (uint8_t)t;
     return err;
@@ -250,7 +250,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getU8(uint8_t& dst, uint8_t min, uint8_t max) const
   {
     uint32_t t;
-    err_t err = _api.var_getU32Bound(this, &t, min, max);
+    err_t err = fog_api.var_getU32Bound(this, &t, min, max);
 
     dst =  (uint8_t)t;
     return err;
@@ -259,7 +259,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getI16(int16_t& dst) const
   {
     int32_t t;
-    err_t err = _api.var_getI32Bound(this, &t, INT16_MIN, INT16_MAX);
+    err_t err = fog_api.var_getI32Bound(this, &t, INT16_MIN, INT16_MAX);
 
     dst =  (int16_t)t;
     return err;
@@ -268,7 +268,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getI16(int16_t& dst, int16_t min, int16_t max) const
   {
     int32_t t;
-    err_t err = _api.var_getI32Bound(this, &t, min, max);
+    err_t err = fog_api.var_getI32Bound(this, &t, min, max);
 
     dst =  (int16_t)t;
     return err;
@@ -277,7 +277,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getU16(uint16_t& dst) const
   {
     uint32_t t;
-    err_t err = _api.var_getU32Bound(this, &t, 0, UINT16_MAX);
+    err_t err = fog_api.var_getU32Bound(this, &t, 0, UINT16_MAX);
 
     dst =  (uint16_t)t;
     return err;
@@ -286,7 +286,7 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getU16(uint16_t& dst, uint16_t min, uint16_t max) const
   {
     uint32_t t;
-    err_t err = _api.var_getU32Bound(this, &t, min, max);
+    err_t err = fog_api.var_getU32Bound(this, &t, min, max);
 
     dst =  (uint16_t)t;
     return err;
@@ -294,106 +294,106 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE err_t getI32(int32_t& dst) const
   {
-    return _api.var_getI32(this, &dst);
+    return fog_api.var_getI32(this, &dst);
   }
 
   FOG_INLINE err_t getI32(int32_t& dst, int32_t min, int32_t max) const
   {
-    return _api.var_getI32Bound(this, &dst, min, max);
+    return fog_api.var_getI32Bound(this, &dst, min, max);
   }
 
   FOG_INLINE err_t getU32(uint32_t& dst) const
   {
-    return _api.var_getU32(this, &dst);
+    return fog_api.var_getU32(this, &dst);
   }
 
   FOG_INLINE err_t getU32(uint32_t& dst, uint32_t min, uint32_t max) const
   {
-    return _api.var_getU32Bound(this, &dst, min, max);
+    return fog_api.var_getU32Bound(this, &dst, min, max);
   }
 
   FOG_INLINE err_t getI64(int64_t& dst) const
   {
-    return _api.var_getI64(this, &dst);
+    return fog_api.var_getI64(this, &dst);
   }
 
   FOG_INLINE err_t getI64(int64_t& dst, int64_t min, int64_t max) const
   {
-    return _api.var_getI64Bound(this, &dst, min, max);
+    return fog_api.var_getI64Bound(this, &dst, min, max);
   }
 
   FOG_INLINE err_t getU64(uint64_t& dst) const
   {
-    return _api.var_getU64(this, &dst);
+    return fog_api.var_getU64(this, &dst);
   }
 
   FOG_INLINE err_t getU64(uint64_t& dst, uint64_t min, uint64_t max) const
   {
-    return _api.var_getU64Bound(this, &dst, min, max);
+    return fog_api.var_getU64Bound(this, &dst, min, max);
   }
 
   FOG_INLINE err_t getSSizeT(size_t& dst) const
   {
     if (sizeof(size_t) == sizeof(int32_t))
-      return _api.var_getI32(this, reinterpret_cast<int32_t*>(&dst));
+      return fog_api.var_getI32(this, reinterpret_cast<int32_t*>(&dst));
     else
-      return _api.var_getI64(this, reinterpret_cast<int64_t*>(&dst));
+      return fog_api.var_getI64(this, reinterpret_cast<int64_t*>(&dst));
   }
 
   FOG_INLINE err_t getSSizeT(size_t& dst, size_t min, size_t max) const
   {
     if (sizeof(size_t) == sizeof(int32_t))
-      return _api.var_getI32Bound(this, reinterpret_cast<int32_t*>(&dst), (int32_t)min, (int32_t)max);
+      return fog_api.var_getI32Bound(this, reinterpret_cast<int32_t*>(&dst), (int32_t)min, (int32_t)max);
     else
-      return _api.var_getI64Bound(this, reinterpret_cast<int64_t*>(&dst), (int64_t)min, (int64_t)max);
+      return fog_api.var_getI64Bound(this, reinterpret_cast<int64_t*>(&dst), (int64_t)min, (int64_t)max);
   }
 
   FOG_INLINE err_t getSizeT(size_t& dst) const
   {
     if (sizeof(size_t) == sizeof(uint32_t))
-      return _api.var_getU32(this, reinterpret_cast<uint32_t*>(&dst));
+      return fog_api.var_getU32(this, reinterpret_cast<uint32_t*>(&dst));
     else
-      return _api.var_getU64(this, reinterpret_cast<uint64_t*>(&dst));
+      return fog_api.var_getU64(this, reinterpret_cast<uint64_t*>(&dst));
   }
 
   FOG_INLINE err_t getSizeT(size_t& dst, size_t min, size_t max) const
   {
     if (sizeof(size_t) == sizeof(uint32_t))
-      return _api.var_getU32Bound(this, reinterpret_cast<uint32_t*>(&dst), (uint32_t)min, (uint32_t)max);
+      return fog_api.var_getU32Bound(this, reinterpret_cast<uint32_t*>(&dst), (uint32_t)min, (uint32_t)max);
     else
-      return _api.var_getU64Bound(this, reinterpret_cast<uint64_t*>(&dst), (uint64_t)min, (uint64_t)max);
+      return fog_api.var_getU64Bound(this, reinterpret_cast<uint64_t*>(&dst), (uint64_t)min, (uint64_t)max);
   }
 
   FOG_INLINE err_t getLong(long& dst) const
   {
     if (sizeof(long) == sizeof(int32_t))
-      return _api.var_getI32(this, reinterpret_cast<int32_t*>(&dst));
+      return fog_api.var_getI32(this, reinterpret_cast<int32_t*>(&dst));
     else
-      return _api.var_getI64(this, reinterpret_cast<int64_t*>(&dst));
+      return fog_api.var_getI64(this, reinterpret_cast<int64_t*>(&dst));
   }
 
   FOG_INLINE err_t getLong(long& dst, size_t min, size_t max) const
   {
     if (sizeof(long) == sizeof(int32_t))
-      return _api.var_getI32Bound(this, reinterpret_cast<int32_t*>(&dst), (int32_t)min, (int32_t)max);
+      return fog_api.var_getI32Bound(this, reinterpret_cast<int32_t*>(&dst), (int32_t)min, (int32_t)max);
     else
-      return _api.var_getI64Bound(this, reinterpret_cast<int64_t*>(&dst), (int64_t)min, (int64_t)max);
+      return fog_api.var_getI64Bound(this, reinterpret_cast<int64_t*>(&dst), (int64_t)min, (int64_t)max);
   }
 
   FOG_INLINE err_t getULong(ulong& dst) const
   {
     if (sizeof(ulong) == sizeof(uint32_t))
-      return _api.var_getU32(this, reinterpret_cast<uint32_t*>(&dst));
+      return fog_api.var_getU32(this, reinterpret_cast<uint32_t*>(&dst));
     else
-      return _api.var_getU64(this, reinterpret_cast<uint64_t*>(&dst));
+      return fog_api.var_getU64(this, reinterpret_cast<uint64_t*>(&dst));
   }
 
   FOG_INLINE err_t getULong(ulong& dst, ulong min, ulong max) const
   {
     if (sizeof(ulong) == sizeof(uint32_t))
-      return _api.var_getU32Bound(this, reinterpret_cast<uint32_t*>(&dst), (uint32_t)min, (uint32_t)max);
+      return fog_api.var_getU32Bound(this, reinterpret_cast<uint32_t*>(&dst), (uint32_t)min, (uint32_t)max);
     else
-      return _api.var_getU64Bound(this, reinterpret_cast<uint64_t*>(&dst), (uint64_t)min, (uint64_t)max);
+      return fog_api.var_getU64Bound(this, reinterpret_cast<uint64_t*>(&dst), (uint64_t)min, (uint64_t)max);
   }
 
   FOG_INLINE err_t getInt(int8_t& dst) const { return getI8(dst); }
@@ -414,34 +414,34 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getInt(int64_t& dst, int64_t min, int64_t max) const { return getI64(dst, min, max); }
   FOG_INLINE err_t getInt(uint64_t& dst, uint64_t min, uint64_t max) const { return getU64(dst, min, max); }
 
-  FOG_INLINE err_t setI8(int8_t src) { int32_t t = src; return _api.var_setType(this, VAR_TYPE_INT32, &t); }
-  FOG_INLINE err_t setU8(uint8_t src) { uint32_t t = src; return _api.var_setType(this, VAR_TYPE_UINT32, &t); }
-  FOG_INLINE err_t setI16(int16_t src) { int32_t t = src; return _api.var_setType(this, VAR_TYPE_INT32, &t); }
-  FOG_INLINE err_t setU16(uint16_t src) { uint32_t t = src; return _api.var_setType(this, VAR_TYPE_UINT32, &t); }
+  FOG_INLINE err_t setI8(int8_t src) { int32_t t = src; return fog_api.var_setType(this, VAR_TYPE_INT32, &t); }
+  FOG_INLINE err_t setU8(uint8_t src) { uint32_t t = src; return fog_api.var_setType(this, VAR_TYPE_UINT32, &t); }
+  FOG_INLINE err_t setI16(int16_t src) { int32_t t = src; return fog_api.var_setType(this, VAR_TYPE_INT32, &t); }
+  FOG_INLINE err_t setU16(uint16_t src) { uint32_t t = src; return fog_api.var_setType(this, VAR_TYPE_UINT32, &t); }
 
-  FOG_INLINE err_t setI32(int32_t src) { return _api.var_setType(this, VAR_TYPE_INT32, &src); }
-  FOG_INLINE err_t setU32(uint32_t src) { return _api.var_setType(this, VAR_TYPE_UINT32, &src); }
-  FOG_INLINE err_t setI64(int64_t src) { return _api.var_setType(this, VAR_TYPE_INT64, &src); }
-  FOG_INLINE err_t setU64(uint64_t src) { return _api.var_setType(this, VAR_TYPE_UINT64, &src); }
+  FOG_INLINE err_t setI32(int32_t src) { return fog_api.var_setType(this, VAR_TYPE_INT32, &src); }
+  FOG_INLINE err_t setU32(uint32_t src) { return fog_api.var_setType(this, VAR_TYPE_UINT32, &src); }
+  FOG_INLINE err_t setI64(int64_t src) { return fog_api.var_setType(this, VAR_TYPE_INT64, &src); }
+  FOG_INLINE err_t setU64(uint64_t src) { return fog_api.var_setType(this, VAR_TYPE_UINT64, &src); }
 
   FOG_INLINE err_t setSSizeT(size_t src)
   {
-    return _api.var_setType(this, sizeof(ssize_t) == sizeof(int64_t) ? VAR_TYPE_INT64 : VAR_TYPE_INT32, &src);
+    return fog_api.var_setType(this, sizeof(ssize_t) == sizeof(int64_t) ? VAR_TYPE_INT64 : VAR_TYPE_INT32, &src);
   }
 
   FOG_INLINE err_t setSizeT(size_t src)
   {
-    return _api.var_setType(this, sizeof(size_t) == sizeof(uint64_t) ? VAR_TYPE_UINT64 : VAR_TYPE_UINT32, &src);
+    return fog_api.var_setType(this, sizeof(size_t) == sizeof(uint64_t) ? VAR_TYPE_UINT64 : VAR_TYPE_UINT32, &src);
   }
 
   FOG_INLINE err_t setLong(long src)
   {
-    return _api.var_setType(this, sizeof(long) == sizeof(int64_t) ? VAR_TYPE_INT64 : VAR_TYPE_INT32, &src);
+    return fog_api.var_setType(this, sizeof(long) == sizeof(int64_t) ? VAR_TYPE_INT64 : VAR_TYPE_INT32, &src);
   }
 
   FOG_INLINE err_t setULong(ulong src)
   {
-    return _api.var_setType(this, sizeof(ulong) == sizeof(uint64_t) ? VAR_TYPE_INT64 : VAR_TYPE_INT32, &src);
+    return fog_api.var_setType(this, sizeof(ulong) == sizeof(uint64_t) ? VAR_TYPE_INT64 : VAR_TYPE_INT32, &src);
   }
 
   FOG_INLINE err_t setInt(int8_t src) { return setI8(src); }
@@ -457,11 +457,11 @@ struct FOG_NO_EXPORT Var
   // [Accessors - Real]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t getFloat(float& dst) const { return _api.var_getFloat(this, &dst); }
-  FOG_INLINE err_t getDouble(double& dst) const { return _api.var_getDouble(this, &dst); }
+  FOG_INLINE err_t getFloat(float& dst) const { return fog_api.var_getFloat(this, &dst); }
+  FOG_INLINE err_t getDouble(double& dst) const { return fog_api.var_getDouble(this, &dst); }
 
-  FOG_INLINE err_t getFloat(float& dst, float min, float max) const { return _api.var_getFloatBound(this, &dst, min, max); }
-  FOG_INLINE err_t getDouble(double& dst, double min, double max) const { return _api.var_getDoubleBound(this, &dst, min, max); }
+  FOG_INLINE err_t getFloat(float& dst, float min, float max) const { return fog_api.var_getFloatBound(this, &dst, min, max); }
+  FOG_INLINE err_t getDouble(double& dst, double min, double max) const { return fog_api.var_getDoubleBound(this, &dst, min, max); }
 
   FOG_INLINE err_t getReal(float& dst) const { return getFloat(dst); }
   FOG_INLINE err_t getReal(double& dst) const { return getDouble(dst); }
@@ -469,8 +469,8 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t getReal(float& dst, float min, float max) const { return getFloat(dst, min, max); }
   FOG_INLINE err_t getReal(double& dst, double min, double max) const { return getDouble(dst, min, max); }
 
-  FOG_INLINE err_t setFloat(float src) { return _api.var_setType(this, VAR_TYPE_FLOAT, &src); }
-  FOG_INLINE err_t setDouble(double src) { return _api.var_setType(this, VAR_TYPE_DOUBLE, &src); }
+  FOG_INLINE err_t setFloat(float src) { return fog_api.var_setType(this, VAR_TYPE_FLOAT, &src); }
+  FOG_INLINE err_t setDouble(double src) { return fog_api.var_setType(this, VAR_TYPE_DOUBLE, &src); }
 
   FOG_INLINE err_t setReal(float src) { return setFloat(src); }
   FOG_INLINE err_t setReal(double src) { return setDouble(src); }
@@ -479,12 +479,12 @@ struct FOG_NO_EXPORT Var
   // [Accessors - String]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t getString(StringA& dst) { return _api.var_getType(this, VAR_TYPE_STRINGA, &dst); }
-  FOG_INLINE err_t getString(StringW& dst) { return _api.var_getType(this, VAR_TYPE_STRINGW, &dst); }
+  FOG_INLINE err_t getString(StringA& dst) { return fog_api.var_getType(this, VAR_TYPE_STRINGA, &dst); }
+  FOG_INLINE err_t getString(StringW& dst) { return fog_api.var_getType(this, VAR_TYPE_STRINGW, &dst); }
 
-  FOG_INLINE err_t setString(const StringA& src) { return _api.var_setType(this, VAR_TYPE_STRINGA, &src); }
-  FOG_INLINE err_t setString(const StringW& src) { return _api.var_setType(this, VAR_TYPE_STRINGW, &src); }
-  FOG_INLINE err_t setString(const ManagedStringW& src) { return _api.var_setType(this, VAR_TYPE_STRINGW, &src); }
+  FOG_INLINE err_t setString(const StringA& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGA, &src); }
+  FOG_INLINE err_t setString(const StringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
+  FOG_INLINE err_t setString(const ManagedStringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -492,18 +492,18 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE Var& operator=(const Var& other)
   {
-    _api.var_copy(this, &other);
+    fog_api.var_copy(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const Var& other) const { return  _api.var_eq(this, &other); }
-  FOG_INLINE bool operator!=(const Var& other) const { return !_api.var_eq(this, &other); }
+  FOG_INLINE bool operator==(const Var& other) const { return  fog_api.var_eq(this, &other); }
+  FOG_INLINE bool operator!=(const Var& other) const { return !fog_api.var_eq(this, &other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Var& null() { return *_api.var_oNull; }
+  static FOG_INLINE const Var& null() { return *fog_api.var_oNull; }
 
   // --------------------------------------------------------------------------
   // [Statics - From]
@@ -557,12 +557,12 @@ struct FOG_NO_EXPORT Var
 
   static FOG_INLINE bool eq(const Var* a, const Var* b)
   {
-    return _api.var_eq(a, b);
+    return fog_api.var_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.var_eq;
+    return (EqFunc)fog_api.var_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -571,12 +571,12 @@ struct FOG_NO_EXPORT Var
 
   static FOG_INLINE int compare(const Var* a, const Var* b)
   {
-    return _api.var_compare(a, b);
+    return fog_api.var_compare(a, b);
   }
 
   static FOG_INLINE CompareFunc getCompareFunc()
   {
-    return (CompareFunc)_api.var_compare;
+    return (CompareFunc)fog_api.var_compare;
   }
 
   // --------------------------------------------------------------------------

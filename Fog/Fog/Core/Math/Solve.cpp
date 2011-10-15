@@ -384,20 +384,20 @@ static int FOG_CDECL MathT_solveAt_Quartic(NumT* dst, const NumT* func, const Nu
 
 FOG_NO_EXPORT void Math_init_solve(void)
 {
-  _api.mathf_solve  [MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<float>;
-  _api.mathd_solve  [MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<double>;
-  _api.mathf_solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<float>;
-  _api.mathd_solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<double>;
+  fog_api.mathf_solve  [MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<float>;
+  fog_api.mathd_solve  [MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<double>;
+  fog_api.mathf_solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<float>;
+  fog_api.mathd_solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<double>;
 
-  _api.mathf_solve  [MATH_SOLVE_CUBIC    ] = MathT_solve_Cubic<float>;
-  _api.mathd_solve  [MATH_SOLVE_CUBIC    ] = MathT_solve_Cubic<double>;
-  _api.mathf_solveAt[MATH_SOLVE_CUBIC    ] = MathT_solveAt_Cubic<float>;
-  _api.mathd_solveAt[MATH_SOLVE_CUBIC    ] = MathT_solveAt_Cubic<double>;
+  fog_api.mathf_solve  [MATH_SOLVE_CUBIC    ] = MathT_solve_Cubic<float>;
+  fog_api.mathd_solve  [MATH_SOLVE_CUBIC    ] = MathT_solve_Cubic<double>;
+  fog_api.mathf_solveAt[MATH_SOLVE_CUBIC    ] = MathT_solveAt_Cubic<float>;
+  fog_api.mathd_solveAt[MATH_SOLVE_CUBIC    ] = MathT_solveAt_Cubic<double>;
 
-  _api.mathf_solve  [MATH_SOLVE_QUARTIC  ] = MathT_solve_Quartic<float>;
-  _api.mathd_solve  [MATH_SOLVE_QUARTIC  ] = MathT_solve_Quartic<double>;
-  _api.mathf_solveAt[MATH_SOLVE_QUARTIC  ] = MathT_solveAt_Quartic<float>;
-  _api.mathd_solveAt[MATH_SOLVE_QUARTIC  ] = MathT_solveAt_Quartic<double>;
+  fog_api.mathf_solve  [MATH_SOLVE_QUARTIC  ] = MathT_solve_Quartic<float>;
+  fog_api.mathd_solve  [MATH_SOLVE_QUARTIC  ] = MathT_solve_Quartic<double>;
+  fog_api.mathf_solveAt[MATH_SOLVE_QUARTIC  ] = MathT_solveAt_Quartic<float>;
+  fog_api.mathd_solveAt[MATH_SOLVE_QUARTIC  ] = MathT_solveAt_Quartic<double>;
 }
 
 } // Fog namespace

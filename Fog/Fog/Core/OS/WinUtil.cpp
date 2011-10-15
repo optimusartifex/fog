@@ -1469,14 +1469,14 @@ FOG_NO_EXPORT void WinUtil_init(void)
 {
   WinUtil_startup();
 
-  _api.winutil_getErrFromWinErrorCode = WinUtil_getErrFromWinErrorCode;
-  _api.winutil_getErrFromWinLastError = WinUtil_getErrFromWinLastError;
+  fog_api.winutil_getErrFromWinErrorCode = WinUtil_getErrFromWinErrorCode;
+  fog_api.winutil_getErrFromWinLastError = WinUtil_getErrFromWinLastError;
 
-  _api.winutil_getWinVersion = WinUtil_getWinVersion;
-  _api.winutil_getWinDirectory = WinUtil_getWinDirectory;
+  fog_api.winutil_getWinVersion = WinUtil_getWinVersion;
+  fog_api.winutil_getWinDirectory = WinUtil_getWinDirectory;
 
-  _api.winutil_getModuleFileName = WinUtil_getModuleFileName;
-  _api.winutil_makeWinPath = WinUtil_makeWinPath;
+  fog_api.winutil_getModuleFileName = WinUtil_getModuleFileName;
+  fog_api.winutil_makeWinPath = WinUtil_makeWinPath;
 }
 
 } // Fog namespace

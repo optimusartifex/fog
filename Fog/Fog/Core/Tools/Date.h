@@ -94,9 +94,9 @@ struct FOG_NO_EXPORT Date
   // --------------------------------------------------------------------------
 
   //! @brief Get date value, see @c DATE_VALUE.
-  FOG_INLINE int getValue(uint32_t key) const { return _api.date_getValue(this, key); }
+  FOG_INLINE int getValue(uint32_t key) const { return fog_api.date_getValue(this, key); }
   //! @brief Set date value, see @c DATE_VALUE.
-  FOG_INLINE err_t setValue(uint32_t key, int value) { return _api.date_setValue(this, key, value); }
+  FOG_INLINE err_t setValue(uint32_t key, int value) { return fog_api.date_setValue(this, key, value); }
 
   //! @brief Get year.
   FOG_INLINE int getYear() const { return getValue(DATE_VALUE_YEAR); }
@@ -159,7 +159,7 @@ struct FOG_NO_EXPORT Date
 
   FOG_INLINE err_t addValue(uint32_t key, int64_t value)
   {
-    return _api.date_addValue(this, key, value);
+    return fog_api.date_addValue(this, key, value);
   }
 
   // --------------------------------------------------------------------------
@@ -169,12 +169,12 @@ struct FOG_NO_EXPORT Date
   //! @brief
   FOG_INLINE err_t setYMD(int year, int month, int day)
   {
-    return _api.date_setYMD(this, year, month, day);
+    return fog_api.date_setYMD(this, year, month, day);
   }
 
   FOG_INLINE err_t setHMS(int hour, int minute, int second, int us)
   {
-    return _api.date_setHMS(this, hour, minute, second, us);
+    return fog_api.date_setHMS(this, hour, minute, second, us);
   }
 
   // --------------------------------------------------------------------------
@@ -204,7 +204,7 @@ struct FOG_NO_EXPORT Date
   //! @note The calculation is based on the Gregorian cutoff date.
   FOG_INLINE bool isLeapYear(int year) const
   {
-    return _api.date_isLeapYear(this, year);
+    return fog_api.date_isLeapYear(this, year);
   }
 
   //! @brief Get number of days in year.
@@ -212,7 +212,7 @@ struct FOG_NO_EXPORT Date
   //! @note The calculation is based on the Gregorian cutoff date.
   FOG_INLINE int getNumberOfDaysInYear(int year) const
   {
-    return _api.date_getNumberOfDaysInYear(this, year);
+    return fog_api.date_getNumberOfDaysInYear(this, year);
   }
 
   //! @brief Get number of days in year and month.
@@ -220,7 +220,7 @@ struct FOG_NO_EXPORT Date
   //! @note The calculation is based on the Gregorian cutoff date.
   FOG_INLINE int getNumberOfDaysInMonth(int year, int month) const
   {
-    return _api.date_getNumberOfDaysInMonth(this, year, month);
+    return fog_api.date_getNumberOfDaysInMonth(this, year, month);
   }
 
   // --------------------------------------------------------------------------
@@ -229,7 +229,7 @@ struct FOG_NO_EXPORT Date
 
   FOG_INLINE bool eq(const Date& other) const
   {
-    return _api.date_eq(this, &other);
+    return fog_api.date_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -238,7 +238,7 @@ struct FOG_NO_EXPORT Date
 
   FOG_INLINE int compare(const Date& other) const
   {
-    return _api.date_compare(this, &other);
+    return fog_api.date_compare(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -266,7 +266,7 @@ struct FOG_NO_EXPORT Date
   static FOG_INLINE Date fromTime(const Time& time)
   {
     Date result(UNINITIALIZED);
-    _api.date_fromTime(&result, &time);
+    fog_api.date_fromTime(&result, &time);
     return result;
   }
 
@@ -276,12 +276,12 @@ struct FOG_NO_EXPORT Date
 
   static FOG_INLINE bool eq(const Date* a, const Date* b)
   {
-    return _api.date_eq(a, b);
+    return fog_api.date_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.date_eq;
+    return (EqFunc)fog_api.date_eq;
   }
 
   // --------------------------------------------------------------------------
@@ -290,12 +290,12 @@ struct FOG_NO_EXPORT Date
 
   static FOG_INLINE int compare(const Date* a, const Date* b)
   {
-    return _api.date_compare(a, b);
+    return fog_api.date_compare(a, b);
   }
 
   static FOG_INLINE CompareFunc getCompareFunc()
   {
-    return (CompareFunc)_api.date_compare;
+    return (CompareFunc)fog_api.date_compare;
   }
 
   // --------------------------------------------------------------------------

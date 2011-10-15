@@ -26,13 +26,13 @@ struct FOG_NO_EXPORT UserUtil
   //! @brief Get the current user ID.
   static FOG_INLINE uint32_t getUid()
   {
-    return _api.userutil_getUid();
+    return fog_api.userutil_getUid();
   }
   
   //! @brief Get the current group ID.
   static FOG_INLINE uint32_t getGid()
   {
-    return _api.userutil_getGid();
+    return fog_api.userutil_getGid();
   }
 
   //! @brief Get the user related directory, see @c USER_DIRECTORY enumeration
@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT UserUtil
   //! run in restricted environment (sandbox for example).
   static FOG_INLINE err_t getUserDirectory(StringW& dst, uint32_t userDirectory)
   {
-    return _api.userutil_getUserDirectory(&dst, userDirectory);
+    return fog_api.userutil_getUserDirectory(&dst, userDirectory);
   }
 };
 

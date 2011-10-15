@@ -55,7 +55,7 @@ static err_t FOG_CDECL FeColorLutArray_detach(FeColorLutArray* self)
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  FeColorLutArrayData* newd = _api.fecolorlutarray_dCreate();
+  FeColorLutArrayData* newd = fog_api.fecolorlutarray_dCreate();
 
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
@@ -91,7 +91,7 @@ static err_t FOG_CDECL FeColorLutArray_setFromComponentFunction(FeColorLutArray*
   FeColorLutArrayData* d = self->_d;
   if (d->reference.get() != 1)
   {
-    d = _api.fecolorlutarray_dCreate();
+    d = fog_api.fecolorlutarray_dCreate();
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
@@ -365,21 +365,21 @@ FOG_NO_EXPORT void FeColorLutArray_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fecolorlutarray_ctor = FeColorLutArray_ctor;
-  _api.fecolorlutarray_ctorCopy = FeColorLutArray_ctorCopy;
-  _api.fecolorlutarray_dtor = FeColorLutArray_dtor;
+  fog_api.fecolorlutarray_ctor = FeColorLutArray_ctor;
+  fog_api.fecolorlutarray_ctorCopy = FeColorLutArray_ctorCopy;
+  fog_api.fecolorlutarray_dtor = FeColorLutArray_dtor;
 
-  _api.fecolorlutarray_setAt = FeColorLutArray_setAt;
-  _api.fecolorlutarray_setFromComponentFunction = FeColorLutArray_setFromComponentFunction;
-  _api.fecolorlutarray_reset = FeColorLutArray_reset;
-  _api.fecolorlutarray_copy = FeColorLutArray_copy;
-  _api.fecolorlutarray_eq = FeColorLutArray_eq;
+  fog_api.fecolorlutarray_setAt = FeColorLutArray_setAt;
+  fog_api.fecolorlutarray_setFromComponentFunction = FeColorLutArray_setFromComponentFunction;
+  fog_api.fecolorlutarray_reset = FeColorLutArray_reset;
+  fog_api.fecolorlutarray_copy = FeColorLutArray_copy;
+  fog_api.fecolorlutarray_eq = FeColorLutArray_eq;
 
-  _api.fecolorlutarray_dCreate = FeColorLutArray_dCreate;
-  _api.fecolorlutarray_dFree = FeColorLutArray_dFree;
+  fog_api.fecolorlutarray_dCreate = FeColorLutArray_dCreate;
+  fog_api.fecolorlutarray_dFree = FeColorLutArray_dFree;
 
-  _api.fecolorlutarray_setIdentity = FeColorLutArray_setIdentity;
-  _api.fecolorlutarray_isIdentity = FeColorLutArray_isIdentity;
+  fog_api.fecolorlutarray_setIdentity = FeColorLutArray_setIdentity;
+  fog_api.fecolorlutarray_isIdentity = FeColorLutArray_isIdentity;
 
   // --------------------------------------------------------------------------
   // [Data]
@@ -390,7 +390,7 @@ FOG_NO_EXPORT void FeColorLutArray_init(void)
   d->reference.init(1);
   FeColorLutArray_setIdentity(d->data);
 
-  _api.fecolorlutarray_oIdentity = FeColorLutArray_oIdentity.initCustom1(d);
+  fog_api.fecolorlutarray_oIdentity = FeColorLutArray_oIdentity.initCustom1(d);
 }
 
 } // Fog namespace

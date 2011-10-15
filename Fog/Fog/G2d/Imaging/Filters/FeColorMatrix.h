@@ -32,19 +32,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   FOG_INLINE FeColorMatrix()
   {
-    _api.fecolormatrix_ctor(this);
+    fog_api.fecolormatrix_ctor(this);
   }
 
   FOG_INLINE FeColorMatrix(const float data[25])
   {
     _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
-    _api.fecolormatrix_copy(m, data);
+    fog_api.fecolormatrix_copy(m, data);
   }
 
   FOG_INLINE FeColorMatrix(const FeColorMatrix& other)
   {
     _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
-    _api.fecolormatrix_copy(m, other.m);
+    fog_api.fecolormatrix_copy(m, other.m);
   }
 
   FOG_INLINE FeColorMatrix(
@@ -91,7 +91,7 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @see @c Type for type possibilities and its descriptions.
   FOG_INLINE uint32_t getType() const
   {
-    return _api.fecolormatrix_getType(this);
+    return fog_api.fecolormatrix_getType(this);
   }
 
   // --------------------------------------------------------------------------
@@ -100,13 +100,13 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   FOG_INLINE FeColorMatrix& setMatrix(const float data[25])
   {
-    _api.fecolormatrix_copy(m, data);
+    fog_api.fecolormatrix_copy(m, data);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& setMatrix(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_copy(m, other.m);
+    fog_api.fecolormatrix_copy(m, other.m);
     return *this;
   }
 
@@ -133,19 +133,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Add other matrix into this matrix.
   FOG_INLINE FeColorMatrix& add(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_addMatrix(this, this, &other);
+    fog_api.fecolormatrix_addMatrix(this, this, &other);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& add(float scalar)
   {
-    _api.fecolormatrix_addScalar(this, this, NULL, scalar);
+    fog_api.fecolormatrix_addScalar(this, this, NULL, scalar);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& add(const RectI& rect, float scalar)
   {
-    _api.fecolormatrix_addScalar(this, this, &rect, scalar);
+    fog_api.fecolormatrix_addScalar(this, this, &rect, scalar);
     return *this;
   }
 
@@ -156,19 +156,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Subtract other matrix from this matrix.
   FOG_INLINE FeColorMatrix& subtract(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_subtractMatrix(this, this, &other);
+    fog_api.fecolormatrix_subtractMatrix(this, this, &other);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& subtract(float scalar)
   {
-    _api.fecolormatrix_subtractScalar(this, this, NULL, scalar);
+    fog_api.fecolormatrix_subtractScalar(this, this, NULL, scalar);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& subtract(const RectI& rect, float scalar)
   {
-    _api.fecolormatrix_subtractScalar(this, this, &rect, scalar);
+    fog_api.fecolormatrix_subtractScalar(this, this, &rect, scalar);
     return *this;
   }
 
@@ -179,28 +179,28 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Multiply this matrix with @a other matrix.
   FOG_INLINE FeColorMatrix& multiply(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_multiplyMatrix(this, &other, this);
+    fog_api.fecolormatrix_multiplyMatrix(this, &other, this);
     return *this;
   }
 
   //! @brief Multiply this matrix with @a other matrix.
   FOG_INLINE FeColorMatrix& multiply(const FeColorMatrix& other, uint32_t order)
   {
-    _api.fecolormatrix_multiplyOther(this, &other, order);
+    fog_api.fecolormatrix_multiplyOther(this, &other, order);
     return *this;
   }
 
   //! @brief Multiply this matrix with scalar value.
   FOG_INLINE FeColorMatrix& multiply(float scalar)
   {
-    _api.fecolormatrix_multiplyScalar(this, this, NULL, scalar);
+    fog_api.fecolormatrix_multiplyScalar(this, this, NULL, scalar);
     return *this;
   }
 
   //! @overload
   FOG_INLINE FeColorMatrix& multiply(const RectI& rect, float scalar)
   {
-    _api.fecolormatrix_multiplyScalar(this, this, &rect, scalar);
+    fog_api.fecolormatrix_multiplyScalar(this, this, &rect, scalar);
     return *this;
   }
 
@@ -211,19 +211,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Translate the color components of the matrix.
   FOG_INLINE FeColorMatrix& translateArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_translateArgb(this, a, r, g, b, order);
+    fog_api.fecolormatrix_translateArgb(this, a, r, g, b, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& translateRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_translateArgb(this, 1.0f, c, c, c, order);
+    fog_api.fecolormatrix_translateArgb(this, 1.0f, c, c, c, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& translateAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_translateArgb(this, a, 1.0f, 1.0f, 1.0f, order);
+    fog_api.fecolormatrix_translateArgb(this, a, 1.0f, 1.0f, 1.0f, order);
     return *this;
   }
 
@@ -234,19 +234,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Scale the color components of the matrix.
   FOG_INLINE FeColorMatrix& scaleArgb(float a, float r, float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_scaleArgb(this, a, r, g, b, order);
+    fog_api.fecolormatrix_scaleArgb(this, a, r, g, b, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& scaleRgb(float c, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_scaleArgb(this, 1.0f, c, c, c, order);
+    fog_api.fecolormatrix_scaleArgb(this, 1.0f, c, c, c, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& scaleAlpha(float a, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_scaleArgb(this, a, 1.0f, 1.0f, 1.0f, order);
+    fog_api.fecolormatrix_scaleArgb(this, a, 1.0f, 1.0f, 1.0f, order);
     return *this;
   }
 
@@ -256,7 +256,7 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @param amount [-1.0 to 1.0, 0 = neutral]
   FOG_INLINE FeColorMatrix& scaleTint(float phi, float amount)
   {
-    _api.fecolormatrix_scaleTint(this, phi, amount);
+    fog_api.fecolormatrix_scaleTint(this, phi, amount);
     return *this;
   }
 
@@ -266,19 +266,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   FOG_INLINE FeColorMatrix& rotateRed(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_rotateColor(this, 2, 1, phi, order);
+    fog_api.fecolormatrix_rotateColor(this, 2, 1, phi, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& rotateGreen(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_rotateColor(this, 0, 2, phi, order);
+    fog_api.fecolormatrix_rotateColor(this, 0, 2, phi, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& rotateBlue(float phi, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_rotateColor(this, 1, 0, phi, order);
+    fog_api.fecolormatrix_rotateColor(this, 1, 0, phi, order);
     return *this;
   }
 
@@ -287,7 +287,7 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! Luminance is fixed, other colors are rotated.
   FOG_INLINE FeColorMatrix& rotateHue(float phi)
   {
-    _api.fecolormatrix_rotateHue(this, phi);
+    fog_api.fecolormatrix_rotateHue(this, phi);
     return *this;
   }
 
@@ -297,19 +297,19 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   FOG_INLINE FeColorMatrix& shearRed(float g, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_shearColor(this, 0, 1, g, 2, b, order);
+    fog_api.fecolormatrix_shearColor(this, 0, 1, g, 2, b, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& shearGreen( float r, float b, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_shearColor(this, 1, 0, r, 2, b, order);
+    fog_api.fecolormatrix_shearColor(this, 1, 0, r, 2, b, order);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& shearBlue(float r, float g, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_shearColor(this, 2, 0, r, 1, g, order);
+    fog_api.fecolormatrix_shearColor(this, 2, 0, r, 1, g, order);
     return *this;
   }
 
@@ -322,7 +322,7 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! Saturation of 0.0 yields black & white, 1.0 is neutral.
   FOG_INLINE FeColorMatrix& saturate(float s, uint32_t order = MATRIX_ORDER_PREPEND)
   {
-    _api.fecolormatrix_saturate(this, s, order);
+    fog_api.fecolormatrix_saturate(this, s, order);
     return *this;
   }
 
@@ -332,7 +332,7 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   FOG_INLINE bool eq(const FeColorMatrix& other) const
   {
-    return _api.fecolormatrix_eq(this, &other);
+    return fog_api.fecolormatrix_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -342,37 +342,37 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Map @a argb color.
   FOG_INLINE void mapArgb(Argb32& argb) const
   {
-    return _api.fecolormatrix_mapArgb32(this, &argb, &argb);
+    return fog_api.fecolormatrix_mapArgb32(this, &argb, &argb);
   }
 
   //! @overload.
   FOG_INLINE void mapArgb(Argb32& dst, const Argb32& src) const
   {
-    return _api.fecolormatrix_mapArgb32(this, &dst, &src);
+    return fog_api.fecolormatrix_mapArgb32(this, &dst, &src);
   }
 
   //! @brief Map @a argb color.
   FOG_INLINE void mapArgb(Argb64& argb) const
   {
-    return _api.fecolormatrix_mapArgb64(this, &argb, &argb);
+    return fog_api.fecolormatrix_mapArgb64(this, &argb, &argb);
   }
 
   //! @overload.
   FOG_INLINE void mapArgb(Argb64& dst, const Argb64& src) const
   {
-    return _api.fecolormatrix_mapArgb64(this, &dst, &src);
+    return fog_api.fecolormatrix_mapArgb64(this, &dst, &src);
   }
 
   //! @brief Map @a argb color.
   FOG_INLINE void mapArgb(ArgbF& argb) const
   {
-    return _api.fecolormatrix_mapArgbF(this, &argb, &argb);
+    return fog_api.fecolormatrix_mapArgbF(this, &argb, &argb);
   }
 
   //! @overload.
   FOG_INLINE void mapArgb(ArgbF& dst, const ArgbF& src) const
   {
-    return _api.fecolormatrix_mapArgbF(this, &dst, &src);
+    return fog_api.fecolormatrix_mapArgbF(this, &dst, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -382,64 +382,64 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   //! @brief Assignment operator.
   FOG_INLINE FeColorMatrix& operator=(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_copy(m, other.m);
+    fog_api.fecolormatrix_copy(m, other.m);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& operator+=(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_addMatrix(this, this, &other);
+    fog_api.fecolormatrix_addMatrix(this, this, &other);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& operator+=(float scalar)
   {
-    _api.fecolormatrix_addScalar(this, this, NULL, scalar);
+    fog_api.fecolormatrix_addScalar(this, this, NULL, scalar);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& operator-=(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_subtractMatrix(this, this, &other);
+    fog_api.fecolormatrix_subtractMatrix(this, this, &other);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& operator-=(float scalar)
   {
-    _api.fecolormatrix_subtractScalar(this, this, NULL, scalar);
+    fog_api.fecolormatrix_subtractScalar(this, this, NULL, scalar);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& operator*=(const FeColorMatrix& other)
   {
-    _api.fecolormatrix_multiplyMatrix(this, this, &other);
+    fog_api.fecolormatrix_multiplyMatrix(this, this, &other);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix& operator*=(float scalar)
   {
-    _api.fecolormatrix_multiplyScalar(this, this, NULL, scalar);
+    fog_api.fecolormatrix_multiplyScalar(this, this, NULL, scalar);
     return *this;
   }
 
   FOG_INLINE FeColorMatrix operator+(const FeColorMatrix& other) const
   {
     FeColorMatrix t(UNINITIALIZED);
-    _api.fecolormatrix_addMatrix(&t, this, &other);
+    fog_api.fecolormatrix_addMatrix(&t, this, &other);
     return t;
   }
 
   FOG_INLINE FeColorMatrix operator-(const FeColorMatrix& other) const
   {
     FeColorMatrix t(UNINITIALIZED);
-    _api.fecolormatrix_subtractMatrix(&t, this, &other);
+    fog_api.fecolormatrix_subtractMatrix(&t, this, &other);
     return t;
   }
 
   FOG_INLINE FeColorMatrix operator*(const FeColorMatrix& other) const
   {
     FeColorMatrix t(UNINITIALIZED);
-    _api.fecolormatrix_multiplyMatrix(&t, this, &other);
+    fog_api.fecolormatrix_multiplyMatrix(&t, this, &other);
     return t;
   }
 
@@ -466,15 +466,15 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   // --------------------------------------------------------------------------
 
   //! @brief Get global identity matrix.
-  static FOG_INLINE const FeColorMatrix& identity() { return *_api.fecolormatrix_oIdentity; }
+  static FOG_INLINE const FeColorMatrix& identity() { return *fog_api.fecolormatrix_oIdentity; }
   //! @brief Get global zero matrix.
-  static FOG_INLINE const FeColorMatrix& zero() { return *_api.fecolormatrix_oZero; }
+  static FOG_INLINE const FeColorMatrix& zero() { return *fog_api.fecolormatrix_oZero; }
   //! @brief Get global grayscale matrix.
-  static FOG_INLINE const FeColorMatrix& greyscale() { return *_api.fecolormatrix_oGreyscale; }
+  static FOG_INLINE const FeColorMatrix& greyscale() { return *fog_api.fecolormatrix_oGreyscale; }
   //! @brief Get global pre-hue matrix (used by rotate-hue).
-  static FOG_INLINE const FeColorMatrix& preHue() { return *_api.fecolormatrix_oPreHue; }
+  static FOG_INLINE const FeColorMatrix& preHue() { return *fog_api.fecolormatrix_oPreHue; }
   //! @brief Get global post-hue matrix (used by rotate-hue).
-  static FOG_INLINE const FeColorMatrix& postHue() { return *_api.fecolormatrix_oPostHue; }
+  static FOG_INLINE const FeColorMatrix& postHue() { return *fog_api.fecolormatrix_oPostHue; }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
@@ -482,12 +482,12 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   static FOG_INLINE bool eq(const FeColorMatrix* a, const FeColorMatrix* b)
   {
-    return _api.fecolormatrix_eq(a, b);
+    return fog_api.fecolormatrix_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.fecolormatrix_eq;
+    return (EqFunc)fog_api.fecolormatrix_eq;
   }
 
   // --------------------------------------------------------------------------

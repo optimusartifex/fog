@@ -46,12 +46,12 @@ struct FOG_NO_EXPORT MemPool
 
   FOG_INLINE MemPool()
   {
-    _api.mempool_ctor(this);
+    fog_api.mempool_ctor(this);
   }
 
   FOG_INLINE ~MemPool()
   {
-    _api.mempool_dtor(this);
+    fog_api.mempool_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -60,7 +60,7 @@ struct FOG_NO_EXPORT MemPool
 
   FOG_INLINE size_t getCapacity() const
   {
-    return _api.mempool_getCapacity(this);
+    return fog_api.mempool_getCapacity(this);
   }
 
   // --------------------------------------------------------------------------
@@ -69,12 +69,12 @@ struct FOG_NO_EXPORT MemPool
 
   FOG_INLINE void reset()
   {
-    _api.mempool_reset(this);
+    fog_api.mempool_reset(this);
   }
 
   FOG_INLINE void* save()
   {
-    return _api.mempool_save(this);
+    return fog_api.mempool_save(this);
   }
 
   // --------------------------------------------------------------------------
@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT MemPool
 
   FOG_INLINE err_t prealloc(size_t szItem, size_t count)
   {
-    return _api.mempool_prealloc(this, szItem, count);
+    return fog_api.mempool_prealloc(this, szItem, count);
   }
 
   //! @brief Alloc a memory (or reuse the existing allocation) of @a size bytes.
@@ -96,7 +96,7 @@ struct FOG_NO_EXPORT MemPool
     Link* p = unused;
 
     if (p == NULL)
-      return _api.mempool_alloc(this, szItem);
+      return fog_api.mempool_alloc(this, szItem);
 
     unused = p->next;
     return reinterpret_cast<void*>(p);
@@ -116,7 +116,7 @@ struct FOG_NO_EXPORT MemPool
 
   static FOG_INLINE void freeSaved(void* p)
   {
-    _api.mempool_freeSaved(p);
+    fog_api.mempool_freeSaved(p);
   }
 
   // --------------------------------------------------------------------------

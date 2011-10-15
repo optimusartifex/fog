@@ -65,6 +65,9 @@ FOG_NO_EXPORT void Lock_fini(void);
 FOG_NO_EXPORT void ThreadLocal_init(void);
 FOG_NO_EXPORT void ThreadLocal_fini(void);
 
+FOG_NO_EXPORT void ThreadEvent_init(void);
+FOG_NO_EXPORT void ThreadCondition_init(void);
+
 FOG_NO_EXPORT void Thread_init(void);
 FOG_NO_EXPORT void Thread_fini(void);
 

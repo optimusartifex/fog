@@ -89,13 +89,13 @@ struct FOG_NO_EXPORT MemZoneAllocator
   //! @param nodeSize Default size for one zone node.
   FOG_INLINE MemZoneAllocator(size_t nodeSize)
   {
-    _api.memzoneallocator_ctor(this, nodeSize);
+    fog_api.memzoneallocator_ctor(this, nodeSize);
   }
 
   //! @brief Destroy the zone allocator instance.
   FOG_INLINE ~MemZoneAllocator()
   {
-    _api.memzoneallocator_dtor(this);
+    fog_api.memzoneallocator_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -148,7 +148,7 @@ struct FOG_NO_EXPORT MemZoneAllocator
     _current->pos += size;
 
     if (FOG_UNLIKELY(_current->pos > _current->end))
-      return _api.memzoneallocator_alloc(this, size);
+      return fog_api.memzoneallocator_alloc(this, size);
 
     return (void*)p;
   }
@@ -164,13 +164,13 @@ struct FOG_NO_EXPORT MemZoneAllocator
   //! but another needs to be run.
   FOG_INLINE void clear()
   {
-    return _api.memzoneallocator_clear(this);
+    return fog_api.memzoneallocator_clear(this);
   }
 
   //! @brief Free allocated memory.
   FOG_INLINE void reset()
   {
-    return _api.memzoneallocator_reset(this);
+    return fog_api.memzoneallocator_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -180,13 +180,13 @@ struct FOG_NO_EXPORT MemZoneAllocator
   //! @brief Record current state.
   FOG_INLINE MemZoneRecord* record()
   {
-    return _api.memzoneallocator_record(this);
+    return fog_api.memzoneallocator_record(this);
   }
 
   //! @brief Revert to state previously recorded by @c record() method.
   FOG_INLINE void revert(MemZoneRecord* record, bool keepRecord = false)
   {
-    return _api.memzoneallocator_revert(this, record, keepRecord);
+    return fog_api.memzoneallocator_revert(this, record, keepRecord);
   }
 
   // --------------------------------------------------------------------------

@@ -488,7 +488,7 @@ static void* FOG_CDECL MemMgr_realloc_debug(void* p, size_t size)
 
   if (FOG_IS_NULL(p))
   {
-    return _api.memmgr_alloc(size);
+    return fog_api.memmgr_alloc(size);
   }
 
   p = _DBG_FROM_USER(p);
@@ -499,7 +499,7 @@ static void* FOG_CDECL MemMgr_realloc_debug(void* p, size_t size)
 
   if (FOG_UNLIKELY(size == 0))
   {
-    _api.memmgr_free(p);
+    fog_api.memmgr_free(p);
     return NULL;
   }
 
@@ -539,10 +539,10 @@ FOG_NO_EXPORT void MemDebug_init(void)
   memdbg.init();
 
   // Replace the default allocators debug versions.
-  _api.memmgr_alloc = MemMgr_alloc_debug;
-  _api.memmgr_calloc = MemMgr_calloc_debug;
-  _api.memmgr_realloc = MemMgr_realloc_debug;
-  _api.memmgr_free = MemMgr_free_debug;
+  fog_api.memmgr_alloc = MemMgr_alloc_debug;
+  fog_api.memmgr_calloc = MemMgr_calloc_debug;
+  fog_api.memmgr_realloc = MemMgr_realloc_debug;
+  fog_api.memmgr_free = MemMgr_free_debug;
 }
 
 FOG_NO_EXPORT void MemDebug_fini(void)

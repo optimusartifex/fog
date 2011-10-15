@@ -185,7 +185,7 @@ struct FOG_NO_EXPORT FeComponentFunctionData
   FOG_INLINE void release()
   {
     if (reference.deref())
-      _api.fecomponentfunction_dFree(this);
+      fog_api.fecomponentfunction_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -218,12 +218,12 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   FOG_INLINE FeComponentFunction()
   {
-    _api.fecomponentfunction_ctor(this);
+    fog_api.fecomponentfunction_ctor(this);
   }
 
   FOG_INLINE FeComponentFunction(const FeComponentFunction& other)
   {
-    _api.fecomponentfunction_ctorCopy(this, &other);
+    fog_api.fecomponentfunction_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE FeComponentFunction(FeComponentFunctionData* d) :
@@ -233,7 +233,7 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   FOG_INLINE ~FeComponentFunction()
   {
-    _api.fecomponentfunction_dtor(this);
+    fog_api.fecomponentfunction_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -247,11 +247,11 @@ struct FOG_NO_EXPORT FeComponentFunction
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getFunctionType() const { return _d->functionType; }
-  FOG_INLINE bool resultsInIdentity() const { return _api.fecomponentfunction_resultsInIdentity(this); }
+  FOG_INLINE bool resultsInIdentity() const { return fog_api.fecomponentfunction_resultsInIdentity(this); }
 
   FOG_INLINE err_t _getData(uint32_t functionType, void* functionData) const
   {
-    return _api.fecomponentfunction_getData(this, functionType, functionData);
+    return fog_api.fecomponentfunction_getData(this, functionType, functionData);
   }
 
   FOG_INLINE err_t getTable(List<float>& dst) const
@@ -276,13 +276,13 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   FOG_INLINE err_t setIdentity()
   {
-    _api.fecomponentfunction_reset(this);
+    fog_api.fecomponentfunction_reset(this);
     return ERR_OK;
   }
 
   FOG_INLINE err_t _setData(uint32_t functionType, const void* functionData)
   {
-    return _api.fecomponentfunction_setData(this, functionType, functionData);
+    return fog_api.fecomponentfunction_setData(this, functionType, functionData);
   }
 
   FOG_INLINE err_t setTable(const List<float>& dst)
@@ -311,7 +311,7 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   FOG_INLINE void reset()
   {
-    _api.fecomponentfunction_reset(this);
+    fog_api.fecomponentfunction_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -320,7 +320,7 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   FOG_INLINE bool eq(const FeComponentFunction& other) const
   {
-    return _api.fecomponentfunction_eq(this, &other);
+    return fog_api.fecomponentfunction_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -330,7 +330,7 @@ struct FOG_NO_EXPORT FeComponentFunction
   //! @brief Assignment operator.
   FOG_INLINE FeComponentFunction& operator=(const FeComponentFunction& other)
   {
-    _api.fecomponentfunction_copy(this, &other);
+    fog_api.fecomponentfunction_copy(this, &other);
     return *this;
   }
 
@@ -343,7 +343,7 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   static FOG_INLINE const FeComponentFunction& identity()
   {
-    return *_api.fecomponentfunction_oIdentity;
+    return *fog_api.fecomponentfunction_oIdentity;
   }
 
   // --------------------------------------------------------------------------
@@ -352,12 +352,12 @@ struct FOG_NO_EXPORT FeComponentFunction
 
   static FOG_INLINE bool eq(const FeComponentFunction* a, const FeComponentFunction* b)
   {
-    return _api.fecomponentfunction_eq(a, b);
+    return fog_api.fecomponentfunction_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.fecomponentfunction_eq;
+    return (EqFunc)fog_api.fecomponentfunction_eq;
   }
 
   // --------------------------------------------------------------------------

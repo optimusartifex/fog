@@ -21,7 +21,7 @@ namespace Fog {
 
 static void FOG_CDECL FeColorLut_ctor(FeColorLut* self)
 {
-  FeColorLutArrayData* identity = _api.fecolorlutarray_oIdentity->_d;
+  FeColorLutArrayData* identity = fog_api.fecolorlutarray_oIdentity->_d;
   identity->reference.add(4);
 
   self->_filterType = IMAGE_FILTER_TYPE_COLOR_LUT;
@@ -54,7 +54,7 @@ static void FOG_CDECL FeColorLut_dtor(FeColorLut* self)
 
 static void FOG_CDECL FeColorLut_reset(FeColorLut* self)
 {
-  FeColorLutArrayData* identity = _api.fecolorlutarray_oIdentity->_d;
+  FeColorLutArrayData* identity = fog_api.fecolorlutarray_oIdentity->_d;
   identity->reference.add(4);
 
   atomicPtrXchg(&self->c[0]->_d, identity)->release();
@@ -99,13 +99,13 @@ FOG_NO_EXPORT void FeColorLut_init(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  _api.fecolorlut_ctor = FeColorLut_ctor;
-  _api.fecolorlut_ctorCopy = FeColorLut_ctorCopy;
-  _api.fecolorlut_dtor = FeColorLut_dtor;
+  fog_api.fecolorlut_ctor = FeColorLut_ctor;
+  fog_api.fecolorlut_ctorCopy = FeColorLut_ctorCopy;
+  fog_api.fecolorlut_dtor = FeColorLut_dtor;
 
-  _api.fecolorlut_reset = FeColorLut_reset;
-  _api.fecolorlut_copy = FeColorLut_copy;
-  _api.fecolorlut_eq = FeColorLut_eq;
+  fog_api.fecolorlut_reset = FeColorLut_reset;
+  fog_api.fecolorlut_copy = FeColorLut_copy;
+  fog_api.fecolorlut_eq = FeColorLut_eq;
 }
 
 } // Fog namespace

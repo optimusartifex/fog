@@ -30,17 +30,17 @@ struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
 
   FOG_INLINE FeConvolveMatrix()
   {
-    _api.feconvolvematrix_ctor(this);
+    fog_api.feconvolvematrix_ctor(this);
   }
 
   FOG_INLINE FeConvolveMatrix(const FeConvolveMatrix& other)
   {
-    _api.feconvolvematrix_ctorCopy(this, &other);
+    fog_api.feconvolvematrix_ctorCopy(this, &other);
   }
 
   FOG_INLINE ~FeConvolveMatrix()
   {
-    _api.feconvolvematrix_dtor(this);
+    fog_api.feconvolvematrix_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -61,7 +61,7 @@ struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
 
   FOG_INLINE void reset()
   {
-    _api.feconvolvematrix_reset(this);
+    fog_api.feconvolvematrix_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -70,7 +70,7 @@ struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
 
   FOG_INLINE bool eq(const FeConvolveMatrix& other) const
   {
-    return _api.feconvolvematrix_eq(this, &other);
+    return fog_api.feconvolvematrix_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -80,7 +80,7 @@ struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
   //! @brief Assignment operator.
   FOG_INLINE FeConvolveMatrix& operator=(const FeConvolveMatrix& other)
   {
-    _api.feconvolvematrix_copy(this, &other);
+    fog_api.feconvolvematrix_copy(this, &other);
     return *this;
   }
 
@@ -93,12 +93,12 @@ struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
 
   static FOG_INLINE bool eq(const FeConvolveMatrix* a, const FeConvolveMatrix* b)
   {
-    return _api.feconvolvematrix_eq(a, b);
+    return fog_api.feconvolvematrix_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.feconvolvematrix_eq;
+    return (EqFunc)fog_api.feconvolvematrix_eq;
   }
 
   // --------------------------------------------------------------------------

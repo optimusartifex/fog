@@ -366,7 +366,7 @@ _Invalid:
 
 FOG_NO_EXPORT void PathClipper_init_SSE2(void)
 {
-  _api.pathclipperd_measurePath = PathClipperD_measurePath_SSE2;
+  fog_api.pathclipperd_measurePath = PathClipperD_measurePath_SSE2;
 }
 
 } // Fog namespace

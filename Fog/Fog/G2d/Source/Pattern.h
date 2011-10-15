@@ -52,7 +52,7 @@ struct FOG_NO_EXPORT PatternData
   FOG_INLINE void release()
   {
     if (vType != VAR_TYPE_NULL && reference.deref())
-      _api.pattern_dFree(this);
+      fog_api.pattern_dFree(this);
   }
 
   // --------------------------------------------------------------------------
@@ -148,57 +148,57 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE Pattern()
   {
-    _api.pattern_ctor(this);
+    fog_api.pattern_ctor(this);
   }
 
   FOG_INLINE Pattern(const Pattern& other)
   {
-    _api.pattern_ctorCopy(this, &other);
+    fog_api.pattern_ctorCopy(this, &other);
   }
 
   explicit FOG_INLINE Pattern(const ArgbBase32& argb32)
   {
-    _api.pattern_ctorArgb32(this, &argb32);
+    fog_api.pattern_ctorArgb32(this, &argb32);
   }
 
   explicit FOG_INLINE Pattern(const Color& color)
   {
-    _api.pattern_ctorColor(this, &color);
+    fog_api.pattern_ctorColor(this, &color);
   }
 
   explicit FOG_INLINE Pattern(const Texture& texture)
   {
-    _api.pattern_ctorTextureF(this, &texture, NULL);
+    fog_api.pattern_ctorTextureF(this, &texture, NULL);
   }
 
   explicit FOG_INLINE Pattern(const GradientF& gradient)
   {
-    _api.pattern_ctorGradientF(this, &gradient, NULL);
+    fog_api.pattern_ctorGradientF(this, &gradient, NULL);
   }
 
   explicit FOG_INLINE Pattern(const GradientD& gradient)
   {
-    _api.pattern_ctorGradientD(this, &gradient, NULL);
+    fog_api.pattern_ctorGradientD(this, &gradient, NULL);
   }
 
   FOG_INLINE Pattern(const Texture& texture, const TransformF& transform)
   {
-    _api.pattern_ctorTextureF(this, &texture, &transform);
+    fog_api.pattern_ctorTextureF(this, &texture, &transform);
   }
 
   FOG_INLINE Pattern(const Texture& texture, const TransformD& transform)
   {
-    _api.pattern_ctorTextureD(this, &texture, &transform);
+    fog_api.pattern_ctorTextureD(this, &texture, &transform);
   }
 
   FOG_INLINE Pattern(const GradientF& gradient, const TransformF& transform)
   {
-    _api.pattern_ctorGradientF(this, &gradient, &transform);
+    fog_api.pattern_ctorGradientF(this, &gradient, &transform);
   }
 
   FOG_INLINE Pattern(const GradientD& gradient, const TransformD& transform)
   {
-    _api.pattern_ctorGradientD(this, &gradient, &transform);
+    fog_api.pattern_ctorGradientD(this, &gradient, &transform);
   }
 
   explicit FOG_INLINE Pattern(PatternData* d) :
@@ -208,7 +208,7 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE ~Pattern()
   {
-    _api.pattern_dtor(this);
+    fog_api.pattern_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -219,7 +219,7 @@ struct FOG_NO_EXPORT Pattern
   FOG_INLINE bool isDetached() const { return getReference() == 1; }
 
   FOG_INLINE err_t detach() { return isDetached() ? (err_t)ERR_OK : _detach(); }
-  FOG_INLINE err_t _detach() { return _api.pattern_detach(this); }
+  FOG_INLINE err_t _detach() { return fog_api.pattern_detach(this); }
 
   // --------------------------------------------------------------------------
   // [Type]
@@ -247,29 +247,29 @@ struct FOG_NO_EXPORT Pattern
   //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR).
   FOG_INLINE err_t getColor(ArgbBase32& argb32) const
   {
-    return _api.pattern_getArgb32(this, &argb32);
+    return fog_api.pattern_getArgb32(this, &argb32);
   }
 
   //! @brief Get pattern color (for @c PATTERN_TYPE_COLOR)
   FOG_INLINE err_t getColor(Color& color) const
   {
-    return _api.pattern_getColor(this, &color);
+    return fog_api.pattern_getColor(this, &color);
   }
 
   //! @brief Get texture.
   FOG_INLINE err_t getTexture(Texture& texture) const
   {
-    return _api.pattern_getTexture(this, &texture);
+    return fog_api.pattern_getTexture(this, &texture);
   }
 
   FOG_INLINE err_t _getGradientF(uint32_t targetType, GradientF& gradient) const
   {
-    return _api.pattern_getGradientF(this, targetType, &gradient);
+    return fog_api.pattern_getGradientF(this, targetType, &gradient);
   }
 
   FOG_INLINE err_t _getGradientD(uint32_t targetType, GradientD& gradient) const
   {
-    return _api.pattern_getGradientD(this, targetType, &gradient);
+    return fog_api.pattern_getGradientD(this, targetType, &gradient);
   }
 
   FOG_INLINE err_t getGradient(GradientF& gr) const { return _getGradientF(0xFFFFFFFF, gr); }
@@ -289,17 +289,17 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE err_t setPattern(const Pattern& other)
   {
-    return _api.pattern_copy(this, &other);
+    return fog_api.pattern_copy(this, &other);
   }
 
   FOG_INLINE err_t getTransform(TransformF& tr) const
   {
-    return _api.pattern_getTransformF(this, &tr);
+    return fog_api.pattern_getTransformF(this, &tr);
   }
 
   FOG_INLINE err_t getTransform(TransformD& tr) const
   {
-    return _api.pattern_getTransformD(this, &tr);
+    return fog_api.pattern_getTransformD(this, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -309,59 +309,59 @@ struct FOG_NO_EXPORT Pattern
   //! @brief Create a color pattern and set color to @a argb32.
   FOG_INLINE err_t createColor(const ArgbBase32& argb32)
   {
-    return _api.pattern_createArgb32(this, &argb32);
+    return fog_api.pattern_createArgb32(this, &argb32);
   }
 
   //! @brief Create a color pattern and set color to @a color.
   FOG_INLINE err_t createColor(const Color& color)
   {
-    return _api.pattern_createColor(this, &color);
+    return fog_api.pattern_createColor(this, &color);
   }
 
   //! @brief Create a texture pattern and set texture to @a texture.
   FOG_INLINE err_t createTexture(const Texture& texture)
   {
-    return _api.pattern_createTextureF(this, &texture, NULL);
+    return fog_api.pattern_createTextureF(this, &texture, NULL);
   }
 
   //! @brief Create a texture pattern and set texture to @a texture and transform
   //! to @a tr.
   FOG_INLINE err_t createTexture(const Texture& texture, const TransformF& tr)
   {
-    return _api.pattern_createTextureF(this, &texture, &tr);
+    return fog_api.pattern_createTextureF(this, &texture, &tr);
   }
 
   //! @brief Create a texture pattern and set texture to @a texture and transform
   //! to @a tr.
   FOG_INLINE err_t createTexture(const Texture& texture, const TransformD& tr)
   {
-    return _api.pattern_createTextureD(this, &texture, &tr);
+    return fog_api.pattern_createTextureD(this, &texture, &tr);
   }
 
   //! @brief Create a gradient pattern and set gradient to @a gradient.
   FOG_INLINE err_t createGradient(const GradientF& gradient)
   {
-    return _api.pattern_createGradientF(this, &gradient, NULL);
+    return fog_api.pattern_createGradientF(this, &gradient, NULL);
   }
 
   //! @brief Create a gradient pattern and set gradient to @a gradient and transform
   //! to @a tr.
   FOG_INLINE err_t createGradient(const GradientF& gradient, const TransformF& tr)
   {
-    return _api.pattern_createGradientF(this, &gradient, &tr);
+    return fog_api.pattern_createGradientF(this, &gradient, &tr);
   }
 
   //! @brief Create a gradient pattern and set gradient to @a gradient.
   FOG_INLINE err_t createGradient(const GradientD& gradient)
   {
-    return _api.pattern_createGradientD(this, &gradient, NULL);
+    return fog_api.pattern_createGradientD(this, &gradient, NULL);
   }
 
   //! @brief Create a gradient pattern and set gradient to @a gradient and transform
   //! to @a tr.
   FOG_INLINE err_t createGradient(const GradientD& gradient, const TransformD& tr)
   {
-    return _api.pattern_createGradientD(this, &gradient, &tr);
+    return fog_api.pattern_createGradientD(this, &gradient, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -370,22 +370,22 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE err_t setTransform(const TransformF& tr)
   {
-    return _api.pattern_setTransformF(this, &tr);
+    return fog_api.pattern_setTransformF(this, &tr);
   }
 
   FOG_INLINE err_t setTransform(const TransformD& tr)
   {
-    return _api.pattern_setTransformD(this, &tr);
+    return fog_api.pattern_setTransformD(this, &tr);
   }
 
   FOG_INLINE err_t _transform(uint32_t transformOp, const void* params)
   {
-    return _api.pattern_applyTransform(this, transformOp, params);
+    return fog_api.pattern_applyTransform(this, transformOp, params);
   }
 
   FOG_INLINE err_t resetTransform()
   {
-    return _api.pattern_resetTransform(this);
+    return fog_api.pattern_resetTransform(this);
   }
 
   // --------------------------------------------------------------------------
@@ -476,7 +476,7 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE void reset()
   {
-    _api.pattern_reset(this);
+    fog_api.pattern_reset(this);
   }
 
   // --------------------------------------------------------------------------
@@ -485,7 +485,7 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE bool eq(const Pattern& other) const
   {
-    return _api.pattern_eq(this, &other);
+    return fog_api.pattern_eq(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -494,7 +494,7 @@ struct FOG_NO_EXPORT Pattern
 
   FOG_INLINE Pattern& operator=(const Pattern& other)
   {
-    _api.pattern_copy(this, &other); return *this;
+    fog_api.pattern_copy(this, &other); return *this;
   }
 
   FOG_INLINE bool operator==(const Pattern& other) const { return  eq(other); }
@@ -504,7 +504,7 @@ struct FOG_NO_EXPORT Pattern
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Pattern& null() { return *_api.pattern_oNull; }
+  static FOG_INLINE const Pattern& null() { return *fog_api.pattern_oNull; }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
@@ -512,12 +512,12 @@ struct FOG_NO_EXPORT Pattern
 
   static FOG_INLINE bool eq(const Pattern* a, const Pattern* b)
   {
-    return _api.pattern_eq(a, b);
+    return fog_api.pattern_eq(a, b);
   }
 
   static FOG_INLINE EqFunc getEqFunc()
   {
-    return (EqFunc)_api.pattern_eq;
+    return (EqFunc)fog_api.pattern_eq;
   }
 
   // --------------------------------------------------------------------------

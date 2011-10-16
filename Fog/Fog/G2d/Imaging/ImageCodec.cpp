@@ -68,7 +68,7 @@ err_t ImageCodec::_setProperty(const ManagedStringW& name, const Var& src)
       name == FOG_STR_(IMAGE_CODEC_framesCount) ||
       name == FOG_STR_(IMAGE_CODEC_progress))
   {
-    return ERR_OBJECT_READ_ONLY_PROPERTY;
+    return ERR_PROPERTY_READ_ONLY;
   }
 
   return base::_setProperty(name, src);

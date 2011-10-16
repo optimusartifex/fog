@@ -284,7 +284,7 @@ static WinCvEvent* ThreadCondition_getEventForWaiting(ThreadCondition* self)
 
   if (cvar->_recyclingListSize == 0)
   {
-    FOG_ASSERT(_recyclingList.isEmpty());
+    FOG_ASSERT(cvar->_recyclingList.isEmpty());
 
     e = reinterpret_cast<WinCvEvent*>(MemMgr::alloc(sizeof(WinCvEvent)));
     if (FOG_IS_NULL(e))
@@ -576,7 +576,7 @@ static void ThreadCondition_init_vista(void)
   ThreadConditionFuncsVista& funcs = ThreadCondition_funcs_vista;
 
   funcs.kernel32 = ::LoadLibraryW(L"Kernel32.dll");
-  FOG_ASSERT(api.kernel32 != NULLL);
+  FOG_ASSERT(funcs.kernel32 != NULL);
 
   funcs._InitializeConditionVariable = (InitializeConditionVariableFunc)::GetProcAddress(funcs.kernel32, "InitializeConditionVariable");
   if (funcs._InitializeConditionVariable == NULL) return;

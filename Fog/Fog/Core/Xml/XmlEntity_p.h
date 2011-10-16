@@ -14,7 +14,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Xml_Util
+//! @addtogroup Fog_Core_Xml
 //! @{
 
 // ============================================================================

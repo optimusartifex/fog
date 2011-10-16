@@ -487,6 +487,15 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t setString(const ManagedStringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
 
   // --------------------------------------------------------------------------
+  // [Accessors - Var]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setVar(const Var& other)
+  {
+    return fog_api.var_copy(this, &other);
+  }
+  
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 

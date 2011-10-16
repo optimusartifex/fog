@@ -1,4 +1,4 @@
-// ============================================================================
+ ============================================================================
 // [Fog - Core - Main]
 // ============================================================================
 
@@ -18,11 +18,6 @@
 //! @defgroup Fog_Core_Public Fog-Core
 //!
 //! Public classes and functions related to Fog-Core library.
-
-
-
-//! @defgroup Fog_Core_Application Application
-//! @ingroup Fog_Core_Public
 
 
 
@@ -118,38 +113,18 @@
 //! - @ref FOG_LIKELY.
 //! - @ref FOG_UNLIKELY.
 //!
-//! @note Currently only when compiling by gcc these macros are used, when
+//! @note Currently only when compiling by GCC these macros are used, when
 //! compiling for example by MSVC there is no such functionality (when using
-//! this compiler try to use profile based optimizations instead).
+//! this compiler try to use profile based optimization instead).
 
 
 
-//! @defgroup Fog_Core_Constants Constants
+//! @defgroup Fog_Core_Global Global definitions, constants, and macros
 //! @ingroup Fog_Core_Public
 
 
 
-//! @defgroup Fog_Core_DateTime Date and time
-//! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_Debugging Debugging
-//! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_Language Language (C++) compile-time information and tools
-//! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_Library Libraries and plugins
-//! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_Localization Localization and internationalization
+//! @defgroup Fog_Core_Kernel Object-system, properties, events and timers
 //! @ingroup Fog_Core_Public
 
 
@@ -159,7 +134,7 @@
 
 
 
-//! @defgroup Fog_Core_Memory Memory management
+//! @defgroup Fog_Core_Memory Memory management and operations
 //! @ingroup Fog_Core_Public
 
 
@@ -169,35 +144,18 @@
 
 
 
-//! @defgroup Fog_Core_IO Filesystem and streams
-//! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_System Object-system, properties, events and timers
-//! @ingroup Fog_Core_Public
-
-
-
 //! @defgroup Fog_Core_Threading Threading, tasks, timers, event loop and atomic ops
 //! @ingroup Fog_Core_Public
 
 
 
-//! @defgroup Fog_Core_Tools Strings, byte arrays, formatting and other tooling classes
+//! @defgroup Fog_Core_Tools Strings, collections, streaming and other helper classes
 //! @ingroup Fog_Core_Public
 
 
 
-//! @defgroup Fog_Core_Util Utility classes and functions
+//! @defgroup Fog_Core_Xml XML DOM and IO
 //! @ingroup Fog_Core_Public
-
-
-
-//! @defgroup Fog_Core_Macros Macros
-//! @ingroup Fog_Core_Public
-//!
-//! Macros that helps with compiling Fog-Framework and all applications.
 
 // ============================================================================
 // [Fog-Core Shared]
@@ -212,7 +170,7 @@ struct Implicit
   // [Sharing]
 
   //! @brief Returns reference count of object data.
-  sysuint_t getReference() const;
+  size_t getReference() const;
 
   //! @brief Returns @c true if object is not sharing data with another.
   //!
@@ -263,16 +221,6 @@ struct Implicit
   //! objects are allocated by library and shared between all
   //! null instances (empty instances).
   bool isNull() const;
-
-  //! @brief Returns @c true if object data are alive.
-  //!
-  //! Alive data means, that assign operations will ever free these data
-  //! and deep copy will be used instead.
-  //!
-  //! This flag is set only by template versions of original objects.
-  //! For example @c Fog::StringTmp<> templates sets this flag to
-  //! true, but @c Fog::String family classes never set this flag.
-  bool isStrong() const;
 };
 
 } // Doxygen namespace
@@ -441,32 +389,6 @@ struct Implicit
 
 #endif // FOG_DOXYGEN
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================================================
 // [Fog-Svg Documentation]
 // ============================================================================
@@ -495,53 +417,4 @@ struct Implicit
 
 //! @defgroup Fog_Svg_Util Svg utilities
 //! @ingroup Fog_Svg_Public
-#endif // FOG_DOXYGEN
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================================
-// [Fog-Xml Documentation]
-// ============================================================================
-
-#if defined(FOG_DOXYGEN)
-//! @defgroup Fog_Xml_Public Fog-Xml
-//!
-//! Public classes and functions related to Fog-Xml library.
-
-
-
-//! @defgroup Fog_Xml_Constants Constants
-//! @ingroup Fog_Xml_Public
-
-
-
-//! @defgroup Fog_Xml_Dom Xml-DOM
-//! @ingroup Fog_Xml_Public
-
-
-
-//! @defgroup Fog_Xml_IO Xml-IO
-//! @ingroup Fog_Xml_Public
-
-
-
-//! @defgroup Fog_Xml_Util Xml-Util
-//! @ingroup Fog_Xml_Public
 #endif // FOG_DOXYGEN

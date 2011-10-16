@@ -19,15 +19,17 @@ namespace Fog {
 // [TypeDefs - Classes]
 // ============================================================================
 
-// Core/Kernel.
+// Fog/Core/Kernel.
 struct Application;
 struct Event;
 struct EventLoop;
+struct MetaClass;
 struct Object;
+struct ObjectExtra;
 struct Task;
 struct Timer;
 
-// Core/Math.
+// Fog/Core/Math.
 union  DoubleBits;
 union  FloatBits;
 struct FunctionF;
@@ -35,7 +37,7 @@ struct FunctionD;
 struct IntervalF;
 struct IntervalD;
 
-// Core/Memory.
+// Fog/Core/Memory.
 struct MemBlockAllocator;
 struct MemBlockNode;
 struct MemBuffer;
@@ -44,7 +46,7 @@ struct MemZoneAllocator;
 struct MemZoneNode;
 struct MemZoneRecord;
 
-// Core/OS.
+// CFog/ore/OS.
 struct DirIterator;
 struct FileInfo;
 struct FileInfoData;
@@ -57,7 +59,7 @@ struct LibraryData;
 struct WinVersion;
 #endif // FOG_OS_WINDOWS
 
-// Core/Threading.
+// Fog/Core/Threading.
 template<typename T> struct Atomic;
 struct Lock;
 struct Thread;
@@ -67,7 +69,7 @@ struct ThreadLocal;
 struct ThreadPool;
 struct ThreadPoolEntry;
 
-// Core/Tools.
+// Fog/Core/Tools.
 struct Ascii8;
 struct Local8;
 struct Utf8;
@@ -118,11 +120,11 @@ struct TimeTicks;
 struct Var;
 struct VarData;
 
-// Core/Xml
+// Fog/Core/Xml
 struct XmlDocument;
 struct XmlElement;
 
-// G2d/Geometry.
+// Fog/G2d/Geometry.
 struct ArcF;
 struct ArcD;
 struct BoxI;
@@ -179,7 +181,7 @@ struct TransformD;
 struct TriangleF;
 struct TriangleD;
 
-// G2d/Imaging.
+// Fog/G2d/Imaging.
 struct Image;
 struct ImageBits;
 struct ImageCodec;
@@ -198,7 +200,7 @@ struct ImagePalette;
 struct ImagePaletteData;
 struct ImageVTable;
 
-// G2d/Imaging/Filters.
+// Fog/G2d/Imaging/Filters.
 struct FeBase;
 struct FeBlur;
 struct FeBorder;
@@ -215,7 +217,7 @@ struct FeConvolveMatrix;
 struct FeConvolveSeparable;
 struct FeMorphology;
 
-// G2d/Painting.
+// Fog/G2d/Painting.
 struct Painter;
 struct PaintDevice;
 struct PaintDeviceInfo;
@@ -223,7 +225,7 @@ struct PaintEngine;
 struct PaintParamsF;
 struct PaintParamsD;
 
-// G2d/Source.
+// Fog/G2d/Source.
 struct AcmykF;
 struct AcmykBaseF;
 struct AhslF;
@@ -261,7 +263,7 @@ struct RectangularGradientF;
 struct RectangularGradientD;
 struct Texture;
 
-// G2d/Text
+// Fog/G2d/Text
 struct Font;
 struct FontData;
 struct FontFace;
@@ -286,7 +288,7 @@ struct TextRectI;
 struct TextRectF;
 struct TextRectD;
 
-// G2d/Tools.
+// Fog/G2d/Tools.
 struct Dpi;
 struct MatrixF;
 struct MatrixD;
@@ -294,6 +296,12 @@ struct MatrixDataF;
 struct MatrixDataD;
 struct Region;
 struct RegionData;
+
+// Fog/UI/Layout
+struct Layout;
+
+// Fog/UI/Widget
+struct Widget;
 
 // ============================================================================
 // [TypeDefs - Template-Specialization]

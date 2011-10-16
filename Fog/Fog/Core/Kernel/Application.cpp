@@ -246,7 +246,7 @@ void Application_Local::applicationArgumentsWasSet()
   Library::addLibraryPath(applicationDirectory, LIBRARY_PATH_PREPEND);
 }
 
-static Static<Application_Local> _core_application_local;
+static Static<Application_Local> Application_local;
 
 // ============================================================================
 // [Fog::Application]
@@ -261,7 +261,8 @@ Application::Application(const StringW& type)
 
 Application::Application(const StringW& type, int argc, const char* argv[])
 {
-  _core_application_init_arguments(argc, argv);
+  ::fog_init_args(argc, argv);
+
   _init(type);
 }
 
@@ -340,12 +341,12 @@ void Application::quit()
 
 StringW Application::getApplicationExecutable()
 {
-  return _core_application_local->applicationExecutable;
+  return Application_local->applicationExecutable;
 }
 
 List<StringW> Application::getApplicationArguments()
 {
-  return _core_application_local->applicationArguments;
+  return Application_local->applicationArguments;
 }
 
 // ============================================================================
@@ -450,7 +451,7 @@ GuiEngine* Application::createGuiEngine(const StringW& _name)
     name = detectGuiEngine();
 
   // Try to create registered native engine.
-  GuiEngine* ge = _core_application_local->createGuiEngine(name);
+  GuiEngine* ge = Application_local->createGuiEngine(name);
   if (ge)
     return ge;
 
@@ -482,14 +483,14 @@ GuiEngine* Application::createGuiEngine(const StringW& _name)
 
 bool Application::registerGuiEngine(const StringW& name, GuiEngineConstructor ctor)
 {
-  AutoLock locked(_core_application_local->lock);
-  return _core_application_local->guiEngineHash.put(name, ctor);
+  AutoLock locked(Application_local->lock);
+  return Application_local->guiEngineHash.put(name, ctor);
 }
 
 bool Application::unregisterGuiEngine(const StringW& name)
 {
-  AutoLock locked(_core_application_local->lock);
-  return _core_application_local->guiEngineHash.remove(name);
+  AutoLock locked(Application_local->lock);
+  return Application_local->guiEngineHash.remove(name);
 }
 
 // ============================================================================
@@ -498,14 +499,14 @@ bool Application::unregisterGuiEngine(const StringW& name)
 
 bool Application::registerEventLoop(const StringW& name, EventLoopConstructor ctor)
 {
-  AutoLock locked(_core_application_local->lock);
-  return _core_application_local->eventLoopHash.put(name, ctor);
+  AutoLock locked(Application_local->lock);
+  return Application_local->eventLoopHash.put(name, ctor);
 }
 
 bool Application::unregisterEventLoop(const StringW& name)
 {
-  AutoLock locked(_core_application_local->lock);
-  return _core_application_local->eventLoopHash.remove(name);
+  AutoLock locked(Application_local->lock);
+  return Application_local->eventLoopHash.remove(name);
 }
 
 // ============================================================================
@@ -520,7 +521,7 @@ EventLoop* Application::createEventLoop(const StringW &_name)
   if (name == Ascii8("UI"))
     name = detectGuiEngine();
 
-  return _core_application_local->createEventLoop(name);
+  return Application_local->createEventLoop(name);
 }
 
 // ============================================================================
@@ -529,7 +530,7 @@ EventLoop* Application::createEventLoop(const StringW &_name)
 
 FOG_NO_EXPORT void Application_init(void)
 {
-  _core_application_local.init();
+  Application_local.init();
 
   StringW type;
 
@@ -550,20 +551,23 @@ FOG_NO_EXPORT void Application_init(void)
 
 FOG_NO_EXPORT void Application_fini(void)
 {
-  _core_application_local.destroy();
+  Application_local.destroy();
 }
+
+} // Fog namespace
 
 // ============================================================================
 // [Fog::Application - initArguments]
 // ============================================================================
 
-void _core_application_init_arguments(int argc, const char* argv[])
+FOG_CAPI_DECLARE void fog_init_args(int argc, const char* argv[])
 {
+  using namespace Fog;
   if (argc < 1) return;
 
-  AutoLock locked(_core_application_local->lock);
+  AutoLock locked(Application_local->lock);
 
-  List<StringW>& arguments = _core_application_local->applicationArguments;
+  List<StringW>& arguments = Application_local->applicationArguments;
   if (arguments.getLength() != 0) return;
 
   for (int i = 0; i < argc; i++)
@@ -573,7 +577,5 @@ void _core_application_init_arguments(int argc, const char* argv[])
     arguments.append(arg);
   }
 
-  _core_application_local->applicationArgumentsWasSet();
+  Application_local->applicationArgumentsWasSet();
 }
-
-} // Fog namespace

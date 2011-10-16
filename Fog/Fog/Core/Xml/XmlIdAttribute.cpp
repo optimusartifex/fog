@@ -42,13 +42,14 @@ err_t XmlIdAttribute::setValue(const StringW& value)
 
   if (document && !element->_id.isEmpty()) document->_elementIdsHash.remove(element);
 
-  // When assigning, we will generate hash code and we are omitting to call
-  // this function from XmlIdManager.
+  // When assigning, we are going to generate hash code and omit function call
+  // to this function by XmlIdManager.
   element->_id = value;
   element->_id.getHashCode();
   _value = value;
 
-  if (document && !element->_id.isEmpty()) document->_elementIdsHash.add(element);
+  if (document && !element->_id.isEmpty())
+    document->_elementIdsHash.add(element);
   return ERR_OK;
 }
 

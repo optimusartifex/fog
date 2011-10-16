@@ -12,7 +12,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_System
+//! @addtogroup Fog_Core_Kernel
 //! @{
 
 // ============================================================================
@@ -22,15 +22,30 @@ namespace Fog {
 //! @brief Task that can be send to thread event loop.
 struct FOG_API Task
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   Task();
   virtual ~Task();
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool destroyOnFinish() const { return _destroyOnFinish; }
+
+  // --------------------------------------------------------------------------
+  // [Interface]
+  // --------------------------------------------------------------------------
 
   virtual void run() = 0;
   virtual void destroy();
 
-  FOG_INLINE bool destroyOnFinish() const { return _destroyOnFinish; }
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
-protected:
   bool _destroyOnFinish;
 
 private:
@@ -38,7 +53,7 @@ private:
 };
 
 // ============================================================================
-// [Fog::CancellableTask]
+// [Fog::CancelableTask]
 // ============================================================================
 
 struct FOG_API CancelableTask : public Task
@@ -57,10 +72,17 @@ struct DeleteTask : public CancelableTask
 {
   explicit DeleteTask(T* obj) : _obj(obj) {}
 
+  // --------------------------------------------------------------------------
+  // [Interface]
+  // --------------------------------------------------------------------------
+
   virtual void run() { if (_obj) fog_delete(_obj); }
   virtual void cancel() { _obj = NULL; }
 
-private:
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+  
   T* _obj;
 };
 
@@ -72,7 +94,6 @@ private:
 // arbitrary EventLoop to quit.
 struct FOG_API QuitTask : public Task
 {
-public:
   virtual void run();
 };
 

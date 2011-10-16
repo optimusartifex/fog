@@ -36,7 +36,7 @@ _FOG_TYPE_DECLARE(Fog::EventLoopPendingTask, Fog::TYPE_CATEGORY_SIMPLE)
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_System
+//! @addtogroup Fog_Core_Kernel
 //! @{
 
 // ============================================================================

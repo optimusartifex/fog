@@ -63,7 +63,7 @@ struct FOG_NO_EXPORT MemBlockNode
 //! @brief Custom memory allocator used by raster paint engine.
 //!
 //! This allocator allocates larger blocks (see @c BLOCK_SIZE) dividing them
-//! into small pieces demanded throught @c MemBlockAllocator::alloc() method.
+//! into small pieces demanded through @c MemBlockAllocator::alloc() method.
 //! Each allocation contains information about memory block used by allocator
 //! and when the memory is not needed (and @c MemBlockAllocator::free() is called)
 //! it's atomically removed from memory block.

@@ -16,6 +16,7 @@
 #include <Fog/Core/Global/Debug.h>
 #include <Fog/Core/Global/Enum.h>
 #include <Fog/Core/Global/Init.h>
+#include <Fog/Core/Global/Main.h>
 #include <Fog/Core/Global/Static.h>
 #include <Fog/Core/Global/TypeDefs.h>
 #include <Fog/Core/Global/TypeInfo.h>

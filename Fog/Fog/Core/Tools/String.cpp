@@ -4324,13 +4324,13 @@ static bool FOG_CDECL StringT_eqString(const CharT_(String)* a, const SrcT_(Stri
   size_t aLength = a_d->length;
   size_t bLength = b_d->length;
 
-  if (a_d == b_d)
+  if (sizeof(CharT) == sizeof(SrcT) && (const void*)a_d == (const void*)b_d)
     return true;
 
   if (aLength != bLength)
     return false;
 
-  if (sizeof(CharT) == sizeof(SrcT) && ((a_d->vType & b_d->vType) & STRING_FLAG_MANAGED) == 1)
+  if (sizeof(CharT) == sizeof(SrcT) && ((a_d->vType & b_d->vType) & VAR_FLAG_STRING_MANAGED) == VAR_FLAG_STRING_MANAGED)
     return false;
 
   return StringUtil::eq(a_d->data, b_d->data, aLength, CASE_SENSITIVE);
@@ -5393,10 +5393,10 @@ FOG_NO_EXPORT void String_init(void)
   StringDataW* dw = &StringW_dEmpty;
 
   da->reference.init(1);
-  da->vType = VAR_TYPE_STRINGA | STRING_FLAG_MANAGED;
+  da->vType = VAR_TYPE_STRINGA | VAR_FLAG_STRING_MANAGED;
 
   dw->reference.init(1);
-  dw->vType = VAR_TYPE_STRINGW | STRING_FLAG_MANAGED;
+  dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_MANAGED;
 
   fog_api.stringa_oEmpty = StringA_oEmpty.initCustom1(da);
   fog_api.stringw_oEmpty = StringW_oEmpty.initCustom1(dw);

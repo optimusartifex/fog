@@ -16,7 +16,7 @@ namespace Fog {
 //! @{
 
 //! @brief Error codes used by Fog-Framework.
-enum ERR_ENUM
+enum ERR_CODE
 {
   // --------------------------------------------------------------------------
   // [Global/Ok]
@@ -122,7 +122,7 @@ enum ERR_ENUM
   //! Tried to remove object from a bad ascendant.
   //!
   //! @note This is very likely a runtime error and should be reported.
-  ERR_OBJECT_NOT_PART_OF_HIERARCHY,
+  ERR_OBJECT_NOT_FOUND,
 
   //! @brief Object has already part of a different hierarchy.
   //!
@@ -130,12 +130,14 @@ enum ERR_ENUM
   //! another else. You must first remove it from its current parent.
   //!
   //! @note This is very likely a runtime error and should be reported.
-  ERR_OBJECT_ALREADY_PART_OF_HIERARCHY,
+  ERR_OBJECT_HAS_PARENT,
 
-  //! @brief Property not exists.
-  ERR_OBJECT_INVALID_PROPERTY,
+  //! @brief Invalid property name/syntax.
+  ERR_PROPERTY_INVALID,
+  //! @brief Property not found.
+  ERR_PROPERTY_NOT_FOUND,
   //! @brief Property is read-only.
-  ERR_OBJECT_READ_ONLY_PROPERTY,
+  ERR_PROPERTY_READ_ONLY,
 
   // --------------------------------------------------------------------------
   // [Core/OS - Environment]

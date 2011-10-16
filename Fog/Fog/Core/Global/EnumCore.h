@@ -1539,6 +1539,77 @@ enum OBJECT_EVENT_HANDLER_BEHAVIOR
 };
 
 // ============================================================================
+// [Fog::OBJECT_FLAG]
+// ============================================================================
+
+//! @brief @ref Object flags.
+enum OBJECT_FLAG
+{
+  // --------------------------------------------------------------------------
+  // [Object]
+  // --------------------------------------------------------------------------
+
+  //! @brief Object was wrapped by @c Ref<Object> or wrap was ignored.
+  //!
+  //! @note This flag is set first time the object is wrapped.
+  OBJECT_FLAG_WRAPPED = 0x00000001,
+
+  //! @brief Object was created and create event was received.
+  OBJECT_FLAG_CREATED = 0x00000002,
+  //! @brief Object will be destroyed, method @c destroyLater() was called.
+  OBJECT_FLAG_RELEASE_SCHEDULED = 0x00000004,
+
+  OBJECT_FLAG_CHILDREN = 0x00000010,
+  OBJECT_FLAG_DYNAMIC_PROPERTIES = 0x00000020,
+
+  // --------------------------------------------------------------------------
+  // [Type]
+  // --------------------------------------------------------------------------
+
+  //! @brief The @ref Object instance is @ref Layout.
+  OBJECT_FLAG_IS_LAYOUT = 0x40000000,
+  //! @brief The @ref Object instance is @ref Widget.
+  OBJECT_FLAG_IS_WIDGET = 0x80000000
+};
+
+// ============================================================================
+// [Fog::OBJECT_CREATE]
+// ============================================================================
+
+//! @brief Object create flags.
+enum OBJECT_CREATE
+{
+  // --------------------------------------------------------------------------
+  // [Object]
+  // --------------------------------------------------------------------------
+
+  //! @brief Mark object as wrapped and ignore the first @c Ref<Object> wrap
+  //! which do not increase @ref Object reference count.
+  //!
+  //! @sa OBJECT_FLAG_WRAPPED.
+  //!
+  //! @note Must be equal to @c OBJECT_FLAG_WRAPPED.
+  OBJECT_CREATE_WRAPPED = 0x00000001,
+
+  // --------------------------------------------------------------------------
+  // [Var]
+  // --------------------------------------------------------------------------
+
+  //! @note Must be equal to @c VAR_FLAG_STATIC.
+  OBJECT_CREATE_STATIC = 0x01000000,
+
+  // --------------------------------------------------------------------------
+  // [Default]
+  // --------------------------------------------------------------------------
+
+  //! @brief Default flags passed to the @c Object constructor.
+  //!
+  //! At this time there are no default flags, this enumeration is reserved
+  //! for the future in case that something will be changed.
+  OBJECT_CREATE_DEFAULT = NO_FLAGS
+};
+
+// ============================================================================
 // [Fog::WIN_VERSION]
 // ============================================================================
 
@@ -1678,11 +1749,11 @@ enum STREAM_SEEK_MODE
 };
 
 // ============================================================================
-// [Fog::STRID]
+// [Fog::STR_CODE]
 // ============================================================================
 
 //! @brief Cached strings IDs used in @c fog_strings array.
-enum STRID
+enum STR_CODE
 {
   // --------------------------------------------------------------------------
   // [Fog/Core - Object / Property System]
@@ -2605,43 +2676,14 @@ enum VAR_FLAG
 };
 
 // ============================================================================
-// [Fog::OBJECT_FLAG]
+// [Fog::VAR_FLAG_STRING]
 // ============================================================================
 
-//! @brief @ref Object flags.
-enum OBJECT_FLAG
+//! @brief Var flags used by @ref StringA and @ref StringW.
+enum VAR_FLAG_STRING
 {
-  // --------------------------------------------------------------------------
-  // [Core]
-  // --------------------------------------------------------------------------
-
-  //! @brief Object was created and create event was received.
-  OBJECT_FLAG_CREATED = VAR_FLAG_RESERVED_1,
-  //! @brief Object will be destroyed, method @c destroyLater() was called.
-  OBJECT_FLAG_DESTROY_LATER = VAR_FLAG_RESERVED_2,
-
-  // --------------------------------------------------------------------------
-  // [Cast]
-  // --------------------------------------------------------------------------
-
-  // These flags were designed for fast object identification in a Fog-Gui
-  // library. Generally all flags above 1 << 16 are used by Fog-Gui.
-
-  OBJECT_FLAG_IS_COMPONENT = VAR_FLAG_RESERVED_4,
-  //! @brief The @ref Object instance is @ref Widget.
-  OBJECT_FLAG_IS_WIDGET = VAR_FLAG_RESERVED_5,
-  //! @brief The @ref Object instance is @ref Layout.
-  OBJECT_FLAG_IS_LAYOUT = VAR_FLAG_RESERVED_6
-};
-
-// ============================================================================
-// [Fog::STRING_FLAG]
-// ============================================================================
-
-enum STRING_FLAG
-{
-  STRING_FLAG_MANAGED = VAR_FLAG_RESERVED_1,
-  STRING_FLAG_CACHED = VAR_FLAG_RESERVED_2
+  VAR_FLAG_STRING_MANAGED = VAR_FLAG_RESERVED_1,
+  VAR_FLAG_STRING_CACHED = VAR_FLAG_RESERVED_2
 };
 
 // ============================================================================

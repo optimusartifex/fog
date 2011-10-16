@@ -82,7 +82,7 @@ void AnimationDispatcher::onTimer(TimerEvent* e)
     // Who is responsible to destruct?
     // Current answer: call destroy on Animation
     removeListener(e);
-    e->destroy();
+    e->release();
   }
 
   Application::getInstance()->getGuiEngine()->update();
@@ -254,7 +254,7 @@ void WidgetAnimation::onFinished(AnimationEvent* e)
 
     if (_flags & ANIMATION_WIDGET_DESTROY_ON_END)
     {
-      _widget->destroy();
+      _widget->release();
     }
   }
 

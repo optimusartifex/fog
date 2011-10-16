@@ -14,7 +14,7 @@
 // [Fog::Core - Standard Macros]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Macros
+//! @addtogroup Fog_Core_Global
 //! @{
 
 //! @brief Some systems hasn't defined @c offsetof keyword, but FOG_OFFSET_OF

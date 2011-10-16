@@ -18,15 +18,15 @@ namespace Fog {
 // These macros are used internally, so don't use them outside if Fog library.
 // ============================================================================
 
-#define FOG_WIDGET_TREE_ITERATOR(__name__, __basewidget__, __conditional__, __before_traverse__, __after_traverse__) \
-  FOG_WIDGET_TREE_ITERATOR_EX(__name__, __basewidget__, __conditional__, __before_traverse__, __after_traverse__, {}, {})
+#define FOG_WIDGET_TREE_ITERATOR(_Name_, _Base_, _Cond_, _BeforeTraverse_, _AfterTraverse_) \
+  FOG_WIDGET_TREE_ITERATOR_EX(_Name_, _Base_, _Cond_, _BeforeTraverse_, _AfterTraverse_, {}, {})
 
-#define FOG_WIDGET_TREE_ITERATOR_EX(__name__, __basewidget__, __conditional__, __before_traverse__, __after_traverse__, __push__, __pop__) \
-  if ((__basewidget__)->_children.getLength()) \
+#define FOG_WIDGET_TREE_ITERATOR_EX(_Name_, _Base_, _Cond_, _BeforeTraverse_, _AfterTraverse_, _Push_, _Pop_) \
+  if ((_Base_)->_objectExtra->_children.getLength()) \
   { \
     ::Fog::StackP<512> stack; \
-    ::Fog::Widget** childCur = (::Fog::Widget** )( __basewidget__->_children.getData() ); \
-    ::Fog::Widget** childEnd = childCur + ( __basewidget__->_children.getLength() ); \
+    ::Fog::Widget** childCur = (::Fog::Widget** )( _Base_->_objectExtra->_children.getData() ); \
+    ::Fog::Widget** childEnd = childCur + ( _Base_->_objectExtra->_children.getLength() ); \
     ::Fog::Widget* child; \
     \
     for (;;) \
@@ -34,29 +34,29 @@ namespace Fog {
       child = *childCur; \
       \
       if (!((::Fog::Object*)child)->isWidget()) \
-        goto __name__##_next; \
+        goto _Name_##_next; \
       \
-      __before_traverse__ \
+      _BeforeTraverse_ \
       \
-      if (child->_children.getLength() && (__conditional__)) \
+      if (child->_objectExtra->_children.getLength() && (_Cond_)) \
       { \
         \
-        __push__ \
+        _Push_ \
         \
         stack.push(childCur); \
         stack.push(childEnd); \
         \
-        childCur = (::Fog::Widget** )child->_children.getData(); \
-        childEnd = childCur + child->_children.getLength(); \
+        childCur = (::Fog::Widget** )child->_objectExtra->_children.getData(); \
+        childEnd = childCur + child->_objectExtra->_children.getLength(); \
         \
         continue; \
       } \
       \
-__name__##_after: \
+_Name_##_after: \
       \
-      __after_traverse__ \
+      _AfterTraverse_ \
       \
-__name__##_next: \
+_Name_##_next: \
       \
       childCur++; \
       \
@@ -67,14 +67,14 @@ __name__##_next: \
         stack.pop(childEnd); \
         stack.pop(childCur); \
         \
-        __pop__ \
+        _Pop_ \
         \
-        goto __name__##_after; \
+        goto _Name_##_after; \
       } \
     } \
   }
 
-#define FOG_WIDGET_TREE_ITERATOR_NEXT(__name__) goto __name__##_next
+#define FOG_WIDGET_TREE_ITERATOR_NEXT(_Name_) goto _Name_##_next
 
 } // Fog namespace
 

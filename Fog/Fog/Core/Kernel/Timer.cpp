@@ -26,38 +26,52 @@ namespace Fog {
 
 struct FOG_NO_EXPORT TimerTask : public Task
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   TimerTask(Timer* timer) :
     timer(timer)
   {
   }
 
-  virtual void run()
-  {
-    if (timer)
-    {
-      // First send events.
-      TimerEvent e(timer);
-      timer->sendEvent(&e);
+  // --------------------------------------------------------------------------
+  // [Interface]
+  // --------------------------------------------------------------------------
 
-      // Repeat?
-      if (timer)
-      {
-        timer->getHomeThread()->getEventLoop()->postTask(this, true, static_cast<int>(timer->_interval.getMilliseconds()));
-        _destroyOnFinish = false;
-      }
-      else
-      {
-        // We must be sure, it can be set to false.
-        _destroyOnFinish = true;
-      }
-    }
-  }
+  virtual void run();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
 
   Timer* timer;
 };
 
+void TimerTask::run()
+{
+  if (timer)
+  {
+    // First send events.
+    TimerEvent e(timer);
+    timer->sendEvent(&e);
+
+    // Repeat?
+    if (timer)
+    {
+      timer->getHomeThread()->getEventLoop()->postTask(this, true, static_cast<int>(timer->_interval.getMilliseconds()));
+      _destroyOnFinish = false;
+    }
+    else
+    {
+      // We must be sure, it can be set to false.
+      _destroyOnFinish = true;
+    }
+  }
+}
+
 // ============================================================================
-// [Fog::Timer]
+// [Fog::Timer - Construction / Destruction]
 // ============================================================================
 
 Timer::Timer() :
@@ -70,10 +84,21 @@ Timer::~Timer()
   stop();
 }
 
-bool Timer::isRunning()
+// ============================================================================
+// [Fog::Timer - Accessors]
+// ============================================================================
+
+void Timer::setInterval(TimeDelta interval)
 {
-  return _task != NULL;
+  if (_interval == interval)
+    return;
+
+  _interval = interval;
 }
+
+// ============================================================================
+// [Fog::Timer - Start / Stop]
+// ============================================================================
 
 bool Timer::start()
 {
@@ -90,14 +115,6 @@ void Timer::stop()
   {
     static_cast<TimerTask *>(_task)->timer = NULL;
     _task = NULL;
-  }
-}
-
-void Timer::setInterval(TimeDelta interval)
-{
-  if (_interval != interval)
-  {
-    _interval = interval;
   }
 }
 

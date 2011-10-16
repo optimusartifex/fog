@@ -55,7 +55,7 @@ Widget::Widget(uint32_t createFlags) :
   _reserved(0),
   _widgetflags(0)
 {
-  _vType |= OBJECT_FLAG_IS_WIDGET;
+  _objectFlags |= OBJECT_FLAG_IS_WIDGET;
 
   // TODO ?
   _focusLink = NULL;
@@ -106,9 +106,9 @@ err_t Widget::_addChild(size_t index, Object* child)
     // GuiWindow for this, so inline popup can be handled by it. Hmm, what is
     // purpose of this widget, shouldn't be sufficient to just create a regular
     // widget and add it to the top-level hierarchy?
-    if (!isInlinePopup && _children.getLength() > 0)
+    if (!isInlinePopup && _objectExtra->_children.getLength() > 0)
     {
-      ListReverseIterator<Object*> it(_children);
+      ListReverseIterator<Object*> it(_objectExtra->_children);
 
       while (it.isValid())
       {
@@ -454,7 +454,7 @@ Widget* Widget::getChildAt(const PointI& pt, bool recursive) const
 
 _Repeat:
   {
-    ListReverseIterator<Object*> it(current->_children);
+    ListReverseIterator<Object*> it(current->_objectExtra->_children);
     while (it.isValid())
     {
       Widget* widget = fog_object_cast<Widget*>(it.getItem());
@@ -530,7 +530,7 @@ void Widget::setLayout(Layout* lay)
 void Widget::deleteLayout()
 {
   Layout* lay = takeLayout();
-  if (lay) lay->destroy();
+  if (lay) lay->release();
 }
 
 Layout* Widget::takeLayout()

@@ -514,7 +514,7 @@ _DetectLoopDo:
   }
 
 _ClipLoop:
-  // Copy the vertices which passed throught detect-loop.
+  // Copy the vertices which passed through detect-loop.
   if (unchangedCmd != srcCmd)
   {
     size_t copyLength = (size_t)(srcCmd - unchangedCmd);

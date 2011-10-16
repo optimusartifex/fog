@@ -1405,7 +1405,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(size_t, var_getReference)(const Var* self);
   FOG_CAPI_METHOD(uint32_t, var_getVarType)(const Var* self);
   FOG_CAPI_METHOD(void, var_reset)(Var* self);
-  FOG_CAPI_METHOD(void, var_copy)(Var* self, const Var* other);
+  FOG_CAPI_METHOD(err_t, var_copy)(Var* self, const Var* other);
   FOG_CAPI_METHOD(err_t, var_getI32)(const Var* self, int32_t* dst);
   FOG_CAPI_METHOD(err_t, var_getI32Bound)(const Var* self, int32_t* dst, int32_t min, int32_t max);
   FOG_CAPI_METHOD(err_t, var_getU32)(const Var* self, uint32_t* dst);
@@ -2474,6 +2474,14 @@ struct FOG_NO_EXPORT Api
 
 //! @brief Fog-CAPI interface.
 FOG_CVAR_EXTERN Fog::Api fog_api;
+
+//! @brief Function that should be called if application arguments are not
+//! initialized and Application object not exists or it's not known that it
+//! will exist in the future.
+//!
+//! This method is called automatically by @c FOG_CORE_MAIN and @c FOG_UI_MAIN
+//! macros.
+FOG_CAPI_EXTERN void fog_init_args(int argc, const char* argv[]);
 
 // [Guard]
 #endif // _FOG_CORE_GLOBAL_API_H

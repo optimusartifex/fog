@@ -19,7 +19,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_System
+//! @addtogroup Fog_Core_Kernel
 //! @{
 
 // ============================================================================
@@ -39,17 +39,17 @@ struct FOG_API Timer : public Object
   virtual ~Timer();
 
   // --------------------------------------------------------------------------
-  // [Construction / Destruction]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE bool isRunning() const { return _task != NULL; }
   FOG_INLINE TimeDelta getInterval() const { return _interval; }
+
   void setInterval(TimeDelta interval);
 
   // --------------------------------------------------------------------------
-  // [State]
+  // [Start / Stop]
   // --------------------------------------------------------------------------
-
-  bool isRunning();
 
   bool start();
   void stop();

@@ -136,13 +136,14 @@ StringDataW* ManagedStringHashW::addStubA(const char* sData, size_t sLength, uin
 
   StringDataW* d = reinterpret_cast<StringDataW*>(node + 1);
   d->reference.init(2);
-  d->vType = VAR_TYPE_STRINGW | STRING_FLAG_MANAGED;
+  d->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_MANAGED;
   d->hashCode = hashCode;
   d->capacity = sLength;
   d->length = sLength;
   StringUtil::copy(d->data, sData, sLength);
 
   node->next = NULL;
+  node->string->_d = d;
   *pPrev = node;
 
   if (++_length >= _expandLength)
@@ -177,13 +178,14 @@ StringDataW* ManagedStringHashW::addStubW(const CharW* sData, size_t sLength, ui
 
   StringDataW* d = reinterpret_cast<StringDataW*>(node + 1);
   d->reference.init(2);
-  d->vType = VAR_TYPE_STRINGW | STRING_FLAG_MANAGED;
+  d->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_MANAGED;
   d->hashCode = hashCode;
   d->capacity = sLength;
   d->length = sLength;
   StringUtil::copy(d->data, sData, sLength);
 
   node->next = NULL;
+  node->string->_d = d;
   *pPrev = node;
 
   if (++_length >= _expandLength)
@@ -215,11 +217,11 @@ void ManagedStringHashW::addList(ManagedStringW* listData, size_t listLength)
 
     while (node)
     {
-      StringDataW* d = node->string->_d;
+      StringDataW* node_d = node->string->_d;
 
-      if (d->length == sLength && StringUtil::eq(d->data, sData, sLength))
+      if (node_d->length == sLength && StringUtil::eq(node_d->data, sData, sLength))
       {
-        listData[i]._string->_d = d->addRef();
+        listData[i]._string->_d = node_d->addRef();
 
         d->reference.init(0);
         d = NULL;
@@ -336,7 +338,7 @@ ManagedStringNodeW* ManagedStringHashW::_cleanup()
     while (node)
     {
       ManagedStringNodeW* next = node->next;
-      if ((node->string->_d->vType & STRING_FLAG_CACHED) == 0 && node->string->_d->reference.cmpXchg(1, 0))
+      if ((node->string->_d->vType & VAR_FLAG_STRING_CACHED) == 0 && node->string->_d->reference.cmpXchg(1, 0))
       {
         *pPrev = next;
 
@@ -393,11 +395,11 @@ static err_t FOG_CDECL ManagedStringW_ctorStubA(ManagedStringW* self, const Stub
 
   if (!sLength)
   {
-    fog_api.managedstringw_ctor(self);
+    self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
     return ERR_OK;
   }
 
-  uint32_t hashCode = HashUtil::hashStubA(StubA(sData, sLength));
+  uint32_t hashCode = HashUtil::hash(StubA(sData, sLength));
 
   AutoLock locked(ManagedStringW_lock);
   StringDataW* d;
@@ -431,11 +433,11 @@ static err_t FOG_CDECL ManagedStringW_ctorStubW(ManagedStringW* self, const Stub
 
   if (!sLength)
   {
-    fog_api.managedstringw_ctor(self);
+    self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
     return ERR_OK;
   }
 
-  uint32_t hashCode = HashUtil::hashStubW(StubW(sData, sLength));
+  uint32_t hashCode = HashUtil::hash(StubW(sData, sLength));
 
   AutoLock locked(ManagedStringW_lock);
   StringDataW* d;
@@ -467,9 +469,15 @@ static err_t FOG_CDECL ManagedStringW_ctorStringW(ManagedStringW* self, const St
 {
   StringDataW* d = str->_d;
 
-  if ((d->vType & STRING_FLAG_MANAGED) != 0 || d->length == 0)
+  if ((d->vType & VAR_FLAG_STRING_MANAGED) != 0)
   {
     self->_string->_d = d->addRef();
+    return ERR_OK;
+  }
+
+  if (d->length == 0)
+  {
+    self->_string->_d = fog_api.stringw_oEmpty->_d->addRef();
     return ERR_OK;
   }
 
@@ -519,7 +527,7 @@ static err_t FOG_CDECL ManagedStringW_setStubA(ManagedStringW* self, const StubA
     return ERR_OK;
   }
 
-  uint32_t hashCode = HashUtil::hashStubA(StubA(sData, sLength));
+  uint32_t hashCode = HashUtil::hash(StubA(sData, sLength));
 
   AutoLock locked(ManagedStringW_lock);
   StringDataW* d;
@@ -552,7 +560,7 @@ static err_t FOG_CDECL ManagedStringW_setStubW(ManagedStringW* self, const StubW
     return ERR_OK;
   }
 
-  uint32_t hashCode = HashUtil::hashStubW(StubW(sData, sLength));
+  uint32_t hashCode = HashUtil::hash(StubW(sData, sLength));
 
   AutoLock locked(ManagedStringW_lock);
   StringDataW* d;
@@ -578,7 +586,7 @@ static err_t FOG_CDECL ManagedStringW_setStringW(ManagedStringW* self, const Str
 {
   StringDataW* d = str->_d;
 
-  if ((d->vType & STRING_FLAG_MANAGED) != 0 || d->length == 0)
+  if ((d->vType & VAR_FLAG_STRING_MANAGED) != 0 || d->length == 0)
   {
     atomicPtrXchg(&self->_string->_d, d->addRef())->reference.dec();
     return ERR_OK;
@@ -660,7 +668,7 @@ static void FOG_CDECL ManagedStringW_cleanupFunc(void* closure, uint32_t reason)
 
 static FOG_INLINE void ManagedStringCacheW_chcopy(CharW* dst, const char* src, size_t length)
 {
-  for (size_t i = 0; i <= length; i++)
+  for (size_t i = 0; i < length; i++)
     dst[i] = src[i];
 }
 
@@ -715,12 +723,13 @@ static ManagedStringCacheW* FOG_CDECL ManagedStringCacheW_create(const char* sDa
       node->string->_d = d;
 
       d->reference.init(2);
-      d->vType = VAR_TYPE_STRINGW | STRING_FLAG_MANAGED | STRING_FLAG_CACHED;
-      d->hashCode = HashUtil::hashStubA(StubA(sMark, len));
+      d->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_MANAGED | VAR_FLAG_STRING_CACHED;
+      d->hashCode = HashUtil::hash(StubA(sMark, len));
       d->length = len;
       d->capacity = len;
 
       ManagedStringCacheW_chcopy(d->data, sMark, len);
+      d->data[len] = 0;
       pData = (uint8_t*)((size_t)pData + (sizeof(CharW) * len + sizeof(size_t) - 1) & ~(size_t)(sizeof(size_t) - 1));
 
       pList->_string->_d = d;

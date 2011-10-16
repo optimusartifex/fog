@@ -19,31 +19,30 @@
 #include <Fog/Core/Tools/List.h>
 
 // ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-namespace Fog {
-
-// TODO: These should be defined by Global/TypeDefs.h, so remove from here.
-// Fog-Core.
-struct Event;
-struct MetaClass;
-
-// Fog-Gui (object_cast specialization).
-struct Layout;
-struct Widget;
-
-} // Fog namespace
-
-// ============================================================================
 // [Fog::Object - CAPI]
 // ============================================================================
 
-//! @addtogroup Fog_Core_System
+//! @addtogroup Fog_Core_Kernel
 //! @{
 
-FOG_CAPI_EXTERN void* fog_object_cast_helper(Fog::Object* self, const Fog::MetaClass* targetMetaClass);
+FOG_CAPI_EXTERN void* fog_object_cast_meta(Fog::Object* self, const Fog::MetaClass* metaClass);
 FOG_CAPI_EXTERN void* fog_object_cast_string(Fog::Object* self, const char* className);
+
+//! @brief Cast @ref Object* to @c T type.
+template <typename T>
+FOG_INLINE T fog_object_cast(Fog::Object* object)
+{
+  return static_cast<T>((Fog::Object*)
+    fog_object_cast_meta(object, ((T)NULL)->getStaticMetaClass()) );
+}
+
+//! @brief Cast const @ref Object* to @c T type.
+template <typename T>
+FOG_INLINE T fog_object_cast(const Fog::Object* object)
+{
+  return static_cast<T>((const Fog::Object*)
+    fog_object_cast_meta((Fog::Object*)object, ((T)NULL)->getStaticMetaClass()) );
+}
 
 //! @}
 
@@ -51,7 +50,7 @@ FOG_CAPI_EXTERN void* fog_object_cast_string(Fog::Object* self, const char* clas
 // [Fog::Object - Macros]
 // ============================================================================
 
-//! @addtogroup Fog_Core_System
+//! @addtogroup Fog_Core_Kernel
 //! @{
 
 //!
@@ -171,16 +170,12 @@ public: \
   \
   const Fog::MetaClass* _SelfType_::getObjectMetaClass() const \
   { \
-    if (_staticMetaClass != NULL) \
-    { \
-      /* Already initialized, expected behavior. */ \
-      return _staticMetaClass; \
-    } \
-    else \
-    { \
+    if (FOG_IS_NULL(_staticMetaClass)) \
       /* Called the first time, need to initialize. */ \
       return getStaticMetaClass(); \
-    } \
+    else \
+      /* Already initialized, expected behavior. */ \
+      return _staticMetaClass; \
   }
 
 //! @brief Declare event handler for @c Fog::Object based class.
@@ -190,7 +185,7 @@ public: \
 //! way of communication between @c Fog::Object based objects.
 //!
 //! This macro creates a fast compiled static table that can't be
-//! overriden by addListener() or removeListener() methods.
+//! overridden by addListener() or removeListener() methods.
 #define FOG_EVENT_BEGIN() \
   virtual FOG_NO_INLINE void onEvent(::Fog::Event* e) \
   { \
@@ -200,16 +195,16 @@ public: \
 //! @brief Add event into event handled declared by
 //! @c FOG_EVENT_BEGIN() macro.
 //!
-//! @param __event_code__ Event code, see event codes.
-//! @param __event_class__ Event class (@c Fog::Event or derived)
-//! @param __event_handler__ Event handler method (expression without parenthesis).
-//! @param __event_type__ Event type, use @c override or @c cascade.
+//! @param _EventCode_ Event code, see event codes.
+//! @param _EventHandler_ Event handler method (expression without parenthesis).
+//! @param _EventClass_ Event class (@c Fog::Event or derived)
+//! @param _EventBehavior_ Event type, use @c override or @c cascade.
 //!
 //! Event type should be @c Override, because event handlers are usually
 //! virtual methods and these methods are more elegant than declaring
 //! them by other way.
-#define FOG_EVENT_DEF(_EventCode__, _EventHandler_, _EventClass_, _EventBehavior_) \
-      case _EventCode__: \
+#define FOG_EVENT_DEF(_EventCode_, _EventHandler_, _EventClass_, _EventBehavior_) \
+      case _EventCode_: \
       { \
         if (::Fog::OBJECT_EVENT_HANDLER_##_EventBehavior_ == ::Fog::OBJECT_EVENT_HANDLER_REVERSE) \
           base::onEvent(e); \
@@ -232,29 +227,29 @@ public: \
     base::onEvent(e); \
   }
 
-// ============================================================================
-// [fog_object_cast<>]
-// ============================================================================
-
-//! @brief Cast @ref Object* to @c T type.
-template <typename T>
-FOG_INLINE T fog_object_cast(Fog::Object* object)
-{
-  return static_cast<T>((Fog::Object*)
-    fog_object_cast_helper(object, ((T)NULL)->getStaticMetaClass()) );
-}
-
-//! @brief Cast const @ref Object* to @c T type.
-template <typename T>
-FOG_INLINE T fog_object_cast(const Fog::Object* object)
-{
-  return static_cast<T>((const Fog::Object*)
-    fog_object_cast_helper((Fog::Object*)object, ((T)NULL)->getStaticMetaClass()) );
-}
-
 //! @}
 
 namespace Fog {
+
+// ============================================================================
+// [Fog::MetaClass]
+// ============================================================================
+
+//! @brief Object record.
+struct FOG_NO_EXPORT MetaClass
+{
+  //! @brief Base meta class.
+  //!
+  //! Note that @c Fog::Object has this value set to NULL, but all other classes
+  //! not.
+  const MetaClass* base;
+
+  //! @brief Object class name.
+  const char* name;
+
+  //! @brief Object class name hash.
+  uint32_t hashCode;
+};
 
 // ============================================================================
 // [Fog::ObjectConnection]
@@ -284,23 +279,54 @@ struct FOG_NO_EXPORT ObjectConnection
 };
 
 // ============================================================================
-// [Fog::MetaClass]
+// [Fog::ObjectExtra]
 // ============================================================================
 
-//! @brief Object record.
-struct FOG_NO_EXPORT MetaClass
+//! @brief Object extra members - object-id and name, connection, and dynamic
+//! properties.
+struct FOG_NO_EXPORT ObjectExtra
 {
-  //! @brief Base meta class.
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ObjectExtra() {}
+  FOG_INLINE ~ObjectExtra() {}
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Object id.
+  StringW _id;
+  
+  //! @brief Object children.
+  List<Object*> _children;
+  
+  //! @brief Dynamic properties.
+  Hash<StringW, Var> _properties;
+
+  //! @brief The forward connection between us and other objects.
   //!
-  //! Note that @c Fog::Object has this value set to NULL, but all other classes
-  //! not.
-  const MetaClass* base;
+  //! Contains event id and object connection pair for each object that is
+  //! listening us.
+  //!
+  //! @note Access to this structure must be always locked by @c Object::_internalLock.
+  Hash<uint32_t, ObjectConnection*> _forwardConnection;
 
-  //! @brief Object class name.
-  const char* name;
-
-  //! @brief Object class name hash.
-  uint32_t hashCode;
+  //! @brief The backward connection between us and other objects.
+  //!
+  //! Contains list of object connections, but in backward direction - list
+  //! of connections we listen to.
+  //!
+  //! If object is listening itself then @c _objectConnection and
+  //! @c _objectBackReference can contain the same connection.
+  //!
+  //! @note Access to this structure must be always locked by @c Object::_internalLock.
+  List<ObjectConnection*> _backwardConnection;
+  
+private:
+  _FOG_NO_COPY(ObjectExtra)
 };
 
 // ============================================================================
@@ -333,61 +359,99 @@ struct FOG_API Object
   // [Construction & Destruction]
   // --------------------------------------------------------------------------
 
-  Object();
+  Object(uint32_t createFlags = OBJECT_CREATE_DEFAULT);
   virtual ~Object();
 
-  //! @brief Destroys object if it's allocated on the heap (calls delete)
-  //!
-  //! Destroy method is called from @c deref() or from @c Fog::Wrap
-  //! template. This is only correct way to delete object from memory,
-  //! because destroying process needs to send Fog::DestroyEvent thats
-  //! only possible before object destructor is called.
+  // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  // TODO: Return ERR.
+
+  //! @brief Release the object.
   //!
   //! @note There is no way how to take this back.
-  void destroy();
+  void release();
 
-  //! @brief Post destroy later task.
+  // TODO: Return ERR.
+
+  //! @brief Schedule release action (posting ReleaseEvent to the event loop).
   //!
   //! Use this method to destroy the object instance from the heap later.
   //! Common usage is to destroy instance where you are handling the event
   //! right now (because you can't delete object that is being processed).
-  void destroyLater();
+  void scheduleRelease();
 
-  //! @brief Get whether the destroyLater() method was called.
-  FOG_INLINE bool isDestroyLaterActive() const
+  //! @brief Get whether the releaseLater() method was called.
+  FOG_INLINE bool isReleaseScheduled() const
   {
-    return (_vType & OBJECT_FLAG_DESTROY_LATER) != 0;
+    return (_objectFlags & OBJECT_FLAG_RELEASE_SCHEDULED) != 0;
   }
 
   // --------------------------------------------------------------------------
-  // [Flags]
+  // [Var]
   // --------------------------------------------------------------------------
-
-  //! @brief Get object flags.
-  FOG_INLINE uint32_t getObjectFlags() const { return _vType; }
 
   //! @brief Get whether the object can be deleted using delete operator.
   FOG_INLINE bool isStatic() const { return (_vType & VAR_FLAG_STATIC) != 0; }
 
-  //! @brief Get whether the object is @c Fog::Widget.
-  FOG_INLINE bool isWidget() const { return (_vType & OBJECT_FLAG_IS_WIDGET) != 0; }
+  // --------------------------------------------------------------------------
+  // [Object Extra]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get @c ObjectExtra instance ready for modification.
+  //!
+  //! @c ObjectExtra was designed to decrease the size needed per @c Object
+  //! instance. If the object is only primitive and the most of its features
+  //! are not used then it's likely that the @c ObjectExtra won't be created
+  //! during the lifetime of the object.
+  ObjectExtra* getMutableExtra();
+
+  // --------------------------------------------------------------------------
+  // [Object Flags]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get object flags.
+  FOG_INLINE uint32_t getObjectFlags() const { return _objectFlags; }
 
   //! @brief Get whether the object is @c Fog::Layout.
-  FOG_INLINE bool isLayout() const { return (_vType & OBJECT_FLAG_IS_LAYOUT) != 0; }
+  FOG_INLINE bool isLayout() const
+  {
+    return (_objectFlags & OBJECT_FLAG_IS_LAYOUT) != 0;
+  }
 
+  //! @brief Get whether the object is @c Fog::Widget.
+  FOG_INLINE bool isWidget() const
+  {
+    return (_objectFlags & OBJECT_FLAG_IS_WIDGET) != 0;
+  }
+  
   // --------------------------------------------------------------------------
-  // [Object Id / Name]
+  // [Object Id]
   // --------------------------------------------------------------------------
 
-  //! @brief Get object id.
-  FOG_INLINE uint32_t getObjectId() const  { return _objectId; }
-  //! @brief Get object name.
-  FOG_INLINE StringW getObjectName() const { return _objectName; }
+  //! @brief Get object id (uniquity is not guaranteed).
+  FOG_INLINE StringW getId() const { return _objectExtra->_id; }
 
   //! @brief Set object id.
-  void setObjectId(uint32_t objectId);
-  //! @brief Set object name.
-  void setObjectName(const StringW& objectName);
+  err_t setId(const StringW& id);
+
+  // --------------------------------------------------------------------------
+  // [Home Thread]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get home thread.
+  //!
+  //! Home thread is thread where the instance was created. This thread not
+  //! owns the @ref Object instance, but is used by Fog-event subsystem to
+  //! deliver events into the correct thread.
+  FOG_INLINE Thread* getHomeThread() const { return _homeThread; }
+  
+  //! @brief Move object and all children to a different thread @a thread.
+  //!
+  //! If @a thread is the current thread where the object lives then this is
+  //! a nop.
+  err_t moveToThread(Thread* thread);
 
   // --------------------------------------------------------------------------
   // [Object Hierarchy]
@@ -396,21 +460,21 @@ struct FOG_API Object
   //! @brief Get whether the object has parent.
   FOG_INLINE bool hasParent() const { return _parent != NULL; }
 
-  //! @brief Get whether the object has children.
-  FOG_INLINE bool hasChildren() const { return !_children.isEmpty(); }
-
-  //! @brief Get object parent.
+  //! @brief Get object parent or NULL if object hasn't parent.
   FOG_INLINE Object* getParent() const { return _parent; }
-
-  //! @brief Get object children.
-  FOG_INLINE const List<Object*>& getChildren() const { return _children; }
 
   //! @brief Set parent of this object to @a parent.
   //!
   //! @note This method can be used to reparent object. If a given @a object
-  //! has parent then it will be first removed using @c remove() method and
-  //! then added using @c add() method.
+  //! has parent then it will be first removed using @c removeChild() method and
+  //! then added using @c addChild() method.
   err_t setParent(Object* parent);
+
+  //! @brief Get whether the object has children.
+  FOG_INLINE bool hasChildren() const { return !_objectExtra->_children.isEmpty(); }
+
+  //! @brief Get object children.
+  FOG_INLINE const List<Object*>& getChildren() const { return _objectExtra->_children; }
 
   //! @brief Add the @a child into the object hierarchy.
   err_t addChild(Object* child);
@@ -423,8 +487,8 @@ struct FOG_API Object
   //! @param index The valid index where to insert a @a child.
   //! @param child The valid @ref Object instance.
   //!
-  //! This method can be overriden to override object hierarchy management. It
-  //! can be called throught @c setParent(), @c addChild() or @c removeChild()
+  //! This method can be overridden to override object hierarchy management. It
+  //! can be called through @c setParent(), @c addChild() or @c removeChild()
   //! methods.
   virtual err_t _addChild(size_t index, Object* child);
 
@@ -433,33 +497,22 @@ struct FOG_API Object
   //! @param index The valid index where the @a child is.
   //! @param child The valid @ref Object instance.
   //!
-  //! This method can be overriden to override object hierarchy management. It
-  //! can be called throught @c setParent(), @c addChild() or @c removeChild()
+  //! This method can be overridden to override object hierarchy management. It
+  //! can be called through @c setParent(), @c addChild() or @c removeChild()
   //! methods.
   virtual err_t _removeChild(size_t index, Object* child);
 
-  //! @brief Delete all children.
+  //! @brief Remove all children.
   //!
-  //! Called by @ref Object or @ref Widget destructors. Children are deleted
-  //! from last to first (the backward direction as they was added into).
+  //! Called by @ref Object or @ref Widget destructor. Children are removed
+  //! from last to first (the backward direction as they was added).
   //!
   //! @note All Objects inside that has flag @ref VAR_FLAG_STATIC are removed
   //! from the hierarchy using the @c _removeChild() method, but not deleted.
-  err_t _deleteChildren();
+  err_t _removeAll();
 
   // --------------------------------------------------------------------------
-  // [Threading]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get home thread.
-  //!
-  //! Home thread is thread where the instance was created. This thread not
-  //! owns the @ref Object instance, but is used by Fog-event subsystem to
-  //! deliver events into the correct thread.
-  FOG_INLINE Thread* getHomeThread() const { return _homeThread; }
-
-  // --------------------------------------------------------------------------
-  // [RTTI]
+  // [Meta-Class]
   // --------------------------------------------------------------------------
 
   //! @brief Static method that's used for retrieving dynamic class info.
@@ -479,16 +532,22 @@ struct FOG_API Object
 
   //! @brief Get object class name.
   FOG_INLINE const char* getClassName() const
-  { return getObjectMetaClass()->name; }
+  {
+    return getObjectMetaClass()->name;
+  }
 
   //! @brief Get whether the object can be casted to @c T.
   template<typename T>
   FOG_INLINE bool isClassOf() const
-  { return fog_object_cast<T>((Object*)this) != NULL; }
+  {
+    return fog_object_cast<T>((Object*)this) != NULL;
+  }
 
   //! @brief Get whether the object can be casted to @a className.
   FOG_INLINE bool isClassOf(const char* className) const
-  { return fog_object_cast_string((Object*)this, className) != NULL; }
+  {
+    return fog_object_cast_string((Object*)this, className) != NULL;
+  }
 
   // --------------------------------------------------------------------------
   // [Properties]
@@ -500,28 +559,21 @@ struct FOG_API Object
   err_t setProperty(const StringW& name, const Var& src);
 
   //! @brief Get property @a name to a given @a value.
-  FOG_INLINE err_t getProperty(const ManagedStringW& name, Var& dst) const
-  {
-    return _getProperty(name, dst);
-  }
-
+  err_t getProperty(const ManagedStringW& name, Var& dst) const;
   //! @brief Set property @a name to a given @a value.
-  FOG_INLINE err_t setProperty(const ManagedStringW& name, const Var& src)
-  {
-    return _setProperty(name, src);
-  }
+  err_t setProperty(const ManagedStringW& name, const Var& src);
 
   //! @brief Get property @a name to a given @a value.
   //!
-  //! This is virtual version that can be overrided to implement own properties.
+  //! This is virtual version that can be overridden to implement own properties.
   virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
   //! @brief Set property @a name to a given @a value.
   //!
-  //! This is virtual version that can be overrided to implement own properties.
+  //! This is virtual version that can be overridden to implement own properties.
   virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
-  // [Event Handling]
+  // [Event Management]
   // --------------------------------------------------------------------------
 
   //! @brief Add a pure C function listener @a fn.
@@ -581,6 +633,14 @@ struct FOG_API Object
   //! @brief Send simple event (only event id) immediately.
   void sendEventByCode(uint32_t eventId);
 
+  bool _addListener(uint32_t code, Object* receiver, const void* del, uint32_t type);
+  bool _removeListener(uint32_t code, Object* receiver, const void* del, uint32_t type);
+  void _callListeners(Event* e);
+
+  // --------------------------------------------------------------------------
+  // [Event Handlers]
+  // --------------------------------------------------------------------------
+
   //! @brief Generic event handler.
   //!
   //! All events should be processed through this event handler.
@@ -609,44 +669,21 @@ struct FOG_API Object
   //! @brief Variable type and flags.
   uint32_t _vType;
 
-  //! @brief Object id.
-  //!
-  //! Object id is not unique and you can't get global object by it's
-  //! id. But it can help you identifying your objects by very fast
-  //! way and ability to use C/C++ switch() statement.
-  //!
-  //! @sa _objectName.
-  uint32_t _objectId;
+  //! @brief Object flags, see @ref OBJECT_FLAG.
+  uint32_t _objectFlags;
 
-  //! @brief Object name.
+  //! @brief Reference count.
+  Atomic<size_t> _reference;
+
+  //! @brief Object extended members.
   //!
-  //! @sa _objectId.
-  StringW _objectName;
+  //! Extended members were designed to reduce a size of @c Object instance
+  //! which doesn't use features like object-id / name, hierarchy, dynamic 
+  //! properties, and object event system.
+  ObjectExtra* _objectExtra;
 
   //! @brief Object parent.
   Object* _parent;
-
-  //! @brief Object children.
-  List<Object*> _children;
-
-  //! @brief The forward connection between us and other objects.
-  //!
-  //! Contains event id and object connection pair for each object that is
-  //! listening us.
-  //!
-  //! @note Access to this structure must be always locked by @c Object::_internalLock.
-  Hash<uint32_t, ObjectConnection*> _forwardConnection;
-
-  //! @brief The backward connection between us and other objects.
-  //!
-  //! Contains list of object connections, but in backward direction - list
-  //! of connections we listen to.
-  //!
-  //! If object is listening itself then @c _objectConnection and
-  //! @c _objectBackReference can contain the same connection.
-  //!
-  //! @note Access to this structure must be always locked by @c Object::_internalLock.
-  List<ObjectConnection*> _backwardConnection;
 
   //! @brief Object home thread.
   //!
@@ -660,17 +697,7 @@ struct FOG_API Object
   //! @note Access to this structure must be always locked by @c Object::_internalLock.
   Event* _events;
 
-  // --------------------------------------------------------------------------
-  // [Private]
-  // --------------------------------------------------------------------------
-
 private:
-  bool _addListener(uint32_t code, Object* receiver, const void* del, uint32_t type);
-  bool _removeListener(uint32_t code, Object* receiver, const void* del, uint32_t type);
-  void _callListeners(Event* e);
-
-  friend struct Event;
-
   _FOG_NO_COPY(Object)
 };
 
@@ -718,6 +745,7 @@ FOG_INLINE const Fog::Layout* fog_object_cast(const Fog::Object* object)
 // [Fog::TypeInfo<>]
 // ============================================================================
 
+// TODO: Move
 _FOG_TYPE_DECLARE(Fog::ObjectConnection, Fog::TYPE_CATEGORY_SIMPLE)
 
 // [Guard]

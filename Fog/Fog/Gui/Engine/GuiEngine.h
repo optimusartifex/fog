@@ -46,7 +46,7 @@ struct Layout;
 //! @brief Base for @c Fog::Widget or @c Fog::Layout classes.
 //!
 //! Layout item can be imagined as interface. It contains pure virtual methods
-//! that's overriden by widgets or layouts.
+//! that's overridden by widgets or layouts.
 struct FOG_API GuiEngine : public Object
 {
   FOG_DECLARE_OBJECT(GuiEngine, Object)

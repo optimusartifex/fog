@@ -393,7 +393,6 @@ Set(FOG_CORE_CPP_HEADERS
   Fog/Core/C++/StdDefs.h
   Fog/Core/C++/StdHeaders.h
   Fog/Core/C++/StdInt.h
-  Fog/Core/C++/StdMain.h
   Fog/Core/C++/StdNew.h
   Fog/Core/C++/StdOS.h
 )
@@ -457,6 +456,7 @@ Set(FOG_CORE_GLOBAL_HEADERS
   Fog/Core/Global/Global.h
   Fog/Core/Global/Init.h
   Fog/Core/Global/Init_p.h
+  Fog/Core/Global/Main.h
   Fog/Core/Global/Private.h
   Fog/Core/Global/Static.h
   Fog/Core/Global/TypeDefs.h

@@ -94,7 +94,7 @@ struct FOG_API Thread
   }
 
   //! @brief Get the native thread id.
-  FOG_INLINE uint32_t getId() const
+  FOG_INLINE uintptr_t getId() const
   {
     return _id;
   }
@@ -205,7 +205,7 @@ struct FOG_API Thread
   static Thread* getCurrentThread();
 
   //! @brief Get the current thread id.
-  static uint32_t getCurrentThreadId();
+  static uintptr_t getCurrentThreadId();
 
   // --------------------------------------------------------------------------
   // [Statics - Main Thread]
@@ -215,7 +215,7 @@ struct FOG_API Thread
   static Thread* getMainThread();
 
   //! @brief Get main thread id.
-  static uint32_t getMainThreadId();
+  static uintptr_t getMainThreadId();
 
   //! @brief Get whether current thread is main.
   static bool isMainThread();
@@ -228,7 +228,7 @@ struct FOG_API Thread
   Handle _handle;
 
   //! @brief Thread id.
-  uint32_t _id;
+  uintptr_t _id;
   //! @brief Stack size.
   uint32_t _stackSize;
 

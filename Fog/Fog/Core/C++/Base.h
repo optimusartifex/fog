@@ -16,8 +16,6 @@
 #include <Fog/Core/C++/StdOS.h>
 #include <Fog/Core/C++/StdDefs.h>
 #include <Fog/Core/C++/StdInt.h>
-#include <Fog/Core/C++/StdMain.h>
-
 #include <Fog/Core/C++/StdHeaders.h>
 #include <Fog/Core/C++/StdNew.h>
 

@@ -15,16 +15,8 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Application
+//! @addtogroup Fog_Core_Kernel
 //! @{
-
-//! @brief Function that should be called if application arguments are not
-//! initialized and Application object not exists or it's not kwown that
-//! it will exist in the future.
-//!
-//! This method is called automatically by @c FOG_CORE_MAIN and @c FOG_UI_MAIN
-//! macros.
-FOG_API void _core_application_init_arguments(int argc, const char* argv[]);
 
 // ============================================================================
 // [Forward Declarations]
@@ -93,7 +85,7 @@ public:
   // [GuiEngine - Register / Unregister]
   // --------------------------------------------------------------------------
 
-  typedef GuiEngine* (*GuiEngineConstructor)();
+  typedef GuiEngine* (*GuiEngineConstructor)(void);
 
   static bool registerGuiEngine(const StringW& name, GuiEngineConstructor ctor);
   static bool unregisterGuiEngine(const StringW& name);

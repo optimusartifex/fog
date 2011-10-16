@@ -14,7 +14,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Xml_Dom
+//! @addtogroup Fog_Core_Xml
 //! @{
 
 // ============================================================================
@@ -60,7 +60,7 @@ struct FOG_API XmlAttribute
   XmlElement* _element;
   //! @brief Attribute name (managed string).
   ManagedStringW _name;
-  //! @brief Attribute value (or empty if value is provided by overriden class).
+  //! @brief Attribute value (or empty if value is provided by overridden class).
   StringW _value;
 
   //! @brief Attribute offset in @c XmlElement (relative to @c XmlElement).

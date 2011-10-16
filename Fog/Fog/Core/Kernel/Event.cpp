@@ -67,7 +67,7 @@ void Event::run()
 
 Event* Event::clone() const
 {
-  return ( fog_new Event(getCode(), getFlags()) )->_cloned(getReceiver());
+  return ( fog_new Event(getCode(), getFlags()) )->_cloned(_receiver);
 }
 
 uint32_t Event::uid()
@@ -119,7 +119,26 @@ ChildEvent::~ChildEvent()
 
 Event* ChildEvent::clone() const
 {
-  return ( fog_new ChildEvent(getCode(), getChild()) )->_cloned(getReceiver());
+  return ( fog_new ChildEvent(getCode(), getChild()) )->_cloned(_receiver);
+}
+
+// ============================================================================
+// [Fog::PropertyEvent]
+// ============================================================================
+
+PropertyEvent::PropertyEvent(const ManagedStringW& name) :
+  Event(EVENT_PROPERTY),
+  _name(name)
+{
+}
+
+PropertyEvent::~PropertyEvent()
+{
+}
+
+Event* PropertyEvent::clone() const
+{
+  return ( fog_new PropertyEvent(getName()) )->_cloned(_receiver);
 }
 
 // ============================================================================
@@ -138,26 +157,7 @@ TimerEvent::~TimerEvent()
 
 Event* TimerEvent::clone() const
 {
-  return ( fog_new TimerEvent(getTimer()) )->_cloned(getReceiver());
-}
-
-// ============================================================================
-// [Fog::PropertyEvent]
-// ============================================================================
-
-PropertyEvent::PropertyEvent(const StringW& name) :
-  Event(EVENT_PROPERTY),
-  _name(name)
-{
-}
-
-PropertyEvent::~PropertyEvent()
-{
-}
-
-Event* PropertyEvent::clone() const
-{
-  return ( fog_new PropertyEvent(getName()) )->_cloned(getReceiver());
+  return ( fog_new TimerEvent(getTimer()) )->_cloned(_receiver);
 }
 
 } // Fog namespace

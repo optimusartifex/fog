@@ -3,8 +3,8 @@
 // [License]
 // MIT, See COPYING file in package
 
-#ifndef _FOG_CORE_CPP_STDMAIN_H
-#define _FOG_CORE_CPP_STDMAIN_H
+#ifndef _FOG_CORE_GLOBAL_MAIN_H
+#define _FOG_CORE_GLOBAL_MAIN_H
 
 #if !defined(FOG_IDE) && !defined(_FOG_CORE_CPP_BASE_H)
 #error "Fog/Core/C++/StdMain.h can be only included by Fog/Core/C++/Base.h"
@@ -14,16 +14,12 @@
 // [Fog::Core::Build - Main]
 // ============================================================================
 
-namespace Fog {
-
-// Defined also in Fog/Core/Kernel/Application.h. It's defined here to prevent
+// Defined also in Fog/Core/Global/Api.h. It's defined here to prevent
 // compilation errors when using FOG_CORE_MAIN() or FOG_UI_MAIN() and
 // this header file is not included.
-FOG_API void _core_application_init_arguments(int argc, const char* argv[]);
+FOG_CAPI_EXTERN void fog_init_args(int argc, const char* argv[]);
 
-} // Fog namespace
-
-//! @addtogroup Fog_Core_Macros
+//! @addtogroup Fog_Core_Global
 //! @{
 
 //! @def FOG_UI_MAIN
@@ -37,20 +33,23 @@ FOG_API void _core_application_init_arguments(int argc, const char* argv[]);
 //!   return Fog::ExitSuccess;
 //! }
 #if defined(FOG_OS_WINDOWS)
+
 #define FOG_UI_MAIN() \
 int PASCAL WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+
 #else
+
 #define FOG_UI_MAIN() \
-static int _fog_main(int argc, char* argv[]); \
+static int ui_main(int argc, char* argv[]); \
 \
 int main(int argc, char* argv[]) \
 { \
-  ::Fog::_core_application_init_arguments(argc, (const char**)argv); \
-  \
-  return _fog_main(argc, argv); \
+  fog_init_args(argc, (const char**)argv); \
+  return ui_main(argc, argv); \
 } \
 \
-static int _fog_main(int argc, char* argv[])
-#endif
+static int ui_main(int argc, char* argv[])
 
-#endif // _FOG_CORE_CPP_STDMAIN_H
+#endif // FOG_OS_...
+
+#endif // _FOG_CORE_GLOBAL_MAIN_H

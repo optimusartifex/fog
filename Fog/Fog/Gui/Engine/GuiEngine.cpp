@@ -844,8 +844,8 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
   goto inside;
 
 pushed:
-  ocur = (Object**)parent->_children.getData();
-  oend = ocur + parent->_children.getLength();
+  ocur = (Object**)parent->_objectExtra->_children.getData();
+  oend = ocur + parent->_objectExtra->_children.getLength();
 
   widget = (Widget*)*ocur;
   for (;;)
@@ -1013,7 +1013,7 @@ inside:
       }
     }
 
-    if ((widgetRec.uflags & WIDGET_UPDATE_CHILD) != 0 && widget->_children.getLength())
+    if ((widgetRec.uflags & WIDGET_UPDATE_CHILD) != 0 && widget->_objectExtra->_children.getLength())
     {
       stackerr = ERR_OK;
       stackerr |= stack.push(parent);
@@ -1290,7 +1290,7 @@ __repeat:
     // Iterate over children and try to find child widget where a mouse
     // position is. Iteration must be done through end, becuase we want
     // widget with highest Z-Order to match mouse position first.
-    ListReverseIterator<Object*> it(w->_children);
+    ListReverseIterator<Object*> it(w->_objectExtra->_children);
 
     while (it.isValid())
     {

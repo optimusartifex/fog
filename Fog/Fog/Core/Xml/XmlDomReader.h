@@ -13,7 +13,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Xml_IO
+//! @addtogroup Fog_Core_Xml
 //! @{
 
 // ============================================================================

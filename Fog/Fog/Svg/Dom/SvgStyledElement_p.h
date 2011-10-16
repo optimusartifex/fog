@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::SvgStyledElement]
 // ============================================================================
 
-// This is not final element, must be overriden.
+// This is not final element, must be overridden.
 struct FOG_NO_EXPORT SvgStyledElement : public SvgElement
 {
   // --------------------------------------------------------------------------

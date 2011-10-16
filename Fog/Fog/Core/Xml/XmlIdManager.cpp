@@ -109,7 +109,8 @@ XmlElement* XmlIdManager::get(const CharW* idStr, size_t idLen) const
   XmlElement* node = _buckets[hashMod];
   while (node)
   {
-    if (node->_id._d->hashCode == hashCode && StringUtil::eq(node->_id.getData(), idStr, idLen)) return node;
+    if (node->_id._d->length == idLen && StringUtil::eq(node->_id.getData(), idStr, idLen))
+      return node;
     node = node->_hashNextId;
   }
   return NULL;
@@ -132,7 +133,12 @@ void XmlIdManager::_rehash(size_t capacity)
 
       XmlElement* newCur = newBuckets[hashMod];
       XmlElement* newPrev = NULL;
-      while (newCur) { newPrev = newCur; newCur = newCur->_hashNextId; }
+
+      while (newCur)
+      {
+        newPrev = newCur;
+        newCur = newCur->_hashNextId;
+      }
 
       if (newPrev)
         newPrev->_hashNextId = node;
@@ -153,7 +159,9 @@ void XmlIdManager::_rehash(size_t capacity)
   _shrinkLength = (size_t)((ssize_t)_shrinkCapacity * 0.70);
 
   atomicPtrXchg(&_buckets, newBuckets);
-  if (oldBuckets != _bucketsBuffer) MemMgr::free(oldBuckets);
+
+  if (oldBuckets != _bucketsBuffer)
+    MemMgr::free(oldBuckets);
 }
 
 } // Fog namespace

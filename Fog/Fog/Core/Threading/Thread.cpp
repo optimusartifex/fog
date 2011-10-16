@@ -55,14 +55,14 @@ namespace Fog {
 // ============================================================================
 
 static Thread* Thread_mainThread;
-static uint32_t Thread_mainThreadId;
+static uintptr_t Thread_mainThreadId;
 
 #if defined(FOG_OS_WINDOWS)
-static inline uint32_t Thread_getCurrentThreadId() { return ::GetCurrentThreadId(); }
+static inline uintptr_t Thread_getCurrentThreadId() { return (uintptr_t)::GetCurrentThreadId(); }
 #elif defined(FOG_OS_MAC)
-static inline uint32_t Thread_getCurrentThreadId() { return (uint32_t)mach_thread_self(); }
+static inline uintptr_t Thread_getCurrentThreadId() { return (uintptr_t)mach_thread_self(); }
 #else
-static inline uint32_t Thread_getCurrentThreadId() { return (uint32_t)syscall(__NR_gettid); }
+static inline uintptr_t Thread_getCurrentThreadId() { return (uintptr_t)syscall(__NR_gettid); }
 #endif // FOG_OS_...
 
 // ============================================================================
@@ -100,7 +100,7 @@ Thread* Thread::getCurrentThread()
   return reinterpret_cast<Thread*>(TlsGetValue(_Thread_tls));
 }
 
-uint32_t Thread::getCurrentThreadId()
+uintptr_t Thread::getCurrentThreadId()
 {
   return Thread_getCurrentThreadId();
 }
@@ -110,7 +110,7 @@ Thread* Thread::getMainThread()
   return Thread_mainThread;
 }
 
-uint32_t Thread::getMainThreadId()
+uintptr_t Thread::getMainThreadId()
 {
   return Thread_mainThreadId;
 }
@@ -237,7 +237,7 @@ Thread* Thread::getCurrentThread()
   return reinterpret_cast<Thread*>(pthread_getspecific(_Thread_tls));
 }
 
-uint32_t Thread::getCurrentThreadId()
+uintptr_t Thread::getCurrentThreadId()
 {
   return Thread_getCurrentThreadId();
 }
@@ -247,7 +247,7 @@ Thread* Thread::getMainThread()
   return Thread_mainThread;
 }
 
-uint32_t Thread::getMainThreadId()
+uintptr_t Thread::getMainThreadId()
 {
   return Thread_mainThreadId;
 }
@@ -381,9 +381,10 @@ bool Thread::start(const StringW& eventLoopType)
 void Thread::stop()
 {
   // We should only be called on the same thread that started us.
-  FOG_ASSERT(_id != getCurrentThreadId());
+  FOG_ASSERT(_id == getCurrentThreadId());
 
-  if (!isStarted()) return;
+  if (!isStarted())
+    return;
 
   // StopSoon may have already been called.
   if (_eventLoop) _eventLoop->postTask(fog_new QuitTask());
@@ -402,9 +403,10 @@ void Thread::stop()
 void Thread::stopSoon()
 {
   // We should only be called on the same thread that started us.
-  FOG_ASSERT(_id != getCurrentThreadId());
+  FOG_ASSERT(_id == getCurrentThreadId());
 
-  if (!_eventLoop) return;
+  if (!_eventLoop)
+    return;
 
   // We had better have a event loop at this point!  If we do not, then it
   // most likely means that the thread terminated unexpectedly, probably due

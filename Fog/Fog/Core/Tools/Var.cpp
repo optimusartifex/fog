@@ -424,9 +424,10 @@ static void FOG_CDECL Var_reset(Var* self)
 // [Fog::Var - Copy]
 // ============================================================================
 
-static void FOG_CDECL Var_copy(Var* self, const Var* other)
+static err_t FOG_CDECL Var_copy(Var* self, const Var* other)
 {
   atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
 }
 
 // ============================================================================

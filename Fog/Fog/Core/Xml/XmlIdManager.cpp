@@ -95,7 +95,8 @@ XmlElement* XmlIdManager::get(const StringW& id) const
   XmlElement* node = _buckets[hashMod];
   while (node)
   {
-    if (node->_id == id) return node;
+    if (node->_id == id)
+      return node;
     node = node->_hashNextId;
   }
   return NULL;

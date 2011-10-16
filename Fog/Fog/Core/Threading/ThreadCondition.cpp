@@ -158,6 +158,17 @@ threads have references to these otherwise leaked events. They are passed as
 arguments to be recycled just aftre returning from WaitForSingleObject().
 */
 
+// ============================================================================
+// [Configuration]
+// ============================================================================
+
+// It's possible to disable the Windows-Vista CONDITION_VARIABLE support, 
+// mainly for testing purposes (so we are able to test our implementation
+// for Windows 2000/XP on Vista and newer OS.
+
+// #define FOG_NO_WIN_VISTA_SUPPORT
+// #define FOG_NO_WIN_VISTA_CONDITION_VARIABLE
+
 namespace Fog {
 
 // ============================================================================
@@ -579,12 +590,24 @@ static void ThreadCondition_init_vista(void)
   FOG_ASSERT(funcs.kernel32 != NULL);
 
   funcs._InitializeConditionVariable = (InitializeConditionVariableFunc)::GetProcAddress(funcs.kernel32, "InitializeConditionVariable");
-  if (funcs._InitializeConditionVariable == NULL) return;
 
+  // If this symbol wasn't found then the OS is not running Windows-Vista or
+  // never. In this case we are unable to use the CONDITION_VARIABLE related
+  // functions.
+  if (funcs._InitializeConditionVariable == NULL)
+    return;
+
+  // Fetch the rest of symbols.
   funcs._SleepConditionVariableCS = (SleepConditionVariableCSFunc)::GetProcAddress(funcs.kernel32, "SleepConditionVariableCS");
   funcs._WakeConditionVariable    = (WakeConditionVariableFunc   )::GetProcAddress(funcs.kernel32, "WakeConditionVariable"   );
   funcs._WakeAllConditionVariable = (WakeAllConditionVariableFunc)::GetProcAddress(funcs.kernel32, "WakeAllConditionVariable");
 
+  // This shouldn't fail.
+  FOG_ASSERT(funcs._SleepConditionVariableCS != NULL);
+  FOG_ASSERT(funcs._WakeConditionVariable    != NULL);
+  FOG_ASSERT(funcs._WakeAllConditionVariable != NULL);
+
+  // Initialize the improved versions of functions to handle ThreadCondition.
   fog_api.threadcondition_ctor = ThreadCondition_ctor_vista;
   fog_api.threadcondition_dtor = ThreadCondition_dtor_vista;
   fog_api.threadcondition_signal = ThreadCondition_signal_vista;
@@ -674,7 +697,8 @@ FOG_NO_EXPORT void ThreadCondition_init(void)
   fog_api.threadcondition_broadcast = ThreadCondition_broadcast;
   fog_api.threadcondition_wait = ThreadCondition_wait;
 
-#if defined(FOG_OS_WINDOWS)
+#if defined(FOG_OS_WINDOWS) && !defined(FOG_NO_WIN_VISTA_SUPPORT) && \
+                               !defined(FOG_NO_WIN_VISTA_CONDITION_VARIABLE)
   ThreadCondition_init_vista();
 #endif // FOG_OS_WINDOWS
 }

@@ -23,8 +23,8 @@ namespace Fog {
 
 static void FOG_CDECL FeConvolveMatrix_ctor(FeConvolveMatrix* self)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_CONVOLVE_MATRIX;
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_feType = FE_TYPE_CONVOLVE_MATRIX;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor.init();
   self->_matrix.init();
   self->_scale = 1.0f;
@@ -33,7 +33,7 @@ static void FOG_CDECL FeConvolveMatrix_ctor(FeConvolveMatrix* self)
 
 static void FOG_CDECL FeConvolveMatrix_ctorCopy(FeConvolveMatrix* self, const FeConvolveMatrix* other)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_CONVOLVE_MATRIX;
+  self->_feType = FE_TYPE_CONVOLVE_MATRIX;
   self->_extendType = other->_extendType;
   self->_extendColor.init(other->_extendColor);
   self->_matrix.initCustom1(other->_matrix());
@@ -50,7 +50,7 @@ static void FOG_CDECL FeConvolveMatrix_dtor(FeConvolveMatrix* self)
 
 static void FOG_CDECL FeConvolveMatrix_reset(FeConvolveMatrix* self)
 {
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor->reset();
   self->_matrix->reset();
   self->_scale = 1.0f;
@@ -63,7 +63,7 @@ static void FOG_CDECL FeConvolveMatrix_reset(FeConvolveMatrix* self)
 
 static err_t FOG_CDECL FeConvolveMatrix_copy(FeConvolveMatrix* self, const FeConvolveMatrix* other)
 {
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor.init();
   self->_matrix() = other->_matrix();
   self->_scale = other->_scale;

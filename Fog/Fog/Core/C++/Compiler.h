@@ -88,11 +88,17 @@
 
 //! @}
 
+// TODO: Add support for override keyword.
+
 #if defined(FOG_IDE)
 # include "CompilerIde.h"
-#elif defined(__GNUC__) || defined(__clang__)
-# include "CompilerGcc.h"
-#elif defined(_MSC_VER) || defined(__BORLANDC__)
+#elif defined(__BORLANDC__)
+# include "CompilerBorland.h"
+#elif defined(__clang__)
+# include "CompilerClang.h"
+#elif defined(__GNUC__)
+# include "CompilerGnu.h"
+#elif defined(_MSC_VER)
 # include "CompilerMsc.h"
 #else
 # error "Fog::Core::C++ - Unsupported C++ Compiler, please fill a bug report."
@@ -117,9 +123,6 @@
 
 #define FOG_CAPI_EXTERN FOG_CAPI_EXTERN_BASE(FOG_API)
 #define FOG_CAPI_DECLARE FOG_CAPI_DECLARE_BASE(FOG_API)
-
-#define FOG_INIT_EXTERN FOG_INIT_EXTERN_BASE(FOG_API)
-#define FOG_INIT_DECLARE FOG_INIT_DECLARE_BASE(FOG_API)
 
 //! @}
 

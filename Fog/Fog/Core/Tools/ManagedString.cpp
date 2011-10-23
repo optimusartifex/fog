@@ -403,7 +403,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStubA(ManagedStringW* self, const Stub
 
   AutoLock locked(ManagedStringW_lock);
   StringDataW* d;
-  
+
   if ((options & MANAGED_STRING_OPTION_LOOKUP) != 0)
   {
     d = ManagedStringW_hash->lookupStubA(sData, sLength, hashCode);
@@ -483,7 +483,7 @@ static err_t FOG_CDECL ManagedStringW_ctorStringW(ManagedStringW* self, const St
 
   uint32_t hashCode = str->getHashCode();
   AutoLock locked(ManagedStringW_lock);
-  
+
   if ((options & MANAGED_STRING_OPTION_LOOKUP) != 0)
   {
     d = ManagedStringW_hash->lookupStubW(d->data, d->length, hashCode);
@@ -531,7 +531,7 @@ static err_t FOG_CDECL ManagedStringW_setStubA(ManagedStringW* self, const StubA
 
   AutoLock locked(ManagedStringW_lock);
   StringDataW* d;
-  
+
   if ((options & MANAGED_STRING_OPTION_LOOKUP) != 0)
   {
     d = ManagedStringW_hash->lookupStubA(sData, sLength, hashCode);
@@ -676,7 +676,7 @@ static ManagedStringCacheW* FOG_CDECL ManagedStringCacheW_create(const char* sDa
 //  const char* strings, size_t length, size_t count)
 {
   // First subtract two NULL terminators if contained sData[]. This can happed
-  // in case that sizeof() keyword was used to obtain count of characters in 
+  // in case that sizeof() keyword was used to obtain count of characters in
   // sData.
   if (sLength >= 2 && sData[sLength-1] == '\0' && sData[sLength-2] == '\0')
     sLength--;

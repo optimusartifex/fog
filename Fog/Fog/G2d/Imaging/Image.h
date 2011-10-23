@@ -91,6 +91,24 @@ struct FOG_NO_EXPORT ImageData
   // [Members]
   // --------------------------------------------------------------------------
 
+  // ${VAR:BEGIN}
+  //
+  // This data-object is binary compatible with the VarData header in the first
+  // form called - "implicitly shared class". The members must be binary
+  // compatible with the header below:
+  //
+  // +==============+============+============================================+
+  // | Size         | Name       | Description / Purpose                      |
+  // +==============+============+============================================+
+  // | size_t       | reference  | Atomic reference count, can be managed by  |
+  // |              |            | VarData without calling container specific |
+  // |              |            | methods.                                   |
+  // +--------------+------------+--------------------------------------------+
+  // | uint32_t     | vType      | Variable type and flags.                   |
+  // +==============+============+============================================+
+  //
+  // ${VAR:END}
+
   //! @brief Reference count.
   mutable Atomic<size_t> reference;
 
@@ -133,7 +151,7 @@ struct FOG_NO_EXPORT ImageData
   uint32_t padding;
 #endif // FOG_ARCH_BITS >= 64
 
-  //! @brief Original data pointer (in the most cases compatible with 
+  //! @brief Original data pointer (in the most cases compatible with
   uint8_t* data;
   //! @brief Base pointer to the first scanline, in most cases it's equal to
   //! @c handle[0].
@@ -180,7 +198,7 @@ struct FOG_NO_EXPORT Image
     _d(d)
   {
   }
-  
+
   FOG_INLINE ~Image()
   {
     fog_api.image_dtor(this);
@@ -434,7 +452,7 @@ struct FOG_NO_EXPORT Image
   {
     return _d->palette;
   }
-  
+
   //! @brief Set image palette.
   FOG_INLINE err_t setPalette(const ImagePalette& palette)
   {
@@ -538,7 +556,7 @@ struct FOG_NO_EXPORT Image
   {
     return fog_api.image_mirror(this, this, NULL, mirrorMode);
   }
-  
+
   //! @brief Rotate image by 0, 90, 180 or 270 degrees, see @c IMAGE_ROTATE_MODE.
   FOG_INLINE err_t rotate(uint32_t rotateMode)
   {

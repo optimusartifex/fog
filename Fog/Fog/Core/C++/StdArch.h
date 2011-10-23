@@ -52,7 +52,10 @@
 
 #if defined(_M_X64    ) || \
     defined(_M_AMD64  ) || \
-    defined(__x86_64__)
+    defined(__x86_64__) || \
+    defined(__x86_64  ) || \
+    defined(__amd64__ ) || \
+    defined(__amd64   )
 
 # define FOG_ARCH_X86_64
 # define FOG_ARCH_BITS 64
@@ -66,12 +69,17 @@
 // ============================================================================
 
 #elif defined(_M_IX86 ) || \
-      defined(__i386__)
+      defined(__i386__) || \
+      defined(__i386__) || \
+      defined(__i486__) || \
+      defined(__i586__) || \
+      defined(__i686__)
 
 # define FOG_ARCH_X86
 # define FOG_ARCH_BITS 32
 
-# if defined(__i686__)
+// GCC specific.
+# if defined(__MMX__)
 #  define FOG_HARDCODE_MMX
 # endif // __i686__
 

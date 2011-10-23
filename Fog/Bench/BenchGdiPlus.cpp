@@ -63,11 +63,11 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
     case BENCH_TYPE_CREATE_DESTROY:
       runCreateDestroy(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_I:
       runFillRectI(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_F:
       runFillRectF(output, params);
       break;
@@ -81,7 +81,11 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
       break;
 
     case BENCH_TYPE_FILL_POLYGON:
-      runFillPolygon(output, params);
+      runFillPolygon(output, params, 10);
+      break;
+
+    case BENCH_TYPE_FILL_COMPLEX:
+      runFillPolygon(output, params, 100);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_I:
@@ -352,20 +356,20 @@ void BenchGdiPlus::runFillRound(BenchOutput& output, const BenchParams& params)
       colors[0] = Gdiplus::Color(rArgb.getArgb32().getPacked32());
       colors[1] = Gdiplus::Color(rArgb.getArgb32().getPacked32());
       colors[2] = Gdiplus::Color(rArgb.getArgb32().getPacked32());
-      
+
       Gdiplus::LinearGradientBrush brush(
         Gdiplus::PointF(r.x, r.y),
         Gdiplus::PointF(r.x + r.w, r.y + r.h),
         colors[0],
         colors[2]);
       brush.SetInterpolationColors(colors, gradientStopCache, 3);
-      
+
       gr.FillPath((Gdiplus::Brush*)&brush, &path);
     }
   }
 }
 
-void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params)
+void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity)
 {
   Gdiplus::Graphics gr(screenGdi);
   configureGraphics(gr, params);
@@ -376,9 +380,10 @@ void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params
   Fog::SizeI polyScreen(
     params.screenSize.w - params.shapeSize,
     params.screenSize.h - params.shapeSize);
-  float polySize = (int)params.shapeSize;
+  float polySize = (float)params.shapeSize;
 
-  Gdiplus::PointF points[10];
+  Gdiplus::PointF points[128];
+  FOG_ASSERT(complexity < FOG_ARRAY_SIZE(points));
 
   if (params.source == BENCH_SOURCE_SOLID)
   {
@@ -387,7 +392,7 @@ void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params
     {
       Fog::PointF base(rPts.getPointF(polyScreen));
 
-      for (uint32_t j = 0; j < FOG_ARRAY_SIZE(points); j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         points[j].X = rPts.getFloat(base.x, base.x + polySize);
         points[j].Y = rPts.getFloat(base.y, base.y + polySize);
@@ -396,7 +401,7 @@ void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params
       Gdiplus::Color color(rArgb.getArgb32().getPacked32());
       Gdiplus::SolidBrush brush(color);
 
-      gr.FillPolygon((Gdiplus::Brush*)&brush, points, FOG_ARRAY_SIZE(points), Gdiplus::FillModeAlternate);
+      gr.FillPolygon((Gdiplus::Brush*)&brush, points, complexity, Gdiplus::FillModeWinding);
     }
   }
   else
@@ -406,7 +411,7 @@ void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params
     {
       Fog::PointF base(rPts.getPointF(polyScreen));
 
-      for (uint32_t j = 0; j < FOG_ARRAY_SIZE(points); j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         points[j].X = rPts.getFloat(base.x, base.x + polySize);
         points[j].Y = rPts.getFloat(base.y, base.y + polySize);
@@ -424,7 +429,7 @@ void BenchGdiPlus::runFillPolygon(BenchOutput& output, const BenchParams& params
         colors[2]);
       brush.SetInterpolationColors(colors, gradientStopCache, 3);
 
-      gr.FillPolygon((Gdiplus::Brush*)&brush, points, FOG_ARRAY_SIZE(points), Gdiplus::FillModeAlternate);
+      gr.FillPolygon((Gdiplus::Brush*)&brush, points, complexity, Gdiplus::FillModeWinding);
     }
   }
 }

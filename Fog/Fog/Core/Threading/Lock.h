@@ -104,7 +104,7 @@ private:
 //! @brief Auto @c Lock locker.
 //!
 //! @c AutoLock is simple class that locks a @c Lock and unlocks it when the
-//! instance of class is being destroyed. It's designed to simplify the code 
+//! instance of class is being destroyed. It's designed to simplify the code
 //! where it's needed to lock a @c Lock on begin of a function and unlock it at
 //! the end.
 //!

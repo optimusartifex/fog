@@ -137,8 +137,8 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Image_init();
 
   ImageConverter_init();
+  ImageFilter_init();
   ImageCodecProvider_init();
-  ImageEffect_init();
 
   FeColorLutArray_init();
   FeColorLut_init();
@@ -148,6 +148,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   FeBlur_init();
   FeConvolveMatrix_init();
+  FeConvolveSeparable_init();
   FeMorphology_init();
 
   // [G2d/Painting]

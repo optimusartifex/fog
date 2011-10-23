@@ -48,7 +48,7 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
 
   if (screenQt == NULL)
     return;
-  
+
   Fog::Time start(Fog::Time::now());
 
   switch (params.type)
@@ -56,11 +56,11 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
     case BENCH_TYPE_CREATE_DESTROY:
       runCreateDestroy(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_I:
       runFillRectI(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_F:
       runFillRectF(output, params);
       break;
@@ -74,7 +74,11 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
       break;
 
     case BENCH_TYPE_FILL_POLYGON:
-      runFillPolygon(output, params);
+      runFillPolygon(output, params, 10);
+      break;
+
+    case BENCH_TYPE_FILL_COMPLEX:
+      runFillPolygon(output, params, 100);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_I:
@@ -310,7 +314,7 @@ void BenchQt4::runFillRound(BenchOutput& output, const BenchParams& params)
   }
 }
 
-void BenchQt4::runFillPolygon(BenchOutput& output, const BenchParams& params)
+void BenchQt4::runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity)
 {
   QPainter p(screenQt);
   configurePainter(p, params);
@@ -325,7 +329,8 @@ void BenchQt4::runFillPolygon(BenchOutput& output, const BenchParams& params)
     params.screenSize.h - params.shapeSize);
   float polySize = (int)params.shapeSize;
 
-  QPointF points[10];
+  QPointF points[128];
+  FOG_ASSERT(complexity < FOG_ARRAY_SIZE(points));
 
   if (params.source == BENCH_SOURCE_SOLID)
   {
@@ -335,14 +340,14 @@ void BenchQt4::runFillPolygon(BenchOutput& output, const BenchParams& params)
       Fog::PointF base(rPts.getPointF(polyScreen));
       Fog::Argb32 c0(rArgb.getArgb32());
 
-      for (uint32_t j = 0; j < 10; j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         points[j].setX(rPts.getFloat(base.x, base.x + polySize));
         points[j].setY(rPts.getFloat(base.y, base.y + polySize));
       }
-      
+
       p.setBrush(QBrush(QColor(c0.getRed(), c0.getGreen(), c0.getBlue(), c0.getAlpha())));
-      p.drawPolygon(points, 10, Qt::WindingFill);
+      p.drawPolygon(points, complexity, Qt::WindingFill);
     }
   }
   else
@@ -355,14 +360,14 @@ void BenchQt4::runFillPolygon(BenchOutput& output, const BenchParams& params)
       Fog::Argb32 c1(rArgb.getArgb32());
       Fog::Argb32 c2(rArgb.getArgb32());
 
-      for (uint32_t j = 0; j < 10; j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         points[j].setX(rPts.getFloat(base.x, base.x + polySize));
         points[j].setY(rPts.getFloat(base.y, base.y + polySize));
       }
 
       p.setBrush(createLinearGradient(Fog::PointF(base.x, base.y), Fog::PointF(base.x + polySize, base.y + polySize), c0, c1, c2));
-      p.drawPolygon(points, 10, Qt::WindingFill);
+      p.drawPolygon(points, complexity, Qt::WindingFill);
     }
   }
 }

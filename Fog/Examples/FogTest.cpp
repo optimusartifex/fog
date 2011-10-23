@@ -280,7 +280,7 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 #endif
 
-#if 1
+#if 0
   PathF path;
   path.moveTo(PointF(100, 100));
   path.cubicTo(PointF(200, 200), PointF(400, 250), PointF(200, 600));
@@ -352,6 +352,19 @@ void MyWindow::onPaint(PaintEvent* e)
 
   //p->setSource(Argb32(0xFFFF0000));
   //p->fillPath(path);
+#endif
+
+#if 1
+  PathF path;
+
+  path.moveTo(100.0f, 100.0f);
+  path.lineTo(300.0f, 110.5f);
+  path.lineTo(100.0f, 120.0f);
+  path.close();
+
+  p->setSource(Argb32(0xFF000000));
+  p->fillPath(path);
+
 #endif
 
   // --------------------------------------------------------------------------

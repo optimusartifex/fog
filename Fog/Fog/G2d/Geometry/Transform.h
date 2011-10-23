@@ -986,7 +986,7 @@ struct FOG_NO_EXPORT TransformF
   {
     TransformF result(UNINITIALIZED);
     float params[3] = { angle, p.x, p.y };
-    
+
     fog_api.transformf_transform2(&result, this, TRANSFORM_OP_ROTATE_POINTF | (order << 4), params);
     return result;
   }
@@ -1171,7 +1171,7 @@ struct FOG_NO_EXPORT TransformF
   {
     return PointF(_20, _21);
   }
-  
+
   FOG_INLINE PointF getScaling(bool absolute) const
   {
     PointF result;
@@ -1297,7 +1297,7 @@ struct FOG_NO_EXPORT TransformF
       return *this;
     }
   }
-  
+
   FOG_INLINE const float& operator[](size_t i) const { return _data[i]; }
   FOG_INLINE float& operator[](size_t i) { return _data[i]; }
 
@@ -2214,7 +2214,7 @@ struct FOG_NO_EXPORT TransformD
   {
     TransformD result(UNINITIALIZED);
     double params[3] = { angle, p.x, p.y };
-    
+
     fog_api.transformd_transform2(&result, this, TRANSFORM_OP_ROTATED | (order << 4), params);
     return result;
   }

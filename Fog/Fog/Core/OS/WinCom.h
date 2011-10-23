@@ -25,7 +25,7 @@ namespace Fog {
 
 #if !defined(FOG_CC_MSC) && !defined(__uuidof)
 # define __uuidof(_Interface_) IID_##_Interface_
-#elif defined(__MINGW32__) 
+#elif defined(__MINGW32__)
 // __uuidof is only implemented in GCC 4.7
 // __uuidof emulation can be switched off when a stable GCC 4.7 becomes popular
 # ifdef __uuidof // Undefine the __uuidof macro that exists in pre-4.7 headers

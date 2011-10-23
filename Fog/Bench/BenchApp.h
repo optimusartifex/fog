@@ -28,7 +28,7 @@ struct BenchParams;
 // [BENCH_OPERATOR]
 // ============================================================================
 
-// Compositing operators were limited to support all of the benchmarking 
+// Compositing operators were limited to support all of the benchmarking
 // libraries. Gdi+ library contains only these two, so we do not compare
 // the performance of other operators.
 
@@ -66,9 +66,10 @@ enum BENCH_TYPE
   BENCH_TYPE_FILL_RECT_ROTATE = 3,
   BENCH_TYPE_FILL_ROUND = 4,
   BENCH_TYPE_FILL_POLYGON = 5,
-  BENCH_TYPE_BLIT_IMAGE_I = 6,
-  BENCH_TYPE_BLIT_IMAGE_ROTATE = 7,
-  BENCH_TYPE_COUNT = 8
+  BENCH_TYPE_FILL_COMPLEX = 6,
+  BENCH_TYPE_BLIT_IMAGE_I = 7,
+  BENCH_TYPE_BLIT_IMAGE_ROTATE = 8,
+  BENCH_TYPE_COUNT = 9
 };
 
 // ============================================================================
@@ -238,7 +239,7 @@ struct BenchRandom
   {
     return float((int)getNumber() & 0xFFFFF) / float(0xFFFFF);
   }
-  
+
   FOG_INLINE float getFloat(float min, float max)
   {
     return min + (float((int)getNumber() & 0xFFFFF) / float(0xFFFFF)) * (max - min);
@@ -248,7 +249,7 @@ struct BenchRandom
   {
     return float((int)getNumber() & 0xFFFFF) / float(0xFFFFF);
   }
-    
+
   FOG_INLINE double getDouble(double min, double max)
   {
     return min + (double((int)getNumber() & 0xFFFFF) / double(0xFFFFF)) * (max - min);
@@ -258,7 +259,7 @@ struct BenchRandom
   {
     return Fog::Argb32(getNumber() | 0xFF000000);
   }
-  
+
   FOG_INLINE Fog::Argb32 getArgb32()
   {
     return Fog::Argb32(getNumber());

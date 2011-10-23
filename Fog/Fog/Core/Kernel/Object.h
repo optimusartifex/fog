@@ -282,8 +282,8 @@ struct FOG_NO_EXPORT ObjectConnection
 // [Fog::ObjectExtra]
 // ============================================================================
 
-//! @brief Object extra members - object-id and name, connection, and dynamic
-//! properties.
+//! @brief Object extra members - id, children, dynamic properties and object
+//! connection.
 struct FOG_NO_EXPORT ObjectExtra
 {
   // --------------------------------------------------------------------------
@@ -299,10 +299,10 @@ struct FOG_NO_EXPORT ObjectExtra
 
   //! @brief Object id.
   StringW _id;
-  
+
   //! @brief Object children.
   List<Object*> _children;
-  
+
   //! @brief Dynamic properties.
   Hash<StringW, Var> _properties;
 
@@ -324,7 +324,7 @@ struct FOG_NO_EXPORT ObjectExtra
   //!
   //! @note Access to this structure must be always locked by @c Object::_internalLock.
   List<ObjectConnection*> _backwardConnection;
-  
+
 private:
   _FOG_NO_COPY(ObjectExtra)
 };
@@ -425,7 +425,7 @@ struct FOG_API Object
   {
     return (_objectFlags & OBJECT_FLAG_IS_WIDGET) != 0;
   }
-  
+
   // --------------------------------------------------------------------------
   // [Object Id]
   // --------------------------------------------------------------------------
@@ -446,11 +446,11 @@ struct FOG_API Object
   //! owns the @ref Object instance, but is used by Fog-event subsystem to
   //! deliver events into the correct thread.
   FOG_INLINE Thread* getHomeThread() const { return _homeThread; }
-  
+
   //! @brief Move object and all children to a different thread @a thread.
   //!
   //! If @a thread is the current thread where the object lives then this is
-  //! a nop.
+  //! a NOP.
   err_t moveToThread(Thread* thread);
 
   // --------------------------------------------------------------------------
@@ -550,7 +550,7 @@ struct FOG_API Object
   }
 
   // --------------------------------------------------------------------------
-  // [Properties]
+  // [Properties - Accessors]
   // --------------------------------------------------------------------------
 
   //! @brief Get property @a name to a given @a value.
@@ -562,6 +562,10 @@ struct FOG_API Object
   err_t getProperty(const ManagedStringW& name, Var& dst) const;
   //! @brief Set property @a name to a given @a value.
   err_t setProperty(const ManagedStringW& name, const Var& src);
+
+  // --------------------------------------------------------------------------
+  // [Properties - Virtual]
+  // --------------------------------------------------------------------------
 
   //! @brief Get property @a name to a given @a value.
   //!
@@ -678,7 +682,7 @@ struct FOG_API Object
   //! @brief Object extended members.
   //!
   //! Extended members were designed to reduce a size of @c Object instance
-  //! which doesn't use features like object-id / name, hierarchy, dynamic 
+  //! which doesn't use features like object-id / name, hierarchy, dynamic
   //! properties, and object event system.
   ObjectExtra* _objectExtra;
 

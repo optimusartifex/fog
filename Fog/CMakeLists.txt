@@ -373,15 +373,12 @@ Set(FOG_CORE_CPP_SOURCES
 Set(FOG_CORE_CPP_HEADERS
   Fog/Core/C++/Base.h
   Fog/Core/C++/Compiler.h
-  Fog/Core/C++/CompilerGcc.h
+  Fog/Core/C++/CompilerBorland.h
+  Fog/Core/C++/CompilerClang.h
+  Fog/Core/C++/CompilerGnu.h
   Fog/Core/C++/CompilerIde.h
   Fog/Core/C++/CompilerMsc.h
   Fog/Core/C++/ConfigCMake.h
-  Fog/Core/C++/PackByte.h
-  Fog/Core/C++/PackWord.h
-  Fog/Core/C++/PackDWord.h
-  Fog/Core/C++/PackQWord.h
-  Fog/Core/C++/PackRestore.h
   Fog/Core/C++/Intrin3dNow.h
   Fog/Core/C++/IntrinMMX.h
   Fog/Core/C++/IntrinMMXExt.h
@@ -389,6 +386,11 @@ Set(FOG_CORE_CPP_HEADERS
   Fog/Core/C++/IntrinSSE2.h
   Fog/Core/C++/IntrinSSE3.h
   Fog/Core/C++/IntrinSSSE3.h
+  Fog/Core/C++/PackByte.h
+  Fog/Core/C++/PackWord.h
+  Fog/Core/C++/PackDWord.h
+  Fog/Core/C++/PackQWord.h
+  Fog/Core/C++/PackRestore.h
   Fog/Core/C++/StdArch.h
   Fog/Core/C++/StdDefs.h
   Fog/Core/C++/StdHeaders.h
@@ -1711,7 +1713,7 @@ EndIf()
 # =============================================================================
 
 If(NOT FOG_BUILD_STATIC AND FOG_GUI_X11 AND FOG_BUILD_UI_X11)
-  Add_Library(Fog_UI_X11 SHARED 
+  Add_Library(Fog_UI_X11 SHARED
     ${FOG_GUI_ENGINE_X11_SOURCES}
     ${FOG_GUI_ENGINE_X11_HEADERS})
   Target_Link_Libraries(Fog_UI_X11 Fog ${FOG_LIBRARIES})

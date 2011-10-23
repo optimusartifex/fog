@@ -496,6 +496,7 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
     // [Members]
     // ------------------------------------------------------------------------
 
+    Chunk* prev;
     Chunk* next;
     int x0;
     int x1;
@@ -510,12 +511,10 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   struct FOG_NO_EXPORT Row
   {
     //! @brief First chunk in this row (sorted from left).
-    Chunk* first;
-    //! @brief Hint.
     //!
-    //! The chunk which was used last. When rendering the hint chunk is used
-    //! as in optimization to prevent traversing the engire list of chunks.
-    Chunk* hint;
+    //! @note The chunk list is curcullar, thus chunk->prev can be used to
+    //! access the last chunk.
+    Chunk* first;
   };
 
   // --------------------------------------------------------------------------

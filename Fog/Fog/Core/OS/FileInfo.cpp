@@ -27,7 +27,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::FileInfo - Globals]
+// [Fog::FileInfo - Global]
 // ============================================================================
 
 static Static<FileInfoData> FileInfo_dNull;
@@ -209,7 +209,7 @@ static err_t FOG_CDECL FileInfo_fromFileEx(FileInfo* self, const StringW* filePa
   FileInfoData* d = self->_d;
 
   FOG_RETURN_ON_ERROR(FileInfo_fromWinPath(d, &pathW));
- 
+
   FileInfo_fromWinFileAttributeDataPrivate(d, &wfad);
   return ERR_OK;
 }
@@ -379,7 +379,7 @@ FOG_NO_EXPORT void FileInfo_init(void)
   fog_api.fileinfo_detach = FileInfo_detach;
   fog_api.fileinfo_fromFile = FileInfo_fromFile;
   fog_api.fileinfo_fromFileEx = FileInfo_fromFileEx;
-  
+
 #if defined(FOG_OS_WINDOWS)
   fog_api.fileinfo_fromWinFileAttributeData = FileInfo_fromWinFileAttributeData;
   fog_api.fileinfo_fromWinFindData = FileInfo_fromWinFindData;

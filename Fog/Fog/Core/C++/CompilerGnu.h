@@ -3,22 +3,19 @@
 // [License]
 // MIT, See COPYING file in package
 
-#ifndef _FOG_CORE_CPP_COMPILER_GCC_H
-#define _FOG_CORE_CPP_COMPILER_GCC_H
+// [Guard]
+#ifndef _FOG_CORE_CPP_COMPILER_GNU_H
+#define _FOG_CORE_CPP_COMPILER_GNU_H
 
 // ============================================================================
-// [Fog::Core::Config - C++ Compiler - GNU C/C++]
+// [Fog::Core::C++ - GNU]
 // ============================================================================
 
-#if defined(__clang__)
-# define FOG_CC_CLANG __clang__
-#else
-# define FOG_CC_GNU __GNUC__
-# define FOG_CC_GNU_VERSION_EQ(_Major_, _Minor_, _Patch_) \
+#define FOG_CC_GNU __GNUC__
+#define FOG_CC_GNU_VERSION_EQ(_Major_, _Minor_, _Patch_) \
   ( (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= _Major_ * 10000 + _Minor_ * 100 + _Patch_)
-# define FOG_CC_GNU_VERSION_GE(_Major_, _Minor_, _Patch_) \
+#define FOG_CC_GNU_VERSION_GE(_Major_, _Minor_, _Patch_) \
   ( (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= _Major_ * 10000 + _Minor_ * 100 + _Patch_)
-#endif
 
 // Standard attributes.
 #if defined(__MINGW32__)
@@ -35,15 +32,14 @@
 #define FOG_DEPRECATED __attribute__((deprecated))
 
 // Restrict support.
-#if (defined(FOG_CC_GNU) && __GNUC__ >= 3) || \
-    (defined(__clang__))
+#if defined(FOG_CC_GNU) && __GNUC__ >= 3
 # define FOG_RESTRICT __restrict__
 #else
 # define FOG_RESTRICT
 #endif
 
 // 32-bit x86 calling conventions.
-#ifdef FOG_ARCH_X86
+#if defined(FOG_ARCH_X86)
 # define FOG_FASTCALL __attribute__((regparm(3)))
 # define FOG_STDCALL __attribute__((stdcall))
 # define FOG_CDECL __attribute__((cdecl))
@@ -74,8 +70,7 @@
 #if defined(FOG_OS_WINDOWS)
 # define FOG_DLL_IMPORT __declspec(dllimport)
 # define FOG_DLL_EXPORT __declspec(dllexport)
-#elif (defined(__GNUC__) && __GNUC__ >= 4) || \
-      (defined(__clang__))
+#elif defined(__GNUC__) && __GNUC__ >= 4
 # define FOG_DLL_IMPORT
 # define FOG_DLL_EXPORT __attribute__((visibility("default")))
 #else
@@ -84,8 +79,8 @@
 #endif
 
 // Likely / Unlikely.
-#define FOG_LIKELY(exp) __builtin_expect(!!(exp), 1)
-#define FOG_UNLIKELY(exp) __builtin_expect(!!(exp), 0)
+#define FOG_LIKELY(_Exp_) __builtin_expect(!!(_Exp_), 1)
+#define FOG_UNLIKELY(_Exp_) __builtin_expect(!!(_Exp_), 0)
 
 // Nothrow.
 #define FOG_NOTHROW throw()
@@ -108,20 +103,12 @@
 #define FOG_MACRO_END })
 
 // Variables.
-#if defined(__MINGW32__)
-# define FOG_CVAR_EXTERN_BASE(api) extern "C" api
-# define FOG_CVAR_DECLARE_BASE(api)
-#else
-# define FOG_CVAR_EXTERN_BASE(api) extern "C" api
-# define FOG_CVAR_DECLARE_BASE(api)
-#endif // __MINGW32__
+#define FOG_CVAR_EXTERN_BASE(_Api_) extern "C" _Api_
+#define FOG_CVAR_DECLARE_BASE(_Api_)
 
 // C API.
-#define FOG_CAPI_EXTERN_BASE(api) extern "C" api
-#define FOG_CAPI_DECLARE_BASE(api) extern "C"
+#define FOG_CAPI_EXTERN_BASE(_Api_) extern "C" _Api_
+#define FOG_CAPI_DECLARE_BASE(_Api_) extern "C"
 
-// C API - static initializers we can hide them...
-#define FOG_INIT_EXTERN_BASE(api) extern "C" FOG_NO_EXPORT
-#define FOG_INIT_DECLARE_BASE(api) extern "C" FOG_NO_EXPORT
-
-#endif // _FOG_CORE_CPP_COMPILER_GCC_H
+// [Guard]
+#endif // _FOG_CORE_CPP_COMPILER_GNU_H

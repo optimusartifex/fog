@@ -26,7 +26,7 @@ static void FOG_CDECL FeComponentTransfer_ctor(FeComponentTransfer* self)
   FeComponentFunctionData* identity = fog_api.fecomponentfunction_oIdentity->_d;
   identity->reference.add(4);
 
-  self->_filterType = IMAGE_FILTER_TYPE_COMPONENT_TRANSFER;
+  self->_feType = FE_TYPE_COMPONENT_TRANSFER;
   self->c[0].initCustom1(identity);
   self->c[1].initCustom1(identity);
   self->c[2].initCustom1(identity);
@@ -35,7 +35,7 @@ static void FOG_CDECL FeComponentTransfer_ctor(FeComponentTransfer* self)
 
 static void FOG_CDECL FeComponentTransfer_ctorCopy(FeComponentTransfer* self, const FeComponentTransfer* other)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_COMPONENT_TRANSFER;
+  self->_feType = FE_TYPE_COMPONENT_TRANSFER;
   self->c[0].initCustom1(other->c[0]->_d->addRef());
   self->c[1].initCustom1(other->c[1]->_d->addRef());
   self->c[2].initCustom1(other->c[2]->_d->addRef());

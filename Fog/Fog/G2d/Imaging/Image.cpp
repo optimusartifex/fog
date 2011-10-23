@@ -60,7 +60,7 @@ static void  FOG_CDECL Image_Buffer_destroy(ImageData* d);
 static void* FOG_CDECL Image_Buffer_getHandle(const ImageData* d);
 static err_t FOG_CDECL Image_Buffer_updatePalette(ImageData* d, const Range* range);
 
-static const ImageVTable Image_Buffer_vTable = 
+static const ImageVTable Image_Buffer_vTable =
 {
   Image_Buffer_create,
   Image_Buffer_destroy,
@@ -238,7 +238,7 @@ static err_t FOG_CDECL Image_create(Image* self, const SizeI* size, uint32_t for
   // that the size of this image is the same as the given size, and all other
   // members are equal the the @c Image::create() arguments, then we can simply
   // use the existing buffer instead of performing destroy() / create() call.
-  if (d->reference.get() == 1 && 
+  if (d->reference.get() == 1 &&
       d->type == IMAGE_TYPE_BUFFER &&
       d->adopted == 0 &&
       d->stride > 0 &&
@@ -1185,7 +1185,7 @@ static err_t Image_blitImagePrivate(
 
     // We need to update src_d too to handle that case that 'dst == src'.
     dst_d = dst->_d;
-    src_d = src->_d; 
+    src_d = src->_d;
   }
 
   uint8_t* dPixels = dst_d->first;
@@ -1693,7 +1693,7 @@ static void  FOG_CDECL Image_WinDib_destroy(ImageData* d);
 static void* FOG_CDECL Image_WinDib_getHandle(const ImageData* d);
 static err_t FOG_CDECL Image_WinDib_updatePalette(ImageData* d, const Range* range);
 
-static const ImageVTable Image_WinDib_vTable = 
+static const ImageVTable Image_WinDib_vTable =
 {
   Image_WinDib_create,
   Image_WinDib_destroy,
@@ -1762,7 +1762,7 @@ static void* FOG_CDECL Image_WinDib_getHandle(const ImageData* _d)
 static err_t FOG_CDECL Image_WinDib_updatePalette(ImageData* _d, const Range* range)
 {
   WinDibImageData* d = reinterpret_cast<WinDibImageData*>(_d);
-  
+
   if (d->format == IMAGE_FORMAT_I8)
   {
     // TODO: WinDib update palette.
@@ -2056,7 +2056,7 @@ static bool FOG_CDECL Image_eq(const Image* a, const Image* b)
   uint32_t format = a_d->format;
   if (format != b_d->format)
     return false;
-  
+
   uint32_t colorKey = a_d->colorKey;
   if (colorKey != b_d->colorKey)
     return false;
@@ -2106,7 +2106,7 @@ static bool FOG_CDECL Image_eq(const Image* a, const Image* b)
       do {
         for (uint i = 0; i < (uint)w; i++)
         {
-          if ((reinterpret_cast<const uint32_t*>(aData)[i] | 0xFF000000) != 
+          if ((reinterpret_cast<const uint32_t*>(aData)[i] | 0xFF000000) !=
               (reinterpret_cast<const uint32_t*>(bData)[i] | 0xFF000000))
             return false;
         }
@@ -3165,7 +3165,7 @@ FOG_NO_EXPORT void Image_init(void)
   fog_api.image_getDC = Image_getDC;
   fog_api.image_releaseDC = Image_releaseDC;
 #endif // FOG_OS_WINDOWS
-  
+
   fog_api.image_eq = Image_eq;
 
   fog_api.image_getStrideFromWidth = Image_getStrideFromWidth;

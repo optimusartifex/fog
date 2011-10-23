@@ -17,124 +17,197 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declarations]
+// [Fog::ImageFilterData]
 // ============================================================================
 
-struct ImageEffect;
-struct ImageEffectData;
-
-// ============================================================================
-// [Function Prototypes]
-// ============================================================================
-
-typedef void (FOG_FASTCALL *ImageEffectDestroyFunc)(ImageEffectData* d);
-
-// ============================================================================
-// [Fog::ImageEffectData]
-// ============================================================================
-
-//! @brief The image effect data.
-struct FOG_NO_EXPORT ImageEffectData
+//! @brief Image filter data.
+struct FOG_NO_EXPORT ImageFilterData
 {
   // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ImageEffectData* addRef() const
+  FOG_INLINE ImageFilterData* addRef() const
   {
     reference.inc();
-    return const_cast<ImageEffectData*>(this);
+    return const_cast<ImageFilterData*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
     if (reference.deref())
-      destroy(this);
+      fog_api.imagefilter_dFree(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getFeType() const
+  {
+    return *reinterpret_cast<const uint32_t*>(
+      reinterpret_cast<const uint8_t*>(this) + sizeof(ImageFilterData));
+  }
+
+  FOG_INLINE const void* getFeData() const
+  {
+    return reinterpret_cast<const uint8_t*>(this) + sizeof(ImageFilterData);
+  }
+
+  FOG_INLINE void* getFeData()
+  {
+    return reinterpret_cast<uint8_t*>(this) + sizeof(ImageFilterData);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
+  // ${VAR:BEGIN}
+  //
+  // This data-object is binary compatible with the VarData header in the first
+  // form called - "implicitly shared class". The members must be binary
+  // compatible with the header below:
+  //
+  // +==============+============+============================================+
+  // | Size         | Name       | Description / Purpose                      |
+  // +==============+============+============================================+
+  // | size_t       | reference  | Atomic reference count, can be managed by  |
+  // |              |            | VarData without calling container specific |
+  // |              |            | methods.                                   |
+  // +--------------+------------+--------------------------------------------+
+  // | uint32_t     | vType      | Variable type and flags.                   |
+  // +==============+============+============================================+
+  //
+  // ${VAR:END}
+
   //! @brief Reference count.
   mutable Atomic<size_t> reference;
 
-  //! @brief Destructor function.
-  ImageEffectDestroyFunc destroy;
+  //! @brief Variable type and flags.
+  uint32_t vType;
 
-  //! @brief Effect type.
-  uint32_t type;
+#if FOG_ARCH_BITS >= 64
+  uint32_t padding0_32;
+#endif // FOG_ARCH_BITS >= 64
 };
 
 // ============================================================================
-// [Fog::ImageEffect]
+// [Fog::ImageFilter]
 // ============================================================================
 
-//! @brief The image effect.
-struct FOG_API ImageEffect
+//! @brief Image filter.
+struct FOG_NO_EXPORT ImageFilter
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  ImageEffect();
-  ImageEffect(const ImageEffect& other);
-  ~ImageEffect();
+  FOG_INLINE ImageFilter()
+  {
+    fog_api.imagefilter_ctor(this);
+  }
+
+  FOG_INLINE ImageFilter(const ImageFilter& other)
+  {
+    fog_api.imagefilter_ctorCopy(this, &other);
+  }
+
+  explicit FOG_INLINE ImageFilter(ImageFilterData* d) :
+    _d(d)
+  {
+  }
+
+  FOG_INLINE ~ImageFilter()
+  {
+    fog_api.imagefilter_dtor(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
-  FOG_INLINE uint32_t getType() const { return _d->type; }
+  FOG_INLINE uint32_t getFeType() const
+  {
+    return _d->getFeType();
+  }
 
-  // --------------------------------------------------------------------------
-  // [Effect]
-  // --------------------------------------------------------------------------
+  FOG_INLINE err_t getData(FeBase& fe) const
+  {
+    return fog_api.imagefilter_getData(this, &fe);
+  }
 
-  err_t _getEffect(uint32_t type, void* effect) const;
-  err_t _setEffect(uint32_t type, const void* effect);
+  FOG_INLINE err_t setData(const FeBase& fe)
+  {
+    return fog_api.imagefilter_setData(this, &fe);
+  }
 
-  err_t setEffect(const ImageEffect& effect);
+  FOG_INLINE err_t setFilter(const ImageFilter& other)
+  {
+    return fog_api.imagefilter_copy(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  void reset();
+  FOG_INLINE void reset()
+  {
+    fog_api.imagefilter_reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Equality]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const ImageFilter& other) const
+  {
+    return fog_api.imagefilter_eq(this, &other);
+  }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ImageEffect& operator=(const ImageEffect& effect)
+  FOG_INLINE ImageFilter& operator=(const ImageFilter& other)
   {
-    setEffect(effect);
+    fog_api.imagefilter_copy(this, &other);
     return *this;
   }
 
+  FOG_INLINE bool operator==(const ImageFilter& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const ImageFilter& other) const { return !eq(other); }
+
   // --------------------------------------------------------------------------
-  // [Statics]
+  // [Statics - Equality]
   // --------------------------------------------------------------------------
 
-  static Static<ImageEffectData> _dnull;
+  static bool FOG_INLINE eq(const ImageFilter* a, const ImageFilter* b)
+  {
+    return fog_api.imagefilter_eq(a, b);
+  }
+
+  static EqFunc FOG_INLINE getEqFunc()
+  {
+    return (EqFunc)fog_api.imagefilter_eq;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  _FOG_CLASS_D(ImageEffectData)
+  _FOG_CLASS_D(ImageFilterData)
 };
 
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [Fog::TypeInfo<>]
-// ============================================================================
-
-_FOG_TYPE_DECLARE(Fog::ImageEffect, Fog::TYPE_CATEGORY_MOVABLE)
 
 // [Guard]
 #endif // _FOG_G2D_IMAGING_IMAGEFILTER_H

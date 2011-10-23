@@ -515,11 +515,11 @@ void WinEventLoop::_runInternal()
   for (;;)
   {
     // If we do any work, we may create more messages etc., and more work may
-    // possibly be waiting in another task group.  When we (for example)
+    // possibly be waiting in another task group. When we (for example)
     // processNextWindowsMessage(), there is a good chance there are still more
-    // messages waiting.  On the other hand, when any of these methods return
+    // messages waiting. On the other hand, when any of these methods return
     // having done no work, then it is pretty unlikely that calling them again
-    // quickly will find any work to do.  Finally, if they all say they had no
+    // quickly will find any work to do. Finally, if they all say they had no
     // work, then it is a good time to consider sleeping (waiting) for more
     // work.
 
@@ -579,7 +579,7 @@ void WinEventLoop::_scheduleDelayedWork(const Time& delayedWorkTime)
   //
   // We use a single SetTimer() corresponding to the timer that will expire
   // soonest. As new timers are created and destroyed, we update SetTimer().
-  // Getting a spurrious SetTimer() event firing is benign, as we'll just be
+  // Getting a spurious SetTimer() event firing is beyign, as we'll just be
   // processing an empty timer queue.
   _delayedWorkTime = delayedWorkTime;
 
@@ -618,7 +618,7 @@ void WinEventLoop::_waitForWork()
     // The WaitMessage call below is a workaround to give the child window
     // sometime to process its input messages.
 
-    // Here was bug that dalayed NC messages. Thank guys from #chromium-dev
+    // Here was a bug that dalayed NC messages. Thank guys from #chromium-dev
     // for help with catching it. The problem is that QS_MOUSE will return
     // true also for NC messages, so there should be two PeekMessage() calls,
     // first for standard messages and second for NC messages.
@@ -632,7 +632,7 @@ void WinEventLoop::_waitForWork()
         !::PeekMessageW(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_NOREMOVE) &&
         !::PeekMessageW(&msg, NULL, ncMouseFirst , ncMouseLast , PM_NOREMOVE) )
     {
-      WaitMessage();
+      ::WaitMessage();
     }
 
     return;

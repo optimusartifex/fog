@@ -133,7 +133,7 @@ static err_t FOG_CDECL FeComponentFunction_getData(const FeComponentFunction* se
   switch (functionType)
   {
     case FE_COMPONENT_FUNCTION_IDENTITY:
-      // There is no identity data, we just return ERR_OK to inform that 
+      // There is no identity data, we just return ERR_OK to inform that
       // data and function-type match. We really shouldn't get into this case.
       return ERR_OK;
 

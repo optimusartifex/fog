@@ -22,6 +22,7 @@ namespace Fog {
 // ============================================================================
 
 #include <Fog/Core/C++/PackByte.h>
+//! @brief Morphology.
 struct FOG_NO_EXPORT FeMorphology : public FeBorder
 {
   // --------------------------------------------------------------------------

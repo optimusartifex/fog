@@ -28,7 +28,7 @@ struct FOG_NO_EXPORT UserUtil
   {
     return fog_api.userutil_getUid();
   }
-  
+
   //! @brief Get the current group ID.
   static FOG_INLINE uint32_t getGid()
   {

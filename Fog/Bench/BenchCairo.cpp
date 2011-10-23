@@ -45,7 +45,7 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
     screen.getWidth(), screen.getHeight(), (int)screen.getStride());
   if (screenCairo == NULL)
     return;
-  
+
   Fog::Time start(Fog::Time::now());
 
   switch (params.type)
@@ -53,11 +53,11 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
     case BENCH_TYPE_CREATE_DESTROY:
       runCreateDestroy(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_I:
       runFillRectI(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_F:
       runFillRectF(output, params);
       break;
@@ -71,7 +71,11 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
       break;
 
     case BENCH_TYPE_FILL_POLYGON:
-      runFillPolygon(output, params);
+      runFillPolygon(output, params, 10);
+      break;
+
+    case BENCH_TYPE_FILL_COMPLEX:
+      runFillPolygon(output, params, 100);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_I:
@@ -110,7 +114,7 @@ cairo_pattern_t* BenchCairo::createLinearGradient(
 
   if (pattern == NULL)
     return NULL;
-  
+
   cairo_pattern_set_extend(pattern, CAIRO_EXTEND_PAD);
 
   cairo_pattern_add_color_stop_rgba(pattern, 0.0, double(c0.r) * sc, double(c0.g) * sc, double(c0.b) * sc, double(c0.a) * sc);
@@ -367,7 +371,7 @@ void BenchCairo::runFillRound(BenchOutput& output, const BenchParams& params)
   cairo_destroy(cr);
 }
 
-void BenchCairo::runFillPolygon(BenchOutput& output, const BenchParams& params)
+void BenchCairo::runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity)
 {
   cairo_t* cr = cairo_create(screenCairo);
   configureContext(cr, params);
@@ -390,7 +394,7 @@ void BenchCairo::runFillPolygon(BenchOutput& output, const BenchParams& params)
 
       cairo_set_source_rgba(cr, double(c0.r) * sc, double(c0.g) * sc, double(c0.b) * sc, double(c0.a) * sc);
 
-      for (uint32_t j = 0; j < 10; j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         float x = rPts.getFloat(base.x, base.x + polySize);
         float y = rPts.getFloat(base.y, base.y + polySize);
@@ -399,7 +403,7 @@ void BenchCairo::runFillPolygon(BenchOutput& output, const BenchParams& params)
           cairo_move_to(cr, x, y);
         else
           cairo_line_to(cr, x, y);
-        
+
       }
       cairo_close_path(cr);
       cairo_fill(cr);
@@ -417,8 +421,8 @@ void BenchCairo::runFillPolygon(BenchOutput& output, const BenchParams& params)
 
       cairo_pattern_t* pattern = createLinearGradient(base.x, base.y, base.x + polySize, base.y + polySize, c0, c1, c2);
       cairo_set_source(cr, pattern);
-      
-      for (uint32_t j = 0; j < 10; j++)
+
+      for (uint32_t j = 0; j < complexity; j++)
       {
         float x = rPts.getFloat(base.x, base.x + polySize);
         float y = rPts.getFloat(base.y, base.y + polySize);
@@ -427,7 +431,7 @@ void BenchCairo::runFillPolygon(BenchOutput& output, const BenchParams& params)
           cairo_move_to(cr, x, y);
         else
           cairo_line_to(cr, x, y);
-        
+
       }
       cairo_close_path(cr);
       cairo_fill(cr);

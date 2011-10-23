@@ -205,23 +205,41 @@ struct FOG_NO_EXPORT Api
   // [Core/OS - FilePath]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_STATIC(err_t, filepath_join)(StringW* dst, const StringW* base, const StringW* part);
+  FOG_CAPI_STATIC(err_t, filepath_joinStubW)(StringW* dst, const StubW* base, const StubW* part);
+  FOG_CAPI_STATIC(err_t, filepath_joinStringW)(StringW* dst, const StringW* base, const StringW* part);
 
-  FOG_CAPI_STATIC(err_t, filepath_extractFile)(StringW* dst, const StringW* path);
-  FOG_CAPI_STATIC(err_t, filepath_extractExtension)(StringW* dst, const StringW* path);
-  FOG_CAPI_STATIC(err_t, filepath_extractDirectory)(StringW* dst, const StringW* path);
+  FOG_CAPI_STATIC(err_t, filepath_extractFileStubW)(StringW* dst, const StubW* path);
+  FOG_CAPI_STATIC(err_t, filepath_extractFileStringW)(StringW* dst, const StringW* path);
 
-  FOG_CAPI_STATIC(bool, filepath_containsFile)(const StringW* path, const StringW* file, uint cs);
-  FOG_CAPI_STATIC(bool, filepath_containsExtension)(const StringW* path, const StringW* extension, uint cs);
-  FOG_CAPI_STATIC(bool, filepath_containsDirectory)(const StringW* path, const StringW* directory, uint cs);
+  FOG_CAPI_STATIC(err_t, filepath_extractExtensionStubW)(StringW* dst, const StubW* path);
+  FOG_CAPI_STATIC(err_t, filepath_extractExtensionStringW)(StringW* dst, const StringW* path);
 
-  FOG_CAPI_STATIC(err_t, filepath_normalize)(StringW* dst, const StringW* path);
-  FOG_CAPI_STATIC(bool, filepath_isNormalized)(const StringW* path);
+  FOG_CAPI_STATIC(err_t, filepath_extractDirectoryStubW)(StringW* dst, const StubW* path);
+  FOG_CAPI_STATIC(err_t, filepath_extractDirectoryStringW)(StringW* dst, const StringW* path);
 
-  FOG_CAPI_STATIC(bool, filepath_isRoot)(const StringW* path);
+  FOG_CAPI_STATIC(bool, filepath_containsFileStubW)(const StringW* path, const StubW* file, uint cs);
+  FOG_CAPI_STATIC(bool, filepath_containsFileStringW)(const StringW* path, const StringW* file, uint cs);
 
-  FOG_CAPI_STATIC(err_t, filepath_toAbsolute)(StringW* dst, const StringW* path, const StringW* base);
-  FOG_CAPI_STATIC(bool, filepath_isAbsolute)(const StringW* path);
+  FOG_CAPI_STATIC(bool, filepath_containsExtensionStubW)(const StringW* path, const StubW* extension, uint cs);
+  FOG_CAPI_STATIC(bool, filepath_containsExtensionStringW)(const StringW* path, const StringW* extension, uint cs);
+
+  FOG_CAPI_STATIC(bool, filepath_containsDirectoryStubW)(const StringW* path, const StubW* directory, uint cs);
+  FOG_CAPI_STATIC(bool, filepath_containsDirectoryStringW)(const StringW* path, const StringW* directory, uint cs);
+
+  FOG_CAPI_STATIC(err_t, filepath_normalizeStubW)(StringW* dst, const StubW* path);
+  FOG_CAPI_STATIC(err_t, filepath_normalizeStringW)(StringW* dst, const StringW* path);
+
+  FOG_CAPI_STATIC(bool, filepath_isNormalizedStubW)(const StubW* path);
+  FOG_CAPI_STATIC(bool, filepath_isNormalizedStringW)(const StringW* path);
+
+  FOG_CAPI_STATIC(bool, filepath_isRootStubW)(const StubW* path);
+  FOG_CAPI_STATIC(bool, filepath_isRootStringW)(const StringW* path);
+
+  FOG_CAPI_STATIC(err_t, filepath_toAbsoluteStubW)(StringW* dst, const StubW* path, const StubW* base);
+  FOG_CAPI_STATIC(err_t, filepath_toAbsoluteStringW)(StringW* dst, const StringW* path, const StringW* base);
+
+  FOG_CAPI_STATIC(bool, filepath_isAbsoluteStubW)(const StubW* path);
+  FOG_CAPI_STATIC(bool, filepath_isAbsoluteStringW)(const StringW* path);
 
   FOG_CAPI_STATIC(err_t, filepath_substituteEnvironmentVars)(StringW* dst, const StringW* path, uint32_t format);
 
@@ -229,14 +247,19 @@ struct FOG_NO_EXPORT Api
   // [Core/OS - FileUtil]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_STATIC(uint32_t, fileutil_test)(const StringW* path, uint32_t flags);
-  FOG_CAPI_STATIC(bool, fileutil_testLocalName)(const StringW* path);
+  FOG_CAPI_STATIC(uint32_t, fileutil_testStubW)(const StubW* path, uint32_t flags);
+  FOG_CAPI_STATIC(uint32_t, fileutil_testStringW)(const StringW* path, uint32_t flags);
+
+  FOG_CAPI_STATIC(bool, fileutil_testLocalNameStubW)(const StubW* path);
+  FOG_CAPI_STATIC(bool, fileutil_testLocalNameStringW)(const StringW* path);
+
   FOG_CAPI_STATIC(bool, fileutil_findFile)(StringW* dst, const StringW* fileName, const List<StringW>* paths);
   FOG_CAPI_STATIC(err_t, fileutil_createDirectory)(const StringW* dir, bool recursive);
   FOG_CAPI_STATIC(err_t, fileutil_deleteDirectory)(const StringW* dir);
 
 #if defined(FOG_OS_POSIX)
-  FOG_CAPI_STATIC(int, fileutil_stat)(void* dst, const StringW* fileName);
+  FOG_CAPI_STATIC(int, fileutil_statStubW)(void* dst, const StubW* fileName);
+  FOG_CAPI_STATIC(int, fileutil_statStringW)(void* dst, const StringW* fileName);
 #endif // FOG_OS_POSIX
 
   // --------------------------------------------------------------------------
@@ -311,7 +334,8 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(uint32_t, winutil_getWinVersion)(WinVersion* dst);
   FOG_CAPI_STATIC(err_t, winutil_getWinDirectory)(StringW* dst);
   FOG_CAPI_STATIC(err_t, winutil_getModuleFileName)(StringW* dst, HMODULE hModule);
-  FOG_CAPI_STATIC(err_t, winutil_makeWinPath)(StringW* dst, const StringW* src);
+  FOG_CAPI_STATIC(err_t, winutil_makeWinPathStubW)(StringW* dst, const StubW* src);
+  FOG_CAPI_STATIC(err_t, winutil_makeWinPathStringW)(StringW* dst, const StringW* src);
 
 #endif // FOG_OS_WINDOWS
 
@@ -1991,6 +2015,24 @@ struct FOG_NO_EXPORT Api
   ImageConverter* imageconverter_oNull;
 
   // --------------------------------------------------------------------------
+  // [G2d/Imaging - ImageFilter]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(imagefilter_ctor)(ImageFilter* self);
+  FOG_CAPI_CTOR(imagefilter_ctorCopy)(ImageFilter* self, const ImageFilter* other);
+  FOG_CAPI_DTOR(imagefilter_dtor)(ImageFilter* self);
+
+  FOG_CAPI_METHOD(err_t, imagefilter_getData)(const ImageFilter* self, FeBase* feData);
+  FOG_CAPI_METHOD(err_t, imagefilter_setData)(ImageFilter* self, const FeBase* feData);
+
+  FOG_CAPI_METHOD(void, imagefilter_reset)(ImageFilter* self);
+  FOG_CAPI_METHOD(err_t, imagefilter_copy)(ImageFilter* self, const ImageFilter* other);
+  FOG_CAPI_METHOD(bool, imagefilter_eq)(const ImageFilter* a, const ImageFilter* b);
+
+  FOG_CAPI_STATIC(ImageFilterData*, imagefilter_dCreate)(const FeBase* feData);
+  FOG_CAPI_STATIC(void, imagefilter_dFree)(ImageFilterData* d);
+
+  // --------------------------------------------------------------------------
   // [G2d/Imaging - ImageFormatDescription]
   // --------------------------------------------------------------------------
 
@@ -2158,6 +2200,18 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(void, feconvolvematrix_reset)(FeConvolveMatrix* self);
   FOG_CAPI_METHOD(err_t, feconvolvematrix_copy)(FeConvolveMatrix* self, const FeConvolveMatrix* other);
   FOG_CAPI_STATIC(bool, feconvolvematrix_eq)(const FeConvolveMatrix* a, const FeConvolveMatrix* b);
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging/Filters - FeConvolveSeparable]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(feconvolveseparable_ctor)(FeConvolveSeparable* self);
+  FOG_CAPI_CTOR(feconvolveseparable_ctorCopy)(FeConvolveSeparable* self, const FeConvolveSeparable* other);
+  FOG_CAPI_CTOR(feconvolveseparable_dtor)(FeConvolveSeparable* self);
+
+  FOG_CAPI_METHOD(void, feconvolveseparable_reset)(FeConvolveSeparable* self);
+  FOG_CAPI_METHOD(err_t, feconvolveseparable_copy)(FeConvolveSeparable* self, const FeConvolveSeparable* other);
+  FOG_CAPI_STATIC(bool, feconvolveseparable_eq)(const FeConvolveSeparable* a, const FeConvolveSeparable* b);
 
   // --------------------------------------------------------------------------
   // [G2d/Imaging/Filters - FeMorphology]

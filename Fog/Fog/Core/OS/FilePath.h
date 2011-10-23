@@ -57,85 +57,150 @@ struct FOG_NO_EXPORT FilePath
   // [Join]
   // --------------------------------------------------------------------------
 
+  static FOG_INLINE err_t join(StringW& dst, const StubW& base, const StubW& part)
+  {
+    return fog_api.filepath_joinStubW(&dst, &base, &part);
+  }
+
   static FOG_INLINE err_t join(StringW& dst, const StringW& base, const StringW& part)
   {
-    return fog_api.filepath_join(&dst, &base, &part);
+    return fog_api.filepath_joinStringW(&dst, &base, &part);
   }
 
   // --------------------------------------------------------------------------
   // [Extract]
   // --------------------------------------------------------------------------
 
+  static FOG_INLINE err_t extractFile(StringW& dst, const StubW& path)
+  {
+    return fog_api.filepath_extractFileStubW(&dst, &path);
+  }
+
   static FOG_INLINE err_t extractFile(StringW& dst, const StringW& path)
   {
-    return fog_api.filepath_extractFile(&dst, &path);
+    return fog_api.filepath_extractFileStringW(&dst, &path);
+  }
+
+  static FOG_INLINE err_t extractExtension(StringW& dst, const StubW& path)
+  {
+    return fog_api.filepath_extractExtensionStubW(&dst, &path);
   }
 
   static FOG_INLINE err_t extractExtension(StringW& dst, const StringW& path)
   {
-    return fog_api.filepath_extractExtension(&dst, &path);
+    return fog_api.filepath_extractExtensionStringW(&dst, &path);
+  }
+
+  static FOG_INLINE err_t extractDirectory(StringW& dst, const StubW& path)
+  {
+    return fog_api.filepath_extractDirectoryStubW(&dst, &path);
   }
 
   static FOG_INLINE err_t extractDirectory(StringW& dst, const StringW& path)
   {
-    return fog_api.filepath_extractDirectory(&dst, &path);
+    return fog_api.filepath_extractDirectoryStringW(&dst, &path);
+  }
+
+  static FOG_INLINE bool containsFile(const StringW& path, const StubW& file, uint cs = CASE_SENSITIVE)
+  {
+    return fog_api.filepath_containsFileStubW(&path, &file, cs);
   }
 
   static FOG_INLINE bool containsFile(const StringW& path, const StringW& file, uint cs = CASE_SENSITIVE)
   {
-    return fog_api.filepath_containsFile(&path, &file, cs);
+    return fog_api.filepath_containsFileStringW(&path, &file, cs);
+  }
+
+  static FOG_INLINE bool containsExtension(const StringW& path, const StubW& extension, uint cs = CASE_SENSITIVE)
+  {
+    return fog_api.filepath_containsExtensionStubW(&path, &extension, cs);
   }
 
   static FOG_INLINE bool containsExtension(const StringW& path, const StringW& extension, uint cs = CASE_SENSITIVE)
   {
-    return fog_api.filepath_containsExtension(&path, &extension, cs);
+    return fog_api.filepath_containsExtensionStringW(&path, &extension, cs);
+  }
+
+  static FOG_INLINE bool containsDirectory(const StringW& path, const StubW& directory, uint cs = CASE_SENSITIVE)
+  {
+    return fog_api.filepath_containsDirectoryStubW(&path, &directory, cs);
   }
 
   static FOG_INLINE bool containsDirectory(const StringW& path, const StringW& directory, uint cs = CASE_SENSITIVE)
   {
-    return fog_api.filepath_containsDirectory(&path, &directory, cs);
+    return fog_api.filepath_containsDirectoryStringW(&path, &directory, cs);
   }
 
   // --------------------------------------------------------------------------
   // [Normalize]
   // --------------------------------------------------------------------------
 
+  static FOG_INLINE err_t normalize(StringW& dst, const StubW& path)
+  {
+    return fog_api.filepath_normalizeStubW(&dst, &path);
+  }
+
   static FOG_INLINE err_t normalize(StringW& dst, const StringW& path)
   {
-    return fog_api.filepath_normalize(&dst, &path);
+    return fog_api.filepath_normalizeStringW(&dst, &path);
+  }
+
+  static FOG_INLINE bool isNormalized(const StubW& path)
+  {
+    return fog_api.filepath_isNormalizedStubW(&path);
   }
 
   static FOG_INLINE bool isNormalized(const StringW& path)
   {
-    return fog_api.filepath_isNormalized(&path);
+    return fog_api.filepath_isNormalizedStringW(&path);
   }
 
   // --------------------------------------------------------------------------
   // [Root]
   // --------------------------------------------------------------------------
 
+  static FOG_INLINE bool isRoot(const StubW& path)
+  {
+    return fog_api.filepath_isRootStubW(&path);
+  }
+
   static FOG_INLINE bool isRoot(const StringW& path)
   {
-    return fog_api.filepath_isRoot(&path);
+    return fog_api.filepath_isRootStringW(&path);
   }
 
   // --------------------------------------------------------------------------
   // [Relative / Absolute]
   // --------------------------------------------------------------------------
 
+  static FOG_INLINE err_t toAbsolute(StringW& dst, const StubW& path)
+  {
+    return fog_api.filepath_toAbsoluteStubW(&dst, &path, NULL);
+  }
+
+  static FOG_INLINE err_t toAbsolute(StringW& dst, const StubW& path, const StubW& base)
+  {
+    return fog_api.filepath_toAbsoluteStubW(&dst, &path, &base);
+  }
+
   static FOG_INLINE err_t toAbsolute(StringW& dst, const StringW& path)
   {
-    return fog_api.filepath_toAbsolute(&dst, &path, NULL);
+    return fog_api.filepath_toAbsoluteStringW(&dst, &path, NULL);
   }
 
   static FOG_INLINE err_t toAbsolute(StringW& dst, const StringW& path, const StringW& base)
   {
-    return fog_api.filepath_toAbsolute(&dst, &path, &base);
+    return fog_api.filepath_toAbsoluteStringW(&dst, &path, &base);
+  }
+
+  static FOG_INLINE bool isAbsolute(const StubW& path)
+  {
+    return fog_api.filepath_isAbsoluteStubW(&path);
   }
 
   static FOG_INLINE bool isAbsolute(const StringW& path)
   {
-    return fog_api.filepath_isAbsolute(&path);
+    return fog_api.filepath_isAbsoluteStringW(&path);
   }
 
   // --------------------------------------------------------------------------

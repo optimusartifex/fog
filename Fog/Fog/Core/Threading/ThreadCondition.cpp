@@ -162,7 +162,7 @@ arguments to be recycled just aftre returning from WaitForSingleObject().
 // [Configuration]
 // ============================================================================
 
-// It's possible to disable the Windows-Vista CONDITION_VARIABLE support, 
+// It's possible to disable the Windows-Vista CONDITION_VARIABLE support,
 // mainly for testing purposes (so we are able to test our implementation
 // for Windows 2000/XP on Vista and newer OS.
 
@@ -323,8 +323,8 @@ static WinCvEvent* ThreadCondition_getEventForWaiting(ThreadCondition* self)
   return e;
 }
 
-// ThreadCondition::recycleEvent() takes a WinCvEvent that was previously used 
-// for wait()ing, and recycles it for use in future wait() calls for this or 
+// ThreadCondition::recycleEvent() takes a WinCvEvent that was previously used
+// for wait()ing, and recycles it for use in future wait() calls for this or
 // other threads. Note that there is a tiny chance that the WinCvEvent is still
 // signaled when we obtain it, and that can cause spurious signals (if/when we
 // re-use the WinCvEvent), but such is quite rare (see FAQ-question-5).
@@ -429,7 +429,7 @@ static void FOG_CDECL ThreadCondition_dtor(ThreadCondition* self)
 
 // ThreadCondition::signal() will select one of the waiting threads, and signal
 // it (signal its WinCvEvent). For better performance we signal the thread that
-// went to sleep most recently (LIFO). If we want fairness, then we wake the 
+// went to sleep most recently (LIFO). If we want fairness, then we wake the
 // thread that has been sleeping the longest (FIFO).
 static void FOG_CDECL ThreadCondition_signal(ThreadCondition* self)
 {
@@ -444,7 +444,7 @@ static void FOG_CDECL ThreadCondition_signal(ThreadCondition* self)
     if (cvar->_waitingList.isEmpty())
       return;  // No one to signal.
 
-    // Only performance option should be used. This is not a leak from 
+    // Only performance option should be used. This is not a leak from
     // cvar->_waitingList. See FAQ-question 12.
     handle = cvar->_waitingList.popBack()->getHandle();  // LIFO.
   } // Release cvar->_internalLock.

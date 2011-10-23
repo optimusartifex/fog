@@ -21,7 +21,7 @@ namespace Fog {
 // [Fog::FeConvolveMatrix]
 // ============================================================================
 
-//! @brief Component transfer.
+//! @brief Convolve matrix.
 struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
 {
   // --------------------------------------------------------------------------

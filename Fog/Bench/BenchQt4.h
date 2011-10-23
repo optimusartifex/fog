@@ -46,7 +46,7 @@ struct BenchQt4 : public BenchModule
   void runFillRectF(BenchOutput& output, const BenchParams& params);
   void runFillRectRotate(BenchOutput& output, const BenchParams& params);
   void runFillRound(BenchOutput& output, const BenchParams& params);
-  void runFillPolygon(BenchOutput& output, const BenchParams& params);
+  void runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity);
   void runBlitImageI(BenchOutput& output, const BenchParams& params);
   void runBlitImageRotate(BenchOutput& output, const BenchParams& params);
 

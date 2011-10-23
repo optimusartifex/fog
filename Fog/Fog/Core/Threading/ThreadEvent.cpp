@@ -162,7 +162,7 @@ static bool FOG_CDECL ThreadEvent_wait(ThreadEvent* self, const TimeDelta* maxTi
   {
     while (!self->_signaled)
       self->_cvar->wait();
-    
+
     if (!self->_manualReset)
       self->_signaled = false;
     return true;
@@ -176,7 +176,7 @@ static bool FOG_CDECL ThreadEvent_wait(ThreadEvent* self, const TimeDelta* maxTi
     {
       TimeTicks start = TimeTicks::now();
       self->_cvar->wait(t - total);
-    
+
       if (self->_signaled)
         break;
 

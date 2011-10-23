@@ -146,6 +146,7 @@ _FOG_VAR_DECLARE_ID(Fog::ColorStopList         , Fog::VAR_TYPE_COLOR_STOP_LIST)
 
 _FOG_VAR_DECLARE_ID(Fog::Image                 , Fog::VAR_TYPE_IMAGE)
 _FOG_VAR_DECLARE_ID(Fog::ImagePalette          , Fog::VAR_TYPE_IMAGE_PALETTE)
+_FOG_VAR_DECLARE_ID(Fog::ImageFilter           , Fog::VAR_TYPE_IMAGE_FILTER)
 
 _FOG_VAR_DECLARE_ID(Fog::Font                  , Fog::VAR_TYPE_FONT)
 

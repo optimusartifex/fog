@@ -38,10 +38,11 @@ struct FOG_NO_EXPORT EllipseF
   FOG_INLINE EllipseF(const PointF& cp, const PointF& rp) { setEllipse(cp, rp); }
   FOG_INLINE EllipseF(const PointF& cp, float rad) { setEllipse(cp, rad); }
 
+  FOG_INLINE EllipseF(float x0, float y0, float rad) { setEllipse(x0, y0, rad); }
+  FOG_INLINE EllipseF(float x0, float y0, float rx, float ry) { setEllipse(x0, y0, rx, ry); }
+
   explicit FOG_INLINE EllipseF(_Uninitialized) {}
   explicit FOG_INLINE EllipseF(const EllipseD& ellipse) { setEllipse(ellipse); }
-  explicit FOG_INLINE EllipseF(const BoxF& r) { setEllipse(r); }
-  explicit FOG_INLINE EllipseF(const RectF& r) { setEllipse(r); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -51,16 +52,19 @@ struct FOG_NO_EXPORT EllipseF
   FOG_INLINE const PointF& getRadius() const { return radius; }
 
   FOG_INLINE void setCenter(const PointF& cp) { center = cp; }
-  FOG_INLINE void setRadius(const PointF& rp) { radius = rp; }
   FOG_INLINE void setRadius(float rad) { radius.set(rad, rad); }
+  FOG_INLINE void setRadius(const PointF& rp) { radius = rp; }
 
   FOG_INLINE void setEllipse(const EllipseF& ellipse) { center = ellipse.center; radius = ellipse.radius; }
   FOG_INLINE void setEllipse(const EllipseD& ellipse);
+
+  FOG_INLINE void setEllipse(const PointF& cp, float rad) { center = cp; radius.set(rad, rad); }
   FOG_INLINE void setEllipse(const PointF& cp, const PointF& rp) { center = cp; radius = rp; }
 
-  FOG_INLINE void setEllipse(const CircleF& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
-  FOG_INLINE void setEllipse(const PointF& cp, float rad) { center = cp; radius.set(rad, rad); }
+  FOG_INLINE void setEllipse(float x0, float y0, float rad) { center.set(x0, y0); radius.set(rad, rad); }
+  FOG_INLINE void setEllipse(float x0, float y0, float rx, float ry) { center.set(x0, y0); radius.set(rx, ry); }
 
+  FOG_INLINE void setEllipse(const CircleF& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
   FOG_INLINE void setEllipse(const RectF& r) { radius.set(r.w * 0.5f, r.h * 0.5f); center.set(r.x + radius.x, r.y + radius.y); }
   FOG_INLINE void setEllipse(const BoxF& r) { radius.set(r.getWidth() * 0.5f, r.getHeight() * 0.5f); center.set(r.x0 + radius.x, r.y0 + radius.y); }
 
@@ -152,6 +156,29 @@ struct FOG_NO_EXPORT EllipseF
   FOG_INLINE bool operator!=(const EllipseF& other) const { return !MemOps::eq_t<EllipseF>(this, &other); }
 
   // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE EllipseF fromCircle(const CircleF& circle)
+  {
+    return EllipseF(circle.center.x, circle.center.y, circle.radius, circle.radius);
+  }
+
+  static FOG_INLINE EllipseF fromBox(const BoxF& r)
+  {
+    float rx = r.getWidth() * 0.5f;
+    float ry = r.getHeight() * 0.5f;
+    return EllipseF(r.x0 + rx, r.y0 + ry, rx, ry);
+  }
+
+  static FOG_INLINE EllipseF fromRect(const RectF& r)
+  {
+    float rx = r.getWidth() * 0.5f;
+    float ry = r.getHeight() * 0.5f;
+    return EllipseF(r.x + rx, r.y + ry, rx, ry);
+  }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -175,10 +202,11 @@ struct FOG_NO_EXPORT EllipseD
   FOG_INLINE EllipseD(const PointD& cp, const PointD& rp) { setEllipse(cp, rp); }
   FOG_INLINE EllipseD(const PointD& cp, double rad) { setEllipse(cp, rad); }
 
+  FOG_INLINE EllipseD(double x0, double y0, double rad) { setEllipse(x0, y0, rad); }
+  FOG_INLINE EllipseD(double x0, double y0, double rx, double ry) { setEllipse(x0, y0, rx, ry); }
+
   explicit FOG_INLINE EllipseD(_Uninitialized) {}
   explicit FOG_INLINE EllipseD(const EllipseF& ellipse) { setEllipse(ellipse); }
-  explicit FOG_INLINE EllipseD(const RectD& r) { setEllipse(r); }
-  explicit FOG_INLINE EllipseD(const BoxD& r) { setEllipse(r); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -193,8 +221,12 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE void setEllipse(const EllipseD& ellipse) { center = ellipse.center; radius = ellipse.radius; }
   FOG_INLINE void setEllipse(const EllipseF& ellipse) { center = ellipse.center; radius = ellipse.radius; }
-  FOG_INLINE void setEllipse(const PointD& cp, const PointD& rp) { center = cp; radius = rp; }
+
   FOG_INLINE void setEllipse(const PointD& cp, double rad) { center = cp; radius.set(rad, rad); }
+  FOG_INLINE void setEllipse(const PointD& cp, const PointD& rp) { center = cp; radius = rp; }
+
+  FOG_INLINE void setEllipse(double x0, double y0, double rad) { center.set(x0, y0); radius.set(rad, rad); }
+  FOG_INLINE void setEllipse(double x0, double y0, double rx, double ry) { center.set(x0, y0); radius.set(rx, ry); }
 
   FOG_INLINE void setEllipse(const CircleD& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
   FOG_INLINE void setEllipse(const RectD& r) { radius.set(r.w * 0.5, r.h * 0.5); center.set(r.x + radius.x, r.y + radius.y); }
@@ -286,6 +318,29 @@ struct FOG_NO_EXPORT EllipseD
 
   FOG_INLINE bool operator==(const EllipseD& other) const { return  MemOps::eq_t<EllipseD>(this, &other); }
   FOG_INLINE bool operator!=(const EllipseD& other) const { return !MemOps::eq_t<EllipseD>(this, &other); }
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE EllipseD fromCircle(const CircleD& circle)
+  {
+    return EllipseD(circle.center.x, circle.center.y, circle.radius, circle.radius);
+  }
+
+  static FOG_INLINE EllipseD fromBox(const BoxD& r)
+  {
+    double rx = r.getWidth() * 0.5;
+    double ry = r.getHeight() * 0.5;
+    return EllipseD(r.x0 + rx, r.y0 + ry, rx, ry);
+  }
+
+  static FOG_INLINE EllipseD fromRect(const RectD& r)
+  {
+    double rx = r.getWidth() * 0.5;
+    double ry = r.getHeight() * 0.5;
+    return EllipseD(r.x + rx, r.y + ry, rx, ry);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]

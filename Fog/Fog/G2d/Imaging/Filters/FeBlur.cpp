@@ -21,8 +21,8 @@ namespace Fog {
 
 static void FOG_CDECL FeBlur_ctor(FeBlur* self)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_BLUR;
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_feType = FE_TYPE_BLUR;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor.init();
 
   self->_blurType = FE_BLUR_TYPE_DEFAULT;
@@ -41,7 +41,7 @@ static void FOG_CDECL FeBlur_ctorCopy(FeBlur* self, const FeBlur* other)
 
 static void FOG_CDECL FeBlur_reset(FeBlur* self)
 {
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor.init();
 
   self->_blurType = FE_BLUR_TYPE_DEFAULT;

@@ -53,6 +53,7 @@ bool BenchApp::hasBenchSource(uint32_t benchType)
     case BENCH_TYPE_FILL_RECT_ROTATE:
     case BENCH_TYPE_FILL_ROUND:
     case BENCH_TYPE_FILL_POLYGON:
+    case BENCH_TYPE_FILL_COMPLEX:
       return true;
 
     default:
@@ -265,7 +266,7 @@ void BenchApp::makeRand()
 
   for (uint32_t i = 0; i < randomSize; i++)
   {
-    randomData[i] = ((rand() & 0xFFFF)      ) ^ 
+    randomData[i] = ((rand() & 0xFFFF)      ) ^
                     ((rand() & 0xFFFF) <<  8) ^
                     ((rand() & 0xFFFF) << 16) ;
   }
@@ -284,6 +285,7 @@ Fog::StringW BenchApp::getBenchString(uint32_t bench) const
     "FillRectRot",
     "FillRound",
     "FillPolygon",
+    "FillComplex",
     "BlitImageI",
     "BlitImageRot"
   };
@@ -520,7 +522,7 @@ int main(int argc, char* argv[])
   BenchApp app(Fog::SizeI(600, 600), 10000);
 
   // Testing...
-  app.saveImages = true;
+  app.saveImages = false;
 
   // Show FogBench info.
   app.logInfo();

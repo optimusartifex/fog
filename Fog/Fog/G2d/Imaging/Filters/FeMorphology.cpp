@@ -21,8 +21,8 @@ namespace Fog {
 
 static void FOG_CDECL FeMorphology_ctor(FeMorphology* self)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_BLUR;
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_feType = FE_TYPE_BLUR;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor.init();
 
   self->_morphologyType = FE_MORPHOLOGY_TYPE_DEFAULT;
@@ -41,7 +41,7 @@ static void FOG_CDECL FeMorphology_ctorCopy(FeMorphology* self, const FeMorpholo
 
 static void FOG_CDECL FeMorphology_reset(FeMorphology* self)
 {
-  self->_extendType = IMAGE_FILTER_EXTEND_COLOR;
+  self->_extendType = FE_EXTEND_COLOR;
   self->_extendColor.init();
 
   self->_morphologyType = FE_MORPHOLOGY_TYPE_DEFAULT;

@@ -24,7 +24,7 @@ static void FOG_CDECL FeColorLut_ctor(FeColorLut* self)
   FeColorLutArrayData* identity = fog_api.fecolorlutarray_oIdentity->_d;
   identity->reference.add(4);
 
-  self->_filterType = IMAGE_FILTER_TYPE_COLOR_LUT;
+  self->_feType = FE_TYPE_COLOR_LUT;
   self->c[0].initCustom1(identity);
   self->c[1].initCustom1(identity);
   self->c[2].initCustom1(identity);
@@ -33,7 +33,7 @@ static void FOG_CDECL FeColorLut_ctor(FeColorLut* self)
 
 static void FOG_CDECL FeColorLut_ctorCopy(FeColorLut* self, const FeColorLut* other)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_COLOR_LUT;
+  self->_feType = FE_TYPE_COLOR_LUT;
   self->c[0].initCustom1(other->c[0]->_d->addRef());
   self->c[1].initCustom1(other->c[1]->_d->addRef());
   self->c[2].initCustom1(other->c[2]->_d->addRef());

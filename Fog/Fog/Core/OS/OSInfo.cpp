@@ -53,7 +53,7 @@ static err_t FOG_CDECL OSInfo_getName(StringW* dst)
     case WIN_VERSION_7       : versionString = "Windows 7"             ; break;
   }
 
-  return dst->format("%s %u.%u.%u", 
+  return dst->format("%s %u.%u.%u",
     versionString,
     versionData.major,
     versionData.minor,

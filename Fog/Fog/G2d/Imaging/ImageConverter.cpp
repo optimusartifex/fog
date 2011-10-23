@@ -18,7 +18,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::ImageConverter - Globals]
+// [Fog::ImageConverter - Global]
 // ============================================================================
 
 static Static<ImageConverterData> ImageConverter_dNull;

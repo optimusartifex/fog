@@ -45,11 +45,11 @@ void BenchFog::bench(BenchOutput& output, const BenchParams& params)
     case BENCH_TYPE_CREATE_DESTROY:
       runCreateDestroy(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_I:
       runFillRectI(output, params);
       break;
-    
+
     case BENCH_TYPE_FILL_RECT_F:
       runFillRectF(output, params);
       break;
@@ -63,7 +63,11 @@ void BenchFog::bench(BenchOutput& output, const BenchParams& params)
       break;
 
     case BENCH_TYPE_FILL_POLYGON:
-      runFillPolygon(output, params);
+      runFillPolygon(output, params, 10);
+      break;
+
+    case BENCH_TYPE_FILL_COMPLEX:
+      runFillPolygon(output, params, 100);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_I:
@@ -87,7 +91,7 @@ void BenchFog::configurePainter(Fog::Painter& p, const BenchParams& params)
   p.setCompositingOperator(params.op);
   p.setGradientQuality(Fog::GRADIENT_QUALITY_NORMAL);
 }
- 
+
 void BenchFog::configureGradient(Fog::LinearGradientF& gradient,
   const Fog::RectI& r, const Fog::Argb32& c0, const Fog::Argb32& c1, const Fog::Argb32& c2)
 {
@@ -307,7 +311,7 @@ void BenchFog::runFillRound(BenchOutput& output, const BenchParams& params)
   }
 }
 
-void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
+void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity)
 {
   Fog::Painter p(screen, Fog::NO_FLAGS);
   configurePainter(p, params);
@@ -320,7 +324,8 @@ void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
     params.screenSize.h - params.shapeSize);
   float polySize = (float)params.shapeSize;
 
-  Fog::PointF points[10];
+  Fog::PointF points[128];
+  FOG_ASSERT(complexity < FOG_ARRAY_SIZE(points));
 
   if (params.source == BENCH_SOURCE_SOLID)
   {
@@ -329,7 +334,7 @@ void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
     {
       Fog::PointF base(rPts.getPointF(polyScreen));
 
-      for (uint32_t j = 0; j < FOG_ARRAY_SIZE(points); j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         float x = rPts.getFloat(base.x, base.x + polySize);
         float y = rPts.getFloat(base.y, base.y + polySize);
@@ -338,7 +343,7 @@ void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
       Fog::Argb32 c0(rArgb.getArgb32());
 
       p.setSource(c0);
-      p.fillPolygon(points, FOG_ARRAY_SIZE(points));
+      p.fillPolygon(points, complexity);
     }
   }
   else
@@ -351,7 +356,7 @@ void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
     {
       Fog::PointF base(rPts.getPointF(polyScreen));
 
-      for (uint32_t j = 0; j < FOG_ARRAY_SIZE(points); j++)
+      for (uint32_t j = 0; j < complexity; j++)
       {
         float x = rPts.getFloat(base.x, base.x + polySize);
         float y = rPts.getFloat(base.y, base.y + polySize);
@@ -364,7 +369,7 @@ void BenchFog::runFillPolygon(BenchOutput& output, const BenchParams& params)
 
       configureGradient(gradient, Fog::RectF(base.x, base.y, polySize, polySize), c0, c1, c2);
       p.setSource(gradient);
-      p.fillPolygon(points, FOG_ARRAY_SIZE(points));
+      p.fillPolygon(points, complexity);
       p.setSource();
     }
   }

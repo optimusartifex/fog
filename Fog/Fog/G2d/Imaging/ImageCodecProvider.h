@@ -129,7 +129,6 @@ struct FOG_API ImageCodecProvider
   // [Members]
   // --------------------------------------------------------------------------
 
-protected:
   mutable Atomic<size_t> _reference;
 
   //! @brief Supported device flags (see @c IMAGE_CODEC).

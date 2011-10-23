@@ -83,7 +83,7 @@ static err_t FOG_CDECL UserUtil_getSpecialDirectory(StringW* dst, DWORD csidl, c
   {
 _Fail:
     dst->set(bail);
-    FOG_RETURN_ON_ERROR(FilePath::substituteEnvironmentVars(*dst, *dst, 
+    FOG_RETURN_ON_ERROR(FilePath::substituteEnvironmentVars(*dst, *dst,
       FILE_PATH_SUBSTITUTE_FORMAT_WINDOWS));
 
     return ERR_OK;
@@ -206,7 +206,7 @@ static err_t FOG_CDECL UserUtil_getUserDirectory(StringW* dst, uint32_t userDire
     case USER_DIRECTORY_HOME:
       err = UserUtil_getHomeDirectory(dst);
       break;
-    
+
     case USER_DIRECTORY_CONFIG:
       err = UserUtil_getSpecialDirectory(dst, CSIDL_LOCAL_APPDATA, Ascii8("~/Local Settings/Application Data"));
       break;
@@ -218,7 +218,7 @@ static err_t FOG_CDECL UserUtil_getUserDirectory(StringW* dst, uint32_t userDire
     case USER_DIRECTORY_CACHE:
       err = UserUtil_getSpecialDirectory(dst, CSIDL_INTERNET_CACHE, Ascii8("~/Local Settings/Temporary Internet Files"));
       break;
-    
+
     default:
       err = UserUtil_registryLookupDir(dst, userDirectory);
       break;
@@ -252,7 +252,7 @@ static uint32_t FOG_CDECL UserUtil_getGid()
 static err_t FOG_CDECL UserUtil_getEnvDirectory(StringW* dst, const Ascii8& key, const Ascii8& bail)
 {
   char* s = getenv(key.getData());
-  
+
   if (s != NULL && s[0])
     FOG_RETURN_ON_ERROR(TextCodec::local8().decode(*dst, StubA(s)));
   else
@@ -320,7 +320,7 @@ static err_t FOG_CDECL UserUtil_getXdgDirectory(StringW* dst, uint32_t userDirec
 {
   FOG_ASSERT(userDirectory < FOG_ARRAY_SIZE(UserUtil_userDirectoryNames));
   FOG_ASSERT(UserUtil_userDirectoryNames[userDirectory] != NULL);
-  
+
   // Dst should be empty.
   FOG_ASSERT(dst->isEmpty());
 
@@ -348,7 +348,7 @@ static err_t FOG_CDECL UserUtil_getXdgDirectory(StringW* dst, uint32_t userDirec
 
   FileMapping fileMapping;
   err_t err = fileMapping.open(configPath, FILE_MAPPING_FLAG_LOAD_FALLBACK);
-  
+
   if (FOG_IS_ERROR(err))
     goto _Fail;
 

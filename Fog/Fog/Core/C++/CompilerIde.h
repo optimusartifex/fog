@@ -3,11 +3,12 @@
 // [License]
 // MIT, See COPYING file in package
 
+// [Guard]
 #ifndef _FOG_CORE_CPP_COMPILER_IDE_H
 #define _FOG_CORE_CPP_COMPILER_IDE_H
 
 // ============================================================================
-// [Fog::Core::Config - C++ Compiler - IDE]
+// [Fog::Core::C++ - IDE Support (Compiler Agnostic)]
 // ============================================================================
 
 // Here we generate macros thats friendly for IDEs. In compilation time they are
@@ -40,14 +41,14 @@
 #define FOG_DLL_EXPORT
 
 // Likely / Unlikely.
-#define FOG_LIKELY(exp) (exp)
-#define FOG_UNLIKELY(exp) (exp)
+#define FOG_LIKELY(_Exp_) (_Exp_)
+#define FOG_UNLIKELY(_Exp_) (_Exp_)
 
 // Nothrow.
 #define FOG_NOTHROW throw()
 
 // Unused.
-#define FOG_UNUSED(a)
+#define FOG_UNUSED(a) (void)(a)
 
 // Static-template.
 # define FOG_STATIC_T
@@ -64,19 +65,16 @@
 #define FOG_MACRO_END } while(0)
 
 // Variables.
-#define FOG_CVAR_EXTERN_BASE(api) extern "C"
-#define FOG_CVAR_DECLARE_BASE(api) extern "C"
+#define FOG_CVAR_EXTERN_BASE(_Api_) extern "C"
+#define FOG_CVAR_DECLARE_BASE(_Api_) extern "C"
 
 // C API.
-#define FOG_CAPI_EXTERN_BASE(api) extern "C"
-#define FOG_CAPI_DECLARE_BASE(api) extern "C"
-
-// C API.
-#define FOG_INIT_EXTERN_BASE(api) extern "C"
-#define FOG_INIT_DECLARE_BASE(api) extern "C"
+#define FOG_CAPI_EXTERN_BASE(_Api_) extern "C"
+#define FOG_CAPI_DECLARE_BASE(_Api_) extern "C"
 
 // API.
 #define FOG_API
 #define FOG_NO_EXPORT
 
+// [Guard]
 #endif // _FOG_CORE_CPP_COMPILER_IDE_H

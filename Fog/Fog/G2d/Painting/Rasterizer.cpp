@@ -38,6 +38,14 @@ struct CellLogger
 
   static CellLogger instance;
 
+  static void out(const char* fmt, ...)
+  {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(instance.f, fmt, ap);
+    va_end(ap);
+  }
+
   static void log(int x, int y, int cover, int area, const char* where_)
   {
     fprintf(instance.f, "%s [%3d %3d] ... [Cover=%d, Area=%d]\n", where_, x, y, cover, area);
@@ -51,6 +59,7 @@ struct CellLogger
     }
     else
     {
+      PathRasterizer8::Chunk* first = chunk;
       fprintf(instance.f, "%d - ", y);
       int sum = 0;
 
@@ -65,10 +74,12 @@ struct CellLogger
         fprintf(instance.f, "] ");
 
         chunk = chunk->next;
-      } while (chunk);
+      } while (chunk != first);
 
       fprintf(instance.f, "COVER_SUM=%d", sum);
       fprintf(instance.f, "\n");
+      fflush(instance.f);
+      FOG_ASSERT(sum == 0);
     }
   }
 };
@@ -86,8 +97,11 @@ CellLogger CellLogger::instance;
 enum A8_ENUM
 {
   A8_SHIFT   = 8,             // 8
+  A8_SHIFT_2 = A8_SHIFT + 1,  // 9
+
   A8_SCALE   = 1 << A8_SHIFT, // 256
   A8_SCALE_2 = A8_SCALE * 2,  // 512
+
   A8_MASK    = A8_SCALE - 1,  // 255
   A8_MASK_2  = A8_SCALE_2 - 1 // 511
 };
@@ -481,6 +495,44 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_mask(
 }
 
 // ============================================================================
+// [Fog::PathRasterizer8 - Debug]
+// ============================================================================
+
+#if defined(FOG_DEBUG)
+# define VERIFY_CHUNKS_8(_First_) \
+  FOG_MACRO_BEGIN \
+    PathRasterizer8::Chunk* _cVerifyFirst = (_First_); \
+    PathRasterizer8::Chunk* _cVerifyPtr = _cVerifyFirst; \
+    \
+    int _cVerifySum = 0; \
+    \
+    FOG_ASSERT_X(_cVerifyPtr->x0 < _cVerifyFirst->prev->x1, \
+      "Fog::PathRasterizer8::VERIFY_CHUNKS() - Invalid first chunk."); \
+    \
+    do { \
+      PathRasterizer8::Chunk* _cVerifyNext = _cVerifyPtr->next; \
+      \
+      FOG_ASSERT(_cVerifyPtr->x0 <  _cVerifyPtr->x1); \
+      FOG_ASSERT(_cVerifyPtr->x1 <= _cVerifyNext->x0 || _cVerifyNext == _cVerifyFirst); \
+      \
+      int _cVerifyLength = _cVerifyPtr->x1 - _cVerifyPtr->x0; \
+      for (int _cVerifyI = 0; _cVerifyI < _cVerifyLength; _cVerifyI++) \
+      { \
+        _cVerifySum += _cVerifyPtr->cells[_cVerifyI].cover; \
+      } \
+      _cVerifyPtr = _cVerifyNext; \
+    } while (_cVerifyPtr != _cVerifyFirst); \
+    \
+    FOG_ASSERT_X(_cVerifySum == 0, \
+      "Fog::PathRasterizer8::VERIFY_CHUNKS() - Invalid sum of cells, must be zero."); \
+    \
+  FOG_MACRO_END
+#else
+# define VERIFY_CHUNKS_8(_First_) \
+  FOG_NOP
+#endif // FOG_DEBUG
+
+// ============================================================================
 // [Fog::PathRasterizer8 - Construction / Destruction]
 // ============================================================================
 
@@ -678,7 +730,7 @@ _MoveTo:
       }
 
       levelStack[0] = level;
-      top       = 0;
+      top = 0;
 
       do {
         level = levelStack[top];
@@ -977,327 +1029,129 @@ void PathRasterizer8::addBox(const BoxD& box)
 // [Fog::PathRasterizer8 - Render]
 // ============================================================================
 
-#define NEW_CHUNK(_Chunk_, _Next_, _X0_, _Length_) \
+#define NEW_CHUNK(_Chunk_, _X_, _Length_) \
   FOG_MACRO_BEGIN \
-    PathRasterizer8::Chunk* _ch = reinterpret_cast<PathRasterizer8::Chunk*>( \
-      self->_allocator.alloc(PathRasterizer8::Chunk::getSizeOf(_Length_))); \
+    _Chunk_ = reinterpret_cast<PathRasterizer8::Chunk*>(self->_allocator.alloc(PathRasterizer8::Chunk::getSizeOf(_Length_))); \
+    if (FOG_IS_NULL(_Chunk_)) goto _Bail; \
     \
-    if (FOG_IS_NULL(_ch)) \
-      goto _Bail; \
-    \
-    _ch->next = _Next_; \
-    _ch->x0 = _X0_; \
-    _ch->x1 = _X0_ + _Length_; \
-    \
-    _Chunk_ = _ch; \
+    _Chunk_->x0 = (_X_); \
+    _Chunk_->x1 = (_X_) + _Length_; \
   FOG_MACRO_END
 
-static FOG_INLINE bool PathRasterizer8_renderHLine(PathRasterizer8* self, int ey, Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1)
-{
-  int dx = x1 - x0;
-  int dy = y1 - y0;
-
-  // Trivial case. Happens often.
-  if (dy == 0)
-    return true;
-
-  int ex0 = x0 >> A8_SHIFT;
-  int ex1 = x1 >> A8_SHIFT;
-
-  int fx0 = x0 & A8_MASK;
-  int fx1 = x1 & A8_MASK;
-
-  int cover, area;
-  int p, lift, mod, rem;
-
-  int first = true;
-  int last;
-
-  int additive;
-  int stop;
-
-  PathRasterizer8::Row* row = &self->_rows[ey];
-  PathRasterizer8::Cell* cell;
-
-  PathRasterizer8::Chunk** link;
-  PathRasterizer8::Chunk* chunk;
-
-  if (dx < 0)
-  {
-    dx = -dx;
-    swap(ex0, ex1);
-    swap(fx0, fx1);
-  }
-
-  chunk = row->hint;
-  if (chunk && chunk->x0 <= ex0)
-  {
-    link = NULL;
-    if (chunk->x1 <= ex0)
-    {
-      link = &chunk->next;
-      chunk = *link;
-    }
-  }
-  else
-  {
-    link = &row->first;
-    chunk = *link;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Single-Cell]
-  // --------------------------------------------------------------------------
-
-  if (ex0 == ex1)
-  {
-    cover = dy;
-    area = dy * (fx0 + fx1);
-
-_Single:
-    while (chunk)
-    {
-      //   Chunk    ex0
-      //<---------| |-|
-      if (chunk->x1 <= ex0)
-      {
-        link = &chunk->next;
-        chunk = *link;
-        continue;
-      }
-
-      if (chunk->x0 <= ex0)
-      {
-        FOG_ASSERT(ex0 >= chunk->x0 && ex0 < chunk->x1);
-        cell = &chunk->cells[ex0 - chunk->x0];
-        // CellLogger::log(ex0, ey, cover, area, "H+One");
-        cell->add(cover, area);
-        return true;
-      }
-      break;
-    }
-
-    NEW_CHUNK(chunk, chunk, ex0, 1);
-    *link = chunk;
-
-    // CellLogger::log(ex0, ey, cover, area, "H-One");
-    chunk->cells[0].set(cover, area);
-    row->hint = chunk;
-    return true;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Multi-Cell]
-  // --------------------------------------------------------------------------
-
-  row->hint = chunk;
-
-  // Create cover and area for the first cell.
-  p     = dy * (A8_SCALE - fx0);
-  cover = p / dx;
-  mod   = p % dx; if (mod < 0) { mod += dx; cover--; }
-  area  = cover * (fx0 + A8_SCALE);
-
-  // Create cover and area for adjacent cells.
-  if (ex1 - ex0 > 1)
-  {
-    p     = dy * A8_SCALE;
-    lift  = p / dx;
-    rem   = p % dx; if (rem < 0) { rem += dx; lift--; }
-    mod  -= dx;
-  }
-
-  // Skip the first cell if zero.
-  if (area == 0)
-  {
-    first = false;
-    ex0++;
-  }
-
-  // Convert the [ex0, ex1] coordinates to the standard format,
-  // thus 'ex1' becomes outside of the horizontal-line boundary.
-  ex1++;
-
-  // The last cells coverage which is added to the cell chunk can be zero. We
-  // ignore this situation unless the last cell position is outside of the
-  // screen.
-  //if (ex0 == ex1)
-  //  return true;
-
-_Advance:
-  additive = false;
-  stop = ex1;
-
-  if (chunk == NULL)
-  {
-_EntireHLine:
-    int len = ex1 - ex0;
-
-    if (len > PATHRASTERIZER8_MAX_CHUNK_SIZE)
-    {
-      len = PATHRASTERIZER8_MAX_CHUNK_SIZE;
-      stop = ex0 + len;
-    }
-
-    NEW_CHUNK(chunk, chunk, ex0, len);
-    *link = chunk;
-    cell = chunk->cells;
-    row->hint = chunk;
-  }
-  else
-  {
-    do {
-      if (chunk->x1 <= ex0)
-      {
-        link = &chunk->next;
-        chunk = *link;
-        continue;
-      }
-
-      if (chunk->x0 >= ex1)
-        goto _EntireHLine;
-      break;
-    } while (chunk);
-
-    if (chunk == NULL)
-      goto _EntireHLine;
-
-    // There must be intersection if we are here.
-    FOG_ASSERT(Math::max(chunk->x0, ex0) < Math::min(chunk->x1, ex1));
-
-    stop = chunk->x0;
-    if (stop > ex0)
-    {
-      //ex0       ex1
-      // |---------|
-      //
-      //      |---------|
-      //         Chunk
-
-      int len = stop - ex0;
-      if (len > PATHRASTERIZER8_MAX_CHUNK_SIZE)
-      {
-        len = PATHRASTERIZER8_MAX_CHUNK_SIZE;
-        stop = ex0 + len;
-      }
-
-      FOG_ASSERT(link != NULL);
-      NEW_CHUNK(chunk, chunk, ex0, len);
-
-      *link = chunk;
-      cell = chunk->cells;
-    }
-    else
-    {
-      //   Chunk
-      //|---------|
-      //
-      //     |---------|
-      //    ex0       ex1
-      additive = true;
-      stop = Math::min(chunk->x1, ex1);
-      cell = &chunk->cells[ex0 - chunk->x0];
-    }
-  }
-
-  FOG_ASSERT(ex0 < stop);
-  FOG_ASSERT(ex1 >= stop);
-
-  last = (stop == ex1);
-  stop -= last;
-
-  if (additive)
-  {
-    if (first)
-    {
-      FOG_ASSERT(ex0 != stop);
-      first = false;
-      // CellLogger::log(ex0, ey, cover, area, "H+1st");
-      goto _DoAdd;
-    }
-
-    while (ex0 != stop)
-    {
-      cover = lift;
-      mod  += rem; if (mod >= 0) { mod -= dx; cover++; }
-      area  = cover * A8_SCALE;
-
-      // CellLogger::log(ex0, ey, cover, area, "H+Mid");
-_DoAdd:
-      cell->add(cover, area);
-      cell++;
-
-      y0 += cover;
-      ex0++;
-    }
-
-    if (!last)
-      goto _Advance;
-
-    cover = y1 - y0;
-    area = cover * fx1;
-
-    // CellLogger::log(ex0, ey, cover, area, "H+End");
-    cell->add(cover, area);
-    return true;
-  }
-  else
-  {
-    if (first)
-    {
-      FOG_ASSERT(ex0 != stop);
-      first = false;
-      // CellLogger::log(ex0, ey, cover, area, "H-1st");
-      goto _DoSet;
-    }
-
-    while (ex0 != stop)
-    {
-      cover = lift;
-      mod  += rem; if (mod >= 0) { mod -= dx; cover++; }
-      area  = cover * A8_SCALE;
-
-      // CellLogger::log(ex0, ey, cover, area, "H-Mid");
-_DoSet:
-      cell->set(cover, area);
-      cell++;
-
-      y0 += cover;
-      ex0++;
-    }
-
-    if (!last)
-      goto _Advance;
-
-    cover = y1 - y0;
-    area = cover * fx1;
-
-    // CellLogger::log(ex0, ey, cover, area, "H-End");
-    cell->set(cover, area);
-    return true;
-  }
-
-_Bail:
-  return false;
-}
+#define ADD_SINGLE(_Name_, _X_, _Cover_, _Area_) \
+  FOG_MACRO_BEGIN \
+    PathRasterizer8::Chunk* _chunk = rPtr->first; \
+    \
+    if (_chunk == NULL) \
+    { \
+      NEW_CHUNK(_chunk, _X_, 1); \
+      \
+      _chunk->prev = _chunk; \
+      _chunk->next = _chunk; \
+      /*CellLogger::log(_X_, (int)(rPtr - self->_rows), _Cover_, _Area_, "H=One"); */\
+      _chunk->cells[0].set(_Cover_, _Area_); \
+      \
+      rPtr->first = _chunk; \
+    } \
+    else if (_X_ < _chunk->x0) \
+    { \
+      PathRasterizer8::Chunk* _last = _chunk->prev; \
+      PathRasterizer8::Chunk* _cNew; \
+      \
+      NEW_CHUNK(_cNew, _X_, 1); \
+      \
+      _cNew->prev = _last; \
+      _cNew->next = _chunk; \
+      /*CellLogger::log(_X_, (int)(rPtr - self->_rows), _Cover_, _Area_, "H=One"); */\
+      _cNew->cells[0].set(_Cover_, _Area_); \
+      \
+      _last->next = _cNew; \
+      _chunk->prev = _cNew; \
+      \
+      rPtr->first = _cNew; \
+      FOG_ASSERT(_cNew->x1 <= _chunk->x0); \
+    } \
+    else \
+    { \
+      PathRasterizer8::Chunk* _last = _chunk->prev; \
+      \
+      if (_X_ < _last->x1) \
+      { \
+        if ((_X_ - _chunk->x0) <= (_last->x1 - _X_)) \
+        { \
+          for (;;) \
+          { \
+            if (_X_ < _chunk->x0) \
+              break; \
+            \
+            if (_X_ < _chunk->x1) \
+              goto _Name_##_Merge; \
+            \
+            FOG_ASSERT(_chunk != _last); \
+            _chunk = _chunk->next; \
+          } \
+        } \
+        else \
+        { \
+          _chunk = _last; \
+          for (;;) \
+          { \
+            if (_X_ >= _chunk->x0) \
+            { \
+_Name_##_Merge: \
+              /*CellLogger::log(_X_, (int)(rPtr - self->_rows), _Cover_, _Area_, "H+One"); */\
+              _chunk->cells[_X_ - _chunk->x0].add(_Cover_, _Area_); \
+              goto _Name_##_End; \
+            } \
+            \
+            _chunk = _chunk->prev; \
+            FOG_ASSERT(_chunk != _last); \
+            \
+            if (_X_ >= _chunk->x1) \
+              break; \
+          } \
+          _chunk = _chunk->next; \
+        } \
+        FOG_ASSERT(_X_ + 1 <= _chunk->x0); \
+      } \
+      \
+      PathRasterizer8::Chunk* _prev = _chunk->prev; \
+      PathRasterizer8::Chunk* _cNew; \
+      \
+      NEW_CHUNK(_cNew, _X_, 1); \
+      \
+      _cNew->prev = _prev; \
+      _cNew->next = _chunk; \
+      /*CellLogger::log(_X_, (int)(rPtr - self->_rows), _Cover_, _Area_, "H=One"); */\
+      _cNew->cells[0].set(_Cover_, _Area_); \
+      \
+      _prev->next = _cNew; \
+      _chunk->prev = _cNew; \
+    } \
+_Name_##_End: \
+    ; \
+  FOG_MACRO_END \
 
 static bool PathRasterizer8_renderLine(PathRasterizer8* self, Fixed24x8 x0, Fixed24x8 y0, Fixed24x8 x1, Fixed24x8 y1)
 {
-  enum DXLimitEnum { DXLimit = 16384 << A8_SHIFT };
-
   int dx = x1 - x0;
   int dy = y1 - y0;
+
+  //CellLogger::out("RenderLine [x0=%d y0=%d] -> [x1=%d y1=%d] | (dx=%d dy=%d)\n", x0, y0, x1, y1, dx, dy);
 
   if (dy == 0)
     return true;
 
+  enum DXLimitEnum { DXLimit = 16384 << A8_SHIFT };
   if (FOG_UNLIKELY(!Math::isBounded<int>(dx, -DXLimit, DXLimit)))
   {
     int cx = (x0 + x1) >> 1;
     int cy = (y0 + y1) >> 1;
 
-    if (!PathRasterizer8_renderLine(self, x0, y0, cx, cy)) return false;
-    if (!PathRasterizer8_renderLine(self, cx, cy, x1, y1)) return false;
+    if (!PathRasterizer8_renderLine(self, x0, y0, cx, cy))
+      return false;
+    if (!PathRasterizer8_renderLine(self, cx, cy, x1, y1))
+      return false;
 
     return true;
   }
@@ -1309,134 +1163,97 @@ static bool PathRasterizer8_renderLine(PathRasterizer8* self, Fixed24x8 x0, Fixe
   int fy0 = y0 & A8_MASK;
   int fy1 = y1 & A8_MASK;
 
-  int x_from, x_to;
-  int p, rem, mod, lift, delta, first, incr;
+  //CellLogger::out("RenderLine [ex0=%d ey0=%d] -> [ex1=%d ey1=%d] | (fy0=%d fy1=%d)\n", ex0, ey0, ex1, ey1, fy0, fy1);
 
-  PathRasterizer8::Row* rows = self->_rows;
+  int i = 1;
+  int j = ey1 - ey0;
 
-  // Initialize bounding box if this is the first call to renderLine().
-  if (FOG_UNLIKELY(self->_boundingBox.y0 == -1))
+  int incr  = ey1 >= ey0;
+  int first = A8_SCALE;
+
+  if (!incr)
   {
-    self->_boundingBox.x0 = ex0;
-    self->_boundingBox.y0 = ey0;
-    self->_boundingBox.x1 = ex0;
-    self->_boundingBox.y1 = ey0;
-
-    rows[ey0].first = NULL;
-    rows[ey0].hint = NULL;
+    first = 0;
+    incr  =-1;
+    dy    =-dy;
+    j     =-j;
   }
 
-  if (ex0 < ex1)
+  PathRasterizer8::Row* rPtr = self->_rows;
+  PathRasterizer8::Row* rEnd = rPtr;
+
+  // --------------------------------------------------------------------------
+  // [Initialize / Merge Bounding-Box]
+  // --------------------------------------------------------------------------
+
+  if (FOG_UNLIKELY(self->_boundingBox.y0 == -1))
   {
-    if (ex0 < self->_boundingBox.x0) self->_boundingBox.x0 = ex0;
-    if (ex1 > self->_boundingBox.x1) self->_boundingBox.x1 = ex1;
+    // This is the first call to the renderLine(), thus initialize the bounding-box.
+    self->_boundingBox.x0 = Math::min(ex0, ex1);
+    self->_boundingBox.y0 = Math::min(ey0, ey1);
+    self->_boundingBox.x1 = Math::max(ex0, ex1);
+    self->_boundingBox.y1 = Math::max(ey0, ey1);
+
+    // And clear all rows within it.
+    int iy = ey0;
+    for (;;)
+    {
+      rPtr[iy].first = NULL;
+      if (iy == ey1)
+        break;
+      iy += incr;
+    }
   }
   else
   {
-    if (ex1 < self->_boundingBox.x0) self->_boundingBox.x0 = ex1;
-    if (ex0 > self->_boundingBox.x1) self->_boundingBox.x1 = ex0;
+    // This is not the first call to the renderLine(), thus extend the bounding-box
+    // by x0/x1.
+    {
+      int ix0 = ex0;
+      int ix1 = ex1;
+
+      if (ex0 > ex1)
+        swap(ix0, ix1);
+
+      if (ix0 < self->_boundingBox.x0) self->_boundingBox.x0 = ix0;
+      if (ix1 > self->_boundingBox.x1) self->_boundingBox.x1 = ix1;
+    }
+
+    // And purge new rows which will be accessed.
+    {
+      int iy0 = ey0;
+      int iy1 = ey1;
+      int ybox;
+
+      if (ey0 > ey1)
+        swap(iy0, iy1);
+
+      if (iy0 < (ybox = self->_boundingBox.y0))
+      {
+        self->_boundingBox.y0 = iy0;
+        do {
+          rPtr[iy0++].first = NULL;
+        } while (iy0 != ybox);
+      }
+
+      if (iy1 > (ybox = self->_boundingBox.y1))
+      {
+        self->_boundingBox.y1 = iy1;
+        do {
+          rPtr[++ybox].first = NULL;
+        } while (ybox != iy1);
+      }
+    }
   }
+
+  rPtr += ey0;
+  rEnd += ey1 + incr;
 
   FOG_ASSERT(ex0 >= 0 && ey0 >= 0 && ex0 <= self->_size.w && ey0 <= self->_size.h);
   FOG_ASSERT(ex1 >= 0 && ey1 >= 0 && ex1 <= self->_size.w && ey1 <= self->_size.h);
 
-#define PURGE_ROWS(_Start_, _Length_) \
-  FOG_MACRO_BEGIN \
-    PathRasterizer8::Row* _p = &rows[_Start_]; \
-    for (uint _i = _Length_; _i; _i--, _p++) \
-    { \
-      _p->first = NULL; \
-      _p->hint  = NULL; \
-    } \
-  FOG_MACRO_END
-
-#define ADD_SINGLE(_Name_, _X_, _Y_, _Cover_, _Area_) \
-  FOG_MACRO_BEGIN \
-    PathRasterizer8::Row* _row = &rows[_Y_]; \
-    \
-    PathRasterizer8::Chunk** _link; \
-    PathRasterizer8::Chunk* _chunk; \
-    \
-    _chunk = _row->hint; \
-    if (_chunk && _chunk->x0 <= _X_) \
-    { \
-      _link = NULL; \
-      if (_chunk->x1 <= ex0) \
-      { \
-        _link = &_chunk->next; \
-        _chunk = *_link; \
-      } \
-    } \
-    else \
-    { \
-      _link = &_row->first; \
-      _chunk = *_link; \
-    } \
-    \
-    while (_chunk) \
-    { \
-      if (_chunk->x1 <= _X_) \
-      { \
-        _link = &_chunk->next; \
-        _chunk = *_link; \
-        continue; \
-      } \
-      \
-      if (_chunk->x0 <= _X_) \
-      { \
-        FOG_ASSERT(_X_ >= _chunk->x0 && _X_ < _chunk->x1); \
-        /* CellLogger::log(_X_, _Y_, _Cover_, _Area_, "X-One"); */ \
-        _chunk->cells[_X_ - _chunk->x0].add(_Cover_, _Area_); \
-        goto _Name_##_End; \
-      } \
-      break; \
-    } \
-    \
-    NEW_CHUNK(_chunk, _chunk, _X_, 1); \
-    *_link = _chunk; \
-    /* CellLogger::log(_X_, _Y_, _Cover_, _Area_, "X-One"); */ \
-    _chunk->cells[0].set(_Cover_, _Area_); \
-    _row->hint = _chunk; \
-_Name_##_End: \
-    ; \
-  FOG_MACRO_END \
-
-  if (ey0 < ey1)
-  {
-    if (ey0 < self->_boundingBox.y0)
-    {
-      PURGE_ROWS(ey0, self->_boundingBox.y0 - ey0);
-      self->_boundingBox.y0 = ey0;
-    }
-    if (ey1 > self->_boundingBox.y1)
-    {
-      PURGE_ROWS(self->_boundingBox.y1 + 1, ey1 - self->_boundingBox.y1);
-      self->_boundingBox.y1 = ey1;
-    }
-  }
-  else
-  {
-    if (ey1 < self->_boundingBox.y0)
-    {
-      PURGE_ROWS(ey1, self->_boundingBox.y0 - ey1);
-      self->_boundingBox.y0 = ey1;
-    }
-    if (ey0 > self->_boundingBox.y1)
-    {
-      PURGE_ROWS(self->_boundingBox.y1 + 1, ey0 - self->_boundingBox.y1);
-      self->_boundingBox.y1 = ey0;
-    }
-  }
-#undef PURGE_ROWS
-
-  // Everything is on a single hline.
-  if (ey0 == ey1)
-    return PathRasterizer8_renderHLine(self, ey0, x0, fy0, x1, fy1);
-
-  incr = 1;
-
   // --------------------------------------------------------------------------
-  // [Vertical]
+  // [Vertical Line]
   // --------------------------------------------------------------------------
 
   // We have to calculate start and end cells, and then - the common values of
@@ -1444,79 +1261,443 @@ _Name_##_End: \
   // only one cell, so, we don't have to use complicated hline rendering.
   if (dx == 0)
   {
-    first = A8_SCALE;
-    if (dy < 0) { first = 0; incr = -1; }
+    int fx = (x0 & 0xFF) << 1;
+    int cover = dy;
 
-    int two_fx = (x0 - (ex0 << A8_SHIFT)) << 1;
-    int cover = first - fy0;
-    int area = cover * two_fx;
+    if (ey0 != ey1)
+      cover = first - fy0;
 
-    ADD_SINGLE(SingleFirst, ex0, ey0, cover, area);
-    ey0 += incr;
+    //CellLogger::out("Vertical\n");
 
-    cover = 2 * first - A8_SCALE;
-    area = cover * two_fx;
-
-    while (ey0 != ey1)
+    for (;;)
     {
-      ADD_SINGLE(SingleMiddle, ex0, ey0, cover, area);
-      ey0 += incr;
-    }
+      int area = cover * fx;
 
-    cover = first + fy1 - A8_SCALE;
-    area = cover * two_fx;
-    ADD_SINGLE(SingleLast, ex0, ey0, cover, area);
+      do {
+        ADD_SINGLE(VLineSingleCell, ex0, cover, area);
+        rPtr += incr;
+      } while (--i);
+
+      if (rPtr == rEnd)
+        break;
+
+      if (j > 1)
+      {
+        cover = (first << 1) - A8_SCALE;
+        i = j - 1;
+        j = 1;
+      }
+      else
+      {
+        cover = first + fy1 - A8_SCALE;
+        i = j;
+        j = 1;
+      }
+    }
     return true;
   }
 
   // --------------------------------------------------------------------------
-  // [Generic]
+  // [Generic Line]
   // --------------------------------------------------------------------------
 
-  p = (A8_SCALE - fy0) * dx;
-  first = A8_SCALE;
-
-  if (dy < 0)
+  else
   {
-    p     = fy0 * dx;
-    first = 0;
-    incr  = -1;
-    dy    = -dy;
-  }
+    int xEnd = x1;
+    int fyEnd = fy1;
 
-  delta = p / dy;
-  mod   = p % dy;
-  if (mod < 0) { delta--; mod += dy; }
+    int p, rem, mod;
+    int lift, delta;
 
-  x_from = x0 + delta;
-  if (!PathRasterizer8_renderHLine(self, ey0, x0, fy0, x_from, first))
-    goto _Bail;
-  ey0 += incr;
-
-  if (ey0 != ey1)
-  {
-    p     = dx * A8_SCALE;
-    lift  = p / dy;
-    rem   = p % dy;
-    if (rem < 0) { lift--; rem += dy; }
-    mod -= dy;
-
-    while (ey0 != ey1)
+    if (ey0 != ey1)
     {
-      delta = lift;
-      mod  += rem;
-      if (mod >= 0) { mod -= dy; delta++; }
+      fy1   = first;
+      p     = ((incr > 0) ? (A8_SCALE - fy0) : fy0) * dx;
 
-      x_to = x_from + delta;
-      if (!PathRasterizer8_renderHLine(self, ey0, x_from, A8_SCALE - first, x_to, first))
-        goto _Bail;
-      x_from = x_to;
+      delta = p / dy;
+      mod   = p % dy; if (mod < 0) { delta--; mod += dy; }
 
-      ey0 += incr;
+      x1 = x0 + delta;
     }
-  }
 
-  return PathRasterizer8_renderHLine(self, ey0, x_from, A8_SCALE - first, x1, fy1);
+    for (;;)
+    {
+      for (;;)
+      {
+        // --------------------------------------------------------------------
+        // [Generic - HLine - Init]
+        // --------------------------------------------------------------------
+
+        int px0 = x0;
+        int px1 = x1;
+
+        if (px0 > px1)
+          swap(px0, px1);
+
+        int dpx = px1 - px0;
+        int dfy = fy1 - fy0;
+
+        int ex0 = px0 >> A8_SHIFT;
+        int ex1 = px1 >> A8_SHIFT;
+
+        int fx0 = px0 & A8_MASK;
+        int fx1 = px1 & A8_MASK;
+
+        // --------------------------------------------------------------------
+        // [Generic - HLine - Nop]
+        // --------------------------------------------------------------------
+
+        if (dfy == 0)
+        {
+          FOG_NOP;
+        }
+
+        // --------------------------------------------------------------------
+        // [Generic - HLine - Single-Cell]
+        // --------------------------------------------------------------------
+
+        else if (ex0 == ex1)
+        {
+          int cover = dfy;
+          int area = dfy * (fx0 + fx1);
+          ADD_SINGLE(HLineSingleCell, ex0, cover, area);
+        }
+
+        // --------------------------------------------------------------------
+        // [Generic - HLine - Multi-Cell]
+        // --------------------------------------------------------------------
+
+        else
+        {
+          int py0 = fy0;
+          int stop;
+
+          PathRasterizer8::Chunk* cFirst = rPtr->first;
+          PathRasterizer8::Chunk* cEnd = NULL;
+
+          PathRasterizer8::Chunk* cPtr = cFirst;
+          PathRasterizer8::Cell* cell;
+
+          // Create cover and area for the first cell.
+          int h_p, h_mod;
+          int h_lift, h_rem;
+          int cover, area;
+
+          h_p   = dfy * (A8_SCALE - fx0);
+          cover = h_p / dpx;
+          h_mod = h_p % dpx; if (h_mod < 0) { h_mod += dpx; cover--; }
+          area  = cover * (fx0 + A8_SCALE);
+
+          // Create cover and area for adjacent cells.
+          if (ex1 - ex0 > 1)
+          {
+            h_p    = dfy * A8_SCALE;
+            h_lift = h_p / dpx;
+            h_rem  = h_p % dpx; if (h_rem < 0) { h_rem += dpx; h_lift--; }
+            h_mod -= dpx;
+          }
+
+          // Turn off additive cell merging by default (it will be set to true
+          // later if needed).
+          int additive = false;
+
+          // Skip the first cell if zero.
+          int isFirst = (area != 0);
+          int isLast;
+
+          // Convert the [ex0, ex1] coordinates to the [ex0, ex1) format, thus ex1
+          // becomes outside of the horizontal-line boundary (this is the standard
+          // convention used in Fog).
+          ex0 += (area == 0);
+          ex1++;
+
+          // ------------------------------------------------------------------
+          // [Generic - HLine - Chunk - First]
+          // ------------------------------------------------------------------
+
+          if (cPtr == NULL)
+          {
+            int len = ex1 - ex0;
+            if (FOG_UNLIKELY(len > PATHRASTERIZER8_MAX_CHUNK_SIZE))
+              len = PATHRASTERIZER8_MAX_CHUNK_SIZE;
+
+            NEW_CHUNK(cPtr, ex0, len);
+            cPtr->prev = cPtr;
+            cPtr->next = cPtr;
+
+            cFirst = cPtr;
+            cEnd = cPtr;
+
+            rPtr->first = cPtr;
+
+            cell = cPtr->cells;
+            stop = ex0 + len;
+            goto _HLine_Do;
+          }
+
+          cEnd = cPtr->prev;
+
+          // ------------------------------------------------------------------
+          // [Generic - HLine - Chunk - Prepend]
+          // ------------------------------------------------------------------
+
+          if (ex0 < cPtr->x0)
+          {
+            int len = Math::min(cPtr->x0, ex1) - ex0;
+            if (FOG_UNLIKELY(len > PATHRASTERIZER8_MAX_CHUNK_SIZE))
+              len = PATHRASTERIZER8_MAX_CHUNK_SIZE;
+
+            PathRasterizer8::Chunk* cNext = cPtr;
+            NEW_CHUNK(cPtr, ex0, len);
+
+            cPtr->prev = cEnd;
+            cPtr->next = cNext;
+
+            cEnd->next = cPtr;
+            cNext->prev = cPtr;
+
+            rPtr->first = cFirst = cPtr;
+
+            cell = cPtr->cells;
+            stop = ex0 + len;
+            goto _HLine_Do;
+          }
+
+          // ------------------------------------------------------------------
+          // [Generic - HLine - Chunk - Append]
+          // ------------------------------------------------------------------
+
+          // Append a new chunk to the row chunk-list.
+          if (ex0 >= cEnd->x1)
+          {
+            cPtr = cEnd;
+            goto _HLine_Append;
+          }
+
+          // ------------------------------------------------------------------
+          // [Generic - HLine - Chunk - Find]
+          // ------------------------------------------------------------------
+
+          if ((ex0 - cPtr->x0) <= (cEnd->x1 - ex0))
+          {
+            for (;;)
+            {
+              if (ex0 < cPtr->x1)
+                goto _HLine_Merge;
+
+              // The list is curcullar, but we know that the [ex0, ex1] intersects with
+              // bounding-box of the chunk-list. This means that we can't skip into the
+              // first chunk in this loop.
+              cPtr = cPtr->next;
+              FOG_ASSERT(cPtr != cFirst);
+            }
+          }
+          else
+          {
+            cPtr = cEnd;
+            for (;;)
+            {
+              if (ex0 >= cPtr->x0)
+              {
+                if (ex0 >= cPtr->x1)
+                  cPtr = cPtr->next;
+                goto _HLine_Merge;
+              }
+
+              // Again, we can't iterate forever.
+              FOG_ASSERT(cPtr != cFirst);
+              cPtr = cPtr->prev;
+            }
+          }
+
+          // ------------------------------------------------------------------
+          // [Generic - HLine - Chunk - Advance]
+          // ------------------------------------------------------------------
+
+_HLine_Advance:
+          if (cPtr == cEnd)
+          {
+_HLine_Append:
+            int len = ex1 - ex0;
+            if (FOG_UNLIKELY(len > PATHRASTERIZER8_MAX_CHUNK_SIZE))
+              len = PATHRASTERIZER8_MAX_CHUNK_SIZE;
+
+            PathRasterizer8::Chunk* cPrev = cPtr;
+            NEW_CHUNK(cPtr, ex0, len);
+
+            cPtr->prev = cPrev;
+            cPtr->next = cFirst;
+
+            cFirst->prev = cPtr;
+            cPrev->next = cPtr;
+            cEnd = cPtr;
+
+            cell = cPtr->cells;
+            stop = ex0 + len;
+          }
+          else
+          {
+            cPtr = cPtr->next;
+
+_HLine_Merge:
+            if (ex0 < cPtr->x0)
+            {
+              int len = Math::min(ex1, cPtr->x0) - ex0;
+              if (FOG_UNLIKELY(len > PATHRASTERIZER8_MAX_CHUNK_SIZE))
+                len = PATHRASTERIZER8_MAX_CHUNK_SIZE;
+
+              PathRasterizer8::Chunk* cPrev = cPtr->prev;
+              PathRasterizer8::Chunk* cNext = cPtr;
+              NEW_CHUNK(cPtr, ex0, len);
+
+              cPtr->prev = cPrev;
+              cPtr->next = cNext;
+
+              cPrev->next = cPtr;
+              cNext->prev = cPtr;
+
+              cell = cPtr->cells;
+              stop = ex0 + len;
+            }
+            else
+            {
+              FOG_ASSERT(ex0 < cPtr->x1);
+
+              cell = &cPtr->cells[ex0 - cPtr->x0];
+              stop = Math::min(cPtr->x1, ex1);
+
+              additive = true;
+            }
+          }
+
+          // ------------------------------------------------------------------
+          // [Generic - HLine - Chunk - Fill]
+          // ------------------------------------------------------------------
+
+_HLine_Do:
+          FOG_ASSERT(ex0 <  stop);
+          FOG_ASSERT(ex1 >= stop);
+
+          isLast = (stop == ex1);
+          stop -= isLast;
+
+          if (additive)
+          {
+            if (isFirst)
+            {
+              FOG_ASSERT(ex0 != stop);
+              isFirst = false;
+              //CellLogger::log(ex0, (int)(rPtr - self->_rows), cover, area, "H+1st");
+              goto _HLine_DoAdd;
+            }
+
+            while (ex0 != stop)
+            {
+              cover = h_lift;
+              h_mod  += h_rem; if (h_mod >= 0) { h_mod -= dpx; cover++; }
+              area  = cover * A8_SCALE;
+
+              //CellLogger::log(ex0, (int)(rPtr - self->_rows), cover, area, "H+Mid");
+_HLine_DoAdd:
+              cell->add(cover, area);
+              cell++;
+
+              py0 += cover;
+              ex0++;
+            }
+
+            additive = false;
+            if (!isLast)
+              goto _HLine_Advance;
+
+            cover = fy1 - py0;
+            area = cover * fx1;
+
+            //CellLogger::log(ex0, (int)(rPtr - self->_rows), cover, area, "H+End");
+            cell->add(cover, area);
+          }
+          else
+          {
+            if (isFirst)
+            {
+              FOG_ASSERT(ex0 != stop);
+              isFirst = false;
+              //CellLogger::log(ex0, (int)(rPtr - self->_rows), cover, area, "H=1st");
+              goto _HLine_DoSet;
+            }
+
+            while (ex0 != stop)
+            {
+              cover = h_lift;
+              h_mod  += h_rem; if (h_mod >= 0) { h_mod -= dpx; cover++; }
+              area  = cover * A8_SCALE;
+
+              //CellLogger::log(ex0, (int)(rPtr - self->_rows), cover, area, "H=Mid");
+_HLine_DoSet:
+              cell->set(cover, area);
+              cell++;
+
+              py0 += cover;
+              ex0++;
+            }
+
+            if (!isLast)
+              goto _HLine_Advance;
+
+            cover = fy1 - py0;
+            area = cover * fx1;
+
+            //CellLogger::log(ex0, (int)(rPtr - self->_rows), cover, area, "H=End");
+            cell->set(cover, area);
+          }
+        }
+
+        // --------------------------------------------------------------------
+        // [Generic - HLine - Advance]
+        // --------------------------------------------------------------------
+
+        x0 = x1;
+
+        rPtr += incr;
+        if (--i == 0)
+          break;
+
+        delta = lift;
+        mod  += rem; if (mod >= 0) { mod -= dy; delta++; }
+        x1   += delta;
+      }
+
+      if (rPtr == rEnd)
+        break;
+
+      if (j > 1)
+      {
+        fy0   = A8_SCALE - first;
+        p     = dx * A8_SCALE;
+
+        lift  = p / dy;
+        rem   = p % dy; if (rem < 0) { lift--; rem += dy; }
+        mod  -= dy;
+
+        delta = lift;
+        mod  += rem; if (mod >= 0) { mod -= dy; delta++; }
+        x1   += delta;
+
+        i = j - 1;
+        j = 1;
+      }
+      else
+      {
+        fy0   = A8_SCALE - first;
+        fy1   = fyEnd;
+        x1    = xEnd;
+
+        i = j;
+        j = 1;
+      }
+    }
+    return true;
+  }
 
 _Bail:
   return false;
@@ -1526,47 +1707,6 @@ _Bail:
 // [Fog::PathRasterizer8 - Render - Helpers]
 // ============================================================================
 
-// Formula:
-//
-// Cover = ?
-// Weight = ?
-// Area = Cover * Weight;
-//
-// FIRST:
-//   Alpha = abs( ((Cover << (POLY_SUBPIXEL_SHIFT + 1)) - Area) >> (POLY_SUBPIXEL_SHIFT * 2 + 1 - A8_SHIFT) );
-//   Alpha = abs( ((Cover << 9) - Area) >> 9);
-//
-// SPAN:
-//   Alpha = abs( ((Cover << (POLY_SUBPIXEL_SHIFT + 1))       ) >> (POLY_SUBPIXEL_SHIFT * 2 + 1 - A8_SHIFT) );
-//   Alpha = abs( Cover );
-//
-// NON_ZERO:
-//   if (Alpha > A8_MASK) Alpha = A8_MASK;
-//
-// EVEN_ODD:
-//   Alpha &= A8_MASK_2;
-//   if (Alpha > A8_SCALE) Alpha = A8_SCALE_2 - cover;
-//   if (Alpha > A8_MASK) Alpha = A8_MASK;
-template<int _RULE, int _USE_ALPHA>
-static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha(const PathRasterizer8* self, int area)
-{
-  int cover = area >> (A8_SHIFT*2 + 1 - A8_SHIFT);
-  if (cover < 0) cover = -cover;
-
-  if (_RULE == FILL_RULE_NON_ZERO)
-  {
-    if (cover > A8_SCALE) cover = A8_SCALE;
-  }
-  else
-  {
-    cover &= A8_MASK_2;
-    if (cover > A8_SCALE) cover = A8_SCALE_2 - cover;
-  }
-
-  if (_USE_ALPHA) cover = (cover * self->_opacity) >> 8;
-  return cover;
-}
-
 template<int _RULE, int _USE_ALPHA>
 static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8* self, int cover)
 {
@@ -1574,17 +1714,187 @@ static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8
 
   if (_RULE == FILL_RULE_NON_ZERO)
   {
-    if (cover > A8_SCALE) cover = A8_SCALE;
+    if (cover > A8_SCALE)
+      cover = A8_SCALE;
   }
   else
   {
     cover &= A8_MASK_2;
-    if (cover > A8_SCALE) cover = A8_SCALE_2 - cover;
+    if (cover > A8_SCALE)
+      cover = A8_SCALE_2 - cover;
   }
 
-  if (_USE_ALPHA) cover = (cover * self->_opacity) >> 8;
+  if (_USE_ALPHA)
+    cover = (cover * self->_opacity) >> 8;
+
   return cover;
 }
+
+// ============================================================================
+// [Fog::PathRasterizer8 - Render - Clip-Box]
+// ============================================================================
+
+template<int _RULE, int _USE_ALPHA>
+static void FOG_CDECL PathRasterizer8_render_st_clip_box(
+  Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
+{
+  PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
+
+  FOG_ASSERT(self->_isFinalized);
+
+  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
+    return;
+
+  int y0 = self->_boundingBox.y0;
+  int y1 = self->_boundingBox.y1;
+
+  PathRasterizer8::Row* rows = self->_rows - self->_sceneBox.y0 + y0;
+
+  int xOffset = self->_sceneBox.x0;
+  int xEnd = self->_sceneBox.x1;
+
+  filler->prepare(y0);
+  for (;;)
+  {
+    // ------------------------------------------------------------------------
+    // [Merge / Skip]
+    // ------------------------------------------------------------------------
+
+    PathRasterizer8::Chunk* first = rows->first;
+    rows++;
+
+    if (FOG_IS_NULL(first))
+    {
+      int mark = y0;
+      do {
+        if (++y0 >= y1) return;
+
+        first = rows->first;
+        rows++;
+      } while (first == NULL);
+
+      filler->skip(y0 - mark);
+    }
+
+    // ------------------------------------------------------------------------
+    // [Fetch]
+    // ------------------------------------------------------------------------
+
+    scanline->begin();
+
+    // ------------------------------------------------------------------------
+    // [Declare]
+    // ------------------------------------------------------------------------
+
+    PathRasterizer8::Chunk* chunk = first;
+    PathRasterizer8::Cell* cell = chunk->cells;
+
+    VERIFY_CHUNKS_8(first);
+    //CellLogger::logChunk(y0, first);
+
+    uint i = (uint)chunk->getLength();
+
+    int x;
+    int xNext = chunk->x0 + xOffset;
+    int cover = 0;
+    int area;
+    uint32_t alpha;
+
+    for (;;)
+    {
+      if (xNext == xEnd)
+        break;
+
+      x = xNext;
+      scanline->lnkA8Extra(x);
+
+_Continue:
+      x += i;
+      if (x > xEnd && --i == 0)
+      {
+        FOG_ASSERT(x - 1 == xEnd);
+        goto _Finalize;
+      }
+
+      do {
+        area    = cell->area >> (A8_SHIFT_2);
+        cover  += cell->cover;
+
+        alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover - area);
+        scanline->valA8Extra(alpha);
+
+        cell++;
+      } while (--i);
+
+      chunk = chunk->next;
+      if (chunk == first)
+      {
+_Finalize:
+        scanline->endA8Extra();
+        break;
+      }
+
+      cell = chunk->cells;
+      xNext = chunk->x0 + xOffset;
+      i = (uint)chunk->getLength();
+
+      if (x == xNext)
+        goto _Continue;
+
+      scanline->endA8Extra();
+
+      if (area)
+        alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover);
+
+      if (alpha)
+        scanline->lnkConstSpanOrMerge(x, xNext, alpha);
+    }
+
+    // ------------------------------------------------------------------------
+    // [Fill / Skip]
+    // ------------------------------------------------------------------------
+
+    if (FOG_IS_ERROR(scanline->close()) || scanline->getSpans() == NULL)
+    {
+_SkipScanline:
+      filler->skip(1);
+    }
+    else
+    {
+#if defined(FOG_DEBUG_RASTERIZER)
+      Rasterizer_dumpSpans(y0, scanline->getSpans());
+#endif // FOG_DEBUG_RASTERIZER
+      filler->process(scanline->getSpans());
+    }
+
+    if (++y0 >= y1)
+      return;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================================
+// [Fog::PathRasterizer8 - Render - Clip-Region]
+// ============================================================================
 
 #define RASTER_FETCH_DECLARE() \
   PathRasterizer8::Chunk* chunk; \
@@ -1631,275 +1941,6 @@ static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8
       break; \
     } \
   FOG_MACRO_END
-
-#define RENDER_IS_END() FOG_IS_NULL(chunk)
-
-// ============================================================================
-// [Fog::PathRasterizer8 - Render - Clip-Box]
-// ============================================================================
-
-#if 0
-template<int _RULE, int _USE_ALPHA>
-static void FOG_CDECL PathRasterizer8_render_st_clip_box(
-  PathRasterizer8* self, RasterFiller* filler, RasterScanline8* scanline)
-{
-  FOG_ASSERT(self->_isFinalized);
-
-  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
-    return;
-
-  int y0 = self->_boundingBox.y0;
-  int y1 = self->_boundingBox.y1;
-
-  PathRasterizer8::Chunk** row = self->_rows - self->_sceneBox.y0 + y0;
-
-  int xOffset = self->_sceneBox.x0;
-  int xEnd = self->_sceneBox.x1;
-
-  filler->prepare(y0);
-  for (;;)
-  {
-    // ------------------------------------------------------------------------
-    // [Merge / Skip]
-    // ------------------------------------------------------------------------
-
-    PathRasterizer8::Chunk* chunk = *row++;
-
-    if (FOG_IS_NULL(chunk))
-    {
-      int mark = y0;
-      do {
-        if (++y0 >= y1) return;
-      } while ((chunk = *row++) == NULL);
-      filler->skip(y0 - mark);
-    }
-
-    // ------------------------------------------------------------------------
-    // [Fetch]
-    // ------------------------------------------------------------------------
-
-    scanline->begin();
-
-    // ------------------------------------------------------------------------
-    // [Declare]
-    // ------------------------------------------------------------------------
-
-    PathRasterizer8::Cell* cell = chunk->cells;
-    uint i = (uint)chunk->getLength();
-
-    int x;
-    int xNext = chunk->x0 + xOffset;
-    int cover = 0;
-    int area;
-    uint32_t alpha;
-
-    for (;;)
-    {
-      if (xNext == xEnd) break;
-
-      x = xNext;
-      scanline->lnkA8Extra(x);
-
-_Continue:
-      x += i;
-      if (x > xEnd && --i == 0)
-      {
-        FOG_ASSERT(x - 1 == xEnd);
-        goto _Finalize;
-      }
-
-      do {
-        area    = cell->area;
-        cover  += cell->cover << (A8_SHIFT + 1);
-
-        alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-        scanline->valA8Extra(alpha);
-
-        cell++;
-      } while (--i);
-
-      chunk = chunk->next;
-      if (chunk == NULL)
-      {
-_Finalize:
-        scanline->endA8Extra();
-        break;
-      }
-
-      cell = chunk->cells;
-      xNext = chunk->x0 + xOffset;
-      i = (uint)chunk->getLength();
-
-      if (x == xNext)
-        goto _Continue;
-
-      scanline->endA8Extra();
-
-      if (area)
-        alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover);
-
-      if (alpha)
-        scanline->lnkConstSpanOrMerge(x, xNext, alpha);
-    }
-
-    // ------------------------------------------------------------------------
-    // [Fill / Skip]
-    // ------------------------------------------------------------------------
-
-    if (FOG_IS_ERROR(scanline->close()) || scanline->getSpans() == NULL)
-    {
-_SkipScanline:
-      filler->skip(1);
-    }
-    else
-    {
-#if defined(FOG_DEBUG_RASTERIZER)
-      Rasterizer_dumpSpans(y0, scanline->getSpans());
-#endif // FOG_DEBUG_RASTERIZER
-      filler->process(scanline->getSpans());
-    }
-
-    if (++y0 >= y1)
-      return;
-  }
-}
-#endif
-
-template<int _RULE, int _USE_ALPHA>
-static void FOG_CDECL PathRasterizer8_render_st_clip_box(
-  Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
-{
-  PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
-
-  FOG_ASSERT(self->_isFinalized);
-
-  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
-    return;
-
-  int y0 = self->_boundingBox.y0;
-  int y1 = self->_boundingBox.y1;
-
-  PathRasterizer8::Row* rows = self->_rows - self->_sceneBox.y0 + y0;
-
-  int xOffset = self->_sceneBox.x0;
-  int xEnd = self->_sceneBox.x1;
-
-  filler->prepare(y0);
-  for (;;)
-  {
-    // ------------------------------------------------------------------------
-    // [Merge / Skip]
-    // ------------------------------------------------------------------------
-
-    PathRasterizer8::Chunk* chunk = rows->first;
-    rows++;
-
-    if (FOG_IS_NULL(chunk))
-    {
-      int mark = y0;
-      do {
-        if (++y0 >= y1) return;
-
-        chunk = rows->first;
-        rows++;
-      } while (chunk == NULL);
-
-      filler->skip(y0 - mark);
-    }
-
-    // ------------------------------------------------------------------------
-    // [Fetch]
-    // ------------------------------------------------------------------------
-
-    scanline->begin();
-
-    // ------------------------------------------------------------------------
-    // [Declare]
-    // ------------------------------------------------------------------------
-
-    PathRasterizer8::Cell* cell = chunk->cells;
-    uint i = (uint)chunk->getLength();
-
-    int x;
-    int xNext = chunk->x0 + xOffset;
-    int cover = 0;
-    int area;
-    uint32_t alpha;
-
-    for (;;)
-    {
-      if (xNext == xEnd) break;
-
-      x = xNext;
-      scanline->lnkA8Extra(x);
-
-_Continue:
-      x += i;
-      if (x > xEnd && --i == 0)
-      {
-        FOG_ASSERT(x - 1 == xEnd);
-        goto _Finalize;
-      }
-
-      do {
-        area    = cell->area >> 9;
-        cover  += cell->cover;
-
-        alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover - area);
-        scanline->valA8Extra(alpha);
-
-        cell++;
-      } while (--i);
-
-      chunk = chunk->next;
-      if (chunk == NULL)
-      {
-_Finalize:
-        scanline->endA8Extra();
-        break;
-      }
-
-      cell = chunk->cells;
-      xNext = chunk->x0 + xOffset;
-      i = (uint)chunk->getLength();
-
-      if (x == xNext)
-        goto _Continue;
-
-      scanline->endA8Extra();
-
-      if (area)
-        alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover);
-
-      if (alpha)
-        scanline->lnkConstSpanOrMerge(x, xNext, alpha);
-    }
-
-    // ------------------------------------------------------------------------
-    // [Fill / Skip]
-    // ------------------------------------------------------------------------
-
-    if (FOG_IS_ERROR(scanline->close()) || scanline->getSpans() == NULL)
-    {
-_SkipScanline:
-      filler->skip(1);
-    }
-    else
-    {
-#if defined(FOG_DEBUG_RASTERIZER)
-      Rasterizer_dumpSpans(y0, scanline->getSpans());
-#endif // FOG_DEBUG_RASTERIZER
-      filler->process(scanline->getSpans());
-    }
-
-    if (++y0 >= y1)
-      return;
-  }
-}
-
-// ============================================================================
-// [Fog::PathRasterizer8 - Render - Clip-Region]
-// ============================================================================
 
 template<int _RULE, int _USE_ALPHA>
 static void FOG_CDECL PathRasterizer8_render_st_clip_region(
@@ -2705,6 +2746,25 @@ _SkipScanline:
 #undef RENDER_VARIABLES
 #undef RASTER_FETCH_ROW
 #undef RASTER_FETCH_CELL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // [Fog::PathRasterizer8 - Finalize]

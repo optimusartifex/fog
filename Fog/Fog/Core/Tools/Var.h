@@ -211,6 +211,7 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE bool isImage() const { return getVarType() == VAR_TYPE_IMAGE; }
   FOG_INLINE bool isImagePalette() const { return getVarType() == VAR_TYPE_IMAGE_PALETTE; }
+  FOG_INLINE bool isImageFilter() const { return getVarType() == VAR_TYPE_IMAGE_FILTER; }
 
   FOG_INLINE bool isFont() const { return getVarType() == VAR_TYPE_FONT; }
 
@@ -479,8 +480,8 @@ struct FOG_NO_EXPORT Var
   // [Accessors - String]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t getString(StringA& dst) { return fog_api.var_getType(this, VAR_TYPE_STRINGA, &dst); }
-  FOG_INLINE err_t getString(StringW& dst) { return fog_api.var_getType(this, VAR_TYPE_STRINGW, &dst); }
+  FOG_INLINE err_t getString(StringA& dst) const { return fog_api.var_getType(this, VAR_TYPE_STRINGA, &dst); }
+  FOG_INLINE err_t getString(StringW& dst) const { return fog_api.var_getType(this, VAR_TYPE_STRINGW, &dst); }
 
   FOG_INLINE err_t setString(const StringA& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGA, &src); }
   FOG_INLINE err_t setString(const StringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
@@ -494,7 +495,7 @@ struct FOG_NO_EXPORT Var
   {
     return fog_api.var_copy(this, &other);
   }
-  
+
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------

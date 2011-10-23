@@ -465,7 +465,7 @@ static const uint16_t WinError_table_400_to_403[] =
 /* 00403: ERROR_PROCESS_MODE_NOT_BACKGROUND                             */ _UNASSIGNED
 };
 
-static const uint16_t WinError_table_534_to_805[] = 
+static const uint16_t WinError_table_534_to_805[] =
 {
 /* 00534: ERROR_ARITHMETIC_OVERFLOW                                     */ _MAP(ERR_RT_OVERFLOW),
 /* 00535: ERROR_PIPE_CONNECTED                                          */ _UNASSIGNED,
@@ -741,7 +741,7 @@ static const uint16_t WinError_table_534_to_805[] =
 /* 00805: ERROR_INVALID_ACE_CONDITION                                   */ _UNASSIGNED
 };
 
-static const uint16_t WinError_table_994_to_1470[] = 
+static const uint16_t WinError_table_994_to_1470[] =
 {
 /* 00994: ERROR_EA_ACCESS_DENIED                                        */ _UNASSIGNED,
 /* 00995: ERROR_OPERATION_ABORTED                                       */ _UNASSIGNED,
@@ -1222,14 +1222,14 @@ static const uint16_t WinError_table_994_to_1470[] =
 /* 01470: ERROR_NO_NVRAM_RESOURCES                                      */ _UNASSIGNED
 };
 
-static const uint16_t WinError_table_1550_to_1552[] = 
+static const uint16_t WinError_table_1550_to_1552[] =
 {
 /* 01550: ERROR_INVALID_TASK_NAME                                       */ _UNASSIGNED,
 /* 01551: ERROR_INVALID_TASK_INDEX                                      */ _UNASSIGNED,
 /* 01552: ERROR_THREAD_ALREADY_IN_TASK                                  */ _UNASSIGNED
 };
 
-static const uint16_t WinError_table_2000_to_2023[] = 
+static const uint16_t WinError_table_2000_to_2023[] =
 {
 /* 02000: ERROR_INVALID_PIXEL_FORMAT                                    */ _MAP(ERR_RT_INVALID_ARGUMENT),
 /* 02001: ERROR_BAD_DRIVER                                              */ _UNASSIGNED,
@@ -1446,10 +1446,24 @@ static err_t FOG_CDECL WinUtil_getModuleFileName(StringW* dst, HMODULE hModule)
   }
 }
 
-static err_t FOG_CDECL WinUtil_makeWinPath(StringW* dst, const StringW* src)
+// TODO: Rewrite, not optimal, toAbsolute() should be modified to append
+// the path into dst instead of replace it (use CONTAINER_OP_...).
+
+static err_t FOG_CDECL WinUtil_makeWinPathStubW(StringW* dst, const StubW* src)
 {
-  // TODO: Rewrite, not optimal, toAbsolute() should be modified to append
-  // the path into dst instead of replace it (use CONTAINER_OP_...).
+  FOG_RETURN_ON_ERROR(FilePath::toAbsolute(*dst, *src));
+  FOG_RETURN_ON_ERROR(dst->normalizeSlashes(SLASH_FORM_WINDOWS));
+
+  // Do not translate the root path like C:\ to \\?\C:\, because Win-API do not
+  // expect that!
+  if (dst->getLength() > 3)
+    FOG_RETURN_ON_ERROR(dst->prepend(Ascii8("\\\\?\\")));
+
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL WinUtil_makeWinPathStringW(StringW* dst, const StringW* src)
+{
   FOG_RETURN_ON_ERROR(FilePath::toAbsolute(*dst, *src));
   FOG_RETURN_ON_ERROR(dst->normalizeSlashes(SLASH_FORM_WINDOWS));
 
@@ -1476,7 +1490,9 @@ FOG_NO_EXPORT void WinUtil_init(void)
   fog_api.winutil_getWinDirectory = WinUtil_getWinDirectory;
 
   fog_api.winutil_getModuleFileName = WinUtil_getModuleFileName;
-  fog_api.winutil_makeWinPath = WinUtil_makeWinPath;
+
+  fog_api.winutil_makeWinPathStubW = WinUtil_makeWinPathStubW;
+  fog_api.winutil_makeWinPathStringW = WinUtil_makeWinPathStringW;
 }
 
 } // Fog namespace

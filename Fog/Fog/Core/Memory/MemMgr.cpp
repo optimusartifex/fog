@@ -347,7 +347,7 @@ static uint64_t FOG_CDECL MemMgr_getAmountOfPhysicalMemory(void)
 
   int result = host_info(mach_host_self(), HOST_BASIC_INFO,
     reinterpret_cast<host_info_t>(&hostinfo), &count);
-  
+
   if (result != KERN_SUCCESS)
     return 0;
   if (count != HOST_BASIC_INFO_COUNT)

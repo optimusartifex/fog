@@ -40,8 +40,8 @@ struct ManagedStringCacheW;
 //! Why to introduce another string class?
 //!
 //! It's easy - performance and easy to use API. If you want to see the code that
-//! is using managed strings in detail, you should look at Fog::Object and 
-//! Fog::Xml. For all XML tags and attributes managed strings are used. The 
+//! is using managed strings in detail, you should look at Fog::Object and
+//! Fog::Xml. For all XML tags and attributes managed strings are used. The
 //! idea is very simple - XML tag names and attributes are very likely to be
 //! used in many XML elements, thus we can save memory and processing.
 //!

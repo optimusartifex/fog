@@ -260,7 +260,7 @@ static int64_t FOG_CDECL DirIterator_tell(DirIterator* self)
 // __linux__ is defined on Linux, __GNU__ on HURD and __GLIBC__ on Debian GNU/k*BSD
 #if defined(__linux__) || defined(__GNU__) || defined(__GLIBC__)
 # define FOG_HAVE_REENTRANT_READDIR
-#endif // __linux__ || __GNU__ || __GLIBC__ 
+#endif // __linux__ || __GNU__ || __GLIBC__
 
 struct FOG_NO_EXPORT PosixDirIteratorData : public DirIteratorData
 {

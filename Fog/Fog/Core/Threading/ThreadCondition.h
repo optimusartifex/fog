@@ -48,12 +48,12 @@ namespace Fog {
 //!
 //! Especially avoid the above if you are relying on some other thread only
 //! issuing a signal up *if* there is work-to-do.  There can/will be spurious
-//! signals. Recheck state on waiting thread before assuming the signal was 
+//! signals. Recheck state on waiting thread before assuming the signal was
 //! intentional. Caveat caller.
 //!
 //! The broadcast() method frees up all waiting threads at once, which leads
-//! to contention for the locks they all held when they called wait(). This 
-//! results in poor performance. A much better approach to getting a lot of 
+//! to contention for the locks they all held when they called wait(). This
+//! results in poor performance. A much better approach to getting a lot of
 //! threads out of wait() is to have each thread (upon exiting wait()) call
 //! signal() to free up another waiting thread.
 //!
@@ -62,10 +62,10 @@ namespace Fog {
 //! point.
 //!
 //! The semantics of broadcast() are carefully crafted so that all threads that
-//! were waiting when the request was made will indeed get signaled. Some 
+//! were waiting when the request was made will indeed get signaled. Some
 //! implementations mess up, and don't signal them all, while others allow the
-//! wait to be effectively turned off (for a while while waiting threads come 
-//! around). This implementation appears correct, as it will not lose any 
+//! wait to be effectively turned off (for a while while waiting threads come
+//! around). This implementation appears correct, as it will not lose any
 //! signals, and will guarantee that all threads get signaled by broadcast().
 //!
 //! This implementation offers support for "performance" in its selection of

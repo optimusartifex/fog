@@ -123,10 +123,14 @@ int main(int argc, char* argv[])
   PRINT_PART("G2d/Imaging");
   PRINT_TYPE(Image);
   PRINT_TYPE(ImageBits);
+  PRINT_TYPE(ImageCodec);
+  PRINT_TYPE(ImageCodecProvider);
   PRINT_TYPE(ImageConverter);
   PRINT_TYPE(ImageData);
   PRINT_TYPE(ImageDecoder);
   PRINT_TYPE(ImageEncoder);
+  PRINT_TYPE(ImageFilter);
+  PRINT_TYPE(ImageFilterData);
   PRINT_TYPE(ImageFormatDescription);
   PRINT_TYPE(ImagePalette);
   PRINT_TYPE(ImagePaletteData);

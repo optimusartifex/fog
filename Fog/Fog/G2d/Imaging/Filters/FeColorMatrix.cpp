@@ -25,7 +25,7 @@ namespace Fog {
 
 struct FOG_NO_EXPORT FeColorMatrixStatic
 {
-  uint32_t _filterType;
+  uint32_t _feType;
   float m[25];
 };
 
@@ -37,7 +37,7 @@ static const float LumB = 0.072f;
 #define _FOG_FE_COLOR_MATRIX_STATIC(_Name_, M00, M01, M02, M03, M04, M10, M11, M12, M13, M14, M20, M21, M22, M23, M24, M30, M31, M32, M33, M34, M40, M41, M42, M43, M44) \
   static const FeColorMatrixStatic _Name_ = \
   { \
-    IMAGE_FILTER_TYPE_COLOR_MATRIX, \
+    FE_TYPE_COLOR_MATRIX, \
     { \
       M00, M01, M02, M03, M04, \
       M10, M11, M12, M13, M14, \
@@ -110,7 +110,7 @@ static bool FeColorMatrix_fitRect(uint& x0, uint& y0, uint& x1, uint& y1, const 
 
 static void FOG_CDECL FeColorMatrix_ctor(FeColorMatrix* self)
 {
-  self->_filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
+  self->_feType = FE_TYPE_COLOR_MATRIX;
   fog_api.fecolormatrix_copy(self->m, FeColorMatrix_oIdentity.m);
 }
 

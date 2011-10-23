@@ -63,7 +63,7 @@ enum ERR_CODE
   //! by your code or Fog-Framework itself. Fog never return this error code
   //! when compiled in debug-mode, instead the assertion is raised.
   //!
-  //! @note When running under Windows and Windows error to Fog error translator 
+  //! @note When running under Windows and Windows error to Fog error translator
   //! is used, the ERR_RT_ASSERTION_FAILURE is translated from the following
   //! Windows error codes:
   //!   - ERROR_ASSERTION_FAILURE,
@@ -86,7 +86,7 @@ enum ERR_CODE
 
   //! @brief Invalid state.
   //!
-  //! This is generic error which is returned if some object is accessed 
+  //! This is generic error which is returned if some object is accessed
   //! improperly. Fog contains objects that wraps others (for example @ref
   //! Pattern). If the method to retrieve the current state of the instance
   //! is used improperly (for example getting a color, but the object is a

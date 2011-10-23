@@ -74,7 +74,7 @@ struct FOG_NO_EXPORT Convert
 
     if (d->isCopy)
     {
-      // ImageConverterData::isCopy means that there is no conversion between 
+      // ImageConverterData::isCopy means that there is no conversion between
       // target and source pixels, thus pixel format depth must be equal as well.
       FOG_ASSERT(df.getDepth() == sf.getDepth());
 
@@ -342,7 +342,7 @@ struct FOG_NO_EXPORT Convert
       case 8:
         if (d.getFormat() == IMAGE_FORMAT_A8)
           return RASTER_FORMAT_A8;
-        
+
         if (d.getFormat() == IMAGE_FORMAT_I8)
           return RASTER_FORMAT_I8;
 
@@ -357,7 +357,7 @@ struct FOG_NO_EXPORT Convert
             d.getGMask32() == 0x03E0 &&
             d.getBMask32() == 0x001F)
           return RASTER_FORMAT_RGB16_555 + d.isByteSwapped();
-        
+
         if (d.getAMask32() == 0x0000 &&
             d.getRMask32() == 0xF800 &&
             d.getGMask32() == 0x07E0 &&
@@ -378,7 +378,7 @@ struct FOG_NO_EXPORT Convert
             d.getGMask32() == 0x0000FF00 &&
             d.getBMask32() == 0x000000FF)
           return RASTER_FORMAT_RGB24_888;
-        
+
         if (d.getAMask32() == 0x00000000 &&
             d.getRMask32() == 0x000000FF &&
             d.getGMask32() == 0x0000FF00 &&
@@ -393,19 +393,19 @@ struct FOG_NO_EXPORT Convert
             d.getGMask32() == 0x0000FF00 &&
             d.getBMask32() == 0x000000FF)
           return RASTER_FORMAT_RGB32_888;
-        
+
         if (d.getAMask32() == 0x00000000 &&
             d.getRMask32() == 0x000000FF &&
             d.getGMask32() == 0x0000FF00 &&
             d.getBMask32() == 0x00FF0000)
           return RASTER_FORMAT_RGB32_888_BS;
-        
+
         if (d.getAMask32() == 0xFF000000 &&
             d.getRMask32() == 0x00FF0000 &&
             d.getGMask32() == 0x0000FF00 &&
             d.getBMask32() == 0x000000FF)
           return RASTER_FORMAT_ARGB32_8888;
-        
+
         if (d.getAMask32() == 0x000000FF &&
             d.getRMask32() == 0x0000FF00 &&
             d.getGMask32() == 0x00FF0000 &&
@@ -658,7 +658,7 @@ struct FOG_NO_EXPORT Convert
       case 2: MemOps::copy_2(dst - 4, src - 4);
       case 1: MemOps::copy_2(dst - 2, src - 2);
         break;
-      
+
       default:
         FOG_ASSERT_NOT_REACHED();
     }
@@ -758,7 +758,7 @@ struct FOG_NO_EXPORT Convert
       case 2: MemOps::copy_4(dst -  8, src -  8);
       case 1: MemOps::copy_4(dst -  4, src -  4);
         break;
-      
+
       default:
         FOG_ASSERT_NOT_REACHED();
     }
@@ -957,7 +957,7 @@ struct FOG_NO_EXPORT Convert
       case 2: Face::p32Store2a(dst - 4, p0);
       case 1: Face::p32Store2a(dst - 2, p0);
         break;
-      
+
       default:
         FOG_ASSERT_NOT_REACHED();
     }

@@ -180,7 +180,7 @@ ObjectExtra* Object::getMutableExtra()
 {
   if (FOG_LIKELY(_objectExtra != &Object_extraNull))
     return _objectExtra;
-  
+
   ObjectExtra* extra = ObjectExtra_create();
   if (FOG_IS_NULL(extra))
     return NULL;
@@ -236,7 +236,7 @@ err_t Object::setId(const StringW& id)
 // ============================================================================
 // [Fog::Object - Home Thread]
 // ============================================================================
-  
+
 err_t Object::moveToThread(Thread* thread)
 {
   if (_homeThread == thread)
@@ -272,7 +272,7 @@ err_t Object::addChild(Object* child)
 {
   if (FOG_IS_NULL(child))
     return ERR_RT_INVALID_ARGUMENT;
-  
+
   // If object is already in our hierarchy then we return quickly.
   if (child->getParent() == this)
     return ERR_OK;
@@ -363,16 +363,16 @@ err_t Object::_removeAll()
 }
 
 // ============================================================================
-// [Fog::Object - Properties]
+// [Fog::Object - Property - Validate]
 // ============================================================================
 
 // Object name can contain characters [A-Z], [a-z], '-', '_', [0-9]. Numbers
-// are not allowed for first character.
+// are not allowed for the first character.
 static err_t Object_validatePropertyName(const StringW& name)
 {
   const CharW* data = name.getData();
   size_t length = name.getLength();
-  
+
   if (length == 0)
     return ERR_PROPERTY_INVALID;
 
@@ -385,9 +385,13 @@ static err_t Object_validatePropertyName(const StringW& name)
     if (!(c.isAsciiNumlet() || c == CharW('_') || c == CharW('-')))
       return ERR_PROPERTY_INVALID;
   }
-  
+
   return ERR_OK;
 }
+
+// ============================================================================
+// [Fog::Object - Property - Dynamic]
+// ============================================================================
 
 static err_t Object_getDynamicProperty(const Object* self, const ManagedStringW& name, Var& dst)
 {
@@ -420,12 +424,16 @@ static err_t Object_setDynamicProperty(Object* self, const ManagedStringW& name,
   {
     FOG_RETURN_ON_ERROR(extra->_properties.put(name, src));
   }
-  
+
   PropertyEvent e(name);
   self->sendEvent(&e);
-  
+
   return ERR_OK;
 }
+
+// ============================================================================
+// [Fog::Object - Property - Accessors]
+// ============================================================================
 
 err_t Object::getProperty(const StringW& name, Var& dst) const
 {
@@ -469,11 +477,11 @@ err_t Object::setProperty(const StringW& name, const Var& src)
     // We know that there is a ManagedStringW, so try Object::_setProperty().
     err_t err = _setProperty(m_name, src);
 
-    // If something bad happened (for example wrong argument type) then we 
+    // If something bad happened (for example wrong argument type) then we
     // report it immediately.
     if (err != ERR_PROPERTY_NOT_FOUND)
       return err;
-    
+
     // We are going to set dynamic property (this means that it can be created)
     // so we must be sure that the property name is valid.
     FOG_RETURN_ON_ERROR(Object_validatePropertyName(name));
@@ -508,10 +516,17 @@ err_t Object::setProperty(const ManagedStringW& name, const Var& src)
   return Object_setDynamicProperty(this, name, src);
 }
 
+// ============================================================================
+// [Fog::Object - Property - Virtual]
+// ============================================================================
+
 err_t Object::_getProperty(const ManagedStringW& name, Var& dst) const
 {
   FOG_UNUSED(name);
   FOG_UNUSED(dst);
+
+  if (name == FOG_STR_(OBJECT_id))
+    return dst.setString(_objectExtra->_id);
 
   return ERR_PROPERTY_NOT_FOUND;
 }
@@ -520,6 +535,13 @@ err_t Object::_setProperty(const ManagedStringW& name, const Var& src)
 {
   FOG_UNUSED(name);
   FOG_UNUSED(src);
+
+  if (name == FOG_STR_(OBJECT_id))
+  {
+    StringW src_string;
+    FOG_RETURN_ON_ERROR(src.getString(src_string));
+    return setId(src_string);
+  }
 
   return ERR_PROPERTY_NOT_FOUND;
 }
@@ -669,7 +691,7 @@ bool Object::_addListener(uint32_t code, Object* listener, const void* del, uint
 
   if (listener->getMutableExtra() == NULL)
     return false;
-  
+
   ObjectConnection* prev = NULL;
   ObjectConnection* conn = extra->_forwardConnection.get(code, NULL);
   Delegate0<> d = *(const Delegate0<> *)del;

@@ -191,7 +191,7 @@ struct FOG_NO_EXPORT FeComponentFunctionData
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-  
+
   //! @brief Reference.
   mutable Atomic<size_t> reference;
 

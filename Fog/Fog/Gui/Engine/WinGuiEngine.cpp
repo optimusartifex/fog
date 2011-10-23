@@ -800,11 +800,11 @@ void WinGuiWindow::moveToBottom(GuiWindow* w)
   // TODO: The Flag of HWND_TOPMOST will be cleared!! (update internal Flag)
   if (w)
   {
-    SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+    ::SetWindowPos((HWND)getHandle(),(HWND)w->getHandle(),0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
   }
   else
   {
-    SetWindowPos((HWND)getHandle(),HWND_BOTTOM,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
+    ::SetWindowPos((HWND)getHandle(),HWND_BOTTOM,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE);
   }
 
   if (_widget)
@@ -833,7 +833,7 @@ void WinGuiWindow::setTransparency(float val)
       if ((flag & WS_EX_LAYERED) != 0)
       {
         flag &=~WS_EX_LAYERED;
-        SetWindowLong((HWND)getHandle(),GWL_EXSTYLE,flag);
+        ::SetWindowLongW((HWND)getHandle(),GWL_EXSTYLE,flag);
       }
     }
     else
@@ -842,7 +842,7 @@ void WinGuiWindow::setTransparency(float val)
       LONG flag = GetWindowLong((HWND)getHandle(),GWL_EXSTYLE);
       if ((flag & WS_EX_LAYERED) == 0)
       {
-        SetWindowLong((HWND)getHandle(), GWL_EXSTYLE, flag | WS_EX_LAYERED);
+        ::SetWindowLongW((HWND)getHandle(), GWL_EXSTYLE, flag | WS_EX_LAYERED);
       }
 
       SetLayeredWindowAttributes((HWND)getHandle(), 0, (int)(255 * val), LWA_ALPHA);
@@ -861,10 +861,10 @@ void WinGuiWindow::setTransparency(float val)
     LONG flag = GetWindowLong((HWND)getHandle(), GWL_EXSTYLE);
     if ((flag & WS_EX_LAYERED) == 0)
     {
-      SetWindowLong((HWND)getHandle(), GWL_EXSTYLE, flag | WS_EX_LAYERED);
+      ::SetWindowLongW((HWND)getHandle(), GWL_EXSTYLE, flag | WS_EX_LAYERED);
     }
 
-    bool ret = UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL, (COLORREF)NULL, &blend, ULW_ALPHA);
+    bool ret = ::UpdateLayeredWindow((HWND)getHandle(), NULL, NULL, NULL, NULL, NULL, (COLORREF)NULL, &blend, ULW_ALPHA);
     if (!ret)
     {
       int e = GetLastError();
@@ -967,48 +967,48 @@ void WinGuiWindow::doSystemMenu(uint32_t flags)
 {
   // Do it here, so we don't need to do it in INIT_MENU everytime
 
-  HMENU hMenu = GetSystemMenu((HWND)_handle, false);
+  HMENU hMenu = ::GetSystemMenu((HWND)_handle, false);
   if (hMenu == INVALID_HANDLE_VALUE)
     return;
 
   if (!(flags & WINDOW_CLOSE_BUTTON))
   {
-    EnableMenuItem(hMenu, SC_CLOSE, MF_GRAYED);
+    ::EnableMenuItem(hMenu, SC_CLOSE, MF_GRAYED);
   }
   else
   {
     // Make sure it is enabled.
-    EnableMenuItem(hMenu, SC_CLOSE, MF_ENABLED);
+    ::EnableMenuItem(hMenu, SC_CLOSE, MF_ENABLED);
   }
 
   if (!(flags & WINDOW_MINIMIZE))
   {
-    EnableMenuItem(hMenu, SC_MINIMIZE, MF_GRAYED);
+    ::EnableMenuItem(hMenu, SC_MINIMIZE, MF_GRAYED);
   }
   else
   {
     // Make sure it is enabled.
-    EnableMenuItem(hMenu, SC_MINIMIZE, MF_ENABLED);
+    ::EnableMenuItem(hMenu, SC_MINIMIZE, MF_ENABLED);
   }
 
   if (!(flags & WINDOW_MAXIMIZE))
   {
-    EnableMenuItem(hMenu, SC_MAXIMIZE, MF_GRAYED);
+    ::EnableMenuItem(hMenu, SC_MAXIMIZE, MF_GRAYED);
   }
   else
   {
     // Make sure it is enabled.
-    EnableMenuItem(hMenu, SC_MAXIMIZE, MF_ENABLED);
+    ::EnableMenuItem(hMenu, SC_MAXIMIZE, MF_ENABLED);
   }
 
   if (flags & WINDOW_FIXED_SIZE)
   {
-    EnableMenuItem(hMenu, SC_SIZE, MF_GRAYED);
+    ::EnableMenuItem(hMenu, SC_SIZE, MF_GRAYED);
   }
   else
   {
     // Make sure it is enabled.
-    EnableMenuItem(hMenu, SC_SIZE, MF_ENABLED);
+    ::EnableMenuItem(hMenu, SC_SIZE, MF_ENABLED);
   }
 }
 
@@ -1037,7 +1037,7 @@ err_t WinGuiWindow::create(uint32_t flags)
     if (visible)
     {
       // Prevent flickering!
-      SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM)FALSE, (LPARAM)0);
+      ::SendMessageW((HWND)_handle, WM_SETREDRAW, (WPARAM)FALSE, (LPARAM)0);
     }
 
     if (reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb != b)
@@ -1047,7 +1047,7 @@ err_t WinGuiWindow::create(uint32_t flags)
 
       if (b)
       {
-        SetWindowLong((HWND)_handle,GWL_EXSTYLE, exstyle &~WS_EX_LAYERED);
+        ::SetWindowLongW((HWND)_handle, GWL_EXSTYLE, exstyle & ~WS_EX_LAYERED);
         dwStyleEx |= WS_EX_LAYERED;
       }
     }
@@ -1056,8 +1056,8 @@ err_t WinGuiWindow::create(uint32_t flags)
     // a complete new flag and or it with the clean old one.
     style &=~ (WS_OVERLAPPED | WS_CAPTION | WS_POPUP | WS_SYSMENU | WS_DLGFRAME | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | CS_NOCLOSE | WS_THICKFRAME | WS_BORDER);
 
-    SetWindowLong((HWND)_handle, GWL_STYLE, style | dwStyle);
-    SetWindowLong((HWND)_handle, GWL_EXSTYLE, dwStyleEx);
+    ::SetWindowLongW((HWND)_handle, GWL_STYLE, style | dwStyle);
+    ::SetWindowLongW((HWND)_handle, GWL_EXSTYLE, dwStyleEx);
 
     doSystemMenu(flags);
 
@@ -1066,11 +1066,11 @@ err_t WinGuiWindow::create(uint32_t flags)
     if (visible)
     {
       // Allow repaint again!
-      SendMessage((HWND)_handle, WM_SETREDRAW, (WPARAM) TRUE, (LPARAM) 0);
-      UpdateWindow((HWND)_handle);
+      ::SendMessageW((HWND)_handle, WM_SETREDRAW, (WPARAM) TRUE, (LPARAM) 0);
+      ::UpdateWindow((HWND)_handle);
 
-      SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER);
-      RedrawWindow((HWND)_handle,0,0, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+      ::SetWindowPos((HWND)_handle, 0,0,0,0,0, SWP_FRAMECHANGED | SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER);
+      ::RedrawWindow((HWND)_handle,0,0, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
     }
 
     return ERR_OK;
@@ -1119,7 +1119,7 @@ err_t WinGuiWindow::create(uint32_t flags)
 
   reinterpret_cast<WinGuiBackBuffer*>(_backingStore)->_prgb = b;
 
-  _handle = (void*)CreateWindowExW(
+  _handle = (void*)::CreateWindowExW(
     dwStyleEx, wndClass, L"",
     dwStyle, x, y,
     1, 1,
@@ -1179,7 +1179,7 @@ err_t WinGuiWindow::enable()
   if (!_enabled)
   {
     //_enabled = true;
-    EnableWindow((HWND)_handle, TRUE);
+    ::EnableWindow((HWND)_handle, TRUE);
   }
   return ERR_OK;
 }
@@ -1190,7 +1190,7 @@ err_t WinGuiWindow::disable()
 
   if (_enabled)
   {
-    EnableWindow((HWND)_handle, FALSE);
+    ::EnableWindow((HWND)_handle, FALSE);
     //_enabled = false;
   }
   return ERR_OK;
@@ -1203,12 +1203,12 @@ err_t WinGuiWindow::show(uint32_t state)
   {
     if (!IsWindowVisible((HWND)_handle))
     {
-      ShowWindow((HWND)_handle, SW_SHOW);
+      ::ShowWindow((HWND)_handle, SW_SHOW);
     }
   }
   else if (state == WIDGET_VISIBLE_RESTORE)
   {
-    ShowWindow((HWND)_handle, SW_RESTORE);
+    ::ShowWindow((HWND)_handle, SW_RESTORE);
   }
   else if (state == WIDGET_VISIBLE_MAXIMIZED)
   {
@@ -1216,11 +1216,11 @@ err_t WinGuiWindow::show(uint32_t state)
     {
       bool pos =  !IsWindowVisible((HWND)_handle);
 
-      ShowWindow((HWND)_handle, SW_SHOWMAXIMIZED);
+      ::ShowWindow((HWND)_handle, SW_SHOWMAXIMIZED);
 
       if (pos)
       {
-        SendMessage((HWND)_handle,WM_USER,0,0);
+        ::SendMessageW((HWND)_handle,WM_USER,0,0);
       }
     }
   }
@@ -1228,14 +1228,14 @@ err_t WinGuiWindow::show(uint32_t state)
   {
     if (!IsIconic((HWND)_handle))
     {
-      ShowWindow((HWND)_handle, SW_SHOWMINIMIZED);
+      ::ShowWindow((HWND)_handle, SW_SHOWMINIMIZED);
     }
   }
   else if (state == WIDGET_VISIBLE_FULLSCREEN)
   {
     if (!IsWindowVisible((HWND)_handle))
     {
-      ShowWindow((HWND)_handle, SW_SHOW);
+      ::ShowWindow((HWND)_handle, SW_SHOW);
     }
   }
 
@@ -1248,7 +1248,7 @@ err_t WinGuiWindow::hide()
 
   if (IsWindowVisible((HWND)_handle))
   {
-    ShowWindow((HWND)_handle, SW_HIDE);
+    ::ShowWindow((HWND)_handle, SW_HIDE);
   }
   return ERR_OK;
 }
@@ -1259,7 +1259,7 @@ err_t WinGuiWindow::setPosition(const PointI& pos)
 
   if ((_windowRect.x != pos.x) | (_windowRect.y != pos.y))
   {
-    MoveWindow((HWND)_handle, pos.x, pos.y, _windowRect.w, _windowRect.h, FALSE);
+    ::MoveWindow((HWND)_handle, pos.x, pos.y, _windowRect.w, _windowRect.h, FALSE);
   }
 
   return ERR_OK;
@@ -1272,7 +1272,7 @@ err_t WinGuiWindow::setSize(const SizeI& size)
 
   if (_windowRect.getSize() != size)
   {
-    MoveWindow((HWND)_handle,
+    ::MoveWindow((HWND)_handle,
       _widget->getX(),
       _widget->getY(),
       size.getWidth(),
@@ -1290,7 +1290,7 @@ err_t WinGuiWindow::setGeometry(const RectI& geometry)
 
   if (_windowRect != geometry)
   {
-    MoveWindow((HWND)_handle,
+    ::MoveWindow((HWND)_handle,
       geometry.getX(),
       geometry.getY(),
       geometry.getWidth(),
@@ -1305,7 +1305,7 @@ err_t WinGuiWindow::takeFocus()
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  SetFocus((HWND)_handle);
+  ::SetFocus((HWND)_handle);
   return ERR_OK;
 }
 
@@ -1313,7 +1313,7 @@ err_t WinGuiWindow::setTitle(const StringW& title)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  SetWindowTextW((HWND)_handle, reinterpret_cast<const wchar_t*>(title.getData()));
+  ::SetWindowTextW((HWND)_handle, reinterpret_cast<const wchar_t*>(title.getData()));
   _title = title;
 
   return ERR_OK;
@@ -1363,7 +1363,7 @@ err_t WinGuiWindow::worldToClient(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  return ScreenToClient((HWND)_handle, (POINT *)coords)
+  return ::ScreenToClient((HWND)_handle, (POINT *)coords)
     ? (err_t)ERR_OK
     : (err_t)ERR_UI_CANT_TRANSLATE_COORDINATES;
 }
@@ -1372,7 +1372,7 @@ err_t WinGuiWindow::clientToWorld(PointI* coords)
 {
   if (!_handle) return ERR_RT_INVALID_HANDLE;
 
-  return ClientToScreen((HWND)_handle, (POINT *)coords)
+  return ::ClientToScreen((HWND)_handle, (POINT *)coords)
     ? (err_t)ERR_OK
     : (err_t)ERR_UI_CANT_TRANSLATE_COORDINATES;
 }
@@ -1385,9 +1385,9 @@ void WinGuiWindow::setOwner(GuiWindow* w)
   //
   // NOTE: To write code that is compatible with both 32-bit and 64-bit versions
   // of Windows, use SetWindowLongPtr. When compiling for 32-bit Windows,
-	// SetWindowLongPtr is defined as a call to the SetWindowLong function. - MSDN
-	//   http://msdn.microsoft.com/en-us/library/windows/desktop/ms644898%28v=vs.85%29.aspx
-  SetWindowLongPtr((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)_owner->getHandle());
+  // SetWindowLongPtr is defined as a call to the SetWindowLong function. - MSDN
+  //   http://msdn.microsoft.com/en-us/library/windows/desktop/ms644898%28v=vs.85%29.aspx
+  ::SetWindowLongPtrW((HWND)getHandle(), GWLP_HWNDPARENT, (LONG_PTR)_owner->getHandle());
 }
 
 void WinGuiWindow::releaseOwner()
@@ -1960,7 +1960,7 @@ void WinGuiBackBuffer::blitRects(HDC target, const BoxI* rects, size_t count)
         int w = rects[i].getWidth();
         int h = rects[i].getHeight();
 
-        BitBlt(target, x, y, w, h, _hdc, x, y, SRCCOPY);
+        ::BitBlt(target, x, y, w, h, _hdc, x, y, SRCCOPY);
       }
       break;
   }

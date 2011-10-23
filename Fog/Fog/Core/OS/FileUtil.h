@@ -33,29 +33,54 @@ struct FOG_NO_EXPORT FileUtil
   // [Test / Check]
   // --------------------------------------------------------------------------
 
+  static FOG_INLINE uint32_t test(const StubW& path, uint32_t flags)
+  {
+    return fog_api.fileutil_testStubW(&path, flags);
+  }
+
   static FOG_INLINE uint32_t test(const StringW& path, uint32_t flags)
   {
-    return fog_api.fileutil_test(&path, flags);
+    return fog_api.fileutil_testStringW(&path, flags);
+  }
+
+  static FOG_INLINE bool testLocalName(const StubW& path)
+  {
+    return fog_api.fileutil_testLocalNameStubW(&path);
   }
 
   static FOG_INLINE bool testLocalName(const StringW& path)
   {
-    return fog_api.fileutil_testLocalName(&path);
+    return fog_api.fileutil_testLocalNameStringW(&path);
+  }
+
+  static FOG_INLINE bool exists(const StubW& fileName)
+  {
+    return fog_api.fileutil_testStubW(&fileName, FILE_INFO_EXISTS) == FILE_INFO_EXISTS;
   }
 
   static FOG_INLINE bool exists(const StringW& fileName)
   {
-    return fog_api.fileutil_test(&fileName, FILE_INFO_EXISTS) == FILE_INFO_EXISTS;
+    return fog_api.fileutil_testStringW(&fileName, FILE_INFO_EXISTS) == FILE_INFO_EXISTS;
+  }
+
+  static FOG_INLINE bool isFile(const StubW& fileName)
+  {
+    return fog_api.fileutil_testStubW(&fileName, FILE_INFO_REGULAR_FILE) == FILE_INFO_REGULAR_FILE;
   }
 
   static FOG_INLINE bool isFile(const StringW& fileName)
   {
-    return fog_api.fileutil_test(&fileName, FILE_INFO_REGULAR_FILE) == FILE_INFO_REGULAR_FILE;
+    return fog_api.fileutil_testStringW(&fileName, FILE_INFO_REGULAR_FILE) == FILE_INFO_REGULAR_FILE;
+  }
+
+  static FOG_INLINE bool isDirectory(const StubW& fileName)
+  {
+    return fog_api.fileutil_testStubW(&fileName, FILE_INFO_DIRECTORY) == FILE_INFO_DIRECTORY;
   }
 
   static FOG_INLINE bool isDirectory(const StringW& fileName)
   {
-    return fog_api.fileutil_test(&fileName, FILE_INFO_DIRECTORY) == FILE_INFO_DIRECTORY;
+    return fog_api.fileutil_testStringW(&fileName, FILE_INFO_DIRECTORY) == FILE_INFO_DIRECTORY;
   }
 
   // --------------------------------------------------------------------------
@@ -86,9 +111,14 @@ struct FOG_NO_EXPORT FileUtil
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_POSIX)
+  static FOG_INLINE int stat(struct stat* dst, const StubW& fileName)
+  {
+    return fog_api.fileutil_statStubW(dst, &fileName);
+  }
+
   static FOG_INLINE int stat(struct stat* dst, const StringW& fileName)
   {
-    return fog_api.fileutil_stat(dst, &fileName);
+    return fog_api.fileutil_statStringW(dst, &fileName);
   }
 #endif // FOG_OS_POSIX
 };

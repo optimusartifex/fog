@@ -25,13 +25,13 @@ struct FOG_NO_EXPORT FeBase
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getFilterType() const { return _filterType; }
+  FOG_INLINE uint32_t getFeType() const { return _feType; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t _filterType;
+  uint32_t _feType;
 };
 
 //! @}

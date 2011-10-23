@@ -130,8 +130,8 @@ FOG_NO_EXPORT void PathInfo_init(void);
 FOG_NO_EXPORT void Image_init(void);
 FOG_NO_EXPORT void ImagePalette_init(void);
 FOG_NO_EXPORT void ImageConverter_init(void);
+FOG_NO_EXPORT void ImageFilter_init(void);
 FOG_NO_EXPORT void ImageFormatDescription_init(void);
-FOG_NO_EXPORT void ImageEffect_init(void);
 
 FOG_NO_EXPORT void ImageCodecProvider_init(void);
 FOG_NO_EXPORT void ImageCodecProvider_fini(void);
@@ -143,6 +143,7 @@ FOG_NO_EXPORT void FeColorMatrix_init(void);
 FOG_NO_EXPORT void FeComponentFunction_init(void);
 FOG_NO_EXPORT void FeComponentTransfer_init(void);
 FOG_NO_EXPORT void FeConvolveMatrix_init(void);
+FOG_NO_EXPORT void FeConvolveSeparable_init(void);
 FOG_NO_EXPORT void FeMorphology_init(void);
 
 // [Fog/G2d/Painting]

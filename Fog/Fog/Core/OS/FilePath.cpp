@@ -42,13 +42,10 @@ static CharW* FilePath_copyNorm(CharW* dst, const CharW* src, size_t length)
   return dst;
 }
 
-static err_t _joinPath(StringW* dst, const StringW* base, const StringW* part)
+static err_t _joinPath(StringW* dst,
+  const CharW* bData, size_t bLength,
+  const CharW* pData, size_t pLength)
 {
-  const CharW* bData = base->getData();
-  const CharW* pData = part->getData();
-  size_t bLength = base->getLength();
-  size_t pLength = part->getLength();
-
   if (bLength && FilePath::isAnyDirSeparator(bData[bLength-1]))
     bLength--;
 
@@ -68,18 +65,27 @@ static err_t _joinPath(StringW* dst, const StringW* base, const StringW* part)
 // [Fog::FilePath - Join]
 // ============================================================================
 
-static err_t FOG_CDECL FilePath_join(StringW* dst, const StringW* base_, const StringW* part_)
+static err_t FOG_CDECL FilePath_joinStubW(StringW* dst, const StubW* base, const StubW* part)
+{
+  return _joinPath(dst, base->getData(), base->getLength(),
+                        part->getData(), part->getLength());
+}
+
+static err_t FOG_CDECL FilePath_joinStringW(StringW* dst, const StringW* base_, const StringW* part_)
 {
   // if base or path is shared with dst, we need to do a copy first.
   if (dst->_d == base_->_d || dst->_d == part_->_d)
   {
     StringW base(*base_);
     StringW part(*part_);
-    return _joinPath(dst, &base, &part);
+
+    return _joinPath(dst, base.getData(), base.getLength(),
+                          part.getData(), part.getLength());
   }
   else
   {
-    return _joinPath(dst, base_, part_);
+    return _joinPath(dst, base_->getData(), base_->getLength(),
+                          part_->getData(), part_->getLength());
   }
 }
 
@@ -87,19 +93,53 @@ static err_t FOG_CDECL FilePath_join(StringW* dst, const StringW* base_, const S
 // [Fog::FilePath - Extract]
 // ============================================================================
 
-static err_t FOG_CDECL FilePath_extractFile(StringW* dst, const StringW* path)
+static err_t FOG_CDECL FilePath_extractFileStubW(StringW* dst, const StubW* path)
+{
+  size_t pathLength = path->getComputedLength();
+  size_t index = StringUtil::lastIndexOf(path->getData(), pathLength, CharW('/')) + 1U;
+
+  return dst->set(path->getData() + index, pathLength - index);
+}
+
+static err_t FOG_CDECL FilePath_extractFileStringW(StringW* dst, const StringW* path)
 {
   size_t index = path->lastIndexOf(CharW('/')) + 1U;
   return dst->set(*path, Range(index, path->getLength()));
 }
 
-static err_t FOG_CDECL FilePath_extractExtension(StringW* dst, const StringW* path)
+static err_t FOG_CDECL FilePath_extractExtensionStubW(StringW* dst, const StubW* path)
+{
+  size_t pathLength = path->getComputedLength();
+
+  if (pathLength != 0)
+  {
+    const CharW* pData = path->getData();
+    const CharW* pEnd  = pData + pathLength;
+    const CharW* p     = pEnd;
+
+    do {
+      if (*--p == CharW('.'))
+      {
+        if (++p != pEnd)
+          return dst->set(p, (size_t)(pEnd - p));
+        break;
+      }
+
+      if (*p == CharW('/'))
+        break;
+    } while (p != pData);
+  }
+
+  dst->clear();
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FilePath_extractExtensionStringW(StringW* dst, const StringW* path)
 {
   size_t pathLength = path->getLength();
 
   if (pathLength != 0)
   {
-    // Speed is important, so RAW manipulation is needed
     const CharW* pData = path->getData();
     const CharW* pEnd  = pData + pathLength;
     const CharW* p     = pEnd;
@@ -121,7 +161,20 @@ static err_t FOG_CDECL FilePath_extractExtension(StringW* dst, const StringW* pa
   return ERR_OK;
 }
 
-static err_t FOG_CDECL FilePath_extractDirectory(StringW* dst, const StringW* path)
+static err_t FOG_CDECL FilePath_extractDirectoryStubW(StringW* dst, const StubW* path)
+{
+  size_t pathLength = path->getComputedLength();
+  size_t index = StringUtil::lastIndexOf(path->getData(), pathLength, CharW('/'));
+
+  // In some cases (for example "/root"), index can be 0. So check for this case.
+  if (index != INVALID_INDEX)
+    return dst->set(path->getData(), index != 0 ? index : 1);
+
+  dst->clear();
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FilePath_extractDirectoryStringW(StringW* dst, const StringW* path)
 {
   size_t index = path->lastIndexOf(CharW('/'));
 
@@ -133,7 +186,18 @@ static err_t FOG_CDECL FilePath_extractDirectory(StringW* dst, const StringW* pa
   return ERR_OK;
 }
 
-static bool FOG_CDECL FilePath_containsFile(const StringW* path, const StringW* file, uint cs)
+static bool FOG_CDECL FilePath_containsFileStubW(const StringW* path, const StubW* file, uint cs)
+{
+  size_t fileLength = file->getComputedLength();
+
+  size_t index = path->lastIndexOf(CharW('/'));
+  size_t length = path->getLength() - index;
+
+  return (length == fileLength &&
+    StringUtil::eq(path->getData() + index, file->getData(), length, cs));
+}
+
+static bool FOG_CDECL FilePath_containsFileStringW(const StringW* path, const StringW* file, uint cs)
 {
   size_t index = path->lastIndexOf(CharW('/'));
   size_t length = path->getLength() - index;
@@ -142,36 +206,47 @@ static bool FOG_CDECL FilePath_containsFile(const StringW* path, const StringW* 
     StringUtil::eq(path->getData() + index, file->getData(), length, cs));
 }
 
-static bool FOG_CDECL FilePath_containsExtension(const StringW* path, const StringW* extension, uint cs)
+static FOG_INLINE bool FilePath_containsExtensionRaw(const CharW* pData, size_t pLength, const CharW* eData, size_t eLength, uint cs)
 {
-  size_t pathLength = path->getLength();
-  if (!pathLength) return false;
-
-  // Speed is important, so RAW manipulation is needed
-  const CharW* pathBegin = path->getData();
-  const CharW* pathEnd = pathBegin + pathLength;
-  const CharW* pathCur = pathEnd;
+  const CharW* pBeg = pData;
+  const CharW* pEnd = pData + pLength;
+  const CharW* p = pEnd;
 
   do {
-    if (FOG_UNLIKELY(*--pathCur == CharW('.')))
+    if (FOG_UNLIKELY(*--p == CharW('.')))
     {
-      pathCur++;
-      return ((size_t)(pathEnd - pathCur) == extension->getLength() &&
-        StringUtil::eq(pathCur, extension->getData(), extension->getLength(), cs));
+      p++;
+      return ((size_t)(pEnd - p) == eLength &&
+        StringUtil::eq(p, eData, eLength, cs));
     }
-    else if (FOG_UNLIKELY(FilePath::isAnyDirSeparator(*pathCur)))
+    else if (FOG_UNLIKELY(FilePath::isAnyDirSeparator(*p)))
     {
       return false;
     }
-  } while (pathCur != pathBegin);
+  } while (p != pBeg);
   return false;
 }
 
-static bool FOG_CDECL FilePath_containsDirectory(const StringW* path, const StringW* directory, uint cs)
+static bool FOG_CDECL FilePath_containsExtensionStubW(const StringW* path, const StubW* extension, uint cs)
 {
-  const CharW* dData = directory->getData();
-  size_t dLength = directory->getLength();
+  size_t pathLength = path->getLength();
+  if (!pathLength)
+    return false;
 
+  return FilePath_containsExtensionRaw(path->getData(), pathLength, extension->getData(), extension->getComputedLength(), cs);
+}
+
+static bool FOG_CDECL FilePath_containsExtensionStringW(const StringW* path, const StringW* extension, uint cs)
+{
+  size_t pathLength = path->getLength();
+  if (!pathLength)
+    return false;
+
+  return FilePath_containsExtensionRaw(path->getData(), pathLength, extension->getData(), extension->getLength(), cs);
+}
+
+static FOG_INLINE bool FilePath_containsDirectoryRaw(const StringW* path, const CharW* dData, size_t dLength, uint cs)
+{
   if (dLength == 0)
     return false;
 
@@ -183,43 +258,48 @@ static bool FOG_CDECL FilePath_containsDirectory(const StringW* path, const Stri
     path->startsWith(StubW(dData, dLength), cs));
 }
 
+static bool FOG_CDECL FilePath_containsDirectoryStubW(const StringW* path, const StubW* directory, uint cs)
+{
+  return FilePath_containsDirectoryRaw(path, directory->getData(), directory->getComputedLength(), cs);
+}
+
+static bool FOG_CDECL FilePath_containsDirectoryStringW(const StringW* path, const StringW* directory, uint cs)
+{
+  return FilePath_containsDirectoryRaw(path, directory->getData(), directory->getLength(), cs);
+}
+
 // ============================================================================
 // [Fog::FilePath - Normalize]
 // ============================================================================
 
-static err_t FOG_CDECL FilePath_normalize(StringW* dst, const StringW* _path)
+static err_t FilePath_normalizeRaw(StringW* dst, const CharW* s, size_t sLength)
 {
-  if (FilePath::isNormalized(*_path))
-    return dst->set(*_path);
-
-  StringW path(*_path);
   // we need to convert:
   // - all "//" sequences to "/"
   // - all "/./" to "/" or "BEGIN./" to ""
   // - all "/../" eats previous directory
 
-  size_t pathLength = path.getLength();
-  if (pathLength == 0)
+  if (sLength == 0)
   {
     dst->clear();
     return ERR_OK;
   }
 
-  CharW* pBegin = dst->_prepare(CONTAINER_OP_REPLACE, pathLength);
+  CharW* pBegin = dst->_prepare(CONTAINER_OP_REPLACE, sLength);
   CharW* p = pBegin;
 
   if (pBegin == NULL)
     return ERR_RT_OUT_OF_MEMORY;
 
-  const CharW* sPtr = path.getData();
-  const CharW* sEnd = sPtr + pathLength;
+  const CharW* sPtr = s;
+  const CharW* sEnd = sPtr + sLength;
 
   CharW c;
   bool prevSlash = false;
 
   // Handle Windows absolute path "X:\".
 #if defined(FOG_OS_WINDOWS)
-  if (pathLength > 2 &&
+  if (sLength > 2 &&
     sPtr[0].isAsciiLetter() &&
     sPtr[1] == CharW(':') &&
     FilePath::isAnyDirSeparator(sPtr[2]))
@@ -227,9 +307,9 @@ static err_t FOG_CDECL FilePath_normalize(StringW* dst, const StringW* _path)
     p[0] = sPtr[0];
     p[1] = sPtr[1];
 
-    // We will make path like absolute, next slash will be handled in loop and 
+    // We will make path like absolute, next slash will be handled in loop and
     // corrected.
-    pBegin += 2; 
+    pBegin += 2;
     p      += 2;
     sPtr   += 2;
   }
@@ -317,76 +397,89 @@ _Inc:
   return ERR_OK;
 }
 
-static bool FOG_CDECL FilePath_isNormalized(const StringW* path)
+static err_t FOG_CDECL FilePath_normalizeStubW(StringW* dst, const StubW* _path)
 {
-  if (!FilePath::isAbsolute(*path))
-    return false;
+  if (FilePath::isNormalized(*_path))
+    return dst->set(*_path);
 
-  const CharW* p    = path->getData();
-  const CharW* pEnd = p + path->getLength();
+  return FilePath_normalizeRaw(dst, _path->getData(), _path->getComputedLength());
+}
+
+static err_t FOG_CDECL FilePath_normalizeStringW(StringW* dst, const StringW* _path)
+{
+  if (FilePath::isNormalized(*_path))
+    return dst->set(*_path);
+
+  StringW path(*_path);
+  return FilePath_normalizeRaw(dst, path.getData(), path.getLength());
+}
+
+static bool FilePath_isNormalizedRaw(const CharW* s, size_t sLength)
+{
+  const CharW* sEnd = s + sLength;
 
 #if defined(FOG_OS_WINDOWS)
   // Normalize X:\ form.
-  if (p[2] == CharW('\\'))
+  if (s[2] == CharW('\\'))
     return false;
 
-  p += 3;
-  while (p < pEnd)
+  s += 3;
+  while (s < sEnd)
   {
     // All "\" will be replaced to "/".
-    if (p[0] == CharW('\\'))
+    if (s[0] == CharW('\\'))
       return false;
 
-    if (p[0] == CharW('/'))
+    if (s[0] == CharW('/'))
     {
       // Test for "//".
-      if (p[-1] == CharW('/'))
+      if (s[-1] == CharW('/'))
         return false;
 
-      if (p[-1] == CharW('.'))
+      if (s[-1] == CharW('.'))
       {
         // NOTE: Here is no problem with reading out of buffer range, because
         // buffer often starts with "\" if we are in this loop.
 
         // Test for "/./".
-        if (p[-2] == CharW('/'))
+        if (s[-2] == CharW('/'))
           return false;
 
         // Test for "/../".
-        if (p[-2] == CharW('.') && p[-3] == CharW('/'))
+        if (s[-2] == CharW('.') && s[-3] == CharW('/'))
           return false;
       }
     }
-    p++;
+    s++;
   }
   return true;
 #else
-  if (*p++ == CharW('/'))
+  if (*s++ == CharW('/'))
   {
-    while (p != pEnd)
+    while (s != sEnd)
     {
 
-      if (p[0] == CharW('/'))
+      if (s[0] == CharW('/'))
       {
         // Test for "//".
-        if (p[-1] == CharW('/'))
+        if (s[-1] == CharW('/'))
           return false;
 
-        if (p[-1] == CharW('.'))
+        if (s[-1] == CharW('.'))
         {
-          // NOTE: Here is no problem reading out of buffer range, because 
+          // NOTE: Here is no problem reading out of buffer range, because
           // buffer often starts with "/" if we are in this loop.
 
           // Test for "/./".
-          if (p[-2] == CharW('/'))
+          if (s[-2] == CharW('/'))
             return false;
 
           // Test for "/../".
-          if (p[-2] == CharW('.') && p[-3] == CharW('/'))
+          if (s[-2] == CharW('.') && s[-3] == CharW('/'))
             return false;
         }
       }
-      p++;
+      s++;
     }
     return true;
   }
@@ -394,42 +487,89 @@ static bool FOG_CDECL FilePath_isNormalized(const StringW* path)
 #endif
 }
 
+static bool FOG_CDECL FilePath_isNormalizedStubW(const StubW* path)
+{
+  if (!FilePath::isAbsolute(*path))
+    return false;
+  else
+    return FilePath_isNormalizedRaw(path->getData(), path->getComputedLength());
+}
+
+static bool FOG_CDECL FilePath_isNormalizedStringW(const StringW* path)
+{
+  if (!FilePath::isAbsolute(*path))
+    return false;
+  else
+    return FilePath_isNormalizedRaw(path->getData(), path->getLength());
+}
+
 // ============================================================================
 // [Fog::FilePath - Root]
 // ============================================================================
 
-static bool FOG_CDECL FilePath_isRoot(const StringW* path)
+static FOG_INLINE bool FilePath_isRootRaw(const CharW* s, size_t sLength)
 {
-  StringTmpW<TEMPORARY_LENGTH> norm;
-  if (FilePath::normalize(norm, *path) != ERR_OK)
-    return false;
-
-  const CharW* p = norm.getData();
-  size_t length = norm.getLength();
-
 #if defined(FOG_OS_WINDOWS)
-  if (length < 2 || !p[0].isAsciiLetter() || p[1] != CharW(':'))
+  if (sLength < 2 || !s[0].isAsciiLetter() || s[1] != CharW(':'))
     return false;
-
-  if (length == 2)
+  if (sLength == 2)
     return true;
-  if (length == 3 && p[2] == CharW('/'))
+  if (sLength == 3 && s[2] == CharW('/'))
     return true;
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
-  if (length == 1 && p[0] == CharW('/'))
+  if (sLength == 1 && s[0] == CharW('/'))
     return true;
 #endif // FOG_OS_POSIX
 
   return false;
 }
 
+static bool FOG_CDECL FilePath_isRootStubW(const StubW* path)
+{
+  StringTmpW<TEMPORARY_LENGTH> norm;
+  if (FilePath::normalize(norm, *path) != ERR_OK)
+    return false;
+  else
+    return FilePath_isRootRaw(norm.getData(), norm.getLength());
+}
+
+static bool FOG_CDECL FilePath_isRootStringW(const StringW* path)
+{
+  StringTmpW<TEMPORARY_LENGTH> norm;
+  if (FilePath::normalize(norm, *path) != ERR_OK)
+    return false;
+  else
+    return FilePath_isRootRaw(norm.getData(), norm.getLength());
+}
+
 // ============================================================================
 // [Fog::FilePath - Relative / Absolute]
 // ============================================================================
 
-static err_t FOG_CDECL FilePath_toAbsolute(StringW* dst, const StringW* path, const StringW* base)
+static err_t FOG_CDECL FilePath_toAbsoluteStubW(StringW* dst, const StubW* path, const StubW* base)
+{
+  if (FilePath::isAbsolute(*path))
+    return FilePath::normalize(*dst, *path);
+
+  size_t baseLength;
+  if (base == NULL || (baseLength = base->getComputedLength()) == 0)
+  {
+    StringTmpW<TEMPORARY_LENGTH> working;
+
+    FOG_RETURN_ON_ERROR(Application::getWorkingDirectory(working));
+    FOG_RETURN_ON_ERROR(FilePath::join(*dst, StubW(working.getData(), working.getLength()), *path));
+  }
+  else
+  {
+    FOG_RETURN_ON_ERROR(FilePath::join(*dst, *base, *path));
+  }
+
+  return FilePath::normalize(*dst, *dst);
+}
+
+static err_t FOG_CDECL FilePath_toAbsoluteStringW(StringW* dst, const StringW* path, const StringW* base)
 {
   if (FilePath::isAbsolute(*path))
     return FilePath::normalize(*dst, *path);
@@ -437,6 +577,7 @@ static err_t FOG_CDECL FilePath_toAbsolute(StringW* dst, const StringW* path, co
   if (base == NULL || base->isEmpty())
   {
     StringTmpW<TEMPORARY_LENGTH> working;
+
     FOG_RETURN_ON_ERROR(Application::getWorkingDirectory(working));
     FOG_RETURN_ON_ERROR(FilePath::join(*dst, working, *path));
   }
@@ -448,20 +589,29 @@ static err_t FOG_CDECL FilePath_toAbsolute(StringW* dst, const StringW* path, co
   return FilePath::normalize(*dst, *dst);
 }
 
-static bool FOG_CDECL FilePath_isAbsolute(const StringW* path)
+static FOG_INLINE bool FilePath_isAbsoluteRaw(const CharW* s, size_t sLength)
 {
 #if defined(FOG_OS_WINDOWS)
   // We can accept that "[A-Za-z]:/" as an absolute path.
-  if (path->getLength() > 2)
+  if (sLength > 2)
   {
-    const CharW* s = path->getData();
     return s[0].isAsciiLetter() && s[1] == CharW(':') && FilePath::isAnyDirSeparator(s[2]);
   }
   else
     return false;
 #else
-  return (path->getLength() != 0 && path->getAt(0) == CharW('/'));
+  return (sLength != 0 && s[0] == CharW('/'));
 #endif
+}
+
+static bool FOG_CDECL FilePath_isAbsoluteStubW(const StubW* path)
+{
+  return FilePath_isAbsoluteRaw(path->getData(), path->getComputedLength());
+}
+
+static bool FOG_CDECL FilePath_isAbsoluteStringW(const StringW* path)
+{
+  return FilePath_isAbsoluteRaw(path->getData(), path->getLength());
 }
 
 // ============================================================================
@@ -474,7 +624,7 @@ static err_t FOG_CDECL FilePath_substituteFunc(StringW* dst, const StringW* key)
 
   FOG_RETURN_ON_ERROR(Environment::getValue(*key, value));
   FOG_RETURN_ON_ERROR(dst->append(value));
-  
+
   return ERR_OK;
 }
 
@@ -494,7 +644,7 @@ static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const S
 
   if (dst == path)
     dst = &tmp;
-  
+
   if (length == 0)
     return dst->set(*path);
 
@@ -525,7 +675,7 @@ static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const S
 
       if ((format & FILE_PATH_SUBSTITUTE_FORMAT_UNIX) != 0)
       {
-        if (length >= 5 && StringUtil::eq(p, "$HOME", 5) && 
+        if (length >= 5 && StringUtil::eq(p, "$HOME", 5) &&
            (length == 5 || !(p[5].isNumlet() || p[5] == CharW('_'))))
           homeLen = 5;
         else if (length >= 7 && StringUtil::eq(p, "${HOME}", 7))
@@ -568,7 +718,7 @@ static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const S
 
         if (++p == pEnd)
           goto _End;
-        
+
         c = p[0];
         bool hasBracket = c == CharW('{');
 
@@ -612,7 +762,7 @@ static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const S
             goto _BadSyntax;
 
           variableName = p;
-          
+
           for (;;)
           {
             c = p[0];
@@ -625,7 +775,7 @@ static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const S
 
           variableLen = (size_t)(p - variableName);
         }
-        
+
         goto _Substitute;
       }
       // Windows style.
@@ -641,7 +791,7 @@ static err_t FOG_CDECL FilePath_substituteEnvironmentVars(StringW* _dst, const S
 
         if (++p == pEnd)
           goto _End;
-        
+
         variableName = p;
 
         // Environment name must start with a letter.
@@ -701,7 +851,7 @@ _Fail:
   }
 
   return err;
-  
+
 _BadSyntax:
   err = ERR_PATH_BAD_SYNTAX;
   goto _Fail;
@@ -713,19 +863,42 @@ _BadSyntax:
 
 FOG_NO_EXPORT void FilePath_init(void)
 {
-  fog_api.filepath_join = FilePath_join;
+  fog_api.filepath_joinStubW = FilePath_joinStubW;
+  fog_api.filepath_joinStringW = FilePath_joinStringW;
 
-  fog_api.filepath_extractFile = FilePath_extractFile;
-  fog_api.filepath_extractExtension = FilePath_extractExtension;
-  fog_api.filepath_extractDirectory = FilePath_extractDirectory;
-  fog_api.filepath_containsFile = FilePath_containsFile;
-  fog_api.filepath_containsExtension = FilePath_containsExtension;
-  fog_api.filepath_containsDirectory = FilePath_containsDirectory;
-  fog_api.filepath_normalize = FilePath_normalize;
-  fog_api.filepath_isNormalized = FilePath_isNormalized;
-  fog_api.filepath_isRoot = FilePath_isRoot;
-  fog_api.filepath_toAbsolute = FilePath_toAbsolute;
-  fog_api.filepath_isAbsolute = FilePath_isAbsolute;
+  fog_api.filepath_extractFileStubW = FilePath_extractFileStubW;
+  fog_api.filepath_extractFileStringW = FilePath_extractFileStringW;
+
+  fog_api.filepath_extractExtensionStubW = FilePath_extractExtensionStubW;
+  fog_api.filepath_extractExtensionStringW = FilePath_extractExtensionStringW;
+
+  fog_api.filepath_extractDirectoryStubW = FilePath_extractDirectoryStubW;
+  fog_api.filepath_extractDirectoryStringW = FilePath_extractDirectoryStringW;
+
+  fog_api.filepath_containsFileStubW = FilePath_containsFileStubW;
+  fog_api.filepath_containsFileStringW = FilePath_containsFileStringW;
+
+  fog_api.filepath_containsExtensionStubW = FilePath_containsExtensionStubW;
+  fog_api.filepath_containsExtensionStringW = FilePath_containsExtensionStringW;
+
+  fog_api.filepath_containsDirectoryStubW = FilePath_containsDirectoryStubW;
+  fog_api.filepath_containsDirectoryStringW = FilePath_containsDirectoryStringW;
+
+  fog_api.filepath_normalizeStubW = FilePath_normalizeStubW;
+  fog_api.filepath_normalizeStringW = FilePath_normalizeStringW;
+
+  fog_api.filepath_isNormalizedStubW = FilePath_isNormalizedStubW;
+  fog_api.filepath_isNormalizedStringW = FilePath_isNormalizedStringW;
+
+  fog_api.filepath_isRootStubW = FilePath_isRootStubW;
+  fog_api.filepath_isRootStringW = FilePath_isRootStringW;
+
+  fog_api.filepath_toAbsoluteStubW = FilePath_toAbsoluteStubW;
+  fog_api.filepath_toAbsoluteStringW = FilePath_toAbsoluteStringW;
+
+  fog_api.filepath_isAbsoluteStubW = FilePath_isAbsoluteStubW;
+  fog_api.filepath_isAbsoluteStringW = FilePath_isAbsoluteStringW;
+
   fog_api.filepath_substituteEnvironmentVars = FilePath_substituteEnvironmentVars;
 }
 

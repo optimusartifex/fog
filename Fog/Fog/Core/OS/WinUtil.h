@@ -64,9 +64,14 @@ struct FOG_NO_EXPORT WinUtil
     return fog_api.winutil_getModuleFileName(&dst, hModule);
   }
 
+  static FOG_INLINE err_t makeWinPath(StringW& dst, const StubW& src)
+  {
+    return fog_api.winutil_makeWinPathStubW(&dst, &src);
+  }
+
   static FOG_INLINE err_t makeWinPath(StringW& dst, const StringW& src)
   {
-    return fog_api.winutil_makeWinPath(&dst, &src);
+    return fog_api.winutil_makeWinPathStringW(&dst, &src);
   }
 };
 

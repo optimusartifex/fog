@@ -43,6 +43,7 @@
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Geometry/Triangle.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/G2d/Source/Argb.h>
 #include <Fog/G2d/Source/Color.h>
@@ -193,7 +194,8 @@ static const uint8_t Var_dataSize[] =
   /* 0086: VAR_TYPE_COLOR_STOP_LIST      */ 0,
   /* 0087: VAR_TYPE_IMAGE                */ 0,
   /* 0088: VAR_TYPE_IMAGE_PALETTE        */ 0,
-  /* 0089: VAR_TYPE_FONT                 */ 0
+  /* 0089: VAR_TYPE_IMAGE_FILTER         */ 0,
+  /* 0090: VAR_TYPE_FONT                 */ 0
 };
 // ${VAR_TYPE:END}
 
@@ -339,17 +341,9 @@ _CreateNull:
       goto _CreateSimple;
 
     case VAR_TYPE_COLOR_STOP_LIST:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
-      return;
-
     case VAR_TYPE_IMAGE:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
-      return;
-
     case VAR_TYPE_IMAGE_PALETTE:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
-      return;
-
+    case VAR_TYPE_IMAGE_FILTER:
     case VAR_TYPE_FONT:
       self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
       return;
@@ -1595,6 +1589,9 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
       case VAR_TYPE_IMAGE_PALETTE:
         return *reinterpret_cast<const ImagePalette*>(a) == *reinterpret_cast<const ImagePalette*>(b);
 
+      case VAR_TYPE_IMAGE_FILTER:
+        return *reinterpret_cast<const ImageFilter*>(a) == *reinterpret_cast<const ImageFilter*>(b);
+
       case VAR_TYPE_FONT:
         return *reinterpret_cast<const Font*>(a) == *reinterpret_cast<const Font*>(b);
 
@@ -1965,12 +1962,15 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       return;
 
     case VAR_TYPE_IMAGE:
-      // TODO:
-      // reinterpret_cast<ImageData*>(d)->release();
+      reinterpret_cast<ImageData*>(d)->release();
       return;
 
     case VAR_TYPE_IMAGE_PALETTE:
       reinterpret_cast<ImagePaletteData*>(d)->release();
+      return;
+
+    case VAR_TYPE_IMAGE_FILTER:
+      reinterpret_cast<ImageFilterData*>(d)->release();
       return;
 
     case VAR_TYPE_FONT:

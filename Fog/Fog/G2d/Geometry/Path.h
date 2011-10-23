@@ -12,10 +12,16 @@
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/Range.h>
+#include <Fog/G2d/Geometry/Arc.h>
 #include <Fog/G2d/Geometry/Box.h>
+#include <Fog/G2d/Geometry/CBezier.h>
+#include <Fog/G2d/Geometry/Circle.h>
+#include <Fog/G2d/Geometry/Ellipse.h>
+#include <Fog/G2d/Geometry/Line.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/PathInfo.h>
 #include <Fog/G2d/Geometry/Point.h>
+#include <Fog/G2d/Geometry/QBezier.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Geometry/Triangle.h>
@@ -477,6 +483,18 @@ struct FOG_NO_EXPORT PathF
     return fog_api.pathf_moveToRel(this, &pt0);
   }
 
+  FOG_INLINE err_t moveTo(float x0, float y0)
+  {
+    PointF pt0(x0, y0);
+    return fog_api.pathf_moveTo(this, &pt0);
+  }
+
+  FOG_INLINE err_t moveToRel(float x0, float y0)
+  {
+    PointF pt0(x0, y0);
+    return fog_api.pathf_moveToRel(this, &pt0);
+  }
+
   // --------------------------------------------------------------------------
   // [LineTo]
   // --------------------------------------------------------------------------
@@ -491,6 +509,18 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE err_t lineToRel(const PointF& pt1)
   {
     return fog_api.pathf_lineToRel(this, &pt1);
+  }
+
+  FOG_INLINE err_t lineTo(float x0, float y0)
+  {
+    PointF pt0(x0, y0);
+    return fog_api.pathf_lineTo(this, &pt0);
+  }
+
+  FOG_INLINE err_t lineToRel(float x0, float y0)
+  {
+    PointF pt0(x0, y0);
+    return fog_api.pathf_lineToRel(this, &pt0);
   }
 
   //! @brief Horizontal line to @a x (absolute).
@@ -549,6 +579,20 @@ struct FOG_NO_EXPORT PathF
     return fog_api.pathf_quadToRel(this, &pt1, &pt2);
   }
 
+  FOG_INLINE err_t quadTo(float x1, float y1, float x2, float y2)
+  {
+    PointF pt1(x1, y1);
+    PointF pt2(x2, y2);
+    return fog_api.pathf_quadTo(this, &pt1, &pt2);
+  }
+
+  FOG_INLINE err_t quadToRel(float x1, float y1, float x2, float y2)
+  {
+    PointF pt1(x1, y1);
+    PointF pt2(x2, y2);
+    return fog_api.pathf_quadToRel(this, &pt1, &pt2);
+  }
+
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothQuadTo(const PointF& pt2)
   {
@@ -561,6 +605,17 @@ struct FOG_NO_EXPORT PathF
     return fog_api.pathf_smoothQuadToRel(this, &pt2);
   }
 
+  FOG_INLINE err_t smoothQuadTo(float x2, float y2)
+  {
+    PointF pt2(x2, y2);
+    return fog_api.pathf_smoothQuadTo(this, &pt2);
+  }
+
+  FOG_INLINE err_t smoothQuadToRel(float x2, float y2)
+  {
+    PointF pt2(x2, y2);
+    return fog_api.pathf_smoothQuadToRel(this, &pt2);
+  }
   // --------------------------------------------------------------------------
   // [CubicTo]
   // --------------------------------------------------------------------------
@@ -577,6 +632,22 @@ struct FOG_NO_EXPORT PathF
     return fog_api.pathf_cubicToRel(this, &pt1, &pt2, &pt3);
   }
 
+  FOG_INLINE err_t cubicTo(float x1, float y1, float x2, float y2, float x3, float y3)
+  {
+    PointF pt1(x1, y1);
+    PointF pt2(x2, y2);
+    PointF pt3(x3, y3);
+    return fog_api.pathf_cubicTo(this, &pt1, &pt2, &pt3);
+  }
+
+  FOG_INLINE err_t cubicToRel(float x1, float y1, float x2, float y2, float x3, float y3)
+  {
+    PointF pt1(x1, y1);
+    PointF pt2(x2, y2);
+    PointF pt3(x3, y3);
+    return fog_api.pathf_cubicToRel(this, &pt1, &pt2, &pt3);
+  }
+
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothCubicTo(const PointF& pt2, const PointF& pt3)
   {
@@ -586,6 +657,20 @@ struct FOG_NO_EXPORT PathF
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (relative).
   FOG_INLINE err_t smoothCubicToRel(const PointF& pt2, const PointF& pt3)
   {
+    return fog_api.pathf_smoothCubicToRel(this, &pt2, &pt3);
+  }
+
+  FOG_INLINE err_t smoothCubicTo(float x2, float y2, float x3, float y3)
+  {
+    PointF pt2(x2, y2);
+    PointF pt3(x3, y3);
+    return fog_api.pathf_smoothCubicTo(this, &pt2, &pt3);
+  }
+
+  FOG_INLINE err_t smoothCubicToRel(float x2, float y2, float x3, float y3)
+  {
+    PointF pt2(x2, y2);
+    PointF pt3(x3, y3);
     return fog_api.pathf_smoothCubicToRel(this, &pt2, &pt3);
   }
 
@@ -627,15 +712,27 @@ struct FOG_NO_EXPORT PathF
   // --------------------------------------------------------------------------
 
   //! @brief Add a closed rectangle to the path.
-  FOG_INLINE err_t box(const BoxI& r, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t box(const BoxI& b, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return fog_api.pathf_boxI(this, &r, direction);
+    return fog_api.pathf_boxI(this, &b, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
-  FOG_INLINE err_t box(const BoxF& r, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t box(const BoxF& b, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return fog_api.pathf_boxF(this, &r, direction);
+    return fog_api.pathf_boxF(this, &b, direction);
+  }
+
+  FOG_INLINE err_t box(int x0, int y0, int x1, int y1, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    BoxI b(x0, y0, x1, y1);
+    return fog_api.pathf_boxI(this, &b, direction);
+  }
+
+  FOG_INLINE err_t box(float x0, float y0, float x1, float y1, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    BoxF b(x0, y0, x1, y1);
+    return fog_api.pathf_boxF(this, &b, direction);
   }
 
   //! @brief Add a closed rectangle to the path.
@@ -647,6 +744,20 @@ struct FOG_NO_EXPORT PathF
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectF& r, uint32_t direction = PATH_DIRECTION_CW)
   {
+    return fog_api.pathf_rectF(this, &r, direction);
+  }
+
+  //! @brief Add a closed rectangle to the path.
+  FOG_INLINE err_t rect(int x, int y, int w, int h, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    RectI r(x, y, w, h);
+    return fog_api.pathf_rectI(this, &r, direction);
+  }
+
+  //! @brief Add a closed rectangle to the path.
+  FOG_INLINE err_t rect(float x, float y, float w, float h, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    RectF r(x, y, w, h);
     return fog_api.pathf_rectF(this, &r, direction);
   }
 
@@ -745,6 +856,20 @@ struct FOG_NO_EXPORT PathF
     return _shape(SHAPE_TYPE_LINE, &object, direction, &tr);
   }
 
+  //! @brief Add an unclosed line to the path.
+  FOG_INLINE err_t line(float x0, float y0, float x1, float y1, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    LineF line(x0, y0, x1, y1);
+    return _shape(SHAPE_TYPE_LINE, &line, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t line(float x0, float y0, float x1, float y1, uint32_t direction, const TransformF& tr)
+  {
+    LineF line(x0, y0, x1, y1);
+    return _shape(SHAPE_TYPE_LINE, &line, direction, &tr);
+  }
+
   //! @brief Add an unclosed quadratic bézier curve to the path.
   FOG_INLINE err_t qbezier(const QBezierF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
@@ -757,16 +882,44 @@ struct FOG_NO_EXPORT PathF
     return _shape(SHAPE_TYPE_QBEZIER, &object, direction, &tr);
   }
 
+  //! @brief Add an unclosed line to the path.
+  FOG_INLINE err_t qbezier(float x0, float y0, float x1, float y1, float x2, float y2, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    QBezierF qbez(x0, y0, x1, y1, x2, y2);
+    return _shape(SHAPE_TYPE_QBEZIER, &qbez, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t qbezier(float x0, float y0, float x1, float y1, float x2, float y2, uint32_t direction, const TransformF& tr)
+  {
+    QBezierF qbez(x0, y0, x1, y1, x2, y2);
+    return _shape(SHAPE_TYPE_QBEZIER, &qbez, direction, &tr);
+  }
+
   //! @brief Add an unclosed cubic bézier curve to the path.
-  FOG_INLINE err_t cbezier(const QBezierF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t cbezier(const CBezierF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_CBEZIER, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t cbezier(const QBezierF& object, uint32_t direction, const TransformF& tr)
+  FOG_INLINE err_t cbezier(const CBezierF& object, uint32_t direction, const TransformF& tr)
   {
     return _shape(SHAPE_TYPE_CBEZIER, &object, direction, &tr);
+  }
+
+  //! @brief Add an unclosed line to the path.
+  FOG_INLINE err_t cbezier(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    CBezierF cbez(x0, y0, x1, y1, x2, y2, x3, y3);
+    return _shape(SHAPE_TYPE_CBEZIER, &cbez, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t cbezier(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3, uint32_t direction, const TransformF& tr)
+  {
+    CBezierF cbez(x0, y0, x1, y1, x2, y2, x3, y3);
+    return _shape(SHAPE_TYPE_CBEZIER, &cbez, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
@@ -793,7 +946,21 @@ struct FOG_NO_EXPORT PathF
     return _shape(SHAPE_TYPE_CIRCLE, &object, direction, &tr);
   }
 
-  //! @brief Add a closed ellipse to the path.
+  //! @brief Add a closed circle to the path.
+  FOG_INLINE err_t circle(float x0, float y0, float r, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    CircleF c(x0, y0, r);
+    return _shape(SHAPE_TYPE_CIRCLE, &c, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t circle(float x0, float y0, float r, uint32_t direction, const TransformF& tr)
+  {
+    CircleF c(x0, y0, r);
+    return _shape(SHAPE_TYPE_CIRCLE, &c, direction, &tr);
+  }
+
+  //! @brief Add an closed ellipse to the path.
   FOG_INLINE err_t ellipse(const EllipseF& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, NULL);
@@ -803,6 +970,20 @@ struct FOG_NO_EXPORT PathF
   FOG_INLINE err_t ellipse(const EllipseF& object, uint32_t direction, const TransformF& tr)
   {
     return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr);
+  }
+
+  //! @brief Add an closed ellipse to the path.
+  FOG_INLINE err_t ellipse(float x0, float y0, float rx, float ry, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    EllipseF e(x0, y0, rx, ry);
+    return _shape(SHAPE_TYPE_ELLIPSE, &e, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t ellipse(float x0, float y0, float rx, float ry, uint32_t direction, const TransformF& tr)
+  {
+    EllipseF e(x0, y0, rx, ry);
+    return _shape(SHAPE_TYPE_ELLIPSE, &e, direction, &tr);
   }
 
   //! @brief Add a closed rounded ractangle to the path.
@@ -1319,6 +1500,18 @@ struct FOG_NO_EXPORT PathD
     return fog_api.pathd_moveToRel(this, &pt0);
   }
 
+  FOG_INLINE err_t moveTo(double x0, double y0)
+  {
+    PointD pt0(x0, y0);
+    return fog_api.pathd_moveTo(this, &pt0);
+  }
+
+  FOG_INLINE err_t moveToRel(double x0, double y0)
+  {
+    PointD pt0(x0, y0);
+    return fog_api.pathd_moveToRel(this, &pt0);
+  }
+
   // --------------------------------------------------------------------------
   // [LineTo]
   // --------------------------------------------------------------------------
@@ -1333,6 +1526,18 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE err_t lineToRel(const PointD& pt1)
   {
     return fog_api.pathd_lineToRel(this, &pt1);
+  }
+
+  FOG_INLINE err_t lineTo(double x0, double y0)
+  {
+    PointD pt0(x0, y0);
+    return fog_api.pathd_lineTo(this, &pt0);
+  }
+
+  FOG_INLINE err_t lineToRel(double x0, double y0)
+  {
+    PointD pt0(x0, y0);
+    return fog_api.pathd_lineToRel(this, &pt0);
   }
 
   //! @brief Horizontal line to @a x (absolute).
@@ -1486,6 +1691,18 @@ struct FOG_NO_EXPORT PathD
     return fog_api.pathd_boxD(this, &r, direction);
   }
 
+  FOG_INLINE err_t box(int x0, int y0, int x1, int y1, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    BoxI b(x0, y0, x1, y1);
+    return fog_api.pathd_boxI(this, &b, direction);
+  }
+
+  FOG_INLINE err_t box(double x0, double y0, double x1, double y1, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    BoxD b(x0, y0, x1, y1);
+    return fog_api.pathd_boxD(this, &b, direction);
+  }
+
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectI& r, uint32_t direction = PATH_DIRECTION_CW)
   {
@@ -1501,6 +1718,20 @@ struct FOG_NO_EXPORT PathD
   //! @brief Add a closed rectangle to the path.
   FOG_INLINE err_t rect(const RectD& r, uint32_t direction = PATH_DIRECTION_CW)
   {
+    return fog_api.pathd_rectD(this, &r, direction);
+  }
+
+  //! @brief Add a closed rectangle to the path.
+  FOG_INLINE err_t rect(int x, int y, int w, int h, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    RectI r(x, y, w, h);
+    return fog_api.pathd_rectI(this, &r, direction);
+  }
+
+  //! @brief Add a closed rectangle to the path.
+  FOG_INLINE err_t rect(double x, double y, double w, double h, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    RectD r(x, y, w, h);
     return fog_api.pathd_rectD(this, &r, direction);
   }
 
@@ -1611,6 +1842,20 @@ struct FOG_NO_EXPORT PathD
     return _shape(SHAPE_TYPE_LINE, &object, direction, &tr);
   }
 
+  //! @brief Add an unclosed line to the path.
+  FOG_INLINE err_t line(double x0, double y0, double x1, double y1, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    LineD line(x0, y0, x1, y1);
+    return _shape(SHAPE_TYPE_LINE, &line, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t line(double x0, double y0, double x1, double y1, uint32_t direction, const TransformD& tr)
+  {
+    LineD line(x0, y0, x1, y1);
+    return _shape(SHAPE_TYPE_LINE, &line, direction, &tr);
+  }
+
   //! @brief Add an unclosed quadratic bézier curve to the path.
   FOG_INLINE err_t qbezier(const QBezierD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
@@ -1623,16 +1868,44 @@ struct FOG_NO_EXPORT PathD
     return _shape(SHAPE_TYPE_QBEZIER, &object, direction, &tr);
   }
 
+  //! @brief Add an unclosed line to the path.
+  FOG_INLINE err_t qbezier(double x0, double y0, double x1, double y1, double x2, double y2, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    QBezierD qbez(x0, y0, x1, y1, x2, y2);
+    return _shape(SHAPE_TYPE_QBEZIER, &qbez, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t qbezier(double x0, double y0, double x1, double y1, double x2, double y2, uint32_t direction, const TransformD& tr)
+  {
+    QBezierD qbez(x0, y0, x1, y1, x2, y2);
+    return _shape(SHAPE_TYPE_QBEZIER, &qbez, direction, &tr);
+  }
+
   //! @brief Add an unclosed cubic bézier curve to the path.
-  FOG_INLINE err_t cbezier(const QBezierD& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t cbezier(const CBezierD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
     return _shape(SHAPE_TYPE_CBEZIER, &object, direction, NULL);
   }
 
   //! @overload
-  FOG_INLINE err_t cbezier(const QBezierD& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t cbezier(const CBezierD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_CBEZIER, &object, direction, &tr);
+  }
+
+  //! @brief Add an unclosed line to the path.
+  FOG_INLINE err_t cbezier(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    CBezierD cbez(x0, y0, x1, y1, x2, y2, x3, y3);
+    return _shape(SHAPE_TYPE_CBEZIER, &cbez, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t cbezier(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3, uint32_t direction, const TransformD& tr)
+  {
+    CBezierD cbez(x0, y0, x1, y1, x2, y2, x3, y3);
+    return _shape(SHAPE_TYPE_CBEZIER, &cbez, direction, &tr);
   }
 
   //! @brief Add an unclosed arc to the path.
@@ -1659,6 +1932,20 @@ struct FOG_NO_EXPORT PathD
     return _shape(SHAPE_TYPE_CIRCLE, &object, direction, &tr);
   }
 
+  //! @brief Add a closed circle to the path.
+  FOG_INLINE err_t circle(double x0, double y0, double r, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    CircleD c(x0, y0, r);
+    return _shape(SHAPE_TYPE_CIRCLE, &c, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t circle(double x0, double y0, double r, uint32_t direction, const TransformD& tr)
+  {
+    CircleD c(x0, y0, r);
+    return _shape(SHAPE_TYPE_CIRCLE, &c, direction, &tr);
+  }
+
   //! @brief Add a closed ellipse to the path.
   FOG_INLINE err_t ellipse(const EllipseD& object, uint32_t direction = PATH_DIRECTION_CW)
   {
@@ -1669,6 +1956,20 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE err_t ellipse(const EllipseD& object, uint32_t direction, const TransformD& tr)
   {
     return _shape(SHAPE_TYPE_ELLIPSE, &object, direction, &tr);
+  }
+
+  //! @brief Add an closed ellipse to the path.
+  FOG_INLINE err_t ellipse(double x0, double y0, double rx, double ry, uint32_t direction = PATH_DIRECTION_CW)
+  {
+    EllipseD e(x0, y0, rx, ry);
+    return _shape(SHAPE_TYPE_ELLIPSE, &e, direction, NULL);
+  }
+
+  //! @overload
+  FOG_INLINE err_t ellipse(double x0, double y0, double rx, double ry, uint32_t direction, const TransformD& tr)
+  {
+    EllipseD e(x0, y0, rx, ry);
+    return _shape(SHAPE_TYPE_ELLIPSE, &e, direction, &tr);
   }
 
   //! @brief Add a closed rounded ractangle to the path.

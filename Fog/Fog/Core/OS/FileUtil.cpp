@@ -46,16 +46,11 @@ namespace Fog {
 // ============================================================================
 
 #if defined(FOG_OS_WINDOWS)
-static uint32_t FOG_CDECL FileUtil_test(const StringW* path, uint32_t flags)
+static uint32_t FOG_CDECL FileUtil_testRaw(const CharW* pathData, uint32_t flags)
 {
-  if (flags == 0)
-    return 0;
-
-  StringTmpW<TEMPORARY_LENGTH> pathW;
-  FOG_RETURN_ON_ERROR(WinUtil::makeWinPath(pathW, *path));
-
   WIN32_FILE_ATTRIBUTE_DATA fi;
-  if (::GetFileAttributesExW(reinterpret_cast<const wchar_t*>(pathW.getData()), GetFileExInfoStandard, &fi))
+
+  if (::GetFileAttributesExW(reinterpret_cast<const wchar_t*>(pathData), GetFileExInfoStandard, &fi))
   {
     uint result = FILE_INFO_EXISTS;
     if (fi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
@@ -73,7 +68,7 @@ static uint32_t FOG_CDECL FileUtil_test(const StringW* path, uint32_t flags)
       WIN32_FIND_DATAW fd;
       HANDLE r;
 
-      r = FindFirstFileW(reinterpret_cast<const wchar_t*>(pathW.getData()), &fd);
+      r = FindFirstFileW(reinterpret_cast<const wchar_t*>(pathData), &fd);
       if (r != INVALID_HANDLE_VALUE)
       {
         if (fd.dwReserved0 & IO_REPARSE_TAG_SYMLINK)
@@ -86,16 +81,16 @@ static uint32_t FOG_CDECL FileUtil_test(const StringW* path, uint32_t flags)
 
     if (fi.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
       result |= FILE_INFO_HIDDEN;
-    
+
     if (fi.dwFileAttributes & FILE_ATTRIBUTE_ARCHIVE)
       result |= FILE_INFO_ARCHIVE;
-    
+
     if (fi.dwFileAttributes & FILE_ATTRIBUTE_COMPRESSED)
       result |= FILE_INFO_COMPRESSED;
-    
+
     if (fi.dwFileAttributes & FILE_ATTRIBUTE_SPARSE_FILE)
       result |= FILE_INFO_SPARSE;
-    
+
     if (fi.dwFileAttributes & FILE_ATTRIBUTE_SYSTEM)
       result |= FILE_INFO_SYSTEM;
 
@@ -103,7 +98,7 @@ static uint32_t FOG_CDECL FileUtil_test(const StringW* path, uint32_t flags)
     if ((flags & (FILE_INFO_EXECUTABLE | FILE_INFO_CAN_EXECUTE)) != 0)
     {
       StringTmpW<16> ext;
-      FilePath::extractExtension(ext, *path);
+      FilePath::extractExtension(ext, StubW(pathData));
 
       const CharW* extStr = ext.getData();
       size_t extLength = ext.getLength();
@@ -122,11 +117,38 @@ static uint32_t FOG_CDECL FileUtil_test(const StringW* path, uint32_t flags)
 
     return result & flags;
   }
-  else
-    return 0;
+
+  return 0;
 }
 
-static bool FOG_CDECL FileUtil_testLocalName(const StringW* path)
+static uint32_t FOG_CDECL FileUtil_testStubW(const StubW* path, uint32_t flags)
+{
+  if (flags == 0)
+    return 0;
+
+  StringTmpW<TEMPORARY_LENGTH> pathW;
+  FOG_RETURN_ON_ERROR(WinUtil::makeWinPath(pathW, *path));
+
+  return FileUtil_testRaw(pathW.getData(), flags);
+}
+
+static uint32_t FOG_CDECL FileUtil_testStringW(const StringW* path, uint32_t flags)
+{
+  if (flags == 0)
+    return 0;
+
+  StringTmpW<TEMPORARY_LENGTH> pathW;
+  FOG_RETURN_ON_ERROR(WinUtil::makeWinPath(pathW, *path));
+
+  return FileUtil_testRaw(pathW.getData(), flags);
+}
+
+static bool FOG_CDECL FileUtil_testLocalNameStubW(const StubW* path)
+{
+  return true;
+}
+
+static bool FOG_CDECL FileUtil_testLocalNameStringW(const StringW* path)
 {
   return true;
 }
@@ -190,20 +212,40 @@ static uint32_t FileUtil_testStat(struct stat *s, uint32_t flags)
   return result & flags;
 }
 
-static uint32_t FOG_CDECL FileUtil_test(const StringW* path, uint32_t flags)
+static uint32_t FOG_CDECL FileUtil_testStubW(const StubW* path, uint32_t flags)
 {
-  struct stat s;
-
   if (flags == NO_FLAGS)
     return NO_FLAGS;
 
+  struct stat s;
   if (FileUtil::stat(&s, *path) == 0)
     return FileUtil_testStat(&s, flags);
-  else
-    return 0;
+
+  return 0;
 }
 
-static bool FOG_CDECL FileUtil_testLocalName(const StringW* path)
+static uint32_t FOG_CDECL FileUtil_testStringW(const StringW* path, uint32_t flags)
+{
+  if (flags == NO_FLAGS)
+    return NO_FLAGS;
+
+  struct stat s;
+  if (FileUtil::stat(&s, *path) == 0)
+    return FileUtil_testStat(&s, flags);
+
+  return 0;
+}
+
+static bool FOG_CDECL FileUtil_testLocalNameStubW(const StubW* path)
+{
+  if (TextCodec::local8().isUnicode())
+    return true;
+
+  StringTmpA<TEMPORARY_LENGTH> path8;
+  return TextCodec::local8().encode(path8, *path) == ERR_OK;
+}
+
+static bool FOG_CDECL FileUtil_testLocalNameStringW(const StringW* path)
 {
   if (TextCodec::local8().isUnicode())
     return true;
@@ -338,15 +380,25 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
   if (i == INVALID_INDEX)
     return ERR_RT_INVALID_ARGUMENT;
 
-  if (dirAbs.getAt(length-1) == CharW('/'))
+  if (dirAbs.getAt(length - 1) == CharW('/'))
     length--;
 
   do {
     i++;
     i = dirAbs.indexOf(Range(i, i + length), CharW('/'), CASE_SENSITIVE);
 
-    err_t err = FileUtil_createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
-    if (err != ERR_OK && (err != ERR_PATH_EXISTS || !FileUtil::isDirectory(dirAbs)))
+    StubW curDir(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
+    err_t err = FileUtil_createDirectoryHelper(curDir.getData(), curDir.getLength());
+
+    if (err == ERR_PATH_EXISTS)
+    {
+      if (FileUtil::isDirectory(curDir))
+        continue;
+      else
+        return ERR_PATH_EXISTS;
+    }
+
+    if (err != ERR_OK)
       return err;
 
   } while (i != INVALID_INDEX);
@@ -412,9 +464,20 @@ static err_t FOG_CDECL FileUtil_createDirectory(const StringW* dir, bool recursi
     i++;
     i = dirAbs.indexOf(Range(i, i + length), CharW('/'), CASE_SENSITIVE);
 
-    err_t err = FileUtil_createDirectoryHelper(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
-    if (err != ERR_OK && (err != ERR_PATH_EXISTS || !FileUtil::isDirectory(dirAbs)))
+    StubW curDir(dirAbs.getData(), (i == INVALID_INDEX) ? length : i);
+    err_t err = FileUtil_createDirectoryHelper(curDir.getData(), curDir.getLength());
+
+    if (err == ERR_PATH_EXISTS)
+    {
+      if (FileUtil::isDirectory(curDir))
+        continue;
+      else
+        return ERR_PATH_EXISTS;
+    }
+
+    if (err != ERR_OK)
       return err;
+
   } while (i != INVALID_INDEX);
 
   return ERR_OK;
@@ -437,7 +500,17 @@ static err_t FOG_CDECL FileUtil_deleteDirectory(const StringW* dir)
 // ============================================================================
 
 #if defined(FOG_OS_POSIX)
-static int FOG_CDECL FileUtil_stat(void* dst, const StringW* fileName)
+static int FOG_CDECL FileUtil_statStubW(void* dst, const StubW* fileName)
+{
+  StringTmpA<TEMPORARY_LENGTH> t;
+
+  if (TextCodec::local8().encode(t, *fileName) != ERR_OK)
+    return -1;
+
+  return ::stat(t.getData(), (struct stat*)dst);
+}
+
+static int FOG_CDECL FileUtil_statStringW(void* dst, const StringW* fileName)
 {
   StringTmpA<TEMPORARY_LENGTH> t;
 
@@ -454,14 +527,20 @@ static int FOG_CDECL FileUtil_stat(void* dst, const StringW* fileName)
 
 FOG_NO_EXPORT void FileUtil_init(void)
 {
-  fog_api.fileutil_test = FileUtil_test;
-  fog_api.fileutil_testLocalName = FileUtil_testLocalName;
+  fog_api.fileutil_testStubW = FileUtil_testStubW;
+  fog_api.fileutil_testStringW = FileUtil_testStringW;
+
+  fog_api.fileutil_testLocalNameStubW = FileUtil_testLocalNameStubW;
+  fog_api.fileutil_testLocalNameStringW = FileUtil_testLocalNameStringW;
+
   fog_api.fileutil_findFile = FileUtil_findFile;
+
   fog_api.fileutil_createDirectory = FileUtil_createDirectory;
   fog_api.fileutil_deleteDirectory = FileUtil_deleteDirectory;
 
 #if defined(FOG_OS_POSIX)
-  fog_api.fileutil_stat = FileUtil_stat;
+  fog_api.fileutil_statStubW = FileUtil_statStubW;
+  fog_api.fileutil_statStringW = FileUtil_statStringW;
 #endif // FOG_OS_POSIX
 }
 

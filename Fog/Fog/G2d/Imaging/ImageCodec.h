@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_IMAGEDEVICE_H
-#define _FOG_G2D_IMAGING_IMAGEDEVICE_H
+#ifndef _FOG_G2D_IMAGING_IMAGECODEC_H
+#define _FOG_G2D_IMAGING_IMAGECODEC_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -144,12 +144,10 @@ struct FOG_API ImageCodec : public Object
   //! @brief Progress, 0 to 100 [percent]
   float _progress;
 
-  //! @brief ImagePalette if reading / writing 8 bit or less depth.
-  //!
-  //! This is image palette that can be contained in loaded image, but it's
-  //! not needed if it's supported to load image into the different image
-  //! format.
+  //! @brief ImagePalette used when reading or writing images of depth 8-bit
+  //! or less.
   ImagePalette _palette;
+
   //! @brief Comment.
   StringA _comment;
 };
@@ -159,4 +157,4 @@ struct FOG_API ImageCodec : public Object
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_IMAGEDEVICE_H
+#endif // _FOG_G2D_IMAGING_IMAGECODEC_H

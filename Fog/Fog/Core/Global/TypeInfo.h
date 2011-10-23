@@ -435,6 +435,7 @@ _FOG_TYPE_DECLARE(Fog::Image                   , C(MOVABLE) | F(IMPLICIT) | F(NO
 _FOG_TYPE_DECLARE(Fog::ImageBits               , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImageConverter          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImageDither8Params      , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ) )
+_FOG_TYPE_DECLARE(Fog::ImageFilter             , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImageFormatDescription  , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImagePalette            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 

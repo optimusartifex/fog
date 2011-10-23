@@ -37,7 +37,7 @@ FOG_STATIC_T void strokePath(PathF& dst, const PathF& src, float distance)
       NumT_(Point) v0 = p[i] - p[i - 1];
 
       angle[0] = getDirection<NumT>(v0.x, v0.y);
-      Math::sincos(angle[0] + MATH_HALF_PI, &as[0], &ac[0]);
+      Math::sincos(angle[0] + NumT(MATH_HALF_PI), &as[0], &ac[0]);
 
       as[0] *= distance;
       ac[0] *= distance;
@@ -54,7 +54,7 @@ FOG_STATIC_T void strokePath(PathF& dst, const PathF& src, float distance)
       NumT_(Point) v1 = p[i    ] - p[i - 1];
 
       angle[1] = getDirection<NumT>(v1.x, v1.y);
-      Math::sincos(angle[1] + MATH_HALF_PI, &as[1], &ac[1]);
+      Math::sincos(angle[1] + NumT(MATH_HALF_PI), &as[1], &ac[1]);
 
       as[1] *= distance;
       ac[1] *= distance;

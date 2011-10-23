@@ -37,13 +37,13 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   FOG_INLINE FeColorMatrix(const float data[25])
   {
-    _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
+    _feType = FE_TYPE_COLOR_MATRIX;
     fog_api.fecolormatrix_copy(m, data);
   }
 
   FOG_INLINE FeColorMatrix(const FeColorMatrix& other)
   {
-    _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
+    _feType = FE_TYPE_COLOR_MATRIX;
     fog_api.fecolormatrix_copy(m, other.m);
   }
 
@@ -63,7 +63,7 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
 
   explicit FOG_INLINE FeColorMatrix(_Uninitialized)
   {
-    _filterType = IMAGE_FILTER_TYPE_COLOR_MATRIX;
+    _feType = FE_TYPE_COLOR_MATRIX;
   }
 
   // --------------------------------------------------------------------------

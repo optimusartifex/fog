@@ -23,7 +23,15 @@ namespace Math {
 // [Fog::Math - Solve]
 // ============================================================================
 
-//! @brief Solve the quadratic or cubic function and return the roots.
+//! @brief Solve linear, quadratic, cubic, quartic, or higher degree polynomial
+//! function.
+//!
+//! Linear function:
+//!
+//!   Ax + B == 0
+//!
+//!   A == func[0]
+//!   B == func[1]
 //!
 //! Quadratic function:
 //!

@@ -1493,11 +1493,13 @@ enum MANAGED_STRING_OPTION
 
 enum MATH_SOLVE
 {
-  MATH_SOLVE_QUADRATIC = 0,
-  MATH_SOLVE_CUBIC = 1,
-  MATH_SOLVE_QUARTIC = 2,
+  MATH_SOLVE_NONE = 0,
+  MATH_SOLVE_LINEAR = 2,
+  MATH_SOLVE_QUADRATIC = 3,
+  MATH_SOLVE_CUBIC = 4,
+  MATH_SOLVE_QUARTIC = 5,
 
-  MATH_SOLVE_COUNT = 3
+  MATH_SOLVE_COUNT = 6
 };
 
 // ============================================================================

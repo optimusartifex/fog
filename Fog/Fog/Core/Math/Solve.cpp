@@ -19,6 +19,59 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::Solve - None]
+// ============================================================================
+
+template<typename NumT>
+static int FOG_CDECL MathT_solve_None(NumT* dst, const NumT* func)
+{
+  return 0;
+}
+
+template<typename NumT>
+static int FOG_CDECL MathT_solveAt_None(NumT* dst, const NumT* func, const NumT_(Interval)* interval)
+{
+  return 0;
+}
+
+// ============================================================================
+// [Fog::Solve - Linear]
+// ============================================================================
+
+// x = -b / a.
+
+template<typename NumT>
+static int FOG_CDECL MathT_solve_Linear(NumT* dst, const NumT* func)
+{
+  NumT a = func[0];
+  NumT b = func[1];
+
+  if (Math::isFuzzyZero(a))
+    return 0;
+
+  *dst = -b / a;
+  return 1;
+}
+
+template<typename NumT>
+static int FOG_CDECL MathT_solveAt_Linear(NumT* dst, const NumT* func, const NumT_(Interval)* interval)
+{
+  NumT a = func[0];
+  NumT b = func[1];
+
+  if (Math::isFuzzyZero(a))
+    return 0;
+
+  NumT x = -b / a;
+
+  if (x < interval->getMin() || x > interval->getMax())
+    return 0;
+
+  *dst = x;
+  return 1;
+}
+
+// ============================================================================
 // [Fog::Solve - Quadratic]
 // ============================================================================
 
@@ -384,6 +437,16 @@ static int FOG_CDECL MathT_solveAt_Quartic(NumT* dst, const NumT* func, const Nu
 
 FOG_NO_EXPORT void Math_init_solve(void)
 {
+  fog_api.mathf_solve  [MATH_SOLVE_NONE     ] = MathT_solve_None<float>;
+  fog_api.mathd_solve  [MATH_SOLVE_NONE     ] = MathT_solve_None<double>;
+  fog_api.mathf_solveAt[MATH_SOLVE_NONE     ] = MathT_solveAt_None<float>;
+  fog_api.mathd_solveAt[MATH_SOLVE_NONE     ] = MathT_solveAt_None<double>;
+
+  fog_api.mathf_solve  [MATH_SOLVE_LINEAR   ] = MathT_solve_Linear<float>;
+  fog_api.mathd_solve  [MATH_SOLVE_LINEAR   ] = MathT_solve_Linear<double>;
+  fog_api.mathf_solveAt[MATH_SOLVE_LINEAR   ] = MathT_solveAt_Linear<float>;
+  fog_api.mathd_solveAt[MATH_SOLVE_LINEAR   ] = MathT_solveAt_Linear<double>;
+
   fog_api.mathf_solve  [MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<float>;
   fog_api.mathd_solve  [MATH_SOLVE_QUADRATIC] = MathT_solve_Quadratic<double>;
   fog_api.mathf_solveAt[MATH_SOLVE_QUADRATIC] = MathT_solveAt_Quadratic<float>;

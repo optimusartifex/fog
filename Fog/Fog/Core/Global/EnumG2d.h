@@ -1842,6 +1842,69 @@ enum IMAGE_PRECISION
 };
 
 // ============================================================================
+// [Fog::IMAGE_RESIZE]
+// ============================================================================
+
+//! @brief Built-in resize methods available to Image::resize() function.
+enum IMAGE_RESIZE
+{
+  //! @brief Nearest neighbor filter (radius 1.0).
+  IMAGE_RESIZE_NEAREST = 0,
+
+  //! @brief Bilinear filter (radius 1.0).
+  IMAGE_RESIZE_BILINEAR = 1,
+
+  //! @brief Bicubic filter (radius 2.0).
+  IMAGE_RESIZE_BICUBIC = 2,
+
+  //! @brief Bell filter (radius 1.5).
+  IMAGE_RESIZE_BELL = 3,
+
+  //! @brief Gauss filter (radius 2.0).
+  IMAGE_RESIZE_GAUSS = 4,
+
+  //! @brief Hermite filter (radius 1.0).
+  IMAGE_RESIZE_HERMITE = 5,
+
+  //! @brief Hanning filter (radius 1.0).
+  IMAGE_RESIZE_HANNING = 6,
+
+  //! @brief Catrom filter (radius 2.0).
+  IMAGE_RESIZE_CATROM = 7,
+
+  //! @brief Mitchell filter (radius 2.0).
+  //!
+  //! The Mitchell filter accepts the following parameters:
+  //!   - @a "b" - b value used to calculate the final polynoms p and q, default 1/3.
+  //!   - @a "c" - c value used to calculate the final polynoms p and q, default 1/3.
+  IMAGE_RESIZE_MITCHELL = 8,
+
+  //! @brief Bessel filter (radius 3.2383).
+  IMAGE_RESIZE_BESSEL = 9,
+
+  //! @brief Sinc filter (user defined radius, default 2.0).
+  //!
+  //! The Sinc filter accepts the following parameters:
+  //!   - @a "radius" - filter radius, default 2.0.
+  IMAGE_RESIZE_SINC = 10,
+
+  //! @brief Lanczos filter (user defined radius, default 2.0).
+  //!
+  //! The Lanczos filter accepts the following parameters:
+  //!   - @a "radius" - filter radius, default 2.0.
+  IMAGE_RESIZE_LANCZOS = 11,
+
+  //! @brief Blackman filter (user defined radius, default 2.0).
+  //!
+  //! The Blackman filter accepts the following parameters:
+  //!   - @a "radius" - filter radius, default 2.0.
+  IMAGE_RESIZE_BLACKMAN = 12,
+
+  //! @brief Count of IMAGE_RESIZE filters.
+  IMAGE_RESIZE_COUNT = 13
+};
+
+// ============================================================================
 // [Fog::IMAGE_ROTATE_MODE]
 // ============================================================================
 
@@ -1895,8 +1958,9 @@ enum IMAGE_QUALITY
 {
   IMAGE_QUALITY_NEAREST = 0,
   IMAGE_QUALITY_BILINEAR = 1,
-  IMAGE_QUALITY_BILINEAR_HQ = 2,
-  IMAGE_QUALITY_BICUBIC = 3,
+  IMAGE_QUALITY_BICUBIC = 2,
+
+  IMAGE_QUALITY_BILINEAR_HQ = 3,
   IMAGE_QUALITY_BICUBIC_HQ = 4,
 
   IMAGE_QUALITY_DEFAULT = IMAGE_QUALITY_BILINEAR,
@@ -2082,7 +2146,6 @@ enum PAINT_DEVICE
   PAINT_DEVICE_NULL = 0,
   //! @brief Same as @c PAINT_DEVICE_NULL.
   PAINT_DEVICE_UNKNOWN = 0,
-
   //! @brief Raster paint-device.
   PAINT_DEVICE_RASTER = 1,
 

@@ -1366,7 +1366,7 @@ _Done:
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE2(Color_init_SSE2)
+FOG_CPU_DECLARE_INITIALIZER_SSE2( Color_init_SSE2(void) )
 
 FOG_NO_EXPORT void Color_init(void)
 {
@@ -1437,7 +1437,7 @@ FOG_NO_EXPORT void Color_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_SSE2(Color_init_SSE2)
+  FOG_CPU_USE_INITIALIZER_SSE2( Color_init_SSE2() )
 }
 
 } // Fog namespace

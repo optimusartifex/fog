@@ -169,17 +169,25 @@ static const double MATH_RAD_FROM_DEG   = 0.017453292519943295769;
 static const double MATH_DEG_FROM_RAD   =57.29577951308232087680;
 
 //! @brief 1 / 3.
-static const double MATH_1_DIV_3         = 1.0 / 3.0;
+static const double MATH_1_DIV_2        = 0.5;
+static const double MATH_1_DIV_3        = 0.333333333333333333334;
+static const double MATH_1_DIV_4        = 0.25;
+static const double MATH_1_DIV_5        = 0.20;
+static const double MATH_1_DIV_6        = 0.166666666666666666667;
+
+static const double MATH_2_DIV_3        = 0.666666666666666666667;
+static const double MATH_3_DIV_4        = 0.75;
+static const double MATH_4_DIV_3        = 1.333333333333333333334;
 
 //! @brief 1 / 255.
-static const double MATH_1_DIV_255       = 1.0 / 255.0;
+static const double MATH_1_DIV_255      = 1.0 / 255.0;
 //! @brief 1 / 256.
-static const double MATH_1_DIV_256       = 1.0 / 256.0;
+static const double MATH_1_DIV_256      = 1.0 / 256.0;
 
 //! @brief 1 / 65535.
-static const double MATH_1_DIV_65535     = 1.0 / 65535.0;
+static const double MATH_1_DIV_65535    = 1.0 / 65535.0;
 //! @brief 1 / 65536.
-static const double MATH_1_DIV_65536     = 1.0 / 65536.0;
+static const double MATH_1_DIV_65536    = 1.0 / 65536.0;
 
 //! @brief Default epsilon used in math for 32-bit floats.
 static const float MATH_EPSILON_F = 1e-8f;

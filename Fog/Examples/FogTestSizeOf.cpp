@@ -30,8 +30,10 @@ int main(int argc, char* argv[])
 
   // [Core/Math]
   PRINT_PART("Core/Math");
-  PRINT_TYPE(FunctionF);
-  PRINT_TYPE(FunctionD);
+  PRINT_TYPE(IntervalF);
+  PRINT_TYPE(IntervalD);
+  PRINT_TYPE(MathFunctionF);
+  PRINT_TYPE(MathFunctionD);
 
   // [Core/Memory]
   PRINT_PART("Core/Memory");

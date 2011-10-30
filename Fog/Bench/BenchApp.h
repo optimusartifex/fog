@@ -189,12 +189,15 @@ struct BenchModule
   virtual Fog::StringW getModuleName() const = 0;
 
   virtual void bench(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void prepareSprites(int size);
+  virtual void freeSprites();
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   BenchApp& app;
+
   Fog::TimeDelta totalTime;
   Fog::List<Fog::TimeDelta> sizeTime;
 

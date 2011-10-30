@@ -24,7 +24,6 @@ struct BenchFog : public BenchModule
   // --------------------------------------------------------------------------
 
   virtual Fog::StringW getModuleName() const;
-
   virtual void bench(BenchOutput& output, const BenchParams& params);
 
   // --------------------------------------------------------------------------

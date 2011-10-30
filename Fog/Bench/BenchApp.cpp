@@ -513,6 +513,28 @@ BenchModule::~BenchModule()
 {
 }
 
+void BenchModule::prepareSprites(int size)
+{
+  size_t i, count = app.sprites.getLength();
+  for (i = 0; i < count; i++)
+  {
+    Fog::Image sprite;
+    
+    if (Fog::Image::resize(sprite, Fog::SizeI(size, size), app.sprites[i], Fog::IMAGE_RESIZE_BILINEAR) != Fog::ERR_OK)
+    {
+      freeSprites();
+      return;
+    }
+    
+    sprites.append(sprite);
+  }
+}
+
+void BenchModule::freeSprites()
+{
+  sprites.clear();
+}
+
 // ============================================================================
 // [Main]
 // ============================================================================

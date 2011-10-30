@@ -52,7 +52,7 @@ public:
   virtual err_t run();
   virtual void quit();
 
-  static FOG_INLINE Application* getInstance() { return _instance; }
+  static FOG_INLINE Application* get() { return _instance; }
 
   // --------------------------------------------------------------------------
   // [Application Executable / Arguments]

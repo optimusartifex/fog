@@ -40,7 +40,7 @@ namespace Fog {
 // ============================================================================
 
 #define GUI_ENGINE() \
-  reinterpret_cast<X11GuiEngine*>(Application::getInstance()->getGuiEngine())
+  reinterpret_cast<X11GuiEngine*>(Application::get()->getGuiEngine())
 
 // ============================================================================
 // [Fog::X11GuiEngine - Error]

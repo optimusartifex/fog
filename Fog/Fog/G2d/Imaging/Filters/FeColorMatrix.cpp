@@ -913,7 +913,7 @@ static void FeColorMatrix_dumpHelpers()
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE(FeColorMatrix_init_SSE)
+FOG_CPU_DECLARE_INITIALIZER_SSE( FeColorMatrix_init_SSE(void) )
 
 FOG_NO_EXPORT void FeColorMatrix_init(void)
 {
@@ -962,7 +962,7 @@ FOG_NO_EXPORT void FeColorMatrix_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_SSE(FeColorMatrix_init_SSE)
+  FOG_CPU_USE_INITIALIZER_SSE( FeColorMatrix_init_SSE() )
 }
 
 } // Fog namespace

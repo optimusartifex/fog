@@ -3513,7 +3513,7 @@ static err_t FOG_CDECL Region_regionFromHRGN(Region* dst, HRGN src)
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE2(Region_init_SSE2)
+FOG_CPU_DECLARE_INITIALIZER_SSE2( Region_init_SSE2(void) )
 
 FOG_NO_EXPORT void Region_init(void)
 {
@@ -3592,7 +3592,7 @@ FOG_NO_EXPORT void Region_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_SSE2(Region_init_SSE2)
+  FOG_CPU_USE_INITIALIZER_SSE2( Region_init_SSE2() )
 }
 
 } // Fog namespace

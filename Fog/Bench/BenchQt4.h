@@ -28,8 +28,10 @@ struct BenchQt4 : public BenchModule
   // --------------------------------------------------------------------------
 
   virtual Fog::StringW getModuleName() const;
-
   virtual void bench(BenchOutput& output, const BenchParams& params);
+
+  virtual void prepareSprites(int size);
+  virtual void freeSprites();
 
   // --------------------------------------------------------------------------
   // [Fog-Specific]
@@ -55,6 +57,7 @@ struct BenchQt4 : public BenchModule
   // --------------------------------------------------------------------------
 
   QImage* screenQt;
+  Fog::List<QImage*> spritesQt;
 };
 
 // [Guard]

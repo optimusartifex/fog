@@ -36,8 +36,16 @@ void BenchFog::bench(BenchOutput& output, const BenchParams& params)
 {
   if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
     return;
-  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
 
+  switch (params.type)
+  {
+    case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_ROTATE:
+      prepareSprites(params.shapeSize);
+      break;
+  }
+
+  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
   Fog::Time start(Fog::Time::now());
 
   switch (params.type)
@@ -80,6 +88,8 @@ void BenchFog::bench(BenchOutput& output, const BenchParams& params)
   }
 
   output.time = Fog::Time::now() - start;
+
+  freeSprites();
 }
 
 // ============================================================================

@@ -1329,15 +1329,15 @@ static err_t Image_blitImagePrivate(
   return ERR_OK;
 }
 
-static err_t FOG_CDECL Image_blitImageAt(Image* self, const PointI* pt, const Image* i, const RectI* iFragment, uint32_t compositingOperator, float opacity)
+static err_t FOG_CDECL Image_blitImageAt(Image* self, const PointI* pt, const Image* src, const RectI* sFragment, uint32_t compositingOperator, float opacity)
 {
   if (FOG_UNLIKELY(compositingOperator >= COMPOSITE_COUNT))
     return ERR_RT_INVALID_ARGUMENT;
 
   ImageData* dst_d = self->_d;
-  ImageData* src_d = i->_d;
+  ImageData* src_d = src->_d;
 
-  if (iFragment == NULL)
+  if (sFragment == NULL)
   {
     int w = dst_d->size.w;
     int h = dst_d->size.h;
@@ -1355,17 +1355,17 @@ static err_t FOG_CDECL Image_blitImageAt(Image* self, const PointI* pt, const Im
     if (x0 >= x1 || y0 >= y1)
       return ERR_OK;
 
-    return Image_blitImagePrivate(self, x0, y0, i, x0 - pt->x, y0 - pt->y, x1 - x0, y1 - y0, compositingOperator, opacity);
+    return Image_blitImagePrivate(self, x0, y0, src, x0 - pt->x, y0 - pt->y, x1 - x0, y1 - y0, compositingOperator, opacity);
   }
   else
   {
-    if (FOG_UNLIKELY(!iFragment->isValid()))
+    if (FOG_UNLIKELY(!sFragment->isValid()))
       return ERR_OK;
 
-    int srcX0 = iFragment->x;
-    int srcY0 = iFragment->y;
-    int srcX1 = srcX0 + iFragment->w;
-    int srcY1 = srcY0 + iFragment->h;
+    int srcX0 = sFragment->x;
+    int srcY0 = sFragment->y;
+    int srcX1 = srcX0 + sFragment->w;
+    int srcY1 = srcY0 + sFragment->h;
 
     if (srcX0 < 0) srcX0 = 0;
     if (srcY0 < 0) srcY0 = 0;
@@ -1375,8 +1375,8 @@ static err_t FOG_CDECL Image_blitImageAt(Image* self, const PointI* pt, const Im
     if (srcX0 >= srcX1 || srcY0 >= srcY1)
       return ERR_OK;
 
-    int dstX0 = pt->x + (srcX0 - iFragment->x);
-    int dstY0 = pt->y + (srcY0 - iFragment->y);
+    int dstX0 = pt->x + (srcX0 - sFragment->x);
+    int dstY0 = pt->y + (srcY0 - sFragment->y);
     int dstX1 = dstX0 + (srcX1 - srcX0);
     int dstY1 = dstY0 + (srcY1 - srcY0);
 
@@ -1388,7 +1388,7 @@ static err_t FOG_CDECL Image_blitImageAt(Image* self, const PointI* pt, const Im
     if (dstX0 >= dstX1 || dstY0 >= dstY1)
       return ERR_OK;
 
-    return Image_blitImagePrivate(self, dstX0, dstY0, i, srcX0, srcY0, dstX1 - dstX0, dstY1 - dstY0, compositingOperator, opacity);
+    return Image_blitImagePrivate(self, dstX0, dstY0, src, srcX0, srcY0, dstX1 - dstX0, dstY1 - dstY0, compositingOperator, opacity);
   }
 }
 
@@ -2942,7 +2942,7 @@ static err_t FOG_CDECL Image_rotate(Image* dst, const Image* src, const RectI* a
   if (rotateMode >= IMAGE_ROTATE_COUNT)
     return ERR_RT_INVALID_ARGUMENT;
 
-  // Rotation by 180 degrees has the same effect as MIRROR_BOTH.
+  // Rotation by 180 degrees has the same effect as IMAGE_MIRROR_BOTH.
   if (rotateMode == IMAGE_ROTATE_180)
     return fog_api.image_mirror(dst, src, area, IMAGE_MIRROR_BOTH);
 
@@ -3454,40 +3454,40 @@ err_t Image::filter(const ImageFxFilter& f, const RectI* area)
 err_t Image::filter(
   const ImageFx& fx,
   Image& dst, PointI* dstOffset,
-  const Image& src, const RectI* srcFragment)
+  const Image& src, const RectI* sFragment)
 {
   ImageFxFilter fxFilter;
   FOG_RETURN_ON_ERROR(fxFilter.setEffect(fx));
 
-  return filter(fxFilter, dst, dstOffset, src, srcFragment);
+  return filter(fxFilter, dst, dstOffset, src, sFragment);
 }
 
 err_t Image::filter(
   const ImageFxFilter& fxFilter,
   Image& dst, PointI* dstOffset,
-  const Image& src, const RectI* srcFragment)
+  const Image& src, const RectI* sFragment)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-Image Image::filtered(const ImageFx& fx, const RectI* srcFragment)
+Image Image::filtered(const ImageFx& fx, const RectI* sFragment)
 {
   Image dst;
   ImageFxFilter fxFilter;
 
   if (fxFilter.setEffect(fx) == ERR_OK)
   {
-    filter(fxFilter, dst, NULL, *this, srcFragment);
+    filter(fxFilter, dst, NULL, *this, sFragment);
   }
 
   return dst;
 }
 
-Image Image::filtered(const ImageFxFilter& fxFilter, const RectI* srcFragment)
+Image Image::filtered(const ImageFxFilter& fxFilter, const RectI* sFragment)
 {
   Image dst;
-  filter(fxFilter, dst, NULL, *this, srcFragment);
+  filter(fxFilter, dst, NULL, *this, sFragment);
   return dst;
 }
 #endif

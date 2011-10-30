@@ -164,7 +164,7 @@ err_t Widget::createWindow(uint32_t createFlags)
   if (hasGuiWindow())
     return ERR_OK;
 
-  GuiEngine* ge = Application::getInstance()->getGuiEngine();
+  GuiEngine* ge = Application::get()->getGuiEngine();
   if (ge == NULL) return ERR_UI_NO_ENGINE;
 
   _guiWindow = ge->createGuiWindow(this);
@@ -243,7 +243,7 @@ void Widget::setPosition(const PointI& pos)
   }
   else
   {
-    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    GuiEngine* engine = Application::get()->getGuiEngine();
     if (engine == NULL) return;
 
     engine->dispatchConfigure(this, RectI(pos.x, pos.y, _widgetGeometry.w, _widgetGeometry.h), false);
@@ -260,7 +260,7 @@ void Widget::setSize(const SizeI& sz)
   }
   else
   {
-    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    GuiEngine* engine = Application::get()->getGuiEngine();
     if (engine == NULL) return;
 
     engine->dispatchConfigure(this, RectI(_widgetGeometry.x, _widgetGeometry.y, sz.w, sz.h), false);
@@ -277,7 +277,7 @@ void Widget::setGeometry(const RectI& geometry)
   }
   else
   {
-    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    GuiEngine* engine = Application::get()->getGuiEngine();
     if (engine == NULL) return;
 
     engine->dispatchConfigure(this, geometry, false);
@@ -306,7 +306,7 @@ void Widget::updateClientGeometry()
   }
   else
   {
-    GuiEngine* engine = Application::getInstance()->getGuiEngine();
+    GuiEngine* engine = Application::get()->getGuiEngine();
     if (engine == NULL) return;
 
     engine->dispatchConfigure(this, _widgetGeometry, false);
@@ -943,7 +943,7 @@ void Widget::setEnabled(bool val)
   }
   else
   {
-    GuiEngine* ge = Application::getInstance()->getGuiEngine();
+    GuiEngine* ge = Application::get()->getGuiEngine();
     if (!ge) return;
 
     ge->dispatchEnabled(this, val);
@@ -971,7 +971,7 @@ void Widget::setVisible(uint32_t val)
     _fullscreendata->_restoretransparency = _transparency;
 
     GuiEngine::DisplayInfo info;
-    Application::getInstance()->getGuiEngine()->getDisplayInfo(&info);
+    Application::get()->getGuiEngine()->getDisplayInfo(&info);
 
     setWindowFlags(WINDOW_TYPE_FULLSCREEN | getWindowHints());
     setGeometry(RectI(0,0,info.width, info.height));
@@ -1024,7 +1024,7 @@ void Widget::setVisible(uint32_t val)
   }
   else
   {
-    GuiEngine* ge = Application::getInstance()->getGuiEngine();
+    GuiEngine* ge = Application::get()->getGuiEngine();
     if (!ge) return;
 
     ge->dispatchVisibility(this, val);
@@ -1162,7 +1162,7 @@ void Widget::setOrientation(uint32_t val)
 
   _orientation = val;
 
-  GuiEngine* ge = Application::getInstance()->getGuiEngine();
+  GuiEngine* ge = Application::get()->getGuiEngine();
   if (!ge) return;
 
   ge->dispatchConfigure(this, _widgetGeometry, true);
@@ -1217,7 +1217,7 @@ void Widget::takeFocus(uint32_t reason)
   if (!hasFocus() && getVisibility() == WIDGET_VISIBLE && getState() == WIDGET_ENABLED)
   {
     // TODO:
-    //Application::getInstance()->getGuiEngine()->dispatchTakeFocus(this, reason);
+    //Application::get()->getGuiEngine()->dispatchTakeFocus(this, reason);
   }
 }
 

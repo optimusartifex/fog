@@ -16,22 +16,22 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::FunctionF]
+// [Fog::MathFunctionF]
 // ============================================================================
 
-struct FOG_API FunctionF
+struct FOG_API MathFunctionF
 {
-  virtual ~FunctionF() = 0;
+  virtual ~MathFunctionF();
   virtual err_t evaluate(float* dst, float t) const = 0;
 };
 
 // ============================================================================
-// [Fog::FunctionD]
+// [Fog::MathFunctionD]
 // ============================================================================
 
-struct FOG_API FunctionD
+struct FOG_API MathFunctionD
 {
-  virtual ~FunctionD() = 0;
+  virtual ~MathFunctionD();
   virtual err_t evaluate(double* dst, double t) const = 0;
 };
 
@@ -39,9 +39,9 @@ struct FOG_API FunctionD
 // [Fog::FunctionT<>]
 // ============================================================================
 
-_FOG_NUM_T(Function)
-_FOG_NUM_F(Function)
-_FOG_NUM_D(Function)
+_FOG_NUM_T(MathFunction)
+_FOG_NUM_F(MathFunction)
+_FOG_NUM_D(MathFunction)
 
 //! @}
 

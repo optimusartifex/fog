@@ -3639,9 +3639,9 @@ static NumT FOG_CDECL TransformT_getAverageScaling(const NumT_(Transform)* self)
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_3DNOW(Transform_init_3dNow)
-FOG_CPU_DECLARE_INITIALIZER_SSE(Transform_init_SSE)
-FOG_CPU_DECLARE_INITIALIZER_SSE2(Transform_init_SSE2)
+FOG_CPU_DECLARE_INITIALIZER_3DNOW( Transform_init_3dNow(void) )
+FOG_CPU_DECLARE_INITIALIZER_SSE( Transform_init_SSE(void) )
+FOG_CPU_DECLARE_INITIALIZER_SSE2( Transform_init_SSE2(void) )
 
 FOG_NO_EXPORT void Transform_init(void)
 {
@@ -3732,9 +3732,9 @@ FOG_NO_EXPORT void Transform_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_3DNOW(Transform_init_3dNow)
-  FOG_CPU_USE_INITIALIZER_SSE(Transform_init_SSE)
-  FOG_CPU_USE_INITIALIZER_SSE2(Transform_init_SSE2)
+  FOG_CPU_USE_INITIALIZER_3DNOW( Transform_init_3dNow() )
+  FOG_CPU_USE_INITIALIZER_SSE( Transform_init_SSE() )
+  FOG_CPU_USE_INITIALIZER_SSE2( Transform_init_SSE2() )
 }
 
 } // Fog namespace

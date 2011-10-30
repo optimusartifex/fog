@@ -38,14 +38,17 @@ struct FOG_NO_EXPORT Api
   // [Core/Math - Math]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL *MathF_IntegrateFunc)(float* dst, const FunctionF* func, const IntervalF* interval, uint32_t steps);
-  typedef err_t (FOG_CDECL *MathD_IntegrateFunc)(double* dst, const FunctionD* func, const IntervalD* interval, uint32_t steps);
+  typedef err_t (FOG_CDECL *MathF_IntegrateFunc)(float* dst, const MathFunctionF* func, const IntervalF* interval, uint32_t steps);
+  typedef err_t (FOG_CDECL *MathD_IntegrateFunc)(double* dst, const MathFunctionD* func, const IntervalD* interval, uint32_t steps);
 
   typedef int (FOG_CDECL *MathF_SolveFunc)(float* dst, const float* func);
   typedef int (FOG_CDECL *MathD_SolveFunc)(double* dst, const double* func);
 
   typedef int (FOG_CDECL *MathF_SolveAtFunc)(float* dst, const float* func, const IntervalF* interval);
   typedef int (FOG_CDECL *MathD_SolveAtFunc)(double* dst, const double* func, const IntervalD* interval);
+
+  FOG_CAPI_STATIC(float, mathf_besj)(float x, int n);
+  FOG_CAPI_STATIC(double, mathd_besj)(double x, int n);
 
   MathF_IntegrateFunc mathf_integrate[MATH_INTEGRATION_METHOD_COUNT];
   MathF_SolveFunc mathf_solve[MATH_SOLVE_COUNT];
@@ -1936,7 +1939,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, image_fillRectArgb32)(Image* self, const RectI* r, const Argb32* c0, uint32_t compositingOperator, float opacity);
   FOG_CAPI_METHOD(err_t, image_fillRectColor)(Image* self, const RectI* r, const Color* c0, uint32_t compositingOperator, float opacity);
 
-  FOG_CAPI_METHOD(err_t, image_blitImageAt)(Image* self, const PointI* pt, const Image* i, const RectI* iFragment, uint32_t compositingOperator, float opacity);
+  FOG_CAPI_METHOD(err_t, image_blitImageAt)(Image* self, const PointI* pt, const Image* src, const RectI* sFragment, uint32_t compositingOperator, float opacity);
 
   FOG_CAPI_METHOD(err_t, image_scroll)(Image* self, const PointI* pt, const RectI* area);
 
@@ -1956,6 +1959,9 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, image_getDC)(Image* self, HDC* hDC);
   FOG_CAPI_METHOD(err_t, image_releaseDC)(Image* self, HDC hDC);
 #endif // FOG_OS_WINDOWS
+
+  FOG_CAPI_STATIC(err_t, image_resize)(Image* dst, const SizeI* dSize, const Image* src, const RectI* sFragment, uint32_t resizeFunc, const Hash<StringW, Var>* params);
+  FOG_CAPI_STATIC(err_t, image_resizeCustom)(Image* dst, const SizeI* dSize, const Image* src, const RectI* sFragment, const MathFunctionF* resizeFunc, float radius);
 
   FOG_CAPI_STATIC(bool, image_eq)(const Image* a, const Image* b);
 

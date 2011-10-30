@@ -85,7 +85,7 @@ void AnimationDispatcher::onTimer(TimerEvent* e)
     e->release();
   }
 
-  Application::getInstance()->getGuiEngine()->update();
+  Application::get()->getGuiEngine()->update();
 }
 
 // ============================================================================
@@ -200,7 +200,7 @@ void Animation::onTimer(TimerEvent* e)
     sendEvent(&event);
 
     //should we call this here? Or call it at destructor?
-    Application::getInstance()->getAnimationDispatcher()->removeAnimation(this);
+    Application::get()->getAnimationDispatcher()->removeAnimation(this);
   }
 }
 

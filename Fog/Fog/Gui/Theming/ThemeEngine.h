@@ -45,7 +45,7 @@ struct FOG_API ThemeEngine : public Object
 
   static ThemeEngine* _instance;
 
-  static FOG_INLINE ThemeEngine* getInstance() { return _instance; }
+  static FOG_INLINE ThemeEngine* get() { return _instance; }
 };
 
 //! @}

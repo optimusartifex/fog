@@ -188,10 +188,10 @@ static err_t FOG_CDECL CBezierT_getSplineBBox(const NumT_(Point)* self, size_t l
 // [Fog::CBezier - GetLength]
 // ============================================================================
 
-struct CubicDt : public FunctionD
+struct CubicFunctionD : public MathFunctionD
 {
-  FOG_INLINE CubicDt() {}
-  virtual ~CubicDt() {}
+  FOG_INLINE CubicFunctionD() {}
+  virtual ~CubicFunctionD() {}
 
   virtual err_t evaluate(double* dst, double t) const
   {
@@ -210,7 +210,7 @@ struct CubicDt : public FunctionD
 template<typename NumT>
 static void FOG_CDECL CBezierT_getLength(const NumT_(Point)* self, NumT* length)
 {
-  CubicDt dfunc;
+  CubicFunctionD dfunc;
 
   dfunc.pd[0].x = 3.0 * double(self[1].x - self[0].x);
   dfunc.pd[0].y = 3.0 * double(self[1].y - self[0].y);

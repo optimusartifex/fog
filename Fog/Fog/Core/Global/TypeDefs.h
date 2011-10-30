@@ -32,10 +32,10 @@ struct Timer;
 // Fog/Core/Math.
 union  DoubleBits;
 union  FloatBits;
-struct FunctionF;
-struct FunctionD;
 struct IntervalF;
 struct IntervalD;
+struct MathFunctionF;
+struct MathFunctionD;
 
 // Fog/Core/Memory.
 struct MemBlockAllocator;
@@ -46,7 +46,7 @@ struct MemZoneAllocator;
 struct MemZoneNode;
 struct MemZoneRecord;
 
-// CFog/ore/OS.
+// Fog/Core/OS.
 struct DirIterator;
 struct FileInfo;
 struct FileInfoData;

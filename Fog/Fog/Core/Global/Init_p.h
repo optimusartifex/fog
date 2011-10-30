@@ -128,6 +128,7 @@ FOG_NO_EXPORT void PathInfo_init(void);
 
 // [Fog/G2d/Imaging]
 FOG_NO_EXPORT void Image_init(void);
+FOG_NO_EXPORT void ImageResize_init(void);
 FOG_NO_EXPORT void ImagePalette_init(void);
 FOG_NO_EXPORT void ImageConverter_init(void);
 FOG_NO_EXPORT void ImageFilter_init(void);

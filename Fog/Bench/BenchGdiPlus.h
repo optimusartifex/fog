@@ -8,7 +8,6 @@
 #define _FOG_BENCHGDIPLUS_H
 
 #include "BenchApp.h"
-#if defined(FOG_BENCH_GDIPLUS)
 
 // [Dependencies - GdiPlus]
 #include <windows.h>
@@ -37,6 +36,9 @@ struct BenchGdiPlus : public BenchModule
 
   virtual Fog::StringW getModuleName() const;
   virtual void bench(BenchOutput& output, const BenchParams& params);
+
+  virtual void prepareSprites(int size);
+  virtual void freeSprites();
 
   // --------------------------------------------------------------------------
   // [GdiPlus-Specific]
@@ -67,5 +69,4 @@ struct BenchGdiPlus : public BenchModule
 };
 
 // [Guard]
-#endif // FOG_BENCH_GDIPLUS
 #endif // _FOG_BENCHGDIPLUS_H

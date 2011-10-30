@@ -24,7 +24,7 @@ namespace Fog {
 // ============================================================================
 
 #define GUI_ENGINE() \
-  Application::getInstance()->getGuiEngine()
+  Application::get()->getGuiEngine()
 
 static uint32_t fogButtonToId(uint32_t button)
 {
@@ -95,7 +95,7 @@ bool GuiEngine::unmapHandle(void* handle)
   if (_widgetMapper.getLength() == 0)
   {
     Event e(EVENT_LAST_WINDOW_CLOSED);
-    Application::getInstance()->sendEvent(&e);
+    Application::get()->sendEvent(&e);
   }
 
   return b;
@@ -665,7 +665,7 @@ void GuiEngine::update()
   {
     _updateStatus.scheduled = true;
     _updateStatus.task = fog_new UpdateTask();
-    Application::getInstance()->getEventLoop()->postTask(_updateStatus.task);
+    Application::get()->getEventLoop()->postTask(_updateStatus.task);
   }
 }
 

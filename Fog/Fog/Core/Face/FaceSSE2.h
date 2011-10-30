@@ -1091,7 +1091,7 @@ static FOG_INLINE void m128iMulPU32(
   m128i tb = _mm_shuffle_epi32(y0, _MM_SHUFFLE(2, 3, 0, 1));
 
   dst0 = _mm_mul_epu32(x0, y0);
-  ta  = _mm_mul_epu32(ta, tb);
+  ta = _mm_mul_epu32(ta, tb);
 
   dst0 = _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(dst0), _mm_castsi128_ps(ta), _MM_SHUFFLE(0, 2, 0, 2)));
 }
@@ -1255,8 +1255,8 @@ static FOG_INLINE void m128iMinPU8(m128i& dst0, const m128i& x0, const m128i& y0
 static FOG_INLINE void m128iMinPI16(m128i& dst0, const m128i& x0, const m128i& y0)
 {
   dst0 = _mm_min_epi16(x0, y0);
-
 }
+
 static FOG_INLINE void m128dMinSD(m128d& dst0, const m128d& x0, const m128d& y0)
 {
   dst0 = _mm_min_sd(x0, y0);

@@ -38,7 +38,14 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
 {
   if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
     return;
-  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
+
+  switch (params.type)
+  {
+    case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_ROTATE:
+      prepareSprites(params.shapeSize);
+      break;
+  }
 
   screenCairo = cairo_image_surface_create_for_data(
     (unsigned char*)screen.getFirstX(), CAIRO_FORMAT_ARGB32,
@@ -46,6 +53,7 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
   if (screenCairo == NULL)
     return;
 
+  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
   Fog::Time start(Fog::Time::now());
 
   switch (params.type)
@@ -91,6 +99,40 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
 
   cairo_surface_destroy(screenCairo);
   screenCairo = NULL;
+
+  freeSprites();
+}
+
+void BenchCairo::prepareSprites(int size)
+{
+  BenchModule::prepareSprites(size);
+
+  size_t i, length = sprites.getLength();
+  for (i = 0; i < length; i++)
+  {
+    cairo_surface_t* sprite = cairo_image_surface_create_for_data(
+    (unsigned char*)sprites[i].getFirst(), CAIRO_FORMAT_ARGB32,
+    sprites[i].getWidth(), sprites[i].getHeight(), (int)sprites[i].getStride());
+
+    if (sprite == NULL)
+    {
+      freeSprites();
+      return;
+    }
+
+    spritesCairo.append(sprite);
+  }
+}
+
+void BenchCairo::freeSprites()
+{
+  size_t i, length = spritesCairo.getLength();
+
+  for (i = 0; i < length; i++)
+    cairo_surface_destroy(spritesCairo[i]);
+
+  spritesCairo.clear();
+  BenchModule::freeSprites();
 }
 
 // ============================================================================

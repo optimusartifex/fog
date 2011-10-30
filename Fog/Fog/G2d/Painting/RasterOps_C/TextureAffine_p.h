@@ -68,7 +68,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = Math::bound<int>((int)offy, 0, th);
+        int py0 = Math::bound<int>(Math::fixed16x16FromFloat(offy) >> 16, 0, th);
         srcPixels += py0 * srcStride;
 
         P_FETCH_SPAN8_BEGIN()
@@ -217,14 +217,20 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = Math::bound<int>((int)offy, 0, th);
+        int py = Math::fixed16x16FromFloat(offy);
+        int py0 = py >> 16;
 
-        uint32_t wy = (uint)(Math::fixed24x8FromFloat(offy) & 0xFF);
+        uint32_t wy = (uint)(py >> 8) & 0xFF;
         uint32_t inv_wy = 0x100 - wy;
 
-        const uint8_t* srcLine0 = srcPixels + py0 * srcStride;
-        if (++py0 > th) py0 = th;
-        const uint8_t* srcLine1 = srcPixels + py0 * srcStride;
+        const uint8_t* srcLine0 = srcPixels;
+        const uint8_t* srcLine1 = srcPixels;
+
+        if (py0 >= 0)
+        {
+          srcLine0 += Math::min<int>(py0    , th) * srcStride;
+          srcLine1 += Math::min<int>(py0 + 1, th) * srcStride;
+        }
 
         P_FETCH_SPAN8_BEGIN()
           P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(Accessor::DST_BPP)
@@ -483,7 +489,8 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = (int)(offy);
+        int py0 = Math::fixed16x16FromFloat(offy) >> 16;
+
         FOG_ASSERT(py0 >= 0 && py0 <= th);
         srcPixels += py0 * srcStride;
 
@@ -654,7 +661,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = (int)(offy);
+        int py0 = Math::fixed16x16FromFloat(offy) >> 16;
         FOG_ASSERT(py0 >= 0 && py0 <= th);
 
         uint32_t wy = (uint)(Math::fixed24x8FromFloat(offy) & 0xFF);
@@ -901,8 +908,9 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = (int)(offy);
+        int py0 = Math::fixed16x16FromFloat(offy) >> 16;
         if (py0 > th) py0 = th2 - py0;
+
         FOG_ASSERT(py0 >= 0 && py0 <= th);
         srcPixels += py0 * srcStride;
 
@@ -1083,8 +1091,9 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = (int)(offy);
+        int py0 = Math::fixed16x16FromFloat(offy) >> 16;
         int py1;
+
         Helpers::p_reflect_integer(py0, py1, th, th2);
 
         uint32_t wy = (uint)(Math::fixed24x8FromFloat(offy) & 0xFF);
@@ -1321,7 +1330,7 @@ struct FOG_NO_EXPORT PTextureAffine
 
       if (ctx->_d.texture.affine.xyZero)
       {
-        int py0 = (int)offy;
+        int py0 = Math::fixed16x16FromFloat(offy) >> 16;
         if ((uint)py0 > (uint)th) goto _FetchSolid;
 
         srcPixels += py0 * srcStride;
@@ -1509,7 +1518,7 @@ _FetchEnd:
 
       if (ctx->_d.texture.affine.xyZero && offy >= 0.0 && offy < (double)th)
       {
-        int py0 = (int)offy;
+        int py0 = Math::fixed16x16FromFloat(offy) >> 16;
         FOG_ASSERT(py0 >= 0 && py0 < th);
 
         uint32_t wy = (uint)(Math::fixed24x8FromFloat(offy) & 0xFF);

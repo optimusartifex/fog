@@ -3017,7 +3017,7 @@ static err_t List_Var_swapItems(ListUntyped* self, size_t index1, size_t index2)
 // [Init / Fini]
 // ===========================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE2(List_init_SSE2)
+FOG_CPU_DECLARE_INITIALIZER_SSE2( List_init_SSE2(void) )
 
 FOG_NO_EXPORT void List_init(void)
 {
@@ -3289,7 +3289,7 @@ FOG_NO_EXPORT void List_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_SSE2(List_init_SSE2)
+  FOG_CPU_USE_INITIALIZER_SSE2( List_init_SSE2() )
 }
 
 } // Fog namespace

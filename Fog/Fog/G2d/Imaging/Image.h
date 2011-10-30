@@ -495,16 +495,16 @@ struct FOG_NO_EXPORT Image
   // [Blit]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t blitImage(const PointI& pt, const Image& i,
+  FOG_INLINE err_t blitImage(const PointI& pt, const Image& src,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f)
   {
-    return fog_api.image_blitImageAt(this, &pt, &i, NULL, compositingOperator, opacity);
+    return fog_api.image_blitImageAt(this, &pt, &src, NULL, compositingOperator, opacity);
   }
 
-  FOG_INLINE err_t blitImage(const PointI& pt, const Image& i, const RectI& iFragment,
+  FOG_INLINE err_t blitImage(const PointI& pt, const Image& src, const RectI& srcFragment,
     uint32_t compositingOperator = COMPOSITE_SRC_OVER, float opacity = 1.0f)
   {
-    return fog_api.image_blitImageAt(this, &pt, &i, &iFragment, compositingOperator, opacity);
+    return fog_api.image_blitImageAt(this, &pt, &src, &srcFragment, compositingOperator, opacity);
   }
 
   // --------------------------------------------------------------------------
@@ -740,6 +740,40 @@ struct FOG_NO_EXPORT Image
   static FOG_INLINE const Image& empty()
   {
     return *fog_api.image_oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Resize]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE err_t resize(Image& dst, const SizeI& dSize, const Image& src, uint32_t resizeFunc)
+  {
+    return fog_api.image_resize(&dst, &dSize, &src, NULL, resizeFunc, NULL);
+  }
+
+  static FOG_INLINE err_t resize(Image& dst, const SizeI& dSize, const Image& src, uint32_t resizeFunc, const Hash<StringW, Var>& params)
+  {
+    return fog_api.image_resize(&dst, &dSize, &src, NULL, resizeFunc, &params);
+  }
+
+  static FOG_INLINE err_t resize(Image& dst, const SizeI& dSize, const Image& src, const RectI& sFragment, uint32_t resizeFunc)
+  {
+    return fog_api.image_resize(&dst, &dSize, &src, &sFragment, resizeFunc, NULL);
+  }
+
+  static FOG_INLINE err_t resize(Image& dst, const SizeI& dSize, const Image& src, const RectI& sFragment, uint32_t resizeFunc, const Hash<StringW, Var>& params)
+  {
+    return fog_api.image_resize(&dst, &dSize, &src, &sFragment, resizeFunc, &params);
+  }
+
+  static FOG_INLINE err_t resize(Image& dst, const SizeI& dSize, const Image& src, const MathFunctionF& resizeFunc, float radius)
+  {
+    return fog_api.image_resizeCustom(&dst, &dSize, &src, NULL, &resizeFunc, radius);
+  }
+
+  static FOG_INLINE err_t resizeCustom(Image& dst, const SizeI& dSize, const Image& src, const RectI& sFragment, const MathFunctionF& resizeFunc, float radius)
+  {
+    return fog_api.image_resizeCustom(&dst, &dSize, &src, &sFragment, &resizeFunc, radius);
   }
 
   // --------------------------------------------------------------------------

@@ -398,28 +398,34 @@ static FOG_INLINE uint32_t uroundToWord65536(double x) { return uround(x * 65536
 // This number can be used to do float to signed integer conversion (it handles
 // well the unsigned case). The default behavior of the constant is to round,
 // subtracting 0.5 from that constant means truncation.
+//
+// This code was buggy, mainly because there is unwanted rounding which cannot
+// be disabled (Fog-Framework do not set FPU/XMM rounding mode).
+//
+// static FOG_INLINE Fixed24x8 fixed24x8FromFloat(double d)
+// {
+//   DoubleBits data;
+//   data.d = d + 26388279066624.0;
+//   return data.i32Lo;
+// }
+//
+// static FOG_INLINE Fixed16x16 fixed16x16FromFloat(double d)
+// {
+//   DoubleBits data;
+//   data.d = d + 103079215104.0;
+//   return data.i32Lo;
+// }
 
-static FOG_INLINE Fixed24x8 fixed24x8FromFloat(double d)
-{
-  DoubleBits data;
-  data.d = d + 26388279066624.0;
-  return data.i32Lo;
-}
+static FOG_INLINE Fixed24x8 fixed24x8FromFloat(double d) { return Math::ifloor(d * 256.0); }
+static FOG_INLINE Fixed24x8 fixed24x8FromFloat(float d) { return Math::ifloor(d * 256.0f); }
 
-static FOG_INLINE Fixed16x16 fixed16x16FromFloat(double d)
-{
-  DoubleBits data;
-  data.d = d + 103079215104.0;
-  return data.i32Lo;
-}
+static FOG_INLINE Fixed16x16 fixed16x16FromFloat(double d) { return Math::ifloor(d * 65536.0); }
+static FOG_INLINE Fixed16x16 fixed16x16FromFloat(float d) { return Math::ifloor(d * 65536.0f); }
 
 static FOG_INLINE Fixed48x16 fixed48x16FromFloat(double d) { return (Fixed48x16)(d * 65536.0); }
-static FOG_INLINE Fixed32x32 fixed32x32FromFloat(double d) { return (Fixed32x32)(d * 4294967296.0); }
-
-static FOG_INLINE Fixed24x8 fixed24x8FromFloat(float d) { return fixed24x8FromFloat(double(d)); }
-static FOG_INLINE Fixed16x16 fixed16x16FromFloat(float d) { return fixed16x16FromFloat(double(d)); }
-
 static FOG_INLINE Fixed48x16 fixed48x16FromFloat(float d) { return fixed48x16FromFloat(double(d)); }
+
+static FOG_INLINE Fixed32x32 fixed32x32FromFloat(double d) { return (Fixed32x32)(d * 4294967296.0); }
 static FOG_INLINE Fixed32x32 fixed32x32FromFloat(float d) { return fixed32x32FromFloat(double(d)); }
 
 // ============================================================================
@@ -790,6 +796,13 @@ static FOG_INLINE float pow4(float x) { float x2 = x * x; return x2 * x2; }
 static FOG_INLINE double pow4(double x) { double x2 = x * x; return x2 * x2; }
 
 // ============================================================================
+// [Fog::Math - Exp]
+// ============================================================================
+
+static FOG_INLINE float exp(float x) { return ::expf(x); }
+static FOG_INLINE double exp(double x) { return ::exp(x); }
+
+// ============================================================================
 // [Fog::Math - Sqrt]
 // ============================================================================
 
@@ -832,6 +845,25 @@ static FOG_INLINE double hypot(double x, double y) { return ::hypot(x, y); }
 
 static FOG_INLINE float log(float x) { return ::logf(x); }
 static FOG_INLINE double log(double x) { return ::log(x); }
+
+// ============================================================================
+// [Fog::Math - Bessel]
+// ============================================================================
+
+//! @brief Calculates Bessel function of the first kind of order n.
+//!
+//! @param x Value at which the Bessel function is required.
+//! @param n The order.
+static FOG_INLINE float besj(float x, int n)
+{
+  return fog_api.mathf_besj(x, n);
+}
+
+//! @overload
+static FOG_INLINE double besj(double x, int n)
+{
+  return fog_api.mathd_besj(x, n);
+}
 
 // ============================================================================
 // [Fog::Math - Dist]

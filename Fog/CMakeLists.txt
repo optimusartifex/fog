@@ -261,7 +261,7 @@ Set(CMAKE_EXTRA_INCLUDE_FILES)
 # [Architecture - Enable/Disable Optimizations]
 # =============================================================================
 
-# Disable MMX/3dNow while building for AMD64.
+# Disable MMX/3dNow when building for AMD64.
 If (${FOG_SIZEOF_VOID} EQUAL 4)
   Set(FOG_OPTIMIZE_MMX TRUE)
   # Set(FOG_OPTIMIZE_3DNOW TRUE)
@@ -848,6 +848,7 @@ Set(FOG_G2D_IMAGING_SOURCES
   Fog/G2d/Imaging/ImageFilter.cpp
   Fog/G2d/Imaging/ImageFormatDescription.cpp
   Fog/G2d/Imaging/ImagePalette.cpp
+  Fog/G2d/Imaging/ImageResize.cpp
 )
 
 Set(FOG_G2D_IMAGING_HEADERS
@@ -861,6 +862,17 @@ Set(FOG_G2D_IMAGING_HEADERS
   Fog/G2d/Imaging/ImageFilter.h
   Fog/G2d/Imaging/ImageFormatDescription.h
   Fog/G2d/Imaging/ImagePalette.h
+  Fog/G2d/Imaging/ImageResize_p.h
+)
+
+Set_Source_Files_Properties(
+  Fog/G2d/Imaging/Image.cpp
+  Fog/G2d/Imaging/ImageResize.cpp
+  PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
+)
+
+AddOptimizedSources(FOG_G2D_IMAGING_SOURCES SSE2
+  Fog/G2d/Imaging/ImageResize_SSE2.cpp
 )
 
 Set(FOG_G2D_IMAGING_CODECS_SOURCES
@@ -919,11 +931,6 @@ EndIf()
 If(NOT FOG_HAVE_LIBPNG)
   Check_Include_Files(png.h FOG_HAVE_LIBPNG)
 EndIf()
-
-Set_Source_Files_Properties(
-  Fog/G2d/Imaging/Image.cpp
-  PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
-)
 
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
@@ -1779,6 +1786,7 @@ If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
     FogTestBezierOffset
     FogTestPolyOffset
     FogTestRegion
+    FogTestScale
 #   FogTestRle
   )
 

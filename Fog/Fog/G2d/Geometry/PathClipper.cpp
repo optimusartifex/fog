@@ -1515,8 +1515,8 @@ static err_t FOG_CDECL PathClipperT_clipPath(NumT_(PathClipper)* self,
 // [Init / Fini]
 // ============================================================================
 
-FOG_CPU_DECLARE_INITIALIZER_SSE(PathClipper_init_SSE)
-FOG_CPU_DECLARE_INITIALIZER_SSE2(PathClipper_init_SSE2)
+FOG_CPU_DECLARE_INITIALIZER_SSE( PathClipper_init_SSE(void) )
+FOG_CPU_DECLARE_INITIALIZER_SSE2( PathClipper_init_SSE2(void) )
 
 FOG_NO_EXPORT void PathClipper_init(void)
 {
@@ -1534,8 +1534,8 @@ FOG_NO_EXPORT void PathClipper_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_SSE(PathClipper_init_SSE)
-  FOG_CPU_USE_INITIALIZER_SSE2(PathClipper_init_SSE2)
+  FOG_CPU_USE_INITIALIZER_SSE( PathClipper_init_SSE() )
+  FOG_CPU_USE_INITIALIZER_SSE2( PathClipper_init_SSE2() )
 }
 
 } // Fog namespace

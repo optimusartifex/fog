@@ -25,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 template<typename NumT>
-static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(Function)* f, const NumT_(Interval)* interval, uint32_t steps)
+static err_t FOG_CDECL MathT_integrate_GaussLegendre(NumT* dst, const NumT_(MathFunction)* f, const NumT_(Interval)* interval, uint32_t steps)
 {
   if (!interval->isValid())
     return ERR_RT_INVALID_ARGUMENT;

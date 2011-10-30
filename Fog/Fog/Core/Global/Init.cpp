@@ -135,6 +135,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   ImageFormatDescription_init();
   ImagePalette_init();
   Image_init();
+  ImageResize_init();
 
   ImageConverter_init();
   ImageFilter_init();

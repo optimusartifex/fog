@@ -131,7 +131,7 @@ struct FOG_NO_EXPORT ThreadPool
   // [Statics]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE ThreadPool* getInstance()
+  static FOG_INLINE ThreadPool* get()
   {
     return fog_api.threadpool_oInstance;
   }

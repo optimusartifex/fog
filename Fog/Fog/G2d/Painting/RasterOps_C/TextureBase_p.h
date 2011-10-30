@@ -252,12 +252,19 @@ _Has16BPC:
     if (transformType <= TRANSFORM_TYPE_AFFINE)
     {
       // Offset values 'tx' added in-place by fetch(), 'ty' added by prepare().
-      // Input values are centered to (0.5, 0.5) and then translated back to (0, 0).
-      ctx->_d.texture.affine.tx = 0.5 * (inv._00 + inv._10) + inv._20 - 0.5;
-      ctx->_d.texture.affine.ty = 0.5 * (inv._01 + inv._11) + inv._21 - 0.5;
+      // Input values are centered to (0.5, 0.5).
+      ctx->_d.texture.affine.tx = 0.5 * (inv._00 + inv._10) + inv._20;
+      ctx->_d.texture.affine.ty = 0.5 * (inv._01 + inv._11) + inv._21;
 
       ctx->_d.texture.affine.mx = (double)ctx->_d.texture.base.w;
       ctx->_d.texture.affine.my = (double)ctx->_d.texture.base.h;
+
+      // Translate the center of pixel back if the filter is not NEAREST.
+      if (imageQuality != IMAGE_QUALITY_NEAREST)
+      {
+        ctx->_d.texture.affine.tx -= 0.5;
+        ctx->_d.texture.affine.ty -= 0.5;
+      }
 
       ctx->_d.texture.affine.xx = inv._00;
       ctx->_d.texture.affine.xy = inv._01;

@@ -50,12 +50,20 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
 {
   if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
     return;
-  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
+
+  switch (params.type)
+  {
+    case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_ROTATE:
+      prepareSprites(params.shapeSize);
+      break;
+  }
 
   screenGdi = new Gdiplus::Bitmap(screen.getWidth(), screen.getHeight(), (INT)screen.getStride(), PixelFormat32bppPARGB, (BYTE*)screen.getFirstX());
   if (screenGdi == NULL)
     return;
 
+  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
   Fog::Time start(Fog::Time::now());
 
   switch (params.type)
@@ -101,6 +109,41 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
 
   delete screenGdi;
   screenGdi = NULL;
+
+  freeSprites();
+}
+
+void BenchGdiPlus::prepareSprites(int size)
+{
+  BenchModule::prepareSprites(size);
+
+  size_t i, length = sprites.getLength();
+  for (i = 0; i < length; i++)
+  {
+    Gdiplus::Bitmap* sprite = new Gdiplus::Bitmap(
+      sprites[i].getWidth(), sprites[i].getHeight(),
+      (INT)sprites[i].getStride(), PixelFormat32bppPARGB,
+      (BYTE*)sprites[i].getFirst());
+
+    if (sprite == NULL)
+    {
+      freeSprites();
+      return;
+    }
+
+    spritesGdi.append(sprite);
+  }
+}
+
+void BenchGdiPlus::freeSprites()
+{
+  size_t i, length = spritesGdi.getLength();
+
+  for (i = 0; i < length; i++)
+    delete spritesGdi[i];
+
+  spritesGdi.clear();
+  BenchModule::freeSprites();
 }
 
 // ============================================================================
@@ -451,7 +494,8 @@ void BenchGdiPlus::runBlitImageI(BenchOutput& output, const BenchParams& params)
   uint32_t i, quantity = params.quantity;
   for (i = 0; i < quantity; i++)
   {
-    // TODO: FogBench (Gdiplus).
+    Fog::PointI pt(rPts.getPointI(screenSize));
+    gr.DrawImage(spritesGdi[spriteIndex], pt.x, pt.y);
 
     if (++spriteIndex >= spritesLength)
       spriteIndex = 0;
@@ -483,7 +527,8 @@ void BenchGdiPlus::runBlitImageRotate(BenchOutput& output, const BenchParams& pa
     gr.RotateTransform(Fog::Math::rad2deg(angle));
     gr.TranslateTransform((Gdiplus::REAL)-cx, (Gdiplus::REAL)-cy);
 
-    // TODO: FogBench (Gdiplus).
+    Fog::PointI pt(rPts.getPointI(screenSize));
+    gr.DrawImage(spritesGdi[spriteIndex], pt.x, pt.y);
 
     gr.ResetTransform();
 

@@ -38,7 +38,14 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
 {
   if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
     return;
-  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
+
+  switch (params.type)
+  {
+    case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_ROTATE:
+      prepareSprites(params.shapeSize);
+      break;
+  }
 
   screenQt = new QImage(
     (unsigned char*)screen.getFirst(),
@@ -49,6 +56,7 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
   if (screenQt == NULL)
     return;
 
+  screen.clear(Fog::Color(Fog::Argb32(0x00000000)));
   Fog::Time start(Fog::Time::now());
 
   switch (params.type)
@@ -94,6 +102,42 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
 
   delete screenQt;
   screenQt = NULL;
+
+  freeSprites();
+}
+
+void BenchQt4::prepareSprites(int size)
+{
+  BenchModule::prepareSprites(size);
+
+  size_t i, length = sprites.getLength();
+  for (i = 0; i < length; i++)
+  {
+    QImage* sprite = new QImage(
+      (unsigned char*)sprites[i].getFirst(),
+      sprites[i].getWidth(),
+      sprites[i].getHeight(),
+      QImage::Format_ARGB32_Premultiplied);
+
+    if (sprite == NULL)
+    {
+      freeSprites();
+      return;
+    }
+
+    spritesQt.append(sprite);
+  }
+}
+
+void BenchQt4::freeSprites()
+{
+  size_t i, length = spritesQt.getLength();
+
+  for (i = 0; i < length; i++)
+    delete spritesQt[i];
+
+  spritesQt.clear();
+  BenchModule::freeSprites();
 }
 
 // ============================================================================

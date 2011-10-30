@@ -459,26 +459,6 @@ extern FOG_NO_EXPORT RasterSerializer RasterPaintEngine_serializer[RASTER_MODE_C
     } \
   FOG_MACRO_END
 
-#define _FOG_RASTER_ENTER_CLIP_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
-    \
-    if (FOG_UNLIKELY(ctx.state & RASTER_CONTEXT_NO_PAINT_WORK_REGION)) \
-      return ERR_OK; \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_CLIP_COND(__condition__) \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) return ERR_RT_INVALID_ARGUMENT; \
-    \
-    if (FOG_UNLIKELY(ctx.state & RASTER_CONTEXT_NO_PAINT_WORK_REGION)) \
-      return ERR_OK; \
-    \
-    if (FOG_UNLIKELY(!(__condition__))) \
-      return _clipOpNull(clipOp); \
-    \
-  FOG_MACRO_END
-
 //! @}
 
 } // Fog namespace

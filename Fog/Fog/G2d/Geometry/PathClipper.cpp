@@ -928,7 +928,7 @@ _ClipLineCmd_Done:
               func[2] = cx - clipBox.x0;
               s[tLength + 0] = CLIP_SIDE_X0;
               s[tLength + 1] = CLIP_SIDE_X0;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_QUADRATIC);
             }
 
             if (sides & CLIP_SIDE_X1)
@@ -936,7 +936,7 @@ _ClipLineCmd_Done:
               func[2] = cx - clipBox.x1;
               s[tLength + 0] = CLIP_SIDE_X1;
               s[tLength + 1] = CLIP_SIDE_X1;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_QUADRATIC);
             }
 
             func[0] = ay;
@@ -947,7 +947,7 @@ _ClipLineCmd_Done:
               func[2] = cy - clipBox.y0;
               s[tLength + 0] = CLIP_SIDE_Y0;
               s[tLength + 1] = CLIP_SIDE_Y0;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_QUADRATIC);
             }
 
             if (sides & CLIP_SIDE_Y1)
@@ -955,7 +955,7 @@ _ClipLineCmd_Done:
               func[2] = cy - clipBox.y1;
               s[tLength + 0] = CLIP_SIDE_Y1;
               s[tLength + 1] = CLIP_SIDE_Y1;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_QUADRATIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_QUADRATIC);
             }
 
             // Remove t-values outside of [0, 1] range and sort them.
@@ -994,8 +994,8 @@ _ClipLineCmd_Done:
                   }
                   else
                   {
-                    tp.x = ax * Math::pow2(tVal) + bx * tVal + cx;
-                    tp.y = ay * Math::pow2(tVal) + by * tVal + cy;
+                    tp.x = (ax * tVal + bx) * tVal + cx;
+                    tp.y = (ay * tVal + by) * tVal + cy;
                   }
                   break;
 
@@ -1026,7 +1026,7 @@ _ClipLineCmd_Done:
                 case CLIP_SIDE_BOTTOM:
                   tp.y = clipBox.y1;
 _ClipQuadCmd_EvaluateX:
-                  tp.x = ax * Math::pow2(tVal) + bx * tVal + cx;
+                  tp.x = (ax * tVal + bx) * tVal + cx;
                   break;
 
                 case CLIP_SIDE_RIGHT:
@@ -1036,7 +1036,7 @@ _ClipQuadCmd_EvaluateX:
                 case CLIP_SIDE_LEFT:
                   tp.x = clipBox.x0;
 _ClipQuadCmd_EvaluateY:
-                  tp.y = ay * Math::pow2(tVal) + by * tVal + cy;
+                  tp.y = (ay * tVal + by) * tVal + cy;
                   break;
 
                 default:
@@ -1060,8 +1060,8 @@ _ClipQuadCmd_EvaluateY:
                 // Test whether the curve segment is visible.
                 NumT_(Point) center(UNINITIALIZED);
                 NumT tMiddle = tCut + (tVal - tCut) * NumT(0.5);
-                center.x = ax * Math::pow2(tMiddle) + bx * tMiddle + cx;
-                center.y = ay * Math::pow2(tMiddle) + by * tMiddle + cy;
+                center.x = (ax * tMiddle + bx) * tMiddle + cx;
+                center.y = (ay * tMiddle + by) * tMiddle + cy;
 
                 if (PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
                 {
@@ -1182,7 +1182,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_X0;
               s[tLength + 1] = CLIP_SIDE_X0;
               s[tLength + 2] = CLIP_SIDE_X0;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_CUBIC);
             }
 
             if (sides & CLIP_SIDE_X1)
@@ -1191,7 +1191,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_X1;
               s[tLength + 1] = CLIP_SIDE_X1;
               s[tLength + 2] = CLIP_SIDE_X1;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_CUBIC);
             }
 
             func[0] = ay;
@@ -1204,7 +1204,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_Y0;
               s[tLength + 1] = CLIP_SIDE_Y0;
               s[tLength + 2] = CLIP_SIDE_Y0;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_CUBIC);
             }
 
             if (sides & CLIP_SIDE_Y1)
@@ -1213,7 +1213,7 @@ _ClipQuadCmd_EvaluateY:
               s[tLength + 0] = CLIP_SIDE_Y1;
               s[tLength + 1] = CLIP_SIDE_Y1;
               s[tLength + 2] = CLIP_SIDE_Y1;
-              tLength += Math::solve(t + tLength, func, MATH_SOLVE_CUBIC);
+              tLength += Math::solvePolynomial(t + tLength, func, MATH_POLYNOMIAL_DEGREE_CUBIC);
             }
 
             // Remove t-values outside of [0, 1] range and sort them.
@@ -1252,8 +1252,12 @@ _ClipQuadCmd_EvaluateY:
                   }
                   else
                   {
-                    tp.x = ax * Math::pow3(tVal) + bx * Math::pow2(tVal) + cx * tVal + dx;
-                    tp.y = ay * Math::pow3(tVal) + by * Math::pow2(tVal) + cy * tVal + dy;
+                    // Always use the Horner's method to evaluate a polynomial.
+                    //   At^3 + Bt^2 + Ct + D
+                    //   (At^2 + Bt + C)t + D
+                    //   ((At + B)t + C)t + D
+                    tp.x = ((ax * tVal + bx) * tVal + cx) * tVal + dx;
+                    tp.y = ((ay * tVal + by) * tVal + cy) * tVal + dy;
                   }
                   break;
 
@@ -1281,10 +1285,14 @@ _ClipQuadCmd_EvaluateY:
                   tp.y = clipBox.y1;
                   break;
 
+                // Always use the Horner's method to evaluate a polynomial.
+                //   At^3 + Bt^2 + Ct + D
+                //   (At^2 + Bt + C)t + D
+                //   ((At + B)t + C)t + D
                 case CLIP_SIDE_BOTTOM:
                   tp.y = clipBox.y1;
 _ClipCubicCmd_EvaluateX:
-                  tp.x = ax * Math::pow3(tVal) + bx * Math::pow2(tVal) + cx * tVal + dx;
+                  tp.x = ((ax * tVal + bx) * tVal + cx) * tVal + dx;
                   break;
 
                 case CLIP_SIDE_RIGHT:
@@ -1294,7 +1302,7 @@ _ClipCubicCmd_EvaluateX:
                 case CLIP_SIDE_LEFT:
                   tp.x = clipBox.x0;
 _ClipCubicCmd_EvaluateY:
-                  tp.y = ay * Math::pow3(tVal) + by * Math::pow2(tVal) + cy * tVal + dy;
+                  tp.y = ((ay * tVal + by) * tVal + cy) * tVal + dy;
                   break;
 
                 default:
@@ -1318,8 +1326,8 @@ _ClipCubicCmd_EvaluateY:
                 // Test whether the curve segment is visible.
                 NumT_(Point) center(UNINITIALIZED);
                 NumT tMiddle = tCut + (tVal - tCut) * NumT(0.5);
-                center.x = ax * Math::pow3(tMiddle) + bx * Math::pow2(tMiddle) + cx * tMiddle + dx;
-                center.y = ay * Math::pow3(tMiddle) + by * Math::pow2(tMiddle) + cy * tMiddle + dy;
+                center.x = ((ax * tMiddle + bx) * tMiddle + cx) * tMiddle + dx;
+                center.y = ((ay * tMiddle + by) * tMiddle + cy) * tMiddle + dy;
 
                 if (PathClipperT_getFlags<NumT>(center, clipBox) == CLIP_SIDE_NONE)
                 {
@@ -1328,13 +1336,14 @@ _ClipCubicCmd_EvaluateY:
                   dstPts = PathClipperT_removeRedundantLines<NumT>(dstMark, (size_t)(dstPts - dstMark));
                   dstCmd = dst->getCommandsX() + (size_t)(dstPts - dst->getVertices());
 
-                  // Derivative: 3*a*t^2 + 2*b*t + c.
+                  // Derivative: 3At^2 + 2Bt + c
+                  //             (3At + 2B)t + c
                   NumT_(Point) cp1(
-                    NumT(3.0) * ax * Math::pow2(tCut) + NumT(2.0) * bx * tCut + cx,
-                    NumT(3.0) * ay * Math::pow2(tCut) + NumT(2.0) * by * tCut + cy);
+                    (NumT(3.0) * ax * tCut + NumT(2.0) * bx) * tCut + cx,
+                    (NumT(3.0) * ay * tCut + NumT(2.0) * by) * tCut + cy);
                   NumT_(Point) cp2(
-                    NumT(3.0) * ax * Math::pow2(tVal) + NumT(2.0) * bx * tVal + cx,
-                    NumT(3.0) * ay * Math::pow2(tVal) + NumT(2.0) * by * tVal + cy);
+                    (NumT(3.0) * ax * tVal + NumT(2.0) * bx) * tVal + cx,
+                    (NumT(3.0) * ay * tVal + NumT(2.0) * by) * tVal + cy);
 
                   cp1.x *= dt; cp1.y *= dt;
                   cp2.x *= dt; cp2.y *= dt;

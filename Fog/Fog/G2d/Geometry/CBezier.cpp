@@ -188,40 +188,106 @@ static err_t FOG_CDECL CBezierT_getSplineBBox(const NumT_(Point)* self, size_t l
 // [Fog::CBezier - GetLength]
 // ============================================================================
 
-struct CubicFunctionD : public MathFunctionD
+struct FOG_NO_EXPORT CBezierLengthFunctionD : public MathFunctionD
 {
-  FOG_INLINE CubicFunctionD() {}
-  virtual ~CubicFunctionD() {}
+  FOG_INLINE CBezierLengthFunctionD() {}
+  virtual ~CBezierLengthFunctionD() {}
 
   virtual err_t evaluate(double* dst, double t) const
   {
     double tInv = 1.0 - t;
 
-    double x = pd[0].x * Math::pow2(tInv) + pd[1].x * t * tInv + pd[2].x * Math::pow2(t);
-    double y = pd[0].y * Math::pow2(tInv) + pd[1].y * t * tInv + pd[2].y * Math::pow2(t);
+    // A(1 - t)^2 + Bt(1 - t) + Ct^2
+    double x = (a.x * tInv + b.x * t) * tInv + c.x * Math::pow2(t);
+    double y = (a.y * tInv + b.y * t) * tInv + c.y * Math::pow2(t);
 
     *dst = Math::hypot(x, y);
     return ERR_OK;
   }
 
-  PointD pd[3];
+  PointD a;
+  PointD b;
+  PointD c;
 };
 
 template<typename NumT>
 static void FOG_CDECL CBezierT_getLength(const NumT_(Point)* self, NumT* length)
 {
-  CubicFunctionD dfunc;
+  CBezierLengthFunctionD func;
 
-  dfunc.pd[0].x = 3.0 * double(self[1].x - self[0].x);
-  dfunc.pd[0].y = 3.0 * double(self[1].y - self[0].y);
-  dfunc.pd[1].x = 6.0 * double(self[2].x - self[1].x);
-  dfunc.pd[1].y = 6.0 * double(self[2].y - self[1].y);
-  dfunc.pd[2].x = 3.0 * double(self[3].x - self[2].x);
-  dfunc.pd[2].y = 3.0 * double(self[3].y - self[2].y);
+  func.a.x = 3.0 * (double(self[1].x) - double(self[0].x));
+  func.a.y = 3.0 * (double(self[1].y) - double(self[0].y));
+  func.b.x = 6.0 * (double(self[2].x) - double(self[1].x));
+  func.b.y = 6.0 * (double(self[2].y) - double(self[1].y));
+  func.c.x = 3.0 * (double(self[3].x) - double(self[2].x));
+  func.c.y = 3.0 * (double(self[3].y) - double(self[2].y));
 
   double dst;
-  Math::integrate(&dst, dfunc, IntervalD(0.0, 1.0), MATH_INTEGRATION_METHOD_GAUSS, 4);
+  Math::integrate(&dst, func, IntervalD(0.0, 1.0), MATH_INTEGRATION_METHOD_GAUSS, 4);
   *length = NumT(dst);
+}
+
+// ============================================================================
+// [Fog::CBezier - GetClosestPoint]
+// ============================================================================
+
+template<typename NumT>
+static NumT FOG_CDECL CBezierT_getClosestPoint(const NumT_(Point)* self, NumT_(Point)* dst, const NumT_(Point)* p)
+{
+  NumT_(Point) a;
+  NumT_(Point) b;
+  NumT_(Point) c;
+  NumT_(Point) q;
+
+  b.x = NumT(3.0) * (self[2].x - self[1].x);
+  b.y = NumT(3.0) * (self[2].y - self[1].y);
+  c.x = NumT(3.0) * (self[1].x - self[0].x);
+  c.y = NumT(3.0) * (self[1].y - self[0].y);
+  a.x = self[3].x - self[0].x - b.x;
+  a.y = self[3].y - self[0].y - b.y;
+  b.x -= c.x;
+  b.y -= c.y;
+
+  q.x = self[0].x - p->x;
+  q.y = self[0].y - p->y;
+
+  NumT func[6];
+  func[0] = NumT(3.0) * (a.x * a.x + a.y * a.y);
+  func[1] = NumT(5.0) * (a.x * b.x + a.y * b.y);
+  func[2] = NumT(4.0) * (a.x * c.x + a.y * c.y) + NumT(2.0) * (b.x * b.x + b.y * b.y);
+  func[3] = NumT(3.0) * (b.x * c.x + b.y * c.y) + NumT(3.0) * (a.x * q.x + a.y * q.y);
+  func[4] = c.x * c.x + c.y * c.y + NumT(2.0) * (b.x * q.x + b.y * q.y);
+  func[5] = c.x * q.x + c.y * q.y;
+
+  NumT t[5];
+  int roots = Math::solvePolynomialN(t, func, 5, MATH_POLYNOMIAL_SOLVE_EIGEN, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+
+  NumT minimumT = NumT(0.0);
+  NumT minimumDistance = Math::squaredDistance(self[0].x - p->x, self[0].y - p->y);
+  *dst = self[0];
+
+  NumT distance = Math::squaredDistance(self[3].x - p->x, self[3].y - p->y);
+  if (distance < minimumDistance)
+  {
+    minimumT = NumT(1.0);
+    minimumDistance = distance;
+    *dst = self[3];
+  }
+
+  for (int i = 0 ; i < roots; i++)
+  {
+    reinterpret_cast<const NumT_(CBezier)*>(self)->evaluate(q, t[i]);
+    distance = Math::squaredDistance(q.x - p->x, q.y - p->y);
+
+    if (distance < minimumDistance)
+    {
+      minimumT = t[i];
+      minimumDistance = distance;
+      *dst = q;
+    }
+  }
+
+  return minimumT;
 }
 
 // ============================================================================
@@ -255,7 +321,7 @@ static int FOG_CDECL CBezierT_getInflectionPoints(const NumT_(Point)* self, NumT
   q[1] = NumT(6.0) * (ay * cx - ax * cy);
   q[2] = NumT(2.0) * (by * cx - bx * cy);
 
-  int count = Math::solve(t, q, MATH_SOLVE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+  int count = Math::solvePolynomial(t, q, MATH_POLYNOMIAL_DEGREE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
 
   if (count == 0)
     return 0;
@@ -307,7 +373,7 @@ static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, Nu
   q[1] *= NumT(6.0);
   q[2] *= NumT(2.0);
 
-  int tCount = Math::solve(t, q, MATH_SOLVE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+  int tCount = Math::solvePolynomial(t, q, MATH_POLYNOMIAL_DEGREE_QUADRATIC, NumT_(Interval)(NumT(0.0), NumT(1.0)));
   if (tCusp > NumT(0.0) && tCusp < NumT(1.0))
   {
     t[tCount++] = tCusp;
@@ -632,6 +698,9 @@ FOG_NO_EXPORT void CBezier_init(void)
 
   fog_api.cbezierf_getLength = CBezierT_getLength<float>;
   fog_api.cbezierd_getLength = CBezierT_getLength<double>;
+
+  fog_api.cbezierf_getClosestPoint = CBezierT_getClosestPoint<float>;
+  fog_api.cbezierd_getClosestPoint = CBezierT_getClosestPoint<double>;
 
   fog_api.cbezierf_getInflectionPoints = CBezierT_getInflectionPoints<float>;
   fog_api.cbezierd_getInflectionPoints = CBezierT_getInflectionPoints<double>;

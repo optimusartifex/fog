@@ -395,7 +395,7 @@ err_t PathStrokerContextT<NumT>::calcMiter(
     NumT_(Point)(v2.x + dx2, v2.y - dy2)))
   {
     // Calculation of the intersection succeeded.
-    di = Math::dist(v1.x, v1.y, pi.x, pi.y);
+    di = Math::euclideanDistance(v1.x, v1.y, pi.x, pi.y);
     if (di <= lim)
     {
       // Inside the miter limit.
@@ -747,7 +747,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
 
   for (i = 0; i < count - 1; i++)
   {
-    NumT d = Math::dist(src[i].x, src[i].y, src[i + 1].x, src[i + 1].y);
+    NumT d = Math::euclideanDistance(src[i].x, src[i].y, src[i + 1].x, src[i + 1].y);
     if (d <= MathConstant<NumT>::getDistanceEpsilon()) d = NumT(0.0);
 
     distances[i] = d;
@@ -756,7 +756,7 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
 /*
   for (i = count - 1, cur = src, dist = distances; i; i--, cur++, dist++)
   {
-    NumT d = Math::dist(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
+    NumT d = Math::euclideanDistance(cur[0].x, cur[0].y, cur[1].x, cur[1].y);
     if (d <= MathConstant<NumT>::getDistanceEpsilon()) d = 0.0;
 
     dist[0] = d;
@@ -777,13 +777,13 @@ err_t PathStrokerContextT<NumT>::strokePathFigure(const NumT_(Point)* src, size_
   // [Outline]
   // --------------------------------------------------------------------------
 
-#define IS_DEGENERATED_DIST(__dist__) ((__dist__) <= MathConstant<NumT>::getDistanceEpsilon())
+#define IS_DEGENERATED_DIST(_Dist_) ((_Dist_) <= MathConstant<NumT>::getDistanceEpsilon())
 
   if (outline)
   {
     // We need also to calc distance between first and last point.
     {
-      NumT d = Math::dist(src[count - 1].x, src[count - 1].y, src[0].x, src[0].y);
+      NumT d = Math::euclideanDistance(src[count - 1].x, src[count - 1].y, src[0].x, src[0].y);
       if (d <= MathConstant<NumT>::getDistanceEpsilon()) d = NumT(0.0);
 
       distances[count - 1] = d;

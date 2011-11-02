@@ -75,11 +75,24 @@ struct FOG_NO_EXPORT QBezierF
   FOG_INLINE void setX2(float v) { p[2].x = v; }
   FOG_INLINE void setY2(float v) { p[2].y = v; }
 
+  // --------------------------------------------------------------------------
+  // [GetLength]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE float getLength() const
   {
     float length;
     fog_api.qbezierf_getLength(p, &length);
     return length;
+  }
+
+  // --------------------------------------------------------------------------
+  // [GetClosestPoint]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float getClosestPoint(PointF& dst, const PointF& pt) const
+  {
+    return fog_api.qbezierf_getClosestPoint(p, &dst, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -300,11 +313,24 @@ struct FOG_NO_EXPORT QBezierD
   FOG_INLINE void setX2(double v) { p[2].x = v; }
   FOG_INLINE void setY2(double v) { p[2].y = v; }
 
+  // --------------------------------------------------------------------------
+  // [GetLength]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE double getLength() const
   {
     double length;
     fog_api.qbezierd_getLength(p, &length);
     return length;
+  }
+
+  // --------------------------------------------------------------------------
+  // [GetClosestPoint]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE double getClosestPoint(PointD& dst, const PointD& pt) const
+  {
+    return fog_api.qbezierd_getClosestPoint(p, &dst, &pt);
   }
 
   // --------------------------------------------------------------------------

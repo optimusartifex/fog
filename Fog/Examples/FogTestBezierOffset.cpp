@@ -2,11 +2,11 @@
 
 Helpers::Logger logger;
 
+namespace Fog {
+
 // ============================================================================
 // [...]
 // ============================================================================
-
-namespace Fog {
 
 // Get the angular direction indicated by the provided dx/dy ratio.
 template<typename NumT>
@@ -77,8 +77,8 @@ FOG_STATIC_T void QBezier_offset(NumT_(Path)* dst, const NumT_(Point)* src, NumT
     NumT nxc = xc + distance * ac;
     NumT nyc = yc + distance * as;
 
-    NumT a = Math::dist(pts[0].x, pts[0].y, pts[1].x, pts[1].y);
-    NumT b = Math::dist(pts[2].x, pts[2].y, pts[1].x, pts[1].y);
+    NumT a = Math::euclideanDistance(pts[0].x, pts[0].y, pts[1].x, pts[1].y);
+    NumT b = Math::euclideanDistance(pts[2].x, pts[2].y, pts[1].x, pts[1].y);
 
     // t = sqrt(a) / (sqrt(a) + sqrt(b) = sqrt(ab) / (sqrt(ab) + b)
     NumT sqrt_ab = Math::sqrt(a * b);
@@ -277,8 +277,8 @@ FOG_STATIC_T void CBezier_offset(NumT_(Path)* dst, const NumT_(Point)* src, NumT
     NumT nxd = xd + distance * ac[1];
     NumT nyd = yd + distance * as[1];
 
-    //NumT a = Math::dist(pts[0].x, pts[0].y, pts[1].x, pts[1].y);
-    //NumT b = Math::dist(pts[3].x, pts[3].y, pts[2].x, pts[2].y);
+    //NumT a = Math::euclideanDistance(pts[0].x, pts[0].y, pts[1].x, pts[1].y);
+    //NumT b = Math::euclideanDistance(pts[3].x, pts[3].y, pts[2].x, pts[2].y);
 
     // t = sqrt(a) / (sqrt(a) + sqrt(b) = sqrt(ab) / (sqrt(ab) + b)
     //NumT sqrt_ab = Math::sqrt(a * b);
@@ -390,7 +390,6 @@ static uint32_t FOG_CDECL LineT_intersect(NumT_(Point)* dst,
 
   return LINE_INTERSECTION_BOUNDED;
 }
-
 
 template<typename NumT>
 FOG_STATIC_T void CBezier_offset(NumT_(Path)* dst, const NumT_(Point)* src, NumT distance, int direction)
@@ -559,66 +558,6 @@ _Split:
 }
 #endif
 
-template<typename NumT>
-static NumT edist(NumT x, NumT y)
-{
-  return x * x + y * y;
-}
-
-template<typename NumT>
-static NumT QBezier_getNearestT(NumT_(Point)& dst, const NumT_(Point)* pts, const NumT_(Point)& p)
-{
-  NumT_(Point) P;
-  NumT_(Point) A;
-  NumT_(Point) B;
-
-  P.x = pts[0].x - p.x;
-  P.y = pts[0].y - p.y;
-
-  A.x = pts[1].x - pts[0].x;
-  A.y = pts[1].y - pts[0].y;
-
-  B.x = pts[0].x - NumT(2.0) * pts[1].x + pts[2].x;
-  B.y = pts[0].y - NumT(2.0) * pts[1].y + pts[2].y;
-
-  NumT func[4];
-  func[0] = B.x * B.x + B.y * B.y;
-  func[1] = NumT(3) * (A.x * B.x + A.y * B.y);
-  func[2] = NumT(2) * (A.x * A.x + A.y * A.y) + P.x * B.x + P.y * B.y;
-  func[3] = P.x * A.x + P.y * A.y;
-
-  NumT t[3];
-  uint count = Math::solve(t, func, MATH_SOLVE_CUBIC, NumT_(Interval)(NumT(0), NumT(1)));
-
-  NumT minimumT = NumT(0);
-  NumT minimumDistance = edist(pts[0].x - p.x, pts[0].y - p.y);
-  dst = pts[0];
-
-  NumT distance = edist(pts[2].x - p.x, pts[2].y - p.y);
-  if (distance < minimumDistance)
-  {
-    minimumT = NumT(1);
-    minimumDistance = distance;
-    dst = pts[2];
-  }
-
-  for (uint i = 0; i < count; i++)
-  {
-    NumT_(Point) tp;
-    reinterpret_cast<const NumT_(QBezier)*>(pts)->evaluate(tp, t[i]);
-    distance = edist(tp.x - p.x, tp.y - p.y);
-
-    if (distance < minimumDistance)
-    {
-      minimumT = t[i];
-      minimumDistance = distance;
-      dst = tp;
-    }
-  }
-
-  return minimumT;
-}
-
 } // Fog namespace
 
 // ============================================================================
@@ -703,7 +642,7 @@ void MyWindow::onMouse(MouseEvent* e)
     }
     else
     {
-      QBezier_getNearestT<float>(_nearestPoint, _path.getVertices(), PointF(e->getPosition()));
+      reinterpret_cast<const CBezierF*>(_path.getVertices())->getClosestPoint(_nearestPoint, PointF(e->getPosition()));
       update(WIDGET_UPDATE_ALL);
     }
   }
@@ -798,13 +737,11 @@ void MyWindow::onPaint(PaintEvent* e)
     Helpers::drawPathEx<float>(p, path, 2.0f, Argb32(0xFF0000FF));
     Helpers::drawPathInfo<float>(p, PointI(5, 15), path, getFont(), Argb32(0xFF000000));
 
-    /*
     if (Math::isFinite(_nearestPoint.x))
     {
       p->setSource(Argb32(0xFF000000));
       p->fillCircle(CircleF(_nearestPoint, 4.0f));
     }
-    */
   }
 
   logger.paint(p, getFont(), PointF(5, 40), Argb32(0xFF0000FF));
@@ -817,6 +754,40 @@ void MyWindow::onPaint(PaintEvent* e)
 
 FOG_UI_MAIN()
 {
+  /*
+  {
+    float f[4];
+    int i;
+
+    f[0] =-2.0f;
+    f[1] =-1.1f;
+    f[2] =-1.3f;
+    f[3] = 0.5f;
+
+    float rv[4];
+    int rc = Math::solvePolynomial(rv, f, MATH_POLYNOMIAL_DEGREE_CUBIC);
+
+    float qv[4];
+    int qc = Math::solvePolynomialN(qv, f, 3, MATH_POLYNOMIAL_SOLVE_EIGEN);
+
+    for (i = 0; i < rc; i++)
+    {
+      float r = rv[i];
+      float e = ((f[0] * r + f[1]) * r + f[2]) * r + f[3];
+      printf("R-Root: %f, evaluation: %f\n", r, e);
+    }
+
+    printf("\n");
+
+    for (i = 0; i < qc; i++)
+    {
+      float r = qv[i];
+      float e = ((f[0] * r + f[1]) * r + f[2]) * r + f[3];
+      printf("Q-Root: %f, evaluation: %f\n", r, e);
+    }
+  }
+  */
+
   Application app(StringW::fromAscii8("UI"));
   MyWindow window(WINDOW_TYPE_DEFAULT);
 

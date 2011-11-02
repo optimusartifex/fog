@@ -869,23 +869,17 @@ static FOG_INLINE double besj(double x, int n)
 // [Fog::Math - Dist]
 // ============================================================================
 
-static FOG_INLINE float dist(
-  float x0, float y0,
-  float x1, float y1)
-{
-  float dx = x1 - x0;
-  float dy = y1 - y0;
-  return Math::sqrt(dx * dx + dy * dy);
-}
+static FOG_INLINE float squaredDistance(float x, float y) { return x * x + y * y; }
+static FOG_INLINE double squaredDistance(double x, double y) { return x * x + y * y; }
 
-static FOG_INLINE double dist(
-  double x0, double y0,
-  double x1, double y1)
-{
-  double dx = x1 - x0;
-  double dy = y1 - y0;
-  return Math::sqrt(dx * dx + dy * dy);
-}
+static FOG_INLINE float squaredDistance(float x0, float y0, float x1, float y1) { return squaredDistance(x1 - x0, y1 - y0); }
+static FOG_INLINE double squaredDistance(double x0, double y0, double x1, double y1) { return squaredDistance(x1 - x0, y1 - y0); }
+
+static FOG_INLINE float euclideanDistance(float x, float y) { return Math::sqrt(x * x + y * y); }
+static FOG_INLINE double euclideanDistance(double x, double y) { return Math::sqrt(x * x + y * y); }
+
+static FOG_INLINE float euclideanDistance(float x0, float y0, float x1, float y1) { return euclideanDistance(x1 - x0, y1 - y0); }
+static FOG_INLINE double euclideanDistance(double x0, double y0, double x1, double y1) { return euclideanDistance(x1 - x0, y1 - y0); }
 
 //! @}
 

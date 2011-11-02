@@ -24,25 +24,30 @@ static uint32_t FOG_CDECL LineT_intersect(NumT_(Point)* dst,
   const NumT_(Point)* lineA,
   const NumT_(Point)* lineB)
 {
-  NumT_(Point) ptA = lineA[1] - lineA[0];
-  NumT_(Point) ptB = lineB[1] - lineB[0];
+  double ax = double(lineA[1].x) - double(lineA[0].x);
+  double ay = double(lineA[1].y) - double(lineA[0].y);
+  double bx = double(lineB[1].x) - double(lineB[0].x);
+  double by = double(lineB[1].y) - double(lineB[0].y);
 
-  NumT d = ptA.y * ptB.x - ptA.x * ptB.y;
+  double d = ay * bx - ax * by;
   if (Math::isFuzzyZero(d) || !Math::isFinite(d))
     return LINE_INTERSECTION_NONE;
 
-  NumT_(Point) off = lineA[0] - lineB[0];
-  NumT t = (ptB.y * off.x - ptB.x * off.y) / d;
-  dst->set(lineA[0].x + ptA.x * t, lineA[0].y + ptA.y * t);
+  double ox = double(lineA[0].x - lineB[0].x);
+  double oy = double(lineA[0].y - lineB[0].y);
 
-  if (t < NumT(0.0) && t > NumT(1.0))
+  double t = (by * ox - bx * oy) / d;
+
+  dst->x = NumT(double(lineA[0].x) + ax * t);
+  dst->y = NumT(double(lineA[0].y) + ay * t);
+  if (t < 0.0 && t > 1.0)
     return LINE_INTERSECTION_UNBOUNDED;
 
-  t = (ptA.x * off.y - ptA.y * off.x) / d;
-  if (t < NumT(0.0) && t > NumT(1.0))
+  t = (ax * oy - ay * ox) / d;
+  if (t < 0.0 && t > 1.0)
     return LINE_INTERSECTION_UNBOUNDED;
-
-  return LINE_INTERSECTION_BOUNDED;
+  else
+    return LINE_INTERSECTION_BOUNDED;
 }
 
 // ============================================================================

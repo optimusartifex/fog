@@ -13,15 +13,10 @@
 #include <Fog/G2d/Geometry/Point.h>
 
 namespace Fog {
+namespace Math2d {
 
 //! @addtogroup Fog_G2d_Geometry
 //! @{
-
-// ============================================================================
-// [Fog::Math2d]
-// ============================================================================
-
-namespace Math2d {
 
 // ============================================================================
 // [Fog::Math2d - DistSquare]
@@ -157,10 +152,9 @@ static FOG_INLINE double crossProduct(const PointD& p0, const PointD& p1, const 
          (p2.y - p1.y) * (p1.x - p0.x) ;
 }
 
-} // Math2d namespace
-
 //! @}
 
+} // Math2d namespace
 } // Fog namespace
 
 // [Guard]

@@ -70,7 +70,7 @@
 
 #elif defined(_M_IX86 ) || \
       defined(__i386__) || \
-      defined(__i386__) || \
+      defined(__i386  ) || \
       defined(__i486__) || \
       defined(__i586__) || \
       defined(__i686__)

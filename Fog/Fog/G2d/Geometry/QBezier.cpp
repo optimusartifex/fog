@@ -13,6 +13,7 @@
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
+#include <Fog/Core/Math/Solve.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Path.h>
@@ -181,6 +182,61 @@ static void FOG_CDECL QBezierT_getLength(const NumT_(Point)* self, NumT* length)
     self[0].x, self[0].y,
     self[1].x, self[1].y,
     self[2].x, self[2].y);
+}
+
+// ============================================================================
+// [Fog::QBezier - GetClosestPoint]
+// ============================================================================
+
+template<typename NumT>
+static NumT QBezierT_getClosestPoint(const NumT_(Point)* self, NumT_(Point)* dst, const NumT_(Point)* p)
+{
+  NumT_(Point) a;
+  NumT_(Point) b;
+  NumT_(Point) q;
+
+  a.x = self[1].x - self[0].x;
+  a.y = self[1].y - self[0].y;
+  b.x = self[0].x - NumT(2.0) * self[1].x + self[2].x;
+  b.y = self[0].y - NumT(2.0) * self[1].y + self[2].y;
+  q.x = self[0].x - p->x;
+  q.y = self[0].y - p->y;
+
+  NumT func[4];
+  func[0] = b.x * b.x + b.y * b.y;
+  func[1] = NumT(3.0) * (a.x * b.x + a.y * b.y);
+  func[2] = NumT(2.0) * (a.x * a.x + a.y * a.y) + b.x * q.x + b.y * q.y;
+  func[3] = a.x * q.x + a.y * q.y;
+
+  NumT t[3];
+  uint count = Math::solvePolynomial(t, func, MATH_POLYNOMIAL_DEGREE_CUBIC, NumT_(Interval)(NumT(0), NumT(1)));
+
+  NumT minimumT = NumT(0.0);
+  NumT minimumDistance = Math::squaredDistance(self[0].x - p->x, self[0].y - p->y);
+  *dst = self[0];
+
+  NumT distance = Math::squaredDistance(self[2].x - p->x, self[2].y - p->y);
+  if (distance < minimumDistance)
+  {
+    minimumT = NumT(1.0);
+    minimumDistance = distance;
+    *dst = self[2];
+  }
+
+  for (uint i = 0; i < count; i++)
+  {
+    reinterpret_cast<const NumT_(QBezier)*>(self)->evaluate(q, t[i]);
+    distance = Math::squaredDistance(q.x - p->x, q.y - p->y);
+
+    if (distance < minimumDistance)
+    {
+      minimumT = t[i];
+      minimumDistance = distance;
+      *dst = q;
+    }
+  }
+
+  return minimumT;
 }
 
 // ============================================================================
@@ -394,6 +450,9 @@ FOG_NO_EXPORT void QBezier_init(void)
 
   fog_api.qbezierf_getLength = QBezierT_getLength<float>;
   fog_api.qbezierd_getLength = QBezierT_getLength<double>;
+
+  fog_api.qbezierf_getClosestPoint = QBezierT_getClosestPoint<float>;
+  fog_api.qbezierd_getClosestPoint = QBezierT_getClosestPoint<double>;
 
   fog_api.qbezierf_flatten = QBezierT_flatten<float>;
   fog_api.qbezierd_flatten = QBezierT_flatten<double>;

@@ -251,7 +251,7 @@ static NumT_(PathInfo)* FOG_CDECL PathInfoT_generate(const NumT_(Path)* path)
           case PATH_CMD_LINE_TO:
             _MERGE_BBOX(NumT, boundingBox, srcPts[i]);
 
-            commandDistance = Math::dist(srcPts[i - 1].x, srcPts[i - 1].y, srcPts[i].x, srcPts[i].y);
+            commandDistance = Math::euclideanDistance(srcPts[i - 1].x, srcPts[i - 1].y, srcPts[i].x, srcPts[i].y);
             distanceData[i + 0] = NumT(commandDistance);
 
             i += 1;
@@ -313,7 +313,7 @@ static NumT_(PathInfo)* FOG_CDECL PathInfoT_generate(const NumT_(Path)* path)
             break;
 
           case PATH_CMD_CLOSE:
-            commandDistance = Math::dist(srcPts[i - 1].x, srcPts[i - 1].y, srcPts[start].x, srcPts[start].y);
+            commandDistance = Math::euclideanDistance(srcPts[i - 1].x, srcPts[i - 1].y, srcPts[start].x, srcPts[start].y);
             distanceData[i + 0] = NumT(commandDistance);
 
             if (!hasAcuteEdges || end - start > 2)

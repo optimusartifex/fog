@@ -82,11 +82,24 @@ struct FOG_NO_EXPORT CBezierF
   FOG_INLINE void setX3(float v) { p[3].x = v; }
   FOG_INLINE void setY3(float v) { p[3].y = v; }
 
+  // --------------------------------------------------------------------------
+  // [GetLength]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE float getLength() const
   {
     float length;
     fog_api.cbezierf_getLength(p, &length);
     return length;
+  }
+
+  // --------------------------------------------------------------------------
+  // [GetClosestPoint]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float getClosestPoint(PointF& dst, const PointF& pt) const
+  {
+    return fog_api.cbezierf_getClosestPoint(p, &dst, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -105,9 +118,9 @@ struct FOG_NO_EXPORT CBezierF
   // [Evaluate]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void evaluate(const PointF* pt, double t)
+  FOG_INLINE void evaluate(PointF& pt, float t) const
   {
-    // TODO.
+    evaluate(this, &pt, t);
   }
 
   // --------------------------------------------------------------------------
@@ -223,6 +236,28 @@ struct FOG_NO_EXPORT CBezierF
   // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
+
+  static FOG_INLINE void evaluate(const CBezierF* self, PointF* dst, float t)
+  {
+    evaluate(self->p, dst, t);
+  }
+
+  static FOG_INLINE void evaluate(const PointF* self, PointF* dst, float t)
+  {
+    float tInv = 1.0f - t;
+
+    float ax = self[0].x * tInv + self[1].x * t;
+    float ay = self[0].y * tInv + self[1].y * t;
+    
+    float bx = self[1].x * tInv + self[2].x * t;
+    float by = self[1].y * tInv + self[2].y * t;
+    
+    float cx = self[2].x * tInv + self[3].x * t;
+    float cy = self[2].y * tInv + self[3].y * t;
+
+    dst->x = (ax * tInv + bx * t) * tInv + (bx * tInv + cx * t) * t;
+    dst->y = (ay * tInv + by * t) * tInv + (by * tInv + cy * t) * t;
+  }
 
   static FOG_INLINE err_t getBoundingBox(const CBezierF* self, BoxF* dst)
   {
@@ -410,11 +445,24 @@ struct FOG_NO_EXPORT CBezierD
   FOG_INLINE void setX3(double v) { p[3].x = v; }
   FOG_INLINE void setY3(double v) { p[3].y = v; }
 
+  // --------------------------------------------------------------------------
+  // [GetLength]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE double getLength() const
   {
     double length;
     fog_api.cbezierd_getLength(p, &length);
     return length;
+  }
+
+  // --------------------------------------------------------------------------
+  // [GetClosestPoint]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE double getClosestPoint(PointD& dst, const PointD& pt) const
+  {
+    return fog_api.cbezierd_getClosestPoint(p, &dst, &pt);
   }
 
   // --------------------------------------------------------------------------
@@ -433,9 +481,9 @@ struct FOG_NO_EXPORT CBezierD
   // [Evaluate]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void evaluate(const PointD* pt, double t)
+  FOG_INLINE void evaluate(PointD& pt, double t) const
   {
-    // TODO.
+    evaluate(this, &pt, t);
   }
 
   // --------------------------------------------------------------------------
@@ -551,6 +599,28 @@ struct FOG_NO_EXPORT CBezierD
   // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
+
+  static FOG_INLINE void evaluate(const CBezierD* self, PointD* dst, double t)
+  {
+    evaluate(self->p, dst, t);
+  }
+
+  static FOG_INLINE void evaluate(const PointD* self, PointD* dst, double t)
+  {
+    double tInv = 1.0f - t;
+
+    double ax = self[0].x * tInv + self[1].x * t;
+    double ay = self[0].y * tInv + self[1].y * t;
+    
+    double bx = self[1].x * tInv + self[2].x * t;
+    double by = self[1].y * tInv + self[2].y * t;
+    
+    double cx = self[2].x * tInv + self[3].x * t;
+    double cy = self[2].y * tInv + self[3].y * t;
+
+    dst->x = (ax * tInv + bx * t) * tInv + (bx * tInv + cx * t) * t;
+    dst->y = (ay * tInv + by * t) * tInv + (by * tInv + cy * t) * t;
+  }
 
   static FOG_INLINE err_t getBoundingBox(const CBezierD* self, BoxD* dst)
   {

@@ -41,23 +41,25 @@ struct FOG_NO_EXPORT Api
   typedef err_t (FOG_CDECL *MathF_IntegrateFunc)(float* dst, const MathFunctionF* func, const IntervalF* interval, uint32_t steps);
   typedef err_t (FOG_CDECL *MathD_IntegrateFunc)(double* dst, const MathFunctionD* func, const IntervalD* interval, uint32_t steps);
 
-  typedef int (FOG_CDECL *MathF_SolveFunc)(float* dst, const float* func);
-  typedef int (FOG_CDECL *MathD_SolveFunc)(double* dst, const double* func);
+  typedef int (FOG_CDECL *MathF_SolvePolynomialAFunc)(float* dst, const float* polynomial, const IntervalF* interval);
+  typedef int (FOG_CDECL *MathD_SolvePolynomialAFunc)(double* dst, const double* polynomial, const IntervalD* interval);
 
-  typedef int (FOG_CDECL *MathF_SolveAtFunc)(float* dst, const float* func, const IntervalF* interval);
-  typedef int (FOG_CDECL *MathD_SolveAtFunc)(double* dst, const double* func, const IntervalD* interval);
+  typedef int (FOG_CDECL *MathF_SolvePolynomialNFunc)(float* dst, const float* polynomial, uint32_t degree, const IntervalF* interval);
+  typedef int (FOG_CDECL *MathD_SolvePolynomialNFunc)(double* dst, const double* polynomial, uint32_t degree, const IntervalD* interval);
 
   FOG_CAPI_STATIC(float, mathf_besj)(float x, int n);
   FOG_CAPI_STATIC(double, mathd_besj)(double x, int n);
 
   MathF_IntegrateFunc mathf_integrate[MATH_INTEGRATION_METHOD_COUNT];
-  MathF_SolveFunc mathf_solve[MATH_SOLVE_COUNT];
-  MathF_SolveAtFunc mathf_solveAt[MATH_SOLVE_COUNT];
-  FOG_CAPI_STATIC(void, mathf_vecFloatFromDouble)(float* dst, const double* src, size_t length);
-
   MathD_IntegrateFunc mathd_integrate[MATH_INTEGRATION_METHOD_COUNT];
-  MathD_SolveFunc mathd_solve[MATH_SOLVE_COUNT];
-  MathD_SolveAtFunc mathd_solveAt[MATH_SOLVE_COUNT];
+
+  MathF_SolvePolynomialAFunc mathf_solvePolynomialA[MATH_POLYNOMIAL_DEGREE_MAX_ANALYTIC + 1];
+  MathD_SolvePolynomialAFunc mathd_solvePolynomialA[MATH_POLYNOMIAL_DEGREE_MAX_ANALYTIC + 1];
+
+  MathF_SolvePolynomialNFunc mathf_solvePolynomialN[MATH_POLYNOMIAL_SOLVE_COUNT];
+  MathD_SolvePolynomialNFunc mathd_solvePolynomialN[MATH_POLYNOMIAL_SOLVE_COUNT];
+
+  FOG_CAPI_STATIC(void, mathf_vecFloatFromDouble)(float* dst, const double* src, size_t length);
   FOG_CAPI_STATIC(void, mathd_vecDoubleFromFloat)(double* dst, const float* src, size_t length);
 
   // --------------------------------------------------------------------------
@@ -1477,6 +1479,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, cbezierf_getBoundingBox)(const PointF* self, BoxF* dst);
   FOG_CAPI_METHOD(err_t, cbezierf_getSplineBBox)(const PointF* self, size_t length, BoxF* dst);
   FOG_CAPI_METHOD(void, cbezierf_getLength)(const PointF* self, float* length);
+  FOG_CAPI_METHOD(float, cbezierf_getClosestPoint)(const PointF* self, PointF* dst, const PointF* p);
   FOG_CAPI_METHOD(int, cbezierf_getInflectionPoints)(const PointF* self, float*  t);
   FOG_CAPI_METHOD(int, cbezierf_simplifyForProcessing)(const PointF* self, PointF* pts);
   FOG_CAPI_METHOD(err_t, cbezierf_flatten)(const PointF* self, PathF* dst, uint8_t initialCommand, float flatness);
@@ -1488,6 +1491,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, cbezierd_getBoundingBox)(const PointD* self, BoxD* dst);
   FOG_CAPI_METHOD(err_t, cbezierd_getSplineBBox)(const PointD* self, size_t length, BoxD* dst);
   FOG_CAPI_METHOD(void, cbezierd_getLength)(const PointD* self, double* length);
+  FOG_CAPI_METHOD(double, cbezierd_getClosestPoint)(const PointD* self, PointD* dst, const PointD* p);
   FOG_CAPI_METHOD(int, cbezierd_getInflectionPoints)(const PointD* self, double* t);
   FOG_CAPI_METHOD(int, cbezierd_simplifyForProcessing)(const PointD* self, PointD* pts);
   FOG_CAPI_METHOD(err_t, cbezierd_flatten)(const PointD* self, PathD* dst, uint8_t initialCommand, double flatness);
@@ -1797,6 +1801,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, qbezierf_getBoundingBox)(const PointF* self, BoxF* dst);
   FOG_CAPI_METHOD(err_t, qbezierf_getSplineBBox)(const PointF* self, size_t length, BoxF* dst);
   FOG_CAPI_METHOD(void, qbezierf_getLength)(const PointF* self, float* length);
+  FOG_CAPI_METHOD(float, qbezierf_getClosestPoint)(const PointF* self, PointF* dst, const PointF* p);
   FOG_CAPI_METHOD(err_t, qbezierf_flatten)(const PointF* self, PathF* dst, uint8_t initialCommand, float flatness);
 
   // --------------------------------------------------------------------------
@@ -1806,6 +1811,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, qbezierd_getBoundingBox)(const PointD* self, BoxD* dst);
   FOG_CAPI_METHOD(err_t, qbezierd_getSplineBBox)(const PointD* self, size_t length, BoxD* dst);
   FOG_CAPI_METHOD(void, qbezierd_getLength)(const PointD* self, double* length);
+  FOG_CAPI_METHOD(double, qbezierd_getClosestPoint)(const PointD* self, PointD* dst, const PointD* p);
   FOG_CAPI_METHOD(err_t, qbezierd_flatten)(const PointD* self, PathD* dst, uint8_t initialCommand, double flatness);
 
   // --------------------------------------------------------------------------

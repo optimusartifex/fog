@@ -1464,6 +1464,16 @@ enum LOCALE_CHAR
 };
 
 // ============================================================================
+// [Fog::MANAGED_STRING_OPTION]
+// ============================================================================
+
+enum MANAGED_STRING_OPTION
+{
+  MANAGED_STRING_OPTION_NONE = 0x00000000,
+  MANAGED_STRING_OPTION_LOOKUP = 0x00000001
+};
+
+// ============================================================================
 // [Fog::MATH_INTEGRATION_METHOD]
 // ============================================================================
 
@@ -1478,28 +1488,38 @@ enum MATH_INTEGRATION_METHOD
 };
 
 // ============================================================================
-// [Fog::MANAGED_STRING_OPTION]
+// [Fog::MATH_POLYNOMIAL_SOLVE]
 // ============================================================================
 
-enum MANAGED_STRING_OPTION
+enum MATH_POLYNOMIAL_SOLVE
 {
-  MANAGED_STRING_OPTION_NONE = 0x00000000,
-  MANAGED_STRING_OPTION_LOOKUP = 0x00000001
+  MATH_POLYNOMIAL_SOLVE_EIGEN = 0,
+  MATH_POLYNOMIAL_SOLVE_COUNT = 1,
+
+  MATH_POLYNOMIAL_SOLVE_DEFAULT = MATH_POLYNOMIAL_SOLVE_EIGEN
 };
 
 // ============================================================================
-// [Fog::MATH_SOLVE]
+// [Fog::MATH_POLYNOMIAL_DEGREE]
 // ============================================================================
 
-enum MATH_SOLVE
+//! @brief Degree of polynomial function.
+enum MATH_POLYNOMIAL_DEGREE
 {
-  MATH_SOLVE_NONE = 0,
-  MATH_SOLVE_LINEAR = 2,
-  MATH_SOLVE_QUADRATIC = 3,
-  MATH_SOLVE_CUBIC = 4,
-  MATH_SOLVE_QUARTIC = 5,
+  MATH_POLYNOMIAL_DEGREE_NONE = 0,
+  MATH_POLYNOMIAL_DEGREE_LINEAR = 1,
+  MATH_POLYNOMIAL_DEGREE_QUADRATIC = 2,
+  MATH_POLYNOMIAL_DEGREE_CUBIC = 3,
+  MATH_POLYNOMIAL_DEGREE_QUARTIC = 4,
+  MATH_POLYNOMIAL_DEGREE_QUINTIC = 5,
+  MATH_POLYNOMIAL_DEGREE_SEXTIC = 6,
+  MATH_POLYNOMIAL_DEGREE_SEPTIC = 7,
+  MATH_POLYNOMIAL_DEGREE_OCTIC = 8,
+  MATH_POLYNOMIAL_DEGREE_NONIC = 9,
+  MATH_POLYNOMIAL_DEGREE_DECIC = 10,
 
-  MATH_SOLVE_COUNT = 6
+  MATH_POLYNOMIAL_DEGREE_MAX_ANALYTIC = MATH_POLYNOMIAL_DEGREE_QUARTIC,
+  MATH_POLYNOMIAL_DEGREE_MAX_NUMERIC = 100
 };
 
 // ============================================================================

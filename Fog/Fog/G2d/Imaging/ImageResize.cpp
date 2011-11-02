@@ -88,8 +88,9 @@ struct FOG_NO_EXPORT ImageResize_BicubicFunction : public MathFunctionF
 
   virtual err_t evaluate(float* dst, float t) const
   {
+    // 0.5t^3 - t^2 + 2/3 == (0.5t - 1.0) t^2 + 2/3
     if (t < 1.0f) 
-      *dst = 0.5f * Math::pow3(t) - Math::pow2(t) + 2.0f / 3.0f;
+      *dst = (0.5f * t - 1.0f) * Math::pow2(t) + 2.0f / 3.0f;
     else if (t < 2.0f)
       *dst = Math::pow3(2.0f - t) / 6.0f;
     else

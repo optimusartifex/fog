@@ -92,6 +92,7 @@ void BenchApp::runModule(BenchModule* module)
   {
     if (sprites.isEmpty() && (
         type == BENCH_TYPE_BLIT_IMAGE_I ||
+        type == BENCH_TYPE_BLIT_IMAGE_F ||
         type == BENCH_TYPE_BLIT_IMAGE_ROTATE))
     {
       continue;
@@ -287,6 +288,7 @@ Fog::StringW BenchApp::getBenchString(uint32_t bench) const
     "FillPolygon",
     "FillComplex",
     "BlitImageI",
+    "BlitImageF",
     "BlitImageRot"
   };
 
@@ -541,7 +543,7 @@ void BenchModule::freeSprites()
 
 int main(int argc, char* argv[])
 {
-  BenchApp app(Fog::SizeI(600, 600), 10000);
+  BenchApp app(Fog::SizeI(600, 600), 1000);
 
   // Testing...
   app.saveImages = false;

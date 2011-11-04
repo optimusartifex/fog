@@ -29,7 +29,7 @@ struct NTOAContext
   //! @brief Output flags.
   uint32_t negative;
   //! @brief Decimal point position (for dtoa).
-  uint32_t decpt;
+  int32_t decpt;
 
   //! @brief Output buffer.
   char buffer[256];

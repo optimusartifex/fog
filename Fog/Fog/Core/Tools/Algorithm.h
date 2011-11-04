@@ -260,7 +260,7 @@ template<typename T>
 static FOG_INLINE void qsort_t(T* base, size_t nmemb)
 {
   QSortCore< QSortType<T> > context;
-  context._sort(base, nmemb);
+  context._sort(reinterpret_cast<uint8_t*>(base), nmemb);
 }
 
 // ============================================================================

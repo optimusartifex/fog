@@ -68,8 +68,9 @@ enum BENCH_TYPE
   BENCH_TYPE_FILL_POLYGON = 5,
   BENCH_TYPE_FILL_COMPLEX = 6,
   BENCH_TYPE_BLIT_IMAGE_I = 7,
-  BENCH_TYPE_BLIT_IMAGE_ROTATE = 8,
-  BENCH_TYPE_COUNT = 9
+  BENCH_TYPE_BLIT_IMAGE_F = 8,
+  BENCH_TYPE_BLIT_IMAGE_ROTATE = 9,
+  BENCH_TYPE_COUNT = 10
 };
 
 // ============================================================================
@@ -191,6 +192,20 @@ struct BenchModule
   virtual void bench(BenchOutput& output, const BenchParams& params) = 0;
   virtual void prepareSprites(int size);
   virtual void freeSprites();
+
+  // --------------------------------------------------------------------------
+  // [Run]
+  // --------------------------------------------------------------------------
+
+  virtual void runCreateDestroy(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runFillRectI(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runFillRectF(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runFillRectRotate(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runFillRound(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity) = 0;
+  virtual void runBlitImageI(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runBlitImageF(BenchOutput& output, const BenchParams& params) = 0;
+  virtual void runBlitImageRotate(BenchOutput& output, const BenchParams& params) = 0;
 
   // --------------------------------------------------------------------------
   // [Members]

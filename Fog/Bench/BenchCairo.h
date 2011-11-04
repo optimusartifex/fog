@@ -45,14 +45,19 @@ struct BenchCairo : public BenchModule
 
   void addRound(cairo_t* cr, const Fog::RectF& rect, float radius);
 
-  void runCreateDestroy(BenchOutput& output, const BenchParams& params);
-  void runFillRectI(BenchOutput& output, const BenchParams& params);
-  void runFillRectF(BenchOutput& output, const BenchParams& params);
-  void runFillRectRotate(BenchOutput& output, const BenchParams& params);
-  void runFillRound(BenchOutput& output, const BenchParams& params);
-  void runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity);
-  void runBlitImageI(BenchOutput& output, const BenchParams& params);
-  void runBlitImageRotate(BenchOutput& output, const BenchParams& params);
+  // --------------------------------------------------------------------------
+  // [Run]
+  // --------------------------------------------------------------------------
+
+  virtual void runCreateDestroy(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRectI(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRectF(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRectRotate(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRound(BenchOutput& output, const BenchParams& params);
+  virtual void runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity);
+  virtual void runBlitImageI(BenchOutput& output, const BenchParams& params);
+  virtual void runBlitImageF(BenchOutput& output, const BenchParams& params);
+  virtual void runBlitImageRotate(BenchOutput& output, const BenchParams& params);
 
   // --------------------------------------------------------------------------
   // [Members]

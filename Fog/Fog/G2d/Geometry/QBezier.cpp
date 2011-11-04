@@ -329,7 +329,7 @@ _Realloc:
       da = dx*dx + dy*dy;
       if (da == 0)
       {
-        d = Math2d::distSquare(x0, y0, x1, y1);
+        d = Math::squaredDistance(x0, y0, x1, y1);
       }
       else
       {
@@ -343,11 +343,11 @@ _Realloc:
         }
 
         if (d <= 0)
-          d = Math2d::distSquare(x1, y1, x0, y0);
+          d = Math::squaredDistance(x1, y1, x0, y0);
         else if (d >= 1)
-          d = Math2d::distSquare(x1, y1, x2, y2);
+          d = Math::squaredDistance(x1, y1, x2, y2);
         else
-          d = Math2d::distSquare(x1, y1, x0 + d*dx, y0 + d*dy);
+          d = Math::squaredDistance(x1, y1, x0 + d*dx, y0 + d*dy);
       }
       if (d < distanceToleranceSquare)
       {

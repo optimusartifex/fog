@@ -42,6 +42,7 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
   switch (params.type)
   {
     case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_F:
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
       prepareSprites(params.shapeSize);
       break;
@@ -88,6 +89,10 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
 
     case BENCH_TYPE_BLIT_IMAGE_I:
       runBlitImageI(output, params);
+      break;
+
+    case BENCH_TYPE_BLIT_IMAGE_F:
+      runBlitImageF(output, params);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
@@ -501,7 +506,45 @@ void BenchCairo::runBlitImageI(BenchOutput& output, const BenchParams& params)
   uint32_t i, quantity = params.quantity;
   for (i = 0; i < quantity; i++)
   {
-    // TODO:
+    Fog::PointI pt(rPts.getPointI(screenSize));
+
+    cairo_set_source_surface(cr, spritesCairo[spriteIndex], pt.x, pt.y);
+    cairo_rectangle(cr, pt.x, pt.y, params.shapeSize, params.shapeSize);
+    cairo_fill(cr);
+
+    if (++spriteIndex >= spritesLength)
+      spriteIndex = 0;
+  }
+
+  cairo_destroy(cr);
+}
+
+void BenchCairo::runBlitImageF(BenchOutput& output, const BenchParams& params)
+{
+  cairo_t* cr = cairo_create(screenCairo);
+  configureContext(cr, params);
+
+  BenchRandom rPts(app);
+
+  Fog::SizeI screenSize(
+    params.screenSize.w - params.shapeSize,
+    params.screenSize.h - params.shapeSize);
+
+  uint32_t spriteIndex = 0;
+  uint32_t spritesLength = (uint32_t)sprites.getLength();
+
+  uint32_t i, quantity = params.quantity;
+  for (i = 0; i < quantity; i++)
+  {
+    Fog::PointF pt(rPts.getPointF(screenSize));
+
+    cairo_set_source_surface(cr, spritesCairo[spriteIndex], pt.x, pt.y);
+    cairo_rectangle(cr, 
+      double(pt.x),
+      double(pt.y),
+      double(params.shapeSize),
+      double(params.shapeSize));
+    cairo_fill(cr);
 
     if (++spriteIndex >= spritesLength)
       spriteIndex = 0;
@@ -515,8 +558,8 @@ void BenchCairo::runBlitImageRotate(BenchOutput& output, const BenchParams& para
   cairo_t* cr = cairo_create(screenCairo);
   configureContext(cr, params);
 
-  float cx = (float)params.screenSize.w * 0.5f;
-  float cy = (float)params.screenSize.h * 0.5f;
+  double cx = (double)params.screenSize.w * 0.5;
+  double cy = (double)params.screenSize.h * 0.5;
   float angle = 0.0f;
 
   BenchRandom rPts(app);
@@ -531,7 +574,17 @@ void BenchCairo::runBlitImageRotate(BenchOutput& output, const BenchParams& para
   uint32_t i, quantity = params.quantity;
   for (i = 0; i < quantity; i++, angle += 0.01f)
   {
-    // TODO:
+    Fog::PointI pt(rPts.getPointI(screenSize));
+
+    cairo_matrix_t matrix;
+    cairo_matrix_init_translate(&matrix, cx, cy);
+    cairo_matrix_rotate(&matrix, angle);
+    cairo_matrix_translate(&matrix, -cx, -cy);
+    cairo_set_matrix(cr, &matrix);
+
+    cairo_set_source_surface(cr, spritesCairo[spriteIndex], pt.x, pt.y);
+    cairo_rectangle(cr, pt.x, pt.y, params.shapeSize, params.shapeSize);
+    cairo_fill(cr);
 
     if (++spriteIndex >= spritesLength)
       spriteIndex = 0;

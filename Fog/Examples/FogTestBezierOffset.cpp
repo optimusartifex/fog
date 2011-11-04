@@ -418,6 +418,8 @@ FOG_STATIC_T void CBezier_offset(NumT_(Path)* dst, const NumT_(Point)* src, NumT
   // [Offset]
   // --------------------------------------------------------------------------
 
+  logger.log("---OFFSET---");
+
   for (;;)
   {
     NumT xa = pts[3].x;
@@ -480,9 +482,10 @@ _Split:
     d = (line1.p[1].y - line2.p[0].y) * (line2.p[1].x - line1.p[0].x) -
         (line1.p[1].x - line2.p[0].x) * (line2.p[1].y - line1.p[0].y);
 
-    if (Math::isFuzzyZero(d) || !Math::isFinite(d) || NumI_(Line)::intersect(isect, line1, line2) == LINE_INTERSECTION_NONE)
+    NumI_(Line)::intersect(isect, line1, line2);
+    if (d == NumT(0.0) || !Math::isFinite(d) || NumI_(Line)::intersect(isect, line1, line2) == LINE_INTERSECTION_NONE)
     {
-      logger.log("NO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%d",
+      logger.log("NO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%f",
         line1.p[0].x, line1.p[0].y, line1.p[1].x, line1.p[1].y,
         line2.p[0].x, line2.p[0].y, line2.p[1].x, line2.p[1].y, d);
 
@@ -495,7 +498,7 @@ _Split:
     }
     else
     {
-      logger.log("DO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%d",
+      logger.log("DO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%f",
         line1.p[0].x, line1.p[0].y, line1.p[1].x, line1.p[1].y,
         line2.p[0].x, line2.p[0].y, line2.p[1].x, line2.p[1].y, d);
     }
@@ -511,9 +514,10 @@ _Split:
     d = (line1.p[1].y - line2.p[0].y) * (line2.p[1].x - line1.p[0].x) -
         (line1.p[1].x - line2.p[0].x) * (line2.p[1].y - line1.p[0].y);
 
-    if (Math::isFuzzyZero(d) || !Math::isFinite(d) || NumI_(Line)::intersect(isect, line1, line2) == LINE_INTERSECTION_NONE)
+    NumI_(Line)::intersect(isect, line1, line2);
+    if (d == NumT(0.0) || !Math::isFinite(d) || NumI_(Line)::intersect(isect, line1, line2) == LINE_INTERSECTION_NONE)
     {
-      logger.log("NO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%d",
+      logger.log("NO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%f",
         line1.p[0].x, line1.p[0].y, line1.p[1].x, line1.p[1].y,
         line2.p[0].x, line2.p[0].y, line2.p[1].x, line2.p[1].y, d);
 
@@ -526,7 +530,7 @@ _Split:
     }
     else
     {
-      logger.log("DO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%d",
+      logger.log("DO-ISECT : [%f, %f] -> [%f %f] | [%f %f] -> [%f %f] | d=%f",
         line1.p[0].x, line1.p[0].y, line1.p[1].x, line1.p[1].y,
         line2.p[0].x, line2.p[0].y, line2.p[1].x, line2.p[1].y, d);
     }
@@ -596,10 +600,10 @@ MyWindow::MyWindow(uint32_t createFlags) :
 {
   setWindowTitle(StringW::fromAscii8("Bezier-Offset playground."));
 
-  _path.moveTo(PointF(100.0f, 100.0f));
-  _path.cubicTo(PointF(200.0f, 200.0f),
-                PointF(300.0f, 100.0f),
-                PointF(360.0f, 400.0f));
+  _path.moveTo(PointF(100.0f, 300.0f));
+  _path.cubicTo(PointF(200.0f, 500.0f),
+                PointF(300.0f, 300.0f),
+                PointF(384.0f, 694.0f));
   _path.buildPathInfo();
 
   _pathSelectedIndex = INVALID_INDEX;
@@ -754,22 +758,26 @@ void MyWindow::onPaint(PaintEvent* e)
 
 FOG_UI_MAIN()
 {
-  /*
   {
-    float f[4];
-    int i;
+    float f[10];
+    float rv[10];
+    float qv[10];
 
-    f[0] =-2.0f;
-    f[1] =-1.1f;
+    f[0] = 2.0f;
+    f[1] = 1.1f;
     f[2] =-1.3f;
-    f[3] = 0.5f;
+    f[3] =-2.5f;
+    f[4] = 0.225f;
+    f[5] =-1.1f;
+    f[6] = 2.6f;
+    f[7] = 2.5f;
+    f[8] = -4.5f;
+    f[9] = 0.5f;
 
-    float rv[4];
-    int rc = Math::solvePolynomial(rv, f, MATH_POLYNOMIAL_DEGREE_CUBIC);
+    int rc = Math::solvePolynomialN(rv, f, 9, MATH_POLYNOMIAL_SOLVE_EIGEN);
+    int qc = Math::solvePolynomialN(qv, f, 9, MATH_POLYNOMIAL_SOLVE_JENKINS_TRAUB);
 
-    float qv[4];
-    int qc = Math::solvePolynomialN(qv, f, 3, MATH_POLYNOMIAL_SOLVE_EIGEN);
-
+    int i;
     for (i = 0; i < rc; i++)
     {
       float r = rv[i];
@@ -786,13 +794,12 @@ FOG_UI_MAIN()
       printf("Q-Root: %f, evaluation: %f\n", r, e);
     }
   }
-  */
 
   Application app(StringW::fromAscii8("UI"));
   MyWindow window(WINDOW_TYPE_DEFAULT);
 
   window.addListener(EVENT_CLOSE, &app, &Application::quit);
-  window.setSize(SizeI(400, 300));
+  window.setSize(SizeI(800, 800));
   window.show();
 
   return app.run();

@@ -22,27 +22,13 @@ namespace Math2d {
 // [Fog::Math2d - DistSquare]
 // ============================================================================
 
-static FOG_INLINE float distSquare(float x0, float y0, float x1, float y1)
-{
-  float dx = x1 - x0;
-  float dy = y1 - y0;
-  return dx * dx + dy * dy;
-}
-
-static FOG_INLINE double distSquare(double x0, double y0, double x1, double y1)
-{
-  double dx = x1 - x0;
-  double dy = y1 - y0;
-  return dx * dx + dy * dy;
-}
-
-static FOG_INLINE float distSquare(const PointF& p0, const PointF& p1)
+static FOG_INLINE float squaredDistance(const PointF& p0, const PointF& p1)
 {
   PointF v(p1 - p0);
   return v.x * v.x + v.y * v.y;
 }
 
-static FOG_INLINE double distSquare(const PointD& p0, const PointD& p1)
+static FOG_INLINE double squaredDistance(const PointD& p0, const PointD& p1)
 {
   PointD v(p1 - p0);
   return v.x * v.x + v.y * v.y;
@@ -52,24 +38,24 @@ static FOG_INLINE double distSquare(const PointD& p0, const PointD& p1)
 // [Fog::Math2d - DistEuclidean]
 // ============================================================================
 
-static FOG_INLINE float distEuclidean(float x0, float y0, float x1, float y1)
+static FOG_INLINE float euclideanDistance(float x0, float y0, float x1, float y1)
 {
-  return Math::sqrt(distSquare(x0, y0, x1, y1));
+  return Math::sqrt(Math::squaredDistance(x0, y0, x1, y1));
 }
 
-static FOG_INLINE double distEuclidean(double x0, double y0, double x1, double y1)
+static FOG_INLINE double euclideanDistance(double x0, double y0, double x1, double y1)
 {
-  return Math::sqrt(distSquare(x0, y0, x1, y1));
+  return Math::sqrt(Math::squaredDistance(x0, y0, x1, y1));
 }
 
-static FOG_INLINE float distEuclidean(const PointF& p0, const PointF& p1)
+static FOG_INLINE float euclideanDistance(const PointF& p0, const PointF& p1)
 {
-  return Math::sqrt(distSquare(p0, p1));
+  return Math::sqrt(squaredDistance(p0, p1));
 }
 
-static FOG_INLINE double distEuclidean(const PointD& p0, const PointD& p1)
+static FOG_INLINE double euclideanDistance(const PointD& p0, const PointD& p1)
 {
-  return Math::sqrt(distSquare(p0, p1));
+  return Math::sqrt(squaredDistance(p0, p1));
 }
 
 // ============================================================================
@@ -94,17 +80,37 @@ static FOG_INLINE PointD half(const PointD& p0, const PointD& p1)
 // [Fog::Math2d - Lerp]
 // ============================================================================
 
-static FOG_INLINE PointF lerp(const PointF& p0, const PointF& p1, float t, float inv_t)
+static FOG_INLINE PointF lerp(const PointF& p0, const PointF& p1, float t)
 {
-  float x = inv_t * p0.x + t * p1.x;
-  float y = inv_t * p0.y + t * p1.y;
+  float tInv = 1.0f - t;
+  float x = tInv * p0.x + t * p1.x;
+  float y = tInv * p0.y + t * p1.y;
+
   return PointF(x, y);
 }
 
-static FOG_INLINE PointD lerp(const PointD& p0, const PointD& p1, double t, double inv_t)
+static FOG_INLINE PointD lerp(const PointD& p0, const PointD& p1, double t)
 {
-  double x = inv_t * p0.x + t * p1.x;
-  double y = inv_t * p0.y + t * p1.y;
+  double tInv = 1.0 - t;
+  double x = tInv * p0.x + t * p1.x;
+  double y = tInv * p0.y + t * p1.y;
+
+  return PointD(x, y);
+}
+
+static FOG_INLINE PointF lerp(const PointF& p0, const PointF& p1, float t, float tInv)
+{
+  float x = tInv * p0.x + t * p1.x;
+  float y = tInv * p0.y + t * p1.y;
+
+  return PointF(x, y);
+}
+
+static FOG_INLINE PointD lerp(const PointD& p0, const PointD& p1, double t, double tInv)
+{
+  double x = tInv * p0.x + t * p1.x;
+  double y = tInv * p0.y + t * p1.y;
+
   return PointD(x, y);
 }
 

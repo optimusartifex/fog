@@ -1203,28 +1203,30 @@ static err_t FOG_CDECL StringW_opU64Ex(StringW* self, uint32_t cntOp, uint64_t n
 // [Fog::String - OpFloat / OpDouble]
 // ============================================================================
 
-#if 0
 template<typename CharT>
-static CharT* StringT_appendExponent(CharT* dest, uint exp, CharT zero)
+static CharT* StringT_appendExponent(CharT* p, uint exp, CharT zero)
 {
   uint t;
 
   if (exp > 99)
   {
     t = exp / 100;
-    *dest++ = zero + CharT(t); exp -= t * 100;
+
+    *p++ = zero + CharT(t);
+    exp -= t * 100;
   }
 
   t = exp / 10;
-  *dest++ = zero + CharT(t);
+  *p++ = zero + CharT(t);
 
   exp -= t * 10;
-  *dest++ = zero + CharT(exp);
+  *p++ = zero + CharT(exp);
 
-  return dest;
+  return p;
 }
 
-err_t StringA::appendDouble(double d, int doubleForm, const FormatParams& ff)
+#if 0
+err_t StringA::appendDouble(double d, int form, const FormatParams& ff)
 {
   err_t err = ERR_OK;
 
@@ -1423,215 +1425,19 @@ _Ret:
 
 err_t StringW::appendDouble(double d, int doubleForm, const FormatParams& ff, const Locale* locale)
 {
-  err_t err = ERR_OK;
-  const Locale& l = locale ? *locale : Locale::posix();
-
-  StringUtil::NTOAOut out;
-
-  size_t width = ff.width;
-  size_t precision = ff.precision;
-  uint32_t fmt = ff.flags;
-
-  size_t beginLength = _d->length;
-  size_t numberLength;
-  size_t i;
-  size_t savedPrecision = precision;
-  int decpt;
-
-  uint8_t* bufCur;
-  uint8_t* bufEnd;
-
-  CharW* dest;
-  CharW sign = CharW('\0');
-  CharW zero = l.getChar(LOCALE_CHAR_ZERO) - CharW('0');
-
-  if (precision == NO_PRECISION) precision = 6;
-
-  if (d < 0.0)
-    { sign = l.getChar(LOCALE_CHAR_MINUS); d = -d; }
-  else if (fmt & STRING_FORMAT_SIGN)
-    sign = l.getChar(LOCALE_CHAR_PLUS);
-  else if (fmt & STRING_FORMAT_BLANK)
-    sign = l.getChar(LOCALE_CHAR_SPACE);
-
-  if (sign) append(sign);
-
-  // Decimal form.
-  if (doubleForm == DF_DECIMAL)
-  {
-    StringUtil::dtoa(d, 3, precision, &out);
-
-    decpt = out.decpt;
-    if (out.decpt == 9999) goto _InfOrNaN;
-
-    bufCur = reinterpret_cast<uint8_t*>(out.result);
-    bufEnd = bufCur + out.length;
-
-    // Reserve some space for number.
-    i = precision + 16;
-    if (decpt > 0) i += (size_t)decpt;
-
-    dest = beginManipulation(i, CONTAINER_OP_APPEND);
-    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
-
-    while (bufCur != bufEnd && decpt > 0) { *dest++ = zero + CharW(*bufCur++); decpt--; }
-    // Even if not in buffer.
-    while (decpt > 0) { *dest++ = zero + CharW('0'); decpt--; }
-
-    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd || precision > 0)
-    {
-      if (bufCur == reinterpret_cast<uint8_t*>(out.result)) *dest++ = zero + CharW('0');
-      *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
-      while (decpt < 0 && precision > 0) { *dest++ = zero + CharW('0'); decpt++; precision--; }
-
-      // Print rest of stuff.
-      while (*bufCur && precision > 0) { *dest++ = zero + CharW(*bufCur++); precision--; }
-      // And trailing zeros.
-      while (precision > 0) { *dest++ = zero + CharW('0'); precision--; }
-    }
-
-    _modified(dest);
-  }
-  // Exponential form.
-  else if (doubleForm == DF_EXPONENT)
-  {
-_ExponentialForm:
-    StringUtil::dtoa(d, 2, precision + 1, &out);
-
-    decpt = out.decpt;
-    if (decpt == 9999) goto _InfOrNaN;
-
-    // Reserve some space for number, we need +X.{PRECISION}e+123
-    dest = beginManipulation(precision + 10, CONTAINER_OP_APPEND);
-    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
-
-    bufCur = reinterpret_cast<uint8_t*>(out.result);
-    bufEnd = bufCur + out.length;
-
-    *dest++ = zero + CharW(*bufCur++);
-    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || precision > 0)
-    {
-      if (bufCur != bufEnd || doubleForm == DF_EXPONENT)
-        *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
-    }
-
-    while (bufCur != bufEnd && precision > 0)
-    {
-      *dest++ = zero + CharW(*bufCur++);
-      precision--;
-    }
-
-    // Add trailing zeroes to fill out to ndigits unless this is
-    // DF_SIGNIFICANT_DIGITS.
-    if (doubleForm == DF_EXPONENT)
-    {
-      for (i = precision; i; i--) *dest++ = zero + CharW('0');
-    }
-
-    // Add the exponent.
-    if (doubleForm == DF_EXPONENT || decpt > 1)
-    {
-      *dest++ = l.getChar(LOCALE_CHAR_EXPONENTIAL);
-      decpt--;
-      if (decpt < 0)
-        { *dest++ = l.getChar(LOCALE_CHAR_MINUS); decpt = -decpt; }
-      else
-        *dest++ = l.getChar(LOCALE_CHAR_PLUS);
-
-      dest = StringT_appendExponent(dest, decpt, zero + CharW('0'));
-    }
-
-    _modified(dest);
-  }
-  // Significant digits form.
-  else // if (doubleForm == DF_SIGNIFICANT_DIGITS)
-  {
-    CharW* save;
-    if (d <= 0.0001 || d >= StringUtil::_mprec_log10(precision))
-    {
-      if (precision > 0) precision--;
-      goto _ExponentialForm;
-    }
-
-    if (d < 1.0)
-    {
-      // What we want is ndigits after the point.
-      StringUtil::dtoa(d, 3, ++precision, &out);
-    }
-    else
-    {
-      StringUtil::dtoa(d, 2, precision, &out);
-    }
-
-    decpt = out.decpt;
-    if (decpt == 9999) goto _InfOrNaN;
-
-    // Reserve some space for number.
-    i = precision + 16;
-    if (decpt > 0) i += (size_t)decpt;
-
-    dest = beginManipulation(i, CONTAINER_OP_APPEND);
-    if (FOG_IS_NULL(dest)) { err = ERR_RT_OUT_OF_MEMORY; goto _Ret; }
-
-    save = dest;
-
-    bufCur = reinterpret_cast<uint8_t*>(out.result);
-    bufEnd = bufCur + out.length;
-
-    while (bufCur != bufEnd && decpt > 0) { *dest++ = zero + CharW(*bufCur++); decpt--; precision--; }
-    // Even if not in buffer.
-    while (decpt > 0 && precision > 0) { *dest++ = zero + CharW('0'); decpt--; precision--; }
-
-    if ((fmt & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd)
-    {
-      if (dest == save) *dest++ = zero + CharW('0');
-      *dest++ = l.getChar(LOCALE_CHAR_DECIMAL_POINT);
-      while (decpt < 0 && precision > 0) { *dest++ = zero + CharW('0'); decpt++; precision--; }
-
-      // Print rest of stuff.
-      while (bufCur != bufEnd && precision > 0){ *dest++ = zero + CharW(*bufCur++); precision--; }
-      // And trailing zeros.
-      // while (precision > 0) { *dest++ = zero + CharW('0'); precision--; }
-    }
-
-    _modified(dest);
-  }
-  goto _Ret;
-
-_InfOrNaN:
-  err |= append(Ascii8((const char*)out.result, out.length));
-
-_Ret:
-  // Apply padding.
-  numberLength = _d->length - beginLength;
-  if (width != (size_t)-1 && width > numberLength)
-  {
-    size_t fill = width - numberLength;
-
-    if ((fmt & STRING_FORMAT_LEFT) == 0)
-    {
-      if (savedPrecision == NO_PRECISION)
-        err |= insert(beginLength + !sign.isNull(), zero + CharW('0'), fill);
-      else
-        err |= insert(beginLength, CharW(' '), fill);
-    }
-    else
-    {
-      err |= append(CharW(' '), fill);
-    }
-  }
-  return err;
 }
 #endif
 
+static const FormatReal StringT_formatRealDefult(DF_SIGNIFICANT_DIGITS, NO_FLAGS, NO_PRECISION, NO_WIDTH);
+
 static err_t FOG_CDECL StringA_opDouble(StringA* self, uint32_t cntOp, double d)
 {
-  return fog_api.stringa_opDoubleEx(self, cntOp, d, NULL);
+  return fog_api.stringa_opDoubleEx(self, cntOp, d, &StringT_formatRealDefult);
 }
 
 static err_t FOG_CDECL StringW_opDouble(StringW* self, uint32_t cntOp, double d)
 {
-  return fog_api.stringw_opDoubleEx(self, cntOp, d, NULL, NULL);
+  return fog_api.stringw_opDoubleEx(self, cntOp, d, &StringT_formatRealDefult, NULL);
 }
 
 static err_t FOG_CDECL StringA_opDoubleEx(StringA* self, uint32_t cntOp, double d, const FormatReal* fmt)
@@ -1642,8 +1448,302 @@ static err_t FOG_CDECL StringA_opDoubleEx(StringA* self, uint32_t cntOp, double 
 
 static err_t FOG_CDECL StringW_opDoubleEx(StringW* self, uint32_t cntOp, double d, const FormatReal* fmt, const Locale* locale)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  err_t err = ERR_OK;
+  NTOAContext ctx;
+
+  if (locale == NULL)
+    locale = fog_api.locale_oPosix;
+
+  if (cntOp == CONTAINER_OP_REPLACE)
+    self->clear();
+
+  uint32_t form = fmt->getForm();
+  uint32_t flags = fmt->getFlags();
+
+  size_t width = fmt->getWidth();
+  size_t precision = fmt->getPrecision();
+  size_t savedPrecision = precision;
+  size_t initialLength = self->_d->length;
+
+  CharW sign = CharW('\0');
+  CharW zero = locale->getChar(LOCALE_CHAR_ZERO) - CharW('0');
+
+  if (precision == NO_PRECISION)
+    precision = 6;
+
+  if (d < 0.0)
+  {
+    sign = locale->getChar(LOCALE_CHAR_MINUS);
+    d = -d;
+  }
+  else if (flags & STRING_FORMAT_SIGN)
+  {
+    sign = locale->getChar(LOCALE_CHAR_PLUS);
+  }
+  else if (flags & STRING_FORMAT_BLANK)
+  {
+    sign = locale->getChar(LOCALE_CHAR_SPACE);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Form - Decimal]
+  // --------------------------------------------------------------------------
+
+  if (form == DF_DECIMAL)
+  {
+    StringUtil::dtoa(&ctx, d, 3, (int)precision);
+    
+    int32_t decpt = ctx.decpt;
+    if (decpt == 9999)
+      goto _InfOrNaN;
+
+    uint8_t* bufCur = reinterpret_cast<uint8_t*>(ctx.result);
+    uint8_t* bufEnd = bufCur + ctx.length;
+
+    // Reserve some space for the number.
+    size_t i = precision + 16;
+    if (decpt > 0) i += (size_t)decpt;
+
+    CharW* p = self->_add(i);
+    if (FOG_IS_NULL(p))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    while (bufCur != bufEnd && decpt > 0)
+    {
+      *p++ = zero + CharW(*bufCur++);
+      decpt--;
+    }
+
+    // Even if not in buffer.
+    while (decpt > 0)
+    {
+      *p++ = zero + CharW('0');
+      decpt--;
+    }
+
+    if ((flags & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd || precision > 0)
+    {
+      if (bufCur == reinterpret_cast<uint8_t*>(ctx.result))
+        *p++ = zero + CharW('0');
+
+      *p++ = locale->getChar(LOCALE_CHAR_DECIMAL_POINT);
+
+      while (decpt < 0 && precision > 0)
+      {
+        *p++ = zero + CharW('0');
+        decpt++;
+        precision--;
+      }
+
+      // Print rest of stuff.
+      while (*bufCur && precision > 0)
+      {
+        *p++ = zero + CharW(*bufCur++);
+        precision--;
+      }
+
+      // And trailing zeros.
+      while (precision > 0)
+      {
+        *p++ = zero + CharW('0');
+        precision--;
+      }
+    }
+
+    self->_modified(p);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Form - Exponential]
+  // --------------------------------------------------------------------------
+
+  else if (form == DF_EXPONENT)
+  {
+_ExponentialForm:
+    StringUtil::dtoa(&ctx, d, 2, (int)precision + 1);
+
+    int32_t decpt = ctx.decpt;
+    if (decpt == 9999)
+      goto _InfOrNaN;
+
+    // Reserve some space for number, we need +X.{PRECISION}e+123
+    CharW* p = self->_add(precision + 10);
+    if (FOG_IS_NULL(p))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    uint8_t* bufCur = reinterpret_cast<uint8_t*>(ctx.result);
+    uint8_t* bufEnd = bufCur + ctx.length;
+
+    *p++ = zero + CharW(*bufCur++);
+    if ((flags & STRING_FORMAT_ALTERNATE) != 0 || precision > 0)
+    {
+      if (bufCur != bufEnd || form == DF_EXPONENT)
+        *p++ = locale->getChar(LOCALE_CHAR_DECIMAL_POINT);
+    }
+
+    while (bufCur != bufEnd && precision > 0)
+    {
+      *p++ = zero + CharW(*bufCur++);
+      precision--;
+    }
+
+    // Add trailing zeroes to fill out to ndigits unless this is
+    // DF_SIGNIFICANT_DIGITS.
+    if (form == DF_EXPONENT)
+    {
+      for (size_t i = precision; i; i--)
+        *p++ = zero + CharW('0');
+    }
+
+    // Add the exponent.
+    if (form == DF_EXPONENT || decpt > 1)
+    {
+      *p++ = locale->getChar(LOCALE_CHAR_EXPONENTIAL);
+
+      if (--decpt < 0)
+      {
+        *p++ = locale->getChar(LOCALE_CHAR_MINUS);
+        decpt = -decpt;
+      }
+      else
+      {
+        *p++ = locale->getChar(LOCALE_CHAR_PLUS);
+      }
+
+      p = StringT_appendExponent(p, (uint)decpt, zero + CharW('0'));
+    }
+
+    self->_modified(p);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Form - Significant Digits]
+  // --------------------------------------------------------------------------
+
+  else // if (form == DF_SIGNIFICANT_DIGITS)
+  {
+    CharW* save;
+
+    if (d <= 0.0001 || d >= _mprec_log10((int)precision))
+    {
+      if (precision > 0)
+        precision--;
+      goto _ExponentialForm;
+    }
+
+    if (d < 1.0)
+    {
+      // What we want is ndigits after the point.
+      StringUtil::dtoa(&ctx, d, 3, (int)++precision);
+    }
+    else
+    {
+      StringUtil::dtoa(&ctx, d, 2, (int)precision);
+    }
+
+    int32_t decpt = ctx.decpt;
+    if (decpt == 9999)
+      goto _InfOrNaN;
+
+    // Reserve some space for number.
+    size_t i = precision + 16;
+    if (decpt > 0) i += (size_t)decpt;
+
+    CharW* p = self->_add(i);
+    if (FOG_IS_NULL(p))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    save = p;
+
+    uint8_t* bufCur = reinterpret_cast<uint8_t*>(ctx.result);
+    uint8_t* bufEnd = bufCur + ctx.length;
+
+    while (bufCur != bufEnd && decpt > 0)
+    {
+      *p++ = zero + CharW(*bufCur++);
+      decpt--;
+      precision--;
+    }
+
+    // Even if not in buffer.
+    while (decpt > 0 && precision > 0)
+    {
+      *p++ = zero + CharW('0');
+      decpt--;
+      precision--;
+    }
+
+    if ((flags & STRING_FORMAT_ALTERNATE) != 0 || bufCur != bufEnd)
+    {
+      if (p == save) *p++ = zero + CharW('0');
+      *p++ = locale->getChar(LOCALE_CHAR_DECIMAL_POINT);
+
+      while (decpt < 0 && precision > 0)
+      {
+        *p++ = zero + CharW('0');
+        decpt++;
+        precision--;
+      }
+
+      // Print rest of stuff.
+      while (bufCur != bufEnd && precision > 0)
+      {
+        *p++ = zero + CharW(*bufCur++);
+        precision--;
+      }
+
+      // And trailing zeros.
+      // while (precision > 0) { *p++ = zero + CharW('0'); precision--; }
+    }
+
+    self->_modified(p);
+  }
+  goto _Ret;
+
+  // --------------------------------------------------------------------------
+  // [Infinity or NaN]
+  // --------------------------------------------------------------------------
+
+_InfOrNaN:
+  {
+    CharW* p = self->_add(ctx.length + (!sign.isNull()));
+    if (FOG_IS_NULL(p))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    if (!sign.isNull())
+      *p++ = sign;
+    StringT_chcopy(p, (const char*)ctx.result, ctx.length);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Padding]
+  // --------------------------------------------------------------------------
+
+_Ret:
+  {
+    size_t numberLength = self->_d->length - initialLength;
+    if (width != (size_t)-1 && width > numberLength)
+    {
+      size_t fill = width - numberLength;
+
+      if ((flags & STRING_FORMAT_LEFT) == 0)
+      {
+        if (savedPrecision == NO_PRECISION)
+          err |= self->insert(initialLength + !sign.isNull(), zero + CharW('0'), fill);
+        else
+          err |= self->insert(initialLength, CharW(' '), fill);
+      }
+      else
+      {
+        err |= self->append(CharW(' '), fill);
+      }
+    }
+  }
+
+  if (FOG_IS_ERROR(err))
+    self->truncate(initialLength);
+
+  return err;
 }
 
 // ============================================================================
@@ -1655,7 +1755,7 @@ static err_t FOG_CDECL StringW_opDoubleEx(StringW* self, uint32_t cntOp, double 
 template<typename CharT>
 static err_t FOG_CDECL StringT_opVFormatPrivate(CharT_(String)* self, uint32_t cntOp, const CharT* fmt, size_t fmtLength, const TextCodec* tc, const Locale* locale, va_list ap)
 {
-#define _FOG_CFORMAT_PARSE_NUMBER(_Out_)             \
+#define _FOG_VFORMAT_PARSE_NUMBER(_Out_)             \
   FOG_MACRO_BEGIN                                    \
     /* Clean-up. */                                  \
     _Out_ = 0;                                       \
@@ -1753,7 +1853,7 @@ static err_t FOG_CDECL StringT_opVFormatPrivate(CharT_(String)* self, uint32_t c
 
       if (CharT_Func::isAsciiDigit(c))
       {
-        _FOG_CFORMAT_PARSE_NUMBER(width);
+        _FOG_VFORMAT_PARSE_NUMBER(width);
       }
       else if (c == CharT('*'))
       {
@@ -1775,7 +1875,7 @@ static err_t FOG_CDECL StringT_opVFormatPrivate(CharT_(String)* self, uint32_t c
       {
         if (CharT_Func::isAsciiDigit(c))
         {
-          _FOG_CFORMAT_PARSE_NUMBER(precision);
+          _FOG_VFORMAT_PARSE_NUMBER(precision);
         }
         else if (c == '*')
         {
@@ -2086,7 +2186,7 @@ _End:
     self->append(CharT_(Stub)(fmtBeginChunk, (size_t)(fmt - fmtBeginChunk)));
   return ERR_OK;
 
-#undef _FOG_CFORMAT_PARSE_NUMBER
+#undef _FOG_VFORMAT_PARSE_NUMBER
 }
 
 static err_t FOG_CDECL StringA_opVFormatStubA(StringA* self, uint32_t cntOp, const StubA* fmt, const TextCodec* tc, va_list ap)

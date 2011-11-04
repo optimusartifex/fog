@@ -42,6 +42,7 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
   switch (params.type)
   {
     case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_F:
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
       prepareSprites(params.shapeSize);
       break;
@@ -91,6 +92,10 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
 
     case BENCH_TYPE_BLIT_IMAGE_I:
       runBlitImageI(output, params);
+      break;
+
+    case BENCH_TYPE_BLIT_IMAGE_F:
+      runBlitImageF(output, params);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
@@ -275,12 +280,12 @@ void BenchQt4::runFillRectRotate(BenchOutput& output, const BenchParams& params)
       Fog::RectF r(rRect.getRectF(params.screenSize, params.shapeSize, params.shapeSize));
       Fog::Argb32 c0(rArgb.getArgb32());
 
-      Fog::TransformF t;
-      t.translate(Fog::PointF(cx, cy));
-      t.rotate(angle);
-      t.translate(Fog::PointF(-cx, -cy));
+      QTransform transform;
+      transform.translate(cx, cy);
+      transform.rotateRadians(angle);
+      transform.translate(-cx, -cy);
 
-      p.setMatrix(QMatrix(t[0], t[1], t[3], t[4], t[5], t[6]));
+      p.setTransform(transform, false);
       p.fillRect(
         QRect(r.x, r.y, r.w, r.h),
         QColor(c0.getRed(), c0.getGreen(), c0.getBlue(), c0.getAlpha()));
@@ -297,12 +302,12 @@ void BenchQt4::runFillRectRotate(BenchOutput& output, const BenchParams& params)
       Fog::Argb32 c1(rArgb.getArgb32());
       Fog::Argb32 c2(rArgb.getArgb32());
 
-      Fog::TransformF t;
-      t.translate(Fog::PointF(cx, cy));
-      t.rotate(angle);
-      t.translate(Fog::PointF(-cx, -cy));
+      QTransform transform;
+      transform.translate(cx, cy);
+      transform.rotateRadians(angle);
+      transform.translate(-cx, -cy);
 
-      p.setMatrix(QMatrix(t[0], t[1], t[3], t[4], t[5], t[6]));
+      p.setTransform(transform, false);
       p.fillRect(
         QRect(r.x, r.y, r.w, r.h),
         createLinearGradient(Fog::PointF(r.x, r.y), Fog::PointF(r.x + r.w, r.y + r.h), c0, c1, c2));
@@ -433,7 +438,39 @@ void BenchQt4::runBlitImageI(BenchOutput& output, const BenchParams& params)
   uint32_t i, quantity = params.quantity;
   for (i = 0; i < quantity; i++)
   {
-    // TODO:
+    Fog::PointI pt(rPts.getPointI(screenSize));
+    p.drawImage(QPoint(pt.x, pt.y), *spritesQt[spriteIndex]);
+
+    if (++spriteIndex >= spritesLength)
+      spriteIndex = 0;
+  }
+}
+
+void BenchQt4::runBlitImageF(BenchOutput& output, const BenchParams& params)
+{
+  QPainter p(screenQt);
+  configurePainter(p, params);
+
+  BenchRandom rPts(app);
+
+  Fog::SizeI screenSize(
+    params.screenSize.w - params.shapeSize,
+    params.screenSize.h - params.shapeSize);
+
+  uint32_t spriteIndex = 0;
+  uint32_t spritesLength = (uint32_t)sprites.getLength();
+  
+  qreal shapeSize = qreal(params.shapeSize);
+
+  uint32_t i, quantity = params.quantity;
+  for (i = 0; i < quantity; i++)
+  {
+    Fog::PointF pt(rPts.getPointF(screenSize));
+
+    p.drawImage(
+      QRectF(qreal(pt.x), qreal(pt.y), shapeSize, shapeSize),
+      *spritesQt[spriteIndex],
+      QRectF(qreal(0.0), qreal(0.0), shapeSize, shapeSize));
 
     if (++spriteIndex >= spritesLength)
       spriteIndex = 0;
@@ -461,7 +498,15 @@ void BenchQt4::runBlitImageRotate(BenchOutput& output, const BenchParams& params
   uint32_t i, quantity = params.quantity;
   for (i = 0; i < quantity; i++, angle += 0.01f)
   {
-    // TODO:
+    Fog::PointI pt(rPts.getPointI(screenSize));
+
+    QTransform transform;
+    transform.translate(cx, cy);
+    transform.rotateRadians(angle);
+    transform.translate(-cx, -cy);
+
+    p.setTransform(transform, false);
+    p.drawImage(QPoint(pt.x, pt.y), *spritesQt[spriteIndex]);
 
     if (++spriteIndex >= spritesLength)
       spriteIndex = 0;

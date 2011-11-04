@@ -40,6 +40,7 @@ void BenchFog::bench(BenchOutput& output, const BenchParams& params)
   switch (params.type)
   {
     case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_F:
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
       prepareSprites(params.shapeSize);
       break;
@@ -80,6 +81,10 @@ void BenchFog::bench(BenchOutput& output, const BenchParams& params)
 
     case BENCH_TYPE_BLIT_IMAGE_I:
       runBlitImageI(output, params);
+      break;
+
+    case BENCH_TYPE_BLIT_IMAGE_F:
+      runBlitImageF(output, params);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
@@ -410,6 +415,30 @@ void BenchFog::runBlitImageI(BenchOutput& output, const BenchParams& params)
   }
 }
 
+void BenchFog::runBlitImageF(BenchOutput& output, const BenchParams& params)
+{
+  Fog::Painter p(screen, Fog::NO_FLAGS);
+  configurePainter(p, params);
+
+  BenchRandom rPts(app);
+
+  Fog::SizeI screenSize(
+    params.screenSize.w - params.shapeSize,
+    params.screenSize.h - params.shapeSize);
+
+  uint32_t spriteIndex = 0;
+  uint32_t spritesLength = (uint32_t)sprites.getLength();
+
+  uint32_t i, quantity = params.quantity;
+  for (i = 0; i < quantity; i++)
+  {
+    Fog::PointF pt(rPts.getPointF(screenSize));
+    p.blitImage(pt, sprites[spriteIndex]);
+
+    if (++spriteIndex >= spritesLength)
+      spriteIndex = 0;
+  }
+}
 void BenchFog::runBlitImageRotate(BenchOutput& output, const BenchParams& params)
 {
   Fog::Painter p(screen, Fog::NO_FLAGS);

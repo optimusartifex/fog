@@ -260,7 +260,7 @@ static NumT FOG_CDECL CBezierT_getClosestPoint(const NumT_(Point)* self, NumT_(P
   func[5] = c.x * q.x + c.y * q.y;
 
   NumT t[5];
-  int roots = Math::solvePolynomialN(t, func, 5, MATH_POLYNOMIAL_SOLVE_EIGEN, NumT_(Interval)(NumT(0.0), NumT(1.0)));
+  int roots = Math::solvePolynomialN(t, func, 5, MATH_POLYNOMIAL_SOLVE_DEFAULT, NumT_(Interval)(NumT(0.0), NumT(1.0)));
 
   NumT minimumT = NumT(0.0);
   NumT minimumDistance = Math::squaredDistance(self[0].x - p->x, self[0].y - p->y);
@@ -519,8 +519,8 @@ _Realloc:
         k = dx*dx + dy*dy;
         if (k == 0)
         {
-          d2 = Math2d::distSquare(x0, y0, x1, y1);
-          d3 = Math2d::distSquare(x3, y3, x2, y2);
+          d2 = Math::squaredDistance(x0, y0, x1, y1);
+          d3 = Math::squaredDistance(x3, y3, x2, y2);
         }
         else
         {
@@ -540,18 +540,18 @@ _Realloc:
           }
 
           if (d2 <= 0)
-            d2 = Math2d::distSquare(x1, y1, x0, y0);
+            d2 = Math::squaredDistance(x1, y1, x0, y0);
           else if (d2 >= 1)
-            d2 = Math2d::distSquare(x1, y1, x3, y3);
+            d2 = Math::squaredDistance(x1, y1, x3, y3);
           else
-            d2 = Math2d::distSquare(x1, y1, x0 + d2*dx, y0 + d2*dy);
+            d2 = Math::squaredDistance(x1, y1, x0 + d2*dx, y0 + d2*dy);
 
           if (d3 <= 0)
-            d3 = Math2d::distSquare(x2, y2, x0, y0);
+            d3 = Math::squaredDistance(x2, y2, x0, y0);
           else if (d3 >= 1)
-            d3 = Math2d::distSquare(x2, y2, x3, y3);
+            d3 = Math::squaredDistance(x2, y2, x3, y3);
           else
-            d3 = Math2d::distSquare(x2, y2, x0 + d3*dx, y0 + d3*dy);
+            d3 = Math::squaredDistance(x2, y2, x0 + d3*dx, y0 + d3*dy);
         }
 
         if (d2 > d3)

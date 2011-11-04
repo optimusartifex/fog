@@ -54,6 +54,7 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
   switch (params.type)
   {
     case BENCH_TYPE_BLIT_IMAGE_I:
+    case BENCH_TYPE_BLIT_IMAGE_F:
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
       prepareSprites(params.shapeSize);
       break;
@@ -98,6 +99,10 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
 
     case BENCH_TYPE_BLIT_IMAGE_I:
       runBlitImageI(output, params);
+      break;
+
+    case BENCH_TYPE_BLIT_IMAGE_F:
+      runBlitImageF(output, params);
       break;
 
     case BENCH_TYPE_BLIT_IMAGE_ROTATE:
@@ -496,6 +501,31 @@ void BenchGdiPlus::runBlitImageI(BenchOutput& output, const BenchParams& params)
   {
     Fog::PointI pt(rPts.getPointI(screenSize));
     gr.DrawImage(spritesGdi[spriteIndex], pt.x, pt.y);
+
+    if (++spriteIndex >= spritesLength)
+      spriteIndex = 0;
+  }
+}
+
+void BenchGdiPlus::runBlitImageF(BenchOutput& output, const BenchParams& params)
+{
+  Gdiplus::Graphics gr(screenGdi);
+  configureGraphics(gr, params);
+
+  BenchRandom rPts(app);
+
+  Fog::SizeI screenSize(
+    params.screenSize.w - params.shapeSize,
+    params.screenSize.h - params.shapeSize);
+
+  uint32_t spriteIndex = 0;
+  uint32_t spritesLength = (uint32_t)sprites.getLength();
+
+  uint32_t i, quantity = params.quantity;
+  for (i = 0; i < quantity; i++)
+  {
+    Fog::PointF pt(rPts.getPointF(screenSize));
+    gr.DrawImage(spritesGdi[spriteIndex], Gdiplus::PointF(pt.x, pt.y));
 
     if (++spriteIndex >= spritesLength)
       spriteIndex = 0;

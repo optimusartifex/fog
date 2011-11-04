@@ -54,6 +54,12 @@ struct FOG_NO_EXPORT IntervalF
   FOG_INLINE void setInterval(const IntervalD& i);
 
   // --------------------------------------------------------------------------
+  // [HasValue]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hasValue(float value) const { return (value >= _min) & (value <= _max); }
+
+  // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
@@ -122,6 +128,12 @@ struct FOG_NO_EXPORT IntervalD
   FOG_INLINE void setInterval(double min, double max) { _min = min; _max = max; }
   FOG_INLINE void setInterval(const IntervalF& i) { _min = i._min; _max = i._max; }
   FOG_INLINE void setInterval(const IntervalD& i) { _min = i._min; _max = i._max; }
+
+  // --------------------------------------------------------------------------
+  // [HasValue]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool hasValue(double value) const { return (value >= _min) & (value <= _max); }
 
   // --------------------------------------------------------------------------
   // [Reset]

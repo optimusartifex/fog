@@ -101,7 +101,9 @@ struct FOG_NO_EXPORT FormatReal
 
   FOG_INLINE FormatReal(uint32_t form = DF_SIGNIFICANT_DIGITS, uint32_t flags = NO_FLAGS, size_t precision = NO_PRECISION, size_t width = NO_WIDTH) :
     _form(form),
-    _flags(flags)
+    _flags(flags),
+    _precision(precision),
+    _width(width)
   {
   }
 

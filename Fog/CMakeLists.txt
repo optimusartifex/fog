@@ -497,6 +497,9 @@ Set(FOG_CORE_MATH_SOURCES
   Fog/Core/Math/Math.cpp
   Fog/Core/Math/MathVec.cpp
   Fog/Core/Math/Solve.cpp
+  Fog/Core/Math/Solve_Polynomial_Analytic.cpp
+  Fog/Core/Math/Solve_Polynomial_Eigen.cpp
+  Fog/Core/Math/Solve_Polynomial_JenkinsTraub.cpp
 )
 
 Set(FOG_CORE_MATH_HEADERS

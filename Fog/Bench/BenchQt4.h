@@ -43,14 +43,19 @@ struct BenchQt4 : public BenchModule
     const Fog::PointF& pt0, const Fog::PointF& pt1,
     const Fog::Argb32& c0, const Fog::Argb32& c1, const Fog::Argb32& c2);
 
-  void runCreateDestroy(BenchOutput& output, const BenchParams& params);
-  void runFillRectI(BenchOutput& output, const BenchParams& params);
-  void runFillRectF(BenchOutput& output, const BenchParams& params);
-  void runFillRectRotate(BenchOutput& output, const BenchParams& params);
-  void runFillRound(BenchOutput& output, const BenchParams& params);
-  void runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity);
-  void runBlitImageI(BenchOutput& output, const BenchParams& params);
-  void runBlitImageRotate(BenchOutput& output, const BenchParams& params);
+  // --------------------------------------------------------------------------
+  // [Run]
+  // --------------------------------------------------------------------------
+
+  virtual void runCreateDestroy(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRectI(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRectF(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRectRotate(BenchOutput& output, const BenchParams& params);
+  virtual void runFillRound(BenchOutput& output, const BenchParams& params);
+  virtual void runFillPolygon(BenchOutput& output, const BenchParams& params, uint32_t complexity);
+  virtual void runBlitImageI(BenchOutput& output, const BenchParams& params);
+  virtual void runBlitImageF(BenchOutput& output, const BenchParams& params);
+  virtual void runBlitImageRotate(BenchOutput& output, const BenchParams& params);
 
   // --------------------------------------------------------------------------
   // [Members]

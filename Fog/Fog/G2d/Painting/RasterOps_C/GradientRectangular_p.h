@@ -207,7 +207,7 @@ struct FOG_NO_EXPORT PGradientRectangular
 
         typename Accessor::Pixel c0;
         accessor.fetchAtD(c0, Math::max<double>(rx, ry));
-        accessor.store(dst, c0);
+        accessor.storePix(dst, c0);
 
         dst += Accessor::DST_BPP;
         px += dx;
@@ -265,7 +265,7 @@ struct FOG_NO_EXPORT PGradientRectangular
 
         typename Accessor::Pixel c0;
         accessor.fetchAtD(c0, Math::max<double>(rx, ry));
-        accessor.store(dst, c0);
+        accessor.storePix(dst, c0);
 
         px += dx;
         py += dy;

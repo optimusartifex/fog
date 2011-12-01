@@ -56,7 +56,10 @@ static void FOG_CDECL FileMapping_ctorCopy(FileMapping* self, const FileMapping*
 
 static void FOG_CDECL FileMapping_dtor(FileMapping* self)
 {
-  self->_d->release();
+  FileMappingData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

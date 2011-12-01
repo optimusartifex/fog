@@ -265,6 +265,10 @@ struct FOG_NO_EXPORT TextCodec
     fog_api.textcodec_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE TextCodec(TextCodec&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE TextCodec(TextCodecData* d) : _d(d)
   {
   }

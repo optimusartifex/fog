@@ -39,12 +39,16 @@ struct List<StringA> : public ListUntyped
     fog_api.list_stringa_ctor(this);
   }
 
-  FOG_INLINE List(const List& other)
+  FOG_INLINE List(const List<StringA>& other)
   {
     fog_api.list_untyped_ctorCopy(this, &other);
   }
 
-  FOG_INLINE List(const List& other, const Range& range)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE List(List<StringA>&& other) { ListUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE List(const List<StringA>& other, const Range& range)
   {
     fog_api.list_stringa_ctorSlice(this, &other, &range);
   }
@@ -478,6 +482,10 @@ struct List<StringW> : public ListUntyped
   {
     fog_api.list_untyped_ctorCopy(this, &other);
   }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE List(List<StringW>&& other) { ListUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE List(const List<StringW>& other, const Range& range)
   {

@@ -460,23 +460,29 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   gradient.create[GRADIENT_TYPE_LINEAR] = RasterOps_C::PGradientLinear::create;
 
 #if defined(FOG_RASTER_INIT_C)
-  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_pad_prgb32_xrgb32;
-  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_pad_prgb32_xrgb32;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_pad<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_pad<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_pad<RasterOps_C::PGradientAccessor_A8_Base>;
 
-  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_repeat_prgb32_xrgb32;
-  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_repeat_prgb32_xrgb32;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_repeat<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_repeat<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_simple_nearest_repeat<RasterOps_C::PGradientAccessor_A8_Base>;
 
-  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_simple_nearest_reflect_prgb32_xrgb32;
-  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_simple_nearest_reflect_prgb32_xrgb32;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_simple_nearest_reflect<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_simple_nearest_reflect<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.linear.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_simple_nearest_reflect<RasterOps_C::PGradientAccessor_A8_Base>;
 
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
+  gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Pad>;
 
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
+  gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Repeat>;
 
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
+  gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
 #endif
 
   // --------------------------------------------------------------------------
@@ -488,21 +494,27 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #if defined(FOG_RASTER_INIT_C)
   gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
   gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
+  gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Pad>;
 
   gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
   gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
+  gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Repeat>;
 
   gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
+  gradient.radial.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
 
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
+  gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Pad>;
 
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
+  gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Repeat>;
 
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
+  gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
 #endif
 
   // --------------------------------------------------------------------------
@@ -514,6 +526,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #if defined(FOG_RASTER_INIT_C)
   gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_PRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
   gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_XRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_A8    ] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Base>;
 #endif
 
   // --------------------------------------------------------------------------
@@ -525,21 +538,27 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #if defined(FOG_RASTER_INIT_C)
   gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
   gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
+  gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Pad>;
 
   gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
   gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
+  gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Repeat>;
 
   gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
+  gradient.rectangular.fetch_simple_nearest[IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
 
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Pad>;
+  gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_PAD    ] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Pad>;
 
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Repeat>;
+  gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REPEAT ] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Repeat>;
 
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
+  gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
 #endif
 
   // --------------------------------------------------------------------------

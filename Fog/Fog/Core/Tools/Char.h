@@ -38,9 +38,9 @@ struct FOG_NO_EXPORT CharA
   FOG_INLINE CharA(const CharA& c) : _value(c._value) {}
 
   explicit FOG_INLINE CharA(_Uninitialized) {}
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   explicit FOG_INLINE CharA(char c) : _value((uint8_t)c) {}
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
   explicit FOG_INLINE CharA(signed char c) : _value((uint8_t)c) {}
   explicit FOG_INLINE CharA(unsigned char c) : _value((uint8_t)c) {}
 
@@ -130,11 +130,11 @@ struct FOG_NO_EXPORT CharA
   FOG_INLINE CharA& operator-=(const CharA& c) { _value -= c._value; return *this; }
   FOG_INLINE CharA& operator+=(const CharA& c) { _value += c._value; return *this; }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   FOG_INLINE CharA& operator =(const char& c) { _value  = (uint8_t)c; return *this; }
   FOG_INLINE CharA& operator-=(const char& c) { _value -= (uint8_t)c; return *this; }
   FOG_INLINE CharA& operator+=(const char& c) { _value += (uint8_t)c; return *this; }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
   FOG_INLINE CharA& operator =(const signed char& c) { _value  = (uint8_t)c; return *this; }
   FOG_INLINE CharA& operator-=(const signed char& c) { _value -= (uint8_t)c; return *this; }
@@ -151,14 +151,14 @@ struct FOG_NO_EXPORT CharA
   FOG_INLINE bool operator<=(const CharA& c) { return _value <= c._value; }
   FOG_INLINE bool operator< (const CharA& c) { return _value <  c._value; }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   FOG_INLINE bool operator==(const char& c) { return _value == (uint8_t)c; }
   FOG_INLINE bool operator!=(const char& c) { return _value != (uint8_t)c; }
   FOG_INLINE bool operator>=(const char& c) { return _value >= (uint8_t)c; }
   FOG_INLINE bool operator> (const char& c) { return _value >  (uint8_t)c; }
   FOG_INLINE bool operator<=(const char& c) { return _value <= (uint8_t)c; }
   FOG_INLINE bool operator< (const char& c) { return _value <  (uint8_t)c; }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
   FOG_INLINE bool operator==(const signed char& c) { return _value == (uint8_t)c; }
   FOG_INLINE bool operator!=(const signed char& c) { return _value != (uint8_t)c; }
@@ -180,9 +180,9 @@ struct FOG_NO_EXPORT CharA
 
   FOG_INLINE operator bool() const { return _value != 0; }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   FOG_INLINE operator char() const { return (char)_value; }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
   FOG_INLINE operator signed char() const { return (signed char)_value; }
   FOG_INLINE operator unsigned char() const { return (unsigned char)_value; }
 
@@ -271,9 +271,9 @@ struct FOG_NO_EXPORT CharW
 
   explicit FOG_INLINE CharW(const CharA& ch) : _value(ch._value) {}
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   explicit FOG_INLINE CharW(char c) : _value((unsigned char)c) {}
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
   explicit FOG_INLINE CharW(signed char c) : _value((unsigned char)c) {}
   explicit FOG_INLINE CharW(unsigned char c) : _value(c) {}
@@ -424,13 +424,13 @@ struct FOG_NO_EXPORT CharW
   FOG_INLINE CharW operator-(const CharW& c) { return CharW(_value - c._value); }
   FOG_INLINE CharW operator+(const CharW& c) { return CharW(_value + c._value); }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   FOG_INLINE CharW& operator =(const char& c) { _value  = (uint8_t)c; return *this; }
   FOG_INLINE CharW& operator-=(const char& c) { _value -= (uint8_t)c; return *this; }
   FOG_INLINE CharW& operator+=(const char& c) { _value += (uint8_t)c; return *this; }
   FOG_INLINE CharW operator-(const char& c) { return CharW(_value - (uint8_t)c); }
   FOG_INLINE CharW operator+(const char& c) { return CharW(_value + (uint8_t)c); }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
   FOG_INLINE CharW& operator =(const signed char& c) { _value  = (uint8_t)c; return *this; }
   FOG_INLINE CharW& operator-=(const signed char& c) { _value -= (uint8_t)c; return *this; }
@@ -475,14 +475,14 @@ struct FOG_NO_EXPORT CharW
   FOG_INLINE bool operator<=(const CharW& c) { return _value <= c._value; }
   FOG_INLINE bool operator< (const CharW& c) { return _value <  c._value; }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   FOG_INLINE bool operator==(const char& c) { return _value == (uint8_t)c; }
   FOG_INLINE bool operator!=(const char& c) { return _value != (uint8_t)c; }
   FOG_INLINE bool operator>=(const char& c) { return _value >= (uint8_t)c; }
   FOG_INLINE bool operator> (const char& c) { return _value >  (uint8_t)c; }
   FOG_INLINE bool operator<=(const char& c) { return _value <= (uint8_t)c; }
   FOG_INLINE bool operator< (const char& c) { return _value <  (uint8_t)c; }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
   FOG_INLINE bool operator==(const signed char& c) { return _value == (uint8_t)c; }
   FOG_INLINE bool operator!=(const signed char& c) { return _value != (uint8_t)c; }

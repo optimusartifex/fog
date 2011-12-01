@@ -56,7 +56,10 @@ struct FOG_NO_EXPORT LinearGradientF : public GradientF
   FOG_INLINE const PointF& getEnd() const { return _pts[1]; }
 
   FOG_INLINE void setStart(const PointF& p) { _pts[0] = p; }
+  FOG_INLINE void setStart(float x, float y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setEnd(const PointF& p) { _pts[1] = p; }
+  FOG_INLINE void setEnd(float x, float y) { _pts[1].set(x, y); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -106,7 +109,10 @@ struct FOG_NO_EXPORT LinearGradientD : public GradientD
   FOG_INLINE const PointD& getEnd() const { return _pts[1]; }
 
   FOG_INLINE void setStart(const PointD& p) { _pts[0] = p; }
+  FOG_INLINE void setStart(double x, double y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setEnd(const PointD& p) { _pts[1] = p; }
+  FOG_INLINE void setEnd(double x, double y) { _pts[1].set(x, y); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

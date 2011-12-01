@@ -369,7 +369,10 @@ _CreateSimple:
 
 static void FOG_CDECL Var_dtor(Var* self)
 {
-  self->_d->release();
+  VarData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

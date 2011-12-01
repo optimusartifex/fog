@@ -543,7 +543,7 @@ void BenchModule::freeSprites()
 
 int main(int argc, char* argv[])
 {
-  BenchApp app(Fog::SizeI(600, 600), 1000);
+  BenchApp app(Fog::SizeI(600, 600), 10000);
 
   // Testing...
   app.saveImages = false;

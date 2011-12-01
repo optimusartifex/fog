@@ -155,7 +155,10 @@ static void FOG_CDECL Image_ctorCreate(Image* self, const SizeI* size, uint32_t 
 
 static void FOG_CDECL Image_dtor(Image* self)
 {
-  return self->_d->release();
+  ImageData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

@@ -71,6 +71,10 @@ struct FOG_NO_EXPORT Library
     fog_api.library_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Library(Library&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~Library()
   {
     fog_api.library_dtor(this);

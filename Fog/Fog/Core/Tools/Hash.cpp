@@ -118,7 +118,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_dtor(HashUntyped* self, const HashUnt
 {
   HashUntypedData* d = self->_d;
 
-  if (d->reference.deref())
+  if (d != NULL && d->reference.deref())
     fog_api.hash_unknown_unknown_dFree(d, v);
 }
 
@@ -1235,7 +1235,8 @@ static void FOG_CDECL Hash_StringA_StringA_ctor(HashUntyped* self)
 static void FOG_CDECL Hash_StringA_StringA_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
-  if (d->reference.deref())
+
+  if (d != NULL && d->reference.deref())
     fog_api.hash_unknown_unknown_dFree(d, &Hash_StringA_StringA_vTable);
 }
 
@@ -1318,7 +1319,8 @@ static void FOG_CDECL Hash_StringA_Var_ctor(HashUntyped* self)
 static void FOG_CDECL Hash_StringA_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
-  if (d->reference.deref())
+
+  if (d != NULL && d->reference.deref())
     fog_api.hash_unknown_unknown_dFree(d, &Hash_StringA_Var_vTable);
 }
 
@@ -1401,7 +1403,8 @@ static void FOG_CDECL Hash_StringW_StringW_ctor(HashUntyped* self)
 static void FOG_CDECL Hash_StringW_StringW_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
-  if (d->reference.deref())
+
+  if (d != NULL && d->reference.deref())
     fog_api.hash_unknown_unknown_dFree(d, &Hash_StringW_StringW_vTable);
 }
 
@@ -1506,7 +1509,8 @@ static void FOG_CDECL Hash_StringW_Var_ctor(HashUntyped* self)
 static void FOG_CDECL Hash_StringW_Var_dtor(HashUntyped* self)
 {
   HashUntypedData* d = self->_d;
-  if (d->reference.deref())
+
+  if (d != NULL && d->reference.deref())
     fog_api.hash_unknown_unknown_dFree(d, &Hash_StringW_Var_vTable);
 }
 

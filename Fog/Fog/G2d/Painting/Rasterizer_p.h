@@ -461,6 +461,15 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
       area += _area;
     }
 
+    FOG_INLINE void sub(int _cover, int _area)
+    {
+      FOG_ASSERT(_cover >= -256     && _cover <= 256    );
+      FOG_ASSERT(_area  >= -256*511 && _area  <= 256*511);
+
+      cover -= _cover;
+      area -= _area;
+    }
+
     // ------------------------------------------------------------------------
     // [Members]
     // ------------------------------------------------------------------------
@@ -512,7 +521,7 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   {
     //! @brief First chunk in this row (sorted from left).
     //!
-    //! @note The chunk list is curcullar, thus chunk->prev can be used to
+    //! @note The chunk list is circular, thus chunk->prev can be used to
     //! access the last chunk.
     Chunk* first;
   };
@@ -662,36 +671,6 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
 private:
   _FOG_NO_COPY(PathRasterizer8)
 };
-
-// ============================================================================
-// [Fog::Rasterizer - Debug]
-// ============================================================================
-
-#if defined(FOG_DEBUG_RASTERIZER)
-static void Rasterizer_dumpSpans(int y, const RasterSpan8* span)
-{
-  StringA b;
-  b.appendFormat("Y=%d - ", y);
-
-  while (span)
-  {
-    if (span->isConst())
-    {
-      b.appendFormat("C[%d %d]%0.2X", span->x0, span->x1, span->getConstMask());
-    }
-    else
-    {
-      b.appendFormat("M[%d %d]", span->x0, span->x1);
-      for (int x = 0; x < span->getLength(); x++)
-        b.appendFormat("%0.2X", span->getVMask()[x]);
-    }
-    b.append(' ');
-    span = span->getNext();
-  }
-
-  printf("%s\n", b.getData());
-}
-#endif // FOG_DEBUG_RASTERIZER
 
 //! @}
 

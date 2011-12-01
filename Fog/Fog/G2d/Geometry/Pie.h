@@ -24,7 +24,7 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Pie (float).
-struct FOG_NO_EXPORT PieF : ArcF
+struct FOG_NO_EXPORT PieF : public ArcF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -92,7 +92,7 @@ struct FOG_NO_EXPORT PieF : ArcF
 // ============================================================================
 
 //! @brief Pie (double).
-struct FOG_NO_EXPORT PieD : ArcD
+struct FOG_NO_EXPORT PieD : public ArcD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

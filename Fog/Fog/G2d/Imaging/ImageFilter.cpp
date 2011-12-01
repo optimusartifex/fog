@@ -69,7 +69,10 @@ static void FOG_CDECL ImageFilter_ctorCopy(ImageFilter* self, const ImageFilter*
 
 static void FOG_CDECL ImageFilter_dtor(ImageFilter* self)
 {
-  self->_d->release();
+  ImageFilterData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

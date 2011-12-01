@@ -302,7 +302,7 @@ struct FOG_NO_EXPORT PGradientRadial
       do {
         typename Accessor::Pixel c0;
         accessor.fetchAtD(c0, (b + Math::sqrt(Math::abs(d))) * scale);
-        accessor.store(dst, c0);
+        accessor.storePix(dst, c0);
 
         dst += Accessor::DST_BPP;
         b   += b_d;
@@ -358,7 +358,7 @@ struct FOG_NO_EXPORT PGradientRadial
 
         typename Accessor::Pixel c0;
         accessor.fetchAtD(c0, (b + Math::sqrt(Math::abs(d))) * scale);
-        accessor.store(dst, c0);
+        accessor.storePix(dst, c0);
 
         dst += Accessor::DST_BPP;
       } while (--w);

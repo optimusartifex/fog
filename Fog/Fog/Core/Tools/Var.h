@@ -127,6 +127,10 @@ struct FOG_NO_EXPORT Var
     fog_api.var_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Var(Var&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE Var(uint32_t vType, const void* vData)
   {
     fog_api.var_ctorType(this, vType, vData);
@@ -524,9 +528,9 @@ struct FOG_NO_EXPORT Var
   static FOG_INLINE Var fromBool(bool val) { return Var(VAR_TYPE_BOOL, &val); }
   static FOG_INLINE Var fromChar(CharW val) { return Var(VAR_TYPE_CHAR, &val); }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   static FOG_INLINE Var fromChar(char val) { return fromChar(CharW((unsigned char)val)); }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
   static FOG_INLINE Var fromChar(signed char val) { return fromChar(CharW((unsigned char)val)); }
   static FOG_INLINE Var fromChar(unsigned char val) { return fromChar(CharW(val)); }
@@ -540,9 +544,9 @@ struct FOG_NO_EXPORT Var
   static FOG_INLINE Var fromFloat(float val) { return Var(VAR_TYPE_FLOAT, &val); }
   static FOG_INLINE Var fromDouble(double val) { return Var(VAR_TYPE_DOUBLE, &val); }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
   static FOG_INLINE Var fromInteger(char c) { return fromI32(c); }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
   static FOG_INLINE Var fromInteger(signed char c) { return fromI32(c); }
   static FOG_INLINE Var fromInteger(unsigned char c) { return fromU32(c); }
 

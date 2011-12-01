@@ -1022,12 +1022,16 @@ struct List : public ListImpl< ItemT, TypeInfo<ItemT>::TYPE, !TypeInfo<ItemT>::N
     fog_api.list_untyped_ctor(this);
   }
 
-  FOG_INLINE List(const List& other)
+  FOG_INLINE List(const List<ItemT>& other)
   {
     fog_api.list_untyped_ctorCopy(this, &other);
   }
 
-  FOG_INLINE List(const List& other, const Range& range)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE List(List<ItemT>&& other) { ListUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE List(const List<ItemT>& other, const Range& range)
   {
     _ctorSlice(other, range);
   }

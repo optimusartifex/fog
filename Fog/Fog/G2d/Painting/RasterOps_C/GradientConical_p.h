@@ -157,8 +157,8 @@ struct FOG_NO_EXPORT PGradientConical
         int ipos = (int)(offset - a * scale) & lenMask;
 
         typename Accessor::Pixel c0;
-        accessor.fetchTable(c0, ipos);
-        accessor.store(dst, c0);
+        accessor.fetchRaw(c0, ipos);
+        accessor.storePix(dst, c0);
 
         dst += Accessor::DST_BPP;
         px += dx;

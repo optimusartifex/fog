@@ -109,6 +109,10 @@ struct FOG_NO_EXPORT ImagePalette
     fog_api.imagepalette_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE ImagePalette(ImagePalette&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE ImagePalette(ImagePaletteData* d) : _d(d)
   {
   }

@@ -63,6 +63,10 @@ struct FOG_NO_EXPORT ManagedStringW
     fog_api.managedstringw_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE ManagedStringW(ManagedStringW&& other) { _string->_d = other._string->_d; other._string->_d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE ManagedStringW(const Ascii8& stub, uint32_t options = MANAGED_STRING_OPTION_NONE)
   {
     fog_api.managedstringw_ctorStubA(this, &stub, options);

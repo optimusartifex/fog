@@ -156,7 +156,7 @@ struct FOG_NO_EXPORT RasterScanline
 
   //! @brief The capacity of the _maskData.
   uint32_t _maskCapacity;
-  //! @brief The maximu size of one pixel in the _maskData array.
+  //! @brief The maximum size of one pixel in the _maskData array.
   uint32_t _maskUnit;
 
   // --------------------------------------------------------------------------
@@ -256,6 +256,7 @@ struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
 
     newSpan(x0, RASTER_SPAN_C);
     getCurrent()->setConstMask(m);
+
 _Link:
     getCurrent()->setX1(x1);
   }

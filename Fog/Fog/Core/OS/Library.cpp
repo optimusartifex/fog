@@ -130,7 +130,10 @@ static void FOG_CDECL Library_ctorCopy(Library* self, const Library* other)
 
 static void FOG_CDECL Library_dtor(Library* self)
 {
-  self->_d->release();
+  LibraryData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

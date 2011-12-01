@@ -16,7 +16,7 @@
 // [_Fog_TypeFlags]
 // ===========================================================================
 
-#if defined(FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION)
+#if defined(FOG_CC_HAS_PARTIAL_TEMPLATE_SPECIALIZATION)
 template<typename Type>
 struct _Fog_TypeFlags
 {
@@ -61,7 +61,7 @@ struct _Fog_TypeFlags
       : Fog::TYPE_CATEGORY_COMPLEX
   };
 };
-#endif // FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
+#endif // FOG_CC_HAS_PARTIAL_TEMPLATE_SPECIALIZATION
 
 // ===========================================================================
 // [Fog::]
@@ -227,8 +227,8 @@ struct TypeFunc :
   public TypeFunc_Cmp< Type, ((TypeInfo<Type>::FLAGS & TYPE_FLAG_INTEGER) != 0) ? 2 :
                              ((TypeInfo<Type>::FLAGS & TYPE_FLAG_OWN_CMP) != 0) ? 1 :
                              ((TypeInfo<Type>::FLAGS & TYPE_FLAG_NO_CMP ) == 0) ? 0 : -1 >,
-  public TypeFunc_Eq < Type, ((TypeInfo<Type>::FLAGS & TYPE_FLAG_OWN_CMP) != 0) ? 1 :
-                             ((TypeInfo<Type>::FLAGS & TYPE_FLAG_NO_CMP ) == 0) ? 0 : -1 > {};
+  public TypeFunc_Eq < Type, ((TypeInfo<Type>::FLAGS & TYPE_FLAG_OWN_EQ ) != 0) ? 1 :
+                             ((TypeInfo<Type>::FLAGS & TYPE_FLAG_NO_EQ  ) == 0) ? 0 : -1 > {};
 
 //! @}
 
@@ -297,13 +297,13 @@ struct TypeFunc :
 // [Fog::TypeInfo - C++]
 // ===========================================================================
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
 _FOG_TYPE_DECLARE(char                         , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
-#if defined(FOG_CC_HAVE_NATIVE_WCHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_WCHAR_TYPE)
 _FOG_TYPE_DECLARE(wchar_t                      , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
-#endif // FOG_CC_HAVE_NATIVE_WCHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_WCHAR_TYPE
 
 _FOG_TYPE_DECLARE(signed char                  , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(unsigned char                , C(SIMPLE) | F(POD) | F(INTEGER) | F(BIN_EQ))

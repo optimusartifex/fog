@@ -222,6 +222,12 @@ static void FOG_CDECL StringT_ctor(CharT_(String)* self)
   self->_d = StringT_getDEmpty<CharT>()->addRef();
 }
 
+template<typename CharT>
+static void FOG_CDECL StringT_ctorCopy(CharT_(String)* self, const CharT_(String)* other)
+{
+  self->_d = other->_d->addRef();
+}
+
 template<typename CharT, typename SrcT>
 static void FOG_CDECL StringT_ctorStub(CharT_(String)* self, const SrcT_(Stub)* stub)
 {
@@ -239,11 +245,85 @@ static void FOG_CDECL StringW_ctorCodec(StringW* self, const StubA* stub, const 
   tc->decode(*self, *stub);
 }
 
+template<typename CharT>
+static void FOG_CDECL StringT_ctorStringString(CharT_(String)* self, const CharT_(String)* a, const CharT_(String)* b)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getLength();
+
+  CharT_(StringData)* d;
+
+  if (bLength == 0)
+  {
+    d = a->_d->addRef();
+  }
+  else
+  {
+    if (FOG_LIKELY(Math::canSum(aLength, bLength)))
+    {
+      size_t length = aLength + bLength;
+
+      d = CharI_(String)::_dCreate(length);
+      if (FOG_IS_NULL(d))
+        goto _Fail;
+
+      d->length = length;
+      StringT_chcopy(d->data          , a->getData(), aLength);
+      StringT_chcopy(d->data + aLength, b->getData(), bLength);
+      d->data[length] = 0;
+    }
+    else
+    {
+_Fail:
+      d = StringT_getDEmpty<CharT>()->addRef();
+    }
+  }
+
+  self->_d = d;
+}
+
 template<typename CharT, typename SrcT>
-static void FOG_CDECL StringT_ctorStub2(CharT_(String)* self, const SrcT_(Stub)* a, const SrcT_(Stub)* b)
+static void FOG_CDECL StringT_ctorStringStub(CharT_(String)* self, const CharT_(String)* a, const SrcT_(Stub)* b)
+{
+  size_t aLength = a->getLength();
+  size_t bLength = b->getComputedLength();
+
+  CharT_(StringData)* d;
+
+  if (bLength == 0)
+  {
+    d = a->_d->addRef();
+  }
+  else
+  {
+    if (FOG_LIKELY(Math::canSum(aLength, bLength)))
+    {
+      size_t length = aLength + bLength;
+
+      d = CharI_(String)::_dCreate(length);
+      if (FOG_IS_NULL(d))
+        goto _Fail;
+
+      d->length = length;
+      StringT_chcopy(d->data          , a->getData(), aLength);
+      StringT_chcopy(d->data + aLength, b->getData(), bLength);
+      d->data[length] = 0;
+    }
+    else
+    {
+_Fail:
+      d = StringT_getDEmpty<CharT>()->addRef();
+    }
+  }
+
+  self->_d = d;
+}
+
+template<typename CharT, typename SrcT>
+static void FOG_CDECL StringT_ctorStubString(CharT_(String)* self, const SrcT_(Stub)* a, const CharT_(String)* b)
 {
   size_t aLength = a->getComputedLength();
-  size_t bLength = b->getComputedLength();
+  size_t bLength = b->getLength();
 
   CharT_(StringData)* d;
 
@@ -269,17 +349,11 @@ _Fail:
   self->_d = d;
 }
 
-template<typename CharT>
-static void FOG_CDECL StringT_ctorCopy(CharT_(String)* self, const CharT_(String)* other)
+template<typename CharT, typename SrcT>
+static void FOG_CDECL StringT_ctorStubStub(CharT_(String)* self, const SrcT_(Stub)* a, const SrcT_(Stub)* b)
 {
-  self->_d = other->_d->addRef();
-}
-
-template<typename CharT>
-static void FOG_CDECL StringT_ctorCopy2(CharT_(String)* self, const CharT_(String)* a, const CharT_(String)* b)
-{
-  size_t aLength = a->getLength();
-  size_t bLength = b->getLength();
+  size_t aLength = a->getComputedLength();
+  size_t bLength = b->getComputedLength();
 
   CharT_(StringData)* d;
 
@@ -408,7 +482,10 @@ static void FOG_CDECL StringT_ctorDouble(CharT_(String)* self, double d)
 template<typename CharT>
 static void FOG_CDECL StringT_dtor(CharT_(String)* self)
 {
-  self->_d->release();
+  CharT_(StringData)* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================
@@ -5131,10 +5208,12 @@ FOG_NO_EXPORT void String_init(void)
   // --------------------------------------------------------------------------
 
   fog_api.stringa_ctor = StringT_ctor<char>;
-  fog_api.stringa_ctorStubA = StringT_ctorStub<char, char>;
-  fog_api.stringa_ctorStubA2 = StringT_ctorStub2<char, char>;
   fog_api.stringa_ctorCopyA = StringT_ctorCopy<char>;
-  fog_api.stringa_ctorCopyA2 = StringT_ctorCopy2<char>;
+  fog_api.stringa_ctorStubA = StringT_ctorStub<char, char>;
+  fog_api.stringa_ctorStringAStringA = StringT_ctorStringString<char>;
+  fog_api.stringa_ctorStringAStubA = StringT_ctorStringStub<char, char>;
+  fog_api.stringa_ctorStubAStringA = StringT_ctorStubString<char, char>;
+  fog_api.stringa_ctorStubAStubA = StringT_ctorStubStub<char, char>;
   fog_api.stringa_ctorSubstr = StringT_ctorSubstr<char>;
   fog_api.stringa_ctorU32 = StringT_ctorU32<char>;
   fog_api.stringa_ctorU64 = StringT_ctorU64<char>;
@@ -5299,13 +5378,17 @@ FOG_NO_EXPORT void String_init(void)
   fog_api.stringa_dFree = StringT_dFree<char>;
 
   fog_api.stringw_ctor = StringT_ctor<CharW>;
+  fog_api.stringw_ctorCopyW = StringT_ctorCopy<CharW>;
   fog_api.stringw_ctorStubA = StringT_ctorStub<CharW, char>;
   fog_api.stringw_ctorStubW = StringT_ctorStub<CharW, CharW>;
-  fog_api.stringw_ctorStubA2 = StringT_ctorStub2<CharW, char>;
-  fog_api.stringw_ctorStubW2 = StringT_ctorStub2<CharW, CharW>;
-  fog_api.stringw_ctorCopyW = StringT_ctorCopy<CharW>;
-  fog_api.stringw_ctorCopyW2 = StringT_ctorCopy2<CharW>;
   fog_api.stringw_ctorCodec = StringW_ctorCodec;
+  fog_api.stringw_ctorStringWStringW = StringT_ctorStringString<CharW>;
+  fog_api.stringw_ctorStringWStubW = StringT_ctorStringStub<CharW, CharW>;
+  fog_api.stringw_ctorStringWStubA = StringT_ctorStringStub<CharW, char>;
+  fog_api.stringw_ctorStubWStringW = StringT_ctorStubString<CharW, CharW>;
+  fog_api.stringw_ctorStubWStubW = StringT_ctorStubStub<CharW, CharW>;
+  fog_api.stringw_ctorStubAStringW = StringT_ctorStubString<CharW, char>;
+  fog_api.stringw_ctorStubAStubA = StringT_ctorStubStub<CharW, char>;
   fog_api.stringw_ctorSubstr = StringT_ctorSubstr<CharW>;
   fog_api.stringw_ctorU32 = StringT_ctorU32<CharW>;
   fog_api.stringw_ctorU64 = StringT_ctorU64<CharW>;

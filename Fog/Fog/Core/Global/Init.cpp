@@ -59,8 +59,8 @@ FOG_CAPI_DECLARE void _fog_init(void)
   StringUtil_init_dtoa();
 
   TextCodec_init();
+  Locale_init();
   ManagedString_init();          // Depends on String and Lock.
-  Locale_init();                 // Depends on TextCodec.
 
   Time_init();                   // Depends on Lock.
   Date_init();

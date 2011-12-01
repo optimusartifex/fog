@@ -113,6 +113,10 @@ struct FOG_NO_EXPORT ImageFilter
     fog_api.imagefilter_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE ImageFilter(ImageFilter&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE ImageFilter(ImageFilterData* d) :
     _d(d)
   {

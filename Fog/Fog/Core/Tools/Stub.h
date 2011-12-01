@@ -28,6 +28,7 @@ struct FOG_NO_EXPORT StubA
   // --------------------------------------------------------------------------
 
   explicit FOG_INLINE StubA(const char* data, size_t length = DETECT_LENGTH) : _data(data), _length(length) {}
+  explicit FOG_INLINE StubA(const CharA* data, size_t length = DETECT_LENGTH) : _data(reinterpret_cast<const char*>(data)), _length(length) {}
   explicit FOG_INLINE StubA(const uint8_t* data, size_t length = DETECT_LENGTH) : _data(reinterpret_cast<const char*>(data)), _length(length) {}
 
   explicit FOG_INLINE StubA(_Uninitialized) {}
@@ -75,6 +76,7 @@ struct FOG_NO_EXPORT Ascii8 : public StubA
   // --------------------------------------------------------------------------
 
   explicit FOG_INLINE Ascii8(const char* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
+  explicit FOG_INLINE Ascii8(const CharA* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
   explicit FOG_INLINE Ascii8(const uint8_t* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
 
   explicit FOG_INLINE Ascii8(_Uninitialized) : StubA(UNINITIALIZED) {}
@@ -92,6 +94,7 @@ struct FOG_NO_EXPORT Local8 : public StubA
   // --------------------------------------------------------------------------
 
   explicit FOG_INLINE Local8(const char* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
+  explicit FOG_INLINE Local8(const CharA* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
   explicit FOG_INLINE Local8(const uint8_t* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
 
   explicit FOG_INLINE Local8(_Uninitialized) : StubA(UNINITIALIZED) {}
@@ -109,6 +112,7 @@ struct FOG_NO_EXPORT Utf8 : public StubA
   // --------------------------------------------------------------------------
 
   explicit FOG_INLINE Utf8(const char* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
+  explicit FOG_INLINE Utf8(const CharA* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
   explicit FOG_INLINE Utf8(const uint8_t* data, size_t length = DETECT_LENGTH) : StubA(data, length) {}
 
   explicit FOG_INLINE Utf8(_Uninitialized) : StubA(UNINITIALIZED) {}

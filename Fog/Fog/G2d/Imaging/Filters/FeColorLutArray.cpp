@@ -41,7 +41,10 @@ static void FOG_CDECL FeColorLutArray_ctorCopy(FeColorLutArray* self, const FeCo
 
 static void FOG_CDECL FeColorLutArray_dtor(FeColorLutArray* self)
 {
-  self->_d->release();
+  FeColorLutArrayData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

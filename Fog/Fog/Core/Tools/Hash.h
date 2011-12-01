@@ -323,6 +323,10 @@ struct Hash : public HashImpl<KeyT, ItemT, !TypeInfo<ItemT>::NO_EQ>
     Impl::_ctorCopy(other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<KeyT, ItemT>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~Hash()
   {
     Impl::_dtor();

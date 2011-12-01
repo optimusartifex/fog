@@ -45,7 +45,10 @@ static void FOG_CDECL ImagePalette_ctorCopy(ImagePalette* self, const ImagePalet
 
 static void FOG_CDECL ImagePalette_dtor(ImagePalette* self)
 {
-  self->_d->release();
+  ImagePaletteData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

@@ -113,7 +113,7 @@ void qsort(void* base, size_t nmemb, size_t size, CompareFunc compareFunc)
 #define FOG_QSORT_DEFINE(_Size_) \
   case _Size_: \
   { \
-    QSortCore< QSortCompare<_Size_> > context; \
+    QSortImpl< QSortCompare<_Size_> > context; \
     \
     context._cmp = compareFunc; \
     context._sort(reinterpret_cast<uint8_t*>(base), nmemb); \
@@ -125,7 +125,7 @@ void qsort(void* base, size_t nmemb, size_t size, CompareFunc compareFunc)
   { \
     if (((size_t)base & (sizeof(size_t)-1)) == 0 && size % sizeof(size_t) == 0) \
     { \
-      QSortCore< QSortGeneric<size_t> > context; \
+      QSortImpl< QSortGeneric<size_t> > context; \
       \
       context._cmp = compareFunc; \
       context._size = size; \
@@ -134,7 +134,7 @@ void qsort(void* base, size_t nmemb, size_t size, CompareFunc compareFunc)
     } \
     else \
     { \
-      QSortCore< QSortGeneric<uint8_t> > context; \
+      QSortImpl< QSortGeneric<uint8_t> > context; \
       \
       context._cmp = compareFunc; \
       context._size = size; \
@@ -165,7 +165,7 @@ void qsort(void* base, size_t nmemb, size_t size, CompareExFunc compareFunc, con
 #define FOG_QSORT_DEFINE(_Size_) \
   case _Size_: \
   { \
-    QSortCore< QSortCompareEx<_Size_> > context; \
+    QSortImpl< QSortCompareEx<_Size_> > context; \
     \
     context._cmp = compareFunc; \
     context._self = self; \
@@ -178,7 +178,7 @@ void qsort(void* base, size_t nmemb, size_t size, CompareExFunc compareFunc, con
   { \
     if (((size_t)base & (sizeof(size_t)-1)) == 0 && size % sizeof(size_t) == 0) \
     { \
-      QSortCore< QSortGenericEx<size_t> > context; \
+      QSortImpl< QSortGenericEx<size_t> > context; \
       \
       context._cmp = compareFunc; \
       context._self = self; \
@@ -188,7 +188,7 @@ void qsort(void* base, size_t nmemb, size_t size, CompareExFunc compareFunc, con
     } \
     else \
     { \
-      QSortCore< QSortGenericEx<uint8_t> > context; \
+      QSortImpl< QSortGenericEx<uint8_t> > context; \
       \
       context._cmp = compareFunc; \
       context._self = self; \
@@ -244,7 +244,7 @@ struct BSearchGenericEx
 
 const void* bsearch(const void* _base, size_t nmemb, size_t size, const void* key, CompareFunc compareFunc)
 {
-  BSearchCore<BSearchGeneric> context;
+  BSearchImpl<BSearchGeneric> context;
 
   context._cmp = compareFunc;
   context._size = size;
@@ -255,7 +255,7 @@ const void* bsearch(const void* _base, size_t nmemb, size_t size, const void* ke
 
 const void* bsearch(const void* _base, size_t nmemb, size_t size, const void* key, CompareExFunc compareFunc, const void* self)
 {
-  BSearchCore<BSearchGenericEx> context;
+  BSearchImpl<BSearchGenericEx> context;
 
   context._cmp = compareFunc;
   context._self = self;

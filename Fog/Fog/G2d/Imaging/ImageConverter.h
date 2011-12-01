@@ -150,6 +150,10 @@ struct FOG_NO_EXPORT ImageConverter
     fog_api.imageconverter_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE ImageConverter(ImageConverter&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ImageConverter(
     const ImageFormatDescription& dstFormatDescription,
     const ImageFormatDescription& srcFormatDescription,

@@ -246,7 +246,10 @@ static void FOG_CDECL PathT_ctorCopyT(NumT_(Path)* self, const NumT_(Path)* othe
 template<typename NumT>
 static void FOG_CDECL PathT_dtor(NumT_(Path)* self)
 {
-  self->_d->release();
+  NumT_(PathData)* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================
@@ -1852,14 +1855,14 @@ _ShapeRect:
 
       if (shapeType == SHAPE_TYPE_CIRCLE)
       {
-        const CircleF* shape = reinterpret_cast<const CircleF*>(shapeData);
+        const NumT_(Circle)* shape = reinterpret_cast<const NumT_(Circle)*>(shapeData);
         c = shape->center;
         rx = shape->radius;
         ry = Math::abs(rx);
       }
       else
       {
-        const EllipseF* shape = reinterpret_cast<const EllipseF*>(shapeData);
+        const NumT_(Ellipse)* shape = reinterpret_cast<const NumT_(Ellipse)*>(shapeData);
         c = shape->center;
         rx = shape->radius.x;
         ry = shape->radius.y;

@@ -239,7 +239,10 @@ _Fail:
 
 static void FOG_CDECL Region_dtor(Region* self)
 {
-  self->_d->release();
+  RegionData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

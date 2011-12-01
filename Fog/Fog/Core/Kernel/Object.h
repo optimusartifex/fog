@@ -28,20 +28,20 @@
 FOG_CAPI_EXTERN void* fog_object_cast_meta(Fog::Object* self, const Fog::MetaClass* metaClass);
 FOG_CAPI_EXTERN void* fog_object_cast_string(Fog::Object* self, const char* className);
 
-//! @brief Cast @ref Object* to @c T type.
-template <typename T>
-FOG_INLINE T fog_object_cast(Fog::Object* object)
+//! @brief Cast @ref Object* to @c TypeT type.
+template <typename TypeT>
+FOG_INLINE TypeT fog_object_cast(Fog::Object* object)
 {
-  return static_cast<T>((Fog::Object*)
-    fog_object_cast_meta(object, ((T)NULL)->getStaticMetaClass()) );
+  return static_cast<TypeT>((Fog::Object*)
+    fog_object_cast_meta(object, ((TypeT)NULL)->getStaticMetaClass()) );
 }
 
-//! @brief Cast const @ref Object* to @c T type.
-template <typename T>
-FOG_INLINE T fog_object_cast(const Fog::Object* object)
+//! @brief Cast const @ref Object* to @c TypeT type.
+template <typename TypeT>
+FOG_INLINE TypeT fog_object_cast(const Fog::Object* object)
 {
-  return static_cast<T>((const Fog::Object*)
-    fog_object_cast_meta((Fog::Object*)object, ((T)NULL)->getStaticMetaClass()) );
+  return static_cast<TypeT>((const Fog::Object*)
+    fog_object_cast_meta((Fog::Object*)object, ((TypeT)NULL)->getStaticMetaClass()) );
 }
 
 //! @}
@@ -536,11 +536,11 @@ struct FOG_API Object
     return getObjectMetaClass()->name;
   }
 
-  //! @brief Get whether the object can be casted to @c T.
-  template<typename T>
+  //! @brief Get whether the object can be casted to @c TypeT.
+  template<typename TypeT>
   FOG_INLINE bool isClassOf() const
   {
-    return fog_object_cast<T>((Object*)this) != NULL;
+    return fog_object_cast<TypeT>((Object*)this) != NULL;
   }
 
   //! @brief Get whether the object can be casted to @a className.

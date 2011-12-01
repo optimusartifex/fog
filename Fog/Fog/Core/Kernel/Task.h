@@ -63,14 +63,14 @@ struct FOG_API CancelableTask : public Task
 };
 
 // ============================================================================
-// [Fog::DeleteTask<T>]
+// [Fog::DeleteTask<TypeT>]
 // ============================================================================
 
 // Task to delete an object
-template<typename T>
+template<typename TypeT>
 struct DeleteTask : public CancelableTask
 {
-  explicit DeleteTask(T* obj) : _obj(obj) {}
+  explicit DeleteTask(TypeT* obj) : _obj(obj) {}
 
   // --------------------------------------------------------------------------
   // [Interface]
@@ -83,7 +83,7 @@ struct DeleteTask : public CancelableTask
   // [Members]
   // --------------------------------------------------------------------------
 
-  T* _obj;
+  TypeT* _obj;
 };
 
 // ============================================================================

@@ -630,7 +630,10 @@ static void FOG_CDECL RegExpT_ctorCopy(CharT_(RegExp)* self, const CharT_(RegExp
 template<typename CharT>
 static void FOG_CDECL RegExpT_dtor(CharT_(RegExp)* self)
 {
-  self->_d->release();
+  CharT_(RegExpData)* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

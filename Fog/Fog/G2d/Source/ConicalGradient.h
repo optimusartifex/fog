@@ -56,6 +56,8 @@ struct FOG_NO_EXPORT ConicalGradientF : public GradientF
   FOG_INLINE float getAngle() const { return _pts[1].x; }
 
   FOG_INLINE void setCenter(const PointF& p) { _pts[0] = p; }
+  FOG_INLINE void setCenter(float x, float y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setAngle(float angle) { _pts[1].x = angle; }
 
   // --------------------------------------------------------------------------
@@ -106,6 +108,8 @@ struct FOG_NO_EXPORT ConicalGradientD : public GradientD
   FOG_INLINE double getAngle() const { return _pts[1].x; }
 
   FOG_INLINE void setCenter(const PointD& p) { _pts[0] = p; }
+  FOG_INLINE void setCenter(double x, double y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setAngle(double angle) { _pts[1].x = angle; }
 
   // --------------------------------------------------------------------------

@@ -509,7 +509,10 @@ static err_t FOG_CDECL ManagedStringW_ctorStringW(ManagedStringW* self, const St
 
 static void FOG_CDECL ManagedStringW_dtor(ManagedStringW* self)
 {
-  self->_string->_d->reference.dec();
+  StringDataW* d = self->_string->_d;
+
+  if (d != NULL)
+    d->reference.dec();
 }
 
 // ============================================================================

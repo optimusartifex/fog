@@ -213,7 +213,10 @@ static void FOG_CDECL Pattern_ctorGradientD(Pattern* self, const GradientD* grad
 
 static void FOG_CDECL Pattern_dtor(Pattern* self)
 {
-  self->_d->release();
+  PatternData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

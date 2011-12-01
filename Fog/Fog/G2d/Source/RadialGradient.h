@@ -66,7 +66,10 @@ struct FOG_NO_EXPORT RadialGradientF : public GradientF
   FOG_INLINE const PointF& getRadius() const { return _pts[2]; }
 
   FOG_INLINE void setCenter(const PointF& p) { _pts[0] = p; }
+  FOG_INLINE void setCenter(float x, float y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setFocal(const PointF& p) { _pts[1] = p; }
+  FOG_INLINE void setFocal(float x, float y) { _pts[1].set(x, y); }
 
   FOG_INLINE void setRadius(float rad) { _pts[2].set(rad, rad); }
   FOG_INLINE void setRadius(const PointF& rad) { _pts[2] = rad; }
@@ -129,7 +132,10 @@ struct FOG_NO_EXPORT RadialGradientD : public GradientD
   FOG_INLINE const PointD& getRadius() const { return _pts[2]; }
 
   FOG_INLINE void setCenter(const PointD& p) { _pts[0] = p; }
+  FOG_INLINE void setCenter(double x, double y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setFocal(const PointD& p) { _pts[1] = p; }
+  FOG_INLINE void setFocal(double x, double y) { _pts[1].set(x, y); }
 
   FOG_INLINE void setRadius(double rad) { _pts[2].set(rad, rad); }
   FOG_INLINE void setRadius(const PointD& rad) { _pts[2] = rad; }

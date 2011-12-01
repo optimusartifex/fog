@@ -251,6 +251,10 @@ struct Hash<StringA, ItemT> : public HashStringAImpl<ItemT, !TypeInfo<ItemT>::NO
     fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<StringA, ItemT>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~Hash()
   {
     fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringA, ItemT>::getVTable());
@@ -287,6 +291,10 @@ struct Hash<StringA, StringA> : public HashUntyped
   {
     fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<StringA, StringA>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE ~Hash()
   {
@@ -508,6 +516,10 @@ struct Hash<StringA, Var> : public HashUntyped
   {
     fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<StringA, Var>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE ~Hash()
   {
@@ -1008,6 +1020,10 @@ struct Hash<StringW, ItemT> : public HashStringWImpl<ItemT, !TypeInfo<ItemT>::NO
     fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<StringW, ItemT>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~Hash()
   {
     fog_api.hash_unknown_unknown_dtor(this, HashVTable<StringW, ItemT>::getVTable());
@@ -1044,6 +1060,10 @@ struct Hash<StringW, StringW> : public HashUntyped
   {
     fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<StringW, StringW>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE ~Hash()
   {
@@ -1324,6 +1344,10 @@ struct Hash<StringW, Var> : public HashUntyped
   {
     fog_api.hash_unknown_unknown_ctorCopy(this, &other);
   }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Hash(Hash<StringW, Var>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE ~Hash()
   {

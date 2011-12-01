@@ -91,7 +91,10 @@ static void FOG_CDECL ColorStopList_ctorCopy(ColorStopList* self, const ColorSto
 
 static void FOG_CDECL ColorStopList_dtor(ColorStopList* self)
 {
-  self->_d->release();
+  ColorStopListData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

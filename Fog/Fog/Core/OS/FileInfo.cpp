@@ -49,7 +49,10 @@ static void FOG_CDECL FileInfo_ctorCopy(FileInfo* self, const FileInfo* other)
 
 static void FOG_CDECL FileInfo_dtor(FileInfo* self)
 {
-  self->_d->release();
+  FileInfoData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

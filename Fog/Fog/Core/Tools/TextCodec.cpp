@@ -1610,7 +1610,7 @@ static const char* TextCodec_getCodeset(void)
 #if defined(FOG_OS_WINDOWS)
   // Windows hasn't nl_langinto(CODESET), but we can use setlocale()
   // that returns "Language_Country.CODEPAGE
-  const char* codeset = setlocale(LC_ALL, NULL); // get locale...
+  const char* codeset = setlocale(LC_ALL, ""); // get locale...
   const char* chr = strchr(codeset, '.');
 
   if (chr)
@@ -1683,7 +1683,10 @@ static void FOG_CDECL TextCodec_ctorCopy(TextCodec* self, const TextCodec* other
 
 static void FOG_CDECL TextCodec_dtor(TextCodec* self)
 {
-  self->_d->release();
+  TextCodecData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

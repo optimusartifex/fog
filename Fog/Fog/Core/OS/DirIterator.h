@@ -64,17 +64,17 @@ struct FOG_NO_EXPORT DirIterator
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_NO_EXPORT DirIterator()
+  FOG_INLINE DirIterator()
   {
     fog_api.diriterator_ctor(this);
   }
 
-  FOG_NO_EXPORT DirIterator(const StringW& path, bool skipParent = true)
+  FOG_INLINE DirIterator(const StringW& path, bool skipParent = true)
   {
     fog_api.diriterator_ctorString(this, &path, skipParent);
   }
 
-  FOG_NO_EXPORT ~DirIterator()
+  FOG_INLINE ~DirIterator()
   {
     fog_api.diriterator_dtor(this);
   }

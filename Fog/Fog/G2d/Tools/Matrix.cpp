@@ -65,7 +65,10 @@ static void FOG_CDECL MatrixT_ctorCreate(NumT_(Matrix)* self, const SizeI* size,
 template<typename NumT>
 static void FOG_CDECL MatrixT_dtor(NumT_(Matrix)* self)
 {
-  self->_d->release();
+  NumT_(MatrixData)* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

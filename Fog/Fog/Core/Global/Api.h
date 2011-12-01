@@ -964,10 +964,12 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
   FOG_CAPI_CTOR(stringa_ctor)(StringA* self);
-  FOG_CAPI_CTOR(stringa_ctorStubA)(StringA* self, const StubA* stub);
-  FOG_CAPI_CTOR(stringa_ctorStubA2)(StringA* self, const StubA* a, const StubA* b);
   FOG_CAPI_CTOR(stringa_ctorCopyA)(StringA* self, const StringA* other);
-  FOG_CAPI_CTOR(stringa_ctorCopyA2)(StringA* self, const StringA* a, const StringA* b);
+  FOG_CAPI_CTOR(stringa_ctorStubA)(StringA* self, const StubA* stub);
+  FOG_CAPI_CTOR(stringa_ctorStringAStringA)(StringA* self, const StringA* a, const StringA* b);
+  FOG_CAPI_CTOR(stringa_ctorStringAStubA)(StringA* self, const StringA* a, const StubA* b);
+  FOG_CAPI_CTOR(stringa_ctorStubAStringA)(StringA* self, const StubA* a, const StringA* b);
+  FOG_CAPI_CTOR(stringa_ctorStubAStubA)(StringA* self, const StubA* a, const StubA* b);
   FOG_CAPI_CTOR(stringa_ctorSubstr)(StringA* self, const StringA* other, const Range* range);
   FOG_CAPI_CTOR(stringa_ctorU32)(StringA* self, uint32_t n, bool isUnsigned);
   FOG_CAPI_CTOR(stringa_ctorU64)(StringA* self, uint64_t n, bool isUnsigned);
@@ -1106,13 +1108,17 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
   FOG_CAPI_CTOR(stringw_ctor)(StringW* self);
+  FOG_CAPI_CTOR(stringw_ctorCopyW)(StringW* self, const StringW* other);
   FOG_CAPI_CTOR(stringw_ctorStubA)(StringW* self, const StubA* stub);
   FOG_CAPI_CTOR(stringw_ctorStubW)(StringW* self, const StubW* stub);
   FOG_CAPI_CTOR(stringw_ctorCodec)(StringW* self, const StubA* stub, const TextCodec* tc);
-  FOG_CAPI_CTOR(stringw_ctorStubA2)(StringW* self, const StubA* a, const StubA* b);
-  FOG_CAPI_CTOR(stringw_ctorStubW2)(StringW* self, const StubW* a, const StubW* b);
-  FOG_CAPI_CTOR(stringw_ctorCopyW)(StringW* self, const StringW* other);
-  FOG_CAPI_CTOR(stringw_ctorCopyW2)(StringW* self, const StringW* a, const StringW* b);
+  FOG_CAPI_CTOR(stringw_ctorStringWStringW)(StringW* self, const StringW* a, const StringW* b);
+  FOG_CAPI_CTOR(stringw_ctorStringWStubW)(StringW* self, const StringW* a, const StubW* b);
+  FOG_CAPI_CTOR(stringw_ctorStringWStubA)(StringW* self, const StringW* a, const StubA* b);
+  FOG_CAPI_CTOR(stringw_ctorStubWStringW)(StringW* self, const StubW* a, const StringW* b);
+  FOG_CAPI_CTOR(stringw_ctorStubWStubW)(StringW* self, const StubW* a, const StubW* b);
+  FOG_CAPI_CTOR(stringw_ctorStubAStringW)(StringW* self, const StubA* a, const StringW* b);
+  FOG_CAPI_CTOR(stringw_ctorStubAStubA)(StringW* self, const StubA* a, const StubA* b);
   FOG_CAPI_CTOR(stringw_ctorSubstr)(StringW* self, const StringW* other, const Range* range);
   FOG_CAPI_CTOR(stringw_ctorU32)(StringW* self, uint32_t n, bool isUnsigned);
   FOG_CAPI_CTOR(stringw_ctorU64)(StringW* self, uint64_t n, bool isUnsigned);
@@ -2260,7 +2266,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, color_adjust)(Color* self, uint32_t adjustOp, float param);
 
   FOG_CAPI_METHOD(err_t, color_parseA)(Color* self, const StubA* str, uint32_t flags);
-  FOG_CAPI_METHOD(err_t, color_parseU)(Color* self, const StubW* str, uint32_t flags);
+  FOG_CAPI_METHOD(err_t, color_parseW)(Color* self, const StubW* str, uint32_t flags);
 
   // --------------------------------------------------------------------------
   // [G2d/Source - ColorStopList]

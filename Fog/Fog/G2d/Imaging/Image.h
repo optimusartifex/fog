@@ -189,6 +189,10 @@ struct FOG_NO_EXPORT Image
     fog_api.image_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Image(Image&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE Image(const SizeI& size, uint32_t format, uint32_t type = IMAGE_TYPE_BUFFER)
   {
     fog_api.image_ctorCreate(this, &size, format, type);

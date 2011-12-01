@@ -226,6 +226,10 @@ struct FOG_NO_EXPORT FeComponentFunction
     fog_api.fecomponentfunction_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FeComponentFunction(FeComponentFunction&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE FeComponentFunction(FeComponentFunctionData* d) :
     _d(d)
   {

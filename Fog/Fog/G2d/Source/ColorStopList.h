@@ -131,6 +131,10 @@ struct FOG_NO_EXPORT ColorStopList
     fog_api.colorstoplist_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE ColorStopList(ColorStopList&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE ColorStopList(ColorStopListData* d) :
     _d(d)
   {

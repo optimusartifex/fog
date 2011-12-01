@@ -248,13 +248,13 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE err_t parse(const StubW& str, uint32_t flags = COLOR_NAME_ANY)
   {
-    return fog_api.color_parseU(this, &str, flags);
+    return fog_api.color_parseW(this, &str, flags);
   }
 
   FOG_INLINE err_t parse(const StringW& str, uint32_t flags = COLOR_NAME_ANY)
   {
     StubW stub(str.getData(), str.getLength());
-    return fog_api.color_parseU(this, &stub, flags);
+    return fog_api.color_parseW(this, &stub, flags);
   }
 
   // --------------------------------------------------------------------------

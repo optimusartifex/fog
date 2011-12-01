@@ -1092,9 +1092,17 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawBox(const BoxF& box) { return drawRect(RectF(box)); }
   FOG_INLINE err_t drawBox(const BoxD& box) { return drawRect(RectD(box)); }
 
+  FOG_INLINE err_t drawBox(int x0, int y0, int x1, int y1) { return drawRect(RectI(x0, y0, x1 - x0, y1 - y0)); }
+  FOG_INLINE err_t drawBox(float x0, float y0, float x1, float y1) { return drawRect(RectF(x0, y0, x1 - x0, y1 - y0)); }
+  FOG_INLINE err_t drawBox(double x0, double y0, double x1, double y1) { return drawRect(RectD(x0, y0, x1 - x0, y1 - y0)); }
+
   FOG_INLINE err_t drawRect(const RectI& r) { return _vtable->drawRectI(this, r); }
   FOG_INLINE err_t drawRect(const RectF& r) { return _vtable->drawRectF(this, r); }
   FOG_INLINE err_t drawRect(const RectD& r) { return _vtable->drawRectD(this, r); }
+
+  FOG_INLINE err_t drawRect(int x, int y, int w, int h) { return drawRect(RectI(x, y, w, h)); }
+  FOG_INLINE err_t drawRect(float x, float y, float w, float h) { return drawRect(RectF(x, y, w, h)); }
+  FOG_INLINE err_t drawRect(double x, double y, double w, double h) { return drawRect(RectD(x, y, w, h)); }
 
   FOG_INLINE err_t drawPolyline(const PointI* p, size_t count) { return _vtable->drawPolylineI(this, p, count); }
   FOG_INLINE err_t drawPolyline(const PointF* p, size_t count) { return _vtable->drawPolylineF(this, p, count); }
@@ -1110,11 +1118,20 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawLine(const PointF& p0, const PointF& p1) { return drawLine(LineF(p0, p1)); }
   FOG_INLINE err_t drawLine(const PointD& p0, const PointD& p1) { return drawLine(LineD(p0, p1)); }
 
+  FOG_INLINE err_t drawLine(float x0, float y0, float x1, float y1) { return drawLine(LineF(x0, y0, x1, y1)); }
+  FOG_INLINE err_t drawLine(double x0, double y0, double x1, double y1) { return drawLine(LineD(x0, y0, x1, y1)); }
+
   FOG_INLINE err_t drawQBezier(const QBezierF& quad) { return _vtable->drawShapeF(this, SHAPE_TYPE_QBEZIER, &quad); }
   FOG_INLINE err_t drawQBezier(const QBezierD& quad) { return _vtable->drawShapeD(this, SHAPE_TYPE_QBEZIER, &quad); }
 
+  FOG_INLINE err_t drawQBezier(float x0, float y0, float x1, float y1, float x2, float y2) { return drawQBezier(QBezierF(x0, y0, x1, y1, x2, y2)); }
+  FOG_INLINE err_t drawQBezier(double x0, double y0, double x1, double y1, double x2, double y2) { return drawQBezier(QBezierD(x0, y0, x1, y1, x2, y2)); }
+
   FOG_INLINE err_t drawCBezier(const CBezierF& cubic) { return _vtable->drawShapeF(this, SHAPE_TYPE_CBEZIER, &cubic); }
   FOG_INLINE err_t drawCBezier(const CBezierD& cubic) { return _vtable->drawShapeD(this, SHAPE_TYPE_CBEZIER, &cubic); }
+
+  FOG_INLINE err_t drawCBezier(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) { return drawCBezier(CBezierF(x0, y0, x1, y1, x2, y2, x3, y3)); }
+  FOG_INLINE err_t drawCBezier(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) { return drawCBezier(CBezierD(x0, y0, x1, y1, x2, y2, x3, y3)); }
 
   FOG_INLINE err_t drawArc(const ArcF& arc) { return _vtable->drawShapeF(this, SHAPE_TYPE_ARC, &arc); }
   FOG_INLINE err_t drawArc(const ArcD& arc) { return _vtable->drawShapeD(this, SHAPE_TYPE_ARC, &arc); }
@@ -1153,9 +1170,17 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillBox(const BoxF& box) { return fillRect(RectF(box)); }
   FOG_INLINE err_t fillBox(const BoxD& box) { return fillRect(RectD(box)); }
 
+  FOG_INLINE err_t fillBox(int x0, int y0, int x1, int y1) { return fillRect(RectI(x0, y0, x1 - x0, y1 - y0)); }
+  FOG_INLINE err_t fillBox(float x0, float y0, float x1, float y1) { return fillRect(RectF(x0, y0, x1 - x0, y1 - y0)); }
+  FOG_INLINE err_t fillBox(double x0, double y0, double x1, double y1) { return fillRect(RectD(x0, y0, x1 - x0, y1 - y0)); }
+
   FOG_INLINE err_t fillRect(const RectI& r) { return _vtable->fillRectI(this, r); }
   FOG_INLINE err_t fillRect(const RectF& r) { return _vtable->fillRectF(this, r); }
   FOG_INLINE err_t fillRect(const RectD& r) { return _vtable->fillRectD(this, r); }
+
+  FOG_INLINE err_t fillRect(int x, int y, int w, int h) { return fillRect(RectI(x, y, w, h)); }
+  FOG_INLINE err_t fillRect(float x, float y, float w, float h) { return fillRect(RectF(x, y, w, h)); }
+  FOG_INLINE err_t fillRect(double x, double y, double w, double h) { return fillRect(RectD(x, y, w, h)); }
 
   FOG_INLINE err_t fillRects(const RectI* r, size_t count) { return _vtable->fillRectsI(this, r, count); }
   FOG_INLINE err_t fillRects(const RectF* r, size_t count) { return _vtable->fillRectsF(this, r, count); }
@@ -1168,8 +1193,14 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillQBezier(const QBezierF& quad) { return _vtable->fillShapeF(this, SHAPE_TYPE_QBEZIER, &quad); }
   FOG_INLINE err_t fillQBezier(const QBezierD& quad) { return _vtable->fillShapeD(this, SHAPE_TYPE_QBEZIER, &quad); }
 
+  FOG_INLINE err_t fillQBezier(float x0, float y0, float x1, float y1, float x2, float y2) { return fillQBezier(QBezierF(x0, y0, x1, y1, x2, y2)); }
+  FOG_INLINE err_t fillQBezier(double x0, double y0, double x1, double y1, double x2, double y2) { return fillQBezier(QBezierD(x0, y0, x1, y1, x2, y2)); }
+
   FOG_INLINE err_t fillCBezier(const CBezierF& cubic) { return _vtable->fillShapeF(this, SHAPE_TYPE_CBEZIER, &cubic); }
   FOG_INLINE err_t fillCBezier(const CBezierD& cubic) { return _vtable->fillShapeD(this, SHAPE_TYPE_CBEZIER, &cubic); }
+
+  FOG_INLINE err_t fillCBezier(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) { return fillCBezier(CBezierF(x0, y0, x1, y1, x2, y2, x3, y3)); }
+  FOG_INLINE err_t fillCBezier(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) { return fillCBezier(CBezierD(x0, y0, x1, y1, x2, y2, x3, y3)); }
 
   FOG_INLINE err_t fillArc(const ArcF& arc) { return _vtable->fillShapeF(this, SHAPE_TYPE_ARC, &arc); }
   FOG_INLINE err_t fillArc(const ArcD& arc) { return _vtable->fillShapeD(this, SHAPE_TYPE_ARC, &arc); }

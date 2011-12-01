@@ -38,6 +38,17 @@ struct FOG_NO_EXPORT FeConvolveMatrix : public FeBorder
     fog_api.feconvolvematrix_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FeConvolveMatrix(FeConvolveMatrix&& other)
+  {
+    _matrix->_d = other._matrix->_d;
+    other._matrix->_d = NULL;
+
+    _scale = other._scale;
+    _bias = other._bias;
+  }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~FeConvolveMatrix()
   {
     fog_api.feconvolvematrix_dtor(this);

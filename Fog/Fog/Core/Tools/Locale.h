@@ -104,6 +104,10 @@ struct FOG_NO_EXPORT Locale
     fog_api.locale_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Locale(Locale&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE Locale(const StringW& localeName)
   {
     fog_api.locale_ctorString(this, &localeName);

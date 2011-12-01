@@ -51,7 +51,10 @@ static void FOG_CDECL ImageConverter_ctorCreate(ImageConverter* self,
 
 static void FOG_CDECL ImageConverter_dtor(ImageConverter* self)
 {
-  self->_d->release();
+  ImageConverterData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

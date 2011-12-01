@@ -34,8 +34,8 @@ struct FOG_NO_EXPORT CircleF
 
   FOG_INLINE CircleF() { reset(); }
   FOG_INLINE CircleF(const CircleF& other) { center = other.center; radius = other.radius; }
-  FOG_INLINE CircleF(const PointF& cp, float rad) { center = cp; radius = rad; }
-  FOG_INLINE CircleF(float x0, float y0, float rad) { center.set(x0, y0); radius = rad; }
+  FOG_INLINE CircleF(const PointF& cp, float rad) : center(cp), radius(rad) {}
+  FOG_INLINE CircleF(float x0, float y0, float rad) : center(x0, y0), radius(rad) {}
 
   explicit FOG_INLINE CircleF(_Uninitialized) {}
   explicit FOG_INLINE CircleF(const CircleD& circle);
@@ -162,8 +162,8 @@ struct FOG_NO_EXPORT CircleD
 
   FOG_INLINE CircleD() { reset(); }
   FOG_INLINE CircleD(const CircleD& other) : center(other.center), radius(other.radius) {}
-  FOG_INLINE CircleD(const PointD& cp, double r) : center(cp), radius(r) {}
-  FOG_INLINE CircleD(double x0, double y0, double rad) { center.set(x0, y0); radius = rad; }
+  FOG_INLINE CircleD(const PointD& cp, double rad) : center(cp), radius(rad) {}
+  FOG_INLINE CircleD(double x0, double y0, double rad) : center(x0, y0), radius(rad) {}
 
   explicit FOG_INLINE CircleD(_Uninitialized) {}
   explicit FOG_INLINE CircleD(const CircleF& circle) : center(circle.center), radius(circle.radius) {}

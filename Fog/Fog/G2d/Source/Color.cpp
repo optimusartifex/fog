@@ -1431,7 +1431,7 @@ FOG_NO_EXPORT void Color_init(void)
   fog_api.color_adjust = Color_adjust;
 
   fog_api.color_parseA = Color_parse<char>;
-  fog_api.color_parseU = Color_parse<CharW>;
+  fog_api.color_parseW = Color_parse<CharW>;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

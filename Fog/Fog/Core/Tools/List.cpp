@@ -469,7 +469,10 @@ _Fail:
 
 static void FOG_CDECL List_Simple_dtor(ListUntyped* self)
 {
-  List_Simple_dRelease(self->_d);
+  ListUntypedData* d = self->_d;
+
+  if (d != NULL)
+    List_Simple_dRelease(d);
 }
 
 // ===========================================================================
@@ -1314,7 +1317,10 @@ _Fail:
 
 static void FOG_CDECL List_Unknown_dtor(ListUntyped* self, const ListUntypedVTable* v)
 {
-  List_Unknown_dRelease(self->_d, v);
+  ListUntypedData* d = self->_d;
+
+  if (d != NULL)
+    List_Unknown_dRelease(d, v);
 }
 
 // ===========================================================================
@@ -2770,7 +2776,10 @@ static void FOG_CDECL List_Var_ctorSlice(ListUntyped* self, const ListUntyped* o
 
 static void FOG_CDECL List_Var_dtor(ListUntyped* self)
 {
-  List_Unknown_dRelease(self->_d, &List_Var_vTable);
+  ListUntypedData* d = self->_d;
+
+  if (d != NULL)
+    List_Unknown_dRelease(d, &List_Var_vTable);
 }
 
 // ===========================================================================

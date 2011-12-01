@@ -91,7 +91,10 @@ static void FOG_CDECL Locale_ctorString(Locale* self, const StringW* name)
 
 static void FOG_CDECL Locale_dtor(Locale* self)
 {
-  self->_d->release();
+  LocaleData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

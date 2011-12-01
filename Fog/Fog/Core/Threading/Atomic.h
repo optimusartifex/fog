@@ -44,99 +44,99 @@ namespace Fog {
 // [Fog::AtomicCore]
 // ============================================================================
 
-template<typename T>
+template<typename TypeT>
 struct AtomicCore
 {
-  typedef T Type;
+  typedef TypeT Type;
 
-  typedef AtomicImplementation<sizeof(T)> __Backend;
+  typedef AtomicImplementation<sizeof(TypeT)> __Backend;
   typedef typename __Backend::Type __BackendType;
 
-  static FOG_INLINE void set(T* atomic, T value)
+  static FOG_INLINE void set(TypeT* atomic, TypeT value)
   {
     __Backend::set((__BackendType*)atomic, (__BackendType)value);
   }
 
-  static FOG_INLINE T setXchg(T* atomic, T value)
+  static FOG_INLINE TypeT setXchg(TypeT* atomic, TypeT value)
   {
-    return (T)__Backend::setXchg((__BackendType*)atomic, (__BackendType)value);
+    return (TypeT)__Backend::setXchg((__BackendType*)atomic, (__BackendType)value);
   }
 
-  static FOG_INLINE bool cmpXchg(T* atomic, T compar, T value)
+  static FOG_INLINE bool cmpXchg(TypeT* atomic, TypeT compar, TypeT value)
   {
     return __Backend::cmpXchg((__BackendType*)atomic, (__BackendType)compar, (__BackendType)value);
   }
 
-  static FOG_INLINE T get(const T* atomic)
+  static FOG_INLINE TypeT get(const TypeT* atomic)
   {
-    return (T)__Backend::get((const __BackendType*)atomic);
+    return (TypeT)__Backend::get((const __BackendType*)atomic);
   }
 
-  static FOG_INLINE void inc(T* atomic)
+  static FOG_INLINE void inc(TypeT* atomic)
   {
     __Backend::inc((__BackendType*)atomic);
   }
 
-  static FOG_INLINE void dec(T* atomic)
+  static FOG_INLINE void dec(TypeT* atomic)
   {
     __Backend::dec((__BackendType*)atomic);
   }
 
-  static FOG_INLINE void add(T* atomic, T value)
+  static FOG_INLINE void add(TypeT* atomic, TypeT value)
   {
     __Backend::add((__BackendType*)atomic, (__BackendType)value);
   }
 
-  static FOG_INLINE void sub(T* atomic, T value)
+  static FOG_INLINE void sub(TypeT* atomic, TypeT value)
   {
     __Backend::sub((__BackendType*)atomic, (__BackendType)value);
   }
 
-  static FOG_INLINE T addXchg(T* atomic, T value)
+  static FOG_INLINE TypeT addXchg(TypeT* atomic, TypeT value)
   {
-    return (T)__Backend::addXchg((__BackendType*)atomic, (__BackendType)value);
+    return (TypeT)__Backend::addXchg((__BackendType*)atomic, (__BackendType)value);
   }
 
-  static FOG_INLINE T subXchg(T* atomic, T value)
+  static FOG_INLINE TypeT subXchg(TypeT* atomic, TypeT value)
   {
-    return (T)__Backend::subXchg((__BackendType*)atomic, (__BackendType)value);
+    return (TypeT)__Backend::subXchg((__BackendType*)atomic, (__BackendType)value);
   }
 
-  static FOG_INLINE bool deref(T* atomic)
+  static FOG_INLINE bool deref(TypeT* atomic)
   {
     return __Backend::deref((__BackendType*)atomic);
   }
 };
 
 // ============================================================================
-// [Fog::Atomic<T>]
+// [Fog::Atomic<TypeT>]
 // ============================================================================
 
-template<typename T>
+template<typename TypeT>
 struct Atomic
 {
-  typedef AtomicCore<T> Op;
+  typedef AtomicCore<TypeT> Op;
 
-  mutable T _atomic;
+  mutable TypeT _atomic;
 
-  FOG_INLINE void init(T value) { _atomic = value; }
-  FOG_INLINE void set(T value) { Op::set(&_atomic, value); }
-  FOG_INLINE T setXchg(T value) { return Op::setXchg(&_atomic, value); }
-  FOG_INLINE bool cmpXchg(T compar, T value) { return Op::cmpXchg(&_atomic, compar, value); }
-  FOG_INLINE T get() const{ return Op::get(&_atomic); }
+  FOG_INLINE void init(TypeT value) { _atomic = value; }
+  FOG_INLINE void set(TypeT value) { Op::set(&_atomic, value); }
+  FOG_INLINE TypeT setXchg(TypeT value) { return Op::setXchg(&_atomic, value); }
+  FOG_INLINE bool cmpXchg(TypeT compar, TypeT value) { return Op::cmpXchg(&_atomic, compar, value); }
+  FOG_INLINE TypeT get() const{ return Op::get(&_atomic); }
   FOG_INLINE void inc() { Op::inc(&_atomic); }
   FOG_INLINE void dec() { Op::dec(&_atomic); }
-  FOG_INLINE void add(T value) { Op::add(&_atomic, value); }
-  FOG_INLINE void sub(T value) { Op::sub(&_atomic, value); }
-  FOG_INLINE T addXchg(T value) { return Op::addXchg(&_atomic, value); }
-  FOG_INLINE T subXchg(T value) { return Op::subXchg(&_atomic, value); }
+  FOG_INLINE void add(TypeT value) { Op::add(&_atomic, value); }
+  FOG_INLINE void sub(TypeT value) { Op::sub(&_atomic, value); }
+  FOG_INLINE TypeT addXchg(TypeT value) { return Op::addXchg(&_atomic, value); }
+  FOG_INLINE TypeT subXchg(TypeT value) { return Op::subXchg(&_atomic, value); }
   FOG_INLINE bool deref() { return Op::deref(&_atomic); }
 };
 
-template<typename T>
-static FOG_INLINE T* atomicPtrXchg(T** atomic, T* value)
+template<typename TypeT>
+static FOG_INLINE TypeT* atomicPtrXchg(TypeT** atomic, TypeT* value)
 {
-  return (T*)(void*)AtomicCore<void*>::setXchg((void**)atomic, (void*)value);
+  return (TypeT*)(void*)AtomicCore<void*>::setXchg((void**)atomic, (void*)value);
 }
 
 //! @brief Macro to help setting @c Fog::Atomic structure in static data.

@@ -39,7 +39,10 @@ static void FOG_CDECL FeComponentFunction_ctorCopy(FeComponentFunction* self, co
 
 static void FOG_CDECL FeComponentFunction_dtor(FeComponentFunction* self)
 {
-  self->_d->release();
+  FeComponentFunctionData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

@@ -24,7 +24,7 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Chord (float).
-struct FOG_NO_EXPORT ChordF : ArcF
+struct FOG_NO_EXPORT ChordF : public ArcF
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT ChordF : ArcF
 // ============================================================================
 
 //! @brief Chord (double).
-struct FOG_NO_EXPORT ChordD : ArcD
+struct FOG_NO_EXPORT ChordD : public ArcD
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

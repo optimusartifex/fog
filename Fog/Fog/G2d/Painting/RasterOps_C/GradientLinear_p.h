@@ -177,23 +177,28 @@ struct FOG_NO_EXPORT PGradientLinear
   }
 
   // ==========================================================================
-  // [Fetch - Simple]
+  // [Fetch - Simple - Pad]
   // ==========================================================================
 
-  static void FOG_FASTCALL fetch_simple_nearest_pad_prgb32_xrgb32(
+  template<typename Accessor>
+  static void FOG_FASTCALL fetch_simple_nearest_pad(
     RasterPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RasterPattern* ctx = fetcher->getContext();
-    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
-    int len = ctx->_d.gradient.base.len16x16;
+    Accessor accessor(ctx);
 
     P_FETCH_SPAN8_INIT()
 
     int xx = ctx->_d.gradient.linear.simple.xx16x16;
+    int len = ctx->_d.gradient.base.len16x16;
+
     int pos = Math::fixed16x16FromFloat(fetcher->_d.gradient.linear.simple.pt) + x * xx;
 
-    uint32_t c0 = table[0];
-    uint32_t c1 = table[ctx->_d.gradient.base.len];
+    typename Accessor::Pixel c0;
+    typename Accessor::Pixel c1;
+
+    accessor.fetchRaw(c0, 0);
+    accessor.fetchRaw(c1, ctx->_d.gradient.base.len);
 
     // ------------------------------------------------------------------------
     // [Forward Direction]
@@ -206,17 +211,17 @@ struct FOG_NO_EXPORT PGradientLinear
 
         while (pos <= 0)
         {
-          ((uint32_t*)dst)[0] = c0;
+          accessor.storePix(dst, c0);
           pos += xx;
-          dst += 4;
+          dst += Accessor::DST_BPP;
           if (--w == 0) goto _FetchForwardSkip;
         }
 
         while (pos < len)
         {
-          ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
+          accessor.storeRaw(dst, pos >> 16);
           pos += xx;
-          dst += 4;
+          dst += Accessor::DST_BPP;
           if (--w == 0) goto _FetchForwardSkip;
         }
 
@@ -244,17 +249,17 @@ _FetchForwardSkip:
 
         while (pos >= len)
         {
-          ((uint32_t*)dst)[0] = c1;
+          accessor.storePix(dst, c1);
           pos += xx;
-          dst += 4;
+          dst += Accessor::DST_BPP;
           if (--w == 0) goto _FetchBackwardSkip;
         }
 
         while (pos >= 0)
         {
-          ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
+          accessor.storeRaw(dst, pos >> 16);
           pos += xx;
-          dst += 4;
+          dst += Accessor::DST_BPP;
           if (--w == 0) goto _FetchBackwardSkip;
         }
         goto _FetchSolidLoop;
@@ -278,15 +283,15 @@ _FetchBackwardSkip:
       if (pos > len)
         c0 = c1;
       else if (pos >= 0)
-        c0 = table[(uint)(pos >> 16)];
+        accessor.fetchRaw(c0, pos >> 16);
     }
 
     P_FETCH_SPAN8_BEGIN()
       P_FETCH_SPAN8_SET_CURRENT()
       do {
 _FetchSolidLoop:
-        ((uint32_t*)dst)[0] = c0;
-        dst += 4;
+        accessor.storePix(dst, c0);
+        dst += Accessor::DST_BPP;
       } while (--w);
       P_FETCH_SPAN8_NEXT()
     P_FETCH_SPAN8_END()
@@ -299,11 +304,16 @@ _End:
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
 
-  static void FOG_FASTCALL fetch_simple_nearest_repeat_prgb32_xrgb32(
+  // ==========================================================================
+  // [Fetch - Simple - Repeat]
+  // ==========================================================================
+
+  template<typename Accessor>
+  static void FOG_FASTCALL fetch_simple_nearest_repeat(
     RasterPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RasterPattern* ctx = fetcher->getContext();
-    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
+    Accessor accessor(ctx);
 
     P_FETCH_SPAN8_INIT()
 
@@ -323,9 +333,9 @@ _End:
         P_FETCH_SPAN8_SET_CURRENT()
 
         do {
-          ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
+          accessor.storeRaw(dst, pos >> 16);
           if ((pos += xx) >= len) pos -= len;
-          dst += 4;
+          dst += Accessor::DST_BPP;
         } while (--w);
 
         P_FETCH_SPAN8_HOLE(
@@ -346,9 +356,9 @@ _End:
         P_FETCH_SPAN8_SET_CURRENT()
 
         do {
-          ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
+          accessor.storeRaw(dst, pos >> 16);
           if ((pos += xx) < 0) pos += len;
-          dst += 4;
+          dst += Accessor::DST_BPP;
         } while (--w);
 
         P_FETCH_SPAN8_HOLE(
@@ -364,13 +374,14 @@ _End:
 
     else
     {
-      uint32_t c0 = table[(uint)(pos >> 16)];
+      typename Accessor::Pixel c0;
+      accessor.fetchRaw(c0, pos >> 16);
 
       P_FETCH_SPAN8_BEGIN()
         P_FETCH_SPAN8_SET_CURRENT()
         do {
-          ((uint32_t*)dst)[0] = c0;
-          dst += 4;
+          accessor.storePix(dst, c0);
+          dst += Accessor::DST_BPP;
         } while (--w);
         P_FETCH_SPAN8_NEXT()
       P_FETCH_SPAN8_END()
@@ -383,11 +394,16 @@ _End:
     fetcher->_d.gradient.linear.simple.pt += fetcher->_d.gradient.linear.simple.dt;
   }
 
-  static void FOG_FASTCALL fetch_simple_nearest_reflect_prgb32_xrgb32(
+  // ==========================================================================
+  // [Fetch - Simple - Reflect]
+  // ==========================================================================
+
+  template<typename Accessor>
+  static void FOG_FASTCALL fetch_simple_nearest_reflect(
     RasterPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
     const RasterPattern* ctx = fetcher->getContext();
-    const uint32_t* table = reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table);
+    Accessor accessor(ctx);
 
     P_FETCH_SPAN8_INIT()
 
@@ -397,7 +413,12 @@ _End:
 
     int pos = Helpers::p_repeat_integer(
       Math::fixed16x16FromFloat(fetcher->_d.gradient.linear.simple.pt) + x * xx, len2);
-    if (pos > len) { pos = len2 - pos; xx = -xx; }
+
+    if (pos > len)
+    {
+      pos = len2 - pos;
+      xx = -xx;
+    }
 
     // ------------------------------------------------------------------------
     // [Forward / Backward Direction]
@@ -411,20 +432,20 @@ _End:
         if (xx > 0)
         {
           do {
-            ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
+            accessor.storeRaw(dst, pos >> 16);
             if ((pos += xx) >= len) {
               pos = len2 - pos;
               xx = -xx;
               goto _Backward;
             }
 _Forward:
-            dst += 4;
+            dst += Accessor::DST_BPP;
           } while (--w);
         }
         else
         {
           do {
-            ((uint32_t*)dst)[0] = table[(uint)(pos >> 16)];
+            accessor.storeRaw(dst, pos >> 16);
             if ((pos += xx) < 0)
             {
               pos = -pos;
@@ -432,14 +453,18 @@ _Forward:
               goto _Forward;
             }
 _Backward:
-            dst += 4;
+            dst += Accessor::DST_BPP;
           } while (--w);
         }
 
         P_FETCH_SPAN8_HOLE(
         {
           pos = Helpers::p_repeat_integer(pos + xx * hole, len2);
-          if (pos > len) { pos = len2 - pos; xx = -xx; }
+          if (pos > len)
+          {
+            pos = len2 - pos;
+            xx = -xx;
+          }
         })
       P_FETCH_SPAN8_END()
     }
@@ -450,13 +475,14 @@ _Backward:
 
     else
     {
-      uint32_t c0 = table[(uint)(pos >> 16)];
+      typename Accessor::Pixel c0;
+      accessor.fetchRaw(c0, pos >> 16);
 
       P_FETCH_SPAN8_BEGIN()
         P_FETCH_SPAN8_SET_CURRENT()
         do {
-          ((uint32_t*)dst)[0] = c0;
-          dst += 4;
+          accessor.storePix(dst, c0);
+          dst += Accessor::DST_BPP;
         } while (--w);
         P_FETCH_SPAN8_NEXT()
       P_FETCH_SPAN8_END()
@@ -496,7 +522,7 @@ _Backward:
       do {
         typename Accessor::Pixel c0;
         accessor.fetchAtD(c0, off + px / pz);
-        accessor.store(dst, c0);
+        accessor.storePix(dst, c0);
 
         dst += Accessor::DST_BPP;
         px += xx;

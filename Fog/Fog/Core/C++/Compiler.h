@@ -88,8 +88,6 @@
 
 //! @}
 
-// TODO: Add support for override keyword.
-
 #if defined(FOG_IDE)
 # include "CompilerIde.h"
 #elif defined(__BORLANDC__)
@@ -103,6 +101,10 @@
 #else
 # error "Fog::Core::C++ - Unsupported C++ Compiler, please fill a bug report."
 #endif
+
+#if !defined(FOG_CC_HAS_OVERRIDE)
+# define override
+#endif // FOG_CC_HAS_OVERRIDE
 
 // ============================================================================
 // [Fog::Core::Build - FOG_API]

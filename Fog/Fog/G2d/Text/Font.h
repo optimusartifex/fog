@@ -134,6 +134,10 @@ struct FOG_NO_EXPORT Font
     fog_api.font_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Font(Font&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE Font(FontData* d) :
     _d(d)
   {

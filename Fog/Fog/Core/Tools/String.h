@@ -339,10 +339,18 @@ struct FOG_NO_EXPORT StringA
     fog_api.stringa_ctor(this);
   }
 
-  explicit FOG_INLINE StringA(const char* str, size_t length = DETECT_LENGTH)
+  FOG_INLINE StringA(const StringA& other)
   {
-    StubA stub(str, length);
-    fog_api.stringa_ctorStubA(this, &stub);
+    fog_api.stringa_ctorCopyA(this, &other);
+  }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE StringA(StringA&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE StringA(const StringA& other, const Range& range)
+  {
+    fog_api.stringa_ctorSubstr(this, &other, &range);
   }
 
   explicit FOG_INLINE StringA(const StubA& str)
@@ -350,31 +358,43 @@ struct FOG_NO_EXPORT StringA
     fog_api.stringa_ctorStubA(this, &str);
   }
 
-  FOG_INLINE StringA(const StringA& other)
+  explicit FOG_INLINE StringA(const char* str, size_t length = DETECT_LENGTH)
   {
-    fog_api.stringa_ctorCopyA(this, &other);
+    StubA stub(str, length);
+    fog_api.stringa_ctorStubA(this, &stub);
   }
 
-  FOG_INLINE StringA(const StringA& other, const Range& range)
+  FOG_INLINE StringA(const StringA& a, const StringA& b)
   {
-    fog_api.stringa_ctorSubstr(this, &other, &range);
+    fog_api.stringa_ctorStringAStringA(this, &a, &b);
   }
 
-  FOG_INLINE StringA(const char* str1, const char* str2)
+  FOG_INLINE StringA(const StringA& a, const StubA& b)
   {
-    StubA stub1(str1);
-    StubA stub2(str2);
-    fog_api.stringa_ctorStubA2(this, &stub1, &stub2);
+    fog_api.stringa_ctorStringAStubA(this, &a, &b);
   }
 
-  FOG_INLINE StringA(const StubA& str1, const StubA& str2)
+  FOG_INLINE StringA(const StringA& a, const char* b)
   {
-    fog_api.stringa_ctorStubA2(this, &str1, &str2);
+    StubA sb(b);
+    fog_api.stringa_ctorStringAStubA(this, &a, &sb);
   }
 
-  FOG_INLINE StringA(const StringA& other1, const StringA& other2)
+  FOG_INLINE StringA(const StubA& a, const StringA& b)
   {
-    fog_api.stringa_ctorCopyA2(this, &other1, &other2);
+    fog_api.stringa_ctorStubAStringA(this, &a, &b);
+  }
+
+  FOG_INLINE StringA(const StubA& a, const StubA& b)
+  {
+    fog_api.stringa_ctorStubAStubA(this, &a, &b);
+  }
+
+  FOG_INLINE StringA(const char* a, const char* b)
+  {
+    StubA sa(a);
+    StubA sb(b);
+    fog_api.stringa_ctorStubAStubA(this, &sa, &sb);
   }
 
   explicit FOG_INLINE StringA(_Uninitialized)
@@ -1800,6 +1820,19 @@ struct FOG_NO_EXPORT StringA
   }
 
   // --------------------------------------------------------------------------
+  // [RValue]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE StringDataA* _acquireData()
+  {
+    StringDataA* d = _d;
+    _d = NULL;
+    return d;
+  }
+#endif // FOG_CC_HAS_RVALUE
+
+  // --------------------------------------------------------------------------
   // [Utf8 Support]
   // --------------------------------------------------------------------------
 
@@ -2024,6 +2057,11 @@ struct FOG_NO_EXPORT StringW
     fog_api.stringw_ctor(this);
   }
 
+  FOG_INLINE StringW(const StringW& other)
+  {
+    fog_api.stringw_ctorCopyW(this, &other);
+  }
+
   explicit FOG_INLINE StringW(const Ascii8& stub)
   {
     fog_api.stringw_ctorStubA(this, &stub);
@@ -2039,43 +2077,67 @@ struct FOG_NO_EXPORT StringW
     fog_api.stringw_ctorCodec(this, &stub, fog_api.textcodec_oCache[TEXT_CODEC_CACHE_UTF8]);
   }
 
+  explicit FOG_INLINE StringW(const StubW& stub)
+  {
+    fog_api.stringw_ctorStubW(this, &stub);
+  }
+
   explicit FOG_INLINE StringW(const CharW* str, size_t length = DETECT_LENGTH)
   {
     StubW stub(str, length);
     fog_api.stringw_ctorStubW(this, &stub);
   }
 
-  explicit FOG_INLINE StringW(const StubW& stub)
-  {
-    fog_api.stringw_ctorStubW(this, &stub);
-  }
-
-  FOG_INLINE StringW(const StringW& other)
-  {
-    fog_api.stringw_ctorCopyW(this, &other);
-  }
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE StringW(StringW&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE StringW(const StringW& other, const Range& range)
   {
     fog_api.stringw_ctorSubstr(this, &other, &range);
   }
 
-  FOG_INLINE StringW(const CharW* str1, const CharW* str2)
+  FOG_INLINE StringW(const StringW& a, const StringW& b)
   {
-    StubW stub1(str1);
-    StubW stub2(str2);
-
-    fog_api.stringw_ctorStubW2(this, &stub1, &stub2);
+    fog_api.stringw_ctorStringWStringW(this, &a, &b);
   }
 
-  FOG_INLINE StringW(const StubW& stub1, const StubW& stub2)
+  FOG_INLINE StringW(const StringW& a, const StubW& b)
   {
-    fog_api.stringw_ctorStubW2(this, &stub1, &stub2);
+    fog_api.stringw_ctorStringWStubW(this, &a, &b);
   }
 
-  FOG_INLINE StringW(const StringW& other1, const StringW& other2)
+  FOG_INLINE StringW(const StringW& a, const Ascii8& b)
   {
-    fog_api.stringw_ctorCopyW2(this, &other1, &other2);
+    fog_api.stringw_ctorStringWStubA(this, &a, &b);
+  }
+
+  FOG_INLINE StringW(const StubW& a, const StringW& b)
+  {
+    fog_api.stringw_ctorStubWStringW(this, &a, &b);
+  }
+
+  FOG_INLINE StringW(const StubW& a, const StubW& b)
+  {
+    fog_api.stringw_ctorStubWStubW(this, &a, &b);
+  }
+
+  FOG_INLINE StringW(const CharW* a, const CharW* b)
+  {
+    StubW sa(a);
+    StubW sb(b);
+
+    fog_api.stringw_ctorStubWStubW(this, &sa, &sb);
+  }
+
+  FOG_INLINE StringW(const Ascii8& a, const StringW& b)
+  {
+    fog_api.stringw_ctorStubAStringW(this, &a, &b);
+  }
+
+  FOG_INLINE StringW(const Ascii8& a, const Ascii8& b)
+  {
+    fog_api.stringw_ctorStubAStubA(this, &a, &b);
   }
 
   explicit FOG_INLINE StringW(_Uninitialized)
@@ -3967,6 +4029,19 @@ struct FOG_NO_EXPORT StringW
   }
 
   // --------------------------------------------------------------------------
+  // [RValue]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE StringDataW* _acquireData()
+  {
+    StringDataW* d = _d;
+    _d = NULL;
+    return d;
+  }
+#endif // FOG_CC_HAS_RVALUE
+
+  // --------------------------------------------------------------------------
   // [Utf16 Support]
   // --------------------------------------------------------------------------
 
@@ -4029,6 +4104,9 @@ struct FOG_NO_EXPORT StringW
 
   static FOG_INLINE StringW fromUtf8(const char* data, size_t length = DETECT_LENGTH) { return StringW(Utf8(data, length)); }
   static FOG_INLINE StringW fromUtf8(const Local8& data) { return StringW(data); }
+
+  static FOG_INLINE StringW fromUtf16(const char* data, size_t length = DETECT_LENGTH) { return StringW(StubW(reinterpret_cast<const CharW*>(data), length)); }
+  static FOG_INLINE StringW fromUtf16(const StubW& data) { return StringW(data); }
 
   static FOG_INLINE StringW fromTwo(const CharW* str1, const CharW* str2) { return StringW(str1, str2); }
   static FOG_INLINE StringW fromTwo(const StubW& str1, const StubW& str2) { return StringW(str1, str2); }
@@ -4189,15 +4267,22 @@ _FOG_CHAR_W(StringData)
 // ============================================================================
 
 static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, const Fog::StringA& b) { return Fog::StringA(a, b); }
+static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, const Fog::StubA&   b) { return Fog::StringA(a, b); }
+static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, const char*         b) { return Fog::StringA(a, Fog::StubA(b)); }
+static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, const Fog::CharA&   b) { return Fog::StringA(a, Fog::StubA(&b, 1)); }
+static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, char                b) { return Fog::StringA(a, Fog::StubA(&b, 1)); }
 
-static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, char b) { Fog::StringA t(a); t.append(b); return t; }
-static FOG_INLINE const Fog::StringA operator+(char a, const Fog::StringA& b) { Fog::StringA t(b); t.append(a); return t; }
+static FOG_INLINE const Fog::StringA operator+(const Fog::StubA& a, const Fog::StringA& b) { return Fog::StringA(a, b); }
+static FOG_INLINE const Fog::StringA operator+(const char*       a, const Fog::StringA& b) { return Fog::StringA(Fog::StubA(a), b); }
+static FOG_INLINE const Fog::StringA operator+(const Fog::CharA& a, const Fog::StringA& b) { return Fog::StringA(Fog::StubA(&a, 1), b); }
+static FOG_INLINE const Fog::StringA operator+(char              a, const Fog::StringA& b) { return Fog::StringA(Fog::StubA(&a, 1), b); }
 
-static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, const Fog::StubA& b) { Fog::StringA t(a); t.append(b); return t; }
-static FOG_INLINE const Fog::StringA operator+(const Fog::StubA& b, const Fog::StringA& a) { Fog::StringA t(b); t.append(a); return t; }
-
-static FOG_INLINE const Fog::StringA operator+(const Fog::StringA& a, const char* b) { Fog::StringA t(a); t.append(b); return t; }
-static FOG_INLINE const Fog::StringA operator+(const char* b, const Fog::StringA& a) { Fog::StringA t(b); t.append(a); return t; }
+#if defined(FOG_CC_HAS_RVALUE)
+static FOG_INLINE Fog::StringA operator+(Fog::StringA&& a, const Fog::StringA& b) { a.append(b); return Fog::StringA(a._acquireData()); }
+static FOG_INLINE Fog::StringA operator+(Fog::StringA&& a, const Fog::StubA& b) { a.append(b); return Fog::StringA(a._acquireData()); }
+static FOG_INLINE Fog::StringA operator+(Fog::StringA&& a, const Fog::CharA& b) { a.append(b); return Fog::StringA(a._acquireData()); }
+static FOG_INLINE Fog::StringA operator+(Fog::StringA&& a, char b) { a.append(b); return Fog::StringA(a._acquireData()); }
+#endif // FOG_CC_HAS_RVALUE
 
 static FOG_INLINE bool operator==(const Fog::StringA& a, const Fog::StringA& b) { return  a.eq(b); }
 static FOG_INLINE bool operator!=(const Fog::StringA& a, const Fog::StringA& b) { return !a.eq(b); }
@@ -4234,16 +4319,22 @@ static FOG_INLINE bool operator< (const char* a, const Fog::StringA& b) { return
 static FOG_INLINE bool operator>=(const char* a, const Fog::StringA& b) { return  b.compare(a) <= 0; }
 static FOG_INLINE bool operator> (const char* a, const Fog::StringA& b) { return  b.compare(a) <  0; }
 
-static FOG_INLINE const Fog::StringW operator+(const Fog::StringW& a, const Fog::StringW& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::StringW& a, const Fog::StringW& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::StringW& a, const Fog::Ascii8& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::StringW& a, const Fog::StubW& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::StringW& a, const Fog::CharW& b) { return Fog::StringW(a, Fog::StubW(&b, 1)); }
 
-static FOG_INLINE const Fog::StringW operator+(const Fog::StringW& a, const Fog::CharW& b) { Fog::StringW t(a); t.append(b); return t; }
-static FOG_INLINE const Fog::StringW operator+(const Fog::CharW& a, const Fog::StringW& b) { Fog::StringW t(b); t.append(a); return t; }
+static FOG_INLINE Fog::StringW operator+(const Fog::StubW& a, const Fog::StringW& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::StubW& a, const Fog::StubW& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::Ascii8& a, const Fog::StringW& b) { return Fog::StringW(a, b); }
+static FOG_INLINE Fog::StringW operator+(const Fog::CharW& a, const Fog::StringW& b) { return Fog::StringW(Fog::StubW(&a, 1), b); }
 
-static FOG_INLINE const Fog::StringW operator+(const Fog::StringW& a, const Fog::Ascii8& b) { Fog::StringW t(a); t.append(b); return t; }
-static FOG_INLINE const Fog::StringW operator+(const Fog::StringW& a, const Fog::StubW& b) { Fog::StringW t(a); t.append(b); return t; }
-
-static FOG_INLINE const Fog::StringW operator+(const Fog::Ascii8& b, const Fog::StringW& a) { Fog::StringW t(b); t.append(a); return t; }
-static FOG_INLINE const Fog::StringW operator+(const Fog::StubW& b, const Fog::StringW& a) { Fog::StringW t(b); t.append(a); return t; }
+#if defined(FOG_CC_HAS_RVALUE)
+static FOG_INLINE Fog::StringW operator+(Fog::StringW&& a, const Fog::StringW& b) { a.append(b); return Fog::StringW(a._acquireData()); }
+static FOG_INLINE Fog::StringW operator+(Fog::StringW&& a, const Fog::StubW& b) { a.append(b); return Fog::StringW(a._acquireData()); }
+static FOG_INLINE Fog::StringW operator+(Fog::StringW&& a, const Fog::Ascii8& b) { a.append(b); return Fog::StringW(a._acquireData()); }
+static FOG_INLINE Fog::StringW operator+(Fog::StringW&& a, const Fog::CharW& b) { a.append(b); return Fog::StringW(a._acquireData()); }
+#endif // FOG_CC_HAS_RVALUE
 
 static FOG_INLINE bool operator==(const Fog::StringW& a, const Fog::StringW& b) { return  a.eq(b); }
 static FOG_INLINE bool operator!=(const Fog::StringW& a, const Fog::StringW& b) { return !a.eq(b); }

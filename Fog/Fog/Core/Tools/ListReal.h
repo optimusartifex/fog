@@ -45,12 +45,16 @@ struct List<float> : public ListImpl< float, TypeInfo<float>::TYPE, 1, 1 >
     fog_api.list_untyped_ctor(this);
   }
 
-  FOG_INLINE List(const List& other)
+  FOG_INLINE List(const List<float>& other)
   {
     fog_api.list_untyped_ctorCopy(this, &other);
   }
 
-  FOG_INLINE List(const List& other, const Range& range)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE List(List<float>&& other) { ListUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE List(const List<float>& other, const Range& range)
   {
     _ctorSlice(other, range);
   }
@@ -139,12 +143,16 @@ struct List<double> : public ListImpl< double, TypeInfo<double>::TYPE, 1, 1 >
     fog_api.list_untyped_ctor(this);
   }
 
-  FOG_INLINE List(const List& other)
+  FOG_INLINE List(const List<double>& other)
   {
     fog_api.list_untyped_ctorCopy(this, &other);
   }
 
-  FOG_INLINE List(const List& other, const Range& range)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE List(List<double>&& other) { ListUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE List(const List<double>& other, const Range& range)
   {
     _ctorSlice(other, range);
   }

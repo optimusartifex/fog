@@ -98,6 +98,10 @@ struct FOG_NO_EXPORT FileMapping
     fog_api.filemapping_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FileMapping(FileMapping&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~FileMapping()
   {
     fog_api.filemapping_dtor(this);

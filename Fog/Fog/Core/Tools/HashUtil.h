@@ -173,13 +173,13 @@ FOG_STATIC_INLINE_T uint32_t hash<_Type_ &>(_Type_& k) _Code_ \
 template<> \
 FOG_STATIC_INLINE_T uint32_t hash<const _Type_ &>(const _Type_& k) _Code_
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
 FOG_DECLARE_HASHABLE(char          , { return (uint8_t)k;        })
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
-#if defined(FOG_CC_HAVE_NATIVE_WCHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_WCHAR_TYPE)
 FOG_DECLARE_HASHABLE(wchar_t       , { return k;                 })
-#endif // FOG_CC_HAVE_NATIVE_WCHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_WCHAR_TYPE
 
 FOG_DECLARE_HASHABLE(signed char   , { return (unsigned char)k;  })
 FOG_DECLARE_HASHABLE(unsigned char , { return (unsigned char)k;  })

@@ -64,7 +64,7 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
   const PointD* pts = src->getVertices();
 
   bool hasInitial = false;
-  Face::m128d xmmLastMoveTo;
+  Face::m128d xmmLastMoveTo = _mm_setzero_pd();
 
   if (((size_t)pts & 0xF) == 0)
   {
@@ -353,10 +353,12 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
   return PATH_CLIPPER_MEASURE_BOUNDED;
 
 _Unbounded:
+  Face::m128dStore16u(&self->_lastMoveTo, xmmLastMoveTo);
   self->_lastIndex = (size_t)(cmd - src->getCommands());
   return PATH_CLIPPER_MEASURE_UNBOUNDED;
 
 _Invalid:
+  Face::m128dStore16u(&self->_lastMoveTo, xmmLastMoveTo);
   return PATH_CLIPPER_MEASURE_INVALID;
 }
 

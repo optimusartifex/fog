@@ -69,6 +69,10 @@ struct FOG_NO_EXPORT FeColorLutArray
     fog_api.fecolorlutarray_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FeColorLutArray(FeColorLutArray&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE FeColorLutArray(FeColorLutArrayData* d) :
     _d(d)
   {

@@ -39,12 +39,16 @@ struct List<Var> : public ListUntyped
     fog_api.list_var_ctor(this);
   }
 
-  FOG_INLINE List(const List& other)
+  FOG_INLINE List(const List<Var>& other)
   {
     fog_api.list_untyped_ctorCopy(this, &other);
   }
 
-  FOG_INLINE List(const List& other, const Range& range)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE List(List<Var>&& other) { ListUntyped::_d = other._d; other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE List(const List<Var>& other, const Range& range)
   {
     fog_api.list_var_ctorSlice(this, &other, &range);
   }

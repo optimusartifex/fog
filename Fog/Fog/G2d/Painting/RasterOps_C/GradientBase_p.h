@@ -281,18 +281,16 @@ struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Base
   enum { DST_BPP = 4 };
 
   FOG_INLINE PGradientAccessor_PRGB32_Base(const RasterPattern* ctx) :
-    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table))
-  {
-  }
+    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)) {}
 
-  FOG_INLINE void fetchTable(Pixel& dst, int position)
-  {
-    dst = _table[position];
-  }
+  FOG_INLINE void fetchRaw(Pixel& dst, int position) { dst = _table[position]; }
+  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Face::p32Store4a(dst, src); }
 
-  FOG_INLINE void store(uint8_t* dst, const Pixel& src)
+  FOG_INLINE void storeRaw(uint8_t* dst, int position)
   {
-    Face::p32Store4a(dst, src);
+    Pixel pixel;
+    fetchRaw(pixel, position);
+    storePix(dst, pixel);
   }
 
   // --------------------------------------------------------------------------
@@ -300,6 +298,47 @@ struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Base
   // --------------------------------------------------------------------------
 
   const uint32_t* _table;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - PGradientAccessor_A8_Base]
+// ============================================================================
+
+struct FOG_NO_EXPORT PGradientAccessor_A8_Base
+{
+  typedef uint8_t Pixel;
+  enum { DST_BPP = 1 };
+
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
+  FOG_INLINE PGradientAccessor_A8_Base(const RasterPattern* ctx) :
+    _table(reinterpret_cast<const uint8_t*>(ctx->_d.gradient.base.table) + PIXEL_ARGB32_POS_A) {}
+
+  FOG_INLINE void fetchRaw(Pixel& dst, int position) { dst = _table[position * 4]; }
+  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Face::p32Store1b(dst, src); }
+#else
+  FOG_INLINE PGradientAccessor_A8_Base(const RasterPattern* ctx) :
+    _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)) {}
+
+  FOG_INLINE void fetchRaw(Pixel& dst, int position) { dst = (uint8_t)(_table[position] >> 24); }
+  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Face::p32Store1b(dst, src); }
+#endif // FOG_ARCH_...
+
+  FOG_INLINE void storeRaw(uint8_t* dst, int position)
+  {
+    Pixel pixel;
+    fetchRaw(pixel, position);
+    storePix(dst, pixel);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
+  const uint8_t* _table;
+#else
+  const uint32_t* _table;
+#endif // FOG_ARCH_...
 };
 
 // ============================================================================
@@ -321,7 +360,37 @@ struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Pad : public PGradientAccessor_PRG
       d = 0.0;
     else if (d > _len_d)
       d = _len_d;
-    fetchTable(dst, (int)d);
+    fetchRaw(dst, (int)d);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  int _len;
+  double _len_d;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - PGradientAccessor_A8_Pad]
+// ============================================================================
+
+struct FOG_NO_EXPORT PGradientAccessor_A8_Pad : public PGradientAccessor_A8_Base
+{
+  FOG_INLINE PGradientAccessor_A8_Pad(const RasterPattern* ctx) :
+    PGradientAccessor_A8_Base(ctx),
+    _len(ctx->_d.gradient.base.len),
+    _len_d(ctx->_d.gradient.base.len)
+  {
+  }
+
+  FOG_INLINE void fetchAtD(Pixel& dst, double d)
+  {
+    if (d < 0.0)
+      d = 0.0;
+    else if (d > _len_d)
+      d = _len_d;
+    fetchRaw(dst, (int)d);
   }
 
   // --------------------------------------------------------------------------
@@ -346,7 +415,31 @@ struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Repeat : public PGradientAccessor_
 
   FOG_INLINE void fetchAtD(Pixel& dst, double d)
   {
-    fetchTable(dst, (int)d & _lenMask);
+    fetchRaw(dst, (int)d & _lenMask);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint _lenMask;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - PGradientAccessor_A8_Repeat]
+// ============================================================================
+
+struct FOG_NO_EXPORT PGradientAccessor_A8_Repeat : public PGradientAccessor_A8_Base
+{
+  FOG_INLINE PGradientAccessor_A8_Repeat(const RasterPattern* ctx) :
+    PGradientAccessor_A8_Base(ctx),
+    _lenMask(ctx->_d.gradient.base.len - 1)
+  {
+  }
+
+  FOG_INLINE void fetchAtD(Pixel& dst, double d)
+  {
+    fetchRaw(dst, (int)d & _lenMask);
   }
 
   // --------------------------------------------------------------------------
@@ -375,7 +468,37 @@ struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Reflect : public PGradientAccessor
 
     i &= _lenMask2;
     if (i > (uint)_len) i ^= _lenMask2;
-    fetchTable(dst, i);
+    fetchRaw(dst, i);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  int _len;
+  uint _lenMask2;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - PGradientAccessor_A8_Reflect]
+// ============================================================================
+
+struct FOG_NO_EXPORT PGradientAccessor_A8_Reflect : public PGradientAccessor_A8_Base
+{
+  FOG_INLINE PGradientAccessor_A8_Reflect(const RasterPattern* ctx) :
+    PGradientAccessor_A8_Base(ctx),
+    _len(ctx->_d.gradient.base.len),
+    _lenMask2(ctx->_d.gradient.base.len * 2 - 1)
+  {
+  }
+
+  FOG_INLINE void fetchAtD(Pixel& dst, double d)
+  {
+    uint i = (int)d;
+
+    i &= _lenMask2;
+    if (i > (uint)_len) i ^= _lenMask2;
+    fetchRaw(dst, i);
   }
 
   // --------------------------------------------------------------------------

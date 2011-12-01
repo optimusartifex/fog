@@ -99,6 +99,10 @@ struct FOG_NO_EXPORT FileInfo
     fog_api.fileinfo_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FileInfo(FileInfo&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE FileInfo(FileInfoData* d) :
     _d(d)
   {

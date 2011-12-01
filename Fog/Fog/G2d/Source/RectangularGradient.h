@@ -59,8 +59,13 @@ struct FOG_NO_EXPORT RectangularGradientF : public GradientF
   FOG_INLINE const PointF& getFocal() const { return _pts[2]; }
 
   FOG_INLINE void setFirst(const PointF& p) { _pts[0] = p; }
+  FOG_INLINE void setFirst(float x, float y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setSecond(const PointF& p) { _pts[1] = p; }
+  FOG_INLINE void setSecond(float x, float y) { _pts[1].set(x, y); }
+
   FOG_INLINE void setFocal(const PointF& p) { _pts[2] = p; }
+  FOG_INLINE void setFocal(float x, float y) { _pts[2].set(x, y); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -113,8 +118,13 @@ struct FOG_NO_EXPORT RectangularGradientD : public GradientD
   FOG_INLINE const PointD& getFocal() const { return _pts[2]; }
 
   FOG_INLINE void setFirst(const PointD& p) { _pts[0] = p; }
+  FOG_INLINE void setFirst(double x, double y) { _pts[0].set(x, y); }
+
   FOG_INLINE void setSecond(const PointD& p) { _pts[1] = p; }
+  FOG_INLINE void setSecond(double x, double y) { _pts[1].set(x, y); }
+
   FOG_INLINE void setFocal(const PointD& p) { _pts[2] = p; }
+  FOG_INLINE void setFocal(double x, double y) { _pts[2].set(x, y); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

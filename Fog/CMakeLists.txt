@@ -84,11 +84,37 @@ Set(FOG_CXX_FLAGS_SSE3 "")
 Set(FOG_CXX_FLAGS_SSSE3 "")
 
 # =============================================================================
-# [C++ Compiler - GCC Support]
+# [C++ Compiler - MSC]
+# =============================================================================
+
+If(MSVC)
+  Set(FOG_CXX_FLAGS_RELEASE "/Oi /Oy /GF /GS- /GR-")
+  Set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FOG_CXX_FLAGS_RELEASE}")
+  Set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${FOG_CXX_FLAGS_RELEASE}")
+  Set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${FOG_CXX_FLAGS_RELEASE}")
+
+  Set(FOG_CXX_FLAGS_OPTIMIZE "/Ot")
+  Set(FOG_CXX_FLAGS_MMX "${FOG_CXX_FLAGS_OPTIMIZE}")
+  Set(FOG_CXX_FLAGS_3DNOW "${FOG_CXX_FLAGS_OPTIMIZE}")
+  Set(FOG_CXX_FLAGS_SSE "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE")
+  Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
+  Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
+  Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
+
+  # Enable multi-process compilation by default.
+  If(MSVC80 OR MSVC90 OR MSVC10)
+     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+  EndIf()
+EndIf()
+
+# =============================================================================
+# [C++ Compiler - GCC]
 # =============================================================================
 
 If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Check for supported compiler flags.
+  Check_CXX_Compiler_Flag("-std=c++0x" FOG_CC_HAS_CPP0X)
+
   Check_CXX_Compiler_Flag("-flto" FOG_CC_HAS_FLTO)
   Check_CXX_Compiler_Flag("-finline-functions" FOG_CC_HAS_INLINE_FUNCTIONS)
   Check_CXX_Compiler_Flag("-fmerge-all-constants" FOG_CC_HAS_FMERGE_ALL_CONSTANTS)
@@ -103,6 +129,11 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Hide all symbols by default. Exported symbols are declared by FOG_API.
   If (NOT MINGW)
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+  EndIf()
+
+  # -std=c++0x
+  If (${FOG_CC_HAS_CPP0X})
+    Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
   EndIf()
 
   # -fmerge-all-constants / -fno-keep-static-consts
@@ -155,9 +186,8 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   EndIf()
 
   # -O3 doesn't improve the performance, because all inner loops used by Fog
-  # Use -O2 as a standard optimization level when running release builds. The
   # are already optimized - there is nothing compiler can do. Another argument
-  # to use -O2 is that -O3 produces larger binaries without speed improvements.
+  # to use -O2 is that -O3 produces larger binary without speed improvements.
   Set(FOG_CXX_FLAGS_OPTIMIZE "-O2")
 
   # Setup FOG_CFLAGS specific to GCC.
@@ -167,30 +197,6 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} -msse -msse2")
   Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -msse -msse2 -msse3")
   Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} -msse -msse2 -msse3 -mssse3")
-EndIf()
-
-# =============================================================================
-# [C++ Compiler - MSVC Support]
-# =============================================================================
-
-If(MSVC)
-  Set(FOG_CXX_FLAGS_RELEASE "/Oi /Oy /GF /GS- /GR-")
-  Set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FOG_CXX_FLAGS_RELEASE}")
-  Set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${FOG_CXX_FLAGS_RELEASE}")
-  Set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${FOG_CXX_FLAGS_RELEASE}")
-
-  Set(FOG_CXX_FLAGS_OPTIMIZE "/Ot")
-  Set(FOG_CXX_FLAGS_MMX "${FOG_CXX_FLAGS_OPTIMIZE}")
-  Set(FOG_CXX_FLAGS_3DNOW "${FOG_CXX_FLAGS_OPTIMIZE}")
-  Set(FOG_CXX_FLAGS_SSE "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE")
-  Set(FOG_CXX_FLAGS_SSE2 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
-  Set(FOG_CXX_FLAGS_SSE3 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
-  Set(FOG_CXX_FLAGS_SSSE3 "${FOG_CXX_FLAGS_OPTIMIZE} /arch:SSE2")
-
-  # Enable multi-process compilation by default.
-  If(MSVC80 OR MSVC90 OR MSVC10)
-     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-  EndIf()
 EndIf()
 
 # =============================================================================
@@ -234,7 +240,7 @@ If(FOG_OS_WINDOWS)
 EndIf()
 
 # =============================================================================
-# [Architecture - Endianness]
+# [Architecture - Endian]
 # =============================================================================
 
 Include(TestBigEndian)

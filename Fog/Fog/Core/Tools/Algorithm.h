@@ -19,28 +19,28 @@ namespace Algorithm {
 //! @{
 
 // ============================================================================
-// [Fog::Algorithm::QSortCore<>]
+// [Fog::Algorithm::QSortImpl<TypeT>]
 // ============================================================================
 
-template<typename T>
-struct QSortCore : public T
+template<typename TypeT>
+struct QSortImpl : public TypeT
 {
   FOG_INLINE uint8_t* _med3(uint8_t* a, uint8_t* b, uint8_t* c);
   FOG_NO_INLINE void _sort(uint8_t* base, size_t nmemb);
 };
 
-template<typename T>
-uint8_t* QSortCore<T>::_med3(uint8_t* a, uint8_t* b, uint8_t* c)
+template<typename TypeT>
+uint8_t* QSortImpl<TypeT>::_med3(uint8_t* a, uint8_t* b, uint8_t* c)
 {
-  int cmp_ab = T::_compare(a, b);
-  int cmp_bc = T::_compare(b, c);
+  int cmp_ab = TypeT::_compare(a, b);
+  int cmp_bc = TypeT::_compare(b, c);
 
-  return cmp_ab < 0 ? (cmp_bc < 0 ? b : (T::_compare(a, c) < 0 ? c : a))
-                    : (cmp_bc > 0 ? b : (T::_compare(a, c) < 0 ? a : c));
+  return cmp_ab < 0 ? (cmp_bc < 0 ? b : (TypeT::_compare(a, c) < 0 ? c : a))
+                    : (cmp_bc > 0 ? b : (TypeT::_compare(a, c) < 0 ? a : c));
 }
 
-template<typename T>
-void QSortCore<T>::_sort(uint8_t* base, size_t nmemb)
+template<typename TypeT>
+void QSortImpl<TypeT>::_sort(uint8_t* base, size_t nmemb)
 {
   uint8_t* pa; uint8_t* pb; uint8_t* pc; uint8_t* pd;
   uint8_t* pl; uint8_t* pm; uint8_t* pn;
@@ -54,20 +54,24 @@ _Repeat:
   // Insertion sort.
   if (nmemb < 7)
   {
-    for (pm = base + T::_size; pm < base + nmemb * T::_size; pm += T::_size)
-      for (pl = pm; pl > base && T::_compare(pl - T::_size, pl) > 0; pl -= T::_size)
-        T::_swap(pl, pl - T::_size);
+    for (pm = base + TypeT::_size; pm < base + nmemb * TypeT::_size; pm += TypeT::_size)
+    {
+      for (pl = pm; pl > base && TypeT::_compare(pl - TypeT::_size, pl) > 0; pl -= TypeT::_size)
+      {
+        TypeT::_swap(pl, pl - TypeT::_size);
+      }
+    }
     return;
   }
 
-  pm = base + (nmemb >> 1) * T::_size;
+  pm = base + (nmemb >> 1) * TypeT::_size;
   if (nmemb > 7)
   {
     pl = base;
-    pn = base + (nmemb - 1) * T::_size;
+    pn = base + (nmemb - 1) * TypeT::_size;
     if (nmemb > 40)
     {
-      d = (nmemb / 8) * T::_size;
+      d = (nmemb / 8) * TypeT::_size;
       pl = _med3(pl        , pl + d, pl + 2 * d);
       pm = _med3(pm - d    , pm    , pm + d    );
       pn = _med3(pn - 2 * d, pn - d, pn        );
@@ -75,40 +79,40 @@ _Repeat:
     pm = _med3(pl, pm, pn);
   }
 
-  T::_swap(base, pm);
+  TypeT::_swap(base, pm);
 
-  pa = pb = base + T::_size;
-  pc = pd = base + (nmemb - 1) * T::_size;
+  pa = pb = base + TypeT::_size;
+  pc = pd = base + (nmemb - 1) * TypeT::_size;
 
   for (;;)
   {
-    while (pb <= pc && (r = T::_compare(pb, base)) <= 0)
+    while (pb <= pc && (r = TypeT::_compare(pb, base)) <= 0)
     {
       if (r == 0)
       {
         swapFlag = 1;
-        T::_swap(pa, pb);
-        pa += T::_size;
+        TypeT::_swap(pa, pb);
+        pa += TypeT::_size;
       }
-      pb += T::_size;
+      pb += TypeT::_size;
     }
 
-    while (pb <= pc && (r = T::_compare(pc, base)) >= 0)
+    while (pb <= pc && (r = TypeT::_compare(pc, base)) >= 0)
     {
       if (r == 0)
       {
         swapFlag = 1;
-        T::_swap(pc, pd);
-        pd -= T::_size;
+        TypeT::_swap(pc, pd);
+        pd -= TypeT::_size;
       }
-      pc -= T::_size;
+      pc -= TypeT::_size;
     }
     if (pb > pc) break;
 
     swapFlag = 1;
-    T::_swap(pb, pc);
-    pb += T::_size;
-    pc -= T::_size;
+    TypeT::_swap(pb, pc);
+    pb += TypeT::_size;
+    pc -= TypeT::_size;
   }
 
   if (swapFlag)
@@ -116,7 +120,7 @@ _Repeat:
     uint8_t* swpA;
     uint8_t* swpB;
 
-    pn = base + nmemb * T::_size;
+    pn = base + nmemb * TypeT::_size;
 
     // Step 1.
     r = Math::min((size_t)(pa - base), (size_t)(pb - pa));
@@ -127,94 +131,98 @@ _Repeat:
     {
       while (r > 0)
       {
-        T::_swap(swpA, swpB);
-        swpA += T::_size;
-        swpB += T::_size;
-        r -= T::_size;
+        TypeT::_swap(swpA, swpB);
+        swpA += TypeT::_size;
+        swpB += TypeT::_size;
+        r -= TypeT::_size;
       }
 
       if (swapFlag == 0) break;
       swapFlag--;
 
       // Step 2.
-      r = Math::min((ssize_t)(pd - pc), (ssize_t)(pn - pd) - (ssize_t)T::_size);
+      r = Math::min((ssize_t)(pd - pc), (ssize_t)(pn - pd) - (ssize_t)TypeT::_size);
       swpA = pb;
       swpB = pn - r;
     }
 
-    if ((r = (size_t)(pb - pa) > T::_size))
+    if ((r = (size_t)(pb - pa) > TypeT::_size))
     {
       // Recurse.
-      _sort(base, (size_t)r / T::_size);
+      _sort(base, (size_t)r / TypeT::_size);
     }
 
-    if ((r = (size_t)(pd - pc) > T::_size))
+    if ((r = (size_t)(pd - pc) > TypeT::_size))
     {
       // Iterate.
       base = pn - r;
-      nmemb = r / T::_size;
+      nmemb = r / TypeT::_size;
       goto _Repeat;
     }
   }
   else
   {
     // Insertion sort.
-    for (pm = base + T::_size; pm < base + nmemb * T::_size; pm += T::_size)
-      for (pl = pm; pl > base && T::_compare(pl - T::_size, pl) > 0; pl -= T::_size)
-        T::_swap(pl, pl - T::_size);
+    for (pm = base + TypeT::_size; pm < base + nmemb * TypeT::_size; pm += TypeT::_size)
+    {
+      for (pl = pm; pl > base && TypeT::_compare(pl - TypeT::_size, pl) > 0; pl -= TypeT::_size)
+      {
+        TypeT::_swap(pl, pl - TypeT::_size);
+      }
+    }
   }
 }
 
 // ============================================================================
-// [Fog::Algorithm::QSortType<>]
+// [Fog::Algorithm::QSortType<TypeT>]
 // ============================================================================
 
-template<typename T>
+template<typename TypeT>
 struct QSortType
 {
   FOG_INLINE int _compare(const void* _a, const void* _b) const
   {
-    const T* a = reinterpret_cast<const T*>(_a);
-    const T* b = reinterpret_cast<const T*>(_b);
+    const TypeT* a = reinterpret_cast<const TypeT*>(_a);
+    const TypeT* b = reinterpret_cast<const TypeT*>(_b);
 
-    return TypeFunc<T>::compare(a, b);
+    return TypeFunc<TypeT>::compare(a, b);
   }
 
   FOG_INLINE void _swap(void* _a, void* _b)
   {
-    T* a = reinterpret_cast<T*>(_a);
-    T* b = reinterpret_cast<T*>(_b);
+    TypeT* a = reinterpret_cast<TypeT*>(_a);
+    TypeT* b = reinterpret_cast<TypeT*>(_b);
 
-    T t(*a);
+    TypeT t(*a);
     *a = *b;
     *b = t;
   }
 
-  enum { _size = sizeof(T) };
+  enum { _size = sizeof(TypeT) };
 };
 
 // ============================================================================
-// [Fog::Algorithm::BSearchCore<>]
+// [Fog::Algorithm::BSearchImpl<>]
 // ============================================================================
 
-template<typename T>
-struct BSearchCore : public T
+template<typename TypeT>
+struct BSearchImpl : public TypeT
 {
   FOG_NO_INLINE const uint8_t* _search(const uint8_t* base, size_t nmemb, const uint8_t* key);
 };
 
-template<typename T>
-const uint8_t* BSearchCore<T>::_search(const uint8_t* base, size_t nmemb, const uint8_t* key)
+template<typename TypeT>
+const uint8_t* BSearchImpl<TypeT>::_search(const uint8_t* base, size_t nmemb, const uint8_t* key)
 {
   size_t lim;
   for (lim = nmemb; lim != 0; lim >>= 1)
   {
-    const uint8_t* cur = base + (lim >> 1) * T::_size;
-    int result = T::_compare(key, cur);
+    const uint8_t* cur = base + (lim >> 1) * TypeT::_size;
+    int result = TypeT::_compare(key, cur);
 
     if (result > 0)
     {
-      base = cur + T::_size;
+      base = cur + TypeT::_size;
       lim--;
       continue;
     }
@@ -232,21 +240,21 @@ const uint8_t* BSearchCore<T>::_search(const uint8_t* base, size_t nmemb, const 
 }
 
 // ============================================================================
-// [Fog::Algorithm::BSearchType<>]
+// [Fog::Algorithm::BSearchType<TypeT>]
 // ============================================================================
 
-template<typename T>
+template<typename TypeT>
 struct BSearchType
 {
   FOG_INLINE int _compare(const void* _a, const void* _b) const
   {
-    const T* a = reinterpret_cast<const T*>(_a);
-    const T* b = reinterpret_cast<const T*>(_b);
+    const TypeT* a = reinterpret_cast<const TypeT*>(_a);
+    const TypeT* b = reinterpret_cast<const TypeT*>(_b);
 
-    return TypeFunc<T>::compare(a, b);
+    return TypeFunc<TypeT>::compare(a, b);
   }
 
-  enum { _size = sizeof(T) };
+  enum { _size = sizeof(TypeT) };
 };
 
 // ============================================================================
@@ -254,12 +262,12 @@ struct BSearchType
 // ============================================================================
 
 FOG_API void qsort(void* base, size_t nmemb, size_t size, CompareFunc compareFunc);
-FOG_API void qsort(void* base, size_t nmemb, size_t size, CompareExFunc comparFunc, const void* data);
+FOG_API void qsort(void* base, size_t nmemb, size_t size, CompareExFunc compareFunc, const void* data);
 
-template<typename T>
-static FOG_INLINE void qsort_t(T* base, size_t nmemb)
+template<typename TypeT>
+static FOG_INLINE void qsort_t(TypeT* base, size_t nmemb)
 {
-  QSortCore< QSortType<T> > context;
+  QSortImpl< QSortType<TypeT> > context;
   context._sort(reinterpret_cast<uint8_t*>(base), nmemb);
 }
 
@@ -267,11 +275,11 @@ static FOG_INLINE void qsort_t(T* base, size_t nmemb)
 // [Fog::Algorithm::ISort]
 // ============================================================================
 
-template<typename T>
-static FOG_INLINE void isort_t(T* base, size_t nmemb)
+template<typename TypeT>
+static FOG_INLINE void isort_t(TypeT* base, size_t nmemb)
 {
-  T* pm;
-  T* pl;
+  TypeT* pm;
+  TypeT* pl;
 
   for (pm = base + 1; pm < base + nmemb; pm++)
     for (pl = pm; pl > base && pl[-1] > pl[0]; pl--)
@@ -285,10 +293,10 @@ static FOG_INLINE void isort_t(T* base, size_t nmemb)
 FOG_API const void* bsearch(const void* base, size_t nmemb, size_t size, const void* key, CompareFunc compar);
 FOG_API const void* bsearch(const void* base, size_t nmemb, size_t size, const void* key, CompareExFunc compar, const void* data);
 
-template<typename T>
-const T* bsearch_t(const T* base, size_t nmemb, const T* key)
+template<typename TypeT>
+const TypeT* bsearch_t(const TypeT* base, size_t nmemb, const TypeT* key)
 {
-  BSearchCore< BSearchType<T> > context;
+  BSearchImpl< BSearchType<TypeT> > context;
 
   return context._search(
     reinterpret_cast<const uint8_t*>(base), nmemb,

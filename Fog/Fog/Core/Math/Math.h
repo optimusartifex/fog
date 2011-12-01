@@ -537,13 +537,13 @@ FOG_STATIC_INLINE_T bool isBounded(const T& x, const T& min, const T& max)
   return x >= min && x <= max;
 }
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
 template<>
 FOG_STATIC_INLINE_T bool isBounded(const char& x, const char& min, const char& max)
 {
   return (unsigned char)(x - min) <= (unsigned char)(max - min);
 }
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 
 template<>
 FOG_STATIC_INLINE_T bool isBounded(const signed char& x, const signed char& min, const signed char& max)

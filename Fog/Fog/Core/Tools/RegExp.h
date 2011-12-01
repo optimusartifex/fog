@@ -192,6 +192,10 @@ struct FOG_NO_EXPORT RegExpA
     fog_api.regexpa_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE RegExpA(RegExpA&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE RegExpA(RegExpDataA* d) : _d(d)
   {
   }
@@ -371,6 +375,10 @@ struct FOG_NO_EXPORT RegExpW
   {
     fog_api.regexpw_ctorCopy(this, &other);
   }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE RegExpW(RegExpW&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
 
   explicit FOG_INLINE RegExpW(RegExpDataW* d) : _d(d)
   {

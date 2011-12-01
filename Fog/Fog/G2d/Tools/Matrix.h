@@ -154,12 +154,16 @@ struct FOG_NO_EXPORT MatrixF
     fog_api.matrixf_ctor(this);
   }
 
-  FOG_NO_EXPORT MatrixF(const MatrixF& other)
+  FOG_INLINE MatrixF(const MatrixF& other)
   {
     fog_api.matrixf_ctorCopy(this, &other);
   }
 
-  FOG_NO_EXPORT MatrixF(const SizeI& size, const float* data = NULL)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE MatrixF(MatrixF&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE MatrixF(const SizeI& size, const float* data = NULL)
   {
     fog_api.matrixf_ctorCreate(this, &size, data);
   }
@@ -169,7 +173,7 @@ struct FOG_NO_EXPORT MatrixF
   {
   }
 
-  FOG_NO_EXPORT ~MatrixF()
+  FOG_INLINE ~MatrixF()
   {
     fog_api.matrixf_dtor(this);
   }
@@ -335,12 +339,16 @@ struct FOG_NO_EXPORT MatrixD
     fog_api.matrixd_ctor(this);
   }
 
-  FOG_NO_EXPORT MatrixD(const MatrixD& other)
+  FOG_INLINE MatrixD(const MatrixD& other)
   {
     fog_api.matrixd_ctorCopy(this, &other);
   }
 
-  FOG_NO_EXPORT MatrixD(const SizeI& size, const double* data = NULL)
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE MatrixD(MatrixD&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  FOG_INLINE MatrixD(const SizeI& size, const double* data = NULL)
   {
     fog_api.matrixd_ctorCreate(this, &size, data);
   }
@@ -350,7 +358,7 @@ struct FOG_NO_EXPORT MatrixD
   {
   }
 
-  FOG_NO_EXPORT ~MatrixD()
+  FOG_INLINE ~MatrixD()
   {
     fog_api.matrixd_dtor(this);
   }

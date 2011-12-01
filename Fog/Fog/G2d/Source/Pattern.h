@@ -156,6 +156,10 @@ struct FOG_NO_EXPORT Pattern
     fog_api.pattern_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE Pattern(Pattern&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
   explicit FOG_INLINE Pattern(const ArgbBase32& argb32)
   {
     fog_api.pattern_ctorArgb32(this, &argb32);

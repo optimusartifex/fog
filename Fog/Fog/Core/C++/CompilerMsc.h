@@ -8,7 +8,7 @@
 #define _FOG_CORE_CPP_COMPILER_MSC_H
 
 // ============================================================================
-// [Fog::Core::C++ - MSC]
+// [Fog::Core::C++ - MSC - Version]
 // ============================================================================
 
 // 1000 - Visual C++ 4
@@ -21,16 +21,27 @@
 // 1600 - Visual C++ 2010
 #define FOG_CC_MSC _MSC_VER
 
-// Standard attributes.
-#define FOG_INLINE __forceinline
-#define FOG_NO_INLINE
+// ============================================================================
+// [Fog::Core::C++ - MSC - Alignment]
+// ============================================================================
+
+#define FOG_ALIGN_BEGIN(_N_) __declspec(align(_N_))
+#define FOG_ALIGN_END(_N_)
+#define FOG_ALIGNED_TYPE(_Type_, _N_) __declspec(align(_N_)) _Type_
+#define FOG_ALIGNED_VAR(_Type_, _Name_, _N_) __declspec(align(_N_)) _Type_ _Name_
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Attributes]
+// ============================================================================
+
 #define FOG_NO_RETURN __declspec(noreturn)
 #define FOG_DEPRECATED __declspec(deprecated)
-
-// Restrict support.
 #define FOG_RESTRICT __restrict
 
-// 32-bit x86 calling conventions.
+// ============================================================================
+// [Fog::Core::C++ - MSC - Calling Conventions]
+// ============================================================================
+
 #if defined(FOG_ARCH_X86)
 # define FOG_FASTCALL __fastcall
 # define FOG_STDCALL __stdcall
@@ -41,61 +52,103 @@
 # define FOG_CDECL
 #endif
 
-// Features setup.
-#if _MSC_VER >= 1300
-# define FOG_CC_HAVE_PARTIAL_TEMPLATE_SPECIALIZATION
-#endif // _MSC_VER >= 1300
+// ============================================================================
+// [Fog::Core::C++ - MSC - Inline / No-Inline]
+// ============================================================================
+
+#define FOG_INLINE __forceinline
+#define FOG_NO_INLINE
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Likely / Unlikely]
+// ============================================================================
+
+#define FOG_LIKELY(_Exp_) (_Exp_)
+#define FOG_UNLIKELY(_Exp_) (_Exp_)
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Native Types]
+// ============================================================================
 
 // MSC treats char, signed char, and unsigned char as different types.
-#define FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#define FOG_CC_HAS_NATIVE_CHAR_TYPE
 
 // MSC must be configured to treat wchar_t and unsigned short as different types.
 #if defined(_NATIVE_WCHAR_T_DEFINED)
-# define FOG_CC_HAVE_NATIVE_WCHAR_TYPE
+# define FOG_CC_HAS_NATIVE_WCHAR_TYPE
 #endif // _NATIVE_WCHAR_T_DEFINED
 
-// Visibility.
+// ============================================================================
+// [Fog::Core::C++ - MSC - Macros]
+// ============================================================================
+
+#define FOG_MACRO_BEGIN do {
+#define FOG_MACRO_END } while (0)
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - No-Throw]
+// ============================================================================
+
+#define FOG_NOTHROW throw()
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Unused]
+// ============================================================================
+
+#define FOG_UNUSED(a) (void)(a)
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Templates]
+// ============================================================================
+
+# define FOG_STATIC_T
+# define FOG_STATIC_INLINE_T FOG_INLINE
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Features]
+// ============================================================================
+
+// C++0x features status:
+//   http://blogs.msdn.com/b/vcblog/archive/2010/04/06/c-0x-core-language-features-in-vc10-the-table.aspx
+//   http://blogs.msdn.com/b/vcblog/archive/2011/09/12/10209291.aspx
+
+#if FOG_CC_MSC >= 1300
+# define FOG_CC_HAS_PARTIAL_TEMPLATE_SPECIALIZATION
+#endif // FOG_CC_MSC >= 1300
+
+#if FOG_CC_MSC >= 1400
+# define FOG_CC_HAS_OVERRIDE
+#endif // FOG_CC_MSC >= 1400
+
+#if FOG_CC_MSC >= 1600
+# define FOG_CC_HAS_DECLTYPE
+# define FOG_CC_HAS_LAMBDA
+# define FOG_CC_HAS_NULLPTR
+# define FOG_CC_HAS_RVALUE
+# define FOG_CC_HAS_STATIC_ASSERT
+#endif // FOG_CC_MSC >= 1600
+
+// ============================================================================
+// [Fog::Core::C++ - MSC - Visibility]
+// ============================================================================
+
 #define FOG_NO_EXPORT
 #define FOG_DLL_IMPORT __declspec(dllimport)
 #define FOG_DLL_EXPORT __declspec(dllexport)
 
-// Likely / Unlikely.
-#define FOG_LIKELY(_Exp_) (_Exp_)
-#define FOG_UNLIKELY(_Exp_) (_Exp_)
-
-// Nothrow.
-#define FOG_NOTHROW throw()
-
-// Unused.
-#define FOG_UNUSED(a) (void)(a)
-
-// Static-template.
-# define FOG_STATIC_T
-# define FOG_STATIC_INLINE_T FOG_INLINE
-
-// Align.
-#define FOG_ALIGN_BEGIN(_N_) __declspec(align(_N_))
-#define FOG_ALIGN_END(_N_)
-#define FOG_ALIGNED_TYPE(_Type_, _N_) __declspec(align(_N_)) _Type_
-#define FOG_ALIGNED_VAR(_Type_, _Name_, _N_) __declspec(align(_N_)) _Type_ _Name_
-
-// Macro begin / end.
-#define FOG_MACRO_BEGIN do {
-#define FOG_MACRO_END } while (0)
-
-// Variables.
 #define FOG_CVAR_EXTERN_BASE(_Api_) extern "C" _Api_
 #define FOG_CVAR_DECLARE_BASE(_Api_) _Api_
 
-// C API.
 #define FOG_CAPI_EXTERN_BASE(_Api_) extern "C" _Api_
 #define FOG_CAPI_DECLARE_BASE(_Api_) extern "C" _Api_
 
-// C API - static initializers we can hide them...
 #define FOG_INIT_EXTERN_BASE(_Api_) extern "C" FOG_NO_EXPORT
 #define FOG_INIT_DECLARE_BASE(_Api_) extern "C" FOG_NO_EXPORT
 
-// Disable warnings.
+// ============================================================================
+// [Fog::Core::C++ - MSC - Disable Warnings]
+// ============================================================================
+
 #pragma warning(disable:4146) // Unary minus operator applied to unsigned type, result still unsigned.
 #pragma warning(disable:4251) // Struct '...' needs to have dll-interface to be used by clients of struct '...'.
 #pragma warning(disable:4800) // Performance warning: casting to bool.

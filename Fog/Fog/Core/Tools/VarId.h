@@ -45,9 +45,9 @@ struct VarId : public _Fog_VarId<Type> {};
 // [Fog::VarId<> - C++]
 // ===========================================================================
 
-#if defined(FOG_CC_HAVE_NATIVE_CHAR_TYPE)
+#if defined(FOG_CC_HAS_NATIVE_CHAR_TYPE)
 _FOG_VAR_DECLARE_ID(char                       , Fog::VAR_TYPE_CHAR)
-#endif // FOG_CC_HAVE_NATIVE_CHAR_TYPE
+#endif // FOG_CC_HAS_NATIVE_CHAR_TYPE
 _FOG_VAR_DECLARE_ID(signed char                , Fog::VAR_TYPE_CHAR)
 _FOG_VAR_DECLARE_ID(unsigned char              , Fog::VAR_TYPE_CHAR)
 

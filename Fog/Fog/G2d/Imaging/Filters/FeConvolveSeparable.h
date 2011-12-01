@@ -38,6 +38,23 @@ struct FOG_NO_EXPORT FeConvolveSeparable : public FeBorder
     fog_api.feconvolveseparable_ctorCopy(this, &other);
   }
 
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FeConvolveSeparable(FeConvolveSeparable&& other)
+  {
+    _hVector->_d = other._hVector->_d;
+    _vVector->_d = other._vVector->_d;
+
+    other._hVector->_d = NULL;
+    other._vVector->_d = NULL;
+
+    _hScale = other._hScale;
+    _vScale = other._vScale;
+
+    _hBias = other._hBias;
+    _vBias = other._vBias;
+  }
+#endif // FOG_CC_HAS_RVALUE
+
   FOG_INLINE ~FeConvolveSeparable()
   {
     fog_api.feconvolveseparable_dtor(this);

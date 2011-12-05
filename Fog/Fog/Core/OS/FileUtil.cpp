@@ -32,7 +32,6 @@
 // [Dependencies - Posix]
 #if defined(FOG_OS_POSIX)
 # include <dirent.h>
-# include <errno.h>
 # include <sys/stat.h>
 # if defined(FOG_HAVE_UNISTD_H)
 #  include <unistd.h>
@@ -218,7 +217,7 @@ static uint32_t FOG_CDECL FileUtil_testStubW(const StubW* path, uint32_t flags)
     return NO_FLAGS;
 
   struct stat s;
-  if (FileUtil::stat(&s, *path) == 0)
+  if (FileUtil::stat(&s, *path) == ERR_OK)
     return FileUtil_testStat(&s, flags);
 
   return 0;
@@ -230,7 +229,7 @@ static uint32_t FOG_CDECL FileUtil_testStringW(const StringW* path, uint32_t fla
     return NO_FLAGS;
 
   struct stat s;
-  if (FileUtil::stat(&s, *path) == 0)
+  if (FileUtil::stat(&s, *path) == ERR_OK)
     return FileUtil_testStat(&s, flags);
 
   return 0;
@@ -321,16 +320,15 @@ static bool FOG_CDECL FileUtil_findFile(StringW* dst, const StringW* fileName, c
     TextCodec::local8().encode(path8, it.getItem());
 
     // Append directory separator if needed
-    if (path8.getLength() && !path8.endsWith(StubA("/", 1))) path8.append('/');
+    if (path8.getLength() && !path8.endsWith(StubA("/", 1)))
+      path8.append('/');
 
     // Append file
     path8.append(fileName8);
 
     // Test
     if (::stat(path8.getData(), &s) == 0 && S_ISREG(s.st_mode))
-    {
       return FilePath::join(*dst, it.getItem(), *fileName) == ERR_OK;
-    }
 
     it.next();
   }
@@ -491,7 +489,7 @@ static err_t FOG_CDECL FileUtil_deleteDirectory(const StringW* dir)
   if (::rmdir(dir8.getData()) == 0)
     return ERR_OK;
   else
-    return errno;
+    return OSUtil::getErrFromLibCErrno();
 }
 #endif // FOG_OS_POSIX
 
@@ -503,21 +501,23 @@ static err_t FOG_CDECL FileUtil_deleteDirectory(const StringW* dir)
 static int FOG_CDECL FileUtil_statStubW(void* dst, const StubW* fileName)
 {
   StringTmpA<TEMPORARY_LENGTH> t;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(t, *fileName));
 
-  if (TextCodec::local8().encode(t, *fileName) != ERR_OK)
-    return -1;
-
-  return ::stat(t.getData(), (struct stat*)dst);
+  if (stat(t.getData(), (struct stat*)dst) == 0)
+    return ERR_OK;
+  else
+    return OSUtil::getErrFromLibCErrno();
 }
 
 static int FOG_CDECL FileUtil_statStringW(void* dst, const StringW* fileName)
 {
   StringTmpA<TEMPORARY_LENGTH> t;
+  FOG_RETURN_ON_ERROR(TextCodec::local8().encode(t, *fileName));
 
-  if (TextCodec::local8().encode(t, *fileName) != ERR_OK)
-    return -1;
-
-  return ::stat(t.getData(), (struct stat*)dst);
+  if (::stat(t.getData(), (struct stat*)dst) == 0)
+    return ERR_OK;
+  else
+    return OSUtil::getErrFromLibCErrno();
 }
 #endif // FOG_OS_POSIX
 

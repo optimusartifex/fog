@@ -1240,17 +1240,21 @@ err_t X11GuiWindow::setTitle(const StringW& title)
   X11GuiEngine* engine = GUI_ENGINE();
   XTextProperty windowProperty;
 
+  int result;
+  wchar_t* titleWChar;
+
 #if FOG_SIZEOF_WCHAR_T == 2
-  const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(title.getData());
+  titleWChar = (wchar_t*)title.getData();
 #else
   StringTmpA<TEMPORARY_LENGTH> titleWArray;
-
   FOG_RETURN_ON_ERROR(TextCodec::utf32().encode(titleWArray, title));
-  const wchar_t *titleWChar = reinterpret_cast<const wchar_t *>(titleWArray.getData());
+
+  titleWChar = (wchar_t*)titleWArray.getData();
+  titleWChar[titleWArray.getLength() / sizeof(wchar_t)] = 0;
 #endif
 
-  int result = engine->pXwcTextListToTextProperty(engine->getDisplay(),
-    (wchar_t **)&titleWChar, 1, XTextStyle, &windowProperty);
+  result = engine->pXwcTextListToTextProperty(
+    engine->getDisplay(), &titleWChar, 1, XTextStyle, &windowProperty);
 
   if (result == XSuccess)
   {

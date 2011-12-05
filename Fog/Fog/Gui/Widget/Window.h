@@ -8,7 +8,7 @@
 #define _FOG_GUI_WIDGET_WINDOW_H
 
 // [Dependencies]
-#include <Fog/Gui/Widget/Composite.h>
+#include <Fog/Gui/Widget/Widget.h>
 
 namespace Fog {
 
@@ -20,9 +20,9 @@ namespace Fog {
 // ============================================================================
 
 //! @brief Top level window.
-struct FOG_API Window : public Composite
+struct FOG_API Window : public Widget
 {
-  FOG_DECLARE_OBJECT(Window, Composite)
+  FOG_DECLARE_OBJECT(Window, Widget)
 
   Window(uint32_t createFlags = 0);
   virtual ~Window();

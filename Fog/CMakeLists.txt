@@ -1361,45 +1361,13 @@ Set(FOG_GUI_THEMING_HEADERS
 
 # [Fog/Gui/Widget]
 Set(FOG_GUI_WIDGET_SOURCES
-  Fog/Gui/Widget/Button.cpp
-  Fog/Gui/Widget/ButtonBase.cpp
-  Fog/Gui/Widget/CheckBox.cpp
-  Fog/Gui/Widget/Composite.cpp
   Fog/Gui/Widget/Event.cpp
-  Fog/Gui/Widget/Frame.cpp
-  Fog/Gui/Widget/GroupBox.cpp
-  Fog/Gui/Widget/MenuBar.cpp
-  Fog/Gui/Widget/MenuItem.cpp
-  Fog/Gui/Widget/MenuSeparator.cpp
-  Fog/Gui/Widget/RadioButton.cpp
-  Fog/Gui/Widget/ScrollArea.cpp
-  Fog/Gui/Widget/ScrollBar.cpp
-  Fog/Gui/Widget/TextArea.cpp
-  Fog/Gui/Widget/TextField.cpp
-  Fog/Gui/Widget/ToolBar.cpp
-  Fog/Gui/Widget/ToolButton.cpp
   Fog/Gui/Widget/Widget.cpp
   Fog/Gui/Widget/Window.cpp
 )
 
 Set(FOG_GUI_WIDGET_HEADERS
-  Fog/Gui/Widget/Button.h
-  Fog/Gui/Widget/ButtonBase.h
-  Fog/Gui/Widget/CheckBox.h
-  Fog/Gui/Widget/Composite.h
   Fog/Gui/Widget/Event.h
-  Fog/Gui/Widget/Frame.h
-  Fog/Gui/Widget/GroupBox.h
-  Fog/Gui/Widget/MenuBar.h
-  Fog/Gui/Widget/MenuItem.h
-  Fog/Gui/Widget/MenuSeparator.h
-  Fog/Gui/Widget/RadioButton.h
-  Fog/Gui/Widget/ScrollArea.h
-  Fog/Gui/Widget/ScrollBar.h
-  Fog/Gui/Widget/TextArea.h
-  Fog/Gui/Widget/TextField.h
-  Fog/Gui/Widget/ToolBar.h
-  Fog/Gui/Widget/ToolButton.h
   Fog/Gui/Widget/Widget.h
   Fog/Gui/Widget/Widget_p.h
   Fog/Gui/Widget/Window.h

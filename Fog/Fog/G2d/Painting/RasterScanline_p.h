@@ -222,10 +222,20 @@ struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
   // [Span - Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RasterSpan8* getSpans() const { return reinterpret_cast<RasterSpan8*>(_spanFirst.getNext()); }
+  FOG_INLINE RasterSpan8* getSpans() const
+  {
+    return reinterpret_cast<RasterSpan8*>(_spanFirst.getNext());
+  }
 
-  FOG_INLINE RasterSpan8* getCurrent() { return reinterpret_cast<RasterSpan8*>(_spanCurrent); }
-  FOG_INLINE const RasterSpan8* getCurrent() const { return reinterpret_cast<const RasterSpan8*>(_spanCurrent); }
+  FOG_INLINE RasterSpan8* getCurrent()
+  {
+    return reinterpret_cast<RasterSpan8*>(_spanCurrent);
+  }
+
+  FOG_INLINE const RasterSpan8* getCurrent() const
+  {
+    return reinterpret_cast<const RasterSpan8*>(_spanCurrent);
+  }
 
   // --------------------------------------------------------------------------
   // [Span - C-Mask]

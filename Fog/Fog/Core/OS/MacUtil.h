@@ -9,7 +9,6 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/OS/MacDefs.h>
 #include <Fog/Core/Tools/String.h>
 
 // [Forward Declarations]

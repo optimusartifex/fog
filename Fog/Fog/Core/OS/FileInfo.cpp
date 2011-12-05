@@ -13,6 +13,7 @@
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/OS/FileInfo.h>
 #include <Fog/Core/OS/FilePath.h>
+#include <Fog/Core/OS/FileUtil.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 
@@ -263,22 +264,8 @@ static err_t FOG_CDECL FileInfo_fromWinFindData(FileInfo* self, const StringW* f
 // ============================================================================
 
 #if defined(FOG_OS_POSIX)
-static err_t FOG_CDECL FileInfo_fromFile(FileInfo* self, const StringW* path)
+static void FileInfo_fillStatData(FileInfoData* d, const struct stat* s)
 {
-  // TODO:
-}
-
-static err_t FOG_CDECL FileInfo_fromFileEx(FileInfo* self, const StringW* filePath, const StringW* fileName)
-{
-  // TODO:
-}
-
-static err_t FOG_CDECL FileInfo_fromStat(FileInfo* self, const StringW* filePath, const StringW* fileName, const void* _s)
-{
-  FOG_RETURN_ON_ERROR(self->detach());
-  FileInfoData* d = self->_d;
-
-  const struct stat* s = reinterpret_cast<const struct stat*>(_s);
   uint32_t flags = FILE_INFO_EXISTS;
 
   // S_ISXXX are POSIX macros to get a file type.
@@ -314,8 +301,6 @@ static err_t FOG_CDECL FileInfo_fromStat(FileInfo* self, const StringW* filePath
 #endif // S_ISSOCK
 
   d->fileFlags = flags;
-  d->filePath->set(*filePath);
-  d->fileName->set(*fileName);
   d->size = 0;
 
   if (flags & FILE_INFO_REGULAR_FILE)
@@ -324,6 +309,54 @@ static err_t FOG_CDECL FileInfo_fromStat(FileInfo* self, const StringW* filePath
   d->creationTime.reset();
   d->modifiedTime.fromTimeT(s->st_mtime);
   d->accessTime.fromTimeT(s->st_atime);
+}
+
+static err_t FOG_CDECL FileInfo_fromFile(FileInfo* self, const StringW* path)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+  FileInfoData* d = self->_d;
+
+  StringTmpW<TEMPORARY_LENGTH> pathAbs;
+  FOG_RETURN_ON_ERROR(FilePath::toAbsolute(pathAbs, *path));
+
+  struct stat s;
+  FOG_RETURN_ON_ERROR(FileUtil::stat(&s, *path));
+
+  FileInfo_fillStatData(d, &s);
+  FOG_RETURN_ON_ERROR(FilePath::extractDirectory(d->filePath(), pathAbs));
+  FOG_RETURN_ON_ERROR(FilePath::extractFile(d->fileName(), pathAbs));
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FileInfo_fromFileEx(FileInfo* self, const StringW* filePath, const StringW* fileName)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+  FileInfoData* d = self->_d;
+
+  StringTmpW<TEMPORARY_LENGTH> path;
+  StringTmpW<TEMPORARY_LENGTH> pathAbs;
+
+  FOG_RETURN_ON_ERROR(FilePath::join(path, *filePath, *fileName));
+  FOG_RETURN_ON_ERROR(FilePath::toAbsolute(pathAbs, path));
+
+  struct stat s;
+  FOG_RETURN_ON_ERROR(FileUtil::stat(&s, pathAbs));
+
+  FileInfo_fillStatData(d, &s);
+  FOG_RETURN_ON_ERROR(FilePath::extractDirectory(d->filePath(), pathAbs));
+  FOG_RETURN_ON_ERROR(FilePath::extractFile(d->fileName(), pathAbs));
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FileInfo_fromStat(FileInfo* self, const StringW* filePath, const StringW* fileName, const void* s)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+  FileInfoData* d = self->_d;
+
+  FileInfo_fillStatData(d, reinterpret_cast<const struct stat*>(s));
+  FOG_RETURN_ON_ERROR(d->filePath->set(*filePath));
+  FOG_RETURN_ON_ERROR(d->fileName->set(*fileName));
+  return ERR_OK;
 }
 #endif // FOG_OS_POSIX
 

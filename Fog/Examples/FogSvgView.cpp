@@ -253,8 +253,7 @@ void MyWindow::onPaint(PaintEvent* e)
     fpsTime = lastTime;
 
     StringW text;
-    //text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
-    text.format("FPS: %d, Time: %d", (int)fps, (int)frameDelta.getMillisecondsD());
+    text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
     setWindowTitle(text);
   }
   else

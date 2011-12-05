@@ -30,23 +30,7 @@
 #include <Fog/Gui/Layout/LayoutUtil.h>
 #include <Fog/Gui/Layout/Margin.h>
 #include <Fog/Gui/Theming/ThemeEngine.h>
-#include <Fog/Gui/Widget/Button.h>
-#include <Fog/Gui/Widget/ButtonBase.h>
-#include <Fog/Gui/Widget/CheckBox.h>
-#include <Fog/Gui/Widget/Composite.h>
 #include <Fog/Gui/Widget/Event.h>
-#include <Fog/Gui/Widget/Frame.h>
-#include <Fog/Gui/Widget/GroupBox.h>
-#include <Fog/Gui/Widget/MenuBar.h>
-#include <Fog/Gui/Widget/MenuItem.h>
-#include <Fog/Gui/Widget/MenuSeparator.h>
-#include <Fog/Gui/Widget/RadioButton.h>
-#include <Fog/Gui/Widget/ScrollArea.h>
-#include <Fog/Gui/Widget/ScrollBar.h>
-#include <Fog/Gui/Widget/TextArea.h>
-#include <Fog/Gui/Widget/TextField.h>
-#include <Fog/Gui/Widget/ToolBar.h>
-#include <Fog/Gui/Widget/ToolButton.h>
 #include <Fog/Gui/Widget/Widget.h>
 #include <Fog/Gui/Widget/Window.h>
 

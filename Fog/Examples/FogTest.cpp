@@ -73,8 +73,8 @@ MyWindow::MyWindow(uint32_t createFlags) :
   i[0].readFromFile(StringW::fromAscii8("C:/My/Devel/Sprites/babelfish.png"));
   i[1].readFromFile(StringW::fromAscii8("C:/My/Devel/Sprites/kweather.png"));
 
-  _subx = 0.0f;
-  _suby = 0.0f;
+  _subx = 1.0f;
+  _suby = 1.0f;
   _rotate = 0.0f;
   _shearX = 0.0f;
   _shearY = 0.0f;
@@ -141,6 +141,8 @@ void MyWindow::onKey(KeyEvent* e)
       case KEY_C: _clip = !_clip; update(WIDGET_UPDATE_ALL); break;
 
       case KEY_ENTER: update(WIDGET_UPDATE_ALL); break;
+
+      case KEY_ESC: Application::get()->quit(); break;
     }
   }
 
@@ -354,17 +356,91 @@ void MyWindow::onPaint(PaintEvent* e)
   //p->fillPath(path);
 #endif
 
-#if 1
-  PathF path;
+#if 0
+  float cx = 120.0f;
+  float cy = 120.0f;
+  float pos[] = {
+    cx + 100.0f,
+    cy         ,
 
-  path.moveTo(100.0f, 100.0f);
-  path.lineTo(300.0f, 110.5f);
-  path.lineTo(100.0f, 120.0f);
-  path.close();
+    cx +  50.0f,
+    cy + 100.0f,
 
-  p->setSource(Argb32(0xFF000000));
-  p->fillPath(path);
+    cx -  50.0f,
+    cy + 100.0f,
 
+    cx - 100.0f,
+    cy         ,
+
+    cx -  50.0f,
+    cy - 100.0f,
+
+    cx +  50.0f,
+    cy - 100.0f
+  };
+  float rad = 6.0f;
+
+  p->save();
+  p->setLineWidth(6.0f);
+
+  LinearGradientF g;
+  g.setGradientSpread(GRADIENT_SPREAD_PAD);
+
+  g.addStop(0.0f, Argb32(0xFFFF0000));
+  g.addStop(1.0f, Argb32(0xFFFFFF00));
+  g.setStart(pos[0], pos[1]);
+  g.setEnd(pos[2], pos[3]);
+  p->setSource(g);
+  p->drawLine(pos[0], pos[1], pos[2], pos[3]);
+  p->fillCircle(CircleF(pos[0], pos[1], rad));
+  g.clearStops();
+
+  g.addStop(0.0f, Argb32(0xFFFFFF00));
+  g.addStop(1.0f, Argb32(0xFF00FF00));
+  g.setStart(pos[2], pos[3]);
+  g.setEnd(pos[4], pos[5]);
+  p->setSource(g);
+  p->drawLine(pos[2], pos[3], pos[4], pos[5]);
+  p->fillCircle(CircleF(pos[2], pos[3], rad));
+  g.clearStops();
+
+  g.addStop(0.0f, Argb32(0xFF00FF00));
+  g.addStop(1.0f, Argb32(0xFF00FFFF));
+  g.setStart(pos[4], pos[5]);
+  g.setEnd(pos[6], pos[7]);
+  p->setSource(g);
+  p->drawLine(pos[4], pos[5], pos[6], pos[7]);
+  p->fillCircle(CircleF(pos[4], pos[5], rad));
+  g.clearStops();
+
+  g.addStop(0.0f, Argb32(0xFF00FFFF));
+  g.addStop(1.0f, Argb32(0xFF0000FF));
+  g.setStart(pos[6], pos[7]);
+  g.setEnd(pos[8], pos[9]);
+  p->setSource(g);
+  p->drawLine(pos[6], pos[7], pos[8], pos[9]);
+  p->fillCircle(CircleF(pos[6], pos[7], rad));
+  g.clearStops();
+
+  g.addStop(0.0f, Argb32(0xFF0000FF));
+  g.addStop(1.0f, Argb32(0xFFFF00FF));
+  g.setStart(pos[8], pos[9]);
+  g.setEnd(pos[10], pos[11]);
+  p->setSource(g);
+  p->drawLine(pos[8], pos[9], pos[10], pos[11]);
+  p->fillCircle(CircleF(pos[8], pos[9], rad));
+  g.clearStops();
+
+  g.addStop(0.0f, Argb32(0xFFFF00FF));
+  g.addStop(1.0f, Argb32(0xFFFF0000));
+  g.setStart(pos[10], pos[11]);
+  g.setEnd(pos[0], pos[1]);
+  p->setSource(g);
+  p->drawLine(pos[10], pos[11], pos[0], pos[1]);
+  p->fillCircle(CircleF(pos[10], pos[11], rad));
+  g.clearStops();
+
+  p->restore();
 #endif
 
   // --------------------------------------------------------------------------

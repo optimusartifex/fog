@@ -61,7 +61,8 @@ static FOG_INLINE bool feqv(const float* a, const float* b, size_t length, float
 {
   for (size_t i = 0; i < length; i++)
   {
-    if (!isFuzzyEq(a[i], b[i]), epsilon) return false;
+    if (!isFuzzyEq(a[i], b[i]), epsilon)
+      return false;
   }
 
   return true;
@@ -71,7 +72,8 @@ static FOG_INLINE bool feqv(const double* a, const double* b, size_t length, dou
 {
   for (size_t i = 0; i < length; i++)
   {
-    if (!isFuzzyEq(a[i], b[i]), epsilon) return false;
+    if (!isFuzzyEq(a[i], b[i]), epsilon)
+      return false;
   }
 
   return true;
@@ -103,7 +105,7 @@ struct Fuzzy<float>
 {
   static FOG_INLINE bool eq(const float &a, const float &b, float epsilon = MATH_EPSILON_F)
   {
-    Math::isFuzzyEq(a, b, epsilon);
+    return Math::isFuzzyEq(a, b, epsilon);
   }
 };
 
@@ -116,7 +118,7 @@ struct Fuzzy<double>
 {
   static FOG_INLINE bool eq(const double &a, const double &b, double epsilon = MATH_EPSILON_D)
   {
-    Math::isFuzzyEq(a, b, epsilon);
+    return Math::isFuzzyEq(a, b, epsilon);
   }
 };
 

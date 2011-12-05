@@ -758,6 +758,7 @@ void MyWindow::onPaint(PaintEvent* e)
 
 FOG_UI_MAIN()
 {
+  /*
   {
     float f[10];
     float rv[10];
@@ -794,6 +795,7 @@ FOG_UI_MAIN()
       printf("Q-Root: %f, evaluation: %f\n", r, e);
     }
   }
+  */
 
   Application app(StringW::fromAscii8("UI"));
   MyWindow window(WINDOW_TYPE_DEFAULT);

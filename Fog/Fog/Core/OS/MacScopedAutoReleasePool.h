@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
-#include <Fog/Core/Mac/MacDefs.h>
+#include <Fog/Core/OS/MacUtil.h>
 
 namespace Fog {
 

@@ -263,8 +263,8 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(err_t, fileutil_deleteDirectory)(const StringW* dir);
 
 #if defined(FOG_OS_POSIX)
-  FOG_CAPI_STATIC(int, fileutil_statStubW)(void* dst, const StubW* fileName);
-  FOG_CAPI_STATIC(int, fileutil_statStringW)(void* dst, const StringW* fileName);
+  FOG_CAPI_STATIC(err_t, fileutil_statStubW)(void* dst, const StubW* fileName);
+  FOG_CAPI_STATIC(err_t, fileutil_statStringW)(void* dst, const StringW* fileName);
 #endif // FOG_OS_POSIX
 
   // --------------------------------------------------------------------------

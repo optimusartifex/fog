@@ -111,12 +111,12 @@ struct FOG_NO_EXPORT FileUtil
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_POSIX)
-  static FOG_INLINE int stat(struct stat* dst, const StubW& fileName)
+  static FOG_INLINE err_t stat(struct stat* dst, const StubW& fileName)
   {
     return fog_api.fileutil_statStubW(dst, &fileName);
   }
 
-  static FOG_INLINE int stat(struct stat* dst, const StringW& fileName)
+  static FOG_INLINE err_t stat(struct stat* dst, const StringW& fileName)
   {
     return fog_api.fileutil_statStringW(dst, &fileName);
   }

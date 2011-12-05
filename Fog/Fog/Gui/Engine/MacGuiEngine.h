@@ -12,16 +12,17 @@
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/Gui/Engine/GuiEngine.h>
-#include <Fog/Core/Mac/MacScopedAutoReleasePool.h>
-#include <Fog/Core/Mac/MacUtil_Core.h>
+#include <Fog/Core/OS/MacScopedAutoReleasePool.h>
+#include <Fog/Core/OS/MacUtil.h>
 
+// [Dependencies - Cocoa]
 #include <CoreFoundation/CoreFoundation.h>
 
 #ifdef __OBJC__
 @class NSEvent;
 @class NSRunLoop;
-@class FogView;              // see MacGuiEngine.mm
-@class FogWindow;            // see MacGuiEngine.mm
+@class FogView;
+@class FogWindow;
 #else
 class NSEvent;
 class NSRunLoop;

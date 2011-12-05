@@ -13,9 +13,6 @@
 #include <Fog/Gui/Engine/GuiEngine.h>
 #include <Fog/Gui/Widget/Window.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-
 FOG_IMPLEMENT_OBJECT(Fog::Window)
 
 namespace Fog {

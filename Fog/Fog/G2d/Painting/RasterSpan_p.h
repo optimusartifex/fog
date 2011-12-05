@@ -313,7 +313,8 @@ struct FOG_NO_EXPORT RasterSpan8 : public RasterSpan
       /* 03 - RASTER_SPAN_AX_EXTRA     */ 2,
       /* 04 - RASTER_SPAN_ARGB32_GLYPH */ 4,
       /* 05 - RASTER_SPAN_ARGBXX_GLYPH */ 4,
-      /* 06 - ...                      */ 0
+      /* 06 - ...                      */ 0,
+      /* 07 - ...                      */ 0
     };
     // ${SPAN:END}
 

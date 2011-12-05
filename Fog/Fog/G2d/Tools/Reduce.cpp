@@ -76,7 +76,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
   int y;
   int i;
 
-  const uint8_t* p = image.getScanline(0);
+  const uint8_t* p = image.getFirst();
   size_t stride = image.getStride() - w * image.getBytesPerPixel();
 
   uint32_t depth = image.getDepth();

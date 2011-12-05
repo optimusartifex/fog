@@ -473,7 +473,7 @@ err_t BmpDecoder::readImage(Image& image)
   // Create image.
   if ((err = image.create(_size, _format))) goto _End;
 
-  pixelsBegin = image.getScanlineX(0);
+  pixelsBegin = image.getFirstX();
   stride = image.getStride();
   pixelsCur = pixelsBegin + stride * (_size.h - 1);
 

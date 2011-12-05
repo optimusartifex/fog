@@ -118,9 +118,39 @@ static void Rasterizer_dumpSpans(int y, const RasterSpan8* span)
   printf("%s\n", b.getData());
 }
 
-#define LOG_CELL(_Where_, _X_, _Y_, _Cover_, _Area_) RasterizerLogger::logCell(_Where_, _X_, _Y_, _Cover_, _Area_)
+static void PathRasterizer8_verifyChunks(PathRasterizer8::Chunk* first)
+{
+  PathRasterizer8::Chunk* chunk = first;
+
+  int sum = 0;
+
+  FOG_ASSERT_X(chunk->x0 < first->prev->x1,
+    "Fog::PathRasterizer8::verifyChunks() - Invalid first chunk.");
+
+  do {
+    PathRasterizer8::Chunk* next = chunk->next;
+
+    FOG_ASSERT(chunk->x0 <  chunk->x1);
+    FOG_ASSERT(chunk->x1 <= next->x0 || next == first);
+
+    int length = chunk->x1 - chunk->x0;
+    for (int i = 0; i < length; i++)
+    {
+      sum += chunk->cells[i].cover;
+    }
+
+    chunk = next;
+  } while (chunk != first);
+
+  FOG_ASSERT_X(sum == 0,
+    "Fog::PathRasterizer8::verifyChunks() - Invalid sum of cells, must be zero.");
+}
+
+# define LOG_CELL(_Where_, _X_, _Y_, _Cover_, _Area_) RasterizerLogger::logCell(_Where_, _X_, _Y_, _Cover_, _Area_)
+# define VERIFY_CHUNKS_8(_First_) PathRasterizer8_verifyChunks(_First_)
 #else
-#define LOG_CELL(_Where_, _X_, _Y_, _Cover_, _Area_) FOG_NOP
+# define LOG_CELL(_Where_, _X_, _Y_, _Cover_, _Area_) FOG_NOP
+# define VERIFY_CHUNKS_8(_First_) FOG_NOP
 #endif // FOG_DEBUG_RASTERIZER
 
 // ============================================================================
@@ -554,44 +584,6 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_mask(
 
   // TODO: Rasterizer.
 }
-
-// ============================================================================
-// [Fog::PathRasterizer8 - Debug]
-// ============================================================================
-
-#if defined(FOG_DEBUG)
-static void PathRasterizer8_verifyChunks(PathRasterizer8::Chunk* first)
-{
-  PathRasterizer8::Chunk* chunk = first;
-
-  int sum = 0;
-
-  FOG_ASSERT_X(chunk->x0 < first->prev->x1,
-    "Fog::PathRasterizer8::verifyChunks() - Invalid first chunk.");
-
-  do {
-    PathRasterizer8::Chunk* next = chunk->next;
-
-    FOG_ASSERT(chunk->x0 <  chunk->x1);
-    FOG_ASSERT(chunk->x1 <= next->x0 || next == first);
-
-    int length = chunk->x1 - chunk->x0;
-    for (int i = 0; i < length; i++)
-    {
-      sum += chunk->cells[i].cover;
-    }
-
-    chunk = next;
-  } while (chunk != first);
-
-  FOG_ASSERT_X(sum == 0,
-    "Fog::PathRasterizer8::verifyChunks() - Invalid sum of cells, must be zero.");
-}
-
-# define VERIFY_CHUNKS_8(_First_) PathRasterizer8_verifyChunks(_First_)
-#else
-# define VERIFY_CHUNKS_8(_First_) FOG_NOP
-#endif // FOG_DEBUG
 
 // ============================================================================
 // [Fog::PathRasterizer8 - Construction / Destruction]
@@ -1976,10 +1968,7 @@ _Vert_P_Single:
               {
                 ex0++;
                 fx0 = 0;
-
-                y0 += int(yLift);
-                yErr += yRem;
-                if (yErr >= 0) { yErr -= dx; y0++; }
+                goto _Vert_P_Advance;
               }
             }
             else
@@ -1989,7 +1978,6 @@ _Vert_P_Single:
                 FOG_ASSERT(fyCut >= fy0 && fyCut <= fy1);
               
                 cover = fyCut - fy0; // Positive.
-                area += A8_SCALE;
                 fx0  &= A8_MASK;
 
                 // Improve the count of generated cells in case that the resulting
@@ -2004,7 +1992,7 @@ _Vert_P_Single:
                 }
                 else
                 {
-                  area *= cover;
+                  area = (area + A8_SCALE) * cover;
                   ROW_ADD_TWO(_Vert_P, rPtr, ex0, cover, area,
                   {
                     cover = fy1 - fyCut; // Positive.
@@ -2014,6 +2002,7 @@ _Vert_P_Single:
                 }
               }
 
+_Vert_P_Advance:
               y0 += int(yLift);
               yErr += yRem;
               if (yErr >= 0) { yErr -= dx; y0++; }
@@ -2067,10 +2056,7 @@ _Vert_N_Single:
               {
                 ex0++;
                 fx0 = 0;
-
-                y0 += int(yLift);
-                yErr += yRem;
-                if (yErr >= 0) { yErr -= dx; y0++; }
+                goto _Vert_N_Advance;
               }
             }
             else
@@ -2080,7 +2066,6 @@ _Vert_N_Single:
                 FOG_ASSERT(fyCut >= fy0 && fyCut <= fy1);
 
                 cover = fy0 - fyCut; // Negative.
-                area += A8_SCALE;
                 fx0  &= A8_MASK;
 
                 // Improve the count of generated cells in case that the resulting
@@ -2095,7 +2080,7 @@ _Vert_N_Single:
                 }
                 else
                 {
-                  area *= cover;
+                  area = (area + A8_SCALE) * cover;
                   ROW_ADD_TWO(_Vert_N, rPtr, ex0, cover, area,
                   {
                     cover = fyCut - fy1; // Negative.
@@ -2105,6 +2090,7 @@ _Vert_N_Single:
                 }
               }
 
+_Vert_N_Advance:
               y0 += int(yLift);
               yErr += yRem;
               if (yErr >= 0) { yErr -= dx; y0++; }
@@ -2187,7 +2173,6 @@ _Horz_Single:
       {
         do {
           coverAcc -= 256;
-
           cover = coverAcc;
           FOG_ASSERT(cover >= 0 && cover <= 256);
 
@@ -2282,6 +2267,7 @@ _Bail:
 // [Fog::PathRasterizer8 - Render - Helpers]
 // ============================================================================
 
+// TODO: Rename back to PathRasterizer8_calculateAlpha() after finished.
 template<int _RULE, int _USE_ALPHA>
 static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8* self, int cover)
 {
@@ -2367,7 +2353,6 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
     int x;
     int xNext = chunk->x0 + xOffset;
     int cover = 0;
-    int area;
     uint32_t alpha;
 
     for (;;)
@@ -2387,12 +2372,10 @@ _Continue:
       }
 
       do {
-        area    = cell->area >> (A8_SHIFT_2);
-        cover  += cell->cover;
+        cover += cell->cover;
+        alpha  = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover - (cell->area >> A8_SHIFT_2));
 
-        alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover - area);
         scanline->valA8Extra(alpha);
-
         cell++;
       } while (--i);
 
@@ -2413,9 +2396,7 @@ _Finalize:
 
       scanline->endA8Extra();
 
-      if (area)
-        alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover);
-
+      alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover);
       if (alpha)
         scanline->lnkConstSpanOrMerge(x, xNext, alpha);
     }

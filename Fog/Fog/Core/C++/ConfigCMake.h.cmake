@@ -112,15 +112,17 @@
 #cmakedefine FOG_HAVE_FONTCONFIG
 
 // ============================================================================
-// [FOG_GUI]
+// [FOG_UI]
 // ============================================================================
 
-//! @brief Whether to build Windows GUI support.
-#cmakedefine FOG_GUI_WINDOWS
-//! @brief Defined to build Mac GUI support.
-#cmakedefine FOG_GUI_MAC
-//! @brief Whether to build X11 GUI support (plugin).
-#cmakedefine FOG_GUI_X11
+//! @brief Whether to build Windows Fog/UI support.
+#cmakedefine FOG_UI_WINDOWS
+
+//! @brief Defined to build MAC Fog/UI support.
+#cmakedefine FOG_UI_MAC
+
+//! @brief Whether to build X11 Fog/UI support (plugin).
+#cmakedefine FOG_UI_X11
 
 // ============================================================================
 // [FOG_INSTALL]

@@ -1,6 +1,6 @@
 #include <Fog/Core.h>
 #include <Fog/G2d.h>
-#include <Fog/Gui.h>
+#include <Fog/UI.h>
 
 // ============================================================================
 // [FogTest]

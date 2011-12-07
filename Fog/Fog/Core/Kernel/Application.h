@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Gui/Animation/Animation.h>
+#include <Fog/UI/Animation/Animation.h>
 
 namespace Fog {
 

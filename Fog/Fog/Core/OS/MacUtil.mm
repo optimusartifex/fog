@@ -6,7 +6,7 @@
 // [Dependencies]
 #include <Fog/Core/OS/MacUtil.h>
 
-// [Cocoa]
+// [Dependencies - Mac]
 #import <Cocoa/Cocoa.h>
 
 namespace Fog {
@@ -16,7 +16,7 @@ namespace MacUtil {
 // [Fog::MacUtil]
 // ============================================================================
 
-err_t StringFromNS(String& dst, NSString* src)
+err_t StringFromNS(StringW& dst, NSString* src)
 {
   NSRange range;
   range.location = 0;
@@ -31,7 +31,7 @@ err_t StringFromNS(String& dst, NSString* src)
 }
 
 // TODO: Not Fog style.
-NSString* NSFromString(const String& src)
+NSString* NSFromString(const StringW& src)
 {
   const unichar* data = reinterpret_cast<const unichar*>(src.getData());
   NSUInteger length = (NSUInteger)src.getLength();

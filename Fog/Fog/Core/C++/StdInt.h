@@ -106,6 +106,10 @@ typedef unsigned long long uint64_t;
 #endif // !_MSC_VER
 #endif // FOG_HAVE_STDINT_H
 
+#if defined(__MINGW32__) || defined(__MINGW64__) 
+# include <sys/types.h>
+#endif // __MINGW32__ || __MINGW64__
+
 // uchar, ushort, uint and ulong, these should never conflict.
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -115,11 +119,11 @@ typedef unsigned long ulong;
 typedef int32_t err_t;
 
 #if defined(FOG_CC_MSC)
-# if FOG_ARCH_BITS == 32
-// Detect 64-bit portability issues
-typedef int __w64 ssize_t;
-# else
+# if FOG_ARCH_BITS == 64
 typedef int64_t ssize_t;
+# else
+// Detect 64-bit portability issues
+typedef long __w64 ssize_t;
 # endif
 #endif // FOG_CC_MSC
 

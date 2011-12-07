@@ -1238,154 +1238,6 @@ Source_Group("G2d/Mac"              FILES ${FOG_G2D_MAC_SOURCES}              ${
 EndIf()
 
 # =============================================================================
-# [Fog/UI]
-# =============================================================================
-
-Message("-- Configuring Fog/UI")
-
-# =============================================================================
-# [Fog/UI - Files]
-# =============================================================================
-
-# Gui backends.
-If(FOG_OS_WINDOWS)
-  Set(FOG_GUI_WINDOWS 1)
-ElseIf(FOG_OS_MAC)
-  Set(FOG_GUI_MAC 1)
-Else()
-  Set(FOG_GUI_X11 1)
-EndIf()
-
-# [Fog/Gui]
-Set(FOG_GUI_LIB_SOURCES
-)
-
-Set(FOG_GUI_LIB_HEADERS
-  Fog/Gui.h
-)
-
-# [Fog/Gui/Animation]
-Set(FOG_GUI_ANIMATION_SOURCES
-  Fog/Gui/Animation/Animation.cpp
-)
-
-Set(FOG_GUI_ANIMATION_HEADERS
-  Fog/Gui/Animation/Animation.h
-)
-
-# [Fog/Gui/Canvas]
-Set(FOG_GUI_CANVAS_SOURCES
-  Fog/Gui/Canvas/CanvasDelegate.cpp
-  Fog/Gui/Canvas/CanvasElement.cpp
-  Fog/Gui/Canvas/CanvasView.cpp
-)
-
-Set(FOG_GUI_CANVAS_HEADERS
-  Fog/Gui/Canvas/CanvasDelegate.h
-  Fog/Gui/Canvas/CanvasElement.h
-  Fog/Gui/Canvas/CanvasView.h
-)
-
-# [Fog/Gui/Engine]
-Set(FOG_GUI_ENGINE_SOURCES
-  Fog/Gui/Engine/GuiEngine.cpp
-)
-
-Set(FOG_GUI_ENGINE_HEADERS
-  Fog/Gui/Engine/GuiEngine.h
-)
-
-Set(FOG_GUI_ENGINE_MAC_SOURCES
-  Fog/Gui/Engine/MacGuiEngine.mm
-)
-
-Set(FOG_GUI_ENGINE_MAC_HEADERS
-  Fog/Gui/Engine/MacGuiEngine.h
-)
-
-Set(FOG_GUI_ENGINE_WIN_SOURCES
-  Fog/Gui/Engine/WinGuiEngine.cpp
-)
-
-Set(FOG_GUI_ENGINE_WIN_HEADERS
-  Fog/Gui/Engine/WinGuiEngine.h
-)
-
-Set(FOG_GUI_ENGINE_X11_SOURCES
-  Fog/Gui/Engine/X11GuiEngine.cpp
-)
-
-Set(FOG_GUI_ENGINE_X11_HEADERS
-  Fog/Gui/Engine/X11GuiEngine.h
-  Fog/Gui/Engine/X11Headers.h
-)
-
-# [Fog/Gui/Layout]
-Set(FOG_GUI_LAYOUT_SOURCES
-  Fog/Gui/Layout/BorderLayout.cpp
-  Fog/Gui/Layout/BoxLayout.cpp
-  Fog/Gui/Layout/FlowLayout.cpp
-  Fog/Gui/Layout/GridLayout.cpp
-  Fog/Gui/Layout/Layout.cpp
-  Fog/Gui/Layout/LayoutHint.cpp
-  Fog/Gui/Layout/LayoutItem.cpp
-  Fog/Gui/Layout/LayoutUtil.cpp
-  Fog/Gui/Layout/Margin.cpp
-)
-
-Set(FOG_GUI_LAYOUT_HEADERS
-  Fog/Gui/Layout/BorderLayout.h
-  Fog/Gui/Layout/BoxLayout.h
-  Fog/Gui/Layout/FlowLayout.h
-  Fog/Gui/Layout/GridLayout.h
-  Fog/Gui/Layout/Layout.h
-  Fog/Gui/Layout/LayoutHint.h
-  Fog/Gui/Layout/LayoutItem.h
-  Fog/Gui/Layout/LayoutPolicy.h
-  Fog/Gui/Layout/LayoutUtil.h
-  Fog/Gui/Layout/Margin.h
-)
-
-# [Fog/Gui/Theming]
-Set(FOG_GUI_THEMING_SOURCES
-  Fog/Gui/Theming/ThemeEngine.cpp
-  Fog/Gui/Theming/DefaultThemeEngine.cpp
-  Fog/Gui/Theming/WinThemeEngine.cpp
-)
-
-Set(FOG_GUI_THEMING_HEADERS
-  Fog/Gui/Theming/ThemeEngine.h
-  Fog/Gui/Theming/DefaultThemeEngine_p.h
-  Fog/Gui/Theming/WinThemeEngine_p.h
-)
-
-# [Fog/Gui/Widget]
-Set(FOG_GUI_WIDGET_SOURCES
-  Fog/Gui/Widget/Event.cpp
-  Fog/Gui/Widget/Widget.cpp
-  Fog/Gui/Widget/Window.cpp
-)
-
-Set(FOG_GUI_WIDGET_HEADERS
-  Fog/Gui/Widget/Event.h
-  Fog/Gui/Widget/Widget.h
-  Fog/Gui/Widget/Widget_p.h
-  Fog/Gui/Widget/Window.h
-)
-
-# Source groups.
-Source_Group("Gui"                  FILES ${FOG_GUI_LIB_SOURCES}              ${FOG_GUI_LIB_HEADERS}             )
-Source_Group("Gui/Animation"        FILES ${FOG_GUI_ANIMATION_SOURCES}        ${FOG_GUI_ANIMATION_HEADERS}       )
-Source_Group("Gui/Canvas"           FILES ${FOG_GUI_CANVAS_SOURCES}           ${FOG_GUI_CANVAS_HEADERS}          )
-Source_Group("Gui/Engine"           FILES ${FOG_GUI_ENGINE_SOURCES}           ${FOG_GUI_ENGINE_HEADERS}
-                                          ${FOG_GUI_ENGINE_MAC_SOURCES}       ${FOG_GUI_ENGINE_MAC_SOURCES}
-                                          ${FOG_GUI_ENGINE_X11_SOURCES}       ${FOG_GUI_ENGINE_X11_HEADERS}
-                                          ${FOG_GUI_ENGINE_WIN_SOURCES}       ${FOG_GUI_ENGINE_WIN_HEADERS}      )
-Source_Group("Gui/Layout"           FILES ${FOG_GUI_LAYOUT_SOURCES}           ${FOG_GUI_LAYOUT_HEADERS}          )
-Source_Group("Gui/Theming"          FILES ${FOG_GUI_THEMING_SOURCES}          ${FOG_GUI_THEMING_HEADERS}         )
-Source_Group("Gui/Widget"           FILES ${FOG_GUI_WIDGET_SOURCES}           ${FOG_GUI_WIDGET_HEADERS}          )
-
-# =============================================================================
 # [Fog/Svg]
 # =============================================================================
 
@@ -1527,6 +1379,154 @@ Source_Group("Svg/Tools"            FILES ${FOG_SVG_TOOLS_SOURCES}            ${
 Source_Group("Svg/Visit"            FILES ${FOG_SVG_VISIT_SOURCES}            ${FOG_SVG_VISIT_HEADERS}           )
 
 # =============================================================================
+# [Fog/UI]
+# =============================================================================
+
+Message("-- Configuring Fog/UI")
+
+# =============================================================================
+# [Fog/UI - Files]
+# =============================================================================
+
+# Backends.
+If(FOG_OS_WINDOWS)
+  Set(FOG_UI_WINDOWS 1)
+ElseIf(FOG_OS_MAC)
+  Set(FOG_UI_MAC 1)
+Else()
+  Set(FOG_UI_X11 1)
+EndIf()
+
+# [Fog/UI]
+Set(FOG_UI_LIB_SOURCES
+)
+
+Set(FOG_UI_LIB_HEADERS
+  Fog/UI.h
+)
+
+# [Fog/UI/Animation]
+Set(FOG_UI_ANIMATION_SOURCES
+  Fog/UI/Animation/Animation.cpp
+)
+
+Set(FOG_UI_ANIMATION_HEADERS
+  Fog/UI/Animation/Animation.h
+)
+
+# [Fog/UI/Canvas]
+Set(FOG_UI_CANVAS_SOURCES
+  Fog/UI/Canvas/CanvasDelegate.cpp
+  Fog/UI/Canvas/CanvasElement.cpp
+  Fog/UI/Canvas/CanvasView.cpp
+)
+
+Set(FOG_UI_CANVAS_HEADERS
+  Fog/UI/Canvas/CanvasDelegate.h
+  Fog/UI/Canvas/CanvasElement.h
+  Fog/UI/Canvas/CanvasView.h
+)
+
+# [Fog/UI/Engine]
+Set(FOG_UI_ENGINE_SOURCES
+  Fog/UI/Engine/GuiEngine.cpp
+)
+
+Set(FOG_UI_ENGINE_HEADERS
+  Fog/UI/Engine/GuiEngine.h
+)
+
+Set(FOG_UI_ENGINE_MAC_SOURCES
+  Fog/UI/Engine/MacGuiEngine.mm
+)
+
+Set(FOG_UI_ENGINE_MAC_HEADERS
+  Fog/UI/Engine/MacGuiEngine.h
+)
+
+Set(FOG_UI_ENGINE_WIN_SOURCES
+  Fog/UI/Engine/WinGuiEngine.cpp
+)
+
+Set(FOG_UI_ENGINE_WIN_HEADERS
+  Fog/UI/Engine/WinGuiEngine.h
+)
+
+Set(FOG_UI_ENGINE_X11_SOURCES
+  Fog/UI/Engine/X11GuiEngine.cpp
+)
+
+Set(FOG_UI_ENGINE_X11_HEADERS
+  Fog/UI/Engine/X11GuiEngine.h
+  Fog/UI/Engine/X11Headers.h
+)
+
+# [Fog/UI/Layout]
+Set(FOG_UI_LAYOUT_SOURCES
+  Fog/UI/Layout/BorderLayout.cpp
+  Fog/UI/Layout/BoxLayout.cpp
+  Fog/UI/Layout/FlowLayout.cpp
+  Fog/UI/Layout/GridLayout.cpp
+  Fog/UI/Layout/Layout.cpp
+  Fog/UI/Layout/LayoutHint.cpp
+  Fog/UI/Layout/LayoutItem.cpp
+  Fog/UI/Layout/LayoutUtil.cpp
+  Fog/UI/Layout/Margin.cpp
+)
+
+Set(FOG_UI_LAYOUT_HEADERS
+  Fog/UI/Layout/BorderLayout.h
+  Fog/UI/Layout/BoxLayout.h
+  Fog/UI/Layout/FlowLayout.h
+  Fog/UI/Layout/GridLayout.h
+  Fog/UI/Layout/Layout.h
+  Fog/UI/Layout/LayoutHint.h
+  Fog/UI/Layout/LayoutItem.h
+  Fog/UI/Layout/LayoutPolicy.h
+  Fog/UI/Layout/LayoutUtil.h
+  Fog/UI/Layout/Margin.h
+)
+
+# [Fog/UI/Theming]
+Set(FOG_UI_THEMING_SOURCES
+  Fog/UI/Theming/ThemeEngine.cpp
+  Fog/UI/Theming/DefaultThemeEngine.cpp
+  Fog/UI/Theming/WinThemeEngine.cpp
+)
+
+Set(FOG_UI_THEMING_HEADERS
+  Fog/UI/Theming/ThemeEngine.h
+  Fog/UI/Theming/DefaultThemeEngine_p.h
+  Fog/UI/Theming/WinThemeEngine_p.h
+)
+
+# [Fog/UI/Widget]
+Set(FOG_UI_WIDGET_SOURCES
+  Fog/UI/Widget/Event.cpp
+  Fog/UI/Widget/Widget.cpp
+  Fog/UI/Widget/Window.cpp
+)
+
+Set(FOG_UI_WIDGET_HEADERS
+  Fog/UI/Widget/Event.h
+  Fog/UI/Widget/Widget.h
+  Fog/UI/Widget/Widget_p.h
+  Fog/UI/Widget/Window.h
+)
+
+# Source groups.
+Source_Group("UI"                   FILES ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
+Source_Group("UI/Animation"         FILES ${FOG_UI_ANIMATION_SOURCES}        ${FOG_UI_ANIMATION_HEADERS}       )
+Source_Group("UI/Canvas"            FILES ${FOG_UI_CANVAS_SOURCES}           ${FOG_UI_CANVAS_HEADERS}          )
+Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
+                                          ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_SOURCES}
+                                          ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
+                                          ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
+Source_Group("UI/Layout"            FILES ${FOG_UI_LAYOUT_SOURCES}           ${FOG_UI_LAYOUT_HEADERS}          )
+Source_Group("UI/Theming"           FILES ${FOG_UI_THEMING_SOURCES}          ${FOG_UI_THEMING_HEADERS}         )
+Source_Group("UI/Widget"            FILES ${FOG_UI_WIDGET_SOURCES}           ${FOG_UI_WIDGET_HEADERS}          )
+
+# =============================================================================
 # [Fog-All]
 # =============================================================================
 
@@ -1556,14 +1556,14 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_SOURCE_SOURCES}
   ${FOG_G2D_TEXT_SOURCES}
   ${FOG_G2D_TOOLS_SOURCES}
-  # Fog/Gui.
-  ${FOG_GUI_LIB_SOURCES}
-  ${FOG_GUI_ANIMATION_SOURCES}
-  ${FOG_GUI_CANVAS_SOURCES}
-  ${FOG_GUI_ENGINE_SOURCES}
-  ${FOG_GUI_LAYOUT_SOURCES}
-  ${FOG_GUI_THEMING_SOURCES}
-  ${FOG_GUI_WIDGET_SOURCES}
+  # Fog/UI.
+  ${FOG_UI_LIB_SOURCES}
+  ${FOG_UI_ANIMATION_SOURCES}
+  ${FOG_UI_CANVAS_SOURCES}
+  ${FOG_UI_ENGINE_SOURCES}
+  ${FOG_UI_LAYOUT_SOURCES}
+  ${FOG_UI_THEMING_SOURCES}
+  ${FOG_UI_WIDGET_SOURCES}
   # Fog/Svg.
   ${FOG_SVG_LIB_SOURCES}
   ${FOG_SVG_DOM_SOURCES}
@@ -1598,21 +1598,21 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_SOURCE_HEADERS}
   ${FOG_G2D_TEXT_HEADERS}
   ${FOG_G2D_TOOLS_HEADERS}
-  # Fog/Gui.
-  ${FOG_GUI_LIB_HEADERS}
-  ${FOG_GUI_ANIMATION_HEADERS}
-  ${FOG_GUI_CANVAS_HEADERS}
-  ${FOG_GUI_ENGINE_HEADERS}
-  ${FOG_GUI_ENGINE_X11_HEADERS}
-  ${FOG_GUI_ENGINE_WIN_HEADERS}
-  ${FOG_GUI_LAYOUT_HEADERS}
-  ${FOG_GUI_THEMING_HEADERS}
-  ${FOG_GUI_WIDGET_HEADERS}
   # Fog/Svg.
   ${FOG_SVG_LIB_HEADERS}
   ${FOG_SVG_DOM_HEADERS}
   ${FOG_SVG_TOOLS_HEADERS}
   ${FOG_SVG_VISIT_HEADERS}
+  # Fog/UI.
+  ${FOG_UI_LIB_HEADERS}
+  ${FOG_UI_ANIMATION_HEADERS}
+  ${FOG_UI_CANVAS_HEADERS}
+  ${FOG_UI_ENGINE_HEADERS}
+  ${FOG_UI_ENGINE_X11_HEADERS}
+  ${FOG_UI_ENGINE_WIN_HEADERS}
+  ${FOG_UI_LAYOUT_HEADERS}
+  ${FOG_UI_THEMING_HEADERS}
+  ${FOG_UI_WIDGET_HEADERS}
 )
 
 If(FOG_OS_WINDOWS)
@@ -1625,14 +1625,14 @@ If(FOG_OS_MAC)
   List(APPEND FOG_ALL_HEADERS ${FOG_G2D_MAC_HEADERS})
 EndIf()
 
-If(FOG_GUI_WINDOWS)
-  List(APPEND FOG_ALL_SOURCES ${FOG_GUI_ENGINE_WIN_SOURCES})
-  List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_WIN_HEADERS})
+If(FOG_UI_WINDOWS)
+  List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_WIN_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_WIN_HEADERS})
 EndIf()
 
-If(FOG_GUI_MAC)
-  List(APPEND FOG_ALL_SOURCES ${FOG_GUI_ENGINE_MAC_SOURCES})
-  List(APPEND FOG_ALL_HEADERS ${FOG_GUI_ENGINE_MAC_HEADERS})
+If(FOG_UI_MAC)
+  List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_MAC_SOURCES})
+  List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_MAC_HEADERS})
 EndIf()
 
 Set(FOG_ALL_SOURCES_CORRECTED "")
@@ -1696,10 +1696,10 @@ EndIf()
 # [Setup - Binary - Fog/UI-X11]
 # =============================================================================
 
-If(NOT FOG_BUILD_STATIC AND FOG_GUI_X11 AND FOG_BUILD_UI_X11)
+If(NOT FOG_BUILD_STATIC AND FOG_UI_X11 AND FOG_BUILD_UI_X11)
   Add_Library(Fog_UI_X11 SHARED
-    ${FOG_GUI_ENGINE_X11_SOURCES}
-    ${FOG_GUI_ENGINE_X11_HEADERS})
+    ${FOG_UI_ENGINE_X11_SOURCES}
+    ${FOG_UI_ENGINE_X11_HEADERS})
   Target_Link_Libraries(Fog_UI_X11 Fog ${FOG_LIBRARIES})
   Install(TARGETS Fog_UI_X11 DESTINATION lib)
 EndIf()

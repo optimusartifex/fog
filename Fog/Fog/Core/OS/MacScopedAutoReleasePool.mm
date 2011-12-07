@@ -6,7 +6,7 @@
 // [Dependencies]
 #include <Fog/Core/OS/MacScopedAutoReleasePool.h>
 
-// [Cocoa]
+// [Dependencies - Mac]
 #import <Cocoa/Cocoa.h>
 
 namespace Fog {

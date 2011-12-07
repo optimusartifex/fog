@@ -15,7 +15,7 @@
 #include <Fog/G2d/Text/MacFontFace.h>
 #include <Fog/G2d/Text/MacFontProvider.h>
 
-// [Cocoa]
+// [Dependencies - Mac]
 #import <Cocoa/Cocoa.h>
 
 namespace Fog {
@@ -40,7 +40,7 @@ MacFontProviderData::~MacFontProviderData()
 // [Fog::MacFontProviderData - Interface]
 // ============================================================================
 
-err_t MacFontProviderData::getFontFace(FontFace** dst, const String& fontFamily)
+err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily)
 {
   NSString* nsName = MacUtil::NSFromString(fontFamily);
 
@@ -48,7 +48,7 @@ err_t MacFontProviderData::getFontFace(FontFace** dst, const String& fontFamily)
   if (nsFont == nil) return ERR_FONT_NOT_MATCHED;
   
   err_t err;
-  String fontName;
+  StringW fontName;
 
   err = MacUtil::StringFromNS(fontName, [nsFont familyName]);
   if (FOG_IS_ERROR(err)) return err;
@@ -79,14 +79,14 @@ err_t MacFontProviderData::getFontFace(FontFace** dst, const String& fontFamily)
   return ERR_OK;
 }
 
-err_t MacFontProviderData::getFontList(List<String>& dst)
+err_t MacFontProviderData::getFontList(List<StringW>& dst)
 {
   NSEnumerator* enumerator = [[mgr availableFontFamilies] objectEnumerator];
   NSString* name;
 
   while (name = [enumerator nextObject])
   {
-    String tmp;
+    StringW tmp;
     if (MacUtil::StringFromNS(tmp, name) == ERR_OK)
       dst.append(tmp);
   }
@@ -94,9 +94,9 @@ err_t MacFontProviderData::getFontList(List<String>& dst)
   return ERR_OK;
 }
 
-String MacFontProviderData::getDefaultFamily()
+StringW MacFontProviderData::getDefaultFamily()
 {
-  return Ascii8("Lucida Grande");
+  return StringW::fromAscii8("Lucida Grande");
 }
 
 } // Fog namespace

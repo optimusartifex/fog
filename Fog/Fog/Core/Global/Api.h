@@ -13,6 +13,10 @@
 #include <Fog/Core/Global/EnumUI.h>
 #include <Fog/Core/Global/TypeDefs.h>
 
+// [Dependencies - C]
+#include <time.h>
+
+// [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 #include <objidl.h>
 #endif // FOG_OS_WINDOWS

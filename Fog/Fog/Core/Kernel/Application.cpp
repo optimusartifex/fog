@@ -23,18 +23,18 @@
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/Core/Tools/TextCodec.h>
-#include <Fog/Gui/Engine/GuiEngine.h>
+#include <Fog/UI/Engine/GuiEngine.h>
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
 # include <Fog/Core/OS/WinUtil.h>
-# include <Fog/Gui/Engine/WinGuiEngine.h>
+# include <Fog/UI/Engine/WinGuiEngine.h>
 # include <io.h>
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies - Mac]
 #if defined(FOG_OS_MAC)
-# include <Fog/Gui/Engine/MacGuiEngine.h>
+# include <Fog/UI/Engine/MacGuiEngine.h>
 #endif // FOG_OS_MAC
 
 // [Dependencies - Posix]

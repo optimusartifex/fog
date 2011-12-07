@@ -2300,7 +2300,6 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
   PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
-
   FOG_ASSERT(self->_isFinalized);
 
   if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
@@ -2393,7 +2392,6 @@ _Finalize:
 
       if (x == xNext)
         goto _Continue;
-
       scanline->endA8Extra();
 
       alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover);

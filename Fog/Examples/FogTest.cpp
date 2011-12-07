@@ -82,14 +82,11 @@ MyWindow::MyWindow(uint32_t createFlags) :
   _spread = GRADIENT_SPREAD_REPEAT;
 
   _clip = false;
-  //testVBoxLayout();
-  //testFrame();
-  //setContentRightMargin(0);
 
-  linear.addStop(ColorStop(0.00f, Argb32(0xFFFFFFFF)));
-  linear.addStop(ColorStop(0.33f, Argb32(0xFFFFFF00)));
-  linear.addStop(ColorStop(0.66f, Argb32(0xFFFF0000)));
-  linear.addStop(ColorStop(1.00f, Argb32(0xFF000000)));
+  linear.addStop(0.00f, Argb32(0xFFFFFFFF));
+  linear.addStop(0.33f, Argb32(0xFFFFFF00));
+  linear.addStop(0.66f, Argb32(0xFFFF0000));
+  linear.addStop(1.00f, Argb32(0xFF000000));
   radial.setStops(linear.getStops());
 
   _lastMousePoint.set(250, 250);

@@ -14,7 +14,7 @@
 #include <Fog/G2d/Text/MacFontFace.h>
 #include <Fog/G2d/Text/MacFontProvider.h>
 
-// [Cocoa]
+// [Dependencies - Mac]
 #import <Cocoa/Cocoa.h>
 
 namespace Fog {
@@ -153,7 +153,7 @@ err_t MacFontFace::_renderGlyphOutline(PathD& dst, GlyphMetricsF& metrics, const
 // [Fog::MacFontFace - Methods]
 // ============================================================================
 
-err_t MacFontFace::_init(const String& family, NSFont* src)
+err_t MacFontFace::_init(const StringW& family, NSFont* src)
 {
   this->family = family;
   this->family.squeeze();

@@ -258,13 +258,13 @@ static void FOG_CDECL BoxRasterizer8_init24x8(BoxRasterizer8* self, const BoxI* 
   if ((x0 & ~0xFF) == (x1 & ~0xFF))
   {
     hr -= hl;
-    hl = hr;
+    hl  = hr;
   }
 
   if ((y0 & ~0xFF) == (y1 & ~0xFF))
   {
     vb -= vt;
-    vt = vb;
+    vt  = vb;
   }
 
   vt *= opacity;
@@ -653,8 +653,8 @@ err_t PathRasterizer8::init()
   _size.set(_sceneBox.getWidth(), _sceneBox.getHeight());
   _size24x8.set(_size.w << A8_SHIFT, _size.h << A8_SHIFT);
 
-  _offsetF.set(-_sceneBox.x0, -_sceneBox.y0);
-  _offsetD.set(-_sceneBox.x0, -_sceneBox.y0);
+  _offsetF.set(0, -_sceneBox.y0);
+  _offsetD.set(0, -_sceneBox.y0);
   uint i = (uint)_sceneBox.getHeight() + 1;
 
   if (_rowsCapacity < i)
@@ -1945,13 +1945,20 @@ _One:
 
     if (dy >= dx)
     {
-      y0 += yDlt;
+      int yAcc = int(y0) + int(yDlt);
 
       if (coverSign > 0)
       {
+        goto _Vert_P_Skip;
+
         for (;;)
         {
           do {
+            xDlt = xLift;
+            xErr += xRem;
+            if (xErr >= 0) { xErr -= dy; xDlt++; }
+
+_Vert_P_Skip:
             area = fx0;
             fx0 += int(xDlt);
 
@@ -1973,46 +1980,40 @@ _Vert_P_Single:
             }
             else
             {
-              {
-                int fyCut = int(y0) & A8_MASK;
-                FOG_ASSERT(fyCut >= fy0 && fyCut <= fy1);
+              yAcc &= 0xFF;
+              FOG_ASSERT(yAcc >= fy0 && yAcc <= fy1);
               
-                cover = fyCut - fy0; // Positive.
-                fx0  &= A8_MASK;
+              cover = yAcc - fy0; // Positive.
+              fx0  &= A8_MASK;
 
-                // Improve the count of generated cells in case that the resulting
-                // cover is zero using the 'ROW_ADD_ONE'. The 'goto' ensures that
-                // the ROW_ADD_ONE() macro will be expanded only once.
-                if (cover == 0)
+              // Improve the count of generated cells in case that the resulting
+              // cover is zero using the 'ROW_ADD_ONE'. The 'goto' ensures that
+              // the ROW_ADD_ONE() macro will be expanded only once.
+              if (cover == 0)
+              {
+                cover = fy1 - yAcc; // Positive.
+                area  = fx0;
+                ex0++;
+                goto _Vert_P_Single;
+              }
+              else
+              {
+                area = (area + A8_SCALE) * cover;
+                ROW_ADD_TWO(_Vert_P, rPtr, ex0, cover, area,
                 {
-                  cover = fy1 - fyCut; // Positive.
-                  area  = fx0;
+                  cover = fy1 - yAcc; // Positive.
+                  area  = fx0 * cover;
                   ex0++;
-                  goto _Vert_P_Single;
-                }
-                else
-                {
-                  area = (area + A8_SCALE) * cover;
-                  ROW_ADD_TWO(_Vert_P, rPtr, ex0, cover, area,
-                  {
-                    cover = fy1 - fyCut; // Positive.
-                    area  = fx0 * cover;
-                    ex0++;
-                  });
-                }
+                });
               }
 
 _Vert_P_Advance:
-              y0 += int(yLift);
+              yAcc += int(yLift);
               yErr += yRem;
-              if (yErr >= 0) { yErr -= dx; y0++; }
+              if (yErr >= 0) { yErr -= dx; yAcc++; }
             }
 
             rPtr += rInc;
-
-            xDlt = xLift;
-            xErr += xRem;
-            if (xErr >= 0) { xErr -= dy; xDlt++; }
           } while (--i);
 
           if (rPtr == rEnd)
@@ -2031,15 +2032,24 @@ _Vert_P_Advance:
           {
             fy0 = 0;
             fy1 = int(y1) & A8_MASK;
+
             xDlt = x1 - (ex0 << 8) - fx0;
+            goto _Vert_P_Skip;
           }
         }
       }
       else
       {
+        goto _Vert_N_Skip;
+
         for (;;)
         {
           do {
+            xDlt = xLift;
+            xErr += xRem;
+            if (xErr >= 0) { xErr -= dy; xDlt++; }
+
+_Vert_N_Skip:
             area = fx0;
             fx0 += int(xDlt);
 
@@ -2061,46 +2071,40 @@ _Vert_N_Single:
             }
             else
             {
+              yAcc &= 0xFF;
+              FOG_ASSERT(yAcc >= fy0 && yAcc <= fy1);
+
+              cover = fy0 - yAcc; // Negative.
+              fx0  &= A8_MASK;
+
+              // Improve the count of generated cells in case that the resulting
+              // cover is zero using the 'ROW_ADD_ONE'. The 'goto' ensures that
+              // the ROW_ADD_ONE() macro will be expanded only once.
+              if (cover == 0)
               {
-                int fyCut = int(y0) & A8_MASK;
-                FOG_ASSERT(fyCut >= fy0 && fyCut <= fy1);
-
-                cover = fy0 - fyCut; // Negative.
-                fx0  &= A8_MASK;
-
-                // Improve the count of generated cells in case that the resulting
-                // cover is zero using the 'ROW_ADD_ONE'. The 'goto' ensures that
-                // the ROW_ADD_ONE() macro will be expanded only once.
-                if (cover == 0)
+                cover = yAcc - fy1; // Negative.
+                area  = fx0;
+                ex0++;
+                goto _Vert_N_Single;
+              }
+              else
+              {
+                area = (area + A8_SCALE) * cover;
+                ROW_ADD_TWO(_Vert_N, rPtr, ex0, cover, area,
                 {
-                  cover = fyCut - fy1; // Negative.
-                  area  = fx0;
+                  cover = yAcc - fy1; // Negative.
+                  area  = fx0 * cover;
                   ex0++;
-                  goto _Vert_N_Single;
-                }
-                else
-                {
-                  area = (area + A8_SCALE) * cover;
-                  ROW_ADD_TWO(_Vert_N, rPtr, ex0, cover, area,
-                  {
-                    cover = fyCut - fy1; // Negative.
-                    area  = fx0 * cover;
-                    ex0++;
-                  });
-                }
+                });
               }
 
 _Vert_N_Advance:
-              y0 += int(yLift);
+              yAcc += int(yLift);
               yErr += yRem;
-              if (yErr >= 0) { yErr -= dx; y0++; }
+              if (yErr >= 0) { yErr -= dx; yAcc++; }
             }
 
             rPtr += rInc;
-
-            xDlt = xLift;
-            xErr += xRem;
-            if (xErr >= 0) { xErr -= dy; xDlt++; }
           } while (--i);
 
           if (rPtr == rEnd)
@@ -2120,6 +2124,7 @@ _Vert_N_Advance:
             fy0 = 0;
             fy1 = int(y1) & A8_MASK;
             xDlt = x1 - (ex0 << 8) - fx0;
+            goto _Vert_N_Skip;
           }
         }
       }
@@ -2167,17 +2172,23 @@ _Horz_Single:
         if (yErr >= 0) { yErr -= dx; coverAcc++; }
       }
 
-      goto _Horz_Continue;
+      if (--i == 0)
+        goto _Horz_After;
 
       for (;;)
       {
         do {
-          coverAcc -= 256;
-          cover = coverAcc;
-          FOG_ASSERT(cover >= 0 && cover <= 256);
+          xDlt = xLift;
+          xErr += xRem;
+          if (xErr >= 0) { xErr -= dy; xDlt++; }
 
           ex0 = int(x0 >> A8_SHIFT);
           fx0 = int(x0) & A8_MASK;
+
+_Horz_Skip:
+          coverAcc -= 256;
+          cover = coverAcc;
+          FOG_ASSERT(cover >= 0 && cover <= 256);
 
 _Horz_Inside:
           x0 += xDlt;
@@ -2218,22 +2229,19 @@ _Horz_Inside:
           });
 
           rPtr += rInc;
-
-_Horz_Continue:
-          xDlt = xLift;
-          xErr += xRem;
-          if (xErr >= 0) { xErr -= dy; xDlt++; }
         } while (--i);
 
         if (rPtr == rEnd)
           break;
 
-        if (j > 1)
+_Horz_After:
+        i = j;
+        j = 1;
+
+        if (i > 1)
         {
           fy1 = A8_SCALE;
-
-          i = j - 1;
-          j = 1;
+          i--;
         }
         else
         {
@@ -2243,14 +2251,15 @@ _Horz_Continue:
           ex0 = int(x0 >> A8_SHIFT);
           fx0 = int(x0) & A8_MASK;
 
-          i = j;
-          j = 1;
-
           if (fx0 + int(xDlt) <= 256)
           {
             cover = fy1 * coverSign;
             area = (fx0 * 2 + int(xDlt)) * cover;
             goto _Horz_Single;
+          }
+          else
+          {
+            goto _Horz_Skip;
           }
         }
       }
@@ -2267,9 +2276,8 @@ _Bail:
 // [Fog::PathRasterizer8 - Render - Helpers]
 // ============================================================================
 
-// TODO: Rename back to PathRasterizer8_calculateAlpha() after finished.
 template<int _RULE, int _USE_ALPHA>
-static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha2(const PathRasterizer8* self, int cover)
+static FOG_INLINE uint32_t PathRasterizer8_calculateAlpha(const PathRasterizer8* self, int cover)
 {
   if (cover < 0) cover = -cover;
 
@@ -2309,8 +2317,6 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
   int y1 = self->_boundingBox.y1;
 
   PathRasterizer8::Row* rows = self->_rows - self->_sceneBox.y0 + y0;
-
-  int xOffset = self->_sceneBox.x0;
   int xEnd = self->_sceneBox.x1;
 
   filler->prepare(y0);
@@ -2350,7 +2356,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
     uint i = (uint)chunk->getLength();
 
     int x;
-    int xNext = chunk->x0 + xOffset;
+    int xNext = chunk->x0;
     int cover = 0;
     uint32_t alpha;
 
@@ -2372,7 +2378,7 @@ _Continue:
 
       do {
         cover += cell->cover;
-        alpha  = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover - (cell->area >> A8_SHIFT_2));
+        alpha  = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - (cell->area >> A8_SHIFT_2));
 
         scanline->valA8Extra(alpha);
         cell++;
@@ -2387,14 +2393,14 @@ _Finalize:
       }
 
       cell = chunk->cells;
-      xNext = chunk->x0 + xOffset;
+      xNext = chunk->x0;
       i = (uint)chunk->getLength();
 
       if (x == xNext)
         goto _Continue;
       scanline->endA8Extra();
 
-      alpha = PathRasterizer8_calculateAlpha2<_RULE, _USE_ALPHA>(self, cover);
+      alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover);
       if (alpha)
         scanline->lnkConstSpanOrMerge(x, xNext, alpha);
     }
@@ -2462,7 +2468,7 @@ _SkipScanline:
   cPtr = chunk->cells; \
   cEnd = cPtr + chunk->getLength(); \
   \
-  xNext = chunk->x0 + xOffset; \
+  xNext = chunk->x0; \
   cover = 0;
 
 #define RASTER_FETCH_CELL() \
@@ -2480,7 +2486,7 @@ _SkipScanline:
         \
         cPtr = chunk->cells; \
         cEnd = cPtr + chunk->getLength(); \
-        xNext = chunk->x0 + xOffset; \
+        xNext = chunk->x0; \
         FOG_ASSERT(x != xNext); \
       } \
       else \
@@ -2490,6 +2496,32 @@ _SkipScanline:
       break; \
     } \
   FOG_MACRO_END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// TODO: This should be really completed early.
 
 template<int _RULE, int _USE_ALPHA>
 static void FOG_CDECL PathRasterizer8_render_st_clip_region(
@@ -2507,8 +2539,6 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_region(
   int y1 = self->_boundingBox.y1;
 
   void** rows = self->_rows - self->_sceneBox.y0;
-  int xOffset = self->_sceneBox.x0;
-
   const BoxI* rectCur = self->_clip.region.data;
   const BoxI* rectEnd = rectCur + self->_clip.region.length;
 
@@ -2758,7 +2788,6 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_mask(
 
   void** rows = self->_rows - self->_sceneBox.y0;
   const RasterSpan8** mrows = self->_clip.mask.spans - self->_clip.mask.y0;
-  int xOffset = self->_sceneBox.x0;
 
   filler->prepare(y0);
 
@@ -3296,6 +3325,21 @@ _SkipScanline:
 #undef RASTER_FETCH_ROW
 #undef RASTER_FETCH_CELL
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ============================================================================
 // [Fog::PathRasterizer8 - Finalize]
 // ============================================================================
@@ -3305,12 +3349,14 @@ err_t PathRasterizer8::finalize()
   PathRasterizer8* self = this;
 
   // If already finalized this is the NOP.
-  if (_error != ERR_OK || _isFinalized) return _error;
+  if (_error != ERR_OK || _isFinalized)
+    return _error;
 
-  if (_boundingBox.y0 == -1) goto _NotValid;
+  if (_boundingBox.y0 == -1)
+    goto _NotValid;
 
   // Translate bounding box to match _sceneBox.
-  _boundingBox.translate(_sceneBox.x0, _sceneBox.y0);
+  _boundingBox.translate(0, _sceneBox.y0);
   // Normalize bounding box to our standard, x1/y1 coordinates are outside.
   _boundingBox.x1++;
   _boundingBox.y1++;

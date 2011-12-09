@@ -254,7 +254,7 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
 
   FOG_INLINE void reset()
   {
-    // TODO:
+    _initialized = false;
   }
 
   // --------------------------------------------------------------------------

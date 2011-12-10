@@ -126,7 +126,7 @@ struct StringTmpW : public StringW
   }
 
   FOG_INLINE StringTmpW(const Ascii8& str) :
-    StringW(StringW::_dAdopt((void*)&_storage, N, StubW(str.getData(), str.getLength())))
+    StringW(StringW::_dAdopt((void*)&_storage, N, StubA(str.getData(), str.getLength())))
   {
   }
 

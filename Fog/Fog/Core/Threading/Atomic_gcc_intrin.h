@@ -129,10 +129,10 @@ struct AtomicInt64
   static FOG_INLINE int64_t get(const int64_t* atomic)
   {
     // There's no __sync_* method which could be used here.
-    int32_t result;
+    int64_t result;
     __asm__ __volatile__
     (
-      "movl %1, %0\n"
+      "movq %1, %0\n"
         : "=r" (result)
         : "m" (*atomic)
     );
@@ -146,7 +146,7 @@ struct AtomicInt64
 
   static FOG_INLINE void dec(int64_t* atomic)
   {
-    __sync_fetch_and_add(atomic, 1);
+    __sync_fetch_and_sub(atomic, 1);
   }
 
   static FOG_INLINE void add(int64_t* atomic, int64_t value)

@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT LayoutPolicy
 
   uint32_t expandingDirections() const
   {
-    uint32_t result;
+    uint32_t result = 0;
 
     if (_data._policy & LAYOUT_EXPANDING_WIDTH)
       result |= ORIENTATION_HORIZONTAL;

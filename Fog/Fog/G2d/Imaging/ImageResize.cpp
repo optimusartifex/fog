@@ -694,7 +694,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32(ImageResizeContext*
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -736,7 +735,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32(ImageResizeContext*
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -805,7 +803,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32(ImageResizeContext*
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -847,7 +844,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32(ImageResizeContext*
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -913,7 +909,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_RGB24(ImageResizeContext* 
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -958,7 +953,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_RGB24(ImageResizeContext* 
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -1022,7 +1016,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_A8(ImageResizeContext* ctx
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -1062,7 +1055,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_A8(ImageResizeContext* ctx
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)

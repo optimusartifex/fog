@@ -52,7 +52,7 @@ static void FOG_CDECL Lock_dtor(Lock* self)
 
 static bool FOG_CDECL Lock_tryLock(Lock* self)
 {
-  pthread_mutex_trylock(&self->_handle) == 0;
+  return pthread_mutex_trylock(&self->_handle) == 0;
 }
 #endif // FOG_OS_POSIX
 

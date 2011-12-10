@@ -70,8 +70,6 @@ static size_t FOG_CDECL Hash_calcExpandCapacity(size_t capacity)
 
 static size_t FOG_CDECL Hash_calcShrinkCapacity(size_t capacity)
 {
-  static const size_t threshold = 1024*1024*4;
-
   capacity /= 2;
   return HashUtil::getClosestPrime(capacity, -1);
 }
@@ -98,6 +96,8 @@ static HashUntypedData* Hash_Unknown_Unknown_getDEmptyForType(uint32_t vType)
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+  
+  return NULL;
 }
 
 // ============================================================================
@@ -889,9 +889,6 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putStub(HashUntyped* self, const Has
   HashKeyNode<CharT_(String)>** pPrev = reinterpret_cast<HashKeyNode<CharT_(String)>**>(&d->data[hashMod]);
   HashKeyNode<CharT_(String)>* node = *pPrev;
 
-  size_t idxKey = v->idxKeyT;
-  EqFunc eqKey = v->eqKey;
-
   while (node)
   {
     if (node->key.getLength() == keyLength && StringUtil::eq(node->key.getData(), keyData, keyLength))
@@ -962,9 +959,6 @@ static err_t FOG_CDECL Hash_StringT_Unknown_putString(HashUntyped* self, const H
   HashKeyNode<CharT_(String)>** pPrev = reinterpret_cast<HashKeyNode<CharT_(String)>**>(&d->data[hashMod]);
   HashKeyNode<CharT_(String)>* node = *pPrev;
 
-  size_t idxKey = v->idxKeyT;
-  EqFunc eqKey = v->eqKey;
-
   while (node)
   {
     if (node->key.getLength() == keyLength && StringUtil::eq(node->key.getData(), keyData, keyLength))
@@ -1011,9 +1005,6 @@ static err_t FOG_CDECL Hash_StringT_Unknown_removeStub(HashUntyped* self, const 
   HashKeyNode<CharT_(String)>** pPrev = reinterpret_cast<HashKeyNode<CharT_(String)>**>(&d->data[hashMod]);
   HashKeyNode<CharT_(String)>* node = *pPrev;
 
-  size_t idxKey = v->idxKeyT;
-  EqFunc eqKey = v->eqKey;
-
   while (node)
   {
     if (node->key.getLength() == keyLength && StringUtil::eq(node->key.getData(), keyData, keyLength))
@@ -1055,9 +1046,6 @@ static err_t FOG_CDECL Hash_StringT_Unknown_removeString(HashUntyped* self, cons
 
   HashKeyNode<CharT_(String)>** pPrev = reinterpret_cast<HashKeyNode<CharT_(String)>**>(&d->data[hashMod]);
   HashKeyNode<CharT_(String)>* node = *pPrev;
-
-  size_t idxKey = v->idxKeyT;
-  EqFunc eqKey = v->eqKey;
 
   while (node)
   {

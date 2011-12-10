@@ -3094,11 +3094,9 @@ static void FOG_CDECL Image_dRelease(ImageData* d)
 {
   if (d->reference.deref())
   {
-    bool wasStatic = (d->vType & VAR_FLAG_STATIC) != 0;
-
-    // FATAL: Image dereferenced during painting.
     if (d->locked)
     {
+      // FATAL: Image dereferenced during painting.
       Debug::failFunc("Fog::ImageData", "release", "ImageData released during painting.\n");
     }
 

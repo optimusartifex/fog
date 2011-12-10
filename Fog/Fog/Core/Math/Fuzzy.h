@@ -61,7 +61,7 @@ static FOG_INLINE bool feqv(const float* a, const float* b, size_t length, float
 {
   for (size_t i = 0; i < length; i++)
   {
-    if (!isFuzzyEq(a[i], b[i]), epsilon)
+    if (!isFuzzyEq(a[i], b[i], epsilon))
       return false;
   }
 
@@ -72,7 +72,7 @@ static FOG_INLINE bool feqv(const double* a, const double* b, size_t length, dou
 {
   for (size_t i = 0; i < length; i++)
   {
-    if (!isFuzzyEq(a[i], b[i]), epsilon)
+    if (!isFuzzyEq(a[i], b[i], epsilon))
       return false;
   }
 

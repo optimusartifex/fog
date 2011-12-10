@@ -95,7 +95,7 @@ static void FOG_CDECL Cpu_cpuid(uint32_t in, CpuId* out)
 }
 #endif // FOG_CC_MSC
 
-#if defined(FOG_CC_GNU)
+#if defined(FOG_CC_GNU) || defined(FOG_CC_CLANG)
 static void FOG_CDECL Cpu_cpuid(uint32_t in, CpuId* out)
 {
 // When using GCC inline assembly it's needed to preserve EBX or RBX register.

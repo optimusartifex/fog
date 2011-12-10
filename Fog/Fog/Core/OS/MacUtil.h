@@ -29,9 +29,8 @@ namespace MacUtil {
 // [Fog::MacUtil]
 // ============================================================================
 
-err_t StringFromNS(String& dst, NSString* src);
-// TODO: Not Fog style.
-NSString* NSFromString(const String& src);
+FOG_API err_t StringW_fromNSString(StringW& self, NSString* src);
+FOG_API err_t StringW_toNSString(const StringW& self, NSString** dst);
 
 } // MacUtil namespace
 } // Fog namespace

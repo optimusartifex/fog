@@ -102,6 +102,21 @@
 # error "Fog::Core::C++ - Unsupported C++ Compiler, please fill a bug report."
 #endif
 
+// Define the C++ specific macros so those macros can be used in #if ... defs.
+// If we don't do that then all preprocessor macros which depends on the C++
+// compiler version won't work.
+
+#if !defined(FOG_CC_GNU_VERSION_EQ)
+# define FOG_CC_GNU_VERSION_EQ(_Major_, _Minor_, _Patch_) 0
+# define FOG_CC_GNU_VERSION_GE(_Major_, _Minor_, _Patch_) 0
+#endif // FOG_CC_GNU_VERSION_EQ
+
+#if !defined(FOG_CC_CLANG_VERSION_EQ)
+# define FOG_CC_CLANG_VERSION_EQ(_Major_, _Minor_, _Patch_) 0
+# define FOG_CC_CLANG_VERSION_GE(_Major_, _Minor_, _Patch_) 0
+#endif // FOG_CC_CLANG_VERSION_EQ
+
+// Define the override attribute if C++ compiler can't use it.
 #if !defined(FOG_CC_HAS_OVERRIDE)
 # define override
 #endif // FOG_CC_HAS_OVERRIDE

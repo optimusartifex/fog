@@ -112,6 +112,8 @@ static err_t FOG_CDECL ThreadEvent_ctor(ThreadEvent* self, bool manualReset, boo
 
   self->_manualReset = manualReset;
   self->_signaled = initialState;
+  
+  return ERR_OK;
 }
 
 static void FOG_CDECL ThreadEvent_dtor(ThreadEvent* self)

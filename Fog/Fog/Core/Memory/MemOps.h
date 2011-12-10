@@ -188,7 +188,7 @@ static FOG_INLINE void copy_s(void* _dst, const void* _src)
   uint8_t* dst = reinterpret_cast<uint8_t*>(_dst);
   const uint8_t* src = reinterpret_cast<const uint8_t*>(_src);
 
-  for (uint i = 0; i < Size / 64; i++)
+  for (uint i = uint(Size / 64); i; i--)
   {
     copy_64(dst, src); dst += 64; src += 64;
   }
@@ -325,7 +325,7 @@ static FOG_INLINE void zero_s(void* _dst)
 {
   uint8_t* dst = reinterpret_cast<uint8_t*>(_dst);
 
-  for (uint i = 0; i < Size / 64; i++)
+  for (uint i = uint(Size / 64); i; i--)
   {
     zero_64(dst); dst += 64;
   }
@@ -490,7 +490,7 @@ static FOG_INLINE bool eq_s(const void* _a, const void* _b)
   const uint8_t* a = reinterpret_cast<const uint8_t*>(_a);
   const uint8_t* b = reinterpret_cast<const uint8_t*>(_b);
 
-  for (uint i = 0; i < Size / 64; i++)
+  for (uint i = uint(Size / 64); i; i--)
   {
     result &= eq_64(a, b);
     if (!result) return result;
@@ -633,7 +633,7 @@ static FOG_INLINE void xchg_s(void* _a, void* _b)
   uint8_t* a = reinterpret_cast<uint8_t*>(_a);
   uint8_t* b = reinterpret_cast<uint8_t*>(_b);
 
-  for (uint i = 0; i < Size / 32; i++)
+  for (uint i = uint(Size / 32); i; i--)
   {
     xchg_32(a, b); a += 32; b += 32;
   }

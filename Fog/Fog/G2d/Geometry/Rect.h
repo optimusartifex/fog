@@ -469,10 +469,10 @@ struct FOG_NO_EXPORT RectF
     return *this;
   }
 
-  FOG_INLINE RectF& setX(float x) { x = x; return *this; }
-  FOG_INLINE RectF& setY(float y) { y = y; return *this; }
-  FOG_INLINE RectF& setWidth(float w) { w = w; return *this; }
-  FOG_INLINE RectF& setHeight(float h) { h = h; return *this; }
+  FOG_INLINE RectF& setX(float x) { this->x = x; return *this; }
+  FOG_INLINE RectF& setY(float y) { this->y = y; return *this; }
+  FOG_INLINE RectF& setWidth(float w) { this->w = w; return *this; }
+  FOG_INLINE RectF& setHeight(float h) { this->h = h; return *this; }
 
   FOG_INLINE RectF& setX0(float x0) { x = x0; return *this; }
   FOG_INLINE RectF& setY0(float y0) { y = y0; return *this; }
@@ -885,10 +885,10 @@ struct FOG_NO_EXPORT RectD
     return *this;
   }
 
-  FOG_INLINE RectD& setX(double x) { x = x; return *this; }
-  FOG_INLINE RectD& setY(double y) { y = y; return *this; }
-  FOG_INLINE RectD& setWidth(double w) { w = w; return *this; }
-  FOG_INLINE RectD& setHeight(double h) { h = h; return *this; }
+  FOG_INLINE RectD& setX(double x) { this->x = x; return *this; }
+  FOG_INLINE RectD& setY(double y) { this->y = y; return *this; }
+  FOG_INLINE RectD& setWidth(double w) { this->w = w; return *this; }
+  FOG_INLINE RectD& setHeight(double h) { this->h = h; return *this; }
 
   FOG_INLINE RectD& setX0(double x0) { x = x0; return *this; }
   FOG_INLINE RectD& setY0(double y0) { y = y0; return *this; }

@@ -23,9 +23,9 @@ namespace Fog {
 
 XmlElement::XmlElement(const ManagedStringW& tagName) :
   _type(XML_ELEMENT_BASE),
-  _dirty(0),
   _reserved0(0),
   _reserved1(0),
+  _dirty(0),
   _flags(XML_ALLOWED_DOM_MANIPULATION | XML_ALLOWED_TAG | XML_ALLOWED_ATTRIBUTES),
   _document(NULL),
   _parent(NULL),

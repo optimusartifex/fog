@@ -284,7 +284,7 @@ FOG_NO_EXPORT void Locale_init(void)
   d->vType = VAR_TYPE_LOCALE;
   d->name.init();
 
-  fog_api.locale_oUser = Locale_oPosix.initCustom1(d);
+  fog_api.locale_oUser = Locale_oUser.initCustom1(d);
   Locale_setLConv(d, localeconv());
 }
 

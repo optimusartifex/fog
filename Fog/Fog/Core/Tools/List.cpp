@@ -651,7 +651,6 @@ static err_t FOG_CDECL List_Simple_growLeft(ListUntyped* self, size_t szItemT, s
 static err_t FOG_CDECL List_Simple_growRight(ListUntyped* self, size_t szItemT, size_t length)
 {
   ListUntypedData* d = self->_d;
-  size_t remainLeft = d->start;
   size_t remainRight = d->capacity - d->end;
 
   if (d->reference.get() == 1 && length <= remainRight)
@@ -768,8 +767,6 @@ static void FOG_CDECL List_Simple_reset(ListUntyped* self)
 
 static err_t FOG_CDECL List_Simple_opList(ListUntyped* self, size_t szItemT, uint32_t cntOp, const ListUntyped* src, const Range* srcRange)
 {
-  ListUntypedData* d = self->_d;
-
   size_t sLength = src->_d->length;
   size_t rStart, rEnd;
 
@@ -793,8 +790,6 @@ static err_t FOG_CDECL List_Simple_opList(ListUntyped* self, size_t szItemT, uin
 
 static err_t FOG_CDECL List_Simple_opData(ListUntyped* self, size_t szItemT, uint32_t cntOp, const void* data, size_t dataLength)
 {
-  ListUntypedData* d = self->_d;
-
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
@@ -1258,6 +1253,8 @@ static ListUntypedData* List_Unknown_getDEmptyForType(uint32_t vType)
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+  
+  return NULL;
 }
 
 // ===========================================================================
@@ -1638,7 +1635,6 @@ static err_t FOG_CDECL List_Unknown_growLeft(ListUntyped* self, const ListUntype
 static err_t FOG_CDECL List_Unknown_growRight(ListUntyped* self, const ListUntypedVTable* v, size_t length)
 {
   ListUntypedData* d = self->_d;
-  size_t remainLeft = d->start;
   size_t remainRight = d->capacity - d->end;
 
   if (d->reference.get() == 1 && length <= remainRight)
@@ -1753,8 +1749,6 @@ static void FOG_CDECL List_Unknown_reset(ListUntyped* self, const ListUntypedVTa
 
 static err_t FOG_CDECL List_Unknown_opList(ListUntyped* self, const ListUntypedVTable* v, uint32_t cntOp, const ListUntyped* src, const Range* srcRange)
 {
-  ListUntypedData* d = self->_d;
-
   size_t sLength = src->_d->length;
   size_t rStart, rEnd;
 
@@ -1778,8 +1772,6 @@ static err_t FOG_CDECL List_Unknown_opList(ListUntyped* self, const ListUntypedV
 
 static err_t FOG_CDECL List_Unknown_opData(ListUntyped* self, const ListUntypedVTable* v, uint32_t cntOp, const void* data, size_t dataLength)
 {
-  ListUntypedData* d = self->_d;
-
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
@@ -2112,10 +2104,8 @@ static void List_Unknown_copy(ListUntyped* self, const ListUntypedVTable* v, con
 
 static err_t FOG_CDECL List_Float_opListD(ListUntyped* self, uint32_t cntOp, const ListUntyped* src, const Range* srcRange)
 {
-  // Impossible.
+  // Impossible (List<float> and List<double> can't share the same data same).
   FOG_ASSERT(self != src);
-
-  ListUntypedData* d = self->_d;
 
   size_t sLength = src->_d->length;
   size_t rStart, rEnd;
@@ -2137,8 +2127,6 @@ static err_t FOG_CDECL List_Float_opListD(ListUntyped* self, uint32_t cntOp, con
 
 static err_t FOG_CDECL List_Float_opDataD(ListUntyped* self, uint32_t cntOp, const void* data, size_t dataLength)
 {
-  ListUntypedData* d = self->_d;
-
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)
@@ -2163,8 +2151,6 @@ static err_t FOG_CDECL List_Double_opListF(ListUntyped* self, uint32_t cntOp, co
   // Impossible.
   FOG_ASSERT(self != src);
 
-  ListUntypedData* d = self->_d;
-
   size_t sLength = src->_d->length;
   size_t rStart, rEnd;
 
@@ -2185,8 +2171,6 @@ static err_t FOG_CDECL List_Double_opListF(ListUntyped* self, uint32_t cntOp, co
 
 static err_t FOG_CDECL List_Double_opDataF(ListUntyped* self, uint32_t cntOp, const void* data, size_t dataLength)
 {
-  ListUntypedData* d = self->_d;
-
   if (dataLength == 0)
   {
     if (cntOp == CONTAINER_OP_REPLACE)

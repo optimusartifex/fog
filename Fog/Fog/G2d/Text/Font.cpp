@@ -67,7 +67,7 @@ static void Font_updateMetrics(FontData* d, float height, uint32_t unit)
   float scale = height / dm._height;
 
   int alignedHeight;
-  uint32_t dataFlags = dataFlags & ~(FONT_DATA_IS_ALIGNED | FONT_DATA_IS_PHYSICAL);
+  uint32_t dataFlags = d->dataFlags & ~(FONT_DATA_IS_ALIGNED | FONT_DATA_IS_PHYSICAL);
 
   d->metrics._height = height;
   d->metrics._ascent = dm._ascent * scale;

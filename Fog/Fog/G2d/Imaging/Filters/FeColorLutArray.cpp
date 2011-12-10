@@ -53,7 +53,7 @@ static void FOG_CDECL FeColorLutArray_dtor(FeColorLutArray* self)
 
 static err_t FOG_CDECL FeColorLutArray_detach(FeColorLutArray* self)
 {
-  FeColorLutArrayData* d;
+  FeColorLutArrayData* d = self->_d;
 
   if (d->reference.get() == 1)
     return ERR_OK;
@@ -371,7 +371,8 @@ FOG_NO_EXPORT void FeColorLutArray_init(void)
   fog_api.fecolorlutarray_ctor = FeColorLutArray_ctor;
   fog_api.fecolorlutarray_ctorCopy = FeColorLutArray_ctorCopy;
   fog_api.fecolorlutarray_dtor = FeColorLutArray_dtor;
-
+  
+  fog_api.fecolorlutarray_detach = FeColorLutArray_detach;
   fog_api.fecolorlutarray_setAt = FeColorLutArray_setAt;
   fog_api.fecolorlutarray_setFromComponentFunction = FeColorLutArray_setFromComponentFunction;
   fog_api.fecolorlutarray_reset = FeColorLutArray_reset;

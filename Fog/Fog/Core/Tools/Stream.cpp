@@ -479,11 +479,10 @@ err_t FdStreamDevice::openFile(const StringW& fileName, uint32_t openFlags, Stre
   }
 
   // Only create file, fail if file exist.
-  if (openFlags & (STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_ONLY) ==
-                  (STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_ONLY))
-  {
+  const uint32_t exclusiveFlags = STREAM_OPEN_CREATE | STREAM_OPEN_CREATE_ONLY;
+
+  if ((openFlags & exclusiveFlags) == exclusiveFlags)
     fdFlags |= O_EXCL;
-  }
 
   // Open file.
   fd = ::open64(fileName8.getData(), fdFlags | O_LARGEFILE);
@@ -497,7 +496,7 @@ err_t FdStreamDevice::openFile(const StringW& fileName, uint32_t openFlags, Stre
   if (fd < 0)
   {
     // Error (Invalid file descriptor).
-    return errno;
+    return OSUtil::getErrFromLibCErrno();
   }
   else
   {

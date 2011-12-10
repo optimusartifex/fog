@@ -1928,7 +1928,6 @@ _TranslatePrepend:
       x = params->pointd().x;
       y = params->pointd().y;
 
-_TranslateAppend:
       self->_20 += x;
       self->_21 += y;
 

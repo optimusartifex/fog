@@ -1875,7 +1875,10 @@ _LargeBaseN:
     }
   }
 
+#if FOG_ARCH_BITS == 32
 _Done:
+#endif
+
   *dst = res64;
   if (pEnd) *pEnd = (size_t)(src - sBegin);
   if (pFlags) *pFlags = flags;

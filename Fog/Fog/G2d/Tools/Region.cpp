@@ -285,7 +285,6 @@ static err_t FOG_CDECL Region_reserve(Region* self, size_t capacity)
 
   if (d->reference.get() > 1)
   {
-_Create:
     RegionData* newd = fog_api.region_dCreateRegion(capacity, d->data, d->length, &d->boundingBox);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
@@ -337,7 +336,6 @@ static err_t FOG_CDECL Region_prepare(Region* self, size_t count)
 
   if (d->reference.get() > 1 || d->capacity < count)
   {
-_Create:
     RegionData* newd = fog_api.region_dCreate(count);
     if (FOG_IS_NULL(newd)) return ERR_RT_OUT_OF_MEMORY;
 
@@ -788,7 +786,6 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
 
   FOG_ASSERT(d->capacity >= length);
   BoxI* dCur = d->data;
-  BoxI* dEnd = dCur + length;
 
   BoxI* dPrevBand = NULL;
   BoxI* dCurBand;
@@ -2786,8 +2783,6 @@ static err_t FOG_CDECL Region_intersectAndClip(Region* dst, const Region* a, con
     dst == a ||
     dst == b ||
     d->reference.get() != 1;
-
-  size_t dCapacity = d->capacity;
 
   BoxI* dCur = NULL;
   BoxI* dPrevBand = NULL;

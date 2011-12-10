@@ -1068,7 +1068,7 @@ FOG_NO_EXPORT double _mprec_log10(int dig)
 {
   double v = 1.0;
 
-  if (dig < FOG_ARRAY_SIZE(tens))
+  if (dig < (int)FOG_ARRAY_SIZE(tens))
     return tens[dig];
 
   while (dig > 0)
@@ -1442,7 +1442,7 @@ static void FOG_CDECL StringUtil_dtoa(NTOAContext* ctx, double _d, uint32_t mode
     s5 = 0;
   }
 
-  if (mode < 0 || mode > 9)
+  if (mode > 9)
     mode = 0;
 
 #ifndef DTOA_SET_INEXACT
@@ -1664,7 +1664,7 @@ _FastFailed:
         }
 #endif
         d.d += d.d;
-        if (d.d > ds.d || d.d == ds.d && L & 1)
+        if (d.d > ds.d || (d.d == ds.d && (L & 1)))
         {
 _BumpUp:
           while (*--s == '9')

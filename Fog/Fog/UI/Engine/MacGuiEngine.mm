@@ -3,7 +3,7 @@
 // [License]
 // MIT, See COPYING file in package
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Global.h>
 #if defined(FOG_OS_MAC)
 
 // [Dependencies]
@@ -114,7 +114,7 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
   using namespace Fog;
   
   uint32_t ch = (uint32_t)[[event charactersIgnoringModifiers] characterAtIndex:0];
-  fogWindow->onKeyPress(ch, 0, 0, (Char)ch);
+  fogWindow->onKeyPress(ch, 0, 0, CharW(ch));
 }
 
 - (void)keyUp:(NSEvent*)event
@@ -122,7 +122,7 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
   using namespace Fog;
   
   uint32_t ch = (uint32_t)[[event charactersIgnoringModifiers] characterAtIndex:0];
-  fogWindow->onKeyRelease(ch, 0, 0, (Char)ch);
+  fogWindow->onKeyRelease(ch, 0, 0, CharW(ch));
 }
 
 - (void)rightMouseUp:(NSEvent*)event
@@ -426,26 +426,33 @@ err_t MacGuiWindow::takeFocus()
   return ERR_OK;
 }
 
-err_t MacGuiWindow::setTitle(const String& title)
+err_t MacGuiWindow::setTitle(const StringW& title)
 {
   if (window == nil) return ERR_RT_INVALID_HANDLE;
   
-  NSString* nsTitle = MacUtil::NSFromString(title);
-  [window setTitle: nsTitle];
+  NSString* nsTitle;
+  FOG_RETURN_ON_ERROR(MacUtil::StringW_toNSString(title, &nsTitle));
 
+  [window setTitle: nsTitle];
   return ERR_OK;
 }
 
-err_t MacGuiWindow::getTitle(String& title)
+err_t MacGuiWindow::getTitle(StringW& title)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
-  return MacUtil::StringFromNS(title, [window title]);
+  if (window == nil)
+    return ERR_RT_INVALID_HANDLE;
+
+  NSString* s = [window title];
+  [s release];
+  
+  return MacUtil::StringW_fromNSString(title, [window title]);
 }
 
 err_t MacGuiWindow::setIcon(const Image& icon)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
-  
+  if (window == nil)
+    return ERR_RT_INVALID_HANDLE;
+
   //[[window standardWindowButton:NSWindowDocumentIconButton] setImage:toNSImage(icon)];
   return ERR_OK;
 }
@@ -606,7 +613,7 @@ bool MacGuiBackBuffer::resize(int width, int height, bool cache)
   // Destroy image buffer
   if (destroyImage)
   {
-    Memory::free(_primaryPixels);
+    MemMgr::free(_primaryPixels);
   }
 
   // Create image buffer.
@@ -615,7 +622,7 @@ bool MacGuiBackBuffer::resize(int width, int height, bool cache)
     _depth = [[NSScreen mainScreen] depth];
     _primaryStride = targetWidth * 4;
     
-    _primaryPixels = (uint8_t*)Memory::alloc(_primaryStride * targetHeight);
+    _primaryPixels = (uint8_t*)MemMgr::alloc(_primaryStride * targetHeight);
 
     _buffer.stride = _primaryStride;
     _buffer.data = _primaryPixels;
@@ -667,9 +674,9 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, size_t coun
     Debug::failFunc("Fog::MacGuiBackBuffer", "updateRects", "Empty image");
   }
 
-  for (sysint_t i=0; i<count; ++i)
+  for (size_t i = 0; i < count; i++)
   {
-    [view drawRect: toNSRect(RectF(rects[i]))];
+    [view drawRect: toNSRect(rects[i])];
   }
 }
 
@@ -740,13 +747,17 @@ void MacEventLoopBase::_scheduleWork()
 
 void MacEventLoopBase::_scheduleDelayedWork(const Time& delayedWorkTime)
 {
-  Time::Exploded now;
-  delayedWorkTime.utcExplode(&now);
-  double seconds = now.second + (static_cast<double>((delayedWorkTime.toInternalValue()) % Time::MicrosecondsPerSecond) /
-                                                      Time::MicrosecondsPerSecond);
-  CFGregorianDate gregorian = { now.year, now.month, now.dayOfMonth, now.hour,now.minute, seconds };
+  // TODO(Petr): Old code was based on the conversion to DATE and then back 
+  // to TIME, I think that this is not necessary, however, more testing is needed,
+  // because I'm not sure whether it's correct. Need more testing.
+  //
+  //Time::Exploded now;
+  //delayedWorkTime.utcExplode(&now);
+  //double seconds = now.second + (static_cast<double>((delayedWorkTime.toInternalValue()) % Time::MicrosecondsPerSecond) /
+  //                                                    Time::MicrosecondsPerSecond);
+  //CFGregorianDate gregorian = { now.year, now.month, now.dayOfMonth, now.hour,now.minute, seconds };
 
-  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, CFGregorianDateGetAbsoluteTime(gregorian, NULL));
+  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, delayedWorkTime.getValue());
 }
 
 void MacEventLoopBase::runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info)

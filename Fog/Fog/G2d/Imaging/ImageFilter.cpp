@@ -141,7 +141,7 @@ static err_t FOG_CDECL ImageFilter_setData(ImageFilter* self, const FeBase* feDa
     case FE_TYPE_MORPHOLOGY        : FE_SET_DATA(FeMorphology)       ; return ERR_OK;
 
     default:
-      FOG_ASSERT_NOT_REACHED();
+      return ERR_RT_INVALID_STATE;
   }
 }
 

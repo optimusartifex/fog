@@ -7,7 +7,7 @@
 #ifndef _FOG_G2D_MAC_MACUTIL_H
 #define _FOG_G2D_MAC_MACUTIL_H
 
-#include <Fog/Core/Config/Config.h>
+#include <Fog/Core/Global/Global.h>
 #if defined(FOG_OS_MAC)
 
 #include <Fog/G2d/Geometry/Point.h>

@@ -61,7 +61,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -219,7 +218,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -433,7 +431,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)
@@ -591,7 +588,6 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
       const ImageResizeRecord* recordList = ctx->recordList;
       const int32_t* weightList = ctx->weightList;
 
-      uint8_t* sp = sData;
       uint8_t* tp = tData;
 
       for (uint x = 0; x < dw; x++)

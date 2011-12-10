@@ -11,7 +11,7 @@
 #include <Fog/Core/Kernel/Object.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/Gui/Engine/GuiEngine.h>
+#include <Fog/UI/Engine/GuiEngine.h>
 #include <Fog/Core/OS/MacScopedAutoReleasePool.h>
 #include <Fog/Core/OS/MacUtil.h>
 
@@ -109,8 +109,8 @@ struct FOG_API MacGuiWindow : public GuiWindow
 
   virtual err_t takeFocus();
 
-  virtual err_t setTitle(const String& title);
-  virtual err_t getTitle(String& title);
+  virtual err_t setTitle(const StringW& title);
+  virtual err_t getTitle(StringW& title);
 
   virtual err_t setIcon(const Image& icon);
   virtual err_t getIcon(Image& icon);

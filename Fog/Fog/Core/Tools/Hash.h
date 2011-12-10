@@ -40,8 +40,25 @@ struct HashVTable
 {
   typedef HashNode<KeyT, ItemT> NodeType;
 
-  static const HashUntypedVTable vtable;
-  static FOG_INLINE const HashUntypedVTable* getVTable() { return &vtable; }
+  static FOG_INLINE const HashUntypedVTable* getVTable() 
+  {
+    static const HashUntypedVTable vtable =
+    {
+      (uint32_t)FOG_OFFSET_OF(NodeType, key),
+      (uint32_t)FOG_OFFSET_OF(NodeType, item),
+      
+      (uint32_t)sizeof(KeyT),
+      (uint32_t)sizeof(ItemT),
+      
+      HashVTable<KeyT, ItemT>::_ctor,
+      HashVTable<KeyT, ItemT>::_dtor,
+      HashVTable<KeyT, ItemT>::_setItem,
+      HashVTable<KeyT, ItemT>::_hashKey,
+      TypeFunc<KeyT>::getEqFunc()
+    };
+
+    return &vtable;
+  }
 
   static HashUntypedNode* FOG_CDECL _ctor(HashUntypedNode* _node, const void* key, const void* item)
   {
@@ -70,22 +87,6 @@ struct HashVTable
   {
     return HashUtil::hash<KeyT>(*reinterpret_cast<const KeyT*>(key));
   }
-};
-
-template<typename KeyT, typename ItemT>
-const HashUntypedVTable HashVTable<KeyT, ItemT>::vtable =
-{
-  (uint32_t)FOG_OFFSET_OF(NodeType, key),
-  (uint32_t)FOG_OFFSET_OF(NodeType, item),
-
-  (uint32_t)sizeof(KeyT),
-  (uint32_t)sizeof(ItemT),
-
-  HashVTable<KeyT, ItemT>::_ctor,
-  HashVTable<KeyT, ItemT>::_dtor,
-  HashVTable<KeyT, ItemT>::_setItem,
-  HashVTable<KeyT, ItemT>::_hashKey,
-  TypeFunc<KeyT>::getEqFunc()
 };
 
 template<>

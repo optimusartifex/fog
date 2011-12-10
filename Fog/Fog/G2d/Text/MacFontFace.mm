@@ -9,8 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Global/Internal_Core_p.h>
-#include <Fog/Core/Mac/MacUtil_Core.h>
+#include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Global/Private.h>
+#include <Fog/Core/OS/MacUtil.h>
 #include <Fog/G2d/Text/MacFontFace.h>
 #include <Fog/G2d/Text/MacFontProvider.h>
 
@@ -49,7 +50,7 @@ MacFontFace::~MacFontFace()
 // [Fog::MacFontFace - Interface]
 // ============================================================================
 
-err_t MacFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str)
+err_t MacFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str)
 {
   AutoLock locked(pd->lock);
   
@@ -57,7 +58,7 @@ err_t MacFontFace::getTextOutline(PathF& dst, const FontData* d, const PointF& p
   return _getTextOutline(dst, &outlineCache, d, pt, str, &ctx);
 }
 
-err_t MacFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str)
+err_t MacFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str)
 {
   AutoLock locked(pd->lock);
   
@@ -65,13 +66,13 @@ err_t MacFontFace::getTextOutline(PathD& dst, const FontData* d, const PointD& p
   return _getTextOutline(dst, &outlineCache, d, pt, str, &ctx);
 }
 
-err_t MacFontFace::getTextExtents(TextExtentsF& extents, const FontData* d, const Utf16& str)
+err_t MacFontFace::getTextExtents(TextExtentsF& extents, const FontData* d, const StubW& str)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-err_t MacFontFace::getTextExtents(TextExtentsD& extents, const FontData* d, const Utf16& str)
+err_t MacFontFace::getTextExtents(TextExtentsD& extents, const FontData* d, const StubW& str)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
@@ -173,7 +174,7 @@ void MacFontFace::_reset()
 {
   if (kerningTable != NULL)
   {
-    Memory::free(kerningTable);
+    MemMgr::free(kerningTable);
     kerningTable = NULL;
   }
 

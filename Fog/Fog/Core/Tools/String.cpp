@@ -2221,13 +2221,13 @@ _FormatUnsigned:
           size_t n = self->getLength() - initialLength;
 
           if (size == sizeof(uint64_t))
-            reinterpret_cast<uint64_t*>(p)[0] = (uint)size;
+            reinterpret_cast<uint64_t*>(p)[0] = (uint64_t)n;
           else if (size == sizeof(uint32_t))
-            reinterpret_cast<uint32_t*>(p)[0] = (uint)size;
+            reinterpret_cast<uint32_t*>(p)[0] = (uint32_t)size;
           else if (size == sizeof(uint16_t))
-            reinterpret_cast<uint16_t*>(p)[0] = (uint)size;
+            reinterpret_cast<uint16_t*>(p)[0] = (uint16_t)size;
           else if (size == sizeof(uint8_t ))
-            reinterpret_cast<uint8_t*>(p)[0] = (uint)size;
+            reinterpret_cast<uint8_t*>(p)[0] = (uint8_t)size;
           else // if (size == 0)
             reinterpret_cast<uint*>(p)[0] = (uint)size;
 
@@ -2824,7 +2824,7 @@ _CaseInsensitiveRemove3:
         dCur = sCur;
         while (sCur != sEnd)
         {
-          if (*sCur != cArray[0] && *sCur != cArray[1] || *sCur != cArray[2])
+          if (*sCur != cArray[0] || *sCur != cArray[1] || *sCur != cArray[2])
             *dCur++ = *sCur;
           sCur++;
         }
@@ -3312,7 +3312,6 @@ static err_t FOG_CDECL StringT_replaceString(CharT_(String)* self, const Range* 
   if (pLength == 0)
     return ERR_OK;
 
-  const CharT* rData = replacementCopy.getData();
   size_t rLength = replacementCopy.getLength();
 
   if (d->reference.get() == 1 && pLength == rLength)

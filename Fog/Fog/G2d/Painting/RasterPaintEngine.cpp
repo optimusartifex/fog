@@ -4761,7 +4761,6 @@ static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxI_st(
         uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
 
         int y0 = box.y0;
-        int y1 = box.y1;
 
         int w = box.x1 - box.x0;
         int i = box.y1 - box.y0;

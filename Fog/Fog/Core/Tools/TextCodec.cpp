@@ -883,7 +883,8 @@ static err_t FOG_CDECL TextCodec_UTF16_decode(const TextCodecData* d,
   {
     if (state->hasBom()) isByteSwapped = state->isByteSwapped();
 
-    if (oldStateSize = state->getBufferLength())
+    oldStateSize = state->getBufferLength();
+    if (oldStateSize)
     {
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
       size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
@@ -1636,7 +1637,8 @@ static const char* TextCodec_getCodeset(void)
 
 static TextCodecData* TextCodec_create(uint32_t code)
 {
-  if (code >= TEXT_ENCODING_COUNT) code = TEXT_ENCODING_NONE;
+  if (code >= TEXT_ENCODING_COUNT)
+    code = TEXT_ENCODING_NONE;
 
   TextCodecData** p = &TextCodec_dCache[code];
   TextCodecData*  v = AtomicCore<TextCodecData*>::get(p);
@@ -1644,7 +1646,8 @@ static TextCodecData* TextCodec_create(uint32_t code)
   enum { CREATING_NOW = 1 };
 
   // Cached.
-  if ((size_t)v > (size_t)CREATING_NOW) goto _End;
+  if ((size_t)v > (size_t)CREATING_NOW)
+    goto _End;
 
   // Create.
   if (AtomicCore<TextCodecData*>::cmpXchg(p, (TextCodecData*)NULL, (TextCodecData*)CREATING_NOW))

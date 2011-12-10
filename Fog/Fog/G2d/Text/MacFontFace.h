@@ -8,7 +8,7 @@
 #define _FOG_G2D_TEXT_MACFONTFACE_H
 
 // [Dependencies]
-#include <Fog/Core/Mac/MacDefs.h>
+#include <Fog/Core/OS/MacUtil.h>
 #include <Fog/G2d/Text/FontFace.h>
 #include <Fog/G2d/Text/FontKerning.h>
 #include <Fog/G2d/Text/GlyphOutlineCache.h>
@@ -42,11 +42,11 @@ struct FOG_API MacFontFace : public FontFace
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const Utf16& str);
-  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const Utf16& str);
+  virtual err_t getTextOutline(PathF& dst, const FontData* d, const PointF& pt, const StubW& str);
+  virtual err_t getTextOutline(PathD& dst, const FontData* d, const PointD& pt, const StubW& str);
 
-  virtual err_t getTextExtents(TextExtentsF& extents, const FontData* d, const Utf16& str);
-  virtual err_t getTextExtents(TextExtentsD& extents, const FontData* d, const Utf16& str);
+  virtual err_t getTextExtents(TextExtentsF& extents, const FontData* d, const StubW& str);
+  virtual err_t getTextExtents(TextExtentsD& extents, const FontData* d, const StubW& str);
 
   virtual FontKerningTableF* getKerningTable(const FontData* d);
 
@@ -61,7 +61,7 @@ struct FOG_API MacFontFace : public FontFace
   // [Methods]
   // --------------------------------------------------------------------------
 
-  err_t _init(const String& family, NSFont* src);
+  err_t _init(const StringW& family, NSFont* src);
   void _reset();
 
   // --------------------------------------------------------------------------
@@ -79,7 +79,7 @@ struct FOG_API MacFontFace : public FontFace
   FontKerningTableF* kerningTable;
 
 private:
-  _FOG_CLASS_NO_COPY(MacFontFace)
+  _FOG_NO_COPY(MacFontFace)
 };
 
 //! @}

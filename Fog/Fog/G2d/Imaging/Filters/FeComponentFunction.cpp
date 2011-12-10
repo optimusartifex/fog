@@ -121,6 +121,8 @@ static bool FOG_CDECL FeComponentFunction_resultsInIdentity(const FeComponentFun
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  return false;
 }
 
 static err_t FOG_CDECL FeComponentFunction_getData(const FeComponentFunction* self, uint32_t functionType, void* functionData)

@@ -258,16 +258,15 @@ err_t PathStrokerContextT<NumT>::_begin()
 template<typename NumT>
 err_t PathStrokerContextT<NumT>::_grow()
 {
-  size_t len = dst->_d->length;
-  size_t cap = dst->_d->capacity;
+  size_t capacity = dst->_d->capacity;
 
-  dst->_d->length = cap;
-  if (cap < 256)
-    cap = 512;
+  dst->_d->length = capacity;
+  if (capacity < 256)
+    capacity = 512;
   else
-    cap *= 2;
+    capacity *= 2;
 
-  err_t err = dst->reserve(cap);
+  err_t err = dst->reserve(capacity);
   if (FOG_IS_ERROR(err))
     return err;
 

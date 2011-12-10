@@ -380,47 +380,39 @@ static int FOG_CDECL CBezierT_simplifyForProcessing(const NumT_(Point)* self, Nu
     Algorithm::isort_t<NumT>(t, tCount);
   }
 
-  switch (tCount)
+  if (tCount == 0)
   {
-    case 0:
+    pts[0] = self[0];
+    pts[1] = self[1];
+    pts[2] = self[2];
+    pts[3] = self[3];
+
+    return 1;
+  }
+  else
+  {
+    int segmentCount = 2;
+
+    NumT t_ = t[0];
+    NumT cut = t_;
+
+    NumI_(CBezier)::splitAt(self, pts, pts + 3, t_);
+    pts += 3;
+
+    for (int tIndex = 1; tIndex < tCount; tIndex++)
     {
-      pts[0] = self[0];
-      pts[1] = self[1];
-      pts[2] = self[2];
-      pts[3] = self[3];
-      return 1;
-    }
+      t_ = t[tIndex];
+      if (Math::isFuzzyEq(t_, cut))
+        continue;
 
-    case 1:
-    case 2:
-    case 3:
-    {
-      int segmentCount = 2;
+      NumI_(CBezier)::splitAt(pts, pts, pts + 3, (t_ - cut) / (NumT(1.0) - cut));
+      cut = t_;
 
-      NumT t_ = t[0];
-      NumT cut = t_;
-
-      NumI_(CBezier)::splitAt(self, pts, pts + 3, t_);
       pts += 3;
-
-      for (int tIndex = 1; tIndex < tCount; tIndex++)
-      {
-        t_ = t[tIndex];
-        if (Math::isFuzzyEq(t_, cut))
-          continue;
-
-        NumI_(CBezier)::splitAt(pts, pts, pts + 3, (t_ - cut) / (NumT(1.0) - cut));
-        cut = t_;
-
-        pts += 3;
-        segmentCount++;
-      }
-
-      return segmentCount;
+      segmentCount++;
     }
 
-    default:
-      FOG_ASSERT_NOT_REACHED();
+    return segmentCount;
   }
 }
 

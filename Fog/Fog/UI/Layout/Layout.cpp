@@ -45,10 +45,10 @@ Layout::Layout() :
 
 Layout::Layout(Widget* parent, Layout* parentLayout) :
   _flexcount(0),
-  _toplevel(0),
   _spacing(0),
-  _enabled(1),
+  _toplevel(0),
   _activated(1),
+  _enabled(1),
   _parentItem(0),
   _nextactivate(0)
 {

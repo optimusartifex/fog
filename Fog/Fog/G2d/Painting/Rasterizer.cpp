@@ -1686,9 +1686,6 @@ _Name_##_Add_N_Fill: \
           FOG_ASSERT_NOT_REACHED(); \
       } \
     } \
-    \
-_Name_##_Add_N_End: \
-    ; \
   FOG_MACRO_END
 
 template<typename FixedT>
@@ -2411,7 +2408,6 @@ _Finalize:
 
     if (FOG_IS_ERROR(scanline->close()) || scanline->getSpans() == NULL)
     {
-_SkipScanline:
       filler->skip(1);
     }
     else

@@ -298,7 +298,7 @@ static void FOG_CDECL Color_ahslf_from_argbf(float* dst, const float* src)
     s = delta / sum;
 
     if (maximum == r)
-      h = (g - b) / delta + (g < b) ? 6.0f : 0.0f;
+      h = (g - b) / delta + ((g < b) ? 6.0f : 0.0f);
     else if (maximum == g)
       h = (b - r) / delta + (2.0f);
     else

@@ -395,7 +395,7 @@ static err_t FOG_CDECL Pattern_getGradientF(const Pattern* self, uint32_t target
       return gradient->setGradient(reinterpret_cast<PatternGradientDataD*>(d)->gradient());
 
     default:
-      FOG_ASSERT_NOT_REACHED();
+      return ERR_RT_INVALID_STATE;
   }
 }
 
@@ -424,7 +424,7 @@ static err_t FOG_CDECL Pattern_getGradientD(const Pattern* self, uint32_t target
       return gradient->setGradient(reinterpret_cast<PatternGradientDataD*>(d)->gradient());
 
     default:
-      FOG_ASSERT_NOT_REACHED();
+      return ERR_RT_INVALID_STATE;
   }
 }
 

@@ -26,17 +26,17 @@ namespace Fog {
 // [Fog::Hash - Global]
 // ============================================================================
 
-static Static<HashUntypedData> Hash_Unknown_Unknown_dEmpty;
-static Static<HashUntypedData> Hash_StringA_StringA_dEmpty;
-static Static<HashUntypedData> Hash_StringW_StringW_dEmpty;
-static Static<HashUntypedData> Hash_StringA_Var_dEmpty;
-static Static<HashUntypedData> Hash_StringW_Var_dEmpty;
-
 static Static<HashUntyped> Hash_Unknown_Unknown_oEmpty;
 static Static<HashUntyped> Hash_StringA_StringA_oEmpty;
 static Static<HashUntyped> Hash_StringW_StringW_oEmpty;
 static Static<HashUntyped> Hash_StringA_Var_oEmpty;
 static Static<HashUntyped> Hash_StringW_Var_oEmpty;
+
+static Static<HashUntypedData> Hash_Unknown_Unknown_dEmpty;
+static Static<HashUntypedData> Hash_StringA_StringA_dEmpty;
+static Static<HashUntypedData> Hash_StringW_StringW_dEmpty;
+static Static<HashUntypedData> Hash_StringA_Var_dEmpty;
+static Static<HashUntypedData> Hash_StringW_Var_dEmpty;
 
 static Static<HashUntypedVTable> Hash_StringA_StringA_vTable;
 static Static<HashUntypedVTable> Hash_StringW_StringW_vTable;
@@ -233,13 +233,13 @@ static err_t FOG_CDECL Hash_Unknown_Unknown_rehashExclude(HashUntyped* self, con
   if (exclude != NULL)
   {
     FOG_ASSERT_X(excluded,
-      "Fog::Hash<?, ?::rehashExclude() - Exclude node specified, but not found.");
+      "Fog::Hash<?, ?>::rehashExclude() - Exclude node specified, but not found.");
   }
 #endif // FOG_DEBUG
 
   newd->length = d->length - (exclude != NULL);
-
   d = atomicPtrXchg(&self->_d, newd);
+
   if (d->reference.deref())
     fog_api.hash_unknown_unknown_dFree(d, v);
 
@@ -322,6 +322,7 @@ static void FOG_CDECL Hash_Unknown_Unknown_clear(HashUntyped* self, const HashUn
       data[i] = NULL;
     }
   }
+
   d->length = 0;
 }
 
@@ -716,6 +717,316 @@ static void FOG_CDECL Hash_Unknown_Unknown_dFree(HashUntypedData* d, const HashU
 }
 
 // ============================================================================
+// [Fog::Hash<UInt32, Unknown>]
+// ============================================================================
+
+static const void* FOG_CDECL Hash_UInt32_Unknown_get(const HashUntyped* self, const HashUntypedVTable* v, uint32_t key)
+{
+  HashUntypedData* d = self->_d;
+  if (d->length == 0)
+    return NULL;
+
+  uint32_t hashMod = key % d->capacity;
+
+  HashKeyNode<uint32_t>* node = reinterpret_cast<HashKeyNode<uint32_t>*>(d->data[hashMod]);
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+
+    node = reinterpret_cast<HashKeyNode<uint32_t>*>(node->next);
+  }
+  return NULL;
+
+_Match:
+  return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
+}
+
+static void* FOG_CDECL Hash_UInt32_Unknown_use(HashUntyped* self, const HashUntypedVTable* v, uint32_t key)
+{
+  HashUntypedData* d = self->_d;
+  if (d->length == 0)
+    return NULL;
+  
+  uint32_t hashMod;
+  
+  HashKeyNode<uint32_t>** pPrev;
+  HashKeyNode<uint32_t>* node;
+  
+_Repeat:
+  hashMod = key % d->capacity;
+  
+  pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&d->data[hashMod]);
+  node = *pPrev;
+  
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+
+    pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&node->next);
+    node = *pPrev;
+  }
+  return NULL;
+  
+_Match:
+  if (d->reference.get() == 1)
+    return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
+  
+  if (fog_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
+    return NULL;
+  
+  d = self->_d;
+  goto _Repeat;
+}
+
+static err_t FOG_CDECL Hash_UInt32_Unknown_put(HashUntyped* self, const HashUntypedVTable* v, uint32_t key, const void* item, bool replace)
+{
+  HashUntypedData* d = self->_d;
+  
+  // If the length is zero then there is a chance that the MemPool allocator is
+  // not initialized (we do not initialize before the first element is added to
+  // the hash table).
+  if (d->length == 0)
+  {
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
+    d = self->_d;
+  }
+  else if (d->reference.get() != 1)
+  {
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_detach(self, v));
+    d = self->_d;
+  }
+  
+  uint32_t hashMod = key % d->capacity;
+
+  HashKeyNode<uint32_t>** pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&d->data[hashMod]);
+  HashKeyNode<uint32_t>* node = *pPrev;
+  
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+    
+    pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&node->next);
+    node = *pPrev;
+  }
+
+  node = reinterpret_cast<HashKeyNode<uint32_t>*>(d->nodePool.alloc(Hash_alignNodeSize(v->idxItemT + v->szItemT)));
+  if (FOG_IS_NULL(node))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  node->next = NULL;
+  v->ctor(node, &key, item);
+  *pPrev = node;
+
+  if (++d->length >= d->expandLength)
+    fog_api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
+  return ERR_OK;
+
+_Match:
+  if (!replace)
+    return ERR_RT_OBJECT_ALREADY_EXISTS;
+  
+  v->setItem(reinterpret_cast<uint8_t*>(node) + v->idxItemT, item);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Hash_UInt32_Unknown_remove(HashUntyped* self, const HashUntypedVTable* v, uint32_t key)
+{
+  HashUntypedData* d = self->_d;
+  if (d->length == 0)
+    return ERR_RT_OBJECT_NOT_FOUND;
+  
+  uint32_t hashMod = key % d->capacity;
+
+  HashKeyNode<uint32_t>** pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&d->data[hashMod]);
+  HashKeyNode<uint32_t>* node = *pPrev;
+  
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+    
+    pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&node->next);
+    node = *pPrev;
+  }
+  return ERR_RT_OBJECT_NOT_FOUND;
+  
+_Match:
+  if (d->reference.get() != 1 || d->length - 1 <= d->shrinkLength)
+  {
+    size_t capacity = HashUtil::getClosestPrime(d->length - 1);
+    return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
+  }
+  else
+  {
+    *pPrev = reinterpret_cast<HashKeyNode<uint32_t>*>(node->next);
+    v->dtor(node);
+    d->nodePool.free(node);
+    d->length--;
+    return ERR_OK;
+  }
+}
+
+// ============================================================================
+// [Fog::Hash<UInt64, Unknown>]
+// ============================================================================
+
+static const void* FOG_CDECL Hash_UInt64_Unknown_get(const HashUntyped* self, const HashUntypedVTable* v, uint64_t key)
+{
+  HashUntypedData* d = self->_d;
+  if (d->length == 0)
+    return NULL;
+
+  uint32_t hashCode = HashUtil::hash(key);
+  uint32_t hashMod = hashCode % d->capacity;
+  
+  HashKeyNode<uint32_t>* node = reinterpret_cast<HashKeyNode<uint32_t>*>(d->data[hashMod]);
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+    
+    node = reinterpret_cast<HashKeyNode<uint32_t>*>(node->next);
+  }
+  return NULL;
+  
+_Match:
+  return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
+}
+
+static void* FOG_CDECL Hash_UInt64_Unknown_use(HashUntyped* self, const HashUntypedVTable* v, uint64_t key)
+{
+  HashUntypedData* d = self->_d;
+  if (d->length == 0)
+    return NULL;
+
+  uint32_t hashCode = HashUtil::hash(key);
+  uint32_t hashMod;
+  
+  HashKeyNode<uint32_t>** pPrev;
+  HashKeyNode<uint32_t>* node;
+  
+_Repeat:
+  hashMod = hashCode % d->capacity;
+  
+  pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&d->data[hashMod]);
+  node = *pPrev;
+  
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+    
+    pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&node->next);
+    node = *pPrev;
+  }
+  return NULL;
+  
+_Match:
+  if (d->reference.get() == 1)
+    return reinterpret_cast<uint8_t*>(node) + v->idxItemT;
+  
+  if (fog_api.hash_unknown_unknown_detach(self, v) != ERR_OK)
+    return NULL;
+  
+  d = self->_d;
+  goto _Repeat;
+}
+
+static err_t FOG_CDECL Hash_UInt64_Unknown_put(HashUntyped* self, const HashUntypedVTable* v, uint64_t key, const void* item, bool replace)
+{
+  HashUntypedData* d = self->_d;
+  
+  // If the length is zero then there is a chance that the MemPool allocator is
+  // not initialized (we do not initialize before the first element is added to
+  // the hash table).
+  if (d->length == 0)
+  {
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_reserve(self, v, HashUtil::getClosestPrime(0)));
+    d = self->_d;
+  }
+  else if (d->reference.get() != 1)
+  {
+    FOG_RETURN_ON_ERROR(fog_api.hash_unknown_unknown_detach(self, v));
+    d = self->_d;
+  }
+  
+  uint32_t hashCode = HashUtil::hash(key);
+  uint32_t hashMod = hashCode % d->capacity;
+
+  HashKeyNode<uint32_t>** pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&d->data[hashMod]);
+  HashKeyNode<uint32_t>* node = *pPrev;
+  
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+    
+    pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&node->next);
+    node = *pPrev;
+  }
+  
+  node = reinterpret_cast<HashKeyNode<uint32_t>*>(d->nodePool.alloc(Hash_alignNodeSize(v->idxItemT + v->szItemT)));
+  if (FOG_IS_NULL(node))
+    return ERR_RT_OUT_OF_MEMORY;
+  
+  node->next = NULL;
+  v->ctor(node, &key, item);
+  *pPrev = node;
+  
+  if (++d->length >= d->expandLength)
+    fog_api.hash_unknown_unknown_rehash(self, v, d->expandCapacity);
+  return ERR_OK;
+  
+_Match:
+  if (!replace)
+    return ERR_RT_OBJECT_ALREADY_EXISTS;
+  
+  v->setItem(reinterpret_cast<uint8_t*>(node) + v->idxItemT, item);
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL Hash_UInt64_Unknown_remove(HashUntyped* self, const HashUntypedVTable* v, uint64_t key)
+{
+  HashUntypedData* d = self->_d;
+  if (d->length == 0)
+    return ERR_RT_OBJECT_NOT_FOUND;
+
+  uint32_t hashCode = HashUtil::hash(key);
+  uint32_t hashMod = hashCode % d->capacity;
+
+  HashKeyNode<uint32_t>** pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&d->data[hashMod]);
+  HashKeyNode<uint32_t>* node = *pPrev;
+
+  while (node)
+  {
+    if (node->key == key)
+      goto _Match;
+    
+    pPrev = reinterpret_cast<HashKeyNode<uint32_t>**>(&node->next);
+    node = *pPrev;
+  }
+  return ERR_RT_OBJECT_NOT_FOUND;
+
+_Match:
+  if (d->reference.get() != 1 || d->length - 1 <= d->shrinkLength)
+  {
+    size_t capacity = HashUtil::getClosestPrime(d->length - 1);
+    return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
+  }
+  else
+  {
+    *pPrev = reinterpret_cast<HashKeyNode<uint32_t>*>(node->next);
+    v->dtor(node);
+    d->nodePool.free(node);
+    d->length--;
+    return ERR_OK;
+  }
+}
+
+// ============================================================================
 // [Fog::Hash<StringT, Unknown>]
 // ============================================================================
 
@@ -1016,7 +1327,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_removeStub(HashUntyped* self, const 
   return ERR_RT_OBJECT_NOT_FOUND;
 
 _Match:
-  if (d->reference.get() != 1 || d->length - 1<= d->shrinkLength)
+  if (d->reference.get() != 1 || d->length - 1 <= d->shrinkLength)
   {
     size_t capacity = HashUtil::getClosestPrime(d->length - 1);
     return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
@@ -1058,7 +1369,7 @@ static err_t FOG_CDECL Hash_StringT_Unknown_removeString(HashUntyped* self, cons
   return ERR_RT_OBJECT_NOT_FOUND;
 
 _Match:
-  if (d->reference.get() != 1 || d->length - 1<= d->shrinkLength)
+  if (d->reference.get() != 1 || d->length - 1 <= d->shrinkLength)
   {
     size_t capacity = HashUtil::getClosestPrime(d->length - 1);
     return Hash_Unknown_Unknown_rehashExclude(self, v, capacity, node);
@@ -1696,17 +2007,17 @@ FOG_NO_EXPORT void Hash_init(void)
   fog_api.hash_unknown_unknown_dCreate = Hash_Unknown_Unknown_dCreate;
   fog_api.hash_unknown_unknown_dFree = Hash_Unknown_Unknown_dFree;
 
-  // Hash<int32_t, ?>
-  fog_api.hash_int32_unknown_get;
-  fog_api.hash_int32_unknown_use;
-  fog_api.hash_int32_unknown_put;
-  fog_api.hash_int32_unknown_remove;
+  // Hash<UInt32, ?>
+  fog_api.hash_uint32_unknown_get = Hash_UInt32_Unknown_get;
+  fog_api.hash_uint32_unknown_use = Hash_UInt32_Unknown_use;
+  fog_api.hash_uint32_unknown_put = Hash_UInt32_Unknown_put;
+  fog_api.hash_uint32_unknown_remove = Hash_UInt32_Unknown_remove;
 
-  // Hash<int64_t, ?>
-  fog_api.hash_int64_unknown_get;
-  fog_api.hash_int64_unknown_use;
-  fog_api.hash_int64_unknown_put;
-  fog_api.hash_int64_unknown_remove;
+  // Hash<UInt64, ?>
+  fog_api.hash_uint64_unknown_get = Hash_UInt64_Unknown_get;
+  fog_api.hash_uint64_unknown_use = Hash_UInt64_Unknown_use;
+  fog_api.hash_uint64_unknown_put = Hash_UInt64_Unknown_put;
+  fog_api.hash_uint64_unknown_remove = Hash_UInt64_Unknown_remove;
 
   // Hash<StringA, ?>
   fog_api.hash_stringa_unknown_getStubA = Hash_StringT_Unknown_getStub<char, char>;

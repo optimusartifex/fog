@@ -10,17 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Tools/String.h>
-
-// [Forward Declarations]
-#ifdef __OBJC__
-@class NSAutoreleasePool;
-@class NSFont;
-@class NSString;
-#else
-class NSAutoreleasePool;
-class NSFont;
-class NSString;
-#endif
+#include <Fog/Core/OS/MacDefs.h>
 
 namespace Fog {
 namespace MacUtil {

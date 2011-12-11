@@ -593,6 +593,7 @@ If(FOG_OS_MAC)
     Fog/Core/OS/MacUtil.mm
   )
   List(APPEND FOG_CORE_OS_HEADERS
+    Fog/Core/OS/MacDefs.h
     Fog/Core/OS/MacScopedAutoReleasePool.h
     Fog/Core/OS/MacUtil.h
   )
@@ -658,6 +659,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/Date.h
   Fog/Core/Tools/Hash.h
   Fog/Core/Tools/HashString.h
+  Fog/Core/Tools/HashUInt.h
   Fog/Core/Tools/HashUntyped.h
   Fog/Core/Tools/HashUtil.h
   Fog/Core/Tools/List.h

@@ -199,7 +199,9 @@ StringW Widget::getWindowTitle() const
 
 err_t Widget::setWindowTitle(const StringW& title)
 {
-  if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
+  if (!_guiWindow)
+    return ERR_RT_INVALID_STATE;
+
   return _guiWindow->setTitle(title);
 }
 
@@ -212,7 +214,9 @@ Image Widget::getWindowIcon() const
 
 err_t Widget::setWindowIcon(const Image& icon)
 {
-  if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
+  if (!_guiWindow)
+    return ERR_RT_INVALID_STATE;
+
   return _guiWindow->setIcon(icon);
 }
 
@@ -225,7 +229,9 @@ PointI Widget::getWindowGranularity() const
 
 err_t Widget::setWindowGranularity(const PointI& pt)
 {
-  if (!_guiWindow) return ERR_RT_INVALID_HANDLE;
+  if (!_guiWindow)
+    return ERR_RT_INVALID_STATE;
+
   return _guiWindow->setSizeGranularity(pt);
 }
 
@@ -252,7 +258,8 @@ void Widget::setPosition(const PointI& pos)
 
 void Widget::setSize(const SizeI& sz)
 {
-  if (_widgetGeometry.getSize() == sz) return;
+  if (_widgetGeometry.getSize() == sz)
+    return;
 
   if (hasGuiWindow())
   {

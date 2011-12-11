@@ -8,7 +8,7 @@
 #define _FOG_G2D_TEXT_MACFONTFACE_H
 
 // [Dependencies]
-#include <Fog/Core/OS/MacUtil.h>
+#include <Fog/Core/OS/MacDefs.h>
 #include <Fog/G2d/Text/FontFace.h>
 #include <Fog/G2d/Text/FontKerning.h>
 #include <Fog/G2d/Text/GlyphOutlineCache.h>

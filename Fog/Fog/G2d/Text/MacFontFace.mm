@@ -88,21 +88,31 @@ FontKerningTableF* MacFontFace::getKerningTable(const FontData* d)
 // ============================================================================
 
 template<typename NumT>
-static err_t _G2d_MacFontFace_renderGlyphOutline(MacFontFace* self, 
+static err_t MacFontFace_renderGlyphOutline(MacFontFace* self, 
   NumT_(Path)& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, MacFontContext* ctx)
 {
-  UniChar uc_array[1] = { (UniChar)uc };
-  NSGlyph uc_glyph[1];
+  UniChar ucArray[2] = { (UniChar)uc, 0 };
+  NSGlyph ucGlyph[2];
+  CFIndex ucSize = 1;
 
-  if (!CTFontGetGlyphsForCharacters((CTFontRef)self->nsFont, uc_array, (CGGlyph *)uc_glyph, 1))
+  if (CharW::isSurrogate(uc))
+  {
+    CharW::ucs4ToSurrogate(
+      static_cast<uint16_t*>(&ucArray[0]),
+      static_cast<uint16_t*>(&ucArray[1]),
+      uc);
+    ucSize++;
+  }
+
+  if (!CTFontGetGlyphsForCharacters((CTFontRef)self->nsFont, ucArray, (CGGlyph *)ucGlyph, ucSize))
     return ERR_FONT_INTERNAL;
 
   NSBezierPath* path = [NSBezierPath bezierPath];
   [path moveToPoint: NSMakePoint(0.0f, 0.0f)];
-  [path appendBezierPathWithGlyphs: uc_glyph count: 1 inFont: self->nsFont];
+  [path appendBezierPathWithGlyphs: ucGlyph count: 1 inFont: self->nsFont];
   
   NSInteger i, len = [path elementCount];
-  
+
   for (i = 0; i < len; i++)
   {
     NSPoint pts[3];
@@ -132,22 +142,22 @@ static err_t _G2d_MacFontFace_renderGlyphOutline(MacFontFace* self,
 
   CGSize advance[1];
   metrics._horizontalAdvance.x = (float)CTFontGetAdvancesForGlyphs(
-    (CTFontRef)self->nsFont, kCTFontHorizontalOrientation, (CGGlyph*)uc_glyph, advance, 1);
+    (CTFontRef)self->nsFont, kCTFontHorizontalOrientation, (CGGlyph*)ucGlyph, advance, 1);
   
   metrics._horizontalAdvance.x = advance[0].width;
   metrics._horizontalAdvance.y = advance[0].height;
   
   return ERR_OK;
 }
-  
+
 err_t MacFontFace::_renderGlyphOutline(PathF& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, void* ctx)
 {
-  return _G2d_MacFontFace_renderGlyphOutline<float>(this, dst, metrics, d, uc, reinterpret_cast<MacFontContext*>(ctx));
+  return MacFontFace_renderGlyphOutline<float>(this, dst, metrics, d, uc, reinterpret_cast<MacFontContext*>(ctx));
 }
 
 err_t MacFontFace::_renderGlyphOutline(PathD& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, void* ctx)
 {
-  return _G2d_MacFontFace_renderGlyphOutline<double>(this, dst, metrics, d, uc, reinterpret_cast<MacFontContext*>(ctx));
+  return MacFontFace_renderGlyphOutline<double>(this, dst, metrics, d, uc, reinterpret_cast<MacFontContext*>(ctx));
 }
 
 // ============================================================================

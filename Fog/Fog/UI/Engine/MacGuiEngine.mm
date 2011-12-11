@@ -54,7 +54,7 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
 - (FogView*) contentView;
 @end
 
-@implementation FogWindow 
+@implementation FogWindow
 
 - (id)init:(Fog::MacGuiWindow*)fogWindow_ frame:(NSRect)frame styleMask:(NSUInteger)style contentView:(NSView*)view
 {
@@ -376,7 +376,8 @@ err_t MacGuiWindow::destroy()
 
 err_t MacGuiWindow::enable()
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   // TODO
   return ERR_OK;
@@ -384,7 +385,8 @@ err_t MacGuiWindow::enable()
 
 err_t MacGuiWindow::disable()
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   // TODO
   return ERR_OK;
@@ -392,7 +394,8 @@ err_t MacGuiWindow::disable()
 
 err_t MacGuiWindow::setPosition(const PointI& pt)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   [window setFrameTopLeftPoint: toNSPoint(pt)];
   return ERR_OK;
@@ -400,7 +403,8 @@ err_t MacGuiWindow::setPosition(const PointI& pt)
 
 err_t MacGuiWindow::setSize(const SizeI& size)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   [window setFrame: NSMakeRect(_widget->getX(), _widget->getY(), 
                                size.getWidth(), size.getHeight())
@@ -410,8 +414,11 @@ err_t MacGuiWindow::setSize(const SizeI& size)
 
 err_t MacGuiWindow::setGeometry(const RectI& geometry)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
-  if (!geometry.isValid()) return ERR_RT_INVALID_ARGUMENT;
+  if (!geometry.isValid())
+    return ERR_RT_INVALID_ARGUMENT;
+  
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   [window setFrame: toNSRect(geometry) display: NO];
 
@@ -420,7 +427,8 @@ err_t MacGuiWindow::setGeometry(const RectI& geometry)
 
 err_t MacGuiWindow::takeFocus()
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   // TODO how?
   return ERR_OK;
@@ -428,7 +436,8 @@ err_t MacGuiWindow::takeFocus()
 
 err_t MacGuiWindow::setTitle(const StringW& title)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   NSString* nsTitle;
   FOG_RETURN_ON_ERROR(MacUtil::StringW_toNSString(title, &nsTitle));
@@ -440,7 +449,7 @@ err_t MacGuiWindow::setTitle(const StringW& title)
 err_t MacGuiWindow::getTitle(StringW& title)
 {
   if (window == nil)
-    return ERR_RT_INVALID_HANDLE;
+    return ERR_RT_INVALID_STATE;
 
   NSString* s = [window title];
   [s release];
@@ -451,7 +460,7 @@ err_t MacGuiWindow::getTitle(StringW& title)
 err_t MacGuiWindow::setIcon(const Image& icon)
 {
   if (window == nil)
-    return ERR_RT_INVALID_HANDLE;
+    return ERR_RT_INVALID_STATE;
 
   //[[window standardWindowButton:NSWindowDocumentIconButton] setImage:toNSImage(icon)];
   return ERR_OK;
@@ -459,7 +468,8 @@ err_t MacGuiWindow::setIcon(const Image& icon)
 
 err_t MacGuiWindow::getIcon(Image& icon)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   // TODO
   return ERR_OK;
@@ -467,7 +477,8 @@ err_t MacGuiWindow::getIcon(Image& icon)
 
 err_t MacGuiWindow::show(uint32_t state)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   [window makeKeyAndOrderFront: nil];
 
@@ -476,7 +487,8 @@ err_t MacGuiWindow::show(uint32_t state)
 
 err_t MacGuiWindow::hide()
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
 
   [window orderOut: nil];
 
@@ -487,21 +499,24 @@ err_t MacGuiWindow::hide()
 
 void MacGuiWindow::moveToTop(GuiWindow* w)
 {
-  if (window == nil || w == NULL) return;
+  if (window == nil || w == NULL)
+    return;
   
   [window orderWindow:NSWindowAbove relativeTo:[static_cast<MacGuiWindow*>(w)->window windowNumber]];
 }
 
 void MacGuiWindow::moveToBottom(GuiWindow* w)
 {
-  if (window == nil || w == NULL) return;
+  if (window == nil || w == NULL)
+    return;
   
   [window orderWindow:NSWindowBelow relativeTo:[static_cast<MacGuiWindow*>(w)->window windowNumber]];
 }
 
 void MacGuiWindow::setTransparency(float val)
 {
-  if (window == nil) return;
+  if (window == nil)
+    return;
 
   [window setOpaque: NO];
   [window setAlphaValue: val];
@@ -509,7 +524,8 @@ void MacGuiWindow::setTransparency(float val)
 
 err_t MacGuiWindow::setSizeGranularity(const PointI& pt)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   // TODO
   return ERR_OK;
@@ -517,7 +533,8 @@ err_t MacGuiWindow::setSizeGranularity(const PointI& pt)
 
 err_t MacGuiWindow::getSizeGranularity(PointI& pt)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   // TODO
   return ERR_OK;
@@ -525,29 +542,30 @@ err_t MacGuiWindow::getSizeGranularity(PointI& pt)
 
 err_t MacGuiWindow::worldToClient(PointI* coords)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   NSPoint clientPt = [window convertScreenToBase: toNSPoint(coords[0])];
-  coords[0].setX(clientPt.x);
-  coords[0].setY(clientPt.y);
+  coords->set(clientPt.x, clientPt.y);
   
   return ERR_OK;
 }
 
 err_t MacGuiWindow::clientToWorld(PointI* coords)
 {
-  if (window == nil) return ERR_RT_INVALID_HANDLE;
+  if (window == nil)
+    return ERR_RT_INVALID_STATE;
   
   NSPoint clientPt = [window convertBaseToScreen: toNSPoint(coords[0])];
-  coords[0].setX(clientPt.x);
-  coords[0].setY(clientPt.y);
+  coords->set(int(clientPt.x), int(clientPt.y));
 
   return ERR_OK;
 }
 
 void MacGuiWindow::setOwner(GuiWindow* owner)
 {
-  if (window == nil) return;
+  if (window == nil)
+    return;
 
   _owner = owner;
   [window setParentWindow: static_cast<MacGuiWindow*>(owner)->window];
@@ -555,7 +573,8 @@ void MacGuiWindow::setOwner(GuiWindow* owner)
 
 void MacGuiWindow::releaseOwner()
 {
-  if (window == nil) return;
+  if (window == nil)
+    return;
   
   // TODO
 }
@@ -650,21 +669,25 @@ void MacGuiBackBuffer::updateRects(const BoxI* rects, size_t count)
 
 void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, size_t count)
 {
-  if (_buffer.size.w == 0 || _buffer.size.h == 0) return;
+  if (_buffer.size.w == 0 || _buffer.size.h == 0)
+    return;
   
   int size = _primaryStride * _buffer.size.h;
 
   CGDataProviderRef provider = 
     CGDataProviderCreateWithData(NULL, _buffer.data, size, NULL);
-  
-  CGImageRef image = CGImageCreate(_buffer.size.w, _buffer.size.h, // size 
-                                   8, 32, _buffer.stride, // bits/component, bits/pixel, bytes/line
-                                   CGColorSpaceCreateDeviceRGB(), // colorspace
-                                   0, // bitmap info
-                                   provider,
-                                   NULL,
-                                   false,
-                                   kCGRenderingIntentDefault);
+
+  // NOTE: Fog-Framework used 32-bit ARGB format 0xAARRGGBB, this means that
+  // it's endian dependent and the alpha is first (see kCGImageAlphaFirst).
+  CGImageRef image = CGImageCreate(
+    _buffer.size.w, _buffer.size.h,                // Size. 
+    8, 32, _buffer.stride,                         // Bpc, bpp, stride.
+    CGColorSpaceCreateDeviceRGB(),                 // Colorspace.
+    kCGBitmapByteOrder32Host | kCGImageAlphaFirst, // Bitmap info.
+    provider,
+    NULL,
+    false,
+    kCGRenderingIntentDefault);
   
   if (view.image) CGImageRelease(view.image);
   view.image = image;
@@ -695,7 +718,7 @@ MacEventLoopBase::MacEventLoopBase() :
   // as needed when _scheduleDelayedWork is called.
   CFRunLoopTimerContext timerContext = CFRunLoopTimerContext();
   timerContext.info = this;
-  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,    // allocator
+  _delayedWorkTimer = CFRunLoopTimerCreate(NULL,     // allocator
                                            DBL_MAX,  // fire time
                                            DBL_MAX,  // interval
                                            0,        // flags

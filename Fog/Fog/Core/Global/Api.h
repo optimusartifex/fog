@@ -18,8 +18,13 @@
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-#include <objidl.h>
+# include <objidl.h>
 #endif // FOG_OS_WINDOWS
+
+// [Dependencies - Mac]
+#if defined(FOG_OS_MAC)
+# include <Fog/Core/OS/MacDefs.h>
+#endif // FOG_OS_MAC
 
 // ============================================================================
 // [Fog::Api]
@@ -479,19 +484,19 @@ struct FOG_NO_EXPORT Api
   // [Core/Tools - Hash<Int32, Unknown>]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_METHOD(const void*, hash_int32_unknown_get)(const HashUntyped* self, const HashUntypedVTable* v, int32_t key);
-  FOG_CAPI_METHOD(void*, hash_int32_unknown_use)(HashUntyped* self, const HashUntypedVTable* v, int32_t key);
-  FOG_CAPI_METHOD(err_t, hash_int32_unknown_put)(HashUntyped* self, const HashUntypedVTable* v, int32_t key, const void* item, bool replace);
-  FOG_CAPI_METHOD(err_t, hash_int32_unknown_remove)(HashUntyped* self, const HashUntypedVTable* v, int32_t key);
+  FOG_CAPI_METHOD(const void*, hash_uint32_unknown_get)(const HashUntyped* self, const HashUntypedVTable* v, uint32_t key);
+  FOG_CAPI_METHOD(void*, hash_uint32_unknown_use)(HashUntyped* self, const HashUntypedVTable* v, uint32_t key);
+  FOG_CAPI_METHOD(err_t, hash_uint32_unknown_put)(HashUntyped* self, const HashUntypedVTable* v, uint32_t key, const void* item, bool replace);
+  FOG_CAPI_METHOD(err_t, hash_uint32_unknown_remove)(HashUntyped* self, const HashUntypedVTable* v, uint32_t key);
 
   // --------------------------------------------------------------------------
   // [Core/Tools - Hash<Int64, Unknown>]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_METHOD(const void*, hash_int64_unknown_get)(const HashUntyped* self, const HashUntypedVTable* v, int64_t key);
-  FOG_CAPI_METHOD(void*, hash_int64_unknown_use)(HashUntyped* self, const HashUntypedVTable* v, int64_t key);
-  FOG_CAPI_METHOD(err_t, hash_int64_unknown_put)(HashUntyped* self, const HashUntypedVTable* v, int64_t key, const void* item, bool replace);
-  FOG_CAPI_METHOD(err_t, hash_int64_unknown_remove)(HashUntyped* self, const HashUntypedVTable* v, int64_t key);
+  FOG_CAPI_METHOD(const void*, hash_uint64_unknown_get)(const HashUntyped* self, const HashUntypedVTable* v, uint64_t key);
+  FOG_CAPI_METHOD(void*, hash_uint64_unknown_use)(HashUntyped* self, const HashUntypedVTable* v, uint64_t key);
+  FOG_CAPI_METHOD(err_t, hash_uint64_unknown_put)(HashUntyped* self, const HashUntypedVTable* v, uint64_t key, const void* item, bool replace);
+  FOG_CAPI_METHOD(err_t, hash_uint64_unknown_remove)(HashUntyped* self, const HashUntypedVTable* v, uint64_t key);
 
   // --------------------------------------------------------------------------
   // [Core/Tools - Hash<StringA, Unknown>]
@@ -1270,6 +1275,9 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(StringDataW*, stringw_dRealloc)(StringDataW* d, size_t capacity);
   FOG_CAPI_STATIC(void, stringw_dFree)(StringDataW* d);
 
+  FOG_CAPI_STATIC(err_t, stringw_fromNSString)(StringW* self, NSString* src);
+  FOG_CAPI_STATIC(err_t, stringw_toNSString)(const StringW* self, NSString** dst);  
+  
   StringW* stringw_oEmpty;
 
   // --------------------------------------------------------------------------

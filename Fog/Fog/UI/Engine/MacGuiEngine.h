@@ -18,17 +18,8 @@
 // [Dependencies - Mac]
 #include <CoreFoundation/CoreFoundation.h>
 
-#ifdef __OBJC__
-@class NSEvent;
-@class NSRunLoop;
-@class FogView;
-@class FogWindow;
-#else
-class NSEvent;
-class NSRunLoop;
-class FogView;
-class FogWindow;
-#endif
+_FOG_OBJC_CLASS(FogView);
+_FOG_OBJC_CLASS(FogWindow);
 
 namespace Fog {
 

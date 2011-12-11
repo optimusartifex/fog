@@ -325,7 +325,11 @@ struct Hash : public HashImpl<KeyT, ItemT, !TypeInfo<ItemT>::NO_EQ>
   }
 
 #if defined(FOG_CC_HAS_RVALUE)
-  FOG_INLINE Hash(Hash<KeyT, ItemT>&& other) { HashUntyped::_d = other._d; other._d = NULL; }
+  FOG_INLINE Hash(Hash<KeyT, ItemT>&& other)
+  {
+    HashUntyped::_d = other._d;
+    other._d = NULL;
+  }
 #endif // FOG_CC_HAS_RVALUE
 
   FOG_INLINE ~Hash()
@@ -419,6 +423,8 @@ struct HashIterator : public HashUntypedIterator
 // ============================================================================
 // [Include Specialized Containers]
 // ============================================================================
+
+#include <Fog/Core/Tools/HashUInt.h>
 
 #if defined(_FOG_CORE_TOOLS_STRING_H)
 # include <Fog/Core/Tools/HashString.h>

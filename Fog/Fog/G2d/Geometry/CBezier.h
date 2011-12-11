@@ -173,6 +173,7 @@ struct FOG_NO_EXPORT CBezierF
   // [Transform]
   // --------------------------------------------------------------------------
 
+  //! @brief Translate all cubic points by @a pt.
   FOG_INLINE void translate(const PointF& pt)
   {
     p[0] += pt;
@@ -182,34 +183,53 @@ struct FOG_NO_EXPORT CBezierF
   }
 
   // --------------------------------------------------------------------------
-  // [From]
+  // [FromQuad / ToQuad]
   // --------------------------------------------------------------------------
 
-  //! @brief Covert a quad bezier curve into the cubic.
+  //! @brief Covert a quad Bezier curve into the cubic Bezier curve.
+  //!
+  //! Any quadratic Bezier curve can be converted into the cubic. The equation
+  //! used for conversion is as follows:
   //!
   //! @verbatim
-  //! cubic[0] = quad[0]
-  //! cubic[1] = quad[0] * (1/3) + quad[1] * (2/3)
-  //! cubic[2] = quad[2] * (1/3) + quad[1] * (2/3)
-  //! cubic[3] = quad[2]
+  //! c0 = q0
+  //! c1 = q0 + 2/3 * (q1 - q0)
+  //! c2 = q2 + 2/3 * (q1 - q2)
+  //! c3 = q2
   //! @endverbatim
-  void fromQuad(const PointF* quad)
+  FOG_INLINE void fromQuad(const PointF* quad)
   {
-    float q1x_23 = quad[1].x * (float)(2.0 / 3.0);
-    float q1y_23 = quad[1].y * (float)(2.0 / 3.0);
+    float q1x_23 = quad[1].x * float(MATH_2_DIV_3);
+    float q1y_23 = quad[1].y * float(MATH_2_DIV_3);
 
     p[0].x = quad[0].x;
     p[0].y = quad[0].y;
-    p[1].x = quad[0].x * (float)(1.0 / 3.0) + q1x_23;
-    p[1].y = quad[0].y * (float)(1.0 / 3.0) + q1y_23;
-    p[2].x = quad[2].x * (float)(1.0 / 3.0) + q1x_23;
-    p[2].y = quad[2].y * (float)(1.0 / 3.0) + q1y_23;
+    p[1].x = quad[0].x * float(MATH_1_DIV_3) + q1x_23;
+    p[1].y = quad[0].y * float(MATH_1_DIV_3) + q1y_23;
+    p[2].x = quad[2].x * float(MATH_1_DIV_3) + q1x_23;
+    p[2].y = quad[2].y * float(MATH_1_DIV_3) + q1y_23;
     p[3].x = quad[2].x;
     p[3].y = quad[2].y;
   }
+  
+  //! @brief Get whether the cubic Bezier curve was created from quadratic
+  //! coordinates, and fill @a quadMiddlePoint by the computed quadratic
+  //! control point.
+  FOG_INLINE bool isQuad(PointF* quadMiddlePoint, float epsilon = MATH_EPSILON_F)
+  {
+    float qx0 = float(MATH_2_DIV_3) * p[1].x + float(MATH_1_DIV_3) * p[0].x;
+    float qy0 = float(MATH_2_DIV_3) * p[1].y + float(MATH_1_DIV_3) * p[0].y;
+
+    float qx1 = float(MATH_2_DIV_3) * p[2].x + float(MATH_1_DIV_3) * p[3].x;
+    float qy1 = float(MATH_2_DIV_3) * p[2].y + float(MATH_1_DIV_3) * p[3].y;
+
+    quadMiddlePoint->set(qx0, qx1);
+    return Math::isFuzzyEq(qx0, qx1, epsilon) &&
+           Math::isFuzzyEq(qy0, qy1, epsilon);
+  }
 
   // --------------------------------------------------------------------------
-  // [Approximate]
+  // [Flatten]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t flatten(PathF& dst, uint8_t initialCommand, float flatness) const
@@ -536,6 +556,7 @@ struct FOG_NO_EXPORT CBezierD
   // [Transform]
   // --------------------------------------------------------------------------
 
+  //! @brief Translate all cubic points by @a pt.
   FOG_INLINE void translate(const PointD& pt)
   {
     p[0] += pt;
@@ -545,18 +566,21 @@ struct FOG_NO_EXPORT CBezierD
   }
 
   // --------------------------------------------------------------------------
-  // [From]
+  // [FromQuad / ToQuad]
   // --------------------------------------------------------------------------
 
-  //! @brief Covert a quad bezier curve into the cubic.
+  //! @brief Covert a quad Bezier curve into the cubic Bezier curve.
+  //!
+  //! Any quadratic Bezier curve can be converted into the cubic. The equation
+  //! used for conversion is as follows:
   //!
   //! @verbatim
-  //! cubic[0] = quad[0]
-  //! cubic[1] = quad[0] * (1/3) + quad[1] * (2/3)
-  //! cubic[2] = quad[2] * (1/3) + quad[1] * (2/3)
-  //! cubic[3] = quad[2]
+  //! c0 = q0
+  //! c1 = q0 + 2/3 * (q1 - q0)
+  //! c2 = q2 + 2/3 * (q1 - q2)
+  //! c3 = q2
   //! @endverbatim
-  void fromQuad(const PointD* quad)
+  FOG_INLINE void fromQuad(const PointD* quad)
   {
     double q1x_23 = quad[1].x * (2.0 / 3.0);
     double q1y_23 = quad[1].y * (2.0 / 3.0);
@@ -571,8 +595,24 @@ struct FOG_NO_EXPORT CBezierD
     p[3].y = quad[2].y;
   }
 
+  //! @brief Get whether the cubic Bezier curve was created from quadratic
+  //! coordinates, and fill @a quadMiddlePoint by the computed quadratic
+  //! control point.
+  FOG_INLINE bool toQuad(PointD* quadMiddlePoint, double epsilon = MATH_EPSILON_D)
+  {
+    double qx0 = MATH_2_DIV_3 * p[1].x + MATH_1_DIV_3 * p[0].x;
+    double qy0 = MATH_2_DIV_3 * p[1].y + MATH_1_DIV_3 * p[0].y;
+    
+    double qx1 = MATH_2_DIV_3 * p[2].x + MATH_1_DIV_3 * p[3].x;
+    double qy1 = MATH_2_DIV_3 * p[2].y + MATH_1_DIV_3 * p[3].y;
+    
+    quadMiddlePoint->set(qx0, qx1);
+    return Math::isFuzzyEq(qx0, qx1, epsilon) &&
+    Math::isFuzzyEq(qy0, qy1, epsilon);
+  }
+
   // --------------------------------------------------------------------------
-  // [Approximate]
+  // [Flatten]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t flatten(PathD& dst, uint8_t initialCommand, double flatness) const

@@ -8,15 +8,9 @@
 #define _FOG_G2D_TEXT_MACFONTPROVIDER_H
 
 // [Dependencies]
+#include <Fog/Core/OS/MacDefs.h>
 #include <Fog/G2d/Text/FontFaceCache.h>
 #include <Fog/G2d/Text/FontProvider.h>
-
-// Forward Declarations (MAC).
-#ifdef __OBJC__
-@class NSFontManager;
-#else
-class NSFontManager;
-#endif
 
 namespace Fog {
 

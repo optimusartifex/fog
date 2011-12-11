@@ -1489,19 +1489,6 @@ Set(FOG_UI_LAYOUT_HEADERS
   Fog/UI/Layout/Margin.h
 )
 
-# [Fog/UI/Theming]
-Set(FOG_UI_THEMING_SOURCES
-  Fog/UI/Theming/ThemeEngine.cpp
-  Fog/UI/Theming/DefaultThemeEngine.cpp
-  Fog/UI/Theming/WinThemeEngine.cpp
-)
-
-Set(FOG_UI_THEMING_HEADERS
-  Fog/UI/Theming/ThemeEngine.h
-  Fog/UI/Theming/DefaultThemeEngine_p.h
-  Fog/UI/Theming/WinThemeEngine_p.h
-)
-
 # [Fog/UI/Widget]
 Set(FOG_UI_WIDGET_SOURCES
   Fog/UI/Widget/Event.cpp
@@ -1525,7 +1512,6 @@ Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${F
                                           ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
                                           ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
 Source_Group("UI/Layout"            FILES ${FOG_UI_LAYOUT_SOURCES}           ${FOG_UI_LAYOUT_HEADERS}          )
-Source_Group("UI/Theming"           FILES ${FOG_UI_THEMING_SOURCES}          ${FOG_UI_THEMING_HEADERS}         )
 Source_Group("UI/Widget"            FILES ${FOG_UI_WIDGET_SOURCES}           ${FOG_UI_WIDGET_HEADERS}          )
 
 # =============================================================================
@@ -1564,7 +1550,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_UI_CANVAS_SOURCES}
   ${FOG_UI_ENGINE_SOURCES}
   ${FOG_UI_LAYOUT_SOURCES}
-  ${FOG_UI_THEMING_SOURCES}
   ${FOG_UI_WIDGET_SOURCES}
   # Fog/Svg.
   ${FOG_SVG_LIB_SOURCES}
@@ -1613,7 +1598,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_UI_ENGINE_X11_HEADERS}
   ${FOG_UI_ENGINE_WIN_HEADERS}
   ${FOG_UI_LAYOUT_HEADERS}
-  ${FOG_UI_THEMING_HEADERS}
   ${FOG_UI_WIDGET_HEADERS}
 )
 

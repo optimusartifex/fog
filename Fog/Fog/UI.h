@@ -29,7 +29,6 @@
 #include <Fog/UI/Layout/LayoutPolicy.h>
 #include <Fog/UI/Layout/LayoutUtil.h>
 #include <Fog/UI/Layout/Margin.h>
-#include <Fog/UI/Theming/ThemeEngine.h>
 #include <Fog/UI/Widget/Event.h>
 #include <Fog/UI/Widget/Widget.h>
 #include <Fog/UI/Widget/Window.h>

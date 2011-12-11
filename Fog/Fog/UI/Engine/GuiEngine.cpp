@@ -573,7 +573,8 @@ void GuiEngine::dispatchConfigure(Widget* w, const RectI& geometry, bool changed
   Layout* layout = w->getLayout();
 
   // TODO: intelligent enum order so we can omit one check here!
-  if (layout && layout->_activated && (changedFlags & GeometryEvent::CHANGED_WIDGET_SIZE) || (changedFlags & GeometryEvent::CHANGED_ORIENTATION))
+  if (layout && layout->_activated && ((changedFlags & GeometryEvent::CHANGED_WIDGET_SIZE) ||
+                                       (changedFlags & GeometryEvent::CHANGED_ORIENTATION)))
   {
     // TODO: Stefan, assertion failure, don't know why, disabled for now.
     // FOG_ASSERT(layout->_toplevel);
@@ -758,9 +759,6 @@ void GuiEngine::doUpdateWindow(GuiWindow* window)
       uflags |= WIDGET_UPDATE_ALL;
     }
   }
-
-  // TODO: Bytes per pixel instead of depth.
-  uint topBytesPerPixel = window->_backingStore->getDepth() >> 3;
 
   // ==========================================================================
   // Bail-out if update is not necessary.

@@ -319,7 +319,8 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
     // whether mach_timebase_info has already been called. This is recommended
     // by Apple's QA1398.
     kern_return_t kr = mach_timebase_info(&timebase_info);
-    FOG_ASSERT(kr == KERN_SUCCESS);
+    if (kr != KERN_SUCCESS)
+      return 0;
   }
 
   // mach_absolute_time is it when it comes to ticks on the Mac. Other calls with

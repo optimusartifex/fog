@@ -637,10 +637,6 @@ static err_t FOG_CDECL FeColorMatrix_saturate(FeColorMatrix* self, float s, uint
   float g = LumG * i;
   float b = LumB * i;
 
-  float r_plus_s = r + s;
-  float g_plus_s = g + s;
-  float b_plus_s = b + s;
-
   if (order == MATRIX_ORDER_PREPEND)
   {
     //     |r+s  r   r   0   0 |

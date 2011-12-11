@@ -198,8 +198,7 @@ const LayoutHint& LayoutItem::getLayoutHint() const
 
   if (isLayout())
   {
-    // TODO: What is this?
-    int i = 100;
+    // TODO: Implement.
   }
 
   return _cache;

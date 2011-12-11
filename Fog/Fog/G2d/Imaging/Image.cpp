@@ -441,6 +441,7 @@ static err_t FOG_CDECL Image_copyDeep(Image* self, const Image* other)
     return ERR_OK;
   }
 
+  // TODO: How to decide which image type to create (Buffered, Windows, ...)?
   uint32_t type = d->type;
   FOG_RETURN_ON_ERROR(self->create(d->size, d->format, IMAGE_TYPE_BUFFER));
 
@@ -2422,7 +2423,6 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
   }
 
   uint32_t format = src_d->format;
-  int bytesPerPixel = src_d->bytesPerPixel;
 
   const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(format);
   if ((desc.getComponentMask() & IMAGE_COMPONENT_ALPHA) == 0) channels &= COLOR_CHANNEL_RGB;

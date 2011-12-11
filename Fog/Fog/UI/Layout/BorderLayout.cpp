@@ -24,9 +24,9 @@ namespace Fog {
 BorderLayout::BorderLayout(Widget* parent) :
   Layout(parent),
   _center(0),
-  _sort(0),
   _horizontalflex(0),
   _verticalflex(0),
+  _sort(0),
   _sortdirty(0)
 {
 }

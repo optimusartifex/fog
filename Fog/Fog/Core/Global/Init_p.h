@@ -56,6 +56,7 @@ FOG_NO_EXPORT void WinUtil_init(void);
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_MAC)
+FOG_NO_EXPORT void MacUtil_init(void);
 #endif // FOG_OS_MAC
 
 // [Fog/Core/Threading]

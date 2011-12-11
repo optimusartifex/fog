@@ -5,35 +5,37 @@
 
 // [Dependencies]
 #include <Fog/Core/OS/MacUtil.h>
+#include <Fog/Core/Tools/String.h>
 
 // [Dependencies - Mac]
 #import <Cocoa/Cocoa.h>
 
 namespace Fog {
-namespace MacUtil {
   
 // ============================================================================
 // [Fog::MacUtil]
 // ============================================================================
 
-err_t StringW_fromNSString(StringW& s, NSString* src)
+static err_t FOG_CDECL StringW_fromNSString(StringW* self, const NSString* src)
 {
   NSRange range;
   range.location = 0;
   range.length = [src length];
 
-  FOG_RETURN_ON_ERROR(s.resize(range.length));
+  FOG_RETURN_ON_ERROR(self->resize(range.length));
 
-  unichar* data = reinterpret_cast<unichar*>(s.getDataX());
+  unichar* data = reinterpret_cast<unichar*>(self->getDataX());
   [src getCharacters: data range: range];
 
   return ERR_OK;
 }
 
-err_t StringW_toNSString(const StringW& s, NSString** dst)
+static err_t FOG_CDECL StringW_toNSString(const StringW* self, NSString** dst)
 {
-  const unichar* sData = reinterpret_cast<const unichar*>(s.getData());
-  NSUInteger sLength = (NSUInteger)s.getLength();
+  StringDataW* d = self->_d;
+
+  const unichar* sData = reinterpret_cast<const unichar*>(d->data);
+  NSUInteger sLength = (NSUInteger)d->length;
 
   *dst = [NSString stringWithCharacters: sData length: sLength];
 
@@ -43,5 +45,14 @@ err_t StringW_toNSString(const StringW& s, NSString** dst)
     return ERR_RT_OUT_OF_MEMORY;
 }
   
-} // MacUtil namespace
+// ============================================================================
+// [Init / Fini]
+// ============================================================================
+
+FOG_NO_EXPORT void MacUtil_init(void)
+{
+  fog_api.stringw_fromNSString = StringW_fromNSString;
+  fog_api.stringw_toNSString = StringW_toNSString;
+}
+
 } // Fog namespace

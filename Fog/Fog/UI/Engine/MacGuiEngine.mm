@@ -440,7 +440,7 @@ err_t MacGuiWindow::setTitle(const StringW& title)
     return ERR_RT_INVALID_STATE;
   
   NSString* nsTitle;
-  FOG_RETURN_ON_ERROR(MacUtil::StringW_toNSString(title, &nsTitle));
+  FOG_RETURN_ON_ERROR(title.toNSString(&nsTitle));
 
   [window setTitle: nsTitle];
   return ERR_OK;
@@ -454,7 +454,7 @@ err_t MacGuiWindow::getTitle(StringW& title)
   NSString* s = [window title];
   [s release];
   
-  return MacUtil::StringW_fromNSString(title, [window title]);
+  return title.fromNSString([window title]);
 }
 
 err_t MacGuiWindow::setIcon(const Image& icon)

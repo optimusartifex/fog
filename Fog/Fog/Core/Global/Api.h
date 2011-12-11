@@ -330,18 +330,19 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(uint32_t, userutil_getGid)(void);
   FOG_CAPI_STATIC(err_t, userutil_getUserDirectory)(StringW* dst, uint32_t directoryId);
 
-#if defined(FOG_OS_WINDOWS)
-
   // --------------------------------------------------------------------------
   // [Core/OS - WinCOM]
   // --------------------------------------------------------------------------
 
+#if defined(FOG_OS_WINDOWS)
   FOG_CAPI_STATIC(err_t, wincom_makeIStream)(IStream** dst, Stream* src);
+#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Core/OS - WinUtil]
   // --------------------------------------------------------------------------
 
+#if defined(FOG_OS_WINDOWS)
   FOG_CAPI_STATIC(err_t, winutil_getErrFromWinErrorCode)(DWORD code);
   FOG_CAPI_STATIC(err_t, winutil_getErrFromWinLastError)(void);
 
@@ -350,8 +351,16 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(err_t, winutil_getModuleFileName)(StringW* dst, HMODULE hModule);
   FOG_CAPI_STATIC(err_t, winutil_makeWinPathStubW)(StringW* dst, const StubW* src);
   FOG_CAPI_STATIC(err_t, winutil_makeWinPathStringW)(StringW* dst, const StringW* src);
-
 #endif // FOG_OS_WINDOWS
+
+  // --------------------------------------------------------------------------
+  // [Core/OS - MacUtil]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_MAC)
+  FOG_CAPI_STATIC(err_t, stringw_fromNSString)(StringW* self, const NSString* src);
+  FOG_CAPI_STATIC(err_t, stringw_toNSString)(const StringW* self, NSString** dst);  
+#endif // FOG_OS_MAC
 
   // --------------------------------------------------------------------------
   // [Core/Threading - Lock]
@@ -1274,9 +1283,6 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(StringDataW*, stringw_dAdoptStubW)(void* address, size_t capacity, const StubW* stub);
   FOG_CAPI_STATIC(StringDataW*, stringw_dRealloc)(StringDataW* d, size_t capacity);
   FOG_CAPI_STATIC(void, stringw_dFree)(StringDataW* d);
-
-  FOG_CAPI_STATIC(err_t, stringw_fromNSString)(StringW* self, NSString* src);
-  FOG_CAPI_STATIC(err_t, stringw_toNSString)(const StringW* self, NSString** dst);  
   
   StringW* stringw_oEmpty;
 
@@ -1976,14 +1982,6 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, image_writeToStream)(const Image* self, Stream* stream, const StringW* ext, const Hash<StringW, Var>* options);
   FOG_CAPI_METHOD(err_t, image_writeToBuffer)(const Image* self, StringA* buffer, uint32_t cntOp, const StringW* ext, const Hash<StringW, Var>* options);
 
-#if defined(FOG_OS_WINDOWS)
-  FOG_CAPI_METHOD(err_t, image_toWinBitmap)(const Image* self, HBITMAP* hBitmap);
-  FOG_CAPI_METHOD(err_t, image_fromWinBitmap)(Image* self, HBITMAP hBitmap);
-
-  FOG_CAPI_METHOD(err_t, image_getDC)(Image* self, HDC* hDC);
-  FOG_CAPI_METHOD(err_t, image_releaseDC)(Image* self, HDC hDC);
-#endif // FOG_OS_WINDOWS
-
   FOG_CAPI_STATIC(err_t, image_resize)(Image* dst, const SizeI* dSize, const Image* src, const RectI* sFragment, uint32_t resizeFunc, const Hash<StringW, Var>* params);
   FOG_CAPI_STATIC(err_t, image_resizeCustom)(Image* dst, const SizeI* dSize, const Image* src, const RectI* sFragment, const MathFunctionF* resizeFunc, float radius);
 
@@ -2256,6 +2254,29 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(bool, femorphology_eq)(const FeMorphology* a, const FeMorphology* b);
 
   // --------------------------------------------------------------------------
+  // [G2d/OS - WinUtil]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_WINDOWS)
+  FOG_CAPI_METHOD(err_t, image_toWinBitmap)(const Image* self, HBITMAP* hBitmap);
+  FOG_CAPI_METHOD(err_t, image_fromWinBitmap)(Image* self, HBITMAP hBitmap);
+  
+  FOG_CAPI_METHOD(err_t, image_getDC)(Image* self, HDC* hDC);
+  FOG_CAPI_METHOD(err_t, image_releaseDC)(Image* self, HDC hDC);
+
+  FOG_CAPI_METHOD(err_t, region_hrgnFromRegion)(HRGN* dst, const Region* src);
+  FOG_CAPI_METHOD(err_t, region_regionFromHRGN)(Region* dst, HRGN src);
+#endif // FOG_OS_WINDOWS
+
+  // --------------------------------------------------------------------------
+  // [G2d/OS - MacUtil]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_MAC)
+  
+#endif // FOG_OS_MAC
+
+  // --------------------------------------------------------------------------
   // [G2d/Painting - Painter]
   // --------------------------------------------------------------------------
 
@@ -2524,11 +2545,6 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(uint32_t, region_hitTestRect)(const Region* self, const RectI* rect);
 
   FOG_CAPI_METHOD(bool, region_eq)(const Region* a, const Region* b);
-
-#if defined(FOG_OS_WINDOWS)
-  FOG_CAPI_METHOD(err_t, region_hrgnFromRegion)(HRGN* dst, const Region* src);
-  FOG_CAPI_METHOD(err_t, region_regionFromHRGN)(Region* dst, HRGN src);
-#endif // FOG_OS_WINDOWS
 
   FOG_CAPI_STATIC(RegionData*, region_dCreate)(size_t capacity);
   FOG_CAPI_STATIC(RegionData*, region_dCreateBox)(size_t capacity, const BoxI* box);

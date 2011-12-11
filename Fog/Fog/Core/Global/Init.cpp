@@ -73,6 +73,10 @@ FOG_CAPI_DECLARE void _fog_init(void)
   WinCOM_init();
 #endif // FOG_OS_WINDOWS
 
+#if defined(FOG_OS_MAC)
+  MacUtil_init();
+#endif // FOG_OS_MAC
+
   OSInfo_init();
   OSUtil_init();
   Library_init();

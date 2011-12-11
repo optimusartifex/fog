@@ -44,14 +44,13 @@ MacFontProviderData::~MacFontProviderData()
 err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily)
 {
   NSString* nsName;
-  FOG_RETURN_ON_ERROR(MacUtil::StringW_toNSString(fontFamily, &nsName));
+  FOG_RETURN_ON_ERROR(fontFamily.toNSString(&nsName));
 
   NSFont* nsFont = [NSFont fontWithName: nsName size: 128.0f];
   if (nsFont == nil) return ERR_FONT_NOT_MATCHED;
   
   StringW fontName;
-
-  FOG_RETURN_ON_ERROR(MacUtil::StringW_fromNSString(fontName, [nsFont familyName]));
+  FOG_RETURN_ON_ERROR(fontName.fromNSString([nsFont familyName]));
 
   AutoLock locked(lock);
   FontFace* face = fontFaceCache.get(fontName);
@@ -87,7 +86,7 @@ err_t MacFontProviderData::getFontList(List<StringW>& dst)
   {
     StringW tmp;
     // TODO: What about propagating an error value?
-    if (MacUtil::StringW_fromNSString(tmp, name) == ERR_OK)
+    if (tmp.fromNSString(name) == ERR_OK)
       dst.append(tmp);
   }
   

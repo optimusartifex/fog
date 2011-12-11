@@ -4064,6 +4064,18 @@ struct FOG_NO_EXPORT StringW
     return fog_api.stringw_bswap(this);
   }
 
+#if defined(FOG_OS_MAC)
+  FOG_INLINE err_t fromNSString(const NSString* src)
+  {
+    return fog_api.stringw_fromNSString(this, src);
+  }
+
+  FOG_INLINE err_t toNSString(NSString** dst) const
+  {
+    return fog_api.stringw_toNSString(this, dst);
+  }
+#endif // FOG_OS_MAC
+
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------

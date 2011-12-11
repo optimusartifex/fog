@@ -38,6 +38,7 @@
 #include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Geometry/Size.h>
+#include <Fog/G2d/Geometry/Thickness.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Geometry/Triangle.h>
 #include <Fog/G2d/Imaging/Image.h>

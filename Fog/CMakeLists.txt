@@ -800,6 +800,7 @@ Set(FOG_G2D_GEOMETRY_SOURCES
   Fog/G2d/Geometry/Shape.cpp
   Fog/G2d/Geometry/Size.cpp
   Fog/G2d/Geometry/Size.cpp
+  Fog/G2d/Geometry/Thickness.cpp
   Fog/G2d/Geometry/Transform.cpp
   Fog/G2d/Geometry/Triangle.cpp
 )
@@ -830,6 +831,7 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Fog/G2d/Geometry/Round.h
   Fog/G2d/Geometry/Shape.h
   Fog/G2d/Geometry/Size.h
+  Fog/G2d/Geometry/Thickness.h
   Fog/G2d/Geometry/Transform.h
   Fog/G2d/Geometry/Triangle.h
 )

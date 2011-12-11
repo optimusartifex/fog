@@ -22,7 +22,7 @@ namespace Fog {
 // [Fog::TimeDelta]
 // ============================================================================
 
-//! @brief Time delta (the difference between two @a Time oe @c TimeTicks instances).
+//! @brief Time delta (the difference between two @a Time or @c TimeTicks instances).
 struct FOG_NO_EXPORT TimeDelta
 {
   // --------------------------------------------------------------------------

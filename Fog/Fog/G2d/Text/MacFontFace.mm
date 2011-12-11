@@ -110,7 +110,7 @@ static err_t MacFontFace_renderGlyphOutline(MacFontFace* self,
   NSBezierPath* path = [NSBezierPath bezierPath];
   [path moveToPoint: NSMakePoint(0.0f, 0.0f)];
   [path appendBezierPathWithGlyphs: ucGlyph count: 1 inFont: self->nsFont];
-  
+
   NSInteger i, len = [path elementCount];
 
   for (i = 0; i < len; i++)
@@ -121,32 +121,53 @@ static err_t MacFontFace_renderGlyphOutline(MacFontFace* self,
     switch (cmd)
     {
       case NSMoveToBezierPathElement:
-        dst.moveTo(NumT_(Point)((float)pts[0].x, (float)-pts[0].y));
+      {
+        dst.moveTo(NumT_(Point)(NumT(pts[0].x), NumT(-pts[0].y)));
         break;
+      }
+
       case NSLineToBezierPathElement:
-        dst.lineTo(NumT_(Point)((float)pts[0].x, (float)-pts[0].y));
+      {
+        dst.lineTo(NumT_(Point)(NumT(pts[0].x), NumT(-pts[0].y)));
         break;
+      }
+
       case NSCurveToBezierPathElement:
-        dst.cubicTo(NumT_(Point)((float)pts[0].x, (float)-pts[0].y),
-                    NumT_(Point)((float)pts[1].x, (float)-pts[1].y),
-                    NumT_(Point)((float)pts[2].x, (float)-pts[2].y));
+      {
+        // Font files are created by quadratic Bezier curves, but CT framework
+        // uses only cubic Beziers. We try convert cubic Bezier curves back to
+        // quadratic ones, if it's possible without losing a precision.
+        NumT_(CBezier) bez;
+
+        bez[0] = dst.getLastVertex();
+        bez[1].set(NumT(pts[0].x), NumT(-pts[0].y));
+        bez[2].set(NumT(pts[1].x), NumT(-pts[1].y));
+        bez[3].set(NumT(pts[2].x), NumT(-pts[2].y));
+
+        NumT_(Point) qPt;
+        if (bez.toQuad(&qPt, NumT(0.001)))
+          dst.quadTo(qPt, bez[3]);
+        else
+          dst.cubicTo(bez[1], bez[2], bez[3]);
         break;
+      }
+
       case NSClosePathBezierPathElement:
+      {
         dst.close();
         break;
+      }
     }
   }
 
-  metrics._horizontalAdvance.reset();
-  metrics._verticalAdvance.reset();
-
   CGSize advance[1];
-  metrics._horizontalAdvance.x = (float)CTFontGetAdvancesForGlyphs(
-    (CTFontRef)self->nsFont, kCTFontHorizontalOrientation, (CGGlyph*)ucGlyph, advance, 1);
-  
+  CTFontGetAdvancesForGlyphs((CTFontRef)self->nsFont, kCTFontHorizontalOrientation, (CGGlyph*)ucGlyph, advance, 1);
+
   metrics._horizontalAdvance.x = advance[0].width;
   metrics._horizontalAdvance.y = advance[0].height;
-  
+  metrics._verticalAdvance.x = 0.0f;
+  metrics._verticalAdvance.y = 0.0f;
+
   return ERR_OK;
 }
 

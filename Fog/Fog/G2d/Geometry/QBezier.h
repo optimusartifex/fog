@@ -167,6 +167,22 @@ struct FOG_NO_EXPORT QBezierF
   FOG_INLINE bool operator==(const QBezierF& other) const { return  MemOps::eq_t<QBezierF>(this, &other); }
   FOG_INLINE bool operator!=(const QBezierF& other) const { return !MemOps::eq_t<QBezierF>(this, &other); }
 
+  FOG_INLINE const PointF& operator[](size_t i) const
+  {
+    FOG_ASSERT_X(i < 3,
+                 "Fog::QBezierF::operator[] - Index out of range");
+    
+    return p[i];
+  }
+  
+  FOG_INLINE PointF& operator[](size_t i)
+  {
+    FOG_ASSERT_X(i < 3,
+                 "Fog::QBezierF::operator[] - Index out of range");
+    
+    return p[i];
+  }
+
   // --------------------------------------------------------------------------
   // [Statics]
   // --------------------------------------------------------------------------
@@ -404,6 +420,22 @@ struct FOG_NO_EXPORT QBezierD
 
   FOG_INLINE bool operator==(const QBezierD& other) const { return  MemOps::eq_t<QBezierD>(this, &other); }
   FOG_INLINE bool operator!=(const QBezierD& other) const { return !MemOps::eq_t<QBezierD>(this, &other); }
+
+  FOG_INLINE const PointD& operator[](size_t i) const
+  {
+    FOG_ASSERT_X(i < 3,
+                 "Fog::QBezierD::operator[] - Index out of range");
+    
+    return p[i];
+  }
+  
+  FOG_INLINE PointD& operator[](size_t i)
+  {
+    FOG_ASSERT_X(i < 3,
+                 "Fog::QBezierD::operator[] - Index out of range");
+    
+    return p[i];
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]

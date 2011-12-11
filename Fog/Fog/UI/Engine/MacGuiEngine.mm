@@ -64,8 +64,8 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
                                   defer: NO])
   {
     [self setContentView:view];
-    
-    // initialize notifications
+
+    // Initialize notifications.
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
     
     [center addObserver:self selector:@selector(windowBecameKey:)
@@ -779,8 +779,9 @@ void MacEventLoopBase::_scheduleDelayedWork(const Time& delayedWorkTime)
   //double seconds = now.second + (static_cast<double>((delayedWorkTime.toInternalValue()) % Time::MicrosecondsPerSecond) /
   //                                                    Time::MicrosecondsPerSecond);
   //CFGregorianDate gregorian = { now.year, now.month, now.dayOfMonth, now.hour,now.minute, seconds };
+  double t = double(delayedWorkTime.getValue()) / double(1000000) + kCFAbsoluteTimeIntervalSince1970;
 
-  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, delayedWorkTime.getValue());
+  CFRunLoopTimerSetNextFireDate(_delayedWorkTimer, t);
 }
 
 void MacEventLoopBase::runDelayedWorkTimer(CFRunLoopTimerRef timer, void* info)
@@ -804,8 +805,14 @@ bool MacEventLoopBase::runDelayedWork()
   if (!more_work) return false;
 
   TimeDelta delay = _delayedWorkTime - Time::now();
-  if (delay > TimeDelta()) _scheduleDelayedWork(_delayedWorkTime);
-  else CFRunLoopSourceSignal(_delayedWorkSource); // direct comeback!
+  if (delay.getDelta() != 0)
+  {
+    _scheduleDelayedWork(_delayedWorkTime);
+    return true;
+  }
+
+  // Direct comeback!
+  CFRunLoopSourceSignal(_delayedWorkSource);
 
   return true;
 }
@@ -844,7 +851,10 @@ void MacNonMainEventLoop::quit()
 
 void MacMainEventLoop::_runInternal()
 {
-  if (![NSApp isRunning]) [NSApp run];
+  if (![NSApp isRunning])
+  {
+    [NSApp run];
+  }
 }
 
 void MacMainEventLoop::quit()

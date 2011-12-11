@@ -311,6 +311,7 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
 
 #if defined(FOG_OS_MAC)
   static mach_timebase_info_data_t timebase_info;
+
   if (timebase_info.denom == 0)
   {
     // Zero-initialization of statics guarantees that denom will be 0 before
@@ -319,6 +320,7 @@ static int64_t FOG_CDECL TimeTicks_now(uint32_t ticksPrecision)
     // whether mach_timebase_info has already been called. This is recommended
     // by Apple's QA1398.
     kern_return_t kr = mach_timebase_info(&timebase_info);
+
     if (kr != KERN_SUCCESS)
       return 0;
   }

@@ -215,17 +215,19 @@ struct FOG_NO_EXPORT CBezierF
   //! @brief Get whether the cubic Bezier curve was created from quadratic
   //! coordinates, and fill @a quadMiddlePoint by the computed quadratic
   //! control point.
-  FOG_INLINE bool isQuad(PointF* quadMiddlePoint, float epsilon = MATH_EPSILON_F)
+  FOG_INLINE bool toQuad(PointF* quadMiddlePoint, float epsilon = MATH_EPSILON_F) const
   {
-    float qx0 = float(MATH_2_DIV_3) * p[1].x + float(MATH_1_DIV_3) * p[0].x;
-    float qy0 = float(MATH_2_DIV_3) * p[1].y + float(MATH_1_DIV_3) * p[0].y;
+    double qx0 = double(1.5) * double(p[1].x) - double(0.5) * double(p[0].x);
+    double qy0 = double(1.5) * double(p[1].y) - double(0.5) * double(p[0].y);
 
-    float qx1 = float(MATH_2_DIV_3) * p[2].x + float(MATH_1_DIV_3) * p[3].x;
-    float qy1 = float(MATH_2_DIV_3) * p[2].y + float(MATH_1_DIV_3) * p[3].y;
+    double qx1 = double(1.5) * double(p[2].x) - double(0.5) * double(p[3].x);
+    double qy1 = double(1.5) * double(p[2].y) - double(0.5) * double(p[3].y);
 
-    quadMiddlePoint->set(qx0, qx1);
-    return Math::isFuzzyEq(qx0, qx1, epsilon) &&
-           Math::isFuzzyEq(qy0, qy1, epsilon);
+    quadMiddlePoint->set(float((qx0 + qx1) * 0.5),
+                         float((qy0 + qy1) * 0.5));
+
+    return Math::isFuzzyEq(qx0, qx1, double(epsilon)) &&
+           Math::isFuzzyEq(qy0, qy1, double(epsilon));
   }
 
   // --------------------------------------------------------------------------
@@ -252,6 +254,22 @@ struct FOG_NO_EXPORT CBezierF
 
   FOG_INLINE bool operator==(const CBezierF& other) const { return  MemOps::eq_t<CBezierF>(this, &other); }
   FOG_INLINE bool operator!=(const CBezierF& other) const { return !MemOps::eq_t<CBezierF>(this, &other); }
+
+  FOG_INLINE const PointF& operator[](size_t i) const
+  {
+    FOG_ASSERT_X(i < 4,
+      "Fog::CBezierF::operator[] - Index out of range");
+    
+    return p[i];
+  }
+  
+  FOG_INLINE PointF& operator[](size_t i)
+  {
+    FOG_ASSERT_X(i < 4,
+                 "Fog::CBezierF::operator[] - Index out of range");
+    
+    return p[i];
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]
@@ -582,15 +600,15 @@ struct FOG_NO_EXPORT CBezierD
   //! @endverbatim
   FOG_INLINE void fromQuad(const PointD* quad)
   {
-    double q1x_23 = quad[1].x * (2.0 / 3.0);
-    double q1y_23 = quad[1].y * (2.0 / 3.0);
+    double q1x_23 = quad[1].x * MATH_2_DIV_3;
+    double q1y_23 = quad[1].y * MATH_2_DIV_3;
 
     p[0].x = quad[0].x;
     p[0].y = quad[0].y;
-    p[1].x = quad[0].x * (1.0 / 3.0) + q1x_23;
-    p[1].y = quad[0].y * (1.0 / 3.0) + q1y_23;
-    p[2].x = quad[2].x * (1.0 / 3.0) + q1x_23;
-    p[2].y = quad[2].y * (1.0 / 3.0) + q1y_23;
+    p[1].x = quad[0].x * MATH_1_DIV_3 + q1x_23;
+    p[1].y = quad[0].y * MATH_1_DIV_3 + q1y_23;
+    p[2].x = quad[2].x * MATH_1_DIV_3 + q1x_23;
+    p[2].y = quad[2].y * MATH_1_DIV_3 + q1y_23;
     p[3].x = quad[2].x;
     p[3].y = quad[2].y;
   }
@@ -598,17 +616,17 @@ struct FOG_NO_EXPORT CBezierD
   //! @brief Get whether the cubic Bezier curve was created from quadratic
   //! coordinates, and fill @a quadMiddlePoint by the computed quadratic
   //! control point.
-  FOG_INLINE bool toQuad(PointD* quadMiddlePoint, double epsilon = MATH_EPSILON_D)
+  FOG_INLINE bool toQuad(PointD* quadMiddlePoint, double epsilon = MATH_EPSILON_D) const
   {
-    double qx0 = MATH_2_DIV_3 * p[1].x + MATH_1_DIV_3 * p[0].x;
-    double qy0 = MATH_2_DIV_3 * p[1].y + MATH_1_DIV_3 * p[0].y;
+    double qx0 = double(1.5) * p[1].x - double(0.5) * p[0].x;
+    double qy0 = double(1.5) * p[1].y - double(0.5) * p[0].y;
     
-    double qx1 = MATH_2_DIV_3 * p[2].x + MATH_1_DIV_3 * p[3].x;
-    double qy1 = MATH_2_DIV_3 * p[2].y + MATH_1_DIV_3 * p[3].y;
+    double qx1 = double(1.5) * p[2].x - double(0.5) * p[3].x;
+    double qy1 = double(1.5) * p[2].y - double(0.5) * p[3].y;
     
-    quadMiddlePoint->set(qx0, qx1);
+    quadMiddlePoint->set(qx0, qy0);
     return Math::isFuzzyEq(qx0, qx1, epsilon) &&
-    Math::isFuzzyEq(qy0, qy1, epsilon);
+           Math::isFuzzyEq(qy0, qy1, epsilon);
   }
 
   // --------------------------------------------------------------------------
@@ -635,6 +653,22 @@ struct FOG_NO_EXPORT CBezierD
 
   FOG_INLINE bool operator==(const CBezierD& other) const { return  MemOps::eq_t<CBezierD>(this, &other); }
   FOG_INLINE bool operator!=(const CBezierD& other) const { return !MemOps::eq_t<CBezierD>(this, &other); }
+
+  FOG_INLINE const PointD& operator[](size_t i) const
+  {
+    FOG_ASSERT_X(i < 4,
+                 "Fog::CBezierD::operator[] - Index out of range");
+    
+    return p[i];
+  }
+  
+  FOG_INLINE PointD& operator[](size_t i)
+  {
+    FOG_ASSERT_X(i < 4,
+                 "Fog::CBezierD::operator[] - Index out of range");
+    
+    return p[i];
+  }
 
   // --------------------------------------------------------------------------
   // [Statics]

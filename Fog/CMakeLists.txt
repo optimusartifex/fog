@@ -1409,15 +1409,6 @@ Set(FOG_UI_LIB_HEADERS
   Fog/UI.h
 )
 
-# [Fog/UI/Animation]
-Set(FOG_UI_ANIMATION_SOURCES
-  Fog/UI/Animation/Animation.cpp
-)
-
-Set(FOG_UI_ANIMATION_HEADERS
-  Fog/UI/Animation/Animation.h
-)
-
 # [Fog/UI/Canvas]
 Set(FOG_UI_CANVAS_SOURCES
   Fog/UI/Canvas/CanvasDelegate.cpp
@@ -1507,7 +1498,6 @@ Set(FOG_UI_WIDGET_HEADERS
 
 # Source groups.
 Source_Group("UI"                   FILES ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
-Source_Group("UI/Animation"         FILES ${FOG_UI_ANIMATION_SOURCES}        ${FOG_UI_ANIMATION_HEADERS}       )
 Source_Group("UI/Canvas"            FILES ${FOG_UI_CANVAS_SOURCES}           ${FOG_UI_CANVAS_HEADERS}          )
 Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
                                           ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_SOURCES}
@@ -1548,7 +1538,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_TOOLS_SOURCES}
   # Fog/UI.
   ${FOG_UI_LIB_SOURCES}
-  ${FOG_UI_ANIMATION_SOURCES}
   ${FOG_UI_CANVAS_SOURCES}
   ${FOG_UI_ENGINE_SOURCES}
   ${FOG_UI_LAYOUT_SOURCES}
@@ -1594,7 +1583,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_SVG_VISIT_HEADERS}
   # Fog/UI.
   ${FOG_UI_LIB_HEADERS}
-  ${FOG_UI_ANIMATION_HEADERS}
   ${FOG_UI_CANVAS_HEADERS}
   ${FOG_UI_ENGINE_HEADERS}
   ${FOG_UI_ENGINE_X11_HEADERS}

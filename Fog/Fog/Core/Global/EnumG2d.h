@@ -2304,10 +2304,11 @@ enum PATH_CMD
   PATH_CMD_QUAD_TO = 2,
   //! @brief Cubic-to command (three vertices).
   PATH_CMD_CUBIC_TO = 3,
-  // TODO: Not implemented yet!
-  //
   //! @brief Command used to distunguish between the additional data needed for
   //! @c PATH_CMD_QUAD_TO and @c PATH_CMD_CUBIC_TO.
+  //!
+  //! One @c PATH_CMD_DATA command follows the @c PATH_CMD_QUAD_TO, and two
+  //! @c PATH_CMD_DATA commands follow the @c PATH_CMD_CUBIC_TO.
   PATH_CMD_DATA = 4,
   //! @brief Close command.
   PATH_CMD_CLOSE = 5

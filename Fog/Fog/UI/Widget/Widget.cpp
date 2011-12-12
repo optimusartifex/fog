@@ -1365,10 +1365,6 @@ void Widget::onClose(CloseEvent* e)
 {
 }
 
-void Widget::onThemeChange(ThemeEvent* e)
-{
-}
-
 void Widget::onLayout(LayoutEvent* e)
 {
 }

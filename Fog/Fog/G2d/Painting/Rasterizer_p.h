@@ -11,6 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemZoneAllocator.h>
+#include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Path.h>
@@ -19,14 +20,6 @@
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterStructs_p.h>
-
-// ============================================================================
-// [Debugging]
-// ============================================================================
-
-#if defined(FOG_DEBUG_RASTERIZER)
-#include <Fog/Core/Tools/String.h>
-#endif // FOG_DEBUG_RASTERIZER
 
 namespace Fog {
 

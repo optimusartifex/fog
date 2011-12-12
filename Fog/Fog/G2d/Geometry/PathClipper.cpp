@@ -883,7 +883,7 @@ _ClipLineCmd_Done:
             dstPts[0] = srcPts[0];
             dstPts[1] = srcPts[1];
             dstCmd[0] = PATH_CMD_QUAD_TO;
-            dstCmd[1] = PATH_CMD_QUAD_TO;
+            dstCmd[1] = PATH_CMD_DATA;
             dstPts += 2;
             dstCmd += 2;
 
@@ -1082,7 +1082,7 @@ _ClipQuadCmd_EvaluateY:
                   dstPts[1].y = tp.y;
 
                   dstCmd[0] = PATH_CMD_QUAD_TO;
-                  dstCmd[1] = PATH_CMD_QUAD_TO;
+                  dstCmd[1] = PATH_CMD_DATA;
 
                   dstPts += 2;
                   dstCmd += 2;
@@ -1134,8 +1134,8 @@ _ClipQuadCmd_EvaluateY:
             dstPts[1] = srcPts[1];
             dstPts[2] = srcPts[2];
             dstCmd[0] = PATH_CMD_CUBIC_TO;
-            dstCmd[1] = PATH_CMD_CUBIC_TO;
-            dstCmd[2] = PATH_CMD_CUBIC_TO;
+            dstCmd[1] = PATH_CMD_DATA;
+            dstCmd[2] = PATH_CMD_DATA;
             dstPts += 3;
             dstCmd += 3;
 
@@ -1356,8 +1356,8 @@ _ClipCubicCmd_EvaluateY:
                   dstPts[2].y = tp.y;
 
                   dstCmd[0] = PATH_CMD_CUBIC_TO;
-                  dstCmd[1] = PATH_CMD_CUBIC_TO;
-                  dstCmd[2] = PATH_CMD_CUBIC_TO;
+                  dstCmd[1] = PATH_CMD_DATA;
+                  dstCmd[2] = PATH_CMD_DATA;
 
                   dstPts += 3;
                   dstCmd += 3;

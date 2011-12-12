@@ -3169,27 +3169,35 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
 {
   if (FOG_UNLIKELY(srcLength == 0))
   {
-    if (cntOp == CONTAINER_OP_REPLACE) dst->clear();
+    if (cntOp == CONTAINER_OP_REPLACE)
+      dst->clear();
+
     return ERR_OK;
   }
 
   if (srcCmd[0] == PATH_CMD_QUAD_TO || srcCmd[0] == PATH_CMD_CUBIC_TO)
   {
-    if (cntOp == CONTAINER_OP_REPLACE) dst->clear();
+    if (cntOp == CONTAINER_OP_REPLACE)
+      dst->clear();
+
     return ERR_GEOMETRY_INVALID;
   }
 
   uint32_t transformType = self->getType();
   if (transformType == TRANSFORM_TYPE_DEGENERATE)
   {
-    if (cntOp == CONTAINER_OP_REPLACE) dst->clear();
+    if (cntOp == CONTAINER_OP_REPLACE)
+      dst->clear();
+
     return ERR_GEOMETRY_DEGENERATE;
   }
 
   if (transformType != TRANSFORM_TYPE_PROJECTION)
   {
     size_t pos = dst->_prepare(cntOp, srcLength);
-    if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
+
+    if (FOG_UNLIKELY(pos == INVALID_INDEX))
+      return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCmd = dst->_d->commands + pos;
     NumT_(Point)* dstPts = dst->_d->vertices + pos;
@@ -3206,7 +3214,9 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
       return ERR_RT_OUT_OF_MEMORY;
 
     size_t pos = dst->_prepare(cntOp, srcLength * 4);
-    if (FOG_UNLIKELY(pos == INVALID_INDEX)) return ERR_RT_OUT_OF_MEMORY;
+
+    if (FOG_UNLIKELY(pos == INVALID_INDEX))
+      return ERR_RT_OUT_OF_MEMORY;
 
     uint8_t* dstCmd = dst->_d->commands + pos;
     NumT_(Point)* dstPts = dst->_d->vertices + pos;
@@ -3223,7 +3233,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
     NumT _21 = self->_21;
     NumT _w;
 
-    // PATH_CMD_QUAD_TO and PATH_CMD_CUBIC_TO were already checked.
+    // PATH_CMD_QUAD_TO and PATH_CMD_CUBIC_TO commands were already checked.
     bool hasPrevious = true;
 
     do {
@@ -3239,7 +3249,8 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
 
         case PATH_CMD_LINE_TO:
         {
-          if (FOG_UNLIKELY(!hasPrevious)) goto _Invalid;
+          if (FOG_UNLIKELY(!hasPrevious))
+            goto _Invalid;
 
           _w = srcPts[0].x * self->_02 + srcPts[0].y * self->_12 + self->_22;
           if (Math::isFuzzyZero(_w)) _w = MathConstant<NumT>::getEpsilon();
@@ -3263,7 +3274,9 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
         {
           FOG_ASSERT(i >= 2);
 
-          if (FOG_UNLIKELY(!hasPrevious)) goto _Invalid;
+          if (FOG_UNLIKELY(!hasPrevious))
+            goto _Invalid;
+
           mask |= PATH_FLAG_HAS_QBEZIER;
 
           if (sizeof(NumT) != sizeof(SrcT))
@@ -3285,6 +3298,20 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
             NumI_(QBezier)::splitHalf(&spline[ 6], &spline[4], &spline[6]);
           }
 
+          static const uint8_t quadCmd[] =
+          {
+            0xFF, // Never accessed.
+            PATH_CMD_QUAD_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_QUAD_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_QUAD_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_QUAD_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_QUAD_TO
+          };
+
           for (uint j = 1; j < 10; j++)
           {
             NumT w = spline[j].x * self->_02 + spline[j].y * self->_12 + self->_22;
@@ -3292,7 +3319,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
 
             NumT wRecip = NumT(1.0) / w;
 
-            dstCmd[0] = PATH_CMD_QUAD_TO;
+            dstCmd[0] = quadCmd[j];
             dstPts[0].set((spline[j].x * _00 + spline[j].y * _10 + _20) * wRecip,
                           (spline[j].x * _01 + spline[j].y * _11 + _21) * wRecip);
             dstCmd++;
@@ -3309,7 +3336,9 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
         {
           FOG_ASSERT(i >= 3);
 
-          if (FOG_UNLIKELY(!hasPrevious)) goto _Invalid;
+          if (FOG_UNLIKELY(!hasPrevious))
+            goto _Invalid;
+
           mask |= PATH_FLAG_HAS_CBEZIER;
 
           if (sizeof(NumT) != sizeof(SrcT))
@@ -3331,6 +3360,23 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
             NumI_(CBezier)::splitHalf(&spline[ 9], &spline[6], &spline[9]);
           }
 
+          static const uint8_t cubicCmd[] =
+          {
+            0xFF, // Never accessed.
+            PATH_CMD_CUBIC_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_DATA,
+            PATH_CMD_CUBIC_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_DATA,
+            PATH_CMD_CUBIC_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_DATA,
+            PATH_CMD_CUBIC_TO,
+            PATH_CMD_DATA,
+            PATH_CMD_DATA
+          };
+
           for (uint j = 1; j < 13; j++)
           {
             NumT w = spline[j].x * self->_02 + spline[j].y * self->_12 + self->_22;
@@ -3338,7 +3384,7 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
 
             NumT wRecip = NumT(1.0) / w;
 
-            dstCmd[0] = PATH_CMD_CUBIC_TO;
+            dstCmd[0] = cubicCmd[j];
             dstPts[0].set((spline[j].x * _00 + spline[j].y * _10 + _20) * wRecip,
                           (spline[j].x * _01 + spline[j].y * _11 + _21) * wRecip);
             dstCmd++;

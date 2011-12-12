@@ -26,8 +26,10 @@
 # include <Fog/Core/OS/MacDefs.h>
 #endif // FOG_OS_MAC
 
+namespace Fog {
+
 // ============================================================================
-// [Fog::Api]
+// [FOG_CAPI_...]
 // ============================================================================
 
 #define FOG_CAPI_CTOR(_Name_) void (FOG_CDECL* _Name_)
@@ -36,7 +38,9 @@
 #define FOG_CAPI_METHOD(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 #define FOG_CAPI_STATIC(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 
-namespace Fog {
+// ============================================================================
+// [Fog::Api]
+// ============================================================================
 
 //! @internal
 //!

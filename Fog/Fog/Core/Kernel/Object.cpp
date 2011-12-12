@@ -34,10 +34,9 @@ const MetaClass* Object::_staticMetaClass;
 Static<Lock> Object::_internalLock;
 
 static Static<ObjectExtra> Object_extraNull;
-
-static Static<Lock> Object_poolLock;
-static Static<MemPool> Object_extraPool;
-static Static<MemPool> Object_connectionPool;
+static Static<Lock> Object_memPoolLock;
+static Static<MemPool> Object_memPoolExtra;
+static Static<MemPool> Object_memPoolConn;
 
 // ============================================================================
 // [Fog::Object - Helpers]
@@ -48,15 +47,14 @@ static ObjectExtra* ObjectExtra_create()
   ObjectExtra* extra;
 
   { // Synchronized.
-    AutoLock locked(Object_poolLock);
+    AutoLock locked(Object_memPoolLock);
 
-    extra = reinterpret_cast<ObjectExtra*>(Object_extraPool->alloc(sizeof(ObjectExtra)));
+    extra = reinterpret_cast<ObjectExtra*>(Object_memPoolExtra->alloc(sizeof(ObjectExtra)));
     if (FOG_IS_NULL(extra))
       return NULL;
   }
 
-  fog_new_p(extra) ObjectExtra();
-  return extra;
+  return fog_new_p(extra) ObjectExtra();
 }
 
 static void ObjectExtra_destroy(ObjectExtra* extra)
@@ -64,8 +62,8 @@ static void ObjectExtra_destroy(ObjectExtra* extra)
   extra->~ObjectExtra();
 
   { // Synchronized.
-    AutoLock locked(Object_poolLock);
-    Object_extraPool->free(extra);
+    AutoLock locked(Object_memPoolLock);
+    Object_memPoolExtra->free(extra);
   }
 }
 
@@ -910,11 +908,11 @@ FOG_NO_EXPORT void Object_init(void)
 
   // Initialize the locks.
   Object::_internalLock.init();
-  Object_poolLock.init();
+  Object_memPoolLock.init();
 
   // Initialize the memory pools.
-  Object_extraPool.init();
-  Object_connectionPool.init();
+  Object_memPoolExtra.init();
+  Object_memPoolConn.init();
 
   // Initialize the ObjectExtra null (initial) instance.
   Object_extraNull.init();
@@ -926,11 +924,11 @@ FOG_NO_EXPORT void Object_fini(void)
   Object_extraNull.destroy();
 
   // Destroy the memory pools.
-  Object_connectionPool.destroy();
-  Object_extraPool.destroy();
+  Object_memPoolConn.destroy();
+  Object_memPoolExtra.destroy();
 
   // Destroy the locks.
-  Object_poolLock.destroy();
+  Object_memPoolLock.destroy();
   Object::_internalLock.destroy();
 }
 
@@ -978,9 +976,7 @@ FOG_CAPI_DECLARE void* fog_object_cast_string(Fog::Object* self, const char* cla
   for (;;)
   {
     // Compare hashes and string class names.
-    if (metaClass->hashCode == classHash && strcmp(
-      (const char*)metaClass->name,
-      (const char*)className) == 0)
+    if (metaClass->hashCode == classHash && strcmp((const char*)metaClass->name, (const char*)className) == 0)
     {
       return (void*)self;
     }

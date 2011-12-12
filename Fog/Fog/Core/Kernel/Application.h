@@ -11,7 +11,6 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/UI/Animation/Animation.h>
 
 namespace Fog {
 
@@ -108,7 +107,6 @@ public:
 
   //! @brief Get application event loop (can be NULL).
   FOG_INLINE EventLoop* getEventLoop() const { return _eventLoop; }
-  FOG_INLINE AnimationDispatcher* getAnimationDispatcher() { return &_animation; }
 
   //! @brief Create event loop.
   static EventLoop* createEventLoop(const StringW& name);
@@ -146,7 +144,6 @@ public:
 
   EventLoop* _eventLoop;
   GuiEngine* _nativeEngine;
-  AnimationDispatcher _animation;
 
 private:
   _FOG_NO_COPY(Application)

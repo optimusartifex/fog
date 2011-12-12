@@ -14,7 +14,7 @@
 #if defined(FOG_UI_X11)
 
 #ifdef _XLIB_H
-#error "Fog::X11 - You must include Fog/UI/UIEngine/X11Headers.h before xlib.h"
+#error "Fog::X11 - You must include Fog/UI/Engine/X11Headers.h before xlib.h"
 #endif
 
 // redefine some critical things

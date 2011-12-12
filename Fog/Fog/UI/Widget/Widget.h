@@ -620,9 +620,6 @@ struct FOG_API Widget : public LayoutItem
   //! @brief Close event handler.
   virtual void onClose(CloseEvent* e);
 
-  //! @brief Theme changed event handler.
-  virtual void onThemeChange(ThemeEvent* e);
-
   //! @brief @c LayoutItem event handler.
   virtual void onLayout(LayoutEvent* e);
 
@@ -675,8 +672,6 @@ struct FOG_API Widget : public LayoutItem
     FOG_EVENT_DEF(EVENT_PAINT               , onPaint           , PaintEvent     , OVERRIDE)
 
     FOG_EVENT_DEF(EVENT_CLOSE               , onClose           , CloseEvent     , OVERRIDE)
-
-    FOG_EVENT_DEF(EVENT_THEME               , onThemeChange     , ThemeEvent     , OVERRIDE)
 
     FOG_EVENT_DEF(EVENT_LAYOUT_SET          , onLayout          , LayoutEvent    , OVERRIDE)
     FOG_EVENT_DEF(EVENT_LAYOUT_REMOVE       , onLayout          , LayoutEvent    , OVERRIDE)

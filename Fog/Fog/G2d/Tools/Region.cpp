@@ -786,6 +786,7 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
 
   FOG_ASSERT(d->capacity >= length);
   BoxI* dCur = d->data;
+  BoxI* dEnd = d->data + d->length;
 
   BoxI* dPrevBand = NULL;
   BoxI* dCurBand;

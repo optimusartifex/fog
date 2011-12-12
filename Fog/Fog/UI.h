@@ -17,7 +17,6 @@
 
 #include <Fog/Core/Global/Global.h>
 
-#include <Fog/UI/Animation/Animation.h>
 #include <Fog/UI/Engine/GuiEngine.h>
 #include <Fog/UI/Layout/BorderLayout.h>
 #include <Fog/UI/Layout/BoxLayout.h>

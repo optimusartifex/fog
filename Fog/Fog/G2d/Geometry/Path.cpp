@@ -687,7 +687,7 @@ static err_t FOG_CDECL PathT_quadTo(
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 2)
     commands[0] = PATH_CMD_QUAD_TO;
-    commands[1] = PATH_CMD_QUAD_TO;
+    commands[1] = PATH_CMD_DATA;
 
     vertices[0] = pt1[0];
     vertices[1] = pt2[0];
@@ -705,7 +705,7 @@ static err_t FOG_CDECL PathT_quadToRel(
     NumT_(Point) tr(vertices[-1]);
 
     commands[0] = PATH_CMD_QUAD_TO;
-    commands[1] = PATH_CMD_QUAD_TO;
+    commands[1] = PATH_CMD_DATA;
 
     vertices[0] = pt1[0] + tr;
     vertices[1] = pt2[0] + tr;
@@ -722,7 +722,7 @@ static err_t FOG_CDECL PathT_smoothQuadTo(
     NumT_(Point) pt1 = vertices[-1];
 
     commands[0] = PATH_CMD_QUAD_TO;
-    commands[1] = PATH_CMD_QUAD_TO;
+    commands[1] = PATH_CMD_DATA;
 
     if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
     {
@@ -745,7 +745,7 @@ static err_t FOG_CDECL PathT_smoothQuadToRel(
     NumT_(Point) pt1(vertices[-1]);
 
     commands[0] = PATH_CMD_QUAD_TO;
-    commands[1] = PATH_CMD_QUAD_TO;
+    commands[1] = PATH_CMD_DATA;
     vertices[1] = pt2[0] + pt1;
 
     if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
@@ -772,8 +772,8 @@ static err_t FOG_CDECL PathT_cubicTo(
 {
   PATH_ADD_VERTEX_BEGIN(NumT, 3)
     commands[0] = PATH_CMD_CUBIC_TO;
-    commands[1] = PATH_CMD_CUBIC_TO;
-    commands[2] = PATH_CMD_CUBIC_TO;
+    commands[1] = PATH_CMD_DATA;
+    commands[2] = PATH_CMD_DATA;
 
     vertices[0] = pt1[0];
     vertices[1] = pt2[0];
@@ -793,8 +793,8 @@ static err_t FOG_CDECL PathT_cubicToRel(
     NumT_(Point) tr(vertices[-1]);
 
     commands[0] = PATH_CMD_CUBIC_TO;
-    commands[1] = PATH_CMD_CUBIC_TO;
-    commands[2] = PATH_CMD_CUBIC_TO;
+    commands[1] = PATH_CMD_DATA;
+    commands[2] = PATH_CMD_DATA;
 
     vertices[0] = pt1[0] + tr;
     vertices[1] = pt2[0] + tr;
@@ -813,8 +813,8 @@ static err_t FOG_CDECL PathT_smoothCubicTo(
     NumT_(Point) pt1(vertices[-1]);
 
     commands[0] = PATH_CMD_CUBIC_TO;
-    commands[1] = PATH_CMD_CUBIC_TO;
-    commands[2] = PATH_CMD_CUBIC_TO;
+    commands[1] = PATH_CMD_DATA;
+    commands[2] = PATH_CMD_DATA;
 
     if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
     {
@@ -839,8 +839,8 @@ static err_t FOG_CDECL PathT_smoothCubicToRel(
     NumT_(Point) pt1(vertices[-1]);
 
     commands[0] = PATH_CMD_CUBIC_TO;
-    commands[1] = PATH_CMD_CUBIC_TO;
-    commands[2] = PATH_CMD_CUBIC_TO;
+    commands[1] = PATH_CMD_DATA;
+    commands[2] = PATH_CMD_DATA;
     vertices[1] = pt2[0] + pt1;
     vertices[2] = pt3[0] + pt1;
 
@@ -1584,7 +1584,7 @@ static err_t FOG_CDECL PathT_shape(
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_QUAD_TO;
-      dstCmd[2] = PATH_CMD_QUAD_TO;
+      dstCmd[2] = PATH_CMD_DATA;
 
       if (direction == PATH_DIRECTION_CW)
       {
@@ -1610,8 +1610,8 @@ static err_t FOG_CDECL PathT_shape(
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_CUBIC_TO;
-      dstCmd[2] = PATH_CMD_CUBIC_TO;
-      dstCmd[3] = PATH_CMD_CUBIC_TO;
+      dstCmd[2] = PATH_CMD_DATA;
+      dstCmd[3] = PATH_CMD_DATA;
 
       if (direction == PATH_DIRECTION_CW)
       {
@@ -1742,23 +1742,23 @@ _ShapeRect:
 
         dstCmd[ 1] = PATH_CMD_LINE_TO;
         dstCmd[ 2] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 3] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 4] = PATH_CMD_CUBIC_TO;
+        dstCmd[ 3] = PATH_CMD_DATA;
+        dstCmd[ 4] = PATH_CMD_DATA;
 
         dstCmd[ 5] = PATH_CMD_LINE_TO;
         dstCmd[ 6] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 7] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 8] = PATH_CMD_CUBIC_TO;
+        dstCmd[ 7] = PATH_CMD_DATA;
+        dstCmd[ 8] = PATH_CMD_DATA;
 
         dstCmd[ 9] = PATH_CMD_LINE_TO;
         dstCmd[10] = PATH_CMD_CUBIC_TO;
-        dstCmd[11] = PATH_CMD_CUBIC_TO;
-        dstCmd[12] = PATH_CMD_CUBIC_TO;
+        dstCmd[11] = PATH_CMD_DATA;
+        dstCmd[12] = PATH_CMD_DATA;
 
         dstCmd[13] = PATH_CMD_LINE_TO;
         dstCmd[14] = PATH_CMD_CUBIC_TO;
-        dstCmd[15] = PATH_CMD_CUBIC_TO;
-        dstCmd[16] = PATH_CMD_CUBIC_TO;
+        dstCmd[15] = PATH_CMD_DATA;
+        dstCmd[16] = PATH_CMD_DATA;
 
         dstCmd[17] = PATH_CMD_CLOSE;
 
@@ -1790,23 +1790,23 @@ _ShapeRect:
       {
         dstCmd[ 0] = PATH_CMD_MOVE_TO;
         dstCmd[ 1] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 2] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 3] = PATH_CMD_CUBIC_TO;
+        dstCmd[ 2] = PATH_CMD_DATA;
+        dstCmd[ 3] = PATH_CMD_DATA;
 
         dstCmd[ 4] = PATH_CMD_LINE_TO;
         dstCmd[ 5] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 6] = PATH_CMD_CUBIC_TO;
-        dstCmd[ 7] = PATH_CMD_CUBIC_TO;
+        dstCmd[ 6] = PATH_CMD_DATA;
+        dstCmd[ 7] = PATH_CMD_DATA;
 
         dstCmd[ 8] = PATH_CMD_LINE_TO;
         dstCmd[ 9] = PATH_CMD_CUBIC_TO;
-        dstCmd[10] = PATH_CMD_CUBIC_TO;
-        dstCmd[11] = PATH_CMD_CUBIC_TO;
+        dstCmd[10] = PATH_CMD_DATA;
+        dstCmd[11] = PATH_CMD_DATA;
 
         dstCmd[12] = PATH_CMD_LINE_TO;
         dstCmd[13] = PATH_CMD_CUBIC_TO;
-        dstCmd[14] = PATH_CMD_CUBIC_TO;
-        dstCmd[15] = PATH_CMD_CUBIC_TO;
+        dstCmd[14] = PATH_CMD_DATA;
+        dstCmd[15] = PATH_CMD_DATA;
 
         dstCmd[16] = PATH_CMD_CLOSE;
 
@@ -1875,17 +1875,17 @@ _ShapeRect:
 
       dstCmd[ 0] = PATH_CMD_MOVE_TO;
       dstCmd[ 1] = PATH_CMD_CUBIC_TO;
-      dstCmd[ 2] = PATH_CMD_CUBIC_TO;
-      dstCmd[ 3] = PATH_CMD_CUBIC_TO;
+      dstCmd[ 2] = PATH_CMD_DATA;
+      dstCmd[ 3] = PATH_CMD_DATA;
       dstCmd[ 4] = PATH_CMD_CUBIC_TO;
-      dstCmd[ 5] = PATH_CMD_CUBIC_TO;
-      dstCmd[ 6] = PATH_CMD_CUBIC_TO;
+      dstCmd[ 5] = PATH_CMD_DATA;
+      dstCmd[ 6] = PATH_CMD_DATA;
       dstCmd[ 7] = PATH_CMD_CUBIC_TO;
-      dstCmd[ 8] = PATH_CMD_CUBIC_TO;
-      dstCmd[ 9] = PATH_CMD_CUBIC_TO;
+      dstCmd[ 8] = PATH_CMD_DATA;
+      dstCmd[ 9] = PATH_CMD_DATA;
       dstCmd[10] = PATH_CMD_CUBIC_TO;
-      dstCmd[11] = PATH_CMD_CUBIC_TO;
-      dstCmd[12] = PATH_CMD_CUBIC_TO;
+      dstCmd[11] = PATH_CMD_DATA;
+      dstCmd[12] = PATH_CMD_DATA;
       dstCmd[13] = PATH_CMD_CLOSE;
 
       dstPts[ 0].set(c.x + rx     , c.y          );
@@ -1944,7 +1944,13 @@ _ShapeRect:
       }
 
       uint len = shape->toCSpline(dstPts);
-      for (uint i = 1; i < len; i++) dstCmd[i] = PATH_CMD_CUBIC_TO;
+      for (uint i = 1; i < len; i += 3)
+      {
+        FOG_ASSERT(i + 2 >= len);
+        dstCmd[i + 0] = PATH_CMD_CUBIC_TO;
+        dstCmd[i + 1] = PATH_CMD_DATA;
+        dstCmd[i + 2] = PATH_CMD_DATA;
+      }
 
       dstCmd[len] = PATH_CMD_CLOSE;
       dstPts[len].setNaN();
@@ -3113,7 +3119,7 @@ _DoLine:
           NumT func[4];
           func[0] = NumT(3.0) * (-p[0].y + NumT(3.0) * (p[1].y - p[2].y) + p[3].y);
           func[1] = NumT(6.0) * ( p[0].y - NumT(2.0) *  p[1].y + p[2].y          );
-          func[2] = NumT(3.0) * (-p[0].y +                p[1].y                   );
+          func[2] = NumT(3.0) * (-p[0].y +              p[1].y                   );
 
           NumT tExtrema[3];
           NumT tCut = NumT(0.0);

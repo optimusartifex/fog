@@ -59,7 +59,7 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
           {
             PATH_CMD_MOVE_TO,
             PATH_CMD_QUAD_TO,
-            PATH_CMD_QUAD_TO,
+            PATH_CMD_DATA,
             0xFF
           };
 
@@ -84,8 +84,8 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
           {
             PATH_CMD_MOVE_TO,
             PATH_CMD_CUBIC_TO,
-            PATH_CMD_CUBIC_TO,
-            PATH_CMD_CUBIC_TO
+            PATH_CMD_DATA,
+            PATH_CMD_DATA
           };
 
           NumT_T1(PathTmp, 16) path;

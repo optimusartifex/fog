@@ -50,15 +50,19 @@
 // [Fog::Core::Config - Architecture - X86_64]
 // ============================================================================
 
-#if defined(_M_X64    ) || \
-    defined(_M_AMD64  ) || \
-    defined(__x86_64__) || \
-    defined(__x86_64  ) || \
-    defined(__amd64__ ) || \
-    defined(__amd64   )
+#if defined(_M_X64        ) || \
+    defined(_M_AMD64      ) || \
+    defined(__x86_64__    ) || \
+    defined(__x86_64      ) || \
+    defined(__amd64__     ) || \
+    defined(__amd64       )
 
 # define FOG_ARCH_X86_64
 # define FOG_ARCH_BITS 64
+
+// x86_64 allows unaligned access.
+# define FOG_ARCH_UNALIGNED_ACCESS_32
+# define FOG_ARCH_UNALIGNED_ACCESS_64
 
 // x86_64 uses always SSE/SSE2
 # define FOG_HARDCODE_SSE
@@ -68,22 +72,26 @@
 // [Fog::Core::Config - Architecture - X86_32]
 // ============================================================================
 
-#elif defined(_M_IX86 ) || \
-      defined(__i386__) || \
-      defined(__i386  ) || \
-      defined(__i486__) || \
-      defined(__i586__) || \
-      defined(__i686__)
+#elif defined(_M_IX86     ) || \
+      defined(__i386__    ) || \
+      defined(__i386      ) || \
+      defined(__i486__    ) || \
+      defined(__i586__    ) || \
+      defined(__i686__    )
 
 # define FOG_ARCH_X86
 # define FOG_ARCH_BITS 32
+
+// x86 allows unaligned access.
+# define FOG_ARCH_UNALIGNED_ACCESS_32
+# define FOG_ARCH_UNALIGNED_ACCESS_64
 
 // GCC specific.
 # if defined(__MMX__)
 #  define FOG_HARDCODE_MMX
 # endif // __i686__
 
-// MSVC defines this if compiler optimizes code for MMX or SSE
+// MSVC defines this if compiler optimizes code for MMX or SSE.
 # if defined(_M_IX86_FP)
 #  if _M_IX86_FP == 1
 #   define FOG_HARDCODE_MMX
@@ -100,20 +108,47 @@
 
 #elif defined(_M_IA64)
 
-#define FOG_ARCH_ITANIUM
-#define FOG_ARCH_BITS 64
+# define FOG_ARCH_ITANIUM
+# define FOG_ARCH_BITS 64
+
+// Unaligned access on itanium is only possible for 32-bit integer, not for
+// pointer type, which is 64-bit wide.
+# define FOG_ARCH_UNALIGNED_ACCESS_32
 
 // ============================================================================
 // [Fog::Core::Config - Architecture - PowerPC]
 // ============================================================================
 
-#elif defined(_M_PPC     ) || \
-      defined(_M_MPPC    ) || \
-      defined(__ppc__    ) || \
-      defined(__powerpc__)
+#elif defined(_M_PPC      ) || \
+      defined(_M_MPPC     ) || \
+      defined(__ppc__     ) || \
+      defined(__powerpc__ )
 
 # define FOG_ARCH_PPC
 # define FOG_ARCH_BITS 32
+
+// PowerPC allows unaligned access of 32-bit data, but prohibits unaligned 
+// access of 64-bit data.
+# define FOG_ARCH_UNALIGNED_ACCESS_32
+
+// ============================================================================
+// [Fog::Core::Config - Architecture - ARM]
+// ============================================================================
+
+#elif defined(__M_ARM     ) || \
+      defined(__arm       ) || \
+      defined(__arm__     ) || \
+      defined(__ARM_NEON__)
+
+# define FOG_ARCH_ARM
+# define FOG_ARCH_BITS 32
+
+# if defined(__ARM_NEON__)
+#  define FOG_ARCH_ARM_NEON
+# endif // __ARM_NEON__
+
+// ARM doesn't allow unaligned access or it's very slow. We disable it and make
+// it prohibited.
 
 // ============================================================================
 // [Fog::Core::Build - Hack for IDE]

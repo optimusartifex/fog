@@ -370,7 +370,7 @@ static err_t FOG_CDECL UserUtil_getXdgDirectory(StringW* dst, uint32_t userDirec
     p += typeLength;
 
     // Skip spaces and tabs.
-    while (p != end && *p == ' ' || *p == '\t') p++;
+    while ((p != end && *p == ' ') || *p == '\t') p++;
     if (p == end)
       break;
 
@@ -379,7 +379,7 @@ static err_t FOG_CDECL UserUtil_getXdgDirectory(StringW* dst, uint32_t userDirec
       goto _NextLine;
 
     // Skip spaces and tabs.
-    while (p != end && *p == ' ' || *p == '\t') p++;
+    while ((p != end && *p == ' ') || *p == '\t') p++;
     if (p == end)
       break;
 

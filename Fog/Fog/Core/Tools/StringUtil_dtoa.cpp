@@ -1848,11 +1848,11 @@ _OneDigit:
         goto _Ret;
       }
 #endif
-      if (j < 0 || j == 0 && mode != 1
+      if (j < 0 || (j == 0 && mode != 1
 #ifndef DTOA_ROUND_BIASED
         && !(d.u32Lo & 1)
 #endif
-        )
+        ))
       {
         if (!b->x[0] && b->wds <= 1)
         {
@@ -1875,7 +1875,7 @@ _OneDigit:
         {
           b = BContext_lshift(&context, b, 1);
           j1 = cmp(b, S);
-          if ((j1 > 0 || j1 == 0 && dig & 1) && dig++ == '9')
+          if ((j1 > 0 || (j1 == 0 && dig & 1)) && dig++ == '9')
             goto _Round9Up;
         }
 _AcceptDigit:
@@ -1941,7 +1941,7 @@ _KeepDigit:
 #endif
   b = BContext_lshift(&context, b, 1);
   j = cmp(b, S);
-  if (j > 0 || j == 0 && dig & 1)
+  if (j > 0 || (j == 0 && (dig & 1)))
   {
 _RoundOff:
     while (*--s == '9')

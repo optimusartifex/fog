@@ -17,24 +17,34 @@ Library dependencies
 
 Windows:
 - Fog-Core
-  - Advapi32   (direct   - linked)
-  - Winmm      (direct   - linked)
+  - Advapi32     (direct   - linked)
+  - Winmm        (direct   - linked)
 - Fog-G2d
-  - GdiPlus    (optional - runtime loading)
-  - Gdi32      (direct   - linked)
+  - GdiPlus      (optional - runtime loading)
+  - Gdi32        (direct   - linked)
 - Fog-UI
-  - Gdi32      (direct   - linked)
-  - User32     (direct   - linked)
+  - Gdi32        (direct   - linked)
+  - User32       (direct   - linked)
+  - UxTheme      (optional - runtime loading)
+
+Mac:
+- Fog-Core
+  - ...
+- Fog-G2d
+  - CoreGraphics (direct   - linked)
+  - CoreText     (direct   - linked)
+- Fog-UI
+  - Cocoa        (direct   - linked)
 
 Linux/BSD:
 - Fog-Core
-  - pthreads   (direct   - linked)
-  - libdl      (direct   - linked)
-  - librt      (direct   - linked)
+  - pthreads     (direct   - linked)
+  - libdl        (direct   - linked)
+  - librt        (direct   - linked)
 - Fog-G2d
-  - libjpeg    (optional - runtime loading)
-  - libpng     (optional - runtime loading)
-  - Fontconfig (optional - runtime loading)
-  - Freetype2  (direct   - runtime loading)
+  - libjpeg      (optional - runtime loading)
+  - libpng       (optional - runtime loading)
+  - Fontconfig   (optional - runtime loading)
+  - Freetype2    (direct   - runtime loading)
 - Fog-UI
-  - X11        (optional - runtime loading)
+  - X11          (optional - runtime loading)

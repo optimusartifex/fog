@@ -1622,16 +1622,29 @@ enum IMAGE_TYPE
 {
   //! @brief Image is a memory buffer (the default).
   //!
-  //! @note This is the default image type.
+  //! @note This is the default, platform independent, image type.
   IMAGE_TYPE_BUFFER = 0,
 
-  //! @brief Image is a Win-DIBSECTION.
+  //! @brief Image is a Windows DIBSECTION.
+  //!
+  //! Fog-Framework can only create or adopt DIBSECTION which is compatible to
+  //! the @c IMAGE_FORMAT. Different pixel formats can't be used inside of the 
+  //! @c Image container.
   //!
   //! @note This is Windows-only image type.
   IMAGE_TYPE_WIN_DIB = 1,
 
+  //! @brief Image is a Mac @c CGImageRef.
+  //!
+  //! Fog-Framework can only create or adopt CGImageRef which is compatible to
+  //! the @c IMAGE_FORMAT. Different pixel formats can't be used inside of the 
+  //! @c Image container.
+  //!
+  //! @note This is Mac-only image type.
+  IMAGE_TYPE_MAC_CG = 2,
+
   //! @brief Count of image types.
-  IMAGE_TYPE_COUNT = 2,
+  IMAGE_TYPE_COUNT = 3,
 
   //! @brief Ignore the image type (used by some functions inside @c Image).
   IMAGE_TYPE_IGNORE = 0xFF
@@ -2266,12 +2279,18 @@ enum PAINTER_PARAMETER
 // [Fog::PAINTER_SOURCE]
 // ============================================================================
 
+//! @brief Painter source parameter.
 enum PAINTER_SOURCE
 {
+  //! @brief Parameter is @c TextureF.
   PAINTER_SOURCE_TEXTURE_F = 0,
+  //! @brief Parameter is @c TextureD.
   PAINTER_SOURCE_TEXTURE_D = 1,
+  //! @brief Parameter is @c GradientF.
   PAINTER_SOURCE_GRADIENT_F = 2,
+  //! @brief Parameter is @c GradientD.
   PAINTER_SOURCE_GRADIENT_D = 3,
+  //! @brief Count of painter source parameters.
   PAINTER_SOURCE_COUNT = 4
 };
 
@@ -2298,20 +2317,27 @@ enum PATH_CMD
 {
   //! @brief Move-to command (one vertex).
   PATH_CMD_MOVE_TO = 0,
+
   //! @brief Line-to command (one vertex).
   PATH_CMD_LINE_TO = 1,
-  //! @brief Quad-to command (two vertices).
+
+  //! @brief Quad-to command (two vertices), followed by @c PATH_CMD_DATA
+  //! command.
   PATH_CMD_QUAD_TO = 2,
-  //! @brief Cubic-to command (three vertices).
+
+  //! @brief Cubic-to command (three vertices), followed by two @c PATH_CMD_DATA
+  //! commands.
   PATH_CMD_CUBIC_TO = 3,
+
+  //! @brief Close command.
+  PATH_CMD_CLOSE = 4,
+
   //! @brief Command used to distunguish between the additional data needed for
   //! @c PATH_CMD_QUAD_TO and @c PATH_CMD_CUBIC_TO.
   //!
   //! One @c PATH_CMD_DATA command follows the @c PATH_CMD_QUAD_TO, and two
   //! @c PATH_CMD_DATA commands follow the @c PATH_CMD_CUBIC_TO.
-  PATH_CMD_DATA = 4,
-  //! @brief Close command.
-  PATH_CMD_CLOSE = 5
+  PATH_CMD_DATA = 5
 };
 
 // ============================================================================
@@ -2333,16 +2359,24 @@ enum PATH_DIRECTION
 // [Fog::PATH_FLAG]
 // ============================================================================
 
+//! @brief @ref PathF and @ref PathF flags.
 enum PATH_FLAG
 {
+  //! @brief Path boudning-box is dirty (needs to be updated).
   PATH_FLAG_DIRTY_BBOX  = VAR_FLAG_RESERVED_1,
+  //! @brief Path command flags are dirty (needs to be updated).
   PATH_FLAG_DIRTY_CMD   = VAR_FLAG_RESERVED_2,
+  //! @brief Path info structure is dirty (needs to be updated).
   PATH_FLAG_DIRTY_INFO  = VAR_FLAG_RESERVED_3,
 
+  //! @brief Path contains bounding-box.
   PATH_FLAG_HAS_BBOX    = VAR_FLAG_RESERVED_4,
+  //! @brief Path contains quadratic Bezier curves.
   PATH_FLAG_HAS_QBEZIER = VAR_FLAG_RESERVED_5,
+  //! @brief Path contains cubic Bezier curves.
   PATH_FLAG_HAS_CBEZIER = VAR_FLAG_RESERVED_6,
 
+  //! @brief Mask of all @ref PathF and @ref PathD specific flags.
   PATH_FLAG_MASK        = PATH_FLAG_DIRTY_BBOX  |
                           PATH_FLAG_DIRTY_CMD   |
                           PATH_FLAG_DIRTY_INFO  |
@@ -2538,7 +2572,7 @@ enum REGION_OP
   REGION_OP_REPLACE = 0,
   //! @brief Intersection (A & B).
   REGION_OP_INTERSECT = 1,
-  //! @brief Union (A + B).
+  //! @brief Union (A | B).
   REGION_OP_UNION = 2,
   //! @brief Xor (A ^ B).
   REGION_OP_XOR = 3,
@@ -2779,7 +2813,7 @@ enum TRANSFORM_OP
   //! @brief Reserved, currently implemented as NOP.
   TRANSFORM_OP_RESERVED = 15,
 
-  //! @brief Count of matrix transform operations.
+  //! @brief Count of transform operations.
   TRANSFORM_OP_COUNT = 16
 };
 
@@ -2822,28 +2856,28 @@ enum TRANSFORM_TYPE
 //!
 //! Coordinate units can be used to create display independent graphics, keeping
 //! the coordinates in device independent units and translating them into
-//! device pixel by Fog-G2d engine.
+//! device pixels by Fog/G2d engine.
 enum UNIT
 {
   //! @brief No unit (compatible with @c UNIT_PX).
   UNIT_NONE = 0,
-  //! @brief Pixel.
+  //! @brief Pixel coordinate(s).
   UNIT_PX,
 
-  //! @brief Point, 1 [pt] == 1/72 [in].
+  //! @brief Point coordinate(s), 1 [pt] == 1/72 [in].
   UNIT_PT,
-  //! @brief Pica, 1 [pc] == 12 [pt].
+  //! @brief Pica coordinate(s), 1 [pc] == 12 [pt].
   UNIT_PC,
 
-  //! @brief Inch, 1 [in] == 2.54 [cm].
+  //! @brief Inch coordinate(s), 1 [in] == 2.54 [cm].
   UNIT_IN,
 
-  //! @brief Millimeter.
+  //! @brief Millimeter coordinate(s).
   UNIT_MM,
-  //! @brief Centimeter.
+  //! @brief Centimeter coordinate(s).
   UNIT_CM,
 
-  //! @brief Used for coordinates which depends on the object bounding box.
+  //! @brief Used for coordinates which depend on the object bounding box.
   UNIT_PERCENTAGE,
 
   //! @brief The font-size of the relevant font (see @c Font).

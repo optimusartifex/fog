@@ -99,7 +99,8 @@ static void parseWinCmdLine(const StringW& cmdLine, List<StringW>& dst)
     }
 
     // Zero character means end.
-    if (cur->isNull()) goto end;
+    if (cur->isNull())
+      goto end;
 
     // Parse quote character (if it's here).
     mark = cur;

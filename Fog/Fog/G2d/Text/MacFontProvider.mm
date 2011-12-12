@@ -16,9 +16,6 @@
 #include <Fog/G2d/Text/MacFontFace.h>
 #include <Fog/G2d/Text/MacFontProvider.h>
 
-// [Dependencies - Mac]
-#import <Cocoa/Cocoa.h>
-
 namespace Fog {
 
 // ============================================================================
@@ -29,8 +26,6 @@ MacFontProviderData::MacFontProviderData()
 {
   this->name.set(Ascii8("Mac"));
   this->id = FONT_PROVIDER_MAC;
-
-  mgr = [NSFontManager sharedFontManager];
 }
 
 MacFontProviderData::~MacFontProviderData()
@@ -43,17 +38,30 @@ MacFontProviderData::~MacFontProviderData()
 
 err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily)
 {
-  NSString* nsName;
-  FOG_RETURN_ON_ERROR(fontFamily.toNSString(&nsName));
+  CFStringRef cfFontFamily;
+  FOG_RETURN_ON_ERROR(fontFamily.toCFString(&cfFontFamily));
 
-  NSFont* nsFont = [NSFont fontWithName: nsName size: 128.0f];
-  if (nsFont == nil) return ERR_FONT_NOT_MATCHED;
-  
-  StringW fontName;
-  FOG_RETURN_ON_ERROR(fontName.fromNSString([nsFont familyName]));
+  CTFontRef ctFont = CTFontCreateWithName(cfFontFamily, 128.0f, NULL);
+  CFRelease(cfFontFamily);
+
+  if (ctFont == NULL)
+    return ERR_FONT_NOT_MATCHED;
+
+  CFStringRef cfFontName = CTFontCopyFullName(ctFont);
+
+  StringW fontNameW;
+  err_t err = fontNameW.fromCFString(cfFontName);
+
+  CFRelease(cfFontName);
+
+  if (FOG_IS_ERROR(err))
+  {
+    CFRelease(ctFont);
+    return err;
+  }
 
   AutoLock locked(lock);
-  FontFace* face = fontFaceCache.get(fontName);
+  FontFace* face = fontFaceCache.get(fontNameW);
 
   if (face != NULL)
   {
@@ -62,11 +70,12 @@ err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily
   }
 
   face = fog_new MacFontFace(this);
-  if (FOG_IS_NULL(face)) return ERR_RT_OUT_OF_MEMORY;
+  if (FOG_IS_NULL(face))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  FOG_RETURN_ON_ERROR(reinterpret_cast<MacFontFace*>(face)->_init(fontName, nsFont));
+  FOG_RETURN_ON_ERROR(reinterpret_cast<MacFontFace*>(face)->_init(fontNameW, ctFont));
 
-  err_t err = fontFaceCache.put(face->family, face);
+  err = fontFaceCache.put(face->family, face);
   if (FOG_IS_ERROR(err))
   {
     face->deref();
@@ -79,18 +88,28 @@ err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily
 
 err_t MacFontProviderData::getFontList(List<StringW>& dst)
 {
-  NSEnumerator* enumerator = [[mgr availableFontFamilies] objectEnumerator];
-  NSString* name;
-
-  while (name = [enumerator nextObject])
+  CFArrayRef cfArray = CTFontManagerCopyAvailableFontFamilyNames();
+  if (cfArray == NULL)
   {
-    StringW tmp;
-    // TODO: What about propagating an error value?
-    if (tmp.fromNSString(name) == ERR_OK)
-      dst.append(tmp);
+    return ERR_RT_OUT_OF_MEMORY;
   }
   
-  return ERR_OK;
+  CFIndex i, length = CFArrayGetCount(cfArray);
+  err_t err = ERR_OK;
+
+  for (i = 0; i < length; i++)
+  {
+    StringW fontNameW;
+    err = fontNameW.fromCFString((CFStringRef)CFArrayGetValueAtIndex(cfArray, i));
+    
+    if (FOG_IS_ERROR(err))
+      break;
+
+    dst.append(fontNameW);
+  }
+
+  CFRelease(cfArray);
+  return err;
 }
 
 StringW MacFontProviderData::getDefaultFamily()

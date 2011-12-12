@@ -638,8 +638,7 @@ static err_t FOG_CDECL ThreadCondition_ctor(ThreadCondition* self, Lock* lock)
 
 static void ThreadCondition_dtor(ThreadCondition* self)
 {
-  int rv = pthread_cond_destroy(&self->_cvar);
-  FOG_ASSERT(rv == 0);
+  pthread_cond_destroy(&self->_cvar);
 }
 
 static void FOG_CDECL ThreadCondition_signal(ThreadCondition* self)

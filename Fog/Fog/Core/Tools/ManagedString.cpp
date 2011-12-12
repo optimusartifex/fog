@@ -707,8 +707,11 @@ static ManagedStringCacheW* FOG_CDECL ManagedStringCacheW_create(const char* sDa
   ManagedStringW* pList = pListBase;
 
   uint8_t* pData = reinterpret_cast<uint8_t*>(pListBase + listLength);
-  uint8_t* pEnd = pData + allocSize;
   size_t counter = 0;
+
+#if defined(FOG_DEBUG)
+  uint8_t* pEnd = pData + allocSize;
+#endif // FOG_DEBUG
 
   for (;;)
   {

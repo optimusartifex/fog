@@ -145,7 +145,6 @@ static size_t TextCodec_addToState(TextCodecState* state, const uint8_t* cur, co
   const CharW* srcEnd = src + srcLength; \
   \
   /* Destination buffer. */ \
-  size_t initSize = dst.getLength(); \
   size_t growSize = _GrowBy_; \
   \
   uint8_t* dstCur = reinterpret_cast<uint8_t*>(dst._add(growSize)); \
@@ -553,6 +552,7 @@ static err_t FOG_CDECL TextCodec_UTF8_encode(const TextCodecData* d,
   StringA& dst, const CharW* src, size_t srcLength, TextCodecState* state,
   TextCodecHandler* handler)
 {
+  size_t initSize = dst.getLength();
   _FOG_TEXTCODEC_ENCODE_INIT_VARS(srcLength * 2 + 4)
   size_t remain = dst.getCapacity() - initSize;
   _FOG_TEXTCODEC_ENCODE_INIT_STATE()
@@ -703,7 +703,6 @@ static err_t FOG_CDECL TextCodec_UTF8_decode(const TextCodecData* d,
     goto _Code;
   }
 
-_Loop:
   for (;;)
   {
     uc = *srcCur;
@@ -742,6 +741,7 @@ _InputTruncated:
   if (state)
   {
     size_t bufSize = (size_t)(srcEnd - srcCur);
+
     memcpy(state->_buffer, srcCur, bufSize);
     state->_bufferLength = (uint32_t)bufSize;
   }
@@ -889,7 +889,8 @@ static err_t FOG_CDECL TextCodec_UTF16_decode(const TextCodecData* d,
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
       size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
-      if (state->getBufferLength() < 2) return ERR_OK;
+      if (bufSize < 2)
+        return ERR_OK;
 
       uc0 = reinterpret_cast<const uint16_t*>(bufPtr)[0];
       if (isByteSwapped) uc0.bswap();
@@ -916,7 +917,6 @@ static err_t FOG_CDECL TextCodec_UTF16_decode(const TextCodecData* d,
     }
   }
 
-_Loop:
   for (;;)
   {
     if (srcCur > srcEndM2) break;
@@ -973,6 +973,7 @@ _NotSurrogatePair:
     if (state)
     {
       size_t bufSize = (size_t)(srcEnd - srcCur);
+
       memcpy(state->_buffer, srcCur, bufSize);
       state->_bufferLength = (uint32_t)bufSize;
     }
@@ -1146,7 +1147,8 @@ static err_t FOG_CDECL TextCodec_UCS2_decode(const TextCodecData* d,
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
       size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
-      if (state->getBufferLength() < 2) return ERR_OK;
+      if (bufSize < 2)
+        return ERR_OK;
 
       uc0 = reinterpret_cast<const uint16_t*>(bufPtr)[0];
       if (isByteSwapped) uc0.bswap();
@@ -1158,7 +1160,6 @@ static err_t FOG_CDECL TextCodec_UCS2_decode(const TextCodecData* d,
     }
   }
 
-_Loop:
   for (;;)
   {
     if (srcCur > srcEndM2) break;
@@ -1194,6 +1195,7 @@ _ProcessChar:
     if (state)
     {
       size_t bufSize = (size_t)(srcEnd - srcCur);
+
       memcpy(state->_buffer, srcCur, bufSize);
       state->_bufferLength = (uint32_t)bufSize;
     }
@@ -1328,7 +1330,8 @@ static err_t FOG_CDECL TextCodec_UTF32_decode(const TextCodecData* d,
       const uint8_t* bufPtr = reinterpret_cast<uint8_t*>(state->_buffer);
       size_t bufSize = TextCodec_addToState(state, srcCur, srcEnd);
 
-      if (state->getBufferLength() < 4) return ERR_OK;
+      if (bufSize < 4)
+        return ERR_OK;
 
       uc = reinterpret_cast<const uint32_t*>(bufPtr)[0];
       if (isByteSwapped) uc = Memory::bswap32(uc);
@@ -1340,7 +1343,6 @@ static err_t FOG_CDECL TextCodec_UTF32_decode(const TextCodecData* d,
     }
   }
 
-_Loop:
   for (;;)
   {
     if (srcCur > srcEndM4) break;
@@ -1381,6 +1383,7 @@ _ProcessChar:
     if (state)
     {
       size_t bufSize = (size_t)(srcEnd - srcCur);
+
       memcpy(state->_buffer, srcCur, bufSize);
       state->_bufferLength = (uint32_t)bufSize;
     }

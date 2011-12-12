@@ -3,9 +3,6 @@
 // [License]
 // MIT, See COPYING file in package
 
-#include <Fog/Core/Global/Global.h>
-#if defined(FOG_OS_MAC)
-
 // [Dependencies]
 #include <Fog/G2d/Mac/MacUtil.h>
 #include <Fog/UI/Engine/MacGuiEngine.h>
@@ -238,7 +235,8 @@ static void createApplicationMenu()
 	  // ----------------------------------------------------------------------------------
 	  // [Create Window Menu]
 	  // ----------------------------------------------------------------------------------
-	  {
+
+    {
 	    NSMenuItem* windowMenu = [mainMenu addItemWithTitle:@"Window" action:NULL keyEquivalent:@""];
 	    NSMenu* submenu = [[NSMenu alloc] initWithTitle:@"Window"];
 
@@ -837,7 +835,11 @@ MacNonMainEventLoop::MacNonMainEventLoop() :
 void MacNonMainEventLoop::_runInternal()
 {
   NSRunLoop* runLoop = [NSRunLoop currentRunLoop];
-  while (keepRunning && [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]) ;
+
+  while (keepRunning && [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]])
+  {
+    continue;
+  }
 }
 
 void MacNonMainEventLoop::quit()
@@ -863,6 +865,3 @@ void MacMainEventLoop::quit()
 }
 
 } // namespace Fog
-
-
-#endif // defined(FOG_OS_MAC)

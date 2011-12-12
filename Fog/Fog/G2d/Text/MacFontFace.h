@@ -61,7 +61,7 @@ struct FOG_API MacFontFace : public FontFace
   // [Methods]
   // --------------------------------------------------------------------------
 
-  err_t _init(const StringW& family, NSFont* src);
+  err_t _init(const StringW& family, CTFontRef src);
   void _reset();
 
   // --------------------------------------------------------------------------
@@ -73,8 +73,8 @@ struct FOG_API MacFontFace : public FontFace
   //! @brief Glyph outline cache.
   GlyphOutlineCache outlineCache;
 
-  //! @brief MAC font-face.
-  NSFont* nsFont;
+  //! @brief Mac font-face reference.
+  CTFontRef ctFont;
   //! @brief Kerning.
   FontKerningTableF* kerningTable;
 

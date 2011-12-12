@@ -83,7 +83,7 @@ struct FOG_NO_EXPORT MemDbg
 
   void insert(void* p, size_t size);
   void remove(void* p);
-  void check(void* p);
+  void _check(void* p);
 
   void show();
 
@@ -193,7 +193,7 @@ void MemDbg::remove(void* p)
   bytesUsed -= size;
 }
 
-void MemDbg::check(void* p)
+void MemDbg::_check(void* p)
 {
   FOG_ASSERT(p != NULL);
 
@@ -201,21 +201,21 @@ void MemDbg::check(void* p)
 
   if (!rbCheck(node))
   {
-    Debug::failFunc("Fog::MemDbg", "check", "Pointer %p not found.", _USER_FROM_DBG(p));
+    Debug::failFunc("Fog::MemDbg", "_check", "Pointer %p not found.", _USER_FROM_DBG(p));
   }
 
   // Check for the buffer underrun.
   if (memcmp(reinterpret_cast<char*>(p) + 32, MemMgr_protectedPattern, 16) != 0 ||
       memcmp(reinterpret_cast<char*>(p) + 48, MemMgr_protectedPattern, 16) != 0 )
   {
-    Debug::failFunc("Fog::MemDbg", "check", "Detected buffer underrun (%p).", _USER_FROM_DBG(p));
+    Debug::failFunc("Fog::MemDbg", "_check", "Detected buffer underrun (%p).", _USER_FROM_DBG(p));
   }
 
   // Check for the buffer overrun.
   if (memcmp(reinterpret_cast<char*>(p) + node->size + 64, MemMgr_protectedPattern, 16) != 0 ||
       memcmp(reinterpret_cast<char*>(p) + node->size + 80, MemMgr_protectedPattern, 16) != 0 )
   {
-    Debug::failFunc("Fog::MemDbg", "check", "Detected buffer overrun (%p).", _USER_FROM_DBG(p));
+    Debug::failFunc("Fog::MemDbg", "_check", "Detected buffer overrun (%p).", _USER_FROM_DBG(p));
   }
 }
 
@@ -492,7 +492,7 @@ static void* FOG_CDECL MemMgr_realloc_debug(void* p, size_t size)
   }
 
   p = _DBG_FROM_USER(p);
-  memdbg->check(p);
+  memdbg->_check(p);
 
   size_t oldSize = reinterpret_cast<MemNode*>(p)->size;
   memdbg->remove(p);
@@ -524,7 +524,7 @@ static void FOG_CDECL MemMgr_free_debug(void* p)
   if (p == NULL) return;
   p = _DBG_FROM_USER(p);
 
-  memdbg->check(p);
+  memdbg->_check(p);
   memdbg->remove(p);
 
   ::free(p);

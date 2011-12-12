@@ -71,13 +71,13 @@ struct FOG_NO_EXPORT TextCodecPage8
 //! character or by sequence of other characters (for example xml-entity).
 struct FOG_API TextCodecHandler
 {
-  virtual ~TextCodecHandler() = 0;
+  virtual ~TextCodecHandler();
 
   //! @brief Callback to replace the character which can't be encoded into the
   //! target stream (buffer).
   //!
   //! @param dst Destination where to write the replacement.
-  //! @param ch Unicode character to replace.
+  //! @param ch 32-bit unicode character to replace (UCS-4).
   //! @param pos Position relative to the input buffer used by the last
   //! call to TextCodec::encode() - for logging or extended error handling.
   //!

@@ -8,7 +8,7 @@
 #include <Fog/Core/Tools/String.h>
 
 // [Dependencies - Mac]
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 namespace Fog {
   
@@ -16,30 +16,34 @@ namespace Fog {
 // [Fog::MacUtil]
 // ============================================================================
 
-static err_t FOG_CDECL StringW_fromNSString(StringW* self, const NSString* src)
+static err_t FOG_CDECL StringW_opCFString(StringW* self, uint32_t cntOp, CFStringRef src)
 {
-  NSRange range;
-  range.location = 0;
-  range.length = [src length];
+  CFIndex length = CFStringGetLength(src);
 
-  FOG_RETURN_ON_ERROR(self->resize(range.length));
+  if (length == 0)
+  {
+    self->clear();
+    return ERR_OK;
+  }
 
-  unichar* data = reinterpret_cast<unichar*>(self->getDataX());
-  [src getCharacters: data range: range];
+  CharW* p = self->_prepare(length, cntOp);
+  if (FOG_IS_NULL(p))
+    return ERR_RT_OUT_OF_MEMORY;
 
+  CFStringGetCharacters(src, CFRangeMake(0, length), reinterpret_cast<UniChar*>(p));
   return ERR_OK;
 }
 
-static err_t FOG_CDECL StringW_toNSString(const StringW* self, NSString** dst)
+static err_t FOG_CDECL StringW_toCFString(const StringW* self, CFStringRef* dst)
 {
   StringDataW* d = self->_d;
+  size_t length = d->length;
 
-  const unichar* sData = reinterpret_cast<const unichar*>(d->data);
-  NSUInteger sLength = (NSUInteger)d->length;
+  if (sizeof(size_t) > sizeof(CFIndex) && length >= (size_t)LONG_MAX)
+    return ERR_RT_OVERFLOW;
 
-  *dst = [NSString stringWithCharacters: sData length: sLength];
-
-  if (*dst)
+  *dst = CFStringCreateWithCharacters(NULL, (const UniChar*)d->data, length);
+  if (*dst != NULL)
     return ERR_OK;
   else
     return ERR_RT_OUT_OF_MEMORY;
@@ -51,8 +55,8 @@ static err_t FOG_CDECL StringW_toNSString(const StringW* self, NSString** dst)
 
 FOG_NO_EXPORT void MacUtil_init(void)
 {
-  fog_api.stringw_fromNSString = StringW_fromNSString;
-  fog_api.stringw_toNSString = StringW_toNSString;
+  fog_api.stringw_opCFString = StringW_opCFString;
+  fog_api.stringw_toCFString = StringW_toCFString;
 }
 
 } // Fog namespace

@@ -4064,15 +4064,39 @@ struct FOG_NO_EXPORT StringW
     return fog_api.stringw_bswap(this);
   }
 
+  // --------------------------------------------------------------------------
+  // [Mac Specific]
+  // --------------------------------------------------------------------------
+
 #if defined(FOG_OS_MAC)
-  FOG_INLINE err_t fromNSString(const NSString* src)
+  FOG_INLINE err_t fromCFString(CFStringRef src)
   {
-    return fog_api.stringw_fromNSString(this, src);
+    return fog_api.stringw_opCFString(this, CONTAINER_OP_REPLACE, src);
   }
 
+  FOG_INLINE err_t fromNSString(const NSString* src)
+  {
+    return fog_api.stringw_opCFString(this, CONTAINER_OP_REPLACE, (CFStringRef)src);
+  }
+
+  FOG_INLINE err_t appendCFString(CFStringRef src)
+  {
+    return fog_api.stringw_opCFString(this, CONTAINER_OP_APPEND, src);
+  }
+
+  FOG_INLINE err_t appendNSString(const NSString* src)
+  {
+    return fog_api.stringw_opCFString(this, CONTAINER_OP_APPEND, (CFStringRef)src);
+  }
+
+  FOG_INLINE err_t toCFString(CFStringRef* dst) const
+  {
+    return fog_api.stringw_toCFString(this, dst);
+  }
+  
   FOG_INLINE err_t toNSString(NSString** dst) const
   {
-    return fog_api.stringw_toNSString(this, dst);
+    return fog_api.stringw_toCFString(this, (CFStringRef*)dst);
   }
 #endif // FOG_OS_MAC
 

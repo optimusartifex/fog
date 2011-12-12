@@ -1,24 +1,11 @@
 # =============================================================================
-# [Project]
+# [Project - CMakeLists.txt]
 # =============================================================================
 
 CMake_Minimum_Required(VERSION 2.8.4)
 
-If(NOT FOG_BUILD_STATIC)
-  # Create Fog-Framework project.
-  Project(Fog C CXX)
-
-  Message("== ====================================================")
-  Message("== [Fog-Framework - Normal Build (${CMAKE_BUILD_TYPE})]")
-  Message("== ====================================================")
-Else()
-  Message("== ====================================================")
-  Message("== [Fog-Framework - Static Build (${CMAKE_BUILD_TYPE})]")
-  Message("== ====================================================")
-EndIf()
-
 # =============================================================================
-# [Configuration]
+# [Project - Configuration]
 # =============================================================================
 
 # Whether to build static library (default FALSE).
@@ -34,7 +21,32 @@ EndIf()
 # Set(FOG_BUILD_UI_X11 TRUE)
 
 # =============================================================================
-# [Basics]
+# [Project - Build]
+# =============================================================================
+
+If(NOT FOG_BUILD_SLAVE)
+  # Create Fog-Framework project.
+  Project(Fog C CXX)
+EndIf()
+
+# Always build static library when compiling for iOS or iOS simulator.
+If(IOS)
+  Set(FOG_BUILD_STATIC TRUE)
+  Message("-- Forcing to build a static library, because of iOS target")
+EndIf()
+
+If(NOT FOG_BUILD_STATIC)
+  Message("== ====================================================")
+  Message("== [Fog-Framework - Normal Build (${CMAKE_BUILD_TYPE})]")
+  Message("== ====================================================")
+Else()
+  Message("== ====================================================")
+  Message("== [Fog-Framework - Static Build (${CMAKE_BUILD_TYPE})]")
+  Message("== ====================================================")
+EndIf()
+
+# =============================================================================
+# [Project - Directory]
 # =============================================================================
 
 If(NOT FOG_DIR)
@@ -44,8 +56,16 @@ Else()
   Message("-- Using Custom FOG_DIR=${FOG_DIR}")
 EndIf()
 
+# =============================================================================
+# [Project - Cleanup]
+# =============================================================================
+
 Set(FOG_LIBRARIES "")
 Set(CMAKE_CXX_STANDARD_LIBRARIES "")
+
+# =============================================================================
+# [Project - Include]
+# =============================================================================
 
 Include(CheckCXXCompilerFlag)
 Include(CheckIncludeFiles)
@@ -63,11 +83,22 @@ Include_Directories(${FOG_DIR})
 # [OS - Detect]
 # =============================================================================
 
+# Detects both x86, and x64 version.
 If(WIN32)
   Set(FOG_OS_WINDOWS TRUE)
-ElseIf(APPLE)
+EndIf()
+
+# Detects both Mac OS X, and iOS.
+If(APPLE)
   Set(FOG_OS_MAC TRUE)
-Else()
+EndIf()
+
+If(IOS)
+  Set(FOG_OS_IOS TRUE)
+EndIf(IOS)
+
+# Detects Mac OS X, Linux, and BSD like OSes.
+If(APPLE OR LINUX OR UNIX)
   Set(FOG_OS_POSIX TRUE)
 EndIf()
 
@@ -84,10 +115,45 @@ Set(FOG_CXX_FLAGS_SSE3 "")
 Set(FOG_CXX_FLAGS_SSSE3 "")
 
 # =============================================================================
+# [C++ Compiler - Fix]
+# =============================================================================
+
+# iOS support is a bit tricky. In order to successfully use it / compile it, we
+# need to hardcode all checks to be able to generate the Xcode project.
+If (FOG_OS_IOS)
+  # Forces to disable any checking, we are hardcoding, because of cross-compilation.
+  Set(DISABLE_COMPILER_CHECKS TRUE)
+
+  # iOS forces Little-Endian.
+  Set(FOG_BYTE_ORDER     1)
+
+  # Hardcode everything we need normally to check-for.
+  Set(FOG_SIZEOF_VOID    4)
+  Set(FOG_SIZEOF_INT     4)
+  Set(FOG_SIZEOF_LONG    4)
+  Set(FOG_SIZEOF_WCHAR_T 4)
+
+  Set(FOG_HAVE_DLFCN_H   TRUE)
+  Set(FOG_HAVE_FENV_H    TRUE)
+  Set(FOG_HAVE_FLOAT_H   TRUE)
+  Set(FOG_HAVE_LIMITS_H  TRUE)
+  Set(FOG_HAVE_STDARG_H  TRUE)
+  Set(FOG_HAVE_STDINT_H  TRUE)
+  Set(FOG_HAVE_UNISTD_H  TRUE)
+
+  Set(FOG_LIBDL_EXISTS   TRUE)
+
+  Set(FOG_CC_HAS_CPP0X   TRUE)
+  Set(FOG_CC_HAS_WINLINE TRUE)
+EndIf (FOG_OS_IOS)
+
+# =============================================================================
 # [C++ Compiler - MSC]
 # =============================================================================
 
 If(MSVC)
+  Message("-- Detected Compiler - MSC")
+
   Set(FOG_CXX_FLAGS_RELEASE "/Oi /Oy /GF /GS- /GR-")
   Set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${FOG_CXX_FLAGS_RELEASE}")
   Set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${FOG_CXX_FLAGS_RELEASE}")
@@ -111,23 +177,44 @@ EndIf()
 # [C++ Compiler - GCC]
 # =============================================================================
 
-If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "g\\+\\+")
+  Message("-- Detected Compiler - GNU")
+
   # Check for supported compiler flags.
-  Check_CXX_Compiler_Flag("-std=c++0x" FOG_CC_HAS_CPP0X)
+  If(NOT FOG_CC_HAS_CPP0X)
+    Check_CXX_Compiler_Flag("-std=c++0x" FOG_CC_HAS_CPP0X)
+  EndIf()
 
-  Check_CXX_Compiler_Flag("-flto" FOG_CC_HAS_FLTO)
-  Check_CXX_Compiler_Flag("-finline-functions" FOG_CC_HAS_INLINE_FUNCTIONS)
-  Check_CXX_Compiler_Flag("-fmerge-all-constants" FOG_CC_HAS_FMERGE_ALL_CONSTANTS)
-  Check_CXX_Compiler_Flag("-fno-keep-static-consts" FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS)
+  If(NOT FOG_CC_HAS_FLTO)
+    Check_CXX_Compiler_Flag("-flto" FOG_CC_HAS_FLTO)
+  EndIf()
 
-  Check_CXX_Compiler_Flag("-Winline" FOG_CC_HAS_WINLINE)
-  Check_CXX_Compiler_Flag("-Wno-enum-compare" FOG_CC_HAS_WNO_ENUM_COMPARE)
+  If(NOT FOG_CC_HAS_INLINE_FUNCTIONS)
+    Check_CXX_Compiler_Flag("-finline-functions" FOG_CC_HAS_INLINE_FUNCTIONS)
+  EndIf()
+
+  If(NOT FOG_CC_HAS_FMERGE_ALL_CONSTANTS)
+    Check_CXX_Compiler_Flag("-fmerge-all-constants" FOG_CC_HAS_FMERGE_ALL_CONSTANTS)
+  EndIf()
+
+  If(NOT FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS)
+    Check_CXX_Compiler_Flag("-fno-keep-static-consts" FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS)
+  EndIf()
+
+  If(NOT FOG_CC_HAS_WINLINE)
+    Check_CXX_Compiler_Flag("-Winline" FOG_CC_HAS_WINLINE)
+  EndIf()
+
+  If(NOT FOG_CC_HAS_FNO_ENUM_COMPARE)
+    Check_CXX_Compiler_Flag("-Wno-enum-compare" FOG_CC_HAS_WNO_ENUM_COMPARE)
+  EndIf()
 
   # Turn off exceptions (smaller code).
   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
 
   # Hide all symbols by default. Exported symbols are declared by FOG_API.
-  If (NOT MINGW)
+  # When running iOS, the flags are set by default.
+  If (NOT MINGW AND NOT FOG_OS_IOS)
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
   EndIf()
 
@@ -144,6 +231,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   If (${FOG_CC_HAS_FMERGE_ALL_CONSTANTS})
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmerge-all-constants")
   EndIf()
+
   If (${FOG_CC_HAS_FNO_KEEP_STATIC_CONSTS})
     Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-keep-static-consts")
   EndIf()
@@ -222,8 +310,8 @@ If(CMAKE_BUILD_TYPE)
   If(${CMAKE_BUILD_TYPE} MATCHES "Release")
   EndIf()
 Else()
-  # Build type is "None". set, assuming that the project is generated for IDE which
-  # supports multiple build options.
+  # Build type is set to "None", assuming that the project is generated for IDE
+  # which supports multiple build options.
   Set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DFOG_DEBUG")
   Set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DFOG_NO_DEBUG")
   Set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DFOG_NO_DEBUG")
@@ -240,42 +328,44 @@ If(FOG_OS_WINDOWS)
 EndIf()
 
 # =============================================================================
-# [Architecture - Endian]
+# [Architecture - Size of basic types and endianness]
 # =============================================================================
 
-Include(TestBigEndian)
-Test_Big_Endian(WORDS_BIGENDIAN)
+# Standard checking procedure.
+If (NOT DISABLE_COMPILER_CHECKS)
+  Include(TestBigEndian)
+  Test_Big_Endian(WORDS_BIGENDIAN)
 
-If(WORDS_BIGENDIAN)
-  Set(FOG_BYTE_ORDER 0)
-Else()
-  Set(FOG_BYTE_ORDER 1)
+  If(WORDS_BIGENDIAN)
+    Set(FOG_BYTE_ORDER 0)
+  Else()
+    Set(FOG_BYTE_ORDER 1)
+  EndIf()
+
+  Check_Type_Size("void*" FOG_SIZEOF_VOID)
+  Check_Type_Size("int" FOG_SIZEOF_INT)
+  Check_Type_Size("long" FOG_SIZEOF_LONG)
+
+  Set(CMAKE_EXTRA_INCLUDE_FILES wchar.h)
+  Check_Type_Size("wchar_t" FOG_SIZEOF_WCHAR_T)
+  Set(CMAKE_EXTRA_INCLUDE_FILES)
 EndIf()
 
 # =============================================================================
-# [Architecture - Size of POD types]
+# [Architecture - Optimizations]
 # =============================================================================
 
-Check_Type_Size("void*" FOG_SIZEOF_VOID)
-Check_Type_Size("int" FOG_SIZEOF_INT)
-Check_Type_Size("long" FOG_SIZEOF_LONG)
-Set(CMAKE_EXTRA_INCLUDE_FILES wchar.h)
-Check_Type_Size("wchar_t" FOG_SIZEOF_WCHAR_T)
-Set(CMAKE_EXTRA_INCLUDE_FILES)
+If (NOT FOG_OS_IOS)
+  # Disable MMX/3dNow when building for AMD64.
+  If (${FOG_SIZEOF_VOID} EQUAL 4)
+    Set(FOG_OPTIMIZE_MMX TRUE)
+    # Set(FOG_OPTIMIZE_3DNOW TRUE)
+  EndIf()
 
-# =============================================================================
-# [Architecture - Enable/Disable Optimizations]
-# =============================================================================
-
-# Disable MMX/3dNow when building for AMD64.
-If (${FOG_SIZEOF_VOID} EQUAL 4)
-  Set(FOG_OPTIMIZE_MMX TRUE)
-  # Set(FOG_OPTIMIZE_3DNOW TRUE)
+  Set(FOG_OPTIMIZE_SSE TRUE)
+  Set(FOG_OPTIMIZE_SSE2 TRUE)
+  Set(FOG_OPTIMIZE_SSSE3 TRUE)
 EndIf()
-
-Set(FOG_OPTIMIZE_SSE TRUE)
-Set(FOG_OPTIMIZE_SSE2 TRUE)
-Set(FOG_OPTIMIZE_SSSE3 TRUE)
 
 Macro(AddOptimizedSources dst optimization)
   Set(local_condition "FOG_OPTIMIZE_${optimization}")
@@ -284,7 +374,7 @@ Macro(AddOptimizedSources dst optimization)
   If(${local_condition})
     Set(local_files "")
     ForEach(file ${ARGN})
-      Message("   Adding optimized file ${file} (${optimization})")
+      Message("   Added optimized file ${file} (${optimization})")
       List(APPEND local_files ${file})
     EndForEach()
     List(APPEND ${dst} ${local_files})
@@ -312,14 +402,12 @@ If(NOT FOG_HAVE_STDINT_H)
   Check_Include_Files(stdint.h FOG_HAVE_STDINT_H)
 EndIf()
 
-If(UNIX)
-  If(NOT FOG_HAVE_UNISTD_H)
-    Check_Include_Files(unistd.h FOG_HAVE_UNISTD_H)
-  EndIf()
+If(UNIX AND NOT FOG_HAVE_UNISTD_H)
+  Check_Include_Files(unistd.h FOG_HAVE_UNISTD_H)
+EndIf()
 
-  If(NOT FOG_HAVE_FENV_H)
-    Check_Include_Files(fenv.h FOG_HAVE_FENV_H)
-  EndIf()
+If(UNIX AND NOT FOG_HAVE_FENV_H)
+  Check_Include_Files(fenv.h FOG_HAVE_FENV_H)
 EndIf()
 
 # =============================================================================
@@ -330,20 +418,27 @@ If(FOG_OS_WINDOWS)
   List(APPEND FOG_LIBRARIES advapi32 gdi32 ole32 user32 uuid shell32 winmm)
 EndIf()
 
-If(FOG_OS_MAC)
+If(FOG_OS_IOS)
+  List(APPEND FOG_LIBRARIES "-framework UIKit")
+ElseIf(FOG_OS_MAC)
   List(APPEND FOG_LIBRARIES "-framework Cocoa")
 EndIf()
 
-If(FOG_OS_POSIX)
-  # librt is Linux specific library (not available in BSD/MAC).
-  If(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    List(APPEND FOG_LIBRARIES "-lrt")
-  EndIf()
+# librt is Linux specific library (not available in BSD/MAC).
+If(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  List(APPEND FOG_LIBRARIES "-lrt")
+EndIf()
 
+If(FOG_OS_POSIX)
   # libdl for dynamic-library opening.
-  Check_Include_Files(dlfcn.h FOG_HAVE_DLFCN_H)
+  If (NOT FOG_HAVE_DLFCN_H)
+    Check_Include_Files(dlfcn.h FOG_HAVE_DLFCN_H)
+  EndIf()
+  
   If(FOG_HAVE_DLFCN_H)
-    Check_Library_Exists(dl dlopen "" FOG_LIBDL_EXISTS)
+    If (NOT FOG_LIBDL_EXISTS)
+      Check_Library_Exists(dl dlopen "" FOG_LIBDL_EXISTS)
+    EndIf()
     If(FOG_LIBDL_EXISTS)
       List(APPEND FOG_LIBRARIES "-ldl")
     EndIf()
@@ -611,8 +706,8 @@ Set(FOG_CORE_THREADING_SOURCES
 
 Set(FOG_CORE_THREADING_HEADERS
   Fog/Core/Threading/Atomic.h
-  Fog/Core/Threading/Atomic_gcc_x86x64.h
   Fog/Core/Threading/Atomic_gcc_intrin.h
+  Fog/Core/Threading/Atomic_gcc_x86x64.h
   Fog/Core/Threading/Atomic_msc_intrin.h
   Fog/Core/Threading/Atomic_msc_x86.h
   Fog/Core/Threading/AtomicPadding.h

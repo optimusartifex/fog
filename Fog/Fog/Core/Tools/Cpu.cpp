@@ -193,7 +193,6 @@ _Skip:
 
 static void Cpu_detect(Cpu* cpu)
 {
-  uint32_t a;
   uint32_t features = NO_FLAGS;
 
   // Reset.
@@ -203,6 +202,7 @@ static void Cpu_detect(Cpu* cpu)
   cpu->_numberOfProcessors = Cpu_detectNumberOfProcessors();
 
 #if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
+  uint32_t a;
   CpuId out;
 
   // Get vendor string.
@@ -313,9 +313,14 @@ static void Cpu_detect(Cpu* cpu)
   }
 
   // Finished...
-  cpu->_features = features;
   simplifyBrandString(cpu->_brand);
 #endif // FOG_ARCH_X86 || FOG_ARCH_X86_64
+
+#if defined(FOG_ARCH_ARM)
+  
+#endif // FOG_ARCH_ARM
+
+  cpu->_features = features;
 }
 
 // ============================================================================

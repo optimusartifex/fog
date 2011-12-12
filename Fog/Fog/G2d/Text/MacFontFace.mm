@@ -15,9 +15,6 @@
 #include <Fog/G2d/Text/MacFontFace.h>
 #include <Fog/G2d/Text/MacFontProvider.h>
 
-// [Dependencies - Mac]
-#import <Cocoa/Cocoa.h>
-
 namespace Fog {
   
 // ============================================================================
@@ -37,7 +34,7 @@ struct FOG_NO_EXPORT MacFontContext
 MacFontFace::MacFontFace(MacFontProviderData* pd) :
   pd(pd)
 {
-  nsFont = nil;
+  ctFont = NULL;
   kerningTable = NULL;
 }
 
@@ -88,11 +85,46 @@ FontKerningTableF* MacFontFace::getKerningTable(const FontData* d)
 // ============================================================================
 
 template<typename NumT>
+static void MacFontFace_cgPathApplier(void* info, const CGPathElement* element)
+{
+  NumT_(Path)* dst = reinterpret_cast<NumT_(Path)*>(info);
+
+  switch (element->type)
+  {
+    case kCGPathElementMoveToPoint:
+      dst->moveTo(element->points[0].x, element->points[0].y);
+      break;
+
+    case kCGPathElementAddLineToPoint:
+      dst->lineTo(element->points[0].x, element->points[0].y);
+      break;
+      
+    case kCGPathElementAddQuadCurveToPoint:
+      dst->quadTo(element->points[0].x, element->points[0].y,
+                  element->points[1].x, element->points[1].y);
+      break;
+      
+    case kCGPathElementAddCurveToPoint:
+      dst->cubicTo(element->points[0].x, element->points[0].y,
+                   element->points[1].x, element->points[1].y,
+                   element->points[2].x, element->points[2].y);
+      break;
+
+    case kCGPathElementCloseSubpath:
+      dst.close();
+      break;
+      
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+template<typename NumT>
 static err_t MacFontFace_renderGlyphOutline(MacFontFace* self, 
   NumT_(Path)& dst, GlyphMetricsF& metrics, const FontData* d, uint32_t uc, MacFontContext* ctx)
 {
   UniChar ucArray[2] = { (UniChar)uc, 0 };
-  NSGlyph ucGlyph[2];
+  CGGlyph ucGlyph[2];
   CFIndex ucSize = 1;
 
   if (CharW::isSurrogate(uc))
@@ -104,13 +136,20 @@ static err_t MacFontFace_renderGlyphOutline(MacFontFace* self,
     ucSize++;
   }
 
-  if (!CTFontGetGlyphsForCharacters((CTFontRef)self->nsFont, ucArray, (CGGlyph *)ucGlyph, ucSize))
+  if (!CTFontGetGlyphsForCharacters(self->ctFont, ucArray, ucGlyph, ucSize))
     return ERR_FONT_INTERNAL;
 
-  NSBezierPath* path = [NSBezierPath bezierPath];
-  [path moveToPoint: NSMakePoint(0.0f, 0.0f)];
-  [path appendBezierPathWithGlyphs: ucGlyph count: 1 inFont: self->nsFont];
+  CGPathRef cgPath = CTFontCreatePathForGlyph(ctFont, ucGlyph[0], NULL);
+  if (cgPath == NULL)
+    return ERR_FONT_INTERNAL;
 
+  CGPathApply(cgPath, &dst, MacFontFace_cgPathApplier<NumT>));
+  CGPathRelease(cgPath);
+
+  //NSBezierPath* path = [NSBezierPath bezierPath];
+  //[path moveToPoint: NSMakePoint(0.0f, 0.0f)];
+  //[path appendBezierPathWithGlyphs: ucGlyph count: 1 inFont: self->nsFont];
+  /*
   NSInteger i, len = [path elementCount];
 
   for (i = 0; i < len; i++)
@@ -159,7 +198,7 @@ static err_t MacFontFace_renderGlyphOutline(MacFontFace* self,
       }
     }
   }
-
+  */
   CGSize advance[1];
   CTFontGetAdvancesForGlyphs((CTFontRef)self->nsFont, kCTFontHorizontalOrientation, (CGGlyph*)ucGlyph, advance, 1);
 
@@ -185,7 +224,7 @@ err_t MacFontFace::_renderGlyphOutline(PathD& dst, GlyphMetricsF& metrics, const
 // [Fog::MacFontFace - Methods]
 // ============================================================================
 
-err_t MacFontFace::_init(const StringW& family, NSFont* src)
+err_t MacFontFace::_init(const StringW& family, CTFontRef src)
 {
   this->family = family;
   this->family.squeeze();

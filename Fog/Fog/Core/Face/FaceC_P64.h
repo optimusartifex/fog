@@ -1328,7 +1328,6 @@ static FOG_INLINE void p64ExtendPBBFromSBB(
   dst0.u32Lo = x0.u32Lo;
   dst0.u32Lo = _FOG_FACE_COMBINE_2(dst0.u32Lo, dst0.u32Lo <<  8);
   dst0.u32Lo = _FOG_FACE_COMBINE_2(dst0.u32Lo, dst0.u32Lo << 16);
-  dst0.u32Lo = _FOG_FACE_COMBINE_2(dst0.u32Lo, dst0.u32Lo << 32);
   dst0.u32Hi = dst0.u32Lo;
 #endif // FOG_FACE_HAS_FAST_MUL
 

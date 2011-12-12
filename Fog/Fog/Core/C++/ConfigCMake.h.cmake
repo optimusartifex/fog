@@ -29,6 +29,15 @@
 #endif // !FOG_DEBUG && !FOG_NO_DEBUG
 
 // ============================================================================
+// [FOG_BYTE_ORDER]
+// ============================================================================
+
+//! @brief Target byteorder, can be:
+//!   - @c FOG_BIG_ENDIAN    == 0.
+//!   - @c FOG_LITTLE_ENDIAN == 1,
+#define FOG_BYTE_ORDER ${FOG_BYTE_ORDER}
+
+// ============================================================================
 // [FOG_OPTIMIZE]
 // ============================================================================
 
@@ -43,15 +52,6 @@
 #cmakedefine FOG_OPTIMIZE_SSE2
 //! @brief Enable support for SSSE3 instructions.
 #cmakedefine FOG_OPTIMIZE_SSSE3
-
-// ============================================================================
-// [FOG_BYTE_ORDER]
-// ============================================================================
-
-//! @brief Target byteorder, can be:
-//!   - @c FOG_LITTLE_ENDIAN,
-//!   - @c FOG_BIG_ENDIAN.
-#define FOG_BYTE_ORDER ${FOG_BYTE_ORDER}
 
 // ============================================================================
 // [Size of Types]

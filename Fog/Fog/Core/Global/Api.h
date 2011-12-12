@@ -362,8 +362,8 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_MAC)
-  FOG_CAPI_STATIC(err_t, stringw_fromNSString)(StringW* self, const NSString* src);
-  FOG_CAPI_STATIC(err_t, stringw_toNSString)(const StringW* self, NSString** dst);  
+  FOG_CAPI_STATIC(err_t, stringw_opCFString)(StringW* self, uint32_t cntOp, CFStringRef src);
+  FOG_CAPI_STATIC(err_t, stringw_toCFString)(const StringW* self, CFStringRef* dst);  
 #endif // FOG_OS_MAC
 
   // --------------------------------------------------------------------------

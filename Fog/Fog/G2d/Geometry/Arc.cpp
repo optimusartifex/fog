@@ -173,7 +173,7 @@ _Identity:
       if (minY > ay) minY = ay;
       if (maxY < ay) maxY = ay;
 
-      if ((t0 >= start && t0 <= end) || t0 + MATH_TWO_PI >= start && t0 + MATH_TWO_PI <= end)
+      if ((t0 >= start && t0 <= end) || (t0 + MATH_TWO_PI >= start && t0 + MATH_TWO_PI <= end))
       {
         Math::sincos(t0, &ts, &tc);
 
@@ -186,7 +186,7 @@ _Identity:
         if (maxX < ax) maxX = ax;
       }
 
-      if ((t1 >= start && t1 <= end) || t1 + MATH_TWO_PI >= start && t1 + MATH_TWO_PI <= end)
+      if ((t1 >= start && t1 <= end) || (t1 + MATH_TWO_PI >= start && t1 + MATH_TWO_PI <= end))
       {
         Math::sincos(t1, &ts, &tc);
 

@@ -2784,11 +2784,6 @@ static err_t FOG_CDECL List_Var_reserve(ListUntyped* self, size_t capacity)
   return List_Unknown_reserve(self, &List_Var_vTable, capacity);
 }
 
-static void* FOG_CDECL List_Var_prepare(ListUntyped* self, uint32_t cntOp, size_t length)
-{
-  return List_Unknown_prepare(self, &List_Var_vTable, cntOp, length);
-}
-
 static void* FOG_CDECL List_Var_prepareAppendItem(ListUntyped* self)
 {
   return List_Unknown_prepareAppendItem(self, &List_Var_vTable);

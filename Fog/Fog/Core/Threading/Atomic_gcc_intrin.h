@@ -39,6 +39,7 @@ struct AtomicInt32
 
   static FOG_INLINE int32_t get(const int32_t* atomic)
   {
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
     // There's no __sync_* method which could be used here.
     int32_t result;
     __asm__ __volatile__
@@ -48,6 +49,9 @@ struct AtomicInt32
         : "m" (*atomic)
     );
     return result;
+#else
+    return *(const volatile int32_t*)atomic;
+#endif
   }
 
   static FOG_INLINE void inc(int32_t* atomic)
@@ -82,6 +86,7 @@ struct AtomicInt32
 
   static FOG_INLINE bool deref(int32_t* atomic)
   {
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
     // There's no __sync_* method, so we leave the x86(_64) version.
     char result;
 
@@ -93,6 +98,9 @@ struct AtomicInt32
         : "m" (*atomic)
     );
     return !result;
+#else
+    return __sync_fetch_and_sub(atomic, 1) == 1;
+#endif
   }
 };
 
@@ -128,6 +136,7 @@ struct AtomicInt64
 
   static FOG_INLINE int64_t get(const int64_t* atomic)
   {
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
     // There's no __sync_* method which could be used here.
     int64_t result;
     __asm__ __volatile__
@@ -137,6 +146,9 @@ struct AtomicInt64
         : "m" (*atomic)
     );
     return result;
+#else
+    return *(const volatile int64_t*)atomic;
+#endif
   }
 
   static FOG_INLINE void inc(int64_t* atomic)
@@ -171,6 +183,7 @@ struct AtomicInt64
 
   static FOG_INLINE bool deref(int64_t* atomic)
   {
+#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
     char result;
 
     __asm__ __volatile__
@@ -181,6 +194,9 @@ struct AtomicInt64
         : "m" (*atomic)
     );
     return !result;
+#else
+    return __sync_fetch_and_sub(atomic, (int64_t)1) == (int64_t)1;
+#endif
   }
 };
 

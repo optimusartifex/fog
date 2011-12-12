@@ -10,7 +10,11 @@
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
 
-// Please don't include here another header files, because this file is 
+// [Dependencies - Mac]
+#include <ApplicationServices/ApplicationServices.h>
+#include <CoreFoundation/CoreFoundation.h>
+
+// Please don't include here another Fog-Header files, because this file is 
 // included from Fog/Core/Global/Api.h in case that we are building for MAC.
 // Maybe we should think about moving it to the Fog/Core/Global subdirectory
 // later.
@@ -35,8 +39,6 @@
 
 _FOG_OBJC_CLASS(NSAutoreleasePool);
 _FOG_OBJC_CLASS(NSEvent);
-_FOG_OBJC_CLASS(NSFont);
-_FOG_OBJC_CLASS(NSFontManager);
 _FOG_OBJC_CLASS(NSRunLoop);
 _FOG_OBJC_CLASS(NSString);
 

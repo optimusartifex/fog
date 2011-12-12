@@ -86,6 +86,12 @@
 # define FOG_OS_DEFINED
 # define FOG_OS_POSIX
 # define FOG_OS_MAC
+
+# include <TargetConditionals.h>
+# if TARGET_OS_IPHONE
+#  define FOG_OS_IOS
+# endif // TARGET_OS_IPHONE
+
 #endif // __DARWIN__ || __APPLE__
 
 //! @}

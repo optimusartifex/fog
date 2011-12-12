@@ -51,7 +51,6 @@ struct FOG_API MacFontProviderData : public FontProviderData
   // --------------------------------------------------------------------------
 
   FontFaceCache fontFaceCache;
-  NSFontManager* mgr;
 
 private:
   _FOG_NO_COPY(MacFontProviderData)

@@ -119,27 +119,41 @@ static err_t FOG_CDECL Image_MacCG_create(ImageData** pd, const SizeI* size, uin
   d->first = d->data;
   d->stride = stride;
 
-  d->palette.init();
-
   CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
+  if (cgColorSpace == NULL)
+  {
+    MemMgr::free(d);
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+  
   CGDataProviderRef cgDataProvider = CGDataProviderCreateDirect(d, d->stride * d->size.h, &Image_MacCG_cgDataProviderCallbacks);
+  if (cgDataProvider == NULL)
+  {
+    CGColorSpaceRelease(cgColorSpace);
+
+    MemMgr::free(d);
+    return ERR_RT_OUT_OF_MEMORY;
+  }
 
   CGImageRef cgImage = CGImageCreate(
     size->w, size->h,                              // Size. 
-    cgBPC, cgBPP, stride,                          // Bpc, bpp, stride.
+    cgBPC, cgBPP, stride,                          // BPC, BPP, stride.
     cgColorSpace,                                  // Colorspace.
     cgFmt,                                         // Image format.
     cgDataProvider,                                // DataProvider - 'd'.
     NULL,                                          // Don't remap colors.
     true,                                          // Interpolate.
     kCGRenderingIntentDefault);                    // Default out-of-gamut handling.
+
+  d->palette.init();
   d->cgImage = cgImage;
 
   CGColorSpaceRelease(cgColorSpace);
   CGDataProviderRelease(cgDataProvider);
 
   // In case that CGImageCreate failed, the 'd' pointer was already released,
-  // because we provided releaseInfoCallback() to CGDataProvider!
+  // because we provided releaseInfoCallback() to CGDataProvider, which was
+  // released by CGDataProviderRelease() method.
   if (cgImage == NULL)
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -185,13 +199,8 @@ static void* FOG_CDECL Image_MacCG_getHandle(const ImageData* _d)
 
 static err_t FOG_CDECL Image_MacCG_updatePalette(ImageData* _d, const Range* range)
 {
-  MacCGImageData* d = reinterpret_cast<MacCGImageData*>(_d);
-
-  if (d->format == IMAGE_FORMAT_I8)
-  {
-    // TODO: MacCG update palette.
-  }
-
+  // There is no indexed palette support on Mac. We safely ignore any call to
+  // MacCGImageData::updatePalette().
   return ERR_OK;
 }
 

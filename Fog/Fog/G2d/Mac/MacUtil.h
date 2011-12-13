@@ -7,28 +7,32 @@
 #ifndef _FOG_G2D_MAC_MACUTIL_H
 #define _FOG_G2D_MAC_MACUTIL_H
 
-#include <Fog/Core/Global/Global.h>
-#if defined(FOG_OS_MAC)
-
+// [Dependencies]
+#include <Fog/Core/OS/MacDefs.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Foundation/Foundation.h>
 
 namespace Fog {
 
+// ============================================================================
+// [Fog::MacUtil]
+// ============================================================================
+
 // [Point Conversions]
 template<typename PointT>
-NSPoint FOG_INLINE toNSPoint(const PointT& pt) { return NSMakePoint(pt.getX(), pt.getY()); }
+static FOG_INLINE CGPoint toCGPoint(const PointT& pt)
+{
+  return CGPointMake(CGFloat(pt.x), CGFloat(pt.y));
+}
 
 // [Rect Conversions]
 template<typename RectT>
-NSRect FOG_INLINE toNSRect(const RectT& rect) { return NSMakeRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight()); }
-
+static FOG_INLINE CGRect toCGRect(const RectT& rect)
+{
+  return CGRectMake(CGFloat(rect.x), CGFloat(rect.y), CGFloat(rect.w), CGFloat(rect.h));
 }
 
-#else
-#warning "Fog::MacUtil - Mac support not enabled, but header file included!"
-#endif // FOG_OS_MAC
+}
 
 // [Guard]
 #endif // _FOG_G2D_MAC_MACUTIL_H

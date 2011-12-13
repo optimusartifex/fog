@@ -1596,6 +1596,20 @@ struct FOG_NO_EXPORT PathD
     return fog_api.pathd_quadToRel(this, &pt1, &pt2);
   }
 
+  FOG_INLINE err_t quadTo(double x1, double y1, double x2, double y2)
+  {
+    PointD pt1(x1, y1);
+    PointD pt2(x2, y2);
+    return fog_api.pathd_quadTo(this, &pt1, &pt2);
+  }
+
+  FOG_INLINE err_t quadToRel(double x1, double y1, double x2, double y2)
+  {
+    PointD pt1(x1, y1);
+    PointD pt2(x2, y2);
+    return fog_api.pathd_quadToRel(this, &pt1, &pt2);
+  }
+
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothQuadTo(const PointD& pt2)
   {
@@ -1605,6 +1619,18 @@ struct FOG_NO_EXPORT PathD
   //! @brief Smooth quadratic curve to @a pt2, calculating pt1 from last points (relative).
   FOG_INLINE err_t smoothQuadToRel(const PointD& pt2)
   {
+    return fog_api.pathd_smoothQuadToRel(this, &pt2);
+  }
+
+  FOG_INLINE err_t smoothQuadTo(double x2, double y2)
+  {
+    PointD pt2(x2, y2);
+    return fog_api.pathd_smoothQuadTo(this, &pt2);
+  }
+
+  FOG_INLINE err_t smoothQuadToRel(double x2, double y2)
+  {
+    PointD pt2(x2, y2);
     return fog_api.pathd_smoothQuadToRel(this, &pt2);
   }
 
@@ -1624,6 +1650,22 @@ struct FOG_NO_EXPORT PathD
     return fog_api.pathd_cubicToRel(this, &pt1, &pt2, &pt3);
   }
 
+  FOG_INLINE err_t cubicTo(double x1, double y1, double x2, double y2, double x3, double y3)
+  {
+    PointD pt1(x1, y1);
+    PointD pt2(x2, y2);
+    PointD pt3(x3, y3);
+    return fog_api.pathd_cubicTo(this, &pt1, &pt2, &pt3);
+  }
+
+  FOG_INLINE err_t cubicToRel(double x1, double y1, double x2, double y2, double x3, double y3)
+  {
+    PointD pt1(x1, y1);
+    PointD pt2(x2, y2);
+    PointD pt3(x3, y3);
+    return fog_api.pathd_cubicToRel(this, &pt1, &pt2, &pt3);
+  }
+
   //! @brief Smooth cubic curve to @a pt2, and @a pt3, calculating pt1 from last points (absolute).
   FOG_INLINE err_t smoothCubicTo(const PointD& pt2, const PointD& pt3)
   {
@@ -1634,6 +1676,20 @@ struct FOG_NO_EXPORT PathD
   FOG_INLINE err_t smoothCubicToRel(const PointD& pt2, const PointD& pt3)
   {
     return fog_api.pathd_smoothCubicToRel(this, &pt2, &pt3);
+  }
+
+  FOG_INLINE err_t smoothCubicTo(double x2, double y2, double x3, double y3)
+  {
+    PointD pt2(x2, y2);
+    PointD pt3(x3, y3);
+    return fog_api.pathd_quadTo(this, &pt2, &pt3);
+  }
+
+  FOG_INLINE err_t smoothCubicToRel(double x2, double y2, double x3, double y3)
+  {
+    PointD pt2(x2, y2);
+    PointD pt3(x3, y3);
+    return fog_api.pathd_quadToRel(this, &pt2, &pt3);
   }
 
   // --------------------------------------------------------------------------

@@ -39,7 +39,7 @@ FOG_API err_t parseOpacity(float& dst, const StringW& str);
 //! @brief Parse SVG matrix and save it to @a dst.
 FOG_API err_t parseTransform(TransformF& dst, const StringW& str);
 
-//! @brief Parse SVG coorinate and return it.
+//! @brief Parse SVG coordinate and return it.
 FOG_API err_t parseCoord(SvgCoord& coord, const StringW& str);
 
 FOG_API err_t parseViewBox(BoxF& box, const StringW& str);

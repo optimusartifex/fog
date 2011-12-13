@@ -9,9 +9,14 @@
 #include <Fog/UI/Widget/Widget.h>
 
 // [Dependencies - Mac]
-#import <AppKit/AppKit.h>
-#import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
+
+#if defined(FOG_OS_IOS)
+# import <UIKit/UIKit.h>
+#else
+# import <AppKit/AppKit.h>
+# import <Cocoa/Cocoa.h>
+#endif // FOG_OS_IOS
 
 FOG_IMPLEMENT_OBJECT(Fog::MacGuiEngine)
 FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
@@ -55,10 +60,7 @@ FOG_IMPLEMENT_OBJECT(Fog::MacGuiWindow)
 
 - (id)init:(Fog::MacGuiWindow*)fogWindow_ frame:(NSRect)frame styleMask:(NSUInteger)style contentView:(NSView*)view
 {
-  if (self = [super initWithContentRect: frame
-                              styleMask: style
-                                backing: NSBackingStoreBuffered
-                                  defer: NO])
+  if (self = [super initWithContentRect: frame styleMask: style backing: NSBackingStoreBuffered defer: NO])
   {
     [self setContentView:view];
 
@@ -395,7 +397,7 @@ err_t MacGuiWindow::setPosition(const PointI& pt)
   if (window == nil)
     return ERR_RT_INVALID_STATE;
   
-  [window setFrameTopLeftPoint: toNSPoint(pt)];
+  [window setFrameTopLeftPoint: NSMakePoint(CGFloat(pt.x), CGFloat(pt.y))];
   return ERR_OK;
 }
 
@@ -404,9 +406,14 @@ err_t MacGuiWindow::setSize(const SizeI& size)
   if (window == nil)
     return ERR_RT_INVALID_STATE;
   
-  [window setFrame: NSMakeRect(_widget->getX(), _widget->getY(), 
-                               size.getWidth(), size.getHeight())
-           display: NO];
+  NSRect nsRect = NSMakeRect(
+    CGFloat(_widget->getX()), 
+    CGFloat(_widget->getY()),
+    CGFloat(size.getWidth()),
+    CGFloat(size.getHeight())
+  );
+
+  [window setFrame: nsRect display: NO];
   return ERR_OK;
 }
 
@@ -418,8 +425,14 @@ err_t MacGuiWindow::setGeometry(const RectI& geometry)
   if (window == nil)
     return ERR_RT_INVALID_STATE;
   
-  [window setFrame: toNSRect(geometry) display: NO];
+  NSRect nsRect = NSMakeRect(
+    CGFloat(geometry.x),
+    CGFloat(geometry.y),
+    CGFloat(geometry.w),
+    CGFloat(geometry.h)
+  );
 
+  [window setFrame: nsRect display: NO];
   return ERR_OK;
 } 
 
@@ -542,9 +555,9 @@ err_t MacGuiWindow::worldToClient(PointI* coords)
 {
   if (window == nil)
     return ERR_RT_INVALID_STATE;
-  
-  NSPoint clientPt = [window convertScreenToBase: toNSPoint(coords[0])];
-  coords->set(clientPt.x, clientPt.y);
+
+  NSPoint result = [window convertScreenToBase: NSMakePoint(CGFloat(coords->x), CGFloat(coords->y))];
+  coords->set(int(result.x), int(result.y));
   
   return ERR_OK;
 }
@@ -554,8 +567,8 @@ err_t MacGuiWindow::clientToWorld(PointI* coords)
   if (window == nil)
     return ERR_RT_INVALID_STATE;
   
-  NSPoint clientPt = [window convertBaseToScreen: toNSPoint(coords[0])];
-  coords->set(int(clientPt.x), int(clientPt.y));
+  NSPoint result = [window convertBaseToScreen: NSMakePoint(CGFloat(coords->x), CGFloat(coords->y))];
+  coords->set(int(result.x), int(result.y));
 
   return ERR_OK;
 }
@@ -697,7 +710,14 @@ void MacGuiBackBuffer::updateRects(FogView* view, const BoxI* rects, size_t coun
 
   for (size_t i = 0; i < count; i++)
   {
-    [view drawRect: toNSRect(rects[i])];
+    NSRect nsRect = NSMakeRect(
+      CGFloat(rects[i].x0),
+      CGFloat(rects[i].y0),
+      CGFloat(rects[i].x1 - rects[i].x0),
+      CGFloat(rects[i].y1 - rects[i].y0)
+    );
+
+    [view drawRect: nsRect];
   }
 }
 
@@ -724,20 +744,20 @@ MacEventLoopBase::MacEventLoopBase() :
                                            runDelayedWorkTimer,
                                            &timerContext);
   CFRunLoopAddTimer(_runLoop, _delayedWorkTimer, kCFRunLoopCommonModes);
-  
-  // run work has 1st priority
+
+  // Run work has 1st priority.
   CFRunLoopSourceContext sourceContext = CFRunLoopSourceContext();
   sourceContext.info = this;
   sourceContext.perform = runWorkSource;
   _workSource = CFRunLoopSourceCreate(NULL, 1, &sourceContext);
   CFRunLoopAddSource(_runLoop, _workSource, kCFRunLoopCommonModes);
-  
-  // run delayed work has 2nd priority
+
+  // Run delayed work has 2nd priority.
   sourceContext.perform = runDelayedWorkSource;
   _delayedWorkSource = CFRunLoopSourceCreate(NULL, 2, &sourceContext);
   CFRunLoopAddSource(_runLoop, _delayedWorkSource, kCFRunLoopCommonModes);
   
-  // run idle work has 3rd priority
+  // Run idle work has 3rd priority.
   sourceContext.perform = runIdleWorkSource;
   _idleWorkSource = CFRunLoopSourceCreate(NULL, 3, &sourceContext);
   CFRunLoopAddSource(_runLoop, _idleWorkSource, kCFRunLoopCommonModes);

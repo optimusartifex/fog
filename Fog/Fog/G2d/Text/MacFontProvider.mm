@@ -16,6 +16,10 @@
 #include <Fog/G2d/Text/MacFontFace.h>
 #include <Fog/G2d/Text/MacFontProvider.h>
 
+#if defined(FOG_OS_IOS)
+# import <UIKit/UIKit.h>
+#endif // FOG_OS_IOS
+
 namespace Fog {
 
 // ============================================================================
@@ -88,6 +92,23 @@ err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily
 
 err_t MacFontProviderData::getFontList(List<StringW>& dst)
 {
+#if defined(FOG_OS_IOS)
+  NSArray* nsArray = [UIFont familyNames];
+  err_t err = ERR_OK;
+
+  for (NSString* familyName in nsArray)
+  {
+    StringW familyNameW;
+    err = familyNameW.fromNSString(familyName);
+    
+    if (FOG_IS_ERROR(err))
+      break;
+
+    dst.append(familyNameW);
+  }
+
+  return err;
+#else
   CFArrayRef cfArray = CTFontManagerCopyAvailableFontFamilyNames();
   if (cfArray == NULL)
   {
@@ -99,17 +120,18 @@ err_t MacFontProviderData::getFontList(List<StringW>& dst)
 
   for (i = 0; i < length; i++)
   {
-    StringW fontNameW;
-    err = fontNameW.fromCFString((CFStringRef)CFArrayGetValueAtIndex(cfArray, i));
+    StringW familyNameW;
+    err = familyNameW.fromCFString((CFStringRef)CFArrayGetValueAtIndex(cfArray, i));
     
     if (FOG_IS_ERROR(err))
       break;
 
-    dst.append(fontNameW);
+    dst.append(familyNameW);
   }
 
   CFRelease(cfArray);
   return err;
+#endif // FOG_OS_IOS
 }
 
 StringW MacFontProviderData::getDefaultFamily()

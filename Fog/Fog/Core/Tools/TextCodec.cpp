@@ -864,8 +864,6 @@ static err_t FOG_CDECL TextCodec_UTF16_decode(const TextCodecData* d,
 
   // Destination Buffer.
   size_t oldStateSize = 0;
-
-  size_t initSize = dst.getLength();
   size_t growSize = (srcSize >> 1) + 2;
 
   CharW* dstCur = dst._add(growSize);

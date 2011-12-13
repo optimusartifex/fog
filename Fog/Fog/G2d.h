@@ -22,6 +22,7 @@
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Chord.h>
 #include <Fog/G2d/Geometry/Circle.h>
+#include <Fog/G2d/Geometry/Coord.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Line.h>
 #include <Fog/G2d/Geometry/Math2d.h>

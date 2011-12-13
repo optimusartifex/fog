@@ -1,5 +1,5 @@
 mkdir ..\Build
 cd ..\Build
-cmake .. -G"Visual Studio 9 2008 Win64" -DFOG_BUILD_BENCH=True -DFOG_BUILD_EXAMPLES=True
+cmake .. -G"Visual Studio 9 2008 Win64" -DFOG_BUILD_UI=1 -DFOG_BUILD_BENCH=1 -DFOG_BUILD_EXAMPLES=1
 cd ..\Scripts
 pause

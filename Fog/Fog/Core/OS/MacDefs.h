@@ -11,8 +11,14 @@
 #include <Fog/Core/C++/Base.h>
 
 // [Dependencies - Mac]
-#include <ApplicationServices/ApplicationServices.h>
 #include <CoreFoundation/CoreFoundation.h>
+
+#if defined(FOG_OS_IOS)
+# include <CoreGraphics/CoreGraphics.h>
+# include <CoreText/CoreText.h>
+#else
+# include <ApplicationServices/ApplicationServices.h>
+#endif // FOG_OS_IOS
 
 // Please don't include here another Fog-Header files, because this file is 
 // included from Fog/Core/Global/Api.h in case that we are building for MAC.

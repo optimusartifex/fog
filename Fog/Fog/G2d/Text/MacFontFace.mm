@@ -92,26 +92,26 @@ static void MacFontFace_cgPathApplier(void* info, const CGPathElement* element)
   switch (element->type)
   {
     case kCGPathElementMoveToPoint:
-      dst->moveTo(element->points[0].x, element->points[0].y);
+      dst->moveTo(NumT(element->points[0].x), NumT(-element->points[0].y));
       break;
 
     case kCGPathElementAddLineToPoint:
-      dst->lineTo(element->points[0].x, element->points[0].y);
+      dst->lineTo(NumT(element->points[0].x), NumT(-element->points[0].y));
       break;
       
     case kCGPathElementAddQuadCurveToPoint:
-      dst->quadTo(element->points[0].x, element->points[0].y,
-                  element->points[1].x, element->points[1].y);
+      dst->quadTo(NumT(element->points[0].x), NumT(-element->points[0].y),
+                  NumT(element->points[1].x), NumT(-element->points[1].y));
       break;
       
     case kCGPathElementAddCurveToPoint:
-      dst->cubicTo(element->points[0].x, element->points[0].y,
-                   element->points[1].x, element->points[1].y,
-                   element->points[2].x, element->points[2].y);
+      dst->cubicTo(NumT(element->points[0].x), NumT(-element->points[0].y),
+                   NumT(element->points[1].x), NumT(-element->points[1].y),
+                   NumT(element->points[2].x), NumT(-element->points[2].y));
       break;
 
     case kCGPathElementCloseSubpath:
-      dst.close();
+      dst->close();
       break;
       
     default:
@@ -139,68 +139,16 @@ static err_t MacFontFace_renderGlyphOutline(MacFontFace* self,
   if (!CTFontGetGlyphsForCharacters(self->ctFont, ucArray, ucGlyph, ucSize))
     return ERR_FONT_INTERNAL;
 
-  CGPathRef cgPath = CTFontCreatePathForGlyph(ctFont, ucGlyph[0], NULL);
-  if (cgPath == NULL)
-    return ERR_FONT_INTERNAL;
+  CGPathRef cgPath = CTFontCreatePathForGlyph(self->ctFont, ucGlyph[0], NULL);
 
-  CGPathApply(cgPath, &dst, MacFontFace_cgPathApplier<NumT>));
-  CGPathRelease(cgPath);
-
-  //NSBezierPath* path = [NSBezierPath bezierPath];
-  //[path moveToPoint: NSMakePoint(0.0f, 0.0f)];
-  //[path appendBezierPathWithGlyphs: ucGlyph count: 1 inFont: self->nsFont];
-  /*
-  NSInteger i, len = [path elementCount];
-
-  for (i = 0; i < len; i++)
+  if (cgPath != NULL)
   {
-    NSPoint pts[3];
-    NSBezierPathElement cmd = [path elementAtIndex: i associatedPoints: pts];
-
-    switch (cmd)
-    {
-      case NSMoveToBezierPathElement:
-      {
-        dst.moveTo(NumT_(Point)(NumT(pts[0].x), NumT(-pts[0].y)));
-        break;
-      }
-
-      case NSLineToBezierPathElement:
-      {
-        dst.lineTo(NumT_(Point)(NumT(pts[0].x), NumT(-pts[0].y)));
-        break;
-      }
-
-      case NSCurveToBezierPathElement:
-      {
-        // Font files are created by quadratic Bezier curves, but CT framework
-        // uses only cubic Beziers. We try convert cubic Bezier curves back to
-        // quadratic ones, if it's possible without losing a precision.
-        NumT_(CBezier) bez;
-
-        bez[0] = dst.getLastVertex();
-        bez[1].set(NumT(pts[0].x), NumT(-pts[0].y));
-        bez[2].set(NumT(pts[1].x), NumT(-pts[1].y));
-        bez[3].set(NumT(pts[2].x), NumT(-pts[2].y));
-
-        NumT_(Point) qPt;
-        if (bez.toQuad(&qPt, NumT(0.001)))
-          dst.quadTo(qPt, bez[3]);
-        else
-          dst.cubicTo(bez[1], bez[2], bez[3]);
-        break;
-      }
-
-      case NSClosePathBezierPathElement:
-      {
-        dst.close();
-        break;
-      }
-    }
+    CGPathApply(cgPath, &dst, MacFontFace_cgPathApplier<NumT>);
+    CGPathRelease(cgPath);
   }
-  */
+
   CGSize advance[1];
-  CTFontGetAdvancesForGlyphs((CTFontRef)self->nsFont, kCTFontHorizontalOrientation, (CGGlyph*)ucGlyph, advance, 1);
+  CTFontGetAdvancesForGlyphs(self->ctFont, kCTFontHorizontalOrientation, ucGlyph, advance, 1);
 
   metrics._horizontalAdvance.x = advance[0].width;
   metrics._horizontalAdvance.y = advance[0].height;
@@ -229,13 +177,12 @@ err_t MacFontFace::_init(const StringW& family, CTFontRef src)
   this->family = family;
   this->family.squeeze();
 
-  [src retain];
-  nsFont = src;
+  this->ctFont = src;
 
   designMetrics.reset();
-  designMetrics._ascent = [nsFont ascender];
-  designMetrics._descent = [nsFont descender];
-  designMetrics._height = [nsFont xHeight];
+  designMetrics._ascent = CTFontGetAscent(ctFont);
+  designMetrics._descent = CTFontGetDescent(ctFont);
+  designMetrics._height = CTFontGetXHeight(ctFont);
   
   return ERR_OK;
 }
@@ -248,8 +195,8 @@ void MacFontFace::_reset()
     kerningTable = NULL;
   }
 
-  [nsFont release];
-  nsFont = nil;
+  CFRelease(ctFont);
+  ctFont = NULL;
 }
 
 } // Fog namespace

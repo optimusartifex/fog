@@ -41,17 +41,27 @@
 // [FOG_OPTIMIZE]
 // ============================================================================
 
-//! @brief Enable support for MMX instructions.
+//! @brief Enable support for x86/x64 MMX instructions.
+//!
+//! @note MMX is not widely used today, because of SSE2/AVX.
 #cmakedefine FOG_OPTIMIZE_MMX
-//! @brief Enable support for 3dNow! instructions.
+
+//! @brief Enable support for x86/x64 3dNow! instructions.
+//!
+//! @note 3dNow! is only implemented by AMD and at this time it's deprecated.
 #cmakedefine FOG_OPTIMIZE_3DNOW
 
-//! @brief Enable support for SSE instructions.
+//! @brief Enable support for x86/x64 SSE instructions.
 #cmakedefine FOG_OPTIMIZE_SSE
-//! @brief Enable support for SSE2 instructions.
+
+//! @brief Enable support for x86/x64 SSE2 instructions.
 #cmakedefine FOG_OPTIMIZE_SSE2
-//! @brief Enable support for SSSE3 instructions.
+
+//! @brief Enable support for x86/x64 SSSE3 instructions.
 #cmakedefine FOG_OPTIMIZE_SSSE3
+
+//! @brief Enable support for ARM Neon instructions.
+#cmakedefine FOG_OPTIMIZE_NEON
 
 // ============================================================================
 // [Size of Types]
@@ -96,20 +106,22 @@
 //!
 //! This is default when using Windows.
 #cmakedefine FOG_FONT_WINDOWS
+
 //! @brief Whether to build Mac font support.
 //!
 //! This is default when using Mac.
 #cmakedefine FOG_FONT_MAC
-//! @brief Whether to build FreeType support
-//!
-//! This is default when using Linux/BSD. May be used together with Windows/Mac
-//! font support.
-#cmakedefine FOG_FONT_FREETYPE
 
 //! @brief Whether to build FontConfig support.
 //!
 //! Can be enabled only if FOG_FONT_FREETYPE is defined.
 #cmakedefine FOG_HAVE_FONTCONFIG
+
+//! @brief Whether to build FreeType support
+//!
+//! This is default when using Linux/BSD. May be used together with Windows/Mac
+//! font support.
+#cmakedefine FOG_FONT_FREETYPE
 
 // ============================================================================
 // [FOG_UI]

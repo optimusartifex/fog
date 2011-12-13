@@ -8,42 +8,78 @@ CMake_Minimum_Required(VERSION 2.8.4)
 # [Project - Configuration]
 # =============================================================================
 
+# Whether to bypass project generator, using cmake Project() function(). This
+# can be used in case that this CMakeLists.txt is included from different
+# project which wants to build Fog statically.
+# Set(FOG_BUILD_SLAVE FALSE)
+
 # Whether to build static library (default FALSE).
-# Set(FOG_BUILD_STATIC TRUE)
+# Set(FOG_BUILD_STATIC FALSE)
+
+# Whether to build Fog/UI (default FALSE).
+# Set(FOG_BUILD_UI FALSE)
+
+# Whether to build Fog/UI-X11 module (default FALSE).
+# Set(FOG_BUILD_UI_X11 FALSE)
 
 # Whether to build FogBench benchmarking tool (default FALSE).
-# Set(FOG_BUILD_BENCH TRUE)
+# Set(FOG_BUILD_BENCH FALSE)
 
 # Whether to build FogExamples (default FALSE).
-# Set(FOG_BUILD_EXAMPLES TRUE)
-
-# Whether to build X11 module for Fog/UI (default FALSE).
-# Set(FOG_BUILD_UI_X11 TRUE)
+# Set(FOG_BUILD_EXAMPLES FALSE)
 
 # =============================================================================
 # [Project - Build]
 # =============================================================================
 
+# Create Fog-Framework project. In case that FOG_BUILD_SLAVE is enabled, no
+# project will be created, but the parent script is responsive for doing that.
 If(NOT FOG_BUILD_SLAVE)
-  # Create Fog-Framework project.
   Project(Fog C CXX)
+  Message("-- Created CMake C/C++ project (FOG_BUILD_SLAVE not enabled).")
+Else()
+  Message("-- Entering slave build-mode (FOG_BUILD_SLAVE enabled).")
 EndIf()
 
 # Always build static library when compiling for iOS or iOS simulator.
 If(IOS)
   Set(FOG_BUILD_STATIC TRUE)
-  Message("-- Forcing to build a static library, because of iOS target")
+  Message("-- Forced to build a static library, because of iOS target.")
 EndIf()
 
 If(NOT FOG_BUILD_STATIC)
+  Message("")
   Message("== ====================================================")
   Message("== [Fog-Framework - Normal Build (${CMAKE_BUILD_TYPE})]")
   Message("== ====================================================")
+  Message("")
 Else()
+  Message("")
   Message("== ====================================================")
   Message("== [Fog-Framework - Static Build (${CMAKE_BUILD_TYPE})]")
   Message("== ====================================================")
+  Message("")
 EndIf()
+
+If(FOG_BUILD_STATIC)
+  Message("-- Build Static - Enabled")
+Else()
+  Message("-- Build Static - Disabled")
+EndIf()
+
+If(FOG_BUILD_UI)
+  Message("-- Build Fog/UI - Enabled")
+Else()
+  Message("-- Build Fog/UI - Disabled")
+EndIf()
+
+If(FOG_BUILD_UI_X11)
+  Message("-- Build Fog/UI(X11) - Enabled")
+Else()
+  Message("-- Build Fog/UI(X11) - Disabled")
+EndIf()
+
+Message("")
 
 # =============================================================================
 # [Project - Directory]
@@ -71,7 +107,12 @@ Include(CheckCXXCompilerFlag)
 Include(CheckIncludeFiles)
 Include(CheckLibraryExists)
 Include(CheckTypeSize)
-Include(FindThreads)
+
+If(IOS)
+  Set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+Else()
+  Include(FindThreads)
+EndIf()
 
 # =============================================================================
 # [Include Directories]
@@ -419,6 +460,8 @@ If(FOG_OS_WINDOWS)
 EndIf()
 
 If(FOG_OS_IOS)
+  List(APPEND FOG_LIBRARIES "-framework CoreGraphics")
+  List(APPEND FOG_LIBRARIES "-framework CoreText")
   List(APPEND FOG_LIBRARIES "-framework UIKit")
 ElseIf(FOG_OS_MAC)
   List(APPEND FOG_LIBRARIES "-framework Cocoa")
@@ -434,7 +477,7 @@ If(FOG_OS_POSIX)
   If (NOT FOG_HAVE_DLFCN_H)
     Check_Include_Files(dlfcn.h FOG_HAVE_DLFCN_H)
   EndIf()
-  
+
   If(FOG_HAVE_DLFCN_H)
     If (NOT FOG_LIBDL_EXISTS)
       Check_Library_Exists(dl dlopen "" FOG_LIBDL_EXISTS)
@@ -877,6 +920,7 @@ Set(FOG_G2D_GEOMETRY_SOURCES
   Fog/G2d/Geometry/CBezier.cpp
   Fog/G2d/Geometry/Chord.cpp
   Fog/G2d/Geometry/Circle.cpp
+  Fog/G2d/Geometry/Coord.cpp
   Fog/G2d/Geometry/Ellipse.cpp
   Fog/G2d/Geometry/Line.cpp
   Fog/G2d/Geometry/Math2d.cpp
@@ -906,6 +950,7 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Fog/G2d/Geometry/CBezier.h
   Fog/G2d/Geometry/Chord.h
   Fog/G2d/Geometry/Circle.h
+  Fog/G2d/Geometry/Coord.h
   Fog/G2d/Geometry/Ellipse.h
   Fog/G2d/Geometry/Internals_p.h
   Fog/G2d/Geometry/Line.h
@@ -1595,7 +1640,7 @@ Set(FOG_UI_WIDGET_HEADERS
 Source_Group("UI"                   FILES ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
 Source_Group("UI/Canvas"            FILES ${FOG_UI_CANVAS_SOURCES}           ${FOG_UI_CANVAS_HEADERS}          )
 Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
-                                          ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_SOURCES}
+                                          ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
                                           ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
                                           ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
 Source_Group("UI/Layout"            FILES ${FOG_UI_LAYOUT_SOURCES}           ${FOG_UI_LAYOUT_HEADERS}          )

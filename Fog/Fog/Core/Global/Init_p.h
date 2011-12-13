@@ -129,6 +129,15 @@ FOG_NO_EXPORT void PathInfo_init(void);
 
 // [Fog/G2d/Imaging]
 FOG_NO_EXPORT void Image_init(void);
+
+#if defined(FOG_OS_WINDOWS)
+FOG_NO_EXPORT void Image_init_win(void);
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_MAC)
+FOG_NO_EXPORT void Image_init_mac(void);
+#endif // FOG_OS_MAC
+
 FOG_NO_EXPORT void ImageResize_init(void);
 FOG_NO_EXPORT void ImagePalette_init(void);
 FOG_NO_EXPORT void ImageConverter_init(void);
@@ -164,7 +173,17 @@ FOG_NO_EXPORT void Pattern_init(void);
 // [Fog/G2d/Tools]
 FOG_NO_EXPORT void Dpi_init(void);
 FOG_NO_EXPORT void Matrix_init(void);
+
 FOG_NO_EXPORT void Region_init(void);
+
+#if defined(FOG_OS_WINDOWS)
+FOG_NO_EXPORT void Region_init_win(void);
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_MAC)
+FOG_NO_EXPORT void Region_init_mac(void);
+#endif // FOG_OS_MAC
+
 FOG_NO_EXPORT void RegionUtil_init(void);
 
 // [Fog/G2d/Text]

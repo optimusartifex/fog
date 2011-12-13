@@ -17,20 +17,20 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::UxThemeLibrary]
+// [Fog::WinUxTheme]
 // ============================================================================
 
-UxThemeLibrary::UxThemeLibrary() :
+WinUxTheme::WinUxTheme() :
   err(0xFFFFFFFF)
 {
 }
 
-UxThemeLibrary::~UxThemeLibrary()
+WinUxTheme::~WinUxTheme()
 {
   close();
 }
 
-err_t UxThemeLibrary::init()
+err_t WinUxTheme::init()
 {
   if (err == 0xFFFFFFFF)
   {
@@ -42,13 +42,13 @@ err_t UxThemeLibrary::init()
   return err;
 }
 
-void UxThemeLibrary::close()
+void WinUxTheme::close()
 {
   dll.close();
   err = 0xFFFFFFFF;
 }
 
-err_t UxThemeLibrary::_init()
+err_t WinUxTheme::_init()
 {
   static const char xp_symbols[] =
     "OpenThemeData\0"
@@ -89,7 +89,7 @@ err_t UxThemeLibrary::_init()
     NUM_XP_SYMBOLS, (char**)&badSymbol) != NUM_XP_SYMBOLS)
   {
     // Some symbol failed to load? Inform about it.
-    Debug::dbgFunc("Fog::UxThemeLibrary", "init", "Can't load symbol '%s'.\n", badSymbol);
+    Debug::dbgFunc("Fog::WinUxTheme", "init", "Can't load symbol '%s'.\n", badSymbol);
     dll.close();
     return ERR_THEME_NATIVE_NOT_AVAILABLE;
   }

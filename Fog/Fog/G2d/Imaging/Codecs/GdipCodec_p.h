@@ -23,7 +23,7 @@
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImageDecoder.h>
 #include <Fog/G2d/Imaging/ImageEncoder.h>
-#include <Fog/G2d/Win/GdipLibrary.h>
+#include <Fog/G2d/OS/WinGdiPlus.h>
 
 namespace Fog {
 
@@ -131,7 +131,7 @@ struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
   //! @brief IStream bridge.
   IStream* _istream;
   //! @brief Gdi+ library.
-  GdipLibrary* _gdip;
+  WinGdiPlus* _gdip;
   //! @brief JPEG, PNG or TIFF parameters.
   GdipCommonParams _params;
 
@@ -183,7 +183,7 @@ struct FOG_NO_EXPORT GdipEncoder : public ImageEncoder
   //! @brief IStream bridge.
   IStream* _istream;
   //! @brief Gdi+ library.
-  GdipLibrary* _gdip;
+  WinGdiPlus* _gdip;
   //! @brief JPEG, PNG or TIFF parameters.
   GdipCommonParams _params;
 };

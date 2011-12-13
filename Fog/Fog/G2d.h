@@ -63,6 +63,7 @@
 #include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
 #include <Fog/G2d/Imaging/Filters/FeConvolveSeparable.h>
 #include <Fog/G2d/Imaging/Filters/FeMorphology.h>
+#include <Fog/G2d/OS/OSUtil.h>
 #include <Fog/G2d/Painting/PaintDevice.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Painting/PaintEngine.h>

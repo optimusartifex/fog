@@ -24,7 +24,7 @@
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
-#include <Fog/G2d/Win/GdipLibrary.h>
+#include <Fog/G2d/OS/WinGdiPlus.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::GdipDecoder)
 FOG_IMPLEMENT_OBJECT(Fog::GdipEncoder)
@@ -145,7 +145,7 @@ static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t stream
 // [Fog::GdipCodecProvider]
 // ===========================================================================
 
-static err_t getGdipEncoderClsid(GdipLibrary* _gdip, const WCHAR* mime, CLSID* clsid)
+static err_t getGdipEncoderClsid(WinGdiPlus* _gdip, const WCHAR* mime, CLSID* clsid)
 {
   GpStatus status;
   GpImageCodecInfo* codecs = NULL;
@@ -301,7 +301,7 @@ err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) con
 {
   FOG_ASSERT(codec != NULL);
 
-  GdipLibrary* gdip = GdipLibrary::get();
+  WinGdiPlus* gdip = WinGdiPlus::get();
   if (FOG_IS_NULL(gdip))
     return ERR_IMAGE_GDIPLUS_NOT_LOADED;
 
@@ -332,7 +332,7 @@ err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) con
 GdipDecoder::GdipDecoder(ImageCodecProvider* provider) :
   ImageDecoder(provider),
   _istream(NULL),
-  _gdip(GdipLibrary::get()),
+  _gdip(WinGdiPlus::get()),
   _gpImage(NULL)
 {
   _GdipCodec_clearCommonParams(&_params, _streamType);
@@ -492,7 +492,7 @@ err_t GdipDecoder::_setProperty(const ManagedStringW& name, const Var& src)
 GdipEncoder::GdipEncoder(ImageCodecProvider* provider) :
   ImageEncoder(provider),
   _istream(NULL),
-  _gdip(GdipLibrary::get())
+  _gdip(WinGdiPlus::get())
 {
   _GdipCodec_clearCommonParams(&_params, _streamType);
 }

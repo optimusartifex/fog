@@ -108,6 +108,15 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Dpi_init();
   Matrix_init();
   Region_init();
+
+#if defined(FOG_OS_WINDOWS)
+  Region_init_win();
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_MAC)
+  Region_init_mac();
+#endif // FOG_OS_MAC
+
   RegionUtil_init();
 
   // [G2d/Geometry]
@@ -139,8 +148,16 @@ FOG_CAPI_DECLARE void _fog_init(void)
   ImageFormatDescription_init();
   ImagePalette_init();
   Image_init();
-  ImageResize_init();
 
+#if defined(FOG_OS_WINDOWS)
+  Image_init_win();
+#endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_MAC)
+  Image_init_mac();
+#endif // FOG_OS_MAC
+
+  ImageResize_init();
   ImageConverter_init();
   ImageFilter_init();
   ImageCodecProvider_init();

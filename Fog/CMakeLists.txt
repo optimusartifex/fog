@@ -1102,11 +1102,14 @@ Set(FOG_G2D_OS_SOURCES
 )
 
 Set(FOG_G2D_OS_HEADERS
+  Fog/G2d/OS/OSUtil.h
 )
 
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_G2D_OS_SOURCES
     Fog/G2d/OS/WinGdiPlus.cpp
+    Fog/G2d/OS/WinImage.cpp
+    Fog/G2d/OS/WinRegion.cpp
     Fog/G2d/OS/WinUtil.cpp
     Fog/G2d/OS/WinUxTheme.cpp
   )

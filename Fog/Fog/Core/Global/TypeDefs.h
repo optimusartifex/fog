@@ -136,6 +136,8 @@ struct ChordF;
 struct ChordD;
 struct CircleF;
 struct CircleD;
+struct CoordF;
+struct CoordD;
 struct EllipseF;
 struct EllipseD;
 struct LineF;

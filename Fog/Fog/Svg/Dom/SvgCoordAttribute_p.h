@@ -11,8 +11,8 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
+#include <Fog/G2d/Geometry/Coord.h>
 #include <Fog/Svg/Dom/SvgDocument.h>
-#include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
 
@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT SvgCoordAttribute : public XmlAttribute
   // [Coords]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const SvgCoord& getCoord() const { return _coord; }
+  FOG_INLINE const CoordF& getCoord() const { return _coord; }
   FOG_INLINE float getCoordValue() const { return _coord.value; };
   FOG_INLINE uint32_t getCoordUnit() const { return _coord.unit; };
 
@@ -57,9 +57,8 @@ struct FOG_NO_EXPORT SvgCoordAttribute : public XmlAttribute
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-protected:
 
-  SvgCoord _coord;
+  CoordF _coord;
 
 private:
   _FOG_NO_COPY(SvgCoordAttribute)

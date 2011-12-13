@@ -1507,12 +1507,10 @@ Set(FOG_SVG_VISIT_HEADERS
 )
 
 Set(FOG_SVG_TOOLS_SOURCES
-  Fog/Svg/Tools/SvgCoord.cpp
   Fog/Svg/Tools/SvgUtil.cpp
 )
 
 Set(FOG_SVG_TOOLS_HEADERS
-  Fog/Svg/Tools/SvgCoord.h
   Fog/Svg/Tools/SvgUtil.h
 )
 

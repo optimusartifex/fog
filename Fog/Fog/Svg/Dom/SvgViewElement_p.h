@@ -19,7 +19,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::SvgRootElement]
+// [Fog::SvgViewElement]
 // ============================================================================
 
 struct FOG_NO_EXPORT SvgViewElement : public SvgStyledElement

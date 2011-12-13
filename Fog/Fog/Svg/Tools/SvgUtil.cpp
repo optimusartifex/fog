@@ -269,7 +269,7 @@ static const char svgUnitNames[] =
   "ex";
 // ${UNIT:END}
 
-err_t parseCoord(SvgCoord& coord, const StringW& str)
+err_t parseCoord(CoordF& coord, const StringW& str)
 {
   float d = 0.0f;
   uint32_t unit = UNIT_PX;
@@ -765,7 +765,7 @@ err_t serializeColor(StringW& dst, const Color& color)
 // [Fog::SvgUtil - Serialize - Coord]
 // ============================================================================
 
-err_t serializeCoord(StringW& dst, const SvgCoord& coord)
+err_t serializeCoord(StringW& dst, const CoordF& coord)
 {
   float val = coord.value;
 

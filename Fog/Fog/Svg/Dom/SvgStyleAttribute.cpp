@@ -57,23 +57,31 @@ SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedStringW& 
   _fillSource(SVG_SOURCE_NONE),
   _fillRule(FILL_RULE_DEFAULT),
   _strokeSource(SVG_SOURCE_NONE),
+
   _strokeLineCap(LINE_CAP_DEFAULT),
   _strokeLineJoin(LINE_JOIN_DEFAULT),
+  _strokeDashOffsetUnit(UNIT_PX),
+  _strokeMiterLimitUnit(UNIT_PX),
+
+  _strokeWidthUnit(UNIT_PX),
+  _fontSizeUnit(UNIT_PX),
+  _letterSpacingUnit(UNIT_PX),
+  _reserved_0(0),
 
   _fillColor(),
   _strokeColor(),
   _stopColor(),
 
-  _opacity(0.0),
-  _fillOpacity(0.0),
-  _strokeOpacity(0.0),
-  _stopOpacity(0.0),
+  _opacity(0.0f),
+  _fillOpacity(0.0f),
+  _strokeOpacity(0.0f),
+  _stopOpacity(0.0f),
 
-  _strokeDashOffset(0.0, UNIT_PX),
-  _strokeMiterLimit(0.0, UNIT_PX),
-  _strokeWidth(0.0, UNIT_PX),
-  _fontSize(0.0, UNIT_PX),
-  _letterSpacing(0.0, UNIT_PX)
+  _strokeDashOffsetValue(0.0f),
+  _strokeMiterLimitValue(0.0f),
+  _strokeWidthValue(0.0f),
+  _fontSizeValue(0.0f),
+  _letterSpacingValue(0.0f)
 {
 }
 
@@ -237,11 +245,11 @@ StringW SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_FONT_SIZE:
-      SvgUtil::serializeCoord(result, _fontSize);
+      SvgUtil::serializeCoord(result, getFontSize());
       break;
 
     case SVG_STYLE_LETTER_SPACING:
-      SvgUtil::serializeCoord(result, _letterSpacing);
+      SvgUtil::serializeCoord(result, getLetterSpacing());
       break;
 
     case SVG_STYLE_MASK:
@@ -280,7 +288,7 @@ StringW SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STROKE_DASH_OFFSET:
-      SvgUtil::serializeCoord(result, _strokeDashOffset);
+      SvgUtil::serializeCoord(result, getStrokeDashOffset());
       break;
 
     case SVG_STYLE_STROKE_LINE_CAP:
@@ -294,7 +302,7 @@ StringW SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STROKE_MITER_LIMIT:
-      SvgUtil::serializeCoord(result, _strokeMiterLimit);
+      SvgUtil::serializeCoord(result, getStrokeMiterLimit());
       break;
 
     case SVG_STYLE_STROKE_OPACITY:
@@ -302,7 +310,7 @@ StringW SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STROKE_WIDTH:
-      SvgUtil::serializeCoord(result, _strokeWidth);
+      SvgUtil::serializeCoord(result, getStrokeWidth());
       break;
 
     default:
@@ -326,24 +334,31 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
   switch (styleId)
   {
     case SVG_STYLE_CLIP_PATH:
+    {
       // SVG TODO:
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
+    }
 
     case SVG_STYLE_CLIP_RULE:
+    {
       i = svgGetEnumId(value, svgEnum_fillRule);
       if (i == -1)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       else
         _clipRule = (uint8_t)(uint)i;
       break;
+    }
 
     case SVG_STYLE_ENABLE_BACKGROUND:
+    {
       // SVG TODO:
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
+    }
 
     case SVG_STYLE_FILL:
+    {
       _fillSource = (uint8_t)SvgUtil::parseColor(_fillColor, value);
       switch (_fillSource)
       {
@@ -358,58 +373,84 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
           break;
       }
       break;
+    }
 
     case SVG_STYLE_FILL_OPACITY:
+    {
       err = SvgUtil::parseOpacity(_fillOpacity, value);
       break;
+    }
 
     case SVG_STYLE_FILL_RULE:
+    {
       i = svgGetEnumId(value, svgEnum_fillRule);
       if (i == -1)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       else
         _fillRule = (uint8_t)(uint)i;
       break;
+    }
 
     case SVG_STYLE_FILTER:
+    {
       // SVG TODO:
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
+    }
 
     case SVG_STYLE_FONT_FAMILY:
+    {
       err = _value.set(value);
       break;
+    }
 
     case SVG_STYLE_FONT_SIZE:
-      if (SvgUtil::parseCoord(_fontSize, value) != ERR_OK)
+    {
+      CoordF coord(UNINITIALIZED);
+      if (SvgUtil::parseCoord(coord, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
+      setFontSize(coord);
       break;
+    }
 
     case SVG_STYLE_LETTER_SPACING:
-      if (SvgUtil::parseCoord(_letterSpacing, value) != ERR_OK)
+    {
+      CoordF coord(UNINITIALIZED);
+      if (SvgUtil::parseCoord(coord, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
+      setLetterSpacing(coord);
       break;
+    }
 
     case SVG_STYLE_MASK:
+    {
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
+    }
 
     case SVG_STYLE_OPACITY:
+    {
       err = SvgUtil::parseOpacity(_opacity, value);
       break;
+    }
 
     case SVG_STYLE_STOP_COLOR:
+    {
       if (SvgUtil::parseColor(_stopColor, value) != SVG_SOURCE_COLOR)
       {
         err = ERR_SVG_INVALID_STYLE_VALUE;
       }
       break;
+    }
 
     case SVG_STYLE_STOP_OPACITY:
+    {
       err = SvgUtil::parseOpacity(_stopOpacity, value);
       break;
+    }
 
     case SVG_STYLE_STROKE:
+    {
       _strokeSource = (uint8_t)SvgUtil::parseColor(_strokeColor, value);
       switch (_strokeSource)
       {
@@ -424,45 +465,66 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
           break;
       }
       break;
+    }
 
     case SVG_STYLE_STROKE_DASH_ARRAY:
+    {
       //err = ERR_RT_NOT_IMPLEMENTED;
       break;
+    }
 
     case SVG_STYLE_STROKE_DASH_OFFSET:
-      if (SvgUtil::parseCoord(_strokeDashOffset, value) != ERR_OK)
+    {
+      CoordF coord(UNINITIALIZED);
+      if (SvgUtil::parseCoord(coord, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
+      setStrokeDashOffset(coord);
       break;
+    }
 
     case SVG_STYLE_STROKE_LINE_CAP:
+    {
       i = svgGetEnumId(value, svgEnum_strokeLineCap);
       if (i == -1)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       else
         _strokeLineCap = (uint8_t)(uint)i;
       break;
+    }
 
     case SVG_STYLE_STROKE_LINE_JOIN:
+    {
       i = svgGetEnumId(value, svgEnum_strokeLineJoin);
       if (i == -1)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       else
         _strokeLineJoin = (uint8_t)(uint)i;
       break;
+    }
 
     case SVG_STYLE_STROKE_MITER_LIMIT:
-      if (SvgUtil::parseCoord(_strokeMiterLimit, value) != ERR_OK)
+    {
+      CoordF coord(UNINITIALIZED);
+      if (SvgUtil::parseCoord(coord, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
+      setStrokeMiterLimit(coord);
       break;
+    }
 
     case SVG_STYLE_STROKE_OPACITY:
+    {
       err = SvgUtil::parseOpacity(_strokeOpacity, value);
       break;
+    }
 
     case SVG_STYLE_STROKE_WIDTH:
-      if (SvgUtil::parseCoord(_strokeWidth, value) != ERR_OK)
+    {
+      CoordF coord(UNINITIALIZED);
+      if (SvgUtil::parseCoord(coord, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
+      setStrokeWidth(coord);
       break;
+    }
 
     default:
       return ERR_RT_INVALID_ARGUMENT;

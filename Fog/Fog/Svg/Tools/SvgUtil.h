@@ -11,10 +11,10 @@
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
+#include <Fog/G2d/Geometry/Coord.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Source/Color.h>
-#include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
 namespace SvgUtil {
@@ -40,7 +40,7 @@ FOG_API err_t parseOpacity(float& dst, const StringW& str);
 FOG_API err_t parseTransform(TransformF& dst, const StringW& str);
 
 //! @brief Parse SVG coordinate and return it.
-FOG_API err_t parseCoord(SvgCoord& coord, const StringW& str);
+FOG_API err_t parseCoord(CoordF& coord, const StringW& str);
 
 FOG_API err_t parseViewBox(BoxF& box, const StringW& str);
 
@@ -55,7 +55,7 @@ FOG_API err_t parsePath(PathF& dst, const StringW& str);
 FOG_API err_t serializeColor(StringW& dst, const Color& color);
 
 //! @brief Serialize SVG coordinate to string.
-FOG_API err_t serializeCoord(StringW& dst, const SvgCoord& coord);
+FOG_API err_t serializeCoord(StringW& dst, const CoordF& coord);
 
 //! @}
 

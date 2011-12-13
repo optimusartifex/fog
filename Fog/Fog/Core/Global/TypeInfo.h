@@ -395,6 +395,8 @@ _FOG_TYPE_DECLARE(Fog::ChordF                  , C(SIMPLE )               | F(NO
 _FOG_TYPE_DECLARE(Fog::ChordD                  , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::CircleF                 , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::CircleD                 , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::CoordF                  , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::CoordD                  , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::EllipseF                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::EllipseD                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::LineF                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))

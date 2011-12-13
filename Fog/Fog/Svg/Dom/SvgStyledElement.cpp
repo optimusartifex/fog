@@ -179,7 +179,7 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
       if (styleMask & (1 << SVG_STYLE_FONT_SIZE))
       {
         size = doc->_dpi.toDeviceSpace(
-          a_style._fontSize.value, a_style._fontSize.unit);
+          a_style._fontSizeValue, a_style._fontSizeUnit);
       }
 
       visitor->_font.create(family, size, UNIT_NONE);
@@ -282,7 +282,7 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
       if (styleMask & (1 << SVG_STYLE_STROKE_MITER_LIMIT))
       {
         float miterLimit = doc->_dpi.toDeviceSpace(
-          a_style._strokeMiterLimit.value, a_style._strokeMiterLimit.unit);
+          a_style._strokeMiterLimitValue, a_style._strokeMiterLimitUnit);
         visitor->setMiterLimit(miterLimit);
       }
 
@@ -294,7 +294,7 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
       if (styleMask & (1 << SVG_STYLE_STROKE_WIDTH))
       {
         float lineWidth = doc->_dpi.toDeviceSpace(
-          a_style._strokeWidth.value, a_style._strokeWidth.unit);
+          a_style._strokeWidthValue, a_style._strokeWidthUnit);
         visitor->setLineWidth(lineWidth);
       }
     }

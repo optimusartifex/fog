@@ -10,6 +10,7 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Circle.h>
+#include <Fog/G2d/Geometry/Coord.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Line.h>
 #include <Fog/G2d/Geometry/Path.h>
@@ -19,7 +20,6 @@
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Text/Font.h>
-#include <Fog/Svg/Tools/SvgCoord.h>
 #include <Fog/Svg/Visit/SvgVisitor.h>
 
 namespace Fog {

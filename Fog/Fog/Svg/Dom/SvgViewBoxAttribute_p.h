@@ -12,8 +12,8 @@
 #include <Fog/Core/Xml/XmlAttribute.h>
 #include <Fog/Core/Xml/XmlElement.h>
 #include <Fog/G2d/Geometry/Box.h>
+#include <Fog/G2d/Geometry/Coord.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/Svg/Tools/SvgCoord.h>
 
 namespace Fog {
 
@@ -21,7 +21,7 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::SvgCoordAttribute]
+// [Fog::SvgViewBoxAttribute]
 // ============================================================================
 
 struct FOG_NO_EXPORT SvgViewBoxAttribute : public XmlAttribute

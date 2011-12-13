@@ -302,10 +302,20 @@ struct MatrixDataD;
 struct Region;
 struct RegionData;
 
-// Fog/UI/Layout
+// Fog/UI/Engine.
+struct FbCaretState;
+struct FbDisplayInfo;
+struct FbEngine;
+struct FbEvent;
+struct FbKeyboardState;
+struct FbMouseState;
+struct FbPaletteInfo;
+struct FbWindow;
+
+// Fog/UI/Layout.
 struct Layout;
 
-// Fog/UI/Widget
+// Fog/UI/Widget.
 struct Widget;
 
 // ============================================================================

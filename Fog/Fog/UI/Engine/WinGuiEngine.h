@@ -16,7 +16,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Gui_Engine
+//! @addtogroup Fog_UI_Engine
 //! @{
 
 // ============================================================================

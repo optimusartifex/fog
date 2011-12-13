@@ -17,6 +17,31 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::FB_EVENT]
+// ============================================================================
+
+enum FB_EVENT
+{
+  FB_EVENT_WINDOW_CREATE = 0,
+  FB_EVENT_WINDOW_DESTROY = 1,
+
+  FB_EVENT_WINDOW_MAXIMIZE = 2,
+  FB_EVENT_WINDOW_MINIMIZE = 3,
+  FB_EVENT_WINDOW_RESTORE = 4,
+  FB_EVENT_WINDOW_CLOSE = 5,
+
+  FB_EVENT_KEY_PRESS = 10,
+  FB_EVENT_KEY_RELEASE = 11,
+
+  FB_EVENT_MOUSE_ENTER = 15,
+  FB_EVENT_MOUSE_LEAVE = 16,
+  FB_EVENT_MOUSE_MOVE = 17,
+
+  FB_EVENT_MOUSE_PRESS = 18,
+  FB_EVENT_MOUSE_RELEASE = 19
+};
+
+// ============================================================================
 // [Fog::MARGIN_LOCATION]
 // ============================================================================
 

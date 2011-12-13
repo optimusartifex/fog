@@ -23,7 +23,7 @@ _FOG_OBJC_CLASS(FogWindow);
 
 namespace Fog {
 
-//! @addtogroup Fog_Gui_Engine
+//! @addtogroup Fog_UI_Engine
 //! @{
 
 // ============================================================================

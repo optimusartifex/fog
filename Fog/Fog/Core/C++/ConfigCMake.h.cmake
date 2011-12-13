@@ -11,7 +11,11 @@
 // [FOG_BUILD]
 // ============================================================================
 
+//! @brief Whether to build Fog-Framework as a static library.
 #cmakedefine FOG_BUILD_STATIC
+
+//! @brief Whether to build Fog/UI (Default).
+#cmakedefine FOG_BUILD_UI
 
 // ============================================================================
 // [FOG_DEBUG]

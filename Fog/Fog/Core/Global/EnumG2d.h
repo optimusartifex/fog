@@ -1778,15 +1778,38 @@ enum IMAGE_FORMAT
   // --------------------------------------------------------------------------
 
   //! @brief 32-bit ARGB (8 bits per component), premultiplied.
+  //!
+  //! Supported natively by these libraries:
+  //!   - Cairo (CAIRO_FORMAT_ARGB32)
+  //!   - CGImageRef (8bpc, 32bpp, Default byte-order, premultiplied alpha last).
+  //!   - DIBSECTION (32bpp, RGB)
+  //!   - Qt (QImage::Format_ARGB32_Premultiplied)
   IMAGE_FORMAT_PRGB32 = 0,
+
   //! @brief 32-bit RGB (8 bits per component).
+  //!
+  //! Supported natively by these libraries:
+  //!   - Cairo (CAIRO_FORMAT_RGB24)
+  //!   - CGImageRef (8bpc, 32bpp, Default byte-order, skip alpha last).
+  //!   - DIBSECTION (32bpp, RGB)
+  //!   - Qt (QImage::Format_RGB32)
   IMAGE_FORMAT_XRGB32 = 1,
+
   //! @brief 24-bit RGB (8 bits per component).
+  //!
+  //! Supported natively by these libraries:
+  //!   - DIBSECTION (24bpp, RGB)
   IMAGE_FORMAT_RGB24 = 2,
 
   //! @brief 8-bit ALPHA.
+  //!
+  //! Supported natively by these libraries:
+  //!   - Cairo (CAIRO_FORMAT_A8)
+  //!   - CGImageRef (8bpc, 8bpp, alpha only).
+  //!   - DIBSECTION (8bpp, palette)
   IMAGE_FORMAT_A8 = 3,
-  //! @brief 8-bit INDEXED (RGB32 palette).
+
+  //! @brief 8-bit INDEXED (RGB32 palette, without alpha).
   IMAGE_FORMAT_I8 = 4,
 
   // --------------------------------------------------------------------------

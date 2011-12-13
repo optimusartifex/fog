@@ -1565,25 +1565,25 @@ Set(FOG_UI_LIB_HEADERS
   Fog/UI.h
 )
 
-# [Fog/UI/Canvas]
-Set(FOG_UI_CANVAS_SOURCES
-  Fog/UI/Canvas/CanvasDelegate.cpp
-  Fog/UI/Canvas/CanvasElement.cpp
-  Fog/UI/Canvas/CanvasView.cpp
-)
-
-Set(FOG_UI_CANVAS_HEADERS
-  Fog/UI/Canvas/CanvasDelegate.h
-  Fog/UI/Canvas/CanvasElement.h
-  Fog/UI/Canvas/CanvasView.h
-)
-
 # [Fog/UI/Engine]
 Set(FOG_UI_ENGINE_SOURCES
+  Fog/UI/Engine/FbEngine.cpp
+  Fog/UI/Engine/FbEvent.cpp
+  Fog/UI/Engine/FbWindow.cpp
+
   Fog/UI/Engine/GuiEngine.cpp
 )
 
 Set(FOG_UI_ENGINE_HEADERS
+  Fog/UI/Engine/FbCaretState.h
+  Fog/UI/Engine/FbDisplayInfo.h
+  Fog/UI/Engine/FbEngine.h
+  Fog/UI/Engine/FbEvent.h
+  Fog/UI/Engine/FbKeyboardState.h
+  Fog/UI/Engine/FbMouseState.h
+  Fog/UI/Engine/FbPaletteInfo.h
+  Fog/UI/Engine/FbWindow.h
+
   Fog/UI/Engine/GuiEngine.h
 )
 
@@ -1654,7 +1654,6 @@ Set(FOG_UI_WIDGET_HEADERS
 
 # Source groups.
 Source_Group("UI"                   FILES ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
-Source_Group("UI/Canvas"            FILES ${FOG_UI_CANVAS_SOURCES}           ${FOG_UI_CANVAS_HEADERS}          )
 Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
                                           ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
                                           ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
@@ -1751,7 +1750,6 @@ If(FOG_BUILD_UI)
   # Fog/UI.
   List(APPEND FOG_ALL_SOURCES
     ${FOG_UI_LIB_SOURCES}
-    ${FOG_UI_CANVAS_SOURCES}
     ${FOG_UI_ENGINE_SOURCES}
     ${FOG_UI_LAYOUT_SOURCES}
     ${FOG_UI_WIDGET_SOURCES}
@@ -1759,7 +1757,6 @@ If(FOG_BUILD_UI)
 
   List(APPEND FOG_ALL_HEADERS
     ${FOG_UI_LIB_HEADERS}
-    ${FOG_UI_CANVAS_HEADERS}
     ${FOG_UI_ENGINE_HEADERS}
     ${FOG_UI_ENGINE_X11_HEADERS}
     ${FOG_UI_ENGINE_WIN_HEADERS}

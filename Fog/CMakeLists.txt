@@ -47,6 +47,18 @@ If(IOS)
   Message("-- Forced to build a static library, because of iOS target.")
 EndIf()
 
+# Disable UI parts in case that UI is completely disabled.
+If(NOT FOG_BUILD_UI AND FOG_BUILD_UI_X11)
+  Set(FOG_BUILD_UI_X11 FALSE)
+  Message("-- Disabled Fog/UI(X11), because of disabled Fog/UI.")
+EndIf()
+
+# Disable Bench/Examples in case that the UI is disabled.
+If(NOT FOG_BUILD_UI AND FOG_BUILD_EXAMPLED)
+  Set(FOG_BUILD_EXAMPLES FALSE)
+  Message("-- Disabled Examples, because of disabled Fog/UI.")
+EndIf()
+
 If(NOT FOG_BUILD_STATIC)
   Message("")
   Message("== ====================================================")
@@ -1085,6 +1097,35 @@ If(NOT FOG_HAVE_LIBPNG)
   Check_Include_Files(png.h FOG_HAVE_LIBPNG)
 EndIf()
 
+# [Fog/G2d/OS]
+Set(FOG_G2D_OS_SOURCES
+)
+
+Set(FOG_G2D_OS_HEADERS
+)
+
+If(FOG_OS_WINDOWS)
+  List(APPEND FOG_G2D_OS_SOURCES
+    Fog/G2d/OS/WinGdiPlus.cpp
+    Fog/G2d/OS/WinUtil.cpp
+    Fog/G2d/OS/WinUxTheme.cpp
+  )
+  List(APPEND FOG_G2D_OS_HEADERS
+    Fog/G2d/OS/WinGdiPlus.h
+    Fog/G2d/OS/WinUtil.h
+    Fog/G2d/OS/WinUxTheme.h
+  )
+EndIf()
+
+If(FOG_OS_MAC)
+  List(APPEND FOG_G2D_OS_SOURCES
+    Fog/G2d/OS/MacUtil.mm
+  )
+  List(APPEND FOG_G2D_OS_HEADERS
+    Fog/G2d/OS/MacUtil.h
+  )
+EndIf()
+
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
   Fog/G2d/Painting/NullPaintEngine.cpp
@@ -1334,28 +1375,6 @@ AddOptimizedSources(FOG_G2D_TOOLS_SOURCES SSE2
   Fog/G2d/Tools/Region_SSE2.cpp
 )
 
-# [Fog/G2d/Win]
-If(FOG_OS_WINDOWS)
-  Set(FOG_G2D_WIN_SOURCES
-    Fog/G2d/Win/GdipLibrary.cpp
-    Fog/G2d/Win/UxThemeLibrary.cpp
-  )
-  Set(FOG_G2D_WIN_HEADERS
-    Fog/G2d/Win/GdipLibrary.h
-    Fog/G2d/Win/UxThemeLibrary.h
-  )
-EndIf()
-
-# [Fog/G2d/Mac]
-If(FOG_OS_MAC)
-  Set(FOG_G2D_MAC_SOURCES
-    Fog/G2d/Mac/MacUtil.mm
-  )
-  Set(FOG_G2D_MAC_HEADERS
-    Fog/G2d/Mac/MacUtil.h
-  )
-EndIf()
-
 # Source groups.
 Source_Group("G2d"                  FILES ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
 Source_Group("G2d/Face"             FILES ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
@@ -1363,6 +1382,7 @@ Source_Group("G2d/Geometry"         FILES ${FOG_G2D_GEOMETRY_SOURCES}         ${
 Source_Group("G2d/Imaging"          FILES ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
 Source_Group("G2d/Imaging/Codecs"   FILES ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
 Source_Group("G2d/Imaging/Filters"  FILES ${FOG_G2D_IMAGING_FILTERS_SOURCES}  ${FOG_G2D_IMAGING_FILTERS_HEADERS} )
+Source_Group("G2d/OS"               FILES ${FOG_G2D_OS_SOURCES}               ${FOG_G2D_OS_HEADERS}              )
 Source_Group("G2d/Painting"         FILES ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
 Source_Group("G2d/Source"           FILES ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
 Source_Group("G2d/Text"             FILES ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
@@ -1372,14 +1392,6 @@ Source_Group("G2d/Painting/RasterOps_C" FILES
   ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
   ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
 )
-
-If(FOG_OS_WINDOWS)
-Source_Group("G2d/Win"              FILES ${FOG_G2D_WIN_SOURCES}              ${FOG_G2D_WIN_HEADERS}             )
-EndIf()
-
-If(FOG_OS_MAC)
-Source_Group("G2d/Mac"              FILES ${FOG_G2D_MAC_SOURCES}              ${FOG_G2D_MAC_HEADERS}             )
-EndIf()
 
 # =============================================================================
 # [Fog/Svg]
@@ -1524,13 +1536,15 @@ Source_Group("Svg/Visit"            FILES ${FOG_SVG_VISIT_SOURCES}            ${
 # [Fog/UI]
 # =============================================================================
 
+If(FOG_BUILD_UI)
+
 Message("-- Configuring Fog/UI")
 
 # =============================================================================
 # [Fog/UI - Files]
 # =============================================================================
 
-# Backends.
+# UI Backends.
 If(FOG_OS_WINDOWS)
   Set(FOG_UI_WINDOWS 1)
 ElseIf(FOG_OS_MAC)
@@ -1644,6 +1658,8 @@ Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${F
 Source_Group("UI/Layout"            FILES ${FOG_UI_LAYOUT_SOURCES}           ${FOG_UI_LAYOUT_HEADERS}          )
 Source_Group("UI/Widget"            FILES ${FOG_UI_WIDGET_SOURCES}           ${FOG_UI_WIDGET_HEADERS}          )
 
+EndIf(FOG_BUILD_UI)
+
 # =============================================================================
 # [Fog-All]
 # =============================================================================
@@ -1669,17 +1685,12 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_IMAGING_SOURCES}
   ${FOG_G2D_IMAGING_CODECS_SOURCES}
   ${FOG_G2D_IMAGING_FILTERS_SOURCES}
+  ${FOG_G2D_OS_SOURCES}
   ${FOG_G2D_PAINTING_SOURCES}
   ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
   ${FOG_G2D_SOURCE_SOURCES}
   ${FOG_G2D_TEXT_SOURCES}
   ${FOG_G2D_TOOLS_SOURCES}
-  # Fog/UI.
-  ${FOG_UI_LIB_SOURCES}
-  ${FOG_UI_CANVAS_SOURCES}
-  ${FOG_UI_ENGINE_SOURCES}
-  ${FOG_UI_LAYOUT_SOURCES}
-  ${FOG_UI_WIDGET_SOURCES}
   # Fog/Svg.
   ${FOG_SVG_LIB_SOURCES}
   ${FOG_SVG_DOM_SOURCES}
@@ -1708,6 +1719,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_IMAGING_HEADERS}
   ${FOG_G2D_IMAGING_CODECS_HEADERS}
   ${FOG_G2D_IMAGING_FILTERS_HEADERS}
+  ${FOG_G2D_OS_HEADERS}
   ${FOG_G2D_PAINTING_HEADERS}
   ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
@@ -1719,14 +1731,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_SVG_DOM_HEADERS}
   ${FOG_SVG_TOOLS_HEADERS}
   ${FOG_SVG_VISIT_HEADERS}
-  # Fog/UI.
-  ${FOG_UI_LIB_HEADERS}
-  ${FOG_UI_CANVAS_HEADERS}
-  ${FOG_UI_ENGINE_HEADERS}
-  ${FOG_UI_ENGINE_X11_HEADERS}
-  ${FOG_UI_ENGINE_WIN_HEADERS}
-  ${FOG_UI_LAYOUT_HEADERS}
-  ${FOG_UI_WIDGET_HEADERS}
 )
 
 If(FOG_OS_WINDOWS)
@@ -1739,22 +1743,45 @@ If(FOG_OS_MAC)
   List(APPEND FOG_ALL_HEADERS ${FOG_G2D_MAC_HEADERS})
 EndIf()
 
-If(FOG_UI_WINDOWS)
-  List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_WIN_SOURCES})
-  List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_WIN_HEADERS})
+If(FOG_BUILD_UI)
+  # Fog/UI.
+  List(APPEND FOG_ALL_SOURCES
+    ${FOG_UI_LIB_SOURCES}
+    ${FOG_UI_CANVAS_SOURCES}
+    ${FOG_UI_ENGINE_SOURCES}
+    ${FOG_UI_LAYOUT_SOURCES}
+    ${FOG_UI_WIDGET_SOURCES}
+  )
+
+  List(APPEND FOG_ALL_HEADERS
+    ${FOG_UI_LIB_HEADERS}
+    ${FOG_UI_CANVAS_HEADERS}
+    ${FOG_UI_ENGINE_HEADERS}
+    ${FOG_UI_ENGINE_X11_HEADERS}
+    ${FOG_UI_ENGINE_WIN_HEADERS}
+    ${FOG_UI_LAYOUT_HEADERS}
+    ${FOG_UI_WIDGET_HEADERS}
+  )
+
+  If(FOG_UI_WINDOWS)
+    List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_WIN_SOURCES})
+    List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_WIN_HEADERS})
+  EndIf()
+
+  If(FOG_UI_MAC)
+    List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_MAC_SOURCES})
+    List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_MAC_HEADERS})
+  EndIf()
 EndIf()
 
-If(FOG_UI_MAC)
-  List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_MAC_SOURCES})
-  List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_MAC_HEADERS})
-EndIf()
-
+# Corrected Sources/Headers.
 Set(FOG_ALL_SOURCES_CORRECTED "")
+Set(FOG_ALL_HEADERS_CORRECTED "")
+
 ForEach(i ${FOG_ALL_SOURCES})
   List(APPEND FOG_ALL_SOURCES_CORRECTED ${FOG_DIR}/${i})
 EndForEach()
 
-Set(FOG_ALL_HEADERS_CORRECTED "")
 ForEach(i ${FOG_ALL_HEADERS})
   List(APPEND FOG_ALL_HEADERS_CORRECTED ${FOG_DIR}/${i})
 EndForEach()

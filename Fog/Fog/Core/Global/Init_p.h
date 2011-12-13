@@ -180,10 +180,6 @@ FOG_NO_EXPORT void Region_init(void);
 FOG_NO_EXPORT void Region_init_win(void);
 #endif // FOG_OS_WINDOWS
 
-#if defined(FOG_OS_MAC)
-FOG_NO_EXPORT void Region_init_mac(void);
-#endif // FOG_OS_MAC
-
 FOG_NO_EXPORT void RegionUtil_init(void);
 
 // [Fog/G2d/Text]

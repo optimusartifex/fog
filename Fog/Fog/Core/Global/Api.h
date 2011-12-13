@@ -2258,13 +2258,13 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(bool, femorphology_eq)(const FeMorphology* a, const FeMorphology* b);
 
   // --------------------------------------------------------------------------
-  // [G2d/OS - WinUtil]
+  // [G2d/OS - WinUtil / Support]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_WINDOWS)
   FOG_CAPI_METHOD(err_t, image_toWinBitmap)(const Image* self, HBITMAP* hBitmap);
   FOG_CAPI_METHOD(err_t, image_fromWinBitmap)(Image* self, HBITMAP hBitmap);
-  
+
   FOG_CAPI_METHOD(err_t, image_getDC)(Image* self, HDC* hDC);
   FOG_CAPI_METHOD(err_t, image_releaseDC)(Image* self, HDC hDC);
 
@@ -2273,7 +2273,7 @@ struct FOG_NO_EXPORT Api
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
-  // [G2d/OS - MacUtil]
+  // [G2d/OS - MacUtil / Support]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_MAC)

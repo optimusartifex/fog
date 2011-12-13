@@ -113,10 +113,6 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Region_init_win();
 #endif // FOG_OS_WINDOWS
 
-#if defined(FOG_OS_MAC)
-  Region_init_mac();
-#endif // FOG_OS_MAC
-
   RegionUtil_init();
 
   // [G2d/Geometry]

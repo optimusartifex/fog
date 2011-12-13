@@ -1122,6 +1122,7 @@ EndIf()
 
 If(FOG_OS_MAC)
   List(APPEND FOG_G2D_OS_SOURCES
+    Fog/G2d/OS/MacImage.mm
     Fog/G2d/OS/MacUtil.mm
   )
   List(APPEND FOG_G2D_OS_HEADERS

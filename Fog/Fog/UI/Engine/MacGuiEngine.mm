@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/G2d/Mac/MacUtil.h>
+#include <Fog/G2d/OS/MacUtil.h>
 #include <Fog/UI/Engine/MacGuiEngine.h>
 #include <Fog/UI/Widget/Widget.h>
 

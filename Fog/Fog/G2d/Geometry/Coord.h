@@ -32,8 +32,17 @@ struct FOG_NO_EXPORT CoordF
   FOG_INLINE CoordF() {}
   explicit FOG_INLINE CoordF(_Uninitialized) {}
 
-  FOG_INLINE CoordF(const CoordF& other) : value(other.value), unit(other.unit) {}
-  FOG_INLINE CoordF(float value, uint32_t unit) : value(value), unit(unit) {}
+  FOG_INLINE CoordF(const CoordF& other) :
+    value(other.value),
+    unit(other.unit)
+  {
+  }
+
+  FOG_INLINE CoordF(float value, uint32_t unit) :
+    value(value),
+    unit(unit)
+  {
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -102,8 +111,17 @@ struct FOG_NO_EXPORT CoordD
   FOG_INLINE CoordD() {}
   explicit FOG_INLINE CoordD(_Uninitialized) {}
 
-  FOG_INLINE CoordD(const CoordD& other) : value(other.value), unit(other.unit) {}
-  FOG_INLINE CoordD(float value, uint32_t unit) : value(value), unit(unit) {}
+  FOG_INLINE CoordD(const CoordD& other) :
+    value(other.value),
+    unit(other.unit)
+  {
+  }
+
+  FOG_INLINE CoordD(float value, uint32_t unit) :
+    value(value),
+    unit(unit)
+  {
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]

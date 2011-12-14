@@ -1582,6 +1582,7 @@ Set(FOG_UI_ENGINE_HEADERS
   Fog/UI/Engine/FbKeyboardState.h
   Fog/UI/Engine/FbMouseState.h
   Fog/UI/Engine/FbPaletteInfo.h
+  Fog/UI/Engine/FbSecondary.h
   Fog/UI/Engine/FbWindow.h
 
   Fog/UI/Engine/GuiEngine.h

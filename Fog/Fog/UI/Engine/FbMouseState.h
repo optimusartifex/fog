@@ -40,7 +40,7 @@ struct FOG_NO_EXPORT FbMouseState
   FOG_INLINE bool eq(const FbMouseState& other) const
   {
     return position == other.position &&
-           hover    == other.hoves    &&
+           hover    == other.hover    &&
            buttons  == other.buttons  ;
   }
 
@@ -48,7 +48,7 @@ struct FOG_NO_EXPORT FbMouseState
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool operator=(const FbMouseState& other)
+  FOG_INLINE FbMouseState& operator=(const FbMouseState& other)
   {
     position = other.position;
     hover = other.hover;

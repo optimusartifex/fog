@@ -325,7 +325,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/My/svg/PatternTest.svg");
     //fileName = Ascii8("C:/my/svg/Denis - map_v.0.2.svg");
     
-    fileName = Ascii8("/Users/petr/Desktop/tiger.svg");
+    //fileName = Ascii8("/Users/petr/Desktop/tiger.svg");
   }
 
   MyWindow window;

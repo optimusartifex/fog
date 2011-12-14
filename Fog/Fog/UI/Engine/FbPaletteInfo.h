@@ -48,7 +48,7 @@ struct FOG_NO_EXPORT FbPaletteInfo
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool operator=(const FbPaletteInfo& other)
+  FOG_INLINE FbPaletteInfo& operator=(const FbPaletteInfo& other)
   {
     MemOps::copy(this, &other, sizeof(FbPaletteInfo));
     return *this;

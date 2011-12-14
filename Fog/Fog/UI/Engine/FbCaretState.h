@@ -25,7 +25,7 @@ namespace Fog {
 //! @brief Frame-buffer caret state.
 struct FOG_NO_EXPORT FbCaretState
 {
-  FOG_INLINE FbCaretInfo() :
+  FOG_INLINE FbCaretState() :
     rect(0, 0, 0, 0),
     color(),
     type(0),
@@ -46,7 +46,7 @@ struct FOG_NO_EXPORT FbCaretState
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool operator=(const FbCaretState& other)
+  FOG_INLINE FbCaretState& operator=(const FbCaretState& other)
   {
     MemOps::copy(this, &other, sizeof(FbCaretState));
     return *this;

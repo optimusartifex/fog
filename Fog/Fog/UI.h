@@ -17,6 +17,16 @@
 
 #include <Fog/Core/Global/Global.h>
 
+#include <Fog/UI/Engine/FbCaretState.h>
+#include <Fog/UI/Engine/FbDisplayInfo.h>
+#include <Fog/UI/Engine/FbEngine.h>
+#include <Fog/UI/Engine/FbEvent.h>
+#include <Fog/UI/Engine/FbKeyboardState.h>
+#include <Fog/UI/Engine/FbMouseState.h>
+#include <Fog/UI/Engine/FbPaletteInfo.h>
+#include <Fog/UI/Engine/FbSecondary.h>
+#include <Fog/UI/Engine/FbWindow.h>
+
 #include <Fog/UI/Engine/GuiEngine.h>
 #include <Fog/UI/Layout/BorderLayout.h>
 #include <Fog/UI/Layout/BoxLayout.h>

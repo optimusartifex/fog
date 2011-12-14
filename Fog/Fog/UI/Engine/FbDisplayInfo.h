@@ -47,7 +47,7 @@ struct FOG_NO_EXPORT FbDisplayInfo
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool operator=(const FbDisplayInfo& other)
+  FOG_INLINE FbDisplayInfo& operator=(const FbDisplayInfo& other)
   {
     MemOps::copy(this, &other, sizeof(FbDisplayInfo));
     return *this;
@@ -71,8 +71,10 @@ struct FOG_NO_EXPORT FbDisplayInfo
   uint32_t gMask;
   //! @brief Screen blue mask.
   uint32_t bMask;
-  //! @brief If true, 16 bit depth is byteswapped (X Server). In other depths
-  //! are byteswapped instead rMask, gMask and bMask values.
+
+  //! @brief If true, 16 bit depth is byte-swapped (X Server). In other bit 
+  //! depths it's likely to byte-swap instead image component masks instead
+  //! of the whole image.
   uint32_t is16BitSwapped;
 };
 

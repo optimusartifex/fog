@@ -65,7 +65,7 @@ namespace Fog {
 //! @brief Frame-buffer engine (abstract).
 struct FOG_API FbEngine : public Object
 {
-  FOG_OBJECT_DECLARE(FbEngine, Object)
+  FOG_DECLARE_OBJECT(FbEngine, Object)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -81,62 +81,64 @@ struct FOG_API FbEngine : public Object
   FOG_INLINE Lock& getLock() { return _lock; }
 
   // --------------------------------------------------------------------------
-  // [Handle <-> FbWindow]
+  // [Display / Palette]
   // --------------------------------------------------------------------------
 
-  //! @brief Map windowing system handle to the @ref GuiWindow instance.
-  virtual bool mapHandle(void* handle, GuiWindow* w);
-  //! @brief Unmap windowing system handle.
-  virtual bool unmapHandle(void* handle);
-  //! @brief Translate windowing system handle to @ref GuiWindow instance.
-  virtual GuiWindow* getWindowFromHandle(void* handle) const;
-
-  // --------------------------------------------------------------------------
-  // [Display]
-  // --------------------------------------------------------------------------
-
-  virtual err_t getDisplayInfo(DisplayInfo* out) const;
-  virtual err_t getPaletteInfo(PaletteInfo* out) const;
+  virtual const FbDisplayInfo* getDisplayInfo() const;
+  virtual const FbPaletteInfo* getPaletteInfo() const;
 
   virtual void updateDisplayInfo() = 0;
 
   // --------------------------------------------------------------------------
-  // [Caret]
+  // [Handle <-> FbWindow]
   // --------------------------------------------------------------------------
 
-  virtual err_t getCaretStatus(CaretStatus* out) const;
+  //! @brief Add a window @a handle and frame-buffer window @a w to the mapping.
+  virtual err_t addHandle(void* handle, FbWindow* w);
+  //! @brief Remove a window @a handle from the mapping.
+  virtual err_t removeHandle(void* handle);
+
+  //! @brief Translate window @a handle to @ref FbWindow.
+  virtual FbWindow* getWindowByHandle(void* handle) const;
+
+  // --------------------------------------------------------------------------
+  // [State]
+  // --------------------------------------------------------------------------
+
+  virtual const FbCaretState* getCaretStatus() const;
+
+  virtual const FbKeyboardState* getKeyboardState() const;
+
+  virtual const FbMouseState* getMouseState(uint32_t id) const;
 
   // --------------------------------------------------------------------------
   // [Keyboard]
   // --------------------------------------------------------------------------
 
-  virtual err_t getKeyboardStatus(KeyboardStatus* out) const;
-  virtual uint32_t getKeyboardModifiers() const;
   virtual uint32_t keyToModifier(uint32_t key) const;
 
   // --------------------------------------------------------------------------
   // [Mouse]
   // --------------------------------------------------------------------------
 
-  virtual err_t getMouseStatus(MouseStatus* out) const;
-  virtual err_t getSystemMouseStatus(SystemMouseStatus* out) const;
+  //virtual err_t getSystemMouseStatus(SystemMouseStatus* out) const;
 
-  virtual void invalidateMouseStatus();
-  virtual void updateMouseStatus();
-  virtual void changeMouseStatus(Widget* w, const PointI& pos);
+  //virtual void invalidateMouseStatus();
+  //virtual void updateMouseStatus();
+  //virtual void changeMouseStatus(Widget* w, const PointI& pos);
 
-  virtual void clearSystemMouseStatus();
+  //virtual void clearSystemMouseStatus();
 
-  virtual bool startButtonRepeat(uint32_t button, bool reset, TimeDelta delay, TimeDelta interval);
-  virtual bool stopButtonRepeat(uint32_t button);
-  virtual void clearButtonRepeat();
+  //virtual bool startButtonRepeat(uint32_t button, bool reset, TimeDelta delay, TimeDelta interval);
+  //virtual bool stopButtonRepeat(uint32_t button);
+  //virtual void clearButtonRepeat();
 
   // --------------------------------------------------------------------------
   // [Wheel]
   // --------------------------------------------------------------------------
 
   virtual int getWheelLines() const;
-  virtual void setWheelLines(int count);
+  virtual void setWheelLines(int lines);
 
   // --------------------------------------------------------------------------
   // [Timing]
@@ -171,17 +173,17 @@ struct FOG_API FbEngine : public Object
 
   //! @brief Runs updating to specific window. This is internally done by
   //! @c doUpdate() for all needed windows.
-  virtual void doUpdateWindow(GuiWindow* window);
+  virtual void doUpdateWindow(FbWindow* window);
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
-  virtual void doBlitWindow(GuiWindow* window, const BoxI* rects, size_t count) = 0;
+  virtual void doBlitWindow(FbWindow* window, const BoxI* rects, size_t count) = 0;
 
   // --------------------------------------------------------------------------
   // [GuiWindow Create / Destroy]
   // --------------------------------------------------------------------------
 
-  virtual GuiWindow* createGuiWindow(Widget* widget) = 0;
-  virtual void destroyGuiWindow(GuiWindow* native) = 0;
+  virtual FbWindow* createWindow() = 0;
+  virtual void destroyWindow(FbWindow* window) = 0;
 
   // --------------------------------------------------------------------------
   // [Event Handlers]
@@ -220,13 +222,13 @@ struct FOG_API FbEngine : public Object
   FbPaletteInfo _paletteInfo;
 
   //! @brief Keyboard status information.
-  FbKeyboardStatus _keyboardStatus;
+  FbKeyboardState _keyboardStatus;
 
   //! @brief System mouse status information.
-  FbMouseStatus _mouseStatus[16];
+  FbMouseState _mouseStatus[16];
 
   //! @brief Caret status.
-  FbCaretStatus _caretStatus;
+  FbCaretState _caretStatus;
 
   TimeDelta _repeatingDelay;
   TimeDelta _repeatingInterval;
@@ -236,7 +238,7 @@ struct FOG_API FbEngine : public Object
   TimeDelta _buttonRepeatInterval[3];
   TimeTicks _buttonTime[3];
 
-  FbUpdateStatus _updateStatus;
+  //FbUpdateStatus _updateStatus;
 };
 
 //! @}

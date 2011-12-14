@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT FbKeyboardState
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool operator=(const FbKeyboardState& other)
+  FOG_INLINE FbKeyboardState& operator=(const FbKeyboardState& other)
   {
     MemOps::copy(this, &other, sizeof(FbKeyboardState));
     return *this;

@@ -17,9 +17,35 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::FB_DOUBLE_BUFFER]
+// ============================================================================
+
+//! @brief FbWindow double-buffer type.
+enum FB_DOUBLE_BUFFER
+{
+  //! @brief No double-buffer yet.
+  FB_DOUBLE_BUFFER_NONE = 0,
+
+  //! @brief Double-buffer is using DIBSECTION (Windows).
+  FB_DOUBLE_BUFFER_WIN_DIBSECTION = 1,
+
+  //! @brief Double-buffer is using CGImageRef (Mac).
+  FB_DOUBLE_BUFFER_MAC_CGIMAGE  = 2,
+
+  //! @brief Double-buffer is using XShm-Pixmap (X11).
+  FB_DOUBLE_BUFFER_X11_XSHM_PIXMAP = 3,
+
+  //! @brief Double-buffer is using XShm-Image (X11).
+  //!
+  //! @note Used in case that it failed to create XShm-Pixmap.
+  FB_DOUBLE_BUFFER_X11_XSHM_IMAGE = 4
+};
+
+// ============================================================================
 // [Fog::FB_EVENT]
 // ============================================================================
 
+//! @brief FbWindow event code.
 enum FB_EVENT
 {
   FB_EVENT_WINDOW_CREATE = 0,
@@ -44,29 +70,17 @@ enum FB_EVENT
 };
 
 // ============================================================================
-// [Fog::FB_GEOMETRY_CHANGED]
+// [Fog::FB_GEOMETRY]
 // ============================================================================
 
-enum FB_GEOMETRY_CHANGED
+//! @brief FbWindow geometry event flags.
+enum FB_GEOMETRY
 {
-  FB_GEOMETRY_CHANGED_NONE = 0x00,
-  FB_GEOMETRY_CHANGED_POSITION = 0x01,
-  FB_GEOMETRY_CHANGED_SIZE = 0x02,
-  FB_GEOMETRY_CHANGED_ORIENTATION = 0x04
-};
-
-// ============================================================================
-// [Fog::FB_DOUBLE_BUFFER]
-// ============================================================================
-
-enum FB_DOUBLE_BUFFER
-{
-  FB_DOUBLE_BUFFER_NONE = 0,
-
-  FB_DOUBLE_BUFFER_WIN_DIBSECTION = 1,
-  FB_DOUBLE_BUFFER_MAC_CGIMAGE  = 2,
-  FB_DOUBLE_BUFFER_X11_XSHM_PIXMAP = 3,
-  FB_DOUBLE_BUFFER_X11_XSHM_IMAGE = 4
+  FB_GEOMETRY_WINDOW_POSITION = 0x01,
+  FB_GEOMETRY_WINDOW_SIZE = 0x02,
+  FB_GEOMETRY_CLIENT_POSITION = 0x04,
+  FB_GEOMETRY_CLIENT_SIZE = 0x08,
+  FB_GEOMETRY_ORIENTATION = 0x10
 };
 
 

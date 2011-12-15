@@ -168,9 +168,6 @@ struct FOG_API FbWindowData
   //! @brief Window screen (the screen is where the window is displayed).
   uint32_t windowScreen;
 
-  //! @brief Window opacity in [0, 1] range (default 1).
-  float windowOpacity;
-
   //! @brief Window geometry, relative to screen (default value depends on 
   //! windowing system or window manager).
   RectI windowGeometry;
@@ -202,6 +199,9 @@ struct FOG_API FbWindowData
   //! can't share buffer for painting and blitting. It can currently happen
   //! only in case that the target pixel format is 8-bit per pixel.
   FbSecondary secondaryBuffer;
+
+  //! @brief Window opacity in [0, 1] range (default 1).
+  float windowOpacity;
 
   //! @brief Window title.
   StringW windowTitle;

@@ -1591,26 +1591,38 @@ Set(FOG_UI_ENGINE_HEADERS
 )
 
 Set(FOG_UI_ENGINE_MAC_SOURCES
+  Fog/UI/Engine/MacFbEngine.mm
+  Fog/UI/Engine/MacFbWindow.mm
   Fog/UI/Engine/MacGuiEngine.mm
 )
 
 Set(FOG_UI_ENGINE_MAC_HEADERS
+  Fog/UI/Engine/MacFbEngine.h
+  Fog/UI/Engine/MacFbWindow.h
   Fog/UI/Engine/MacGuiEngine.h
 )
 
 Set(FOG_UI_ENGINE_WIN_SOURCES
+  Fog/UI/Engine/WinFbEngine.cpp
+  Fog/UI/Engine/WinFbWindow.cpp
   Fog/UI/Engine/WinGuiEngine.cpp
 )
 
 Set(FOG_UI_ENGINE_WIN_HEADERS
+  Fog/UI/Engine/WinFbEngine.h
+  Fog/UI/Engine/WinFbWindow.h
   Fog/UI/Engine/WinGuiEngine.h
 )
 
 Set(FOG_UI_ENGINE_X11_SOURCES
+  Fog/UI/Engine/X11FbEngine.cpp
+  Fog/UI/Engine/X11FbWindow.cpp
   Fog/UI/Engine/X11GuiEngine.cpp
 )
 
 Set(FOG_UI_ENGINE_X11_HEADERS
+  Fog/UI/Engine/X11FbEngine.h
+  Fog/UI/Engine/X11FbWindow.h
   Fog/UI/Engine/X11GuiEngine.h
   Fog/UI/Engine/X11Headers.h
 )

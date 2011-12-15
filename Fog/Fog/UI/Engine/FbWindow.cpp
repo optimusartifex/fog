@@ -35,13 +35,13 @@ FbWindowData::FbWindowData(FbEngine* engine, FbWindow* window) :
   shouldBlit(false),
   reserved_0(0),
   windowScreen(0),
-  windowOpacity(1.0f),
   windowGeometry(0, 0, 0, 0),
   clientGeometry(0, 0, 0, 0),
   sizeGranularity(1, 1),
   bufferCacheSize(0, 0),
   bufferCacheCreated(),
-  bufferCacheExpire()
+  bufferCacheExpire(),
+  windowOpacity(1.0f)
 {
   bufferData.reset();
 }

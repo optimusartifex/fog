@@ -39,6 +39,20 @@ struct FOG_NO_EXPORT FbSecondary
   }
 
   // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint8_t* getData() const { return _data; }
+  FOG_INLINE uint32_t getDepth() const { return _depth; }
+  FOG_INLINE ssize_t getStride() const { return _stride; }
+  FOG_INLINE ImageConverterBlitLineFunc getConvertFunc() const { return _convertFunc; }
+
+  FOG_INLINE void setData(uint8_t* data) { _data = data; }
+  FOG_INLINE void setDepth(uint32_t depth) { _depth = depth; }
+  FOG_INLINE void setStride(size_t stride) { _stride = stride; }
+  FOG_INLINE void setConvertFunc(ImageConverterBlitLineFunc func) { _convertFunc = func; }
+
+  // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 

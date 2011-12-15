@@ -328,7 +328,7 @@ struct FOG_API FbWindow
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Window data (implementation dependent).
+  //! @brief Window data.
   FbWindowData* _d;
 
 private:

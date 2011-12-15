@@ -11,7 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/Rect.h>
-#include <Fog/G2d/Source/Color.h>
+#include <Fog/G2d/Source/Argb.h>
 
 namespace Fog {
 
@@ -26,11 +26,37 @@ namespace Fog {
 struct FOG_NO_EXPORT FbCaretState
 {
   FOG_INLINE FbCaretState() :
-    rect(0, 0, 0, 0),
-    color(),
-    type(0),
-    animation(0)
+    _rect(0, 0, 0, 0),
+    _color(0xFF000000),
+    _type(CARET_TYPE_NORMAL),
+    _animation(0)
   {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const RectI& getRect() const { return _rect; }
+  FOG_INLINE const Argb32& getColor() const { return _color; }
+  FOG_INLINE uint32_t getType() const { return _type; }
+  FOG_INLINE uint32_t getAnimation() const { return _animation; }
+
+  FOG_INLINE void setRect(const RectI& rect) { _rect = rect; }
+  FOG_INLINE void setColor(const Argb32& color) { _color = color; }
+  FOG_INLINE void setType(uint32_t type) { _type = type; }
+  FOG_INLINE void setAnimation(uint32_t animation) { _animation = animation; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+  
+  FOG_INLINE void reset()
+  {
+    _rect.reset();
+    _color.setPacked32(0xFF000000);
+    _type = CARET_TYPE_NORMAL;
+    _animation = 0;
   }
 
   // --------------------------------------------------------------------------
@@ -59,10 +85,10 @@ struct FOG_NO_EXPORT FbCaretState
   // [Members]
   // --------------------------------------------------------------------------
 
-  RectI rect;
-  Argb32 color;
-  uint32_t type;
-  uint32_t animation;
+  RectI _rect;
+  Argb32 _color;
+  uint32_t _type;
+  uint32_t _animation;
 };
 
 //! @}

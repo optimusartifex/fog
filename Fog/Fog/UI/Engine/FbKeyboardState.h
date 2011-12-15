@@ -25,6 +25,25 @@ struct FOG_NO_EXPORT FbKeyboardState
 {
   FOG_INLINE FbKeyboardState()
   {
+    reset();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getModifiers() const { return _modifiers; }
+  FOG_INLINE void setModifiers(uint32_t modifiers) { _modifiers = modifiers; }
+
+  FOG_INLINE uint8_t* getKeyMap() { return _keyMap; }
+  FOG_INLINE const uint8_t* getKeyMap() const { return _keyMap; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
     MemOps::zero(this, sizeof(FbKeyboardState));
   }
 
@@ -54,8 +73,8 @@ struct FOG_NO_EXPORT FbKeyboardState
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t modifiers;
-  uint8_t keymap[256];
+  uint32_t _modifiers;
+  uint8_t _keyMap[256];
 };
 
 //! @}

@@ -1083,7 +1083,7 @@ struct ListIterator
   // --------------------------------------------------------------------------
 
   //! @brief Create a new List<ItemT> iterator.
-  FOG_INLINE ListIterator(const List<ItemT>& container) { start(&container); }
+  FOG_INLINE ListIterator(const List<ItemT>& container) { start(container); }
 
   //! @brief Destroy the List<ItemT> iterator.
   FOG_INLINE ~ListIterator() {}
@@ -1114,9 +1114,9 @@ struct ListIterator
   // [Start / Next]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool start(const List<ItemT>* container)
+  FOG_INLINE bool start(const List<ItemT>& container)
   {
-    _container = container;
+    _container = &container;
     return start();
   }
 
@@ -1173,7 +1173,7 @@ struct ListReverseIterator
   // --------------------------------------------------------------------------
 
   //! @brief Create a new List<ItemT> iterator.
-  FOG_INLINE ListReverseIterator(const List<ItemT>& container) { start(&container); }
+  FOG_INLINE ListReverseIterator(const List<ItemT>& container) { start(container); }
 
   //! @brief Destroy the List<ItemT> iterator.
   FOG_INLINE ~ListReverseIterator() {}
@@ -1204,9 +1204,9 @@ struct ListReverseIterator
   // [Start / Next]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool start(const List<ItemT>* container)
+  FOG_INLINE bool start(const List<ItemT>& container)
   {
-    _container = container;
+    _container = &container;
     return start();
   }
 

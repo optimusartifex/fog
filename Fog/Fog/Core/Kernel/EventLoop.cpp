@@ -143,7 +143,9 @@ void EventLoop::postTask(Task* task, bool nestable, uint32_t delay)
 void EventLoop::_runTask(Task* task)
 {
   task->run();
-  if (task->destroyOnFinish()) task->destroy();
+
+  if (task->getDestroyOnFinish())
+    task->destroy();
 }
 
 bool EventLoop::_deferOrRunPendingTask(const EventLoopPendingTask& pendingTask)
@@ -217,7 +219,9 @@ bool EventLoop::_deletePendingTasks()
     else
     {
       Task* task = pendingTask.getTask();
-      if (task->destroyOnFinish()) task->destroy();
+
+      if (task->getDestroyOnFinish())
+        task->destroy();
     }
   }
 
@@ -227,7 +231,7 @@ bool EventLoop::_deletePendingTasks()
     Task* task = _deferredWorkQueue.getFirst().getTask();
     _deferredWorkQueue.removeFirst();
 
-    if (task->destroyOnFinish())
+    if (task->getDestroyOnFinish())
       task->destroy();
   }
 
@@ -237,7 +241,7 @@ bool EventLoop::_deletePendingTasks()
     Task* task = _delayedWorkQueue.getFirst().getTask();
     _delayedWorkQueue.removeFirst();
 
-    if (task->destroyOnFinish())
+    if (task->getDestroyOnFinish())
       task->destroy();
   }
 

@@ -302,12 +302,15 @@ struct MatrixDataD;
 struct Region;
 struct RegionData;
 
+#if defined(FOG_BUILD_UI)
 // Fog/UI/Engine.
 struct FbCaretState;
 struct FbDisplayInfo;
 struct FbEngine;
 struct FbEvent;
+struct FbKeyboardInfo;
 struct FbKeyboardState;
+struct FbMouseInfo;
 struct FbMouseState;
 struct FbPaletteInfo;
 struct FbWindow;
@@ -317,6 +320,11 @@ struct Layout;
 
 // Fog/UI/Widget.
 struct Widget;
+
+// TODO: Remove
+struct GuiEngine;
+
+#endif // FOG_BUILD_UI
 
 // ============================================================================
 // [TypeDefs - Template-Specialization]
@@ -351,6 +359,13 @@ typedef uint32_t (FOG_CDECL *HashFunc)(const void* key);
 typedef bool (FOG_CDECL *EqFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareExFunc)(const void* a, const void* b, const void* data);
+
+typedef EventLoop* (*EventLoopConstructor)();
+
+#if defined(FOG_BUILD_UI)
+//! @brief Constructor used to create native @ref FbEngine instance.
+typedef GuiEngine* (*FbEngineConstructor)(void);
+#endif // FOG_BUILD_UI
 
 } // Fog namespace
 

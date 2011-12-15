@@ -12,6 +12,7 @@
 #include <Fog/G2d/Tools/RegionTmp_p.h>
 #include <Fog/UI/Engine/GuiEngine.h>
 #include <Fog/UI/Layout/Layout.h>
+#include <Fog/UI/Tools/KeyUtil.h>
 #include <Fog/UI/Widget/Widget_p.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::GuiEngine)
@@ -24,7 +25,7 @@ namespace Fog {
 // ============================================================================
 
 #define GUI_ENGINE() \
-  Application::get()->getGuiEngine()
+  Application::get()->getFbEngine()
 
 static uint32_t fogButtonToId(uint32_t button)
 {
@@ -1479,9 +1480,9 @@ bool GuiWindow::onKeyPress(uint32_t key, uint32_t modifier, uint32_t systemCode,
   e._systemCode = systemCode;
   e._unicode = unicode;
 
-  if (isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
-  if (isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
-  if (isAltMod  (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
+  if (KeyUtil::isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
+  if (KeyUtil::isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
+  if (KeyUtil::isAltMod  (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
 
   // Set this status after modifiers check.
   guiEngine->_keyboardStatus.modifiers |= modifier;
@@ -1506,9 +1507,9 @@ bool GuiWindow::onKeyRelease(uint32_t key, uint32_t modifier, uint32_t systemCod
   e._systemCode = systemCode;
   e._unicode = 0;
 
-  if (isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
-  if (isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
-  if (isAltMod  (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
+  if (KeyUtil::isShiftMod(guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_SHIFT;
+  if (KeyUtil::isCtrlMod (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_CTRL;
+  if (KeyUtil::isAltMod  (guiEngine->_keyboardStatus.modifiers)) e._key |= KEY_ALT;
 
   _widget->_findFocus()->sendEvent(&e);
   return e.isAccepted();

@@ -29,18 +29,40 @@ namespace Fog {
 //! blitting into the screen.
 struct FOG_NO_EXPORT FbSecondary
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FbSecondary()
+  {
+    reset();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero(this, sizeof(FbSecondary));
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   //! @brief Secondary pixel array (native pixel format of target engine).
-  uint8_t* data;
+  uint8_t* _data;
   //! @brief Secondary pixel stride.
-  ssize_t stride;
+  ssize_t _stride;
 
   //! @brief Converter used to convert pixels primery to secondary buffer.
   ImageConverterBlitLineFunc _convertFunc;
   //! @brief Secondary pixel depth.
-  uint32_t depth;
+  uint32_t _depth;
 
 #if FOG_ARCH_BITS >= 64
-  uint32_t padding;
+  uint32_t _padding;
 #endif // FOG_ARCH_BITS >= 64
 };
 

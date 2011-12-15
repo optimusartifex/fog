@@ -22,6 +22,7 @@
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Source/Color.h>
+#include <Fog/G2d/Tools/Region.h>
 #include <Fog/UI/Engine/FbSecondary.h>
 
 namespace Fog {
@@ -40,7 +41,7 @@ struct FOG_API FbWindowData
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FbWindowData();
+  FbWindowData(FbEngine* engine, FbWindow* window);
   virtual ~FbWindowData();
 
   // --------------------------------------------------------------------------
@@ -85,17 +86,10 @@ struct FOG_API FbWindowData
   virtual err_t clientToWorld(PointI& pt) const = 0;
 
   // --------------------------------------------------------------------------
-  // [Window Update]
-  // --------------------------------------------------------------------------
-
-  //! @brief Set the frame-buffer window as dirty (schedule an update task).
-  virtual void setDirty();
-
-  // --------------------------------------------------------------------------
   // [Window Parameters]
   // --------------------------------------------------------------------------
 
-  virtual err_t getParameter(uint32_t id, const void* val) = 0;
+  virtual err_t getParameter(uint32_t id, const void* val) const = 0;
   virtual err_t setParameter(uint32_t id, const void* val) = 0;
 
   // --------------------------------------------------------------------------
@@ -108,6 +102,9 @@ struct FOG_API FbWindowData
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
+  
+  // Members here are stored in a way to minimize gaps needed to align the data
+  // types. Reorder them only in case you find a better way.
 
   //! @brief Frame-buffer engine which owns the @c FbWindowData.
   FbEngine* engine;
@@ -159,14 +156,20 @@ struct FOG_API FbWindowData
   //! @brief Window visibility.
   uint8_t windowVisibility;
 
-  //! @brief Whether the window must be blit onto the screen.
-  uint8_t needBlit;
+  //! @brief Whether the window should be updated.
+  uint8_t shouldUpdate;
+
+  //! @brief Whether the window should be blit to the screen.
+  uint8_t shouldBlit;
 
   //! @brief Reserved for future use (currently has only alignment function).
-  uint8_t reserved[2];
+  uint8_t reserved_0;
 
   //! @brief Window screen (the screen is where the window is displayed).
   uint32_t windowScreen;
+
+  //! @brief Window opacity in [0, 1] range (default 1).
+  float windowOpacity;
 
   //! @brief Window geometry, relative to screen (default value depends on 
   //! windowing system or window manager).
@@ -178,9 +181,6 @@ struct FOG_API FbWindowData
 
   //! @brief Window size granularity (default 1x1).
   SizeI sizeGranularity;
-
-  //! @brief Window opacity in [0, 1] range (default 1).
-  float windowOpacity;
 
   //! @brief Double-buffer stored as @c ImageBits structure.
   //!
@@ -206,6 +206,10 @@ struct FOG_API FbWindowData
   //! @brief Window title.
   StringW windowTitle;
 
+  //! @brief Region which will be used to paint and blit the window into the 
+  //! screen.
+  Region regionOfInterest;
+
 private:
   _FOG_NO_COPY(FbWindowData)
 };
@@ -228,35 +232,63 @@ struct FOG_API FbWindow
   // [Accessors]
   // --------------------------------------------------------------------------
 
+  //! @brief Get frame-buffer window owner (@ref FbEngine).
   FOG_INLINE FbEngine* getEngine() const { return _d->engine; }
+
+  //! @brief Get frame-buffer window handle.
   FOG_INLINE void* getHandle() const { return _d->handle; }
 
+  //! @brief Get whether the frame-buffer window was created.
   FOG_INLINE bool isCreated() const { return _d->handle != NULL; }
 
+  //! @brief Get whether the frame-buffer window is enabled.
   FOG_INLINE bool isEnabled() const { return _d->isEnabled; }
+
+  //! @brief Get whether the frame-buffer window is visible.
   FOG_INLINE bool isVisible() const { return _d->isVisible; }
+
+  //! @brief Get whether the frame-buffer window is dirty (needs update or blit).
   FOG_INLINE bool isDirty() const { return _d->isDirty; }
+
+  //! @brief Get whether the frame-buffer window has focus.
   FOG_INLINE bool hasFocus() const { return _d->hasFocus; }
   
+  //! @brief Get the native depth of the frame-buffer window.
   FOG_INLINE uint32_t getWindowDepth() const { return _d->windowDepth; }
+
+  //! @brief Get the frame-buffer window screen id.
   FOG_INLINE uint32_t getWindowScreen() const { return _d->windowScreen; }
 
+  //! @brief Get whether the window is fully opaque.
   FOG_INLINE bool isWindowOpaque() const { return _d->isWindowOpaque; }
+  //! @brief Get the opacity of the window.
   FOG_INLINE float getWindowOpacity() const { return _d->windowOpacity; }
 
+  //! @brief Get whether the compositing is enabled.
   FOG_INLINE bool isCompositingEnabled() const { return _d->isCompositingEnabled; }
 
+  //! @brief Get window geometry.
   FOG_INLINE const RectI& getWindowGeometry() const { return _d->windowGeometry; }
+  //! @brief Get client geometry.
   FOG_INLINE const RectI& getClientGeometry() const { return _d->clientGeometry; }
+  //! @brief Get Size granularity, used when resizing.
   FOG_INLINE const SizeI& getSizeGranularity() const { return _d->sizeGranularity; }
 
+  //! @brief Get double-buffer data as @ref ImageBits.
   FOG_INLINE ImageBits* getBufferData() { return &_d->bufferData; }
+  //! @overload
   FOG_INLINE const ImageBits* getBufferData() const { return &_d->bufferData; }
 
+  //! @brief Get whether the double-buffer caching is enabled.
+  //!
+  //! @note Takes effect only when window is resized.
   FOG_INLINE bool isBufferCacheEnabled() const { return _d->isBufferCacheEnabled != 0; }
+  //! @brief Get size of the cached double-buffer.
   FOG_INLINE const SizeI& getBufferCacheSize() const { return _d->bufferCacheSize; }
 
+  //! @brief Get when the buffer cache was created.
   FOG_INLINE TimeTicks getBufferCacheCreated() const { return _d->bufferCacheCreated; }
+  //! @brief Get when the buffer cache will expire.
   FOG_INLINE TimeTicks getBufferCacheExpire() const { return _d->bufferCacheExpire; }
 
   // --------------------------------------------------------------------------
@@ -296,6 +328,7 @@ struct FOG_API FbWindow
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Window data (implementation dependent).
   FbWindowData* _d;
 
 private:

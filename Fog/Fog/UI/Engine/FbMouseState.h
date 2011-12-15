@@ -24,14 +24,33 @@ namespace Fog {
 //! @brief Frame-buffer mouse state.
 struct FOG_NO_EXPORT FbMouseState
 {
-  FOG_INLINE FbMouseState() :
-    position(0, 0),
-    hover(0),
-    buttons(0)
+  FOG_INLINE FbMouseState()
   {
+    reset();
   }
 
   explicit FOG_INLINE FbMouseState(_Uninitialized) {}
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const PointI& getPosition() const { return _position; }
+  FOG_INLINE uint32_t getHover() const { return _hover; }
+  FOG_INLINE uint32_t getButtonMask() const { return _buttonMask; }
+
+  FOG_INLINE void setPosition(const PointI& position) { _position = position; }
+  FOG_INLINE void setHover(uint32_t hover) { _hover = hover; }
+  FOG_INLINE void setButtonMask(uint32_t buttonMask) { _buttonMask = buttonMask; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero(this, sizeof(FbMouseState));
+  }
 
   // --------------------------------------------------------------------------
   // [Equality]
@@ -39,9 +58,9 @@ struct FOG_NO_EXPORT FbMouseState
 
   FOG_INLINE bool eq(const FbMouseState& other) const
   {
-    return position == other.position &&
-           hover    == other.hover    &&
-           buttons  == other.buttons  ;
+    return _position   == other._position   &&
+           _hover      == other._hover      &&
+           _buttonMask == other._buttonMask ;
   }
 
   // --------------------------------------------------------------------------
@@ -50,10 +69,7 @@ struct FOG_NO_EXPORT FbMouseState
 
   FOG_INLINE FbMouseState& operator=(const FbMouseState& other)
   {
-    position = other.position;
-    hover = other.hover;
-    buttons = other.buttons;
-
+    MemOps::copy(this, &other, sizeof(FbMouseState));
     return *this;
   }
   
@@ -65,11 +81,11 @@ struct FOG_NO_EXPORT FbMouseState
   // --------------------------------------------------------------------------
 
   //! @brief Mouse position relative to @c uiWindow (in client area).
-  PointI position;
+  PointI _position;
   //! @brief Hover state.
-  uint32_t hover;
-  //! @brief Pressed buttons.
-  uint32_t buttons;
+  uint32_t _hover;
+  //! @brief Pressed button-mask.
+  uint32_t _buttonMask;
 };
 
 //! @}

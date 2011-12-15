@@ -36,9 +36,9 @@ CMake_Minimum_Required(VERSION 2.8.4)
 # project will be created, but the parent script is responsive for doing that.
 If(NOT FOG_BUILD_SLAVE)
   Project(Fog C CXX)
-  Message("-- Created CMake C/C++ project (FOG_BUILD_SLAVE not enabled).")
+  Message("-- Created Fog-Framework project (FOG_BUILD_SLAVE not enabled).")
 Else()
-  Message("-- Entering slave build-mode (FOG_BUILD_SLAVE enabled).")
+  Message("-- Entering Fog-Framework slave build (FOG_BUILD_SLAVE enabled).")
 EndIf()
 
 # Always build static library when compiling for iOS or iOS simulator.
@@ -1579,7 +1579,9 @@ Set(FOG_UI_ENGINE_HEADERS
   Fog/UI/Engine/FbDisplayInfo.h
   Fog/UI/Engine/FbEngine.h
   Fog/UI/Engine/FbEvent.h
+  Fog/UI/Engine/FbKeyboardInfo.h
   Fog/UI/Engine/FbKeyboardState.h
+  Fog/UI/Engine/FbMouseInfo.h
   Fog/UI/Engine/FbMouseState.h
   Fog/UI/Engine/FbPaletteInfo.h
   Fog/UI/Engine/FbSecondary.h
@@ -1639,6 +1641,14 @@ Set(FOG_UI_LAYOUT_HEADERS
   Fog/UI/Layout/Margin.h
 )
 
+# [Fog/UI/Tools]
+Set(FOG_UI_TOOLS_SOURCES
+)
+
+Set(FOG_UI_TOOLS_HEADERS
+  Fog/UI/Tools/KeyUtil.h
+)
+
 # [Fog/UI/Widget]
 Set(FOG_UI_WIDGET_SOURCES
   Fog/UI/Widget/Event.cpp
@@ -1660,6 +1670,7 @@ Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${F
                                           ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
                                           ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
 Source_Group("UI/Layout"            FILES ${FOG_UI_LAYOUT_SOURCES}           ${FOG_UI_LAYOUT_HEADERS}          )
+Source_Group("UI/Tools"             FILES ${FOG_UI_TOOLS_SOURCES}            ${FOG_UI_TOOLS_HEADERS}           )
 Source_Group("UI/Widget"            FILES ${FOG_UI_WIDGET_SOURCES}           ${FOG_UI_WIDGET_HEADERS}          )
 
 EndIf(FOG_BUILD_UI)
@@ -1753,6 +1764,7 @@ If(FOG_BUILD_UI)
     ${FOG_UI_LIB_SOURCES}
     ${FOG_UI_ENGINE_SOURCES}
     ${FOG_UI_LAYOUT_SOURCES}
+    ${FOG_UI_TOOLS_SOURCES}
     ${FOG_UI_WIDGET_SOURCES}
   )
 
@@ -1762,6 +1774,7 @@ If(FOG_BUILD_UI)
     ${FOG_UI_ENGINE_X11_HEADERS}
     ${FOG_UI_ENGINE_WIN_HEADERS}
     ${FOG_UI_LAYOUT_HEADERS}
+    ${FOG_UI_TOOLS_HEADERS}
     ${FOG_UI_WIDGET_HEADERS}
   )
 
@@ -1827,11 +1840,15 @@ EndIf()
 # =============================================================================
 
 If(NOT FOG_BUILD_STATIC)
-  Add_Library(Fog SHARED ${FOG_ALL_SOURCES_CORRECTED} ${FOG_ALL_HEADERS_CORRECTED})
+  Add_Library(Fog SHARED
+    ${FOG_ALL_SOURCES_CORRECTED}
+    ${FOG_ALL_HEADERS_CORRECTED})
   Target_Link_Libraries(Fog ${FOG_LIBRARIES})
   Install(TARGETS Fog DESTINATION lib)
 Else()
-  Add_Library(Fog STATIC ${FOG_ALL_SOURCES_CORRECTED} ${FOG_ALL_HEADERS_CORRECTED})
+  Add_Library(Fog STATIC
+    ${FOG_ALL_SOURCES_CORRECTED}
+    ${FOG_ALL_HEADERS_CORRECTED})
   Target_Link_Libraries(Fog ${FOG_LIBRARIES})
 EndIf()
 

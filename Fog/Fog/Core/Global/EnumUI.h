@@ -24,11 +24,11 @@ enum FB_EVENT
 {
   FB_EVENT_WINDOW_CREATE = 0,
   FB_EVENT_WINDOW_DESTROY = 1,
-
-  FB_EVENT_WINDOW_MAXIMIZE = 2,
-  FB_EVENT_WINDOW_MINIMIZE = 3,
-  FB_EVENT_WINDOW_RESTORE = 4,
-  FB_EVENT_WINDOW_CLOSE = 5,
+  FB_EVENT_WINDOW_GEOMETRY = 2,
+  FB_EVENT_WINDOW_MAXIMIZE = 3,
+  FB_EVENT_WINDOW_MINIMIZE = 4,
+  FB_EVENT_WINDOW_RESTORE = 5,
+  FB_EVENT_WINDOW_CLOSE = 6,
 
   FB_EVENT_KEY_PRESS = 10,
   FB_EVENT_KEY_RELEASE = 11,
@@ -38,18 +38,60 @@ enum FB_EVENT
   FB_EVENT_MOUSE_MOVE = 17,
 
   FB_EVENT_MOUSE_PRESS = 18,
-  FB_EVENT_MOUSE_RELEASE = 19
+  FB_EVENT_MOUSE_RELEASE = 19,
+  FB_EVENT_MOUSE_CLICK = 20,
+  FB_EVENT_MOUSE_DBL_CLICK = 21
 };
 
 // ============================================================================
-// [Fog::FB_WINDOW_BUFFER]
+// [Fog::FB_GEOMETRY_CHANGED]
 // ============================================================================
 
-enum FB_WINDOW_BUFFER
+enum FB_GEOMETRY_CHANGED
 {
-  FB_WINDOW_BUFFER_WIN_DIB,
-  FB_WINDOW_BUFFER_X11_SHM,
+  FB_GEOMETRY_CHANGED_NONE = 0x00,
+  FB_GEOMETRY_CHANGED_POSITION = 0x01,
+  FB_GEOMETRY_CHANGED_SIZE = 0x02,
+  FB_GEOMETRY_CHANGED_ORIENTATION = 0x04
 };
+
+// ============================================================================
+// [Fog::FB_DOUBLE_BUFFER]
+// ============================================================================
+
+enum FB_DOUBLE_BUFFER
+{
+  FB_DOUBLE_BUFFER_NONE = 0,
+
+  FB_DOUBLE_BUFFER_WIN_DIBSECTION = 1,
+  FB_DOUBLE_BUFFER_MAC_CGIMAGE  = 2,
+  FB_DOUBLE_BUFFER_X11_XSHM_PIXMAP = 3,
+  FB_DOUBLE_BUFFER_X11_XSHM_IMAGE = 4
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // [Fog::MARGIN_LOCATION]
@@ -738,17 +780,6 @@ enum MODIFIER_CODE
   MODIFIER_MODE            = 0x4000
 };
 
-static FOG_INLINE bool isClearMod   (uint32_t mod) { return (mod & MODIFIER_MASK  ) == 0; }
-static FOG_INLINE bool isAltMod     (uint32_t mod) { return (mod & MODIFIER_ALT   ) != 0; }
-static FOG_INLINE bool isAltOnly    (uint32_t mod) { return (mod & MODIFIER_MASK  ) == (mod & MODIFIER_ALT); }
-static FOG_INLINE bool isShiftMod   (uint32_t mod) { return (mod & MODIFIER_SHIFT ) != 0; }
-static FOG_INLINE bool isShiftOnly  (uint32_t mod) { return (mod & MODIFIER_MASK  ) == (mod & MODIFIER_SHIFT); }
-static FOG_INLINE bool isCtrlMod    (uint32_t mod) { return (mod & MODIFIER_CTRL  ) != 0; }
-static FOG_INLINE bool isCtrlOnly   (uint32_t mod) { return (mod & MODIFIER_MASK  ) == (mod & MODIFIER_CTRL); }
-static FOG_INLINE bool isCapsLockMod(uint32_t mod) { return (mod & MODIFIER_CAPS  ) != 0; }
-static FOG_INLINE bool isNumLockMod (uint32_t mod) { return (mod & MODIFIER_NUM   ) != 0; }
-static FOG_INLINE bool isModeMod    (uint32_t mod) { return (mod & MODIFIER_MODE  ) != 0; }
-
 // ============================================================================
 // [Fog::BUTTON_CODE]
 // ============================================================================
@@ -848,9 +879,9 @@ enum ALIGNMENT
 enum CARET_TYPE
 {
   //! @brief Normal type of caret.
-  CARET_NORMAL = 0,
+  CARET_TYPE_NORMAL = 0,
   //! @brief Overwrite type of caret.
-  CARET_OVERWRITE = 1,
+  CARET_TYPE_OVERWRITE = 1,
 };
 
 // ============================================================================
@@ -864,72 +895,6 @@ enum FOCUS_REASON
   FOCUS_REASON_WHEEL,
   FOCUS_REASON_TAB_FORWARD,
   FOCUS_REASON_TAB_BACKWARD
-};
-
-// ============================================================================
-// [Fog::CHECKED_STATE]
-// ============================================================================
-
-//! @brief The state value of check box.
-enum CHECKED_STATE
-{
-  //! @brief Non-checked.
-  CHECKED_OFF = 0,
-  //! @brief Checked.
-  CHECKED_ON = 1,
-  //! @brief Mixed (used by hierarchies, some descendants are checked and
-  //! some don't).
-  CHECKED_MIXED = 2
-};
-
-// ============================================================================
-// [Fog::ANIMATION_DIRECTION]
-// ============================================================================
-enum ANIMATION_DIRECTION
-{
-  ANIMATION_FORWARD = 1,
-  ANIMATION_BACKWARD = 2
-};
-
-// ============================================================================
-// [Fog::ANIMATION_TYPE]
-// ============================================================================
-enum ANIMATION_TYPE
-{
-  ANIMATION_FIXED_STEP = 1,
-  ANIMATION_FIXED_TIME = 2
-};
-
-// ============================================================================
-// [Fog::ANIMATION_FLAGS]
-// ============================================================================
-enum ANIMATION_FLAGS
-{
-  ANIMATION_WIDGET_NO_FLAGS = 0,
-  //! @brief show Widget when animation begins.
-  ANIMATION_WIDGET_SHOW_ON_START = (1 << 1),
-  //! @brief hide Widget when animation ends.
-  ANIMATION_WIDGET_HIDE_ON_END = (1 << 2),
-  //! @brief destroy Widget when animation ends.
-  ANIMATION_WIDGET_DESTROY_ON_END = (1 << 3),
-  //! @brief marks that the positions are relative to parent.
-  ANIMATION_WIDGET_RELATIVE_TO_PARENT = (1 << 4),
-
-  //! @brief identifies where the widget is relative to parent.
-  ANIMATION_WIDGET_ORIENTATION_TOP = (1 << 5),
-  ANIMATION_WIDGET_ORIENTATION_BOTTOM = (1 << 6),
-  ANIMATION_WIDGET_ORIENTATION_LEFT = (1 << 7),
-  ANIMATION_WIDGET_ORIENTATION_RIGHT = (1 << 8)
-};
-
-// ============================================================================
-// [Fog::ANIMATION_EVENT_TYPE]
-// ============================================================================
-
-enum ANIMATION_EVENT_TYPE
-{
-  EVENT_ANIMATION_STEP = 1,
-  EVENT_ANIMATION_FINISHED = 2
 };
 
 //! @}

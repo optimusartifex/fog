@@ -60,12 +60,12 @@ void TimerTask::run()
     if (timer)
     {
       timer->getHomeThread()->getEventLoop()->postTask(this, true, static_cast<int>(timer->_interval.getMilliseconds()));
-      _destroyOnFinish = false;
+      setDestroyOnFinish(false);
     }
     else
     {
       // We must be sure, it can be set to false.
-      _destroyOnFinish = true;
+      setDestroyOnFinish(true);
     }
   }
 }

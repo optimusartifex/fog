@@ -27,7 +27,7 @@ namespace Fog {
 struct FOG_NO_EXPORT FbPaletteInfo
 {
   // --------------------------------------------------------------------------
-  // [Cons]
+  // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
   FOG_INLINE FbPaletteInfo()

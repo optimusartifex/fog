@@ -18,13 +18,6 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Forward Declarations]
-// ============================================================================
-
-// Declared in Fog-Gui
-struct GuiEngine;
-
-// ============================================================================
 // [Fog::Application]
 // ============================================================================
 
@@ -68,69 +61,33 @@ public:
   static err_t setWorkingDirectory(const StringW& dir);
 
   // --------------------------------------------------------------------------
-  // [GuiEngine - Access]
+  // [FbEngine]
   // --------------------------------------------------------------------------
 
+#if defined(FOG_BUILD_UI)
   //! @brief Get application @c GuiEngine (can be NULL if GUI is not used).
-  FOG_INLINE GuiEngine* getGuiEngine() const { return _nativeEngine; }
+  FOG_INLINE GuiEngine* getFbEngine() const { return _fbEngine; }
+  //! @brief Create @c GuiEngine based on @a name.
+  static GuiEngine* createFbEngine(const StringW& name);
 
   //! @brief Detect best @c GuiEngine for current platform and configuration.
-  static StringW detectGuiEngine();
+  static StringW detectFbEngine();
 
-  //! @brief Create @c GuiEngine based on @a name.
-  static GuiEngine* createGuiEngine(const StringW& name);
-
-  // --------------------------------------------------------------------------
-  // [GuiEngine - Register / Unregister]
-  // --------------------------------------------------------------------------
-
-  typedef GuiEngine* (*GuiEngineConstructor)(void);
-
-  static bool registerGuiEngine(const StringW& name, GuiEngineConstructor ctor);
-  static bool unregisterGuiEngine(const StringW& name);
-
-  template<typename GuiEngineType>
-  struct _GuiEngineCtorHelper
-  {
-    static GuiEngine* ctor() { return fog_new GuiEngineType(); }
-  };
-
-  template<typename GuiEngineType>
-  static FOG_INLINE bool registerGuiEngineType(const StringW& name)
-  {
-    return registerGuiEngine(name, _GuiEngineCtorHelper<GuiEngineType>::ctor);
-  }
+  static bool registerFbEngine(const StringW& name, FbEngineConstructor ctor);
+  static bool unregisterFbEngine(const StringW& name);
+#endif // FOG_BUILD_UI
 
   // --------------------------------------------------------------------------
-  // [EventLoop - Access]
+  // [EventLoop]
   // --------------------------------------------------------------------------
 
   //! @brief Get application event loop (can be NULL).
   FOG_INLINE EventLoop* getEventLoop() const { return _eventLoop; }
-
   //! @brief Create event loop.
   static EventLoop* createEventLoop(const StringW& name);
 
-  // --------------------------------------------------------------------------
-  // [EventLoop - Register / Unregister]
-  // --------------------------------------------------------------------------
-
-  typedef EventLoop* (*EventLoopConstructor)();
-
   static bool registerEventLoop(const StringW& name, EventLoopConstructor ctor);
   static bool unregisterEventLoop(const StringW& name);
-
-  template<typename EventLoopType>
-  struct _EventLoopCtorHelper
-  {
-    static EventLoop* ctor() { return fog_new EventLoopType(); }
-  };
-
-  template<typename EventLoopType>
-  static FOG_INLINE bool registerEventLoopType(const StringW& name)
-  {
-    return registerEventLoop(name, _EventLoopCtorHelper<EventLoopType>::ctor);
-  }
 
   // --------------------------------------------------------------------------
   // [Statics]
@@ -142,8 +99,15 @@ public:
   // [Members]
   // --------------------------------------------------------------------------
 
+  // TODO: Rename to FbEngine.
+#if defined(FOG_BUILD_UI)
+  GuiEngine* _fbEngine;
+#else
+  void* _fbEngine;
+#endif // FOG_BUILD_UI
+
+  //! @brief Application main event loop.
   EventLoop* _eventLoop;
-  GuiEngine* _nativeEngine;
 
 private:
   _FOG_NO_COPY(Application)

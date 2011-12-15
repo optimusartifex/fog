@@ -22,36 +22,13 @@
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Source/Color.h>
-
 #include <Fog/UI/Engine/FbCaretState.h>
 #include <Fog/UI/Engine/FbDisplayInfo.h>
+#include <Fog/UI/Engine/FbKeyboardInfo.h>
 #include <Fog/UI/Engine/FbKeyboardState.h>
+#include <Fog/UI/Engine/FbMouseInfo.h>
 #include <Fog/UI/Engine/FbMouseState.h>
 #include <Fog/UI/Engine/FbPaletteInfo.h>
-
-#if 0
-//! @brief Contains information about mouse status.
-struct MouseStatus
-{
-  //! @brief Widget where mouse is.
-  Widget* widget;
-  //! @brief Mouse position relative to @c widget.
-  PointI position;
-  //! @brief Hover state.
-  uint32_t hover;
-  //! @brief Pressed buttons.
-  uint32_t buttons;
-  //! @brief Whether this mouse status is valid.
-  uint32_t valid;
-};
-
-struct UpdateStatus
-{
-  uint32_t scheduled;
-  uint32_t updating;
-  CancelableTask* task;
-};
-#endif
 
 namespace Fog {
 
@@ -81,20 +58,15 @@ struct FOG_API FbEngine : public Object
   FOG_INLINE Lock& getLock() { return _lock; }
 
   // --------------------------------------------------------------------------
-  // [Display / Palette]
-  // --------------------------------------------------------------------------
-
-  virtual const FbDisplayInfo* getDisplayInfo() const;
-  virtual const FbPaletteInfo* getPaletteInfo() const;
-
-  virtual void updateDisplayInfo() = 0;
-
-  // --------------------------------------------------------------------------
   // [Handle <-> FbWindow]
   // --------------------------------------------------------------------------
+  
+  // FbEngine contains the default Handle<->FbWindow implementation, but it's
+  // to override it in case that the native engine has something better than
+  // Hash<> table.
 
   //! @brief Add a window @a handle and frame-buffer window @a w to the mapping.
-  virtual err_t addHandle(void* handle, FbWindow* w);
+  virtual err_t addHandle(void* handle, FbWindow* window);
   //! @brief Remove a window @a handle from the mapping.
   virtual err_t removeHandle(void* handle);
 
@@ -102,143 +74,140 @@ struct FOG_API FbEngine : public Object
   virtual FbWindow* getWindowByHandle(void* handle) const;
 
   // --------------------------------------------------------------------------
-  // [State]
+  // [Display / Palette]
   // --------------------------------------------------------------------------
 
-  virtual const FbCaretState* getCaretStatus() const;
+  //! @brief Get information about display.
+  virtual const FbDisplayInfo* getDisplayInfo() const;
+  
+  //! @brief Get information about display palette (only useful for 8-bit depth).
+  virtual const FbPaletteInfo* getPaletteInfo() const;
 
-  virtual const FbKeyboardState* getKeyboardState() const;
+  //! @brief Update display information and palette.
+  //!
+  //! @note Must be reimplemented by the target FbEngine.
+  virtual void updateDisplayInfo() = 0;
 
+  // --------------------------------------------------------------------------
+  // [Caret]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get caret state.
+  virtual const FbCaretState* getCaretState() const;
+
+  // --------------------------------------------------------------------------
+  // [Keyboard / Mouse]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get keyboard info.
+  virtual const FbKeyboardInfo* getKeyboardInfo() const;
+  //! @brief Get mouse info.
+  virtual const FbMouseInfo* getMouseInfo() const;
+
+  //! @brief Get keyboard state.
+  virtual const FbKeyboardState* getKeyboardState(uint32_t id) const;
+  //! @brief Get mouse state.
   virtual const FbMouseState* getMouseState(uint32_t id) const;
 
-  // --------------------------------------------------------------------------
-  // [Keyboard]
-  // --------------------------------------------------------------------------
+  //! @brief Get modifier from @a key.
+  virtual uint32_t getModifierFromKey(uint32_t key) const;
 
-  virtual uint32_t keyToModifier(uint32_t key) const;
-
-  // --------------------------------------------------------------------------
-  // [Mouse]
-  // --------------------------------------------------------------------------
-
-  //virtual err_t getSystemMouseStatus(SystemMouseStatus* out) const;
-
-  //virtual void invalidateMouseStatus();
-  //virtual void updateMouseStatus();
-  //virtual void changeMouseStatus(Widget* w, const PointI& pos);
-
-  //virtual void clearSystemMouseStatus();
-
-  //virtual bool startButtonRepeat(uint32_t button, bool reset, TimeDelta delay, TimeDelta interval);
-  //virtual bool stopButtonRepeat(uint32_t button);
-  //virtual void clearButtonRepeat();
+  //! @brief Set (override) the amount of lines which should be scrolled when
+  //! mouse wheel is used.
+  //!
+  //! @param lines Amount of lines to scroll, zero means to get the value from
+  //! the OS.
+  virtual void setMouseWheelLines(uint32_t lines);
 
   // --------------------------------------------------------------------------
-  // [Wheel]
+  // [ScheduleUpdate / DoUpdate]
   // --------------------------------------------------------------------------
 
-  virtual int getWheelLines() const;
-  virtual void setWheelLines(int lines);
+  //! @brief Schedule update.
+  //!
+  //! Updating means to iterate over all registered @c FbWindow instances and
+  //! to call @c FbWindow::update() in case that it's needed.
+  //!
+  //! @note All @c FbWindow instances are updated together. Only one update and
+  //! blit call is executed in case that more updates were scheduled.
+  virtual void scheduleUpdate();
 
-  // --------------------------------------------------------------------------
-  // [Timing]
-  // --------------------------------------------------------------------------
+  //! @brief Do update.
+  //!
+  //! @note Used internally! Do not call, always use @c scheduleUpdate() if you
+  //! plan to call @c doUpdateAll().
+  virtual void doUpdateAll();
 
-  virtual TimeDelta getRepeatingDelay() const;
-  virtual TimeDelta getRepeatingInterval() const;
-  virtual TimeDelta getDoubleClickInterval() const;
-
-  // --------------------------------------------------------------------------
-  // [Windowing System]
-  // --------------------------------------------------------------------------
-
-  virtual void dispatchEnabled(Widget* w, bool enabled);
-  virtual void dispatchVisibility(Widget* w, uint32_t visible);
-  virtual void dispatchConfigure(Widget* w, const RectI& rect, bool changedOrientation);
-
-  //! @brief Called by widget destructor to erase all links to the widget from UIEngine.
-  virtual void widgetDestroyed(Widget* w);
-
-  // --------------------------------------------------------------------------
-  // [Update]
-  // --------------------------------------------------------------------------
-
-  //! Tells application that some widget needs updating. This is key feature
-  //! in the library that updating is in one place, so widgets can update()
-  //! very often.
-  virtual void update();
-
-  //! @brief Runs updating. Do not use directly, use @c update() or you get into troubles.
-  virtual void doUpdate();
-
-  //! @brief Runs updating to specific window. This is internally done by
-  //! @c doUpdate() for all needed windows.
-  virtual void doUpdateWindow(FbWindow* window);
+  //! @brief Do update of a single @a window. 
+  //!
+  //! @note Called by @c doUpdate(), never call manually.
+  virtual void doUpdateWindow(FbWindow* window, Painter& painter, const RectI& rect);
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
-  virtual void doBlitWindow(FbWindow* window, const BoxI* rects, size_t count) = 0;
+  virtual void doBlitWindow(FbWindow* window) = 0;
 
   // --------------------------------------------------------------------------
-  // [GuiWindow Create / Destroy]
+  // [Window Management]
   // --------------------------------------------------------------------------
 
   virtual FbWindow* createWindow() = 0;
   virtual void destroyWindow(FbWindow* window) = 0;
 
   // --------------------------------------------------------------------------
-  // [Event Handlers]
-  // --------------------------------------------------------------------------
-
-  void _onButtonRepeatTimeOut(TimerEvent* e);
-
-  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Each engine contains lock, used in case the FbWindows are created
-  //! multi-threaded.
+  //! @brief Lock.
   Lock _lock;
 
-  //! @brief Library, if the FbEngine was opened as a plugin (see @c X11FbEngine).
+  //! @brief Whether the engine was correctly initialized.
+  uint32_t _isInitialized;
+
+  //! @brief Library instance, non-null in case that the @c FbEngine was opened
+  //! as a plugin (see @c X11FbEngine).
+  //!
+  //! @note This is mainly useful/used under Linux operating system, where more
+  //! engines can be build and user can specify which one to use (or it can be
+  //! also detected by the runtime).
   Library _library;
 
-  //! @brief Whether The GuiEngine is correctly initialized.
-  bool _initialized;
-
-  //! @brief Count of mouse devices (default 1).
-  int _mouseDevicesCount;
-  //! @brief Count of lines to scroll through mouse wheel.
-  int _wheelLines;
-
   //! @brief Frame-buffer ID <-> FbWindow.
+  //!
+  //! @note Engine can create custom implementation of ID<->FbWindow translation.
+  //! However, this default implementation is currently used by all FbEngine
+  //! implementations used by Fog-Framework.
   Hash<void*, FbWindow*> _windowMap;
 
   //! @brief List of dirty frame-buffer windows which need to be updated.
+  //!
+  //! First call to @c scheduleUpdate() should add FbWindow into this list, all
+  //! other calls should be cached (FbWindow is added only once per update to
+  //! the list).
   List<FbWindow*> _dirtyList;
 
   //! @brief Display information.
   FbDisplayInfo _displayInfo;
-  //! @brief ImagePalette information.
+  //! @brief Display palette information.
   FbPaletteInfo _paletteInfo;
 
-  //! @brief Keyboard status information.
-  FbKeyboardState _keyboardStatus;
+  //! @brief Caret state.
+  FbCaretState _caretState;
 
-  //! @brief System mouse status information.
-  FbMouseState _mouseStatus[16];
+  //! @brief Keyboard info.
+  FbKeyboardInfo _keyboardInfo;
+  //! @brief Mouse information.
+  FbMouseInfo _mouseInfo;
 
-  //! @brief Caret status.
-  FbCaretState _caretStatus;
+  //! @brief Keyboard state.
+  FbKeyboardState* _keyboardState[16];
+  //! @brief Mouse state.
+  FbMouseState* _mouseState[16];
 
-  TimeDelta _repeatingDelay;
-  TimeDelta _repeatingInterval;
-  TimeDelta _doubleClickInterval;
-
-  Timer _buttonRepeat[3];
-  TimeDelta _buttonRepeatInterval[3];
-  TimeTicks _buttonTime[3];
-
-  //FbUpdateStatus _updateStatus;
+  //! @brief Update task (1 instance per engine).
+  void* _updateTask;
+  
+  //! @brief Update is currently in progress.
+  bool _updateInProgress;
 };
 
 //! @}

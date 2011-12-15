@@ -43,7 +43,7 @@ struct FOG_GUIENGINE_X11_API X11GuiEngine : public GuiEngine
   // [Registration]
   // --------------------------------------------------------------------------
 
-  static void registerGuiEngine();
+  static void registerFbEngine();
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

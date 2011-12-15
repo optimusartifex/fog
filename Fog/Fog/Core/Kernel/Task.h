@@ -33,7 +33,8 @@ struct FOG_API Task
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool destroyOnFinish() const { return _destroyOnFinish; }
+  FOG_INLINE bool getDestroyOnFinish() const { return _destroyOnFinish; }
+  FOG_INLINE void setDestroyOnFinish(bool val) { _destroyOnFinish = val; }
 
   // --------------------------------------------------------------------------
   // [Interface]

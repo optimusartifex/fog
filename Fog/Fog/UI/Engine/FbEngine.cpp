@@ -45,7 +45,6 @@ struct FOG_NO_EXPORT FbUpdateTask : public CancelableTask
   // --------------------------------------------------------------------------
 
   FbEngine* _engine;
-
   bool _scheduled;
 };
 
@@ -96,6 +95,8 @@ FbEngine::~FbEngine()
     }
     else
     {
+      // We are safe to delete the task now, it's not scheduled so it's not
+      // in the EventLoop stack.
       fog_delete(task);
     }
   }
@@ -104,7 +105,7 @@ FbEngine::~FbEngine()
 // ============================================================================
 // [Fog::FbEngine - Handle <-> FbWindow]
 // ============================================================================
-  
+
 err_t FbEngine::addHandle(void* handle, FbWindow* window)
 {
   return _windowMap.put(handle, window, true);
@@ -128,12 +129,6 @@ const FbDisplayInfo* FbEngine::getDisplayInfo() const { return &_displayInfo; }
 const FbPaletteInfo* FbEngine::getPaletteInfo() const { return &_paletteInfo; }
 
 // ============================================================================
-// [Fog::FbEngine - Caret]
-// ============================================================================
-
-const FbCaretState* FbEngine::getCaretState() const { return &_caretState; }
-
-// ============================================================================
 // [Fog::FbEngine - Keyboard / Mouse]
 // ============================================================================
 
@@ -145,7 +140,7 @@ const FbKeyboardState* FbEngine::getKeyboardState(uint32_t id) const
   if (id >= _keyboardInfo.getDevicesCount())
     return NULL;
 
-  return _keyboardState[id];
+  return &_keyboardState[id];
 }
 
 const FbMouseState* FbEngine::getMouseState(uint32_t id) const
@@ -153,7 +148,7 @@ const FbMouseState* FbEngine::getMouseState(uint32_t id) const
   if (id >= _mouseInfo.getDevicesCount())
     return NULL;
 
-  return _mouseState[id];
+  return &_mouseState[id];
 }
 
 uint32_t FbEngine::getModifierFromKey(uint32_t key) const
@@ -178,10 +173,40 @@ void FbEngine::setMouseWheelLines(uint32_t lines)
     // This method should be overridden in all cases, this is only very safe
     // value used as default in Windows, and maybe Linux and MAC. If we get
     // here then the FbEngine is probably not at production stage.
-    lines = 3;
+    lines = FB_MISC_DEFAULT_WHEEL_LINES;
   }
 
   _mouseInfo.setWheelLines(lines);
+}
+
+// ============================================================================
+// [Fog::FbEngine - Actions]
+// ============================================================================
+
+void FbEngine::doShowAction(FbWindow* window)
+{
+}
+
+void FbEngine::doHideAction(FbWindow* window)
+{
+}
+
+void FbEngine::doMouseAction(FbWindow* window,
+  uint32_t eventCode,
+  uint32_t mouseId,
+  const PointI& position,
+  uint32_t buttonMask)
+{
+}
+
+void FbEngine::doKeyAction(FbWindow* window,
+  uint32_t eventCode,
+  uint32_t keyboardId,
+  uint32_t keyCode,
+  uint32_t mod,
+  uint32_t systemCode,
+  uint32_t uc)
+{
 }
 
 // ============================================================================
@@ -208,20 +233,22 @@ void FbEngine::doUpdateAll()
   // [Prepare]
   // --------------------------------------------------------------------------
 
-  // Iterate over all dirty GuiWindow's and clear the list.
+  _updateInProgress = true;
+
+  // Iterate over all dirty FbWindow's. We use a local copy of dirty windows
+  // list and clear the original list, because updating can occasionally put
+  // window into dirty state.
   List<FbWindow*> dirty;
   swap(dirty, _dirtyList);
-
-  _updateInProgress = true;
 
   Painter painter;
   int painterIsUsed = 0;
 
+  ListIterator<FbWindow*> it(dirty);
+
   // --------------------------------------------------------------------------
   // [Paint]
   // --------------------------------------------------------------------------
-
-  ListIterator<FbWindow*> it(dirty);
 
   for (it.start(); it.isValid(); it.next())
   {
@@ -298,6 +325,8 @@ void FbEngine::doUpdateAll()
   // [Finished]
   // --------------------------------------------------------------------------
 
+  _updateInProgress = false;
+
   // In case that there is nothing in _dirtyList we reuse the 'dirty' list we
   // acquired instead of abandoning it. We save one MemMgr::alloc() and one
   // MemMgr::free() call.
@@ -306,8 +335,6 @@ void FbEngine::doUpdateAll()
     dirty.clear();
     swap(dirty, _dirtyList);
   }
-
-  _updateInProgress = false;
 }
 
 void FbEngine::doUpdateWindow(FbWindow* window, Painter& painter, const RectI& rect)
@@ -315,6 +342,32 @@ void FbEngine::doUpdateWindow(FbWindow* window, Painter& painter, const RectI& r
   FbWindowData* d = window->_d;
 
   // TODO:
+}
+
+// ============================================================================
+// [Fog::FbEngine - Window Management]
+// ============================================================================
+
+void FbEngine::cleanupWindow(FbWindow* window)
+{
+  // --------------------------------------------------------------------------
+  // [DirtyList]
+  // --------------------------------------------------------------------------
+
+  ListIterator<FbWindow*> it(_dirtyList);
+
+  while (it.isValid())
+  {
+    if (it.getItem() == window)
+    {
+      // Only one reference can be stored in _dirtyList, so if we are here then
+      // we are done.
+      _dirtyList.removeAt(it.getIndex());
+      break;
+    }
+
+    it.next();
+  }
 }
 
 } // Fog namespace

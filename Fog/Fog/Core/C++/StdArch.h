@@ -32,33 +32,43 @@
 //! Very nice method to check whether it's faster to use 64-bit arithmetics.
 
 //! @def FOG_HARDCODE_MMX
-//! @brief If defined, MMX assembly will be hardcoded into binaries and no lower optimizations are allowed.
+//! @brief If defined, MMX assembly will be hardcoded into binaries and no
+//! lower optimizations are allowed.
 
 //! @def FOG_HARDCODE_MMX2
-//! @brief If defined, MMX2 assembly will be hardcoded into binaries and no lower optimizations are allowed.
+//! @brief If defined, MMX2 assembly will be hardcoded into binaries and no
+//! lower optimizations are allowed.
 
 //! @def FOG_HARDCODE_SSE
-//! @brief If defined, SSE assembly will be hardcoded into binaries and no lower optimizations are allowed.
+//! @brief If defined, SSE assembly will be hardcoded into binaries and no
+//! lower optimizations are allowed.
 
 //! @def FOG_HARDCODE_SSE2
-//! @brief If defined, SSE2 assembly will be hardcoded into binaries and no lower optimizations are allowed.
+//! @brief If defined, SSE2 assembly will be hardcoded into binaries and no
+//! lower optimizations are allowed.
 
 //! @def FOG_HARDCODE_SSE3
-//! @brief If defined, SSE3 assembly will be hardcoded into binaries and no lower optimizations are allowed.
+//! @brief If defined, SSE3 assembly will be hardcoded into binaries and no 
+//! lower optimizations are allowed.
+
+//! @def FOG_HARDCODE_NEON
+//! @brief If defined, NEON assembly will be hardcoded into binaries and no 
+//! lower optimizations are allowed.
 
 // ============================================================================
 // [Fog::Core::C++ - Architecture - X86_64]
 // ============================================================================
 
-#if defined(_M_X64        ) || \
-    defined(_M_AMD64      ) || \
-    defined(__x86_64__    ) || \
-    defined(__x86_64      ) || \
-    defined(__amd64__     ) || \
-    defined(__amd64       )
+#if defined(_M_X64          ) || \
+    defined(_M_AMD64        ) || \
+    defined(__x86_64__      ) || \
+    defined(__x86_64        ) || \
+    defined(__amd64__       ) || \
+    defined(__amd64         )
 
 # define FOG_ARCH_X86_64
 # define FOG_ARCH_BITS 64
+# define FOG_ARCH_SIZEOF_VOID 8
 
 // x86_64 allows unaligned access.
 # define FOG_ARCH_UNALIGNED_ACCESS_32
@@ -72,15 +82,17 @@
 // [Fog::Core::C++ - Architecture - X86_32]
 // ============================================================================
 
-#elif defined(_M_IX86     ) || \
-      defined(__i386__    ) || \
-      defined(__i386      ) || \
-      defined(__i486__    ) || \
-      defined(__i586__    ) || \
-      defined(__i686__    )
+#elif defined(_M_IX86       ) || \
+      defined(__i386__      ) || \
+      defined(__i386        ) || \
+      defined(__i486__      ) || \
+      defined(__i586__      ) || \
+      defined(__i686__      )
 
 # define FOG_ARCH_X86
 # define FOG_ARCH_BITS 32
+# define FOG_ARCH_SIZEOF_VOID 4
+# define FOG_ARCH_SIZEOF_LONG 4
 
 // x86 allows unaligned access.
 # define FOG_ARCH_UNALIGNED_ACCESS_32
@@ -110,6 +122,7 @@
 
 # define FOG_ARCH_ITANIUM
 # define FOG_ARCH_BITS 64
+# define FOG_ARCH_SIZEOF_VOID 8
 
 // Unaligned access on itanium is only possible for 32-bit integer, not for
 // pointer type, which is 64-bit wide.
@@ -119,13 +132,15 @@
 // [Fog::Core::C++ - Architecture - ARM]
 // ============================================================================
 
-#elif defined(__M_ARM     ) || \
-      defined(__arm       ) || \
-      defined(__arm__     ) || \
-      defined(__ARM_NEON__)
+#elif defined(__M_ARM       ) || \
+      defined(__arm         ) || \
+      defined(__arm__       ) || \
+      defined(__ARM_NEON__  )
 
 # define FOG_ARCH_ARM
 # define FOG_ARCH_BITS 32
+# define FOG_ARCH_SIZEOF_VOID 4
+# define FOG_ARCH_SIZEOF_LONG 4
 
 # if defined(__ARM_NEON__)
 #  define FOG_ARCH_ARM_NEON
@@ -135,16 +150,33 @@
 // it prohibited.
 
 // ============================================================================
-// [Fog::Core::C++ - Architecture - PowerPC]
+// [Fog::Core::C++ - Architecture - PowerPC 64-Bit]
 // ============================================================================
 
-#elif defined(_M_PPC      ) || \
-      defined(_M_MPPC     ) || \
-      defined(__ppc__     ) || \
-      defined(__powerpc__ )
+#elif defined(__ppc64__     ) || \
+      defined(__powerpc64__ )
+
+# define FOG_ARCH_PPC
+# define FOG_ARCH_BITS 64
+# define FOG_ARCH_SIZEOF_VOID 8
+
+// PowerPC allows unaligned access of 32-bit data, but prohibits unaligned 
+// access of 64-bit data.
+# define FOG_ARCH_UNALIGNED_ACCESS_32
+
+// ============================================================================
+// [Fog::Core::C++ - Architecture - PowerPC 32-Bit]
+// ============================================================================
+
+#elif defined(_M_PPC        ) || \
+      defined(_M_MPPC       ) || \
+      defined(__ppc__       ) || \
+      defined(__powerpc__   )
 
 # define FOG_ARCH_PPC
 # define FOG_ARCH_BITS 32
+# define FOG_ARCH_SIZEOF_VOID 4
+# define FOG_ARCH_SIZEOF_LONG 4
 
 // PowerPC allows unaligned access of 32-bit data, but prohibits unaligned 
 // access of 64-bit data.
@@ -158,6 +190,8 @@
 
 # define FOG_ARCH_X86
 # define FOG_ARCH_BITS 32
+# define FOG_ARCH_SIZEOF_VOID 4
+# define FOG_ARCH_SIZEOF_LONG 4
 
 #else
 // If you know your architecture and you want to try compile

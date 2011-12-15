@@ -19,12 +19,13 @@
 #endif // FOG_HAVE_LIMITS_H
 
 #if defined(FOG_HAVE_STDINT_H)
-#include <stdint.h>
+# include <stdint.h>
 #else
+
 #if defined(_MSC_VER)
 
 #if (_MSC_VER < 1300)
-typedef char int8_t;
+typedef signed char int8_t;
 typedef short int16_t;
 typedef int int32_t;
 typedef unsigned char uint8_t;
@@ -33,7 +34,7 @@ typedef unsigned int uint32_t;
 typedef __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 #else
-typedef __int8 int8_t;
+typedef signed __int8 int8_t;
 typedef __int16 int16_t;
 typedef __int32 int32_t;
 typedef __int64 int64_t;
@@ -44,6 +45,7 @@ typedef unsigned __int64 uint64_t;
 #endif
 
 #else // !defined(_MSC_VER)
+
 // We are trying to be compatible with everything defined by standard compilers.
 // So we will define some macros that says that these types were defined so
 // standard compliant compiler should understand them.
@@ -77,7 +79,7 @@ typedef int int32_t;
 typedef unsigned int uint32_t;
 #endif // __uint32_t_defined
 
-#if FOG_SIZEOF_LONG == 8
+#if FOG_ARCH_SIZEOF_LONG == 8
 
 # if !defined(__int64_t_defined)
 #  define __int64_t_defined
@@ -232,26 +234,26 @@ typedef long __w64 ssize_t;
 #endif
 
 #if !defined(LONG_MIN)
-# if FOG_SIZEOF_LONG == 4
-#  define LONG_MIN INT32_MIN
-# else
+# if FOG_ARCH_SIZEOF_LONG == 8
 #  define LONG_MIN INT64_MIN
+# else
+#  define LONG_MIN INT32_MIN
 # endif
 #endif
 
 #if !defined(LONG_MAX)
-# if FOG_SIZEOF_LONG == 4
-#  define LONG_MAX INT32_MAX
-# else
+# if FOG_ARCH_SIZEOF_LONG == 8
 #  define LONG_MAX INT64_MAX
+# else
+#  define LONG_MAX INT32_MAX
 # endif
 #endif
 
 #if !defined(ULONG_MAX)
-# if FOG_SIZEOF_LONG == 4
-#  define ULONG_MAX UINT32_MAX
-# else
+# if FOG_ARCH_SIZEOF_LONG == 8
 #  define ULONG_MAX UINT64_MAX
+# else
+#  define ULONG_MAX UINT32_MAX
 # endif
 #endif
 

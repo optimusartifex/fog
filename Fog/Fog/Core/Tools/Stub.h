@@ -145,13 +145,20 @@ struct FOG_NO_EXPORT StubW
   {
   }
 
-#if FOG_SIZEOF_WCHAR_T == 2
+#if defined(FOG_OS_WINDOWS)
+  // Simplify making our StubW instances from Windows WCHAR[] arrays. This is
+  // used a lot in Windows support layers, so instead of casting we added this
+  // method.
+  //
+  // NOTE: This is supported only under Windows, because it has 2-byte wchar_t
+  // implementation - it's WinAPI limitation; and this will probably never 
+  // change.
   explicit FOG_INLINE StubW(const wchar_t* data, size_t length = DETECT_LENGTH) :
     _data(reinterpret_cast<const CharW*>(data)),
     _length(length)
   {
   }
-#endif // FOG_SIZEOF_WCHAR_T == 2
+#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [Methods]

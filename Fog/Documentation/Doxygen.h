@@ -87,24 +87,3 @@ struct Implicit
 //! the result into black destination using a source over operator.
 
 #endif // FOG_DOXYGEN
-
-#if defined(FOG_DOXYGEN)
-
-// ============================================================================
-// [Fog-UI Groups]
-// ============================================================================
-
-//! @defgroup Fog_UI Fog/UI
-//!
-//! Public classes and functions related to Fog-Gui library.
-
-//! @defgroup Fog_UI_Engine Engine
-//! @ingroup Fog_UI
-
-//! @defgroup Fog_UI_Layout Layout managers
-//! @ingroup Fog_UI
-
-//! @defgroup Fog_UI_Widget Widgets
-//! @ingroup Fog_UI
-
-#endif // FOG_DOXYGEN

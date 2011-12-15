@@ -93,7 +93,6 @@ static pthread_key_t ThreadLocal_global;
 static err_t ThreadLocal_create(uint32_t* slot, void* _dtor)
 {
   FOG_ASSERT(slot != NULL);
-  FOG_ASSERT(ThreadLocal_global != TLS_OUT_OF_INDEXES);
 
   ThreadLocalDestructorFunc dtor = (ThreadLocalDestructorFunc)_dtor;
   if (dtor == NULL) dtor = ThreadLocal_dummy;
@@ -139,8 +138,6 @@ static err_t ThreadLocal_destroy(uint32_t slot)
 
 static void* ThreadLocal_get(uint32_t slot)
 {
-  FOG_ASSERT(ThreadLocal_global != TLS_OUT_OF_INDEXES);
-
   if (FOG_UNLIKELY(slot - 1 >= THREAD_LOCAL_SIZE - 1))
     return NULL;
 
@@ -156,8 +153,6 @@ static void* ThreadLocal_get(uint32_t slot)
 
 static err_t ThreadLocal_set(uint32_t slot, void* value)
 {
-  FOG_ASSERT(ThreadLocal_global != TLS_OUT_OF_INDEXES);
-
   if (FOG_UNLIKELY(slot - 1 >= THREAD_LOCAL_SIZE - 1))
     return ERR_THREAD_TLS_INVALID;
 

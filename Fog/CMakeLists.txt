@@ -143,7 +143,7 @@ Include_Directories(${FOG_DIR})
 # [OS - Detect]
 # =============================================================================
 
-# Detects both x86, and x64 version.
+# Detects both x86, and x64 version, and maybe ARM version starting at Win-8.
 If(WIN32)
   Set(FOG_OS_WINDOWS TRUE)
 EndIf()
@@ -161,6 +161,10 @@ EndIf(IOS)
 If(APPLE OR LINUX OR UNIX)
   Set(FOG_OS_POSIX TRUE)
 EndIf()
+
+# =============================================================================
+# [C++ Compiler - Architecture]
+# =============================================================================
 
 # =============================================================================
 # [C++ Compiler - Clear Flags]
@@ -184,18 +188,14 @@ If (FOG_OS_IOS)
   # Forces to disable any checking, we are hardcoding, because of cross-compilation.
   Set(DISABLE_COMPILER_CHECKS TRUE)
 
-  # iOS forces Little-Endian.
+  # iOS forces to use little endian.
   Set(FOG_BYTE_ORDER     1)
 
   # Hardcode everything we need normally to check-for.
   If(IOS_PLATFORM MATCHES SIMULATOR)
-    Set(FOG_SIZEOF_VOID    4)
-    Set(FOG_SIZEOF_INT     4)
     Set(FOG_SIZEOF_LONG    4)
     Set(FOG_SIZEOF_WCHAR_T 4)
   Else()
-    Set(FOG_SIZEOF_VOID    4)
-    Set(FOG_SIZEOF_INT     4)
     Set(FOG_SIZEOF_LONG    4)
     Set(FOG_SIZEOF_WCHAR_T 4)
   EndIf()
@@ -410,7 +410,6 @@ If (NOT DISABLE_COMPILER_CHECKS)
   EndIf()
 
   Check_Type_Size("void*" FOG_SIZEOF_VOID)
-  Check_Type_Size("int" FOG_SIZEOF_INT)
   Check_Type_Size("long" FOG_SIZEOF_LONG)
 
   Set(CMAKE_EXTRA_INCLUDE_FILES wchar.h)
@@ -423,8 +422,8 @@ EndIf()
 # =============================================================================
 
 If (NOT FOG_OS_IOS)
-  # Disable MMX/3dNow when building for AMD64.
-  If (${FOG_SIZEOF_VOID} EQUAL 4)
+  # Disable MMX/3dNow when building for Mac or AMD64.
+  If (NOT FOG_OS_MAC AND ${FOG_SIZEOF_VOID} EQUAL 4)
     Set(FOG_OPTIMIZE_MMX TRUE)
     # Set(FOG_OPTIMIZE_3DNOW TRUE)
   EndIf()
@@ -1589,7 +1588,6 @@ Set(FOG_UI_ENGINE_SOURCES
 )
 
 Set(FOG_UI_ENGINE_HEADERS
-  Fog/UI/Engine/FbCaretState.h
   Fog/UI/Engine/FbDisplayInfo.h
   Fog/UI/Engine/FbEngine.h
   Fog/UI/Engine/FbEvent.h

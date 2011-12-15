@@ -16,6 +16,10 @@ namespace Fog {
 //! @addtogroup Fog_Core_Global
 //! @{
 
+// NOTE: All FB_ constants are specific to the frame-buffer implementation and
+// used mainly by FbEngine and FbWindow itself. The standard UI code should use
+// constants without FB_ prefix unless working directly with FbEngine/FbWindow.
+
 // ============================================================================
 // [Fog::FB_DOUBLE_BUFFER]
 // ============================================================================
@@ -48,23 +52,34 @@ enum FB_DOUBLE_BUFFER
 //! @brief FbWindow event code.
 enum FB_EVENT
 {
-  FB_EVENT_WINDOW_CREATE = 0,
-  FB_EVENT_WINDOW_DESTROY = 1,
-  FB_EVENT_WINDOW_GEOMETRY = 2,
-  FB_EVENT_WINDOW_MAXIMIZE = 3,
-  FB_EVENT_WINDOW_MINIMIZE = 4,
-  FB_EVENT_WINDOW_RESTORE = 5,
-  FB_EVENT_WINDOW_CLOSE = 6,
+  FB_EVENT_CREATE = 0,
+  FB_EVENT_DESTROY = 1,
 
-  FB_EVENT_KEY_PRESS = 10,
-  FB_EVENT_KEY_RELEASE = 11,
+  FB_EVENT_CLOSE = 2,
 
-  FB_EVENT_MOUSE_ENTER = 15,
-  FB_EVENT_MOUSE_LEAVE = 16,
+  FB_EVENT_SHOW = 3,
+  FB_EVENT_HIDE = 4,
+  FB_EVENT_HIDE_BY_PARENT = 5,
+
+  FB_EVENT_GEOMETRY = 6,
+  FB_EVENT_MAXIMIZE = 7,
+  FB_EVENT_MINIMIZE = 8,
+  FB_EVENT_RESTORE = 9,
+  
+  FB_EVENT_FOCUS_IN = 10,
+  FB_EVENT_FOCUS_OUT = 11,
+
+  FB_EVENT_KEY_DOWN = 12,
+  FB_EVENT_KEY_UP = 13,
+  FB_EVENT_KEY_PRESS = 14,
+
+  FB_EVENT_MOUSE_IN = 15,
+  FB_EVENT_MOUSE_OUT = 16,
   FB_EVENT_MOUSE_MOVE = 17,
 
-  FB_EVENT_MOUSE_PRESS = 18,
-  FB_EVENT_MOUSE_RELEASE = 19,
+  FB_EVENT_MOUSE_DOWN = 18,
+  FB_EVENT_MOUSE_UP = 19,
+
   FB_EVENT_MOUSE_CLICK = 20,
   FB_EVENT_MOUSE_DBL_CLICK = 21
 };
@@ -83,8 +98,18 @@ enum FB_GEOMETRY
   FB_GEOMETRY_ORIENTATION = 0x10
 };
 
+// ============================================================================
+// [Fog::FB_MISC]
+// ============================================================================
 
-
+//! @brief Various constants used by @c FbEngine and @c FbWindow.
+//!
+//! @note This is mainly for internal purposes, but visible here so the default
+//! values can be safely "modified" to fit into a particular siftware/hardware.
+enum FB_MISC
+{
+  FB_MISC_DEFAULT_WHEEL_LINES = 3
+};
 
 
 

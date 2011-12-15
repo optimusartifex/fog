@@ -515,7 +515,6 @@ _FOG_TYPE_DECLARE(Fog::Region                  , C(MOVABLE) | F(IMPLICIT) | F(NO
 
 #if defined(FOG_BUILD_UI)
 // [Fog/UI/Engine]
-_FOG_TYPE_DECLARE(Fog::FbCaretState            , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FbDisplayInfo           , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FbEvent                 , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ ))
 _FOG_TYPE_DECLARE(Fog::FbKeyboardInfo          , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))

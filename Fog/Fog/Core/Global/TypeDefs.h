@@ -304,7 +304,6 @@ struct RegionData;
 
 #if defined(FOG_BUILD_UI)
 // Fog/UI/Engine.
-struct FbCaretState;
 struct FbDisplayInfo;
 struct FbEngine;
 struct FbEvent;

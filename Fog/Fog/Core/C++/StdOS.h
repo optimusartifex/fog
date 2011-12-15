@@ -94,6 +94,17 @@
 
 #endif // __DARWIN__ || __APPLE__
 
+// If FOG_ARCH_SIZEOF_LONG is zero then the size depends on the operating
+// system. When compiling for Windows, the size of long type is always same
+// as the size for integer type.
+#if !defined(FOG_ARCH_SIZEOF_LONG)
+# if defined(FOG_OS_POSIX) && (FOG_ARCH_BITS >= 64)
+#  define FOG_ARCH_SIZEOF_LONG 8
+# else
+#  define FOG_ARCH_SIZEOF_LONG 4
+# endif // FOG_ARCH_BITS
+#endif // !FOG_ARCH_SIZEOF_LONG
+
 //! @}
 
 #endif // _FOG_CORE_CPP_STDOS_H

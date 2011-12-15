@@ -442,7 +442,6 @@ static err_t FOG_CDECL Image_copyDeep(Image* self, const Image* other)
   }
 
   // TODO: How to decide which image type to create (Buffered, Windows, ...)?
-  uint32_t type = d->type;
   FOG_RETURN_ON_ERROR(self->create(d->size, d->format, IMAGE_TYPE_BUFFER));
 
   ImageData* newd = self->_d;

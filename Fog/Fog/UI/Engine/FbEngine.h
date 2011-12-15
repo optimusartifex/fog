@@ -22,7 +22,6 @@
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Source/Color.h>
-#include <Fog/UI/Engine/FbCaretState.h>
 #include <Fog/UI/Engine/FbDisplayInfo.h>
 #include <Fog/UI/Engine/FbKeyboardInfo.h>
 #include <Fog/UI/Engine/FbKeyboardState.h>
@@ -89,13 +88,6 @@ struct FOG_API FbEngine : public Object
   virtual void updateDisplayInfo() = 0;
 
   // --------------------------------------------------------------------------
-  // [Caret]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get caret state.
-  virtual const FbCaretState* getCaretState() const;
-
-  // --------------------------------------------------------------------------
   // [Keyboard / Mouse]
   // --------------------------------------------------------------------------
 
@@ -118,6 +110,37 @@ struct FOG_API FbEngine : public Object
   //! @param lines Amount of lines to scroll, zero means to get the value from
   //! the OS.
   virtual void setMouseWheelLines(uint32_t lines);
+
+  // --------------------------------------------------------------------------
+  // [Actions]
+  // --------------------------------------------------------------------------
+
+  // NOTE: These virtual functions contains base implementation which is used
+  // by many FbEngine`s. The idea is to make the implementation as generic as
+  // possible so it's easy to add support for a different FbEngine backends.
+  //
+  // These methods store state and sends FbEvent`s to the related FbWindow
+  // instances managed by the engine.
+
+  virtual void doShowAction(FbWindow* window);
+  virtual void doHideAction(FbWindow* window);
+
+  //! @brief Do mouse action to point @a position and apply new @a buttonMask.
+  virtual void doMouseAction(FbWindow* window,
+    uint32_t eventCode,
+    uint32_t mouseId,
+    const PointI& position,
+    uint32_t buttonMask);
+
+  //! @brief Do keyboard action, including keyboard action performed by touch
+  //! key event.
+  virtual void doKeyAction(FbWindow* window,
+    uint32_t eventCode,
+    uint32_t keyboardId,
+    uint32_t keyCode,
+    uint32_t mod,
+    uint32_t systemCode,
+    uint32_t uc);
 
   // --------------------------------------------------------------------------
   // [ScheduleUpdate / DoUpdate]
@@ -150,8 +173,18 @@ struct FOG_API FbEngine : public Object
   // [Window Management]
   // --------------------------------------------------------------------------
 
+  //! @brief Create a new @c FbWindow instance.
   virtual FbWindow* createWindow() = 0;
+
+  //! @brief Destroy an existing @c FnWindow instance.
+  //!
+  //! @note You can only use @c FbWindow created by @c createWindow() method.
   virtual void destroyWindow(FbWindow* window) = 0;
+
+  //! @brief Clean all references to the @a window.
+  //!
+  //! @note You can only use @c FbWindow created by @c createWindow() method.
+  virtual void cleanupWindow(FbWindow* window);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -190,22 +223,19 @@ struct FOG_API FbEngine : public Object
   //! @brief Display palette information.
   FbPaletteInfo _paletteInfo;
 
-  //! @brief Caret state.
-  FbCaretState _caretState;
-
   //! @brief Keyboard info.
   FbKeyboardInfo _keyboardInfo;
   //! @brief Mouse information.
   FbMouseInfo _mouseInfo;
 
   //! @brief Keyboard state.
-  FbKeyboardState* _keyboardState[16];
+  FbKeyboardState _keyboardState[16];
   //! @brief Mouse state.
-  FbMouseState* _mouseState[16];
+  FbMouseState _mouseState[16];
 
   //! @brief Update task (1 instance per engine).
   void* _updateTask;
-  
+
   //! @brief Update is currently in progress.
   bool _updateInProgress;
 };

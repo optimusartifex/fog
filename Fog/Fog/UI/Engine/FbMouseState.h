@@ -35,10 +35,12 @@ struct FOG_NO_EXPORT FbMouseState
   // [Accessors]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE FbWindow* getWindow() const { return _window; }
   FOG_INLINE const PointI& getPosition() const { return _position; }
   FOG_INLINE uint32_t getHover() const { return _hover; }
   FOG_INLINE uint32_t getButtonMask() const { return _buttonMask; }
 
+  FOG_INLINE void setWindow(FbWindow* window) { _window = window; }
   FOG_INLINE void setPosition(const PointI& position) { _position = position; }
   FOG_INLINE void setHover(uint32_t hover) { _hover = hover; }
   FOG_INLINE void setButtonMask(uint32_t buttonMask) { _buttonMask = buttonMask; }
@@ -60,7 +62,8 @@ struct FOG_NO_EXPORT FbMouseState
   {
     return _position   == other._position   &&
            _hover      == other._hover      &&
-           _buttonMask == other._buttonMask ;
+           _buttonMask == other._buttonMask &&
+           _window     == other._window     ;
   }
 
   // --------------------------------------------------------------------------
@@ -80,12 +83,17 @@ struct FOG_NO_EXPORT FbMouseState
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Mouse position relative to @c uiWindow (in client area).
+  // NOTE: It looks weird, but it's better to place _position before _window,
+  // because we get better structure packing when compiling for 64-bit mode.
+
+  //! @brief Mouse position relative to @ref FbWindow (in client area).
   PointI _position;
   //! @brief Hover state.
   uint32_t _hover;
   //! @brief Pressed button-mask.
   uint32_t _buttonMask;
+  //! @brief Window.
+  FbWindow* _window;
 };
 
 //! @}

@@ -19,7 +19,7 @@ namespace Fog {
 // [Fog::KeyUtil]
 // ============================================================================
 
-//! @brief Key codes helpers.
+//! @brief Key code/modifiers helpers.
 struct FOG_NO_EXPORT KeyUtil
 {
   static FOG_INLINE bool isClearMod   (uint32_t mod) { return (mod & MODIFIER_MASK  ) == 0; }

@@ -68,15 +68,6 @@
 #cmakedefine FOG_OPTIMIZE_NEON
 
 // ============================================================================
-// [Size of Types]
-// ============================================================================
-
-#define FOG_SIZEOF_VOID ${FOG_SIZEOF_VOID}
-#define FOG_SIZEOF_INT ${FOG_SIZEOF_INT}
-#define FOG_SIZEOF_LONG ${FOG_SIZEOF_LONG}
-#define FOG_SIZEOF_WCHAR_T ${FOG_SIZEOF_WCHAR_T}
-
-// ============================================================================
 // [Header Files]
 // ============================================================================
 

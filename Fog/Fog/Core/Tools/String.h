@@ -1406,53 +1406,41 @@ struct FOG_NO_EXPORT StringA
   // [ParseLong]
   // --------------------------------------------------------------------------
 
-#if FOG_SIZEOF_LONG == 32
   FOG_INLINE err_t parseLong(long* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringa_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(long) == 8)
+      return fog_api.stringa_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringa_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
   }
 
   FOG_INLINE err_t parseULong(ulong* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringa_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(long) == 8)
+      return fog_api.stringa_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringa_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
   }
-#else
-  FOG_INLINE err_t parseLong(long* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringa_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
-  }
-
-  FOG_INLINE err_t parseULong(ulong* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringa_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
-  }
-#endif
 
   // --------------------------------------------------------------------------
   // [ParseSizeT]
   // --------------------------------------------------------------------------
 
-#if FOG_ARCH_BITS == 32
   FOG_INLINE err_t parseSSizeT(ssize_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringa_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(ssize_t) == 8)
+      return fog_api.stringa_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringa_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
   }
 
   FOG_INLINE err_t parseSizeT(size_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringa_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(size_t) == 8)
+      return fog_api.stringa_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringa_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
   }
-#else
-  FOG_INLINE err_t parseSSizeT(ssize_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringa_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
-  }
-
-  FOG_INLINE err_t parseSizeT(size_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringa_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
-  }
-#endif
 
   // --------------------------------------------------------------------------
   // [ParseReal]
@@ -3546,53 +3534,41 @@ struct FOG_NO_EXPORT StringW
   // [ParseLong]
   // --------------------------------------------------------------------------
 
-#if FOG_SIZEOF_LONG == 32
   FOG_INLINE err_t parseLong(long* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringw_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(long) == 8)
+      return fog_api.stringw_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringw_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
   }
 
   FOG_INLINE err_t parseULong(ulong* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringw_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(ulong) == 8)
+      return fog_api.stringw_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringw_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
   }
-#else
-  FOG_INLINE err_t parseLong(long* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringw_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
-  }
-
-  FOG_INLINE err_t parseULong(ulong* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringw_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
-  }
-#endif
 
   // --------------------------------------------------------------------------
   // [ParseSizeT]
   // --------------------------------------------------------------------------
 
-#if FOG_ARCH_BITS == 32
   FOG_INLINE err_t parseSSizeT(ssize_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringw_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(ssize_t) == 8)
+      return fog_api.stringw_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringw_parseI32(this, reinterpret_cast<int32_t*>(dst), base, pEnd, pFlags);
   }
 
   FOG_INLINE err_t parseSizeT(size_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
   {
-    return fog_api.stringw_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
+    if (sizeof(size_t) == 8)
+      return fog_api.stringw_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
+    else
+      return fog_api.stringw_parseU32(this, reinterpret_cast<uint32_t*>(dst), base, pEnd, pFlags);
   }
-#else
-  FOG_INLINE err_t parseSSizeT(ssize_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringw_parseI64(this, reinterpret_cast<int64_t*>(dst), base, pEnd, pFlags);
-  }
-
-  FOG_INLINE err_t parseSizeT(size_t* dst, uint32_t base = 0, size_t* pEnd = NULL, uint32_t* pFlags = NULL) const
-  {
-    return fog_api.stringw_parseU64(this, reinterpret_cast<uint64_t*>(dst), base, pEnd, pFlags);
-  }
-#endif
 
   // --------------------------------------------------------------------------
   // [ParseReal]

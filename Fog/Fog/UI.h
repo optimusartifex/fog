@@ -12,12 +12,22 @@
 #define _FOG_UI_H
 
 // ============================================================================
-// [Fog-UI]
+// [Fog/UI]
 // ============================================================================
+
+//! @defgroup Fog_UI Fog/UI
+//!
+//! Public classes and functions related to Fog/UI module.
 
 #include <Fog/Core/Global/Global.h>
 
-#include <Fog/UI/Engine/FbCaretState.h>
+// ============================================================================
+// [Fog/UI/Engine]
+// ============================================================================
+
+//! @defgroup Fog_UI_Engine Engine
+//! @ingroup Fog_UI
+
 #include <Fog/UI/Engine/FbDisplayInfo.h>
 #include <Fog/UI/Engine/FbEngine.h>
 #include <Fog/UI/Engine/FbEvent.h>
@@ -28,6 +38,14 @@
 #include <Fog/UI/Engine/FbWindow.h>
 
 #include <Fog/UI/Engine/GuiEngine.h>
+
+// ============================================================================
+// [Fog/UI/Layout]
+// ============================================================================
+
+//! @defgroup Fog_UI_Layout Layout management
+//! @ingroup Fog_UI
+
 #include <Fog/UI/Layout/BorderLayout.h>
 #include <Fog/UI/Layout/BoxLayout.h>
 #include <Fog/UI/Layout/FlowLayout.h>
@@ -38,7 +56,23 @@
 #include <Fog/UI/Layout/LayoutPolicy.h>
 #include <Fog/UI/Layout/LayoutUtil.h>
 #include <Fog/UI/Layout/Margin.h>
+
+// ============================================================================
+// [Fog/UI/Tools]
+// ============================================================================
+
+//! @defgroup Fog_UI_Tools Tools
+//! @ingroup Fog_UI
+
 #include <Fog/UI/Tools/KeyUtil.h>
+
+// ============================================================================
+// [Fog/UI/Widget]
+// ============================================================================
+
+//! @defgroup Fog_UI_Widget Widgets
+//! @ingroup Fog_UI
+
 #include <Fog/UI/Widget/Event.h>
 #include <Fog/UI/Widget/Widget.h>
 #include <Fog/UI/Widget/Window.h>

@@ -11,10 +11,10 @@
 #endif // _FOG_CORE_CPP_BASE_H
 
 // ============================================================================
-// [Fog::Core::Build - OS]
+// [Fog::Core::C++ - OS]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Compiler
+//! @addtogroup Fog_Core_Cpp
 //! @{
 
 //! @def FOG_OS_WINDOWS

@@ -12,13 +12,48 @@
 #define _FOG_SVG_H
 
 // ============================================================================
-// [Fog-Svg]
+// [Fog/Svg]
 // ============================================================================
 
+//! @defgroup Fog_Svg Fog-Svg
+//!
+//! Public classes and functions related to Fog-Svg library.
+
+// ============================================================================
+// [Fog/Svg/Global]
+// ============================================================================
+
+//! @defgroup Fog_Svg_Global SVG global definitions
+//! @ingroup Fog_Svg
+
 #include <Fog/Core/Global/Global.h>
+
+// ============================================================================
+// [Fog/Svg/Dom]
+// ============================================================================
+
+//! @defgroup Fog_Svg_Dom SVG-DOM
+//! @ingroup Fog_Svg
+
 #include <Fog/Svg/Dom/SvgDocument.h>
 #include <Fog/Svg/Dom/SvgElement.h>
+
+// ============================================================================
+// [Fog/Svg/Tools]
+// ============================================================================
+
+//! @defgroup Fog_Svg_Tools SVG tools (parsing and serializing)
+//! @ingroup Fog_Svg
+
 #include <Fog/Svg/Tools/SvgUtil.h>
+
+// ============================================================================
+// [Fog/Svg/Visit]
+// ============================================================================
+
+//! @defgroup Fog_Svg_Visit SVG visitors
+//! @ingroup Fog_Svg
+
 #include <Fog/Svg/Visit/SvgHitTest.h>
 #include <Fog/Svg/Visit/SvgMeasure.h>
 #include <Fog/Svg/Visit/SvgRender.h>

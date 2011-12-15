@@ -11,7 +11,7 @@
 #endif // _FOG_CORE_CPP_BASE_H
 
 // ============================================================================
-// [Fog::Core::Build - System Integer Types]
+// [Fog::Core::C++ - System Integer Types]
 // ============================================================================
 
 #if defined(FOG_HAVE_LIMITS_H)

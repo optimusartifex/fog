@@ -18,7 +18,7 @@
 // [Fog::Core::Config - C++ Compiler]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Compiler
+//! @addtogroup Fog_Core_Cpp
 //! @{
 
 //! @def FOG_INLINE

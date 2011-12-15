@@ -73,6 +73,12 @@ Else()
   Message("")
 EndIf()
 
+If(FOG_BUILD_SLAVE)
+  Message("-- Build Slave - Enabled")
+Else()
+  Message("-- Build Slave - Disabled")
+EndIf()
+
 If(FOG_BUILD_STATIC)
   Message("-- Build Static - Enabled")
 Else()
@@ -108,8 +114,13 @@ EndIf()
 # [Project - Cleanup]
 # =============================================================================
 
-Set(FOG_LIBRARIES "")
 Set(CMAKE_CXX_STANDARD_LIBRARIES "")
+
+# =============================================================================
+# [Project - Libraries]
+# =============================================================================
+
+Set(FOG_LIBRARIES "")
 
 # =============================================================================
 # [Project - Include]
@@ -125,10 +136,6 @@ If(IOS)
 Else()
   Include(FindThreads)
 EndIf()
-
-# =============================================================================
-# [Include Directories]
-# =============================================================================
 
 Include_Directories(${FOG_DIR})
 
@@ -1852,12 +1859,14 @@ EndIf()
 # =============================================================================
 
 If(NOT FOG_BUILD_STATIC)
+  # Shared library.
   Add_Library(Fog SHARED
     ${FOG_ALL_SOURCES_CORRECTED}
     ${FOG_ALL_HEADERS_CORRECTED})
   Target_Link_Libraries(Fog ${FOG_LIBRARIES})
   Install(TARGETS Fog DESTINATION lib)
 Else()
+  # Static library.
   Add_Library(Fog STATIC
     ${FOG_ALL_SOURCES_CORRECTED}
     ${FOG_ALL_HEADERS_CORRECTED})

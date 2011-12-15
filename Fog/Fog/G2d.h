@@ -15,7 +15,18 @@
 // [Fog/G2d]
 // ============================================================================
 
+//! @defgroup Fog_G2d Fog-G2d
+//!
+//! Public classes and functions related to Fog-G2d library.
+
 #include <Fog/Core/C++/Base.h>
+
+// ============================================================================
+// [Fog/G2d/Geometry]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Geometry Geometry classes, vector manipulation and math
+//! @ingroup Fog_G2d
 
 #include <Fog/G2d/Geometry/Arc.h>
 #include <Fog/G2d/Geometry/Box.h>
@@ -42,6 +53,14 @@
 #include <Fog/G2d/Geometry/Thickness.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Geometry/Triangle.h>
+
+// ============================================================================
+// [Fog/G2d/Imaging]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Imaging Imaging, IO and effects
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
@@ -63,14 +82,46 @@
 #include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
 #include <Fog/G2d/Imaging/Filters/FeConvolveSeparable.h>
 #include <Fog/G2d/Imaging/Filters/FeMorphology.h>
+
+// ============================================================================
+// [Fog/G2d/OS]
+// ============================================================================
+
+//! @defgroup Fog_G2d_OS Access OS specific features
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/OS/OSUtil.h>
+
+// ============================================================================
+// [Fog/G2d/Painting]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Painting Painting
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/Painting/PaintDevice.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/PaintUtil.h>
 #include <Fog/G2d/Painting/Painter.h>
+
+// ============================================================================
+// [Fog/G2d/Shader]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Shader Shaders
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/Shader/Shader.h>
+
+// ============================================================================
+// [Fog/G2d/Source]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Source Colors, gradients, and textures
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/Source/Acmyk.h>
 #include <Fog/G2d/Source/Ahsl.h>
 #include <Fog/G2d/Source/Ahsv.h>
@@ -87,6 +138,14 @@
 #include <Fog/G2d/Source/RadialGradient.h>
 #include <Fog/G2d/Source/RectangularGradient.h>
 #include <Fog/G2d/Source/Texture.h>
+
+// ============================================================================
+// [Fog/G2d/Text]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Text Fonts and text manipulation
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/Text/Font.h>
 #include <Fog/G2d/Text/FontFace.h>
 #include <Fog/G2d/Text/FontFaceCache.h>
@@ -102,6 +161,14 @@
 #include <Fog/G2d/Text/GlyphOutlineCache.h>
 #include <Fog/G2d/Text/TextLayout.h>
 #include <Fog/G2d/Text/TextRect.h>
+
+// ============================================================================
+// [Fog/G2d/Tools]
+// ============================================================================
+
+//! @defgroup Fog_G2d_Tools Various tools used in 2d graphics
+//! @ingroup Fog_G2d
+
 #include <Fog/G2d/Tools/Dpi.h>
 #include <Fog/G2d/Tools/Matrix.h>
 #include <Fog/G2d/Tools/Region.h>

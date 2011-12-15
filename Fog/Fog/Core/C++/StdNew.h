@@ -11,7 +11,7 @@
 #endif // _FOG_CORE_CPP_BASE_H
 
 // ============================================================================
-// [Fog::Core::Build - New]
+// [Fog::Core::C++ - New]
 // ============================================================================
 
 #define FOG_USE_STDNEW
@@ -27,7 +27,7 @@
 
 #else
 
-// Implemented by Fog/Core/Memory/MemMgr.h
+// Implemented-Later.
 namespace Fog {
 namespace MemMgr {
 

@@ -513,6 +513,7 @@ _FOG_TYPE_DECLARE(Fog::MatrixF                 , C(MOVABLE) | F(IMPLICIT) | F(NO
 _FOG_TYPE_DECLARE(Fog::MatrixD                 , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::Region                  , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
 
+#if defined(FOG_BUILD_UI)
 // [Fog/UI/Engine]
 _FOG_TYPE_DECLARE(Fog::FbCaretState            , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FbDisplayInfo           , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
@@ -522,6 +523,7 @@ _FOG_TYPE_DECLARE(Fog::FbKeyboardState         , C(SIMPLE )               | F(NO
 _FOG_TYPE_DECLARE(Fog::FbMouseInfo             , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FbMouseState            , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FbPaletteInfo           , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+#endif // FOG_BUILD_UI
 
 // ===========================================================================
 // [Fog::TypeInfo - End]

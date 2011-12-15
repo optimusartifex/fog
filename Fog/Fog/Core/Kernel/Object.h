@@ -713,6 +713,7 @@ private:
 // [fog_object_cast<Fog::Widget*> Specialization]
 // ============================================================================
 
+#if defined(FOG_BUILD_UI)
 template<>
 FOG_INLINE Fog::Widget* fog_object_cast(Fog::Object* object)
 {
@@ -726,11 +727,13 @@ FOG_INLINE const Fog::Widget* fog_object_cast(const Fog::Object* object)
   FOG_ASSERT(object != NULL);
   return (Fog::Widget*)(object->isWidget() ? object : NULL);
 }
+#endif // FOG_BUILD_UI
 
 // ============================================================================
 // [fog_object_cast<Fog::Layout*> Specialization]
 // ============================================================================
 
+#if defined(FOG_BUILD_UI)
 template<>
 FOG_INLINE Fog::Layout* fog_object_cast(Fog::Object* object)
 {
@@ -744,6 +747,7 @@ FOG_INLINE const Fog::Layout* fog_object_cast(const Fog::Object* object)
   FOG_ASSERT(object != NULL);
   return (Fog::Layout*)(object->isLayout() ? object : NULL);
 }
+#endif // FOG_BUILD_UI
 
 // ============================================================================
 // [Fog::TypeInfo<>]

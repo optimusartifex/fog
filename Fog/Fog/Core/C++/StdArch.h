@@ -11,10 +11,10 @@
 #endif // _FOG_CORE_CPP_BASE_H
 
 // ============================================================================
-// [Fog::Core::Config - Architecture]
+// [Fog::Core::C++ - Architecture]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Compiler
+//! @addtogroup Fog_Core_Cpp
 //! @{
 
 //! @def FOG_ARCH_X86
@@ -47,7 +47,7 @@
 //! @brief If defined, SSE3 assembly will be hardcoded into binaries and no lower optimizations are allowed.
 
 // ============================================================================
-// [Fog::Core::Config - Architecture - X86_64]
+// [Fog::Core::C++ - Architecture - X86_64]
 // ============================================================================
 
 #if defined(_M_X64        ) || \
@@ -69,7 +69,7 @@
 # define FOG_HARDCODE_SSE2
 
 // ============================================================================
-// [Fog::Core::Config - Architecture - X86_32]
+// [Fog::Core::C++ - Architecture - X86_32]
 // ============================================================================
 
 #elif defined(_M_IX86     ) || \
@@ -103,7 +103,7 @@
 # endif // _M_IX86_FP
 
 // ============================================================================
-// [Fog::Core::Config - Architecture - Itanium]
+// [Fog::Core::C++ - Architecture - Itanium]
 // ============================================================================
 
 #elif defined(_M_IA64)
@@ -116,23 +116,7 @@
 # define FOG_ARCH_UNALIGNED_ACCESS_32
 
 // ============================================================================
-// [Fog::Core::Config - Architecture - PowerPC]
-// ============================================================================
-
-#elif defined(_M_PPC      ) || \
-      defined(_M_MPPC     ) || \
-      defined(__ppc__     ) || \
-      defined(__powerpc__ )
-
-# define FOG_ARCH_PPC
-# define FOG_ARCH_BITS 32
-
-// PowerPC allows unaligned access of 32-bit data, but prohibits unaligned 
-// access of 64-bit data.
-# define FOG_ARCH_UNALIGNED_ACCESS_32
-
-// ============================================================================
-// [Fog::Core::Config - Architecture - ARM]
+// [Fog::Core::C++ - Architecture - ARM]
 // ============================================================================
 
 #elif defined(__M_ARM     ) || \
@@ -151,7 +135,23 @@
 // it prohibited.
 
 // ============================================================================
-// [Fog::Core::Build - Hack for IDE]
+// [Fog::Core::C++ - Architecture - PowerPC]
+// ============================================================================
+
+#elif defined(_M_PPC      ) || \
+      defined(_M_MPPC     ) || \
+      defined(__ppc__     ) || \
+      defined(__powerpc__ )
+
+# define FOG_ARCH_PPC
+# define FOG_ARCH_BITS 32
+
+// PowerPC allows unaligned access of 32-bit data, but prohibits unaligned 
+// access of 64-bit data.
+# define FOG_ARCH_UNALIGNED_ACCESS_32
+
+// ============================================================================
+// [Fog::Core::C++ - Hack for IDE]
 // ============================================================================
 
 #elif defined(FOG_IDE)

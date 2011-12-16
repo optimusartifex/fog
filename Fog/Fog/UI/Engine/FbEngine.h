@@ -97,9 +97,9 @@ struct FOG_API FbEngine : public Object
   virtual const FbMouseInfo* getMouseInfo() const;
 
   //! @brief Get keyboard state.
-  virtual const FbKeyboardState* getKeyboardState(uint32_t id) const;
+  virtual const FbKeyboardState* getKeyboardState(uint32_t keyboardId) const;
   //! @brief Get mouse state.
-  virtual const FbMouseState* getMouseState(uint32_t id) const;
+  virtual const FbMouseState* getMouseState(uint32_t mouseId) const;
 
   //! @brief Get modifier from @a key.
   virtual uint32_t getModifierFromKey(uint32_t key) const;
@@ -122,8 +122,27 @@ struct FOG_API FbEngine : public Object
   // These methods store state and sends FbEvent`s to the related FbWindow
   // instances managed by the engine.
 
-  virtual void doShowAction(FbWindow* window);
-  virtual void doHideAction(FbWindow* window);
+  virtual void doCreateAction(FbWindow* window);
+  virtual void doDestroyAction(FbWindow* window);
+
+  //! @brief Do enable / disable action.
+  virtual void doStateAction(FbWindow* window,
+    uint32_t eventCode);
+
+  //! @brief Show or hide action.
+  virtual void doVisibilityAction(FbWindow* window,
+    uint32_t eventCode);
+
+  //! @brief Do focus action.
+  virtual void doFocusAction(FbWindow* window,
+    uint32_t eventCode);
+
+  //! @brief Do geometry action.
+  virtual void doGeometryAction(FbWindow* window,
+    uint32_t eventCode,
+    const RectI& windowGeometry,
+    const RectI& clientGeometry,
+    uint32_t orientation);
 
   //! @brief Do mouse action to point @a position and apply new @a buttonMask.
   virtual void doMouseAction(FbWindow* window,
@@ -164,7 +183,13 @@ struct FOG_API FbEngine : public Object
   //! @brief Do update of a single @a window. 
   //!
   //! @note Called by @c doUpdate(), never call manually.
-  virtual void doUpdateWindow(FbWindow* window, Painter& painter, const RectI& rect);
+  virtual void doUpdateWindow(FbWindow* window);
+
+  //! @brief Do painting of a single @a window. Always called after @ref 
+  //! doUpdateWindow()
+  //!
+  //! @note Called by @c doUpdate(), never call manually.
+  virtual void doPaintWindow(FbWindow* window, Painter& painter, const RectI& rect);
 
   //! @brief Blits window content into screen. Called usually from @c doUpdateWindow().
   virtual void doBlitWindow(FbWindow* window) = 0;

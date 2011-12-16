@@ -21,16 +21,16 @@
 #include <new>
 
 #define fog_new new(::std::nothrow)
-#define fog_new_p(p) new(p)
+#define fog_new_p(_Ptr_) new(_Ptr_)
 
-#define fog_delete(t) delete t
+#define fog_delete(_Ptr_) delete _Ptr_
 
 #else
 
-// Implemented-Later.
 namespace Fog {
 namespace MemMgr {
 
+// Implemented-Later.
 static FOG_INLINE void* alloc(size_t size);
 static FOG_INLINE void free(void* p);
 
@@ -66,10 +66,8 @@ void __fog_delete(T* inst)
 // Fog macros to make memory allocation more friendly and compatible with std
 // version.
 #define fog_new new(fog_memmgr)
-#define fog_new_p(p) new(fog_memmgr, p)
-
-#define fog_delete(p) __fog_delete(p);
-// #define fog_delete(p) ::operator delete(__FogMemDeletep, fog_memmgr)
+#define fog_new_p(_Ptr_) new(fog_memmgr, _Ptr_)
+#define fog_delete(_Ptr_) __fog_delete(_Ptr_);
 
 #endif // FOG_USE_STDNEW
 #endif // _FOG_CORE_CPP_STDNEW_H

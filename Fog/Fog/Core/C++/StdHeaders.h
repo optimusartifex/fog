@@ -43,4 +43,12 @@
 # include <Fog/Core/C++/IntrinSSE2.h>
 #endif // FOG_HARDCODE_SSE2
 
+#if defined(FOG_HARDCODE_SSE3)
+# include <Fog/Core/C++/IntrinSSE3.h>
+#endif // FOG_HARDCODE_SSE3
+
+#if defined(FOG_HARDCODE_SSSE3)
+# include <Fog/Core/C++/IntrinSSSE3.h>
+#endif // FOG_HARDCODE_SSSE3
+
 #endif // _FOG_CORE_CPP_STDHEADERS_H

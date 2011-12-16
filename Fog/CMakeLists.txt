@@ -13,6 +13,11 @@ CMake_Minimum_Required(VERSION 2.8.4)
 # project which wants to build Fog statically.
 # Set(FOG_BUILD_SLAVE FALSE)
 
+# Whether to only setup project, but build nothing. Usable for cmake projects
+# which are designed to just include Fog and Fog source files into the project
+# and build all of this without making a static library.
+# Set(FOG_BUILD_NOTHING FALSE)
+
 # Whether to build static library (default FALSE).
 # Set(FOG_BUILD_STATIC FALSE)
 
@@ -77,6 +82,12 @@ If(FOG_BUILD_SLAVE)
   Message("-- Build Slave - Enabled")
 Else()
   Message("-- Build Slave - Disabled")
+EndIf()
+
+If(FOG_BUILD_NOTHING)
+  Message("-- Build Nothing - Enabled")
+Else()
+  Message("-- Build Nothing - Disabled")
 EndIf()
 
 If(FOG_BUILD_STATIC)
@@ -1849,7 +1860,7 @@ String(STRIP "${FOG_LIBRARIES}" FOG_LIBRARIES)
 # [Setup - Install Header Files]
 # =============================================================================
 
-If(NOT FOG_BUILD_SLAVE)
+If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC)
     ForEach(i ${FOG_ALL_HEADERS})
       Get_Filename_Component(path ${i} PATH)
@@ -1865,7 +1876,7 @@ EndIf()
 # [Setup - Binary - Fog]
 # =============================================================================
 
-If(NOT FOG_BUILD_SLAVE)
+If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC)
     # Shared library.
     Add_Library(Fog SHARED
@@ -1886,7 +1897,7 @@ EndIf()
 # [Setup - Binary - Fog/UI-X11]
 # =============================================================================
 
-If(NOT FOG_BUILD_SLAVE)
+If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_UI_X11 AND FOG_BUILD_UI_X11)
     Add_Library(Fog_UI_X11 SHARED
       ${FOG_UI_ENGINE_X11_SOURCES}
@@ -1900,7 +1911,7 @@ EndIf()
 # [Setup - Binary - FogBench]
 # =============================================================================
 
-If(NOT FOG_BUILD_SLAVE)
+If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_BENCH)
     Set(BENCH_LIBRARIES "")
     Set(BENCH_INCLUDE "")
@@ -1950,7 +1961,7 @@ EndIf()
 # [Setup - Binary - Examples]
 # =============================================================================
 
-If(NOT FOG_BUILD_SLAVE)
+If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
     Set(FOG_EXAMPLE_SOURCES
       FogSvgView

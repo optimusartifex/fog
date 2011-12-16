@@ -39,10 +39,10 @@ XmlAttribute* SvgPathElement::_createAttribute(const ManagedStringW& name) const
 
 err_t SvgPathElement::onProcess(SvgVisitor* visitor) const
 {
-  if (_unused)
+  /*if (_unused)
   {
     printf("A");
-  }
+  }*/
 
   if (!a_d.isAssigned()) return ERR_OK;
 

@@ -115,11 +115,13 @@ struct FOG_API FbWindowData
   //! @brief Native frame-buffer window handle.
   void* handle;
 
-  //! @brief Whether the window is enabled.
-  uint8_t isEnabled;
+  //! @brief Whether the window is enabled, disabled, or parent window/screen
+  //! is disabled.
+  uint8_t state;
 
-  //! @brief Whether the window is visible.
-  uint8_t isVisible;
+  //! @brief Whether the window is visible, hidden, or parent window/screen
+  //! is hidden.
+  uint8_t visibility;
 
   //! @brief Window is dirty and needs update.
   uint8_t isDirty;
@@ -156,17 +158,20 @@ struct FOG_API FbWindowData
   //! @brief Window visibility.
   uint8_t windowVisibility;
 
+  //! @brief Window orientation.
+  uint8_t orientation;
+
   //! @brief Whether the window should be updated.
   uint8_t shouldUpdate;
 
-  //! @brief Whether the window should be blit to the screen.
+  //! @brief Whether the window should be paint.
+  uint8_t shouldPaint;
+
+  //! @brief Whether the window should be blit onto the screen.
   uint8_t shouldBlit;
-
-  //! @brief Reserved for future use (currently has only alignment function).
-  uint8_t reserved_0;
-
-  //! @brief Window screen (the screen is where the window is displayed).
-  uint32_t windowScreen;
+  
+  //! @brief Reserved
+  uint8_t reserved[3];
 
   //! @brief Window geometry, relative to screen (default value depends on 
   //! windowing system or window manager).
@@ -199,6 +204,9 @@ struct FOG_API FbWindowData
   //! can't share buffer for painting and blitting. It can currently happen
   //! only in case that the target pixel format is 8-bit per pixel.
   FbSecondary secondaryBuffer;
+
+  //! @brief Window screen (the screen is where the window is displayed).
+  uint32_t windowScreen;
 
   //! @brief Window opacity in [0, 1] range (default 1).
   float windowOpacity;
@@ -242,10 +250,10 @@ struct FOG_API FbWindow
   FOG_INLINE bool isCreated() const { return _d->handle != NULL; }
 
   //! @brief Get whether the frame-buffer window is enabled.
-  FOG_INLINE bool isEnabled() const { return _d->isEnabled; }
+  FOG_INLINE bool getState() const { return _d->state; }
 
   //! @brief Get whether the frame-buffer window is visible.
-  FOG_INLINE bool isVisible() const { return _d->isVisible; }
+  FOG_INLINE bool getVisibility() const { return _d->visibility; }
 
   //! @brief Get whether the frame-buffer window is dirty (needs update or blit).
   FOG_INLINE bool isDirty() const { return _d->isDirty; }

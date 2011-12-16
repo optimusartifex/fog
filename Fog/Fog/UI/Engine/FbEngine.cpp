@@ -15,6 +15,7 @@
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/UI/Engine/FbEngine.h>
+#include <Fog/UI/Engine/FbEvent.h>
 #include <Fog/UI/Engine/FbWindow.h>
 
 FOG_IMPLEMENT_OBJECT(Fog::FbEngine)
@@ -135,20 +136,20 @@ const FbPaletteInfo* FbEngine::getPaletteInfo() const { return &_paletteInfo; }
 const FbKeyboardInfo* FbEngine::getKeyboardInfo() const { return &_keyboardInfo; }
 const FbMouseInfo* FbEngine::getMouseInfo() const { return &_mouseInfo; }
 
-const FbKeyboardState* FbEngine::getKeyboardState(uint32_t id) const
+const FbKeyboardState* FbEngine::getKeyboardState(uint32_t keyboardId) const
 {
-  if (id >= _keyboardInfo.getDevicesCount())
+  if (keyboardId >= _keyboardInfo.getDevicesCount())
     return NULL;
 
-  return &_keyboardState[id];
+  return &_keyboardState[keyboardId];
 }
 
-const FbMouseState* FbEngine::getMouseState(uint32_t id) const
+const FbMouseState* FbEngine::getMouseState(uint32_t mouseId) const
 {
-  if (id >= _mouseInfo.getDevicesCount())
+  if (mouseId >= _mouseInfo.getDevicesCount())
     return NULL;
 
-  return &_mouseState[id];
+  return &_mouseState[mouseId];
 }
 
 uint32_t FbEngine::getModifierFromKey(uint32_t key) const
@@ -183,12 +184,133 @@ void FbEngine::setMouseWheelLines(uint32_t lines)
 // [Fog::FbEngine - Actions]
 // ============================================================================
 
-void FbEngine::doShowAction(FbWindow* window)
+void FbEngine::doCreateAction(FbWindow* window)
 {
+  FbCreateEvent event(FB_EVENT_CREATE, FB_EVENT_FLAG_SYSTEM);
+  window->onFbEvent(&event);
 }
 
-void FbEngine::doHideAction(FbWindow* window)
+void FbEngine::doDestroyAction(FbWindow* window)
 {
+  FbDestroyEvent event(FB_EVENT_DESTROY, FB_EVENT_FLAG_SYSTEM);
+  window->onFbEvent(&event);
+}
+
+void FbEngine::doVisibilityAction(FbWindow* window,
+  uint32_t eventCode)
+{
+  FbWindowData* d = window->_d;
+  FbVisibilityEvent fbEvent(eventCode, FB_EVENT_FLAG_SYSTEM);
+
+  fbEvent._oldVisibility = d->visibility;
+
+  switch (eventCode)
+  {
+    case FB_EVENT_SHOW:
+      d->visibility       = VISIBILITY_VISIBLE;
+      fbEvent._visibility = VISIBILITY_VISIBLE;
+      break;
+    case FB_EVENT_HIDE:
+      d->visibility       = VISIBILITY_HIDDEN;
+      fbEvent._visibility = VISIBILITY_HIDDEN;
+      break;
+    case FB_EVENT_PARENT_HIDDEN:
+      d->visibility       = VISIBILITY_PARENT_HIDDEN;
+      fbEvent._visibility = VISIBILITY_PARENT_HIDDEN;
+      break;
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  window->onFbEvent(&fbEvent);
+}
+
+void FbEngine::doStateAction(FbWindow* window,
+  uint32_t eventCode)
+{
+  FbWindowData* d = window->_d;
+  FbStateEvent fbEvent(eventCode, FB_EVENT_FLAG_SYSTEM);
+
+  fbEvent._oldState = d->state;
+
+  switch (eventCode)
+  {
+    case FB_EVENT_ENABLE:
+      d->state       = STATE_ENABLED;
+      fbEvent._state = STATE_ENABLED;
+      break;
+    case FB_EVENT_DISABLE:
+      d->state       = STATE_DISABLED;
+      fbEvent._state = STATE_DISABLED;
+      break;
+    case FB_EVENT_PARENT_DISABLED:
+      d->state       = STATE_PARENT_DISABLED;
+      fbEvent._state = STATE_PARENT_DISABLED;
+      break;
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  window->onFbEvent(&fbEvent);
+}
+
+void FbEngine::doFocusAction(FbWindow* window,
+  uint32_t eventCode)
+{
+  FbWindowData* d = window->_d;
+  FbFocusEvent fbEvent(eventCode, FB_EVENT_FLAG_SYSTEM);
+
+  switch (eventCode)
+  {
+    case FB_EVENT_FOCUS_IN:
+      d->hasFocus = true;
+      break;
+    case FB_EVENT_FOCUS_OUT:
+      d->hasFocus = false;
+      break;
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  window->onFbEvent(&fbEvent);
+}
+
+void FbEngine::doGeometryAction(FbWindow* window,
+  uint32_t eventCode,
+  const RectI& windowGeometry,
+  const RectI& clientGeometry,
+  uint32_t orientation)
+{
+  FbWindowData* d = window->_d;
+  FbGeometryEvent fbEvent(eventCode, FB_EVENT_FLAG_SYSTEM);
+
+  uint32_t geometryFlags = NO_FLAGS;
+
+  if (windowGeometry.x != d->windowGeometry.x && windowGeometry.y != windowGeometry.y)
+    geometryFlags |= FB_GEOMETRY_WINDOW_POSITION;
+  if (windowGeometry.w != d->windowGeometry.w && windowGeometry.h != windowGeometry.h)
+    geometryFlags |= FB_GEOMETRY_WINDOW_SIZE;
+  if (clientGeometry.x != d->clientGeometry.x && clientGeometry.y != clientGeometry.y)
+    geometryFlags |= FB_GEOMETRY_CLIENT_POSITION;
+  if (clientGeometry.w != d->clientGeometry.w && clientGeometry.h != clientGeometry.h)
+    geometryFlags |= FB_GEOMETRY_CLIENT_SIZE;
+  if (orientation != d->orientation)
+    geometryFlags |= FB_GEOMETRY_ORIENTATION;
+
+  fbEvent._oldOrientation = d->orientation;
+  fbEvent._oldWindowGeometry = d->windowGeometry;
+  fbEvent._oldClientGeometry = d->clientGeometry;
+
+  d->orientation = orientation;
+  d->windowGeometry = windowGeometry;
+  d->clientGeometry = clientGeometry;
+
+  fbEvent._orientation = orientation;
+  fbEvent._windowGeometry = windowGeometry;
+  fbEvent._clientGeometry = clientGeometry;
+  fbEvent._geometryFlags = geometryFlags;
+
+  window->onFbEvent(&fbEvent);
 }
 
 void FbEngine::doMouseAction(FbWindow* window,
@@ -197,6 +319,34 @@ void FbEngine::doMouseAction(FbWindow* window,
   const PointI& position,
   uint32_t buttonMask)
 {
+  FbWindowData* d = window->_d;
+  FbMouseEvent fbEvent(FB_EVENT_NONE, FB_EVENT_FLAG_SYSTEM);
+
+  switch (eventCode)
+  {
+    case FB_EVENT_MOUSE_RECALC:
+      break;
+  
+    case FB_EVENT_MOUSE_IN:
+      break;
+    case FB_EVENT_MOUSE_OUT:
+      break;
+    case FB_EVENT_MOUSE_MOVE:
+      break;
+    case FB_EVENT_MOUSE_UP:
+      break;
+    case FB_EVENT_MOUSE_DOWN:
+      break;
+    case FB_EVENT_MOUSE_CLICK:
+      break;
+    case FB_EVENT_MOUSE_DBL_CLICK:
+      break;
+  
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  window->onFbEvent(&fbEvent);
 }
 
 void FbEngine::doKeyAction(FbWindow* window,
@@ -207,6 +357,8 @@ void FbEngine::doKeyAction(FbWindow* window,
   uint32_t systemCode,
   uint32_t uc)
 {
+  FbWindowData* d = window->_d;
+
 }
 
 // ============================================================================
@@ -247,7 +399,7 @@ void FbEngine::doUpdateAll()
   ListIterator<FbWindow*> it(dirty);
 
   // --------------------------------------------------------------------------
-  // [Paint]
+  // [Update]
   // --------------------------------------------------------------------------
 
   for (it.start(); it.isValid(); it.next())
@@ -263,11 +415,28 @@ void FbEngine::doUpdateAll()
     // Clear dirty and update flags.
     d->isDirty = false;
     d->shouldUpdate = false;
+    
+    doUpdateWindow(window);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Paint]
+  // --------------------------------------------------------------------------
+
+  for (it.start(); it.isValid(); it.next())
+  {
+    FbWindow* window = it.getItem();
+    if (window == NULL)
+      continue;
+
+    FbWindowData* d = window->_d;
+    if (!d->shouldPaint)
+      continue;
 
     // Don't update window that is not visible, it's waste of resources. We 
     // will update it if it gets visible later in case that the window is
     // displayed.
-    if (!d->isVisible)
+    if (d->visibility != VISIBILITY_VISIBLE)
     {
       d->shouldBlit = false;
       continue;
@@ -294,7 +463,7 @@ void FbEngine::doUpdateAll()
 
     if (err == ERR_OK)
     {
-      doUpdateWindow(window, painter, boundingBox);
+      doPaintWindow(window, painter, boundingBox);
       painterIsUsed++;
     }
   }
@@ -329,7 +498,7 @@ void FbEngine::doUpdateAll()
 
   // In case that there is nothing in _dirtyList we reuse the 'dirty' list we
   // acquired instead of abandoning it. We save one MemMgr::alloc() and one
-  // MemMgr::free() call.
+  // MemMgr::free() call (which usually need to lock a global mutex).
   if (_dirtyList.getLength() == 0)
   {
     dirty.clear();
@@ -337,7 +506,15 @@ void FbEngine::doUpdateAll()
   }
 }
 
-void FbEngine::doUpdateWindow(FbWindow* window, Painter& painter, const RectI& rect)
+void FbEngine::doUpdateWindow(FbWindow* window)
+{
+  FbWindowData* d = window->_d;
+  d->shouldPaint = true;
+
+  // TODO:
+}
+
+void FbEngine::doPaintWindow(FbWindow* window, Painter& painter, const RectI& rect)
 {
   FbWindowData* d = window->_d;
 
@@ -424,75 +601,6 @@ void FbEngine::cleanupWindow(FbWindow* window)
 #if 0
 void GuiEngine::dispatchEnabled(Widget* w, bool enabled)
 {
-  uint32_t state = w->getState();
-
-  // Dispatch 'Enable'.
-  if (enabled)
-  {
-    if (state == WIDGET_ENABLED) return;
-    if (state == WIDGET_DISABLED_BY_PARENT && !w->hasGuiWindow()) return;
-
-    w->_state = WIDGET_ENABLED;
-
-    StateEvent e(EVENT_ENABLE);
-    w->sendEvent(&e);
-
-    FOG_WIDGET_TREE_ITERATOR(i1, w, true,
-      // before traverse
-      {
-        // show only child that's hidden by parent
-        if (child->getState() != WIDGET_DISABLED_BY_PARENT)
-          FOG_WIDGET_TREE_ITERATOR_NEXT(i1);
-
-        child->_state = WIDGET_ENABLED;
-        child->sendEvent(&e);
-      },
-      // after traverse
-      {
-      }
-    );
-
-    w->update(WIDGET_UPDATE_ALL);
-  }
-  // Dispatch 'Disable'.
-  else
-  {
-    uint32_t state = w->getState();
-    if (state == WIDGET_DISABLED) return;
-
-    w->_state = WIDGET_DISABLED;
-
-    //StateEvent e(toState == Widget::Disabled
-    //  ? EvDisable
-    //  : EvDisableByParent);
-    StateEvent e(EVENT_DISABLE);
-    w->sendEvent(&e);
-
-    if (state != WIDGET_ENABLED) return;
-
-    e._code = EVENT_DISABLE_BY_PARENT;
-
-    FOG_WIDGET_TREE_ITERATOR(i2, w, true,
-      // before traverse
-      {
-        // Mark by 'DisableByParent' all childs that's visible.
-        if (child->getState() != WIDGET_ENABLED)
-        {
-          FOG_WIDGET_TREE_ITERATOR_NEXT(i2);
-        }
-        else
-        {
-          child->_state = WIDGET_DISABLED_BY_PARENT;
-          child->sendEvent(&e);
-        }
-      },
-      // after traverse
-      {
-      }
-    );
-
-    w->update(WIDGET_UPDATE_ALL);
-  }
 }
 
 void GuiEngine::dispatchVisibility(Widget* w, uint32_t visible)

@@ -22,23 +22,61 @@
 //! Fog library is a high performance library written in C++ language that was
 //! designed to write cross-platform applications and libraries. It tries to
 //! abstract an operating system API and enables to develop applications using
-//! single source-code for multiple operating systems or backends. The primery
+//! single source-code for multiple operating systems or backends. The primary
 //! goal of the library is to work with vector and raster graphics, but now it
 //! is suitable for development of any kind of application or library.
 //!
-//! Fog-Framework is quite big library which provides a rich API, thus it was
+//! Fog-Framework is quite big library which provides rich API, thus it was
 //! divided into several sections called modules or parts. The coding style and
 //! API of all modules is uniform and modules are generally connected together
-//! into single library, thus there are no extra setup steps to access various
-//! modules (or parts) of the library.
+//! into a single library, thus there are no extra setup steps needed to access
+//! various modules (or parts) within the library.
 
 // ============================================================================
 // [Fog/Core]
 // ============================================================================
 
-//! @defgroup Fog_Core Fog-Core
+//! @defgroup Fog_Core Fog/Core
 //!
 //! Public classes and functions related to Fog/Core module.
+//!
+//! The Fog/Core module is divided into these categories:
+//!
+//! - @ref Fog_Core_Cpp "Fog/Core/C++" - Detection of C++ compiler, version,
+//!   features, and host architecture / operating system. Can contain also
+//!   various workarounds used to be able to successfully build the 
+//!   Fog-Framework product.
+//!
+//! - @ref Fog_Core_Global "Fog/Core/Global" - Essential classes, templates,
+//!   and global definitions (constants) used by the rest of the Fog-Framework.
+//!
+//! - @ref Fog_Core_Kernel "Fog/Core/Kernel" - Implementation of Fog-Framework
+//!   object system - @ref Object, @ref EventLoop, @c Timer, and helper classes.
+//!   Generally don't needed to use or learn if you need to start only with 2d
+//!   graphics.
+//!
+//! - @ref Fog_Core_Math "Fog/Core/Math" - Implementation of the @ref Math
+//!   namespace, including classes and functions for numerical mathematics and
+//!   analysis.
+//!
+//! - @ref Fog_Core_Memory "Fog/Core/Memory" - Memory management, including 
+//!   customized memory allocators, pools, and optimized memory operations.
+//!
+//! - @ref Fog_Core_OS "Fog/Core/OS" - Operating system abstraction and
+//!   utility functions. Includes also access to OS specific features.
+//!
+//! - @ref Fog_Core_Threading "Fog/Core/Threading" - Classes and functions used
+//!   by multithreaded applications, including atomic operations, locks, 
+//!   conditional variables, threads, thread-local-storage, and thread pools.
+//!
+//! - @ref Fog_Core_Tools "Fog/Core/Tools" - Uncategorized, contains classes
+//!   and functions to work with strings (including access to unicode character
+//!   database, text conversion, and localization), collections (lists, hash
+//!   tables, and algorithms related to these types of collections), date&time,
+//!   and variant data type called @ref Var.
+//!
+//! - @ref Fog_Core_Xml "Fog/Core/Xml" - Xml SAX parser/serializer and DOM,
+//!   extensible by custom DOM elements, see @c XmlDocument.
 
 // ============================================================================
 // [Fog/Core/C++]

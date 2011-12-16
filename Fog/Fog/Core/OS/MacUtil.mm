@@ -22,11 +22,12 @@ static err_t FOG_CDECL StringW_opCFString(StringW* self, uint32_t cntOp, CFStrin
 
   if (length == 0)
   {
-    self->clear();
+    if (cntOp == CONTAINER_OP_REPLACE)
+      self->clear();
     return ERR_OK;
   }
 
-  CharW* p = self->_prepare(length, cntOp);
+  CharW* p = self->_prepare(cntOp, length);
   if (FOG_IS_NULL(p))
     return ERR_RT_OUT_OF_MEMORY;
 

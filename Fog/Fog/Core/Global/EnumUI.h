@@ -46,42 +46,42 @@ enum FB_DOUBLE_BUFFER
 };
 
 // ============================================================================
-// [Fog::FB_EVENT]
+// [Fog::FB_EVENT_CODE]
 // ============================================================================
 
 //! @brief FbWindow event code.
-enum FB_EVENT
+enum FB_EVENT_CODE
 {
-  FB_EVENT_CREATE = 0,
-  FB_EVENT_DESTROY = 1,
+  FB_EVENT_CREATE = 1,
+  FB_EVENT_DESTROY = 2,
 
-  FB_EVENT_CLOSE = 2,
+  FB_EVENT_CLOSE = 3,
 
-  FB_EVENT_SHOW = 3,
-  FB_EVENT_HIDE = 4,
-  FB_EVENT_HIDE_BY_PARENT = 5,
+  FB_EVENT_SHOW = 4,
+  FB_EVENT_HIDE = 5,
+  FB_EVENT_HIDDEN_PARENT = 6,
 
-  FB_EVENT_GEOMETRY = 6,
-  FB_EVENT_MAXIMIZE = 7,
-  FB_EVENT_MINIMIZE = 8,
-  FB_EVENT_RESTORE = 9,
+  FB_EVENT_GEOMETRY = 7,
+  FB_EVENT_MAXIMIZE = 8,
+  FB_EVENT_MINIMIZE = 9,
+  FB_EVENT_RESTORE = 10,
   
-  FB_EVENT_FOCUS_IN = 10,
-  FB_EVENT_FOCUS_OUT = 11,
+  FB_EVENT_FOCUS_IN = 20,
+  FB_EVENT_FOCUS_OUT = 21,
 
-  FB_EVENT_KEY_DOWN = 12,
-  FB_EVENT_KEY_UP = 13,
-  FB_EVENT_KEY_PRESS = 14,
+  FB_EVENT_KEY_DOWN = 22,
+  FB_EVENT_KEY_UP = 23,
+  FB_EVENT_KEY_PRESS = 24,
 
-  FB_EVENT_MOUSE_IN = 15,
-  FB_EVENT_MOUSE_OUT = 16,
-  FB_EVENT_MOUSE_MOVE = 17,
+  FB_EVENT_MOUSE_IN = 25,
+  FB_EVENT_MOUSE_OUT = 26,
+  FB_EVENT_MOUSE_MOVE = 27,
 
-  FB_EVENT_MOUSE_DOWN = 18,
-  FB_EVENT_MOUSE_UP = 19,
+  FB_EVENT_MOUSE_DOWN = 28,
+  FB_EVENT_MOUSE_UP = 29,
 
-  FB_EVENT_MOUSE_CLICK = 20,
-  FB_EVENT_MOUSE_DBL_CLICK = 21
+  FB_EVENT_MOUSE_CLICK = 30,
+  FB_EVENT_MOUSE_DBL_CLICK = 31
 };
 
 // ============================================================================

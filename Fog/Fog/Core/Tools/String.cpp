@@ -3640,7 +3640,7 @@ _CaseSensitive:
   else
   {
     CharT_Value cArray[4];
-    switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(ch)))
+    switch (StringT_getCaseInsensitiveChars<CharT_Value, CharT>(cArray, CharT(ch)))
     {
       case 1:
         goto _CaseSensitive;
@@ -5260,7 +5260,7 @@ FOG_NO_EXPORT void String_init(void)
   fog_api.stringa_replaceRangeListStringA = StringT_replaceRangeListString<char, char>;
 
   fog_api.stringa_replaceChar = StringT_replaceChar<char>;
-/*
+
   fog_api.stringa_replaceStringA = StringT_replaceString<char>;
   fog_api.stringa_replaceRegExpA = StringT_replaceRegExp<char>;
 
@@ -5541,7 +5541,7 @@ FOG_NO_EXPORT void String_init(void)
   fog_api.stringw_dAdoptStubW = StringT_dAdoptStub<CharW, CharW>;
   fog_api.stringw_dRealloc = StringT_dRealloc<CharW>;
   fog_api.stringw_dFree = StringT_dFree<CharW>;
-*/
+
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------

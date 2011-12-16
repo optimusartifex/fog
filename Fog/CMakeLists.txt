@@ -1849,119 +1849,129 @@ String(STRIP "${FOG_LIBRARIES}" FOG_LIBRARIES)
 # [Setup - Install Header Files]
 # =============================================================================
 
-If(NOT FOG_BUILD_STATIC)
-  ForEach(i ${FOG_ALL_HEADERS})
-    Get_Filename_Component(path ${i} PATH)
-    Get_Filename_Component(name ${i} NAME)
-    If(NOT "${name}" MATCHES "_p.h$")
-      Install(FILES ${i} DESTINATION "include/${path}")
-    EndIf()
-  EndForEach()
+If(NOT FOG_BUILD_SLAVE)
+  If(NOT FOG_BUILD_STATIC)
+    ForEach(i ${FOG_ALL_HEADERS})
+      Get_Filename_Component(path ${i} PATH)
+      Get_Filename_Component(name ${i} NAME)
+      If(NOT "${name}" MATCHES "_p.h$")
+        Install(FILES ${i} DESTINATION "include/${path}")
+      EndIf()
+    EndForEach()
+  EndIf()
 EndIf()
 
 # =============================================================================
 # [Setup - Binary - Fog]
 # =============================================================================
 
-If(NOT FOG_BUILD_STATIC)
-  # Shared library.
-  Add_Library(Fog SHARED
-    ${FOG_ALL_SOURCES_CORRECTED}
-    ${FOG_ALL_HEADERS_CORRECTED})
-  Target_Link_Libraries(Fog ${FOG_LIBRARIES})
-  Install(TARGETS Fog DESTINATION lib)
-Else()
-  # Static library.
-  Add_Library(Fog STATIC
-    ${FOG_ALL_SOURCES_CORRECTED}
-    ${FOG_ALL_HEADERS_CORRECTED})
-  Target_Link_Libraries(Fog ${FOG_LIBRARIES})
+If(NOT FOG_BUILD_SLAVE)
+  If(NOT FOG_BUILD_STATIC)
+    # Shared library.
+    Add_Library(Fog SHARED
+      ${FOG_ALL_SOURCES_CORRECTED}
+      ${FOG_ALL_HEADERS_CORRECTED})
+    Target_Link_Libraries(Fog ${FOG_LIBRARIES})
+    Install(TARGETS Fog DESTINATION lib)
+  Else()
+    # Static library.
+    Add_Library(Fog STATIC
+      ${FOG_ALL_SOURCES_CORRECTED}
+      ${FOG_ALL_HEADERS_CORRECTED})
+    Target_Link_Libraries(Fog ${FOG_LIBRARIES})
+  EndIf()
 EndIf()
 
 # =============================================================================
 # [Setup - Binary - Fog/UI-X11]
 # =============================================================================
 
-If(NOT FOG_BUILD_STATIC AND FOG_UI_X11 AND FOG_BUILD_UI_X11)
-  Add_Library(Fog_UI_X11 SHARED
-    ${FOG_UI_ENGINE_X11_SOURCES}
-    ${FOG_UI_ENGINE_X11_HEADERS})
-  Target_Link_Libraries(Fog_UI_X11 Fog ${FOG_LIBRARIES})
-  Install(TARGETS Fog_UI_X11 DESTINATION lib)
+If(NOT FOG_BUILD_SLAVE)
+  If(NOT FOG_BUILD_STATIC AND FOG_UI_X11 AND FOG_BUILD_UI_X11)
+    Add_Library(Fog_UI_X11 SHARED
+      ${FOG_UI_ENGINE_X11_SOURCES}
+      ${FOG_UI_ENGINE_X11_HEADERS})
+    Target_Link_Libraries(Fog_UI_X11 Fog ${FOG_LIBRARIES})
+    Install(TARGETS Fog_UI_X11 DESTINATION lib)
+  EndIf()
 EndIf()
 
 # =============================================================================
 # [Setup - Binary - FogBench]
 # =============================================================================
 
-If(NOT FOG_BUILD_STATIC AND FOG_BUILD_BENCH)
-  Set(BENCH_LIBRARIES "")
-  Set(BENCH_INCLUDE "")
+If(NOT FOG_BUILD_SLAVE)
+  If(NOT FOG_BUILD_STATIC AND FOG_BUILD_BENCH)
+    Set(BENCH_LIBRARIES "")
+    Set(BENCH_INCLUDE "")
 
-  If(FOG_OS_WINDOWS)
-    # Set(FOG_BENCH_GDIPLUS True)
-  Else()
-    # Set(FOG_BENCH_CAIRO True)
-    # Set(FOG_BENCH_QT4 True)
+    If(FOG_OS_WINDOWS)
+      # Set(FOG_BENCH_GDIPLUS True)
+    Else()
+      # Set(FOG_BENCH_CAIRO True)
+      # Set(FOG_BENCH_QT4 True)
+    EndIf()
+
+    Configure_File(
+      ${CMAKE_CURRENT_LIST_DIR}/Bench/BenchConfig.h.cmake
+      ${CMAKE_CURRENT_LIST_DIR}/Bench/BenchConfig.h)
+
+    Set(FOG_BENCH_FILES
+      Bench/BenchApp.cpp
+      Bench/BenchApp.h
+      Bench/BenchCairo.cpp
+      Bench/BenchCairo.h
+      Bench/BenchConfig.h
+      Bench/BenchFog.cpp
+      Bench/BenchFog.h
+      Bench/BenchGdiPlus.cpp
+      Bench/BenchGdiPlus.h
+      Bench/BenchQt4.cpp
+      Bench/BenchQt4.h
+    )
+
+    If(FOG_BENCH_CAIRO)
+      Include_Directories(/usr/include/cairo)
+      List(APPEND BENCH_LIBRARIES cairo)
+    EndIf(FOG_BENCH_CAIRO)
+
+    If(FOG_BENCH_QT4)
+      Include_Directories(/usr/include/qt4)
+      Link_Directories(/usr/lib/qt4)
+      List(APPEND BENCH_LIBRARIES QtCore QtGui)
+    EndIf(FOG_BENCH_QT4)
+
+    Add_Executable(FogBench ${FOG_BENCH_FILES})
+    Target_Link_Libraries(FogBench Fog ${FOG_LIBRARIES} ${BENCH_LIBRARIES})
   EndIf()
-
-  Configure_File(
-    ${CMAKE_CURRENT_LIST_DIR}/Bench/BenchConfig.h.cmake
-    ${CMAKE_CURRENT_LIST_DIR}/Bench/BenchConfig.h)
-
-  Set(FOG_BENCH_FILES
-    Bench/BenchApp.cpp
-    Bench/BenchApp.h
-    Bench/BenchCairo.cpp
-    Bench/BenchCairo.h
-    Bench/BenchConfig.h
-    Bench/BenchFog.cpp
-    Bench/BenchFog.h
-    Bench/BenchGdiPlus.cpp
-    Bench/BenchGdiPlus.h
-    Bench/BenchQt4.cpp
-    Bench/BenchQt4.h
-  )
-
-  If(FOG_BENCH_CAIRO)
-    Include_Directories(/usr/include/cairo)
-    List(APPEND BENCH_LIBRARIES cairo)
-  EndIf(FOG_BENCH_CAIRO)
-
-  If(FOG_BENCH_QT4)
-    Include_Directories(/usr/include/qt4)
-    Link_Directories(/usr/lib/qt4)
-    List(APPEND BENCH_LIBRARIES QtCore QtGui)
-  EndIf(FOG_BENCH_QT4)
-
-  Add_Executable(FogBench ${FOG_BENCH_FILES})
-  Target_Link_Libraries(FogBench Fog ${FOG_LIBRARIES} ${BENCH_LIBRARIES})
 EndIf()
 
 # =============================================================================
 # [Setup - Binary - Examples]
 # =============================================================================
 
-If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
-  Set(FOG_EXAMPLE_SOURCES
-    FogSvgView
-    FogTest
-    FogTestBezierOffset
-    FogTestPolyOffset
-    FogTestRegion
-    FogTestScale
-#   FogTestRle
-  )
+If(NOT FOG_BUILD_SLAVE)
+  If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
+    Set(FOG_EXAMPLE_SOURCES
+      FogSvgView
+      FogTest
+      FogTestBezierOffset
+      FogTestPolyOffset
+      FogTestRegion
+      FogTestScale
+#     FogTestRle
+    )
 
-  ForEach(file ${FOG_EXAMPLE_SOURCES})
-    Add_Executable(${file} WIN32 MACOSX_BUNDLE
-      Examples/${file}.cpp
-      Examples/Helpers.cpp
-      Examples/Helpers.h)
-    Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
-  EndForEach(file)
+    ForEach(file ${FOG_EXAMPLE_SOURCES})
+      Add_Executable(${file} WIN32 MACOSX_BUNDLE
+        Examples/${file}.cpp
+        Examples/Helpers.cpp
+        Examples/Helpers.h)
+      Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
+    EndForEach(file)
 
-  Add_Executable(FogTestSizeOf
-    Examples/FogTestSizeOf.cpp)
-  Target_Link_Libraries(FogTestSizeOf Fog ${FOG_LIBRARIES})
+    Add_Executable(FogTestSizeOf
+      Examples/FogTestSizeOf.cpp)
+    Target_Link_Libraries(FogTestSizeOf Fog ${FOG_LIBRARIES})
+  EndIf()
 EndIf()

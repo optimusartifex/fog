@@ -36,9 +36,17 @@ err_t SvgGElement::onProcess(SvgVisitor* visitor) const
 
 err_t SvgGElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (!hasChildNodes()) { box.reset(); return ERR_GEOMETRY_NONE; }
+  if (!hasChildNodes())
+  {
+    box.reset();
+    return ERR_GEOMETRY_NONE;
+  }
 
-  // return _walkAndMergeBBox(this
+  // TODO: It seems that there is nothing to do, because all render specific
+  // options are related to a single SVG element, not to a group.
+  // return _walkAndMergeBBox(this);
+
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 } // Fog namespace

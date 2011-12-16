@@ -180,36 +180,37 @@ static FOG_INLINE size_t StringT_cheqi(const CharW* a, const CharW* b, size_t le
   return i;
 }
 
-template<typename CharT>
-FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars(CharT* cArray, CharT ch)
+template<typename ValueT, typename CharT>
+FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars(ValueT* ciArray, CharT ch)
 {
-  FOG_ASSERT_NOT_REACHED();
+  return 0;
 }
 
 template<>
-FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars<char>(char* cArray, char ch)
+FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars<char, char>(char* ciArray, char ch)
 {
-  cArray[0] = CharA::toLower(ch);
-  cArray[1] = CharA::toUpper(ch);
+  ciArray[0] = CharA::toLower(ch);
+  ciArray[1] = CharA::toUpper(ch);
 
-  return 1 + (cArray[0] != cArray[1]);
+  uint ciCount = 2;
+  if (ciArray[0] == ciArray[1])
+    ciCount--;
+  return ciCount;
 }
 
 template<>
-FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars<CharW>(CharW* cArray, CharW ch)
+FOG_STATIC_INLINE_T uint StringT_getCaseInsensitiveChars<uint16_t, CharW>(uint16_t* ciArray, CharW ch)
 {
-  cArray[0] = CharW::toLower(ch);
-  cArray[1] = CharW::toUpper(ch);
-  cArray[2] = CharW::toTitle(ch);
+  ciArray[0] = (uint16_t)CharW::toLower(ch);
+  ciArray[1] = (uint16_t)CharW::toUpper(ch);
+  ciArray[2] = (uint16_t)CharW::toTitle(ch);
 
-  uint cCount = 3;
-
-  if (cArray[1] == cArray[2])
-    cCount--;
-  if (cArray[0] == cArray[1])
-    cCount--;
-
-  return cCount;
+  uint ciCount = 3;
+  if (ciArray[1] == ciArray[2])
+    ciCount--;
+  if (ciArray[0] == ciArray[1])
+    ciCount--;
+  return ciCount;
 }
 
 // ============================================================================
@@ -861,8 +862,13 @@ static err_t FOG_CDECL StringT_appendString(CharT_(String)* self, const SrcT_(St
   if (FOG_IS_NULL(dst))
     return ERR_RT_OUT_OF_MEMORY;
 
-  if (sizeof(CharT) == sizeof(SrcT) && (const void*)self == (const void*)other)
+  // Update the sData in case that self == other, because StringX::_prepare() can
+  // invalidate the sData pointer.
+  if (sizeof(CharT) == sizeof(SrcT) &&
+      reinterpret_cast<const void*>(self) == reinterpret_cast<const void*>(other))
+  {
     sData = other->_d->data;
+  }
 
   StringT_chcopy(dst, sData, sLength);
   return ERR_OK;
@@ -2729,18 +2735,19 @@ static err_t FOG_CDECL StringT_removeChar(CharT_(String)* self, const Range* ran
   CharT* sEnd = sBegin + rEnd;
   CharT* dCur;
 
-  if (cs == CASE_SENSITIVE)
+  CharT_Value ciArray[4];
+  uint ciCount;
+
+  if (cs == CASE_SENSITIVE || (ciCount = StringT_getCaseInsensitiveChars<CharT_Value, CharT>(ciArray, CharT(ch))) == 1)
   {
-_CaseSensitive:
-    while (sCur != sEnd)
+    for (;;)
     {
       if (*sCur == ch)
-        goto _CaseSensitiveRemove;
-      sCur++;
+        break;
+      if (++sCur == sEnd)
+        return ERR_OK;
     }
-    return ERR_OK;
 
-_CaseSensitiveRemove:
     if (d->reference.get() > 1)
     {
       rStart = sCur - sBegin;
@@ -2754,82 +2761,66 @@ _CaseSensitiveRemove:
     }
     dCur = sCur;
 
-    while (sCur != sEnd)
+    do {
+      if (*sCur != ch)
+        *dCur++ = *sCur;
+    } while (++sCur != sEnd);
+  }
+  else if (ciCount == 2)
+  {
+    for (;;)
     {
-      if (*sCur != ch) *dCur++ = *sCur;
-      sCur++;
+      if (*sCur == ciArray[0] || *sCur == ciArray[0])
+        break;
+      if (++sCur == sEnd)
+        return ERR_OK;
     }
+
+    if (d->reference.get() > 1)
+    {
+      rStart = sCur - sBegin;
+      FOG_RETURN_ON_ERROR(self->_detach());
+
+      d = self->_d;
+      sBegin = d->data;
+
+      sCur = sBegin + rStart;
+      sEnd = sBegin + rEnd;
+    }
+
+    dCur = sCur;
+    do {
+      if (*sCur != ciArray[0] && *sCur != ciArray[1])
+        *dCur++ = *sCur;
+    } while (++sCur != sEnd);
   }
   else
   {
-    CharT cArray[4];
-    switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(ch)))
+    for (;;)
     {
-      case 1:
-        goto _CaseSensitive;
-
-      case 2:
-        while (sCur != sEnd)
-        {
-          if (*sCur == cArray[0] || *sCur == cArray[0])
-            goto _CaseInsensitiveRemove2;
-          sCur++;
-        }
-        return ERR_OK;
-
-_CaseInsensitiveRemove2:
-        if (d->reference.get() > 1)
-        {
-          rStart = sCur - sBegin;
-          FOG_RETURN_ON_ERROR(self->_detach());
-
-          d = self->_d;
-          sBegin = d->data;
-
-          sCur = sBegin + rStart;
-          sEnd = sBegin + rEnd;
-        }
-
-        dCur = sCur;
-        while (sCur != sEnd)
-        {
-          if (*sCur != cArray[0] && *sCur != cArray[1])
-            *dCur++ = *sCur;
-          sCur++;
-        }
+      if (*sCur == ciArray[0] || *sCur == ciArray[1] || *sCur == ciArray[2])
         break;
-
-      case 3:
-        while (sCur != sEnd)
-        {
-          if (*sCur == cArray[0] || *sCur == cArray[1] || *sCur == cArray[2])
-            goto _CaseInsensitiveRemove3;
-          sCur++;
-        }
+      if (++sCur == sEnd)
         return ERR_OK;
-
-_CaseInsensitiveRemove3:
-        if (d->reference.get() > 1)
-        {
-          rStart = sCur - sBegin;
-          FOG_RETURN_ON_ERROR(self->_detach());
-
-          d = self->_d;
-          sBegin = d->data;
-
-          sCur = sBegin + rStart;
-          sEnd = sBegin + rEnd;
-        }
-
-        dCur = sCur;
-        while (sCur != sEnd)
-        {
-          if (*sCur != cArray[0] || *sCur != cArray[1] || *sCur != cArray[2])
-            *dCur++ = *sCur;
-          sCur++;
-        }
-        break;
     }
+
+    if (d->reference.get() > 1)
+    {
+      rStart = sCur - sBegin;
+      FOG_RETURN_ON_ERROR(self->_detach());
+
+      d = self->_d;
+      sBegin = d->data;
+
+      sCur = sBegin + rStart;
+      sEnd = sBegin + rEnd;
+    }
+
+    dCur = sCur;
+    do {
+      if (*sCur != ciArray[0] || *sCur != ciArray[1] || *sCur != ciArray[2])
+        *dCur++ = *sCur;
+    } while (++sCur != sEnd);
   }
 
   size_t tail = dLength - rEnd;
@@ -3179,18 +3170,19 @@ static err_t FOG_CDECL StringT_replaceChar(CharT_(String)* self, const Range* ra
   CharT* sCur = d->data + rStart;
   CharT* sEnd = d->data + rEnd;
 
-  if (cs == CASE_SENSITIVE)
+  CharT_Value ciArray[4];
+  uint ciCount;
+
+  if (cs == CASE_SENSITIVE || (ciCount = StringT_getCaseInsensitiveChars<CharT_Value, CharT>(ciArray, CharT(before))) == 1)
   {
-_CaseSensitive:
-    while (sCur != sEnd)
+    for (;;)
     {
       if (*sCur == before)
-        goto _CaseSensitiveReplace;
-      sCur++;
+        break;
+      if (++sCur == sEnd)
+        return ERR_OK;
     }
-    return ERR_OK;
 
-_CaseSensitiveReplace:
     if (d->reference.get() > 1)
     {
       rStart = (size_t)(sCur - d->data);
@@ -3202,79 +3194,62 @@ _CaseSensitiveReplace:
       sEnd = d->data + rEnd;
     }
 
-    while (sCur != sEnd)
-    {
+    do {
       if (*sCur == before)
         *sCur = after;
-      sCur++;
+    } while (++sCur != sEnd);
+  }
+  else if (ciCount == 2)
+  {
+    for (;;)
+    {
+      if (*sCur == ciArray[0] || *sCur == ciArray[1])
+        break;
+      if (++sCur == sEnd)
+        return ERR_OK;
     }
+
+    if (d->reference.get() > 1)
+    {
+      rStart = (size_t)(sCur - d->data);
+
+      FOG_RETURN_ON_ERROR(self->_detach());
+      d = self->_d;
+
+      sCur = d->data + rStart;
+      sEnd = d->data + rEnd;
+    }
+
+    do {
+      if (*sCur == ciArray[0] || *sCur == ciArray[1])
+        *sCur = after;
+    } while (++sCur != sEnd);
   }
   else
   {
-    CharT cArray[3];
-    switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(before)))
+    for (;;)
     {
-      case 1:
-        goto _CaseSensitive;
-
-      case 2:
-        while (sCur != sEnd)
-        {
-          if (*sCur == cArray[0] || *sCur == cArray[1])
-            goto _CaseInsensitiveReplace2;
-          sCur++;
-        }
-        return ERR_OK;
-
-_CaseInsensitiveReplace2:
-        if (d->reference.get() > 1)
-        {
-          rStart = (size_t)(sCur - d->data);
-
-          FOG_RETURN_ON_ERROR(self->_detach());
-          d = self->_d;
-
-          sCur = d->data + rStart;
-          sEnd = d->data + rEnd;
-        }
-
-        while (sCur != sEnd)
-        {
-          if (*sCur == cArray[0] || *sCur == cArray[1])
-            *sCur = after;
-          sCur++;
-        }
+      if (*sCur == ciArray[0] || *sCur == ciArray[1] || *sCur == ciArray[2])
         break;
-
-      case 3:
-        while (sCur != sEnd)
-        {
-          if (*sCur == cArray[0] || *sCur == cArray[1] || *sCur == cArray[2])
-            goto _CaseInsensitiveReplace3;
-          sCur++;
-        }
+      if (++sCur == sEnd)
         return ERR_OK;
-
-_CaseInsensitiveReplace3:
-        if (d->reference.get() > 1)
-        {
-          rStart = (size_t)(sCur - d->data);
-
-          FOG_RETURN_ON_ERROR(self->_detach());
-          d = self->_d;
-
-          sCur = d->data + rStart;
-          sEnd = d->data + rEnd;
-        }
-
-        while (sCur != sEnd)
-        {
-          if (*sCur == cArray[0] || *sCur == cArray[1] || *sCur == cArray[2])
-            *sCur = after;
-          sCur++;
-        }
-        break;
     }
+
+    if (d->reference.get() > 1)
+    {
+      rStart = (size_t)(sCur - d->data);
+
+      FOG_RETURN_ON_ERROR(self->_detach());
+      d = self->_d;
+
+      sCur = d->data + rStart;
+      sEnd = d->data + rEnd;
+    }
+
+    do {
+      if (*sCur == ciArray[0] || *sCur == ciArray[1] || *sCur == ciArray[2])
+        *sCur = after;
+    } while (++sCur != sEnd);
   }
 
   d->hashCode = 0;
@@ -3664,8 +3639,7 @@ _CaseSensitive:
   }
   else
   {
-    CharT cArray[4];
-
+    CharT_Value cArray[4];
     switch (StringT_getCaseInsensitiveChars<CharT>(cArray, CharT(ch)))
     {
       case 1:
@@ -5286,6 +5260,7 @@ FOG_NO_EXPORT void String_init(void)
   fog_api.stringa_replaceRangeListStringA = StringT_replaceRangeListString<char, char>;
 
   fog_api.stringa_replaceChar = StringT_replaceChar<char>;
+/*
   fog_api.stringa_replaceStringA = StringT_replaceString<char>;
   fog_api.stringa_replaceRegExpA = StringT_replaceRegExp<char>;
 
@@ -5566,7 +5541,7 @@ FOG_NO_EXPORT void String_init(void)
   fog_api.stringw_dAdoptStubW = StringT_dAdoptStub<CharW, CharW>;
   fog_api.stringw_dRealloc = StringT_dRealloc<CharW>;
   fog_api.stringw_dFree = StringT_dFree<CharW>;
-
+*/
   // --------------------------------------------------------------------------
   // [Data]
   // --------------------------------------------------------------------------

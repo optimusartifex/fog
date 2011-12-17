@@ -75,7 +75,7 @@ namespace Fog {
 // ============================================================================
 
 #define GUI_ENGINE() \
-  reinterpret_cast<WinGuiEngine*>(Application::get()->getGuiEngine())
+  reinterpret_cast<WinGuiEngine*>(Application::get()->getFbEngine())
 
 static void hwndGetRect(HWND handle, RectI* out)
 {

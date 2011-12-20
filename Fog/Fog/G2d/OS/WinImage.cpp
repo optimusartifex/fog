@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT WinDibImageData : public ImageData
 // DeleteObject(hdc);
 //
 // Image i;
-// i.fromWinBitmap(hbmp);
+// i.fromHBITMAP(hbmp);
 // DeleteObject((HGDIOBJ)hbmp);
 
 static err_t Image_WinDib_createDibSection(HBITMAP* dst, uint8_t** bits, ssize_t* stride, const SizeI* size, uint32_t format)
@@ -207,10 +207,10 @@ static err_t FOG_CDECL Image_WinDib_updatePalette(ImageData* _d, const Range* ra
 }
 
 // ============================================================================
-// [Fog::Image - FromWinBitmap / ToWinBitmap]
+// [Fog::Image - FromHBITMAP / ToHBITMAP]
 // ============================================================================
 
-static err_t FOG_CDECL Image_toWinBitmap(const Image* self, HBITMAP* dst)
+static err_t FOG_CDECL Image_toHBITMAP(const Image* self, HBITMAP* dst)
 {
   ImageData* d = self->_d;
 
@@ -283,7 +283,7 @@ static err_t FOG_CDECL Image_toWinBitmap(const Image* self, HBITMAP* dst)
   return ERR_OK;
 }
 
-static err_t FOG_CDECL Image_fromWinBitmap(Image* self, HBITMAP hBitmap)
+static err_t FOG_CDECL Image_fromHBITMAP(Image* self, HBITMAP hBitmap)
 {
   if (hBitmap == NULL)
   {
@@ -498,8 +498,8 @@ FOG_NO_EXPORT void Image_init_win(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  fog_api.image_toWinBitmap = Image_toWinBitmap;
-  fog_api.image_fromWinBitmap = Image_fromWinBitmap;
+  fog_api.image_toHBITMAP = Image_toHBITMAP;
+  fog_api.image_fromHBITMAP = Image_fromHBITMAP;
   fog_api.image_getDC = Image_getDC;
   fog_api.image_releaseDC = Image_releaseDC;
 }

@@ -32,6 +32,9 @@ FOG_NO_EXPORT void MemZoneAllocator_init(void);
 FOG_NO_EXPORT void Application_init(void);
 FOG_NO_EXPORT void Application_fini(void);
 
+FOG_NO_EXPORT void EventLoop_init(void);
+FOG_NO_EXPORT void EventLoopObserverList_init(void);
+
 FOG_NO_EXPORT void Object_init(void);
 FOG_NO_EXPORT void Object_fini(void);
 

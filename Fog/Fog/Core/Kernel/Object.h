@@ -414,18 +414,6 @@ struct FOG_API Object
   //! @brief Get object flags.
   FOG_INLINE uint32_t getObjectFlags() const { return _objectFlags; }
 
-  //! @brief Get whether the object is @c Fog::Layout.
-  FOG_INLINE bool isLayout() const
-  {
-    return (_objectFlags & OBJECT_FLAG_IS_LAYOUT) != 0;
-  }
-
-  //! @brief Get whether the object is @c Fog::Widget.
-  FOG_INLINE bool isWidget() const
-  {
-    return (_objectFlags & OBJECT_FLAG_IS_WIDGET) != 0;
-  }
-
   // --------------------------------------------------------------------------
   // [Object Id]
   // --------------------------------------------------------------------------
@@ -708,46 +696,6 @@ private:
 //! @}
 
 } // Fog namespace
-
-// ============================================================================
-// [fog_object_cast<Fog::Widget*> Specialization]
-// ============================================================================
-
-#if defined(FOG_BUILD_UI)
-template<>
-FOG_INLINE Fog::Widget* fog_object_cast(Fog::Object* object)
-{
-  FOG_ASSERT(object != NULL);
-  return (Fog::Widget*)(object->isWidget() ? object : NULL);
-}
-
-template<>
-FOG_INLINE const Fog::Widget* fog_object_cast(const Fog::Object* object)
-{
-  FOG_ASSERT(object != NULL);
-  return (Fog::Widget*)(object->isWidget() ? object : NULL);
-}
-#endif // FOG_BUILD_UI
-
-// ============================================================================
-// [fog_object_cast<Fog::Layout*> Specialization]
-// ============================================================================
-
-#if defined(FOG_BUILD_UI)
-template<>
-FOG_INLINE Fog::Layout* fog_object_cast(Fog::Object* object)
-{
-  FOG_ASSERT(object != NULL);
-  return (Fog::Layout*)(object->isLayout() ? object : NULL);
-}
-
-template<>
-FOG_INLINE const Fog::Layout* fog_object_cast(const Fog::Object* object)
-{
-  FOG_ASSERT(object != NULL);
-  return (Fog::Layout*)(object->isLayout() ? object : NULL);
-}
-#endif // FOG_BUILD_UI
 
 // ============================================================================
 // [Fog::TypeInfo<>]

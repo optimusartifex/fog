@@ -135,7 +135,7 @@ struct FOG_API Thread
   // --------------------------------------------------------------------------
 
   //! @brief Get the thread's event loop.
-  FOG_INLINE EventLoop* getEventLoop() const
+  FOG_INLINE EventLoop& getEventLoop()
   {
     return _eventLoop;
   }
@@ -235,9 +235,8 @@ struct FOG_API Thread
   //! @brief Thread startup-data.
   StartupData* _startupData;
 
-  //! @brief Thread's event-loop instance (can be @c NULL if no event loop
-  //! was created).
-  EventLoop* _eventLoop;
+  //! @brief Thread's event-loop.
+  EventLoop _eventLoop;
 
 private:
   _FOG_NO_COPY(Thread)

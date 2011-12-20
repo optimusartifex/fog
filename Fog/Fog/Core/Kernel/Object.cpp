@@ -803,16 +803,15 @@ void Object::_callListeners(Event* e)
 
 void Object::postEvent(Event* e)
 {
-  Thread* thread;
-  EventLoop* eventLoop;
+  Thread* thread = getHomeThread();
 
-  if ((thread = getHomeThread()) == NULL)
+  if (FOG_IS_NULL(thread))
     goto _Fail;
 
-  if ((eventLoop = thread->getEventLoop()) == NULL)
+  if (!thread->getEventLoop().isCreated())
     goto _Fail;
 
-  // Link event with object event queue.
+  // Link event with object`s event queue.
   {
     AutoLock locked(_internalLock);
 
@@ -823,12 +822,12 @@ void Object::postEvent(Event* e)
   }
 
   // Post event (event is posted as task).
-  eventLoop->postTask(e);
+  thread->getEventLoop().postTask(e);
   return;
 
 _Fail:
   Debug::dbgFunc("Fog::Object", "postEvent",
-    "Can't post event to object which has no home thread or event loop. Deleting event.\n");
+    "Can't post event to object which has no home thread or event loop. Event destroyed!\n");
   fog_delete(e);
 }
 

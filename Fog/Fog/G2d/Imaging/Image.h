@@ -691,17 +691,17 @@ struct FOG_NO_EXPORT Image
   //! @brief Convert image to Windows @c HBITMAP (DIBSECTION).
   //!
   //! @note This function is for Windows-only.
-  FOG_INLINE err_t toWinBitmap(HBITMAP& hBitmap)
+  FOG_INLINE err_t toHBITMAP(HBITMAP& hBitmap)
   {
-    return fog_api.image_toWinBitmap(this, &hBitmap);
+    return fog_api.image_toHBITMAP(this, &hBitmap);
   }
 
   //! @brief Convert image from Windows @c HBITMAP.
   //!
   //! @note This function is for Windows-only.
-  FOG_INLINE err_t fromWinBitmap(HBITMAP hBitmap)
+  FOG_INLINE err_t fromHBITMAP(HBITMAP hBitmap)
   {
-    return fog_api.image_fromWinBitmap(this, hBitmap);
+    return fog_api.image_fromHBITMAP(this, hBitmap);
   }
 
   FOG_INLINE err_t getDC(HDC* hDC)
@@ -714,6 +714,28 @@ struct FOG_NO_EXPORT Image
     return fog_api.image_releaseDC(this, hDC);
   }
 #endif // FOG_OS_WINDOWS
+
+  // --------------------------------------------------------------------------
+  // [Windows Support]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_OS_MAC)
+  //! @brief Convert image to Windows @c HBITMAP (DIBSECTION).
+  //!
+  //! @note This function is for Windows-only.
+  FOG_INLINE err_t toCGImage(CGImageRef* cgImage)
+  {
+    return fog_api.image_toCGImage(this, cgImage);
+  }
+
+  //! @brief Convert image from Windows @c HBITMAP.
+  //!
+  //! @note This function is for Windows-only.
+  FOG_INLINE err_t fromCGImage(CGImageRef cgImage)
+  {
+    return fog_api.image_fromCGImage(this, cgImage);
+  }
+#endif // FOG_OS_MAC
 
   // --------------------------------------------------------------------------
   // [Equality]

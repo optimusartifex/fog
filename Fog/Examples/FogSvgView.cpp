@@ -5,255 +5,94 @@
 
 using namespace Fog;
 
-struct MyWindow : public Window
+// ============================================================================
+// [SvgWindow - Declaration]
+// ============================================================================
+
+struct SvgWindow : public UIEngineWindow
 {
-  // [Fog Object System]
-  FOG_DECLARE_OBJECT(MyWindow, Window)
-
+  // --------------------------------------------------------------------------
   // [Construction / Destruction]
-  MyWindow(uint32_t createFlags = 0);
-  virtual ~MyWindow();
+  // --------------------------------------------------------------------------
 
-  void recalcTransform();
-  void recalcActive();
+  SvgWindow(UIEngine* engine, uint32_t hints = 0);
+  virtual ~SvgWindow();
 
+  // --------------------------------------------------------------------------
   // [Event Handlers]
-  virtual void onMouse(MouseEvent* e);
-  virtual void onKey(KeyEvent* e);
-  virtual void onTimer(TimerEvent* e);
-  virtual void onPaint(PaintEvent* e);
+  // --------------------------------------------------------------------------
 
-  SvgDocument svg;
-  Timer timer;
+  virtual void onEngineEvent(UIEngineEvent* ev);
+  virtual void onPaint(Painter* p);
 
-  float fps;
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  SvgDocument svgDocument;
+
+  float fpsTotal;
   float fpsCounter;
-
-  float rotate;
-  float scale;
-  PointF translate;
-  TransformF transform;
-
-  PointF lastPoint;
-  SvgElement* active;
-
-  StringW activeStrokeBackup;
-  StringW activeStrokeWidthBackup;
-  StringW activeOpacityBackup;
-
   Time fpsTime;
-
-  err_t error;
 };
 
-FOG_IMPLEMENT_OBJECT(MyWindow)
+// ============================================================================
+// [SvgWindow - Construction / Destruction]
+// ============================================================================
 
-MyWindow::MyWindow(uint32_t createFlags) :
-  Window(createFlags)
-{
-  timer.setInterval(TimeDelta::fromMilliseconds(2));
-  timer.addListener(EVENT_TIMER, this, &MyWindow::onTimer);
-
-  fps = 0.0f;
-  fpsCounter = 0.0f;
-
-  rotate = 0.0f;
-  scale = 1.0f;
-  translate.reset();
-
-  lastPoint.reset();
-  active = NULL;
-
-  recalcTransform();
-
-  setWindowTitle(StringW::fromAscii8("SvgView"));
-}
-
-MyWindow::~MyWindow()
+SvgWindow::SvgWindow(UIEngine* engine, uint32_t hints) :
+  UIEngineWindow(engine, hints)
 {
 }
 
-void MyWindow::recalcTransform()
+SvgWindow::~SvgWindow()
 {
-  transform.reset();
-
-  SizeF size(getWidth(), getHeight());
-
-  transform.translate(PointF(size.w / 2.0f, size.h / 2.0f));
-  transform.rotate(rotate);
-  transform.translate(PointF(-size.w / 2.0f, -size.h / 2.0f));
-  transform.scale(PointF(scale, scale));
-
-  //transform.translate(PointF(100.0f, 100.0f));
-  transform.translate(translate);
 }
 
-void MyWindow::recalcActive()
+// ============================================================================
+// [SvgWindow - Event Handlers]
+// ============================================================================
+
+void SvgWindow::onEngineEvent(UIEngineEvent* ev)
 {
-  SvgElement* e = NULL;
-
-  List<SvgElement*> elements = svg.hitTest(lastPoint, &transform);
-  if (!elements.isEmpty())
-    e = elements.getLast();
-
-  if (active != e)
+  switch (ev->getCode())
   {
-    if (active != NULL)
-    {
-      active->setStyle(StringW::fromAscii8("stroke"), activeStrokeBackup);
-      active->setStyle(StringW::fromAscii8("stroke-width"), activeStrokeWidthBackup);
-      active->setStyle(StringW::fromAscii8("opacity"), activeOpacityBackup);
-    }
+    case UI_ENGINE_EVENT_CLOSE:
+      Application::get()->quit();
+      break;
 
-    active = e;
-
-    if (active != NULL)
-    {
-      activeStrokeBackup      = active->getStyle(StringW::fromAscii8("stroke"));
-      activeStrokeWidthBackup = active->getStyle(StringW::fromAscii8("stroke-width"));
-      activeOpacityBackup     = active->getStyle(StringW::fromAscii8("opacity"));
-
-      active->setStyle(StringW::fromAscii8("stroke"      ), StringW::fromAscii8("#FF0000"));
-      active->setStyle(StringW::fromAscii8("stroke-width"), StringW::fromAscii8("2.5"));
-      active->setStyle(StringW::fromAscii8("opacity"     ), StringW::fromAscii8("1"));
-    }
+    case UI_ENGINE_EVENT_PAINT:
+      onPaint(static_cast<UIEnginePaintEvent*>(ev)->getPainter());
+      break;
   }
 }
 
-void MyWindow::onMouse(MouseEvent* e)
-{
-  if (e->getCode() == EVENT_MOUSE_PRESS)
-  {
-    if (e->getButton() == BUTTON_LEFT)
-    {
-      lastPoint = e->getPosition();
-      recalcActive();
-      update(WIDGET_UPDATE_ALL);
-    }
-  }
-
-  base::onMouse(e);
-}
-
-void MyWindow::onKey(KeyEvent* e)
-{
-  if (e->getCode() == EVENT_KEY_PRESS)
-  {
-    switch (e->getKey())
-    {
-      case KEY_SPACE:
-        if (timer.isRunning())
-        {
-          timer.stop();
-        }
-        else
-        {
-          timer.start();
-          fps = 0.0f;
-          fpsCounter = 0.0f;
-          fpsTime = Time::now();
-        }
-        break;
-
-      case KEY_Q:
-        scale += 0.1f;
-        recalcTransform();
-        update(WIDGET_UPDATE_PAINT);
-        break;
-      case KEY_W:
-        scale -= 0.1f;
-        recalcTransform();
-        update(WIDGET_UPDATE_PAINT);
-        break;
-
-      case KEY_LEFT:
-        translate.x -= 5.0f;
-        recalcTransform();
-        update(WIDGET_UPDATE_PAINT);
-        break;
-      case KEY_RIGHT:
-        translate.x += 5.0f;
-        recalcTransform();
-        update(WIDGET_UPDATE_PAINT);
-        break;
-      case KEY_UP:
-        translate.y -= 5.0f;
-        recalcTransform();
-        update(WIDGET_UPDATE_PAINT);
-        break;
-      case KEY_DOWN:
-        translate.y += 5.0f;
-        recalcTransform();
-        update(WIDGET_UPDATE_PAINT);
-        break;
-    }
-  }
-
-  base::onKey(e);
-}
-
-void MyWindow::onTimer(TimerEvent* e)
-{
-  rotate += 0.008f;
-  recalcTransform();
-
-  update(WIDGET_UPDATE_PAINT);
-}
-
-void MyWindow::onPaint(PaintEvent* e)
+void SvgWindow::onPaint(Painter* p)
 {
   Time startTime = Time::now();
-
-  Painter* p = e->getPainter();
 
   p->setSource(Argb32(0xFFFFFFFF));
   p->fillAll();
 
   p->save();
-  p->setTransform(transform);
-  svg.render(p);
+  svgDocument.render(p);
   p->restore();
-
-  if (active)
-  {
-    BoxF activeBBox(0.0f, 0.0f, 0.0f, 0.0f);
-    SvgMeasure ctx;
-
-    ctx.transform(transform);
-    ctx.advance(active);
-    active->onProcess(&ctx);
-    //ctx.onVisit(active);
-
-    activeBBox = ctx.getBoundingBox();
-
-    if (activeBBox.isValid())
-    {
-      p->save();
-      p->setSource(Argb32(0xFF0000FF));
-      p->setLineWidth(1.5f);
-      p->setOpacity(0.8f);
-      p->drawBox(activeBBox);
-      p->restore();
-    }
-  }
-
-  // --------------------------------------------------------------------------
 
   p->flush(PAINTER_FLUSH_SYNC);
 
-  Time lastTime = Time::now();
+  Time endTime = Time::now();
 
-  TimeDelta frameDelta = lastTime - startTime;
-  TimeDelta fpsDelta = lastTime - fpsTime;
+  TimeDelta frameDelta = endTime - startTime;
+  TimeDelta fpsDelta = endTime - fpsTime;
 
   if (fpsDelta.getMillisecondsD() >= 1000.0)
   {
-    fps = fpsCounter;
+    fpsTotal = fpsCounter;
     fpsCounter = 0.0f;
-    fpsTime = lastTime;
+    fpsTime = endTime;
 
     StringW text;
-    text.format("FPS: %g, Time: %g", fps, frameDelta.getMillisecondsD());
+    text.format("FPS: %g, Time: %g", fpsTotal, frameDelta.getMillisecondsD());
     setWindowTitle(text);
   }
   else
@@ -262,30 +101,16 @@ void MyWindow::onPaint(PaintEvent* e)
   }
 
   p->resetTransform();
-/*
-  for (int i = 0; i < 2; i++)
-  {
-    PathF path;
-    Font font = getFont();
-
-    font.setKerning(i);
-
-    font.setHeight(25, UNIT_PX);
-    font.getTextOutline(path, PointF(30, 30 + i * 30), text);
-    p->setSource(Argb32(0xFFFF0000));
-    p->fillPath(path);
-  }
-*/
-  // p->fillText(PointI(0, 0), text, getFont());
 }
 
 // ============================================================================
-// [MAIN]
+// [FOG_UI_MAIN]
 // ============================================================================
 
 FOG_UI_MAIN()
 {
   Application app(StringW::fromAscii8("UI"));
+  SvgWindow window(app.getUIEngine());
 
   List<StringW> arguments = Application::getApplicationArguments();
   StringW fileName;
@@ -298,9 +123,9 @@ FOG_UI_MAIN()
   {
     // My testing images...
     //fileName = Ascii8("/my/upload/img/svg/tiger.svg");
-
     //fileName = Ascii8("/my/upload/img/svg/map-krasnaya-plyana.svg");
     //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
+
     //fileName = Ascii8("C:/my/svg/map-krasnaya-plyana.svg");
     //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
@@ -309,7 +134,6 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/my/svg/tommek_Car.svg");
     //fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
     //fileName = Ascii8("C:/My/svg/linear3.svg");
-
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
     fileName = Ascii8("C:/my/svg/tiger.svg");
@@ -322,22 +146,20 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/my/svg/paint-fill-BE-01.svg");
 
     //fileName = Ascii8("C:/my/svg/jean_victor_balin_check.svg");
-    //fileName = Ascii8("C:/My/svg/PatternTest.svg");
+    //fileName = Ascii8("C:/my/svg/PatternTest.svg");
     //fileName = Ascii8("C:/my/svg/Denis - map_v.0.2.svg");
     
-    fileName = Ascii8("/Users/petr/Workspace/SVG/tiger.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/SVG/tiger.svg");
   }
 
-  MyWindow window;
-  window.error = window.svg.readFromFile(fileName);
+  err_t error = window.svgDocument.readFromFile(fileName);
+  SizeF size = window.svgDocument.getDocumentSize();
 
-  SizeF size = window.svg.getDocumentSize();
   if (size.w < 800) size.w = 800;
   if (size.h < 500) size.h = 500;
 
-  window.setSize(SizeI((int)size.w, (int)size.h));
+  window.setWindowSize(SizeI((int)size.w, (int)size.h));
   window.show();
-  window.addListener(EVENT_CLOSE, &app, &Application::quit);
 
   return app.run();
 }

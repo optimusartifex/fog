@@ -46,9 +46,9 @@ static FOG_INLINE void BoxIFromRECT(BoxI* dst, const RECT* src)
   dst->y1 = y1;
 }
 
-static err_t FOG_CDECL Region_hrgnFromRegion(HRGN* dst, const Region* src)
+static err_t FOG_CDECL Region_toHRGN(const Region* self, HRGN* dst)
 {
-  RegionData* d = src->_d;
+  RegionData* d = self->_d;
   size_t length = d->length;
 
   if (length >= (UINT_MAX - sizeof(RGNDATAHEADER)) / sizeof(RECT))
@@ -96,9 +96,9 @@ static err_t FOG_CDECL Region_hrgnFromRegion(HRGN* dst, const Region* src)
   return ERR_OK;
 }
 
-static err_t FOG_CDECL Region_regionFromHRGN(Region* dst, HRGN src)
+static err_t FOG_CDECL Region_fromHRGN(Region* self, HRGN src)
 {
-  dst->clear();
+  self->clear();
 
   if (src == NULL || src == (HRGN)NULLREGION)
     return ERR_OK;
@@ -132,7 +132,7 @@ static err_t FOG_CDECL Region_regionFromHRGN(Region* dst, HRGN src)
       BoxIFromRECT(&dstBox[i], &srcRect[i]);
   }
 
-  return dst->setBoxList(dstBox, length);
+  return self->setBoxList(dstBox, length);
 }
 
 // ============================================================================
@@ -145,8 +145,8 @@ FOG_NO_EXPORT void Region_init_win(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
-  fog_api.region_hrgnFromRegion = Region_hrgnFromRegion;
-  fog_api.region_regionFromHRGN = Region_regionFromHRGN;
+  fog_api.region_toHRGN = Region_toHRGN;
+  fog_api.region_fromHRGN = Region_fromHRGN;
 }
 
 } // Fog namespace

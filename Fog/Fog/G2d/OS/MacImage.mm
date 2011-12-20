@@ -12,6 +12,7 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/OS/OSUtil.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
 #include <Fog/G2d/OS/OSUtil.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
@@ -217,6 +218,260 @@ static void Image_MacCG_releaseInfoCallback(void *info)
 }
 
 // ============================================================================
+// [Fog::Image - FromCGImage / ToCGImage]
+// ============================================================================
+
+static err_t FOG_CDECL Image_toCGImage(const Image* self, CGImageRef* cgImage)
+{
+  if (cgImage == NULL)
+    return ERR_RT_INVALID_ARGUMENT;
+
+  ImageData* d = self->_d;
+  *cgImage = NULL;
+
+  if (d->size.w == 0 || d->size.h == 0)
+    return ERR_RT_INVALID_ARGUMENT;
+  
+  SizeI size = d->size;
+
+  uint32_t cgBPC;
+  uint32_t cgBPP;
+  uint32_t cgFmt;
+  
+  uint64_t cgAMask = 0;
+  uint64_t cgRMask = 0;
+  uint64_t cgGMask = 0;
+  uint64_t cgBMask = 0;
+
+  ssize_t cgStride = 0;
+
+  switch (d->format)
+  {
+    // iOS doesn't support 16-bit BPC images.
+
+    case IMAGE_FORMAT_PRGB32:
+#if defined(FOG_OS_IOS)
+    case IMAGE_FORMAT_PRGB64:
+#endif // FOG_OS_IOS
+      cgBPC = 8;
+      cgBPP = 32;
+      cgFmt = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;
+
+      cgAMask = 0xFF000000;
+      cgRMask = 0x00FF0000;
+      cgGMask = 0x0000FF00;
+      cgBMask = 0x000000FF;
+
+      cgStride = size.w * 4;
+      break;
+
+    case IMAGE_FORMAT_XRGB32:
+    case IMAGE_FORMAT_RGB24:
+#if defined(FOG_OS_IOS)
+    case IMAGE_FORMAT_RGB48:
+#endif // FOG_OS_IOS
+    case IMAGE_FORMAT_I8:
+      cgBPC = 8;
+      cgBPP = 32;
+      cgFmt = kCGBitmapByteOrder32Host | kCGImageAlphaNoneSkipFirst;
+      
+      cgAMask = 0x00000000;
+      cgRMask = 0x00FF0000;
+      cgGMask = 0x0000FF00;
+      cgBMask = 0x000000FF;
+      
+      cgStride = size.w * 4;
+      break;
+
+    case IMAGE_FORMAT_A8:
+    case IMAGE_FORMAT_A16:
+      cgBPC = 8;
+      cgBPP = 8;
+      cgFmt = kCGImageAlphaOnly;
+      
+      cgAMask = 0x000000FF;
+      cgRMask = 0x00000000;
+      cgGMask = 0x00000000;
+      cgBMask = 0x00000000;
+      
+      cgStride = (size.w + 3) & ~3;
+      break;
+
+#if !defined(FOG_OS_IOS)
+    case IMAGE_FORMAT_PRGB64:
+      cgBPC = 16;
+      cgBPP = 64;
+      cgFormat = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
+
+      cgAMask = FOG_UINT64_C(0x000000000000FFFF);
+      cgRMask = FOG_UINT64_C(0xFFFF000000000000);
+      cgGMask = FOG_UINT64_C(0x0000FFFF00000000);
+      cgBMask = FOG_UINT64_C(0x00000000FFFF0000);
+      
+      cgStride = size.w * 8;
+      break;
+
+    case IMAGE_FORMAT_RGB48:
+      cgBPC = 16;
+      cgBPP = 64;
+      cgFormat = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
+      
+      cgAMask = FOG_UINT64_C(0x0000000000000000);
+      cgRMask = FOG_UINT64_C(0xFFFF000000000000);
+      cgGMask = FOG_UINT64_C(0x0000FFFF00000000);
+      cgBMask = FOG_UINT64_C(0x00000000FFFF0000);
+
+      cgStride = size.w * 8;
+      break;
+#endif // FOG_OS_IOS
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  ImageConverter converter;
+
+  FOG_RETURN_ON_ERROR(converter.create(
+    // Destination ImageFormatDescription.
+    ImageFormatDescription::fromArgb(
+      cgBPP,
+      IMAGE_FD_IS_PREMULTIPLIED | IMAGE_FD_FILL_UNUSED_BITS,
+      cgAMask, cgRMask, cgGMask, cgBMask
+    ),
+    // Source ImageFormatDescription (provided natively by Fog-Framework).
+    ImageFormatDescription::getByFormat(d->format),
+    false,       // Use Dithering?
+    NULL,        // Destination Palette.
+    &d->palette  // Source Palette (only used if source is IMAGE_FORMAT_I8).
+  ));
+
+  CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
+  if (cgColorSpace == NULL)
+  {
+    *cgImage = NULL;
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  CFMutableDataRef cfDataRef = CFDataCreateMutable(NULL, CFIndex(cgStride * size.h));
+  if (cfDataRef == NULL)
+  {
+    CFRelease(cgColorSpace);
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  CGDataProviderRef cgDataProvider = CGDataProviderCreateWithCFData(cfDataRef);
+  if (cgDataProvider == NULL)
+  {
+    CFRelease(cgColorSpace);
+    CFRelease(cfDataRef);
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  uint8_t* cgData = (uint8_t*)CFDataGetMutableBytePtr(cfDataRef);
+  FOG_ASSERT(cgData != NULL);
+
+  converter.blitRect(cgData, cgStride, d->first, d->stride, size.w, size.h);
+
+  *cgImage = CGImageCreate(size.w, size.h, cgBPC, cgBPP, cgStride, 
+    cgColorSpace, cgFmt, cgDataProvider, NULL, true, kCGRenderingIntentDefault);
+
+  // We don't need to release cfDataRef, becuase CGDataProviderCreateWithCFData
+  // takes ownership of the cfDataRef object.
+  CFRelease(cgColorSpace);
+  CFRelease(cgDataProvider);
+
+  if (*cgImage == NULL)
+    return ERR_RT_OUT_OF_MEMORY;
+  else
+    return ERR_OK;
+}
+
+static err_t FOG_CDECL Image_fromCGImage(Image* self, CGImageRef cgImage)
+{
+  if (FOG_IS_NULL(cgImage))
+  {
+    self->reset();
+    return ERR_RT_INVALID_ARGUMENT;
+  }
+
+  // Instead of making extensive checks of cgImage we just create compatible
+  // destination image where CGContext paint to, and draw the source image
+  // onto it. This generally means that we should support any incoming cgImage.
+  CGBitmapInfo info = CGImageGetBitmapInfo(cgImage);
+
+  int w = (int)CGImageGetWidth(cgImage);
+  int h = (int)CGImageGetHeight(cgImage);
+
+  uint32_t cgBpc     = 0;
+  uint32_t cgBpp     = 0;
+  uint32_t cgFormat  = 0;
+  uint32_t fogFormat = IMAGE_FORMAT_NULL;
+
+  uint32_t alphaInfo = uint32_t(info) & kCGBitmapAlphaInfoMask;
+
+  if (alphaInfo != kCGImageAlphaNone          &&
+      alphaInfo != kCGImageAlphaNoneSkipLast  &&
+      alphaInfo != kCGImageAlphaNoneSkipFirst )
+  {
+    // We discarded all AlphaMasks which describes image format without alpha,
+    // so we are pretty sure that incoming cgImage has the alpha-channel. So
+    // the possibility at now are PRGB32 or A8. At this time we don't support
+    // other depths, because Fog::Image is not compatible to CGImageRef when
+    // using more than 8-bits per component.
+    if (alphaInfo == kCGImageAlphaOnly)
+    {
+      cgBpc = 8;
+      cgBpp = 8;
+      cgFormat = kCGImageAlphaOnly;
+      fogFormat = IMAGE_FORMAT_A8;
+    }
+    else
+    {
+      cgBpc = 8;
+      cgBpp = 32;
+      cgFormat = kCGBitmapByteOrder32Host | kCGImageAlphaPremultipliedFirst;
+      fogFormat = IMAGE_FORMAT_PRGB32;
+    }
+  }
+  else
+  {
+    cgBpc = 8;
+    cgBpp = 32;
+    cgFormat = kCGBitmapByteOrder32Host | kCGImageAlphaNoneSkipFirst;
+    fogFormat = IMAGE_FORMAT_XRGB32;
+  }
+
+  FOG_RETURN_ON_ERROR(self->create(SizeI(w, h), fogFormat));
+  ImageData* d = self->_d;
+
+  CGColorSpaceRef cgColorSpace = CGColorSpaceCreateDeviceRGB();
+  if (cgColorSpace == NULL)
+  {
+    self->reset();
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  CGContextRef ctx = CGBitmapContextCreate(d->first, d->size.w, d->size.h, cgBpc, d->stride, cgColorSpace, cgFormat);
+
+  if (ctx != NULL)
+  {
+    CGContextSetBlendMode(ctx, kCGBlendModeCopy);
+    CGContextDrawImage(ctx, CGRectMake(0.0f, 0.0f, float(w), float(h)), cgImage);
+    CGContextRelease(ctx);
+  }
+
+  CFRelease(cgColorSpace);
+  
+  if (ctx == NULL)
+  {
+    self->reset();
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+  
+  return ERR_OK;
+}
+
+// ============================================================================
 // [Init / Fini]
 // ============================================================================
 
@@ -232,6 +487,8 @@ FOG_NO_EXPORT void Image_init_mac(void)
   // [Funcs]
   // --------------------------------------------------------------------------
 
+  fog_api.image_toCGImage = Image_toCGImage;
+  fog_api.image_fromCGImage = Image_fromCGImage;
 }
 
 } // Fog namespace

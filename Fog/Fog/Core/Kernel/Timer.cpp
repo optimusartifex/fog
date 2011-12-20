@@ -59,7 +59,7 @@ void TimerTask::run()
     // Repeat?
     if (timer)
     {
-      timer->getHomeThread()->getEventLoop()->postTask(this, true, static_cast<int>(timer->_interval.getMilliseconds()));
+      timer->getHomeThread()->getEventLoop().postTask(this, true, static_cast<int>(timer->_interval.getMilliseconds()));
       setDestroyOnFinish(false);
     }
     else
@@ -105,7 +105,7 @@ bool Timer::start()
   stop();
 
   _task = fog_new TimerTask(this);
-  getHomeThread()->getEventLoop()->postTask(_task, true, static_cast<int>(_interval.getMilliseconds()));
+  getHomeThread()->getEventLoop().postTask(_task, true, static_cast<int>(_interval.getMilliseconds()));
   return true;
 }
 

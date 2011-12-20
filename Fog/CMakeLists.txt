@@ -650,9 +650,12 @@ Set(FOG_CORE_GLOBAL_HEADERS
 # [Fog/Core/Kernel]
 Set(FOG_CORE_KERNEL_SOURCES
   Fog/Core/Kernel/Application.cpp
+  Fog/Core/Kernel/DefaultEventLoopImpl.cpp
   Fog/Core/Kernel/Event.cpp
   Fog/Core/Kernel/EventLoop.cpp
-  Fog/Core/Kernel/ListenerList.cpp
+  Fog/Core/Kernel/EventLoopImpl.cpp
+  Fog/Core/Kernel/EventLoopObserver.cpp
+  Fog/Core/Kernel/EventLoopObserverList.cpp
   Fog/Core/Kernel/Object.cpp
   Fog/Core/Kernel/Task.cpp
   Fog/Core/Kernel/Timer.cpp
@@ -660,14 +663,35 @@ Set(FOG_CORE_KERNEL_SOURCES
 
 Set(FOG_CORE_KERNEL_HEADERS
   Fog/Core/Kernel/Application.h
+  Fog/Core/Kernel/DefaultEventLoopImpl_p.h
   Fog/Core/Kernel/Delegate.h
   Fog/Core/Kernel/Event.h
   Fog/Core/Kernel/EventLoop.h
-  Fog/Core/Kernel/ListenerList.h
+  Fog/Core/Kernel/EventLoopImpl.h
+  Fog/Core/Kernel/EventLoopObserver.h
+  Fog/Core/Kernel/EventLoopObserverList.h
   Fog/Core/Kernel/Object.h
   Fog/Core/Kernel/Task.h
   Fog/Core/Kernel/Timer.h
 )
+
+If(FOG_OS_WINDOWS)
+  List(APPEND FOG_CORE_KERNEL_SOURCES
+    Fog/Core/Kernel/WinEventLoopImpl.cpp
+  )
+  List(APPEND FOG_CORE_KERNEL_HEADERS
+    Fog/Core/Kernel/WinEventLoopImpl.h
+  )
+EndIf()
+
+If(FOG_OS_MAC)
+  List(APPEND FOG_CORE_KERNEL_SOURCES
+    Fog/Core/Kernel/MacEventLoopImpl.mm
+  )
+  List(APPEND FOG_CORE_KERNEL_HEADERS
+    Fog/Core/Kernel/MacEventLoopImpl.h
+  )
+EndIf()
 
 # [Fog/Core/Math]
 Set(FOG_CORE_MATH_SOURCES
@@ -1591,89 +1615,59 @@ Set(FOG_UI_LIB_HEADERS
 
 # [Fog/UI/Engine]
 Set(FOG_UI_ENGINE_SOURCES
-  Fog/UI/Engine/FbEngine.cpp
-  Fog/UI/Engine/FbEvent.cpp
-  Fog/UI/Engine/FbWindow.cpp
-
-  Fog/UI/Engine/GuiEngine.cpp
+  Fog/UI/Engine/UIEngine.cpp
+  Fog/UI/Engine/UIEngineEvent.cpp
+  Fog/UI/Engine/UIEngineWindow.cpp
 )
 
 Set(FOG_UI_ENGINE_HEADERS
-  Fog/UI/Engine/FbDisplayInfo.h
-  Fog/UI/Engine/FbEngine.h
-  Fog/UI/Engine/FbEvent.h
-  Fog/UI/Engine/FbKeyboardInfo.h
-  Fog/UI/Engine/FbKeyboardState.h
-  Fog/UI/Engine/FbMouseInfo.h
-  Fog/UI/Engine/FbMouseState.h
-  Fog/UI/Engine/FbPaletteInfo.h
-  Fog/UI/Engine/FbSecondary.h
-  Fog/UI/Engine/FbWindow.h
-
-  Fog/UI/Engine/GuiEngine.h
+  Fog/UI/Engine/UIEngine.h
+  Fog/UI/Engine/UIEngineDisplayInfo.h
+  Fog/UI/Engine/UIEngineEvent.h
+  Fog/UI/Engine/UIEngineKeyboardInfo.h
+  Fog/UI/Engine/UIEngineKeyboardState.h
+  Fog/UI/Engine/UIEngineMouseInfo.h
+  Fog/UI/Engine/UIEngineMouseState.h
+  Fog/UI/Engine/UIEnginePaletteInfo.h
+  Fog/UI/Engine/UIEngineSecondaryFB.h
+  Fog/UI/Engine/UIEngineWindow.h
 )
 
 Set(FOG_UI_ENGINE_MAC_SOURCES
-  Fog/UI/Engine/MacFbEngine.mm
-  Fog/UI/Engine/MacFbWindow.mm
-  Fog/UI/Engine/MacGuiEngine.mm
+  Fog/UI/Engine/MacUIEngine.mm
+  Fog/UI/Engine/MacUIEngineWindow.mm
+  Fog/UI/Engine/MacUIEventLoopImpl.mm
 )
 
 Set(FOG_UI_ENGINE_MAC_HEADERS
-  Fog/UI/Engine/MacFbEngine.h
-  Fog/UI/Engine/MacFbWindow.h
-  Fog/UI/Engine/MacGuiEngine.h
+  Fog/UI/Engine/MacUIEngine.h
+  Fog/UI/Engine/MacUIEngineWindow.h
+  Fog/UI/Engine/MacUIEventLoopImpl_p.h
 )
 
 Set(FOG_UI_ENGINE_WIN_SOURCES
-  Fog/UI/Engine/WinFbEngine.cpp
-  Fog/UI/Engine/WinFbWindow.cpp
-  Fog/UI/Engine/WinGuiEngine.cpp
+  Fog/UI/Engine/WinUIEngine.cpp
+  Fog/UI/Engine/WinUIEngineWindow.cpp
+  Fog/UI/Engine/WinUIEventLoopImpl.cpp
 )
 
 Set(FOG_UI_ENGINE_WIN_HEADERS
-  Fog/UI/Engine/WinFbEngine.h
-  Fog/UI/Engine/WinFbWindow.h
-  Fog/UI/Engine/WinGuiEngine.h
+  Fog/UI/Engine/WinUIEngine.h
+  Fog/UI/Engine/WinUIEngineWindow.h
+  Fog/UI/Engine/WinUIEventLoopImpl_p.h
 )
 
 Set(FOG_UI_ENGINE_X11_SOURCES
-  Fog/UI/Engine/X11FbEngine.cpp
-  Fog/UI/Engine/X11FbWindow.cpp
-  Fog/UI/Engine/X11GuiEngine.cpp
+  Fog/UI/Engine/X11UIEngine.cpp
+  Fog/UI/Engine/X11UIEngineWindow.cpp
+  Fog/UI/Engine/X11UIEventLoopImpl.cpp
 )
 
 Set(FOG_UI_ENGINE_X11_HEADERS
-  Fog/UI/Engine/X11FbEngine.h
-  Fog/UI/Engine/X11FbWindow.h
-  Fog/UI/Engine/X11GuiEngine.h
-  Fog/UI/Engine/X11Headers.h
-)
-
-# [Fog/UI/Layout]
-Set(FOG_UI_LAYOUT_SOURCES
-  Fog/UI/Layout/BorderLayout.cpp
-  Fog/UI/Layout/BoxLayout.cpp
-  Fog/UI/Layout/FlowLayout.cpp
-  Fog/UI/Layout/GridLayout.cpp
-  Fog/UI/Layout/Layout.cpp
-  Fog/UI/Layout/LayoutHint.cpp
-  Fog/UI/Layout/LayoutItem.cpp
-  Fog/UI/Layout/LayoutUtil.cpp
-  Fog/UI/Layout/Margin.cpp
-)
-
-Set(FOG_UI_LAYOUT_HEADERS
-  Fog/UI/Layout/BorderLayout.h
-  Fog/UI/Layout/BoxLayout.h
-  Fog/UI/Layout/FlowLayout.h
-  Fog/UI/Layout/GridLayout.h
-  Fog/UI/Layout/Layout.h
-  Fog/UI/Layout/LayoutHint.h
-  Fog/UI/Layout/LayoutItem.h
-  Fog/UI/Layout/LayoutPolicy.h
-  Fog/UI/Layout/LayoutUtil.h
-  Fog/UI/Layout/Margin.h
+  Fog/UI/Engine/X11UIEngine.h
+  Fog/UI/Engine/X11UIEngineWindow.h
+  Fog/UI/Engine/X11UIEventLoopImpl_p.h
+  Fog/UI/Engine/X11UIXlib.h
 )
 
 # [Fog/UI/Tools]
@@ -1681,21 +1675,7 @@ Set(FOG_UI_TOOLS_SOURCES
 )
 
 Set(FOG_UI_TOOLS_HEADERS
-  Fog/UI/Tools/KeyUtil.h
-)
-
-# [Fog/UI/Widget]
-Set(FOG_UI_WIDGET_SOURCES
-  Fog/UI/Widget/Event.cpp
-  Fog/UI/Widget/Widget.cpp
-  Fog/UI/Widget/Window.cpp
-)
-
-Set(FOG_UI_WIDGET_HEADERS
-  Fog/UI/Widget/Event.h
-  Fog/UI/Widget/Widget.h
-  Fog/UI/Widget/Widget_p.h
-  Fog/UI/Widget/Window.h
+  Fog/UI/Tools/UIUtil.h
 )
 
 # Source groups.
@@ -1704,9 +1684,7 @@ Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${F
                                           ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
                                           ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
                                           ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
-Source_Group("UI/Layout"            FILES ${FOG_UI_LAYOUT_SOURCES}           ${FOG_UI_LAYOUT_HEADERS}          )
 Source_Group("UI/Tools"             FILES ${FOG_UI_TOOLS_SOURCES}            ${FOG_UI_TOOLS_HEADERS}           )
-Source_Group("UI/Widget"            FILES ${FOG_UI_WIDGET_SOURCES}           ${FOG_UI_WIDGET_HEADERS}          )
 
 EndIf(FOG_BUILD_UI)
 
@@ -1798,9 +1776,7 @@ If(FOG_BUILD_UI)
   List(APPEND FOG_ALL_SOURCES
     ${FOG_UI_LIB_SOURCES}
     ${FOG_UI_ENGINE_SOURCES}
-    ${FOG_UI_LAYOUT_SOURCES}
     ${FOG_UI_TOOLS_SOURCES}
-    ${FOG_UI_WIDGET_SOURCES}
   )
 
   List(APPEND FOG_ALL_HEADERS
@@ -1808,9 +1784,7 @@ If(FOG_BUILD_UI)
     ${FOG_UI_ENGINE_HEADERS}
     ${FOG_UI_ENGINE_X11_HEADERS}
     ${FOG_UI_ENGINE_WIN_HEADERS}
-    ${FOG_UI_LAYOUT_HEADERS}
     ${FOG_UI_TOOLS_HEADERS}
-    ${FOG_UI_WIDGET_HEADERS}
   )
 
   If(FOG_UI_WINDOWS)
@@ -1916,6 +1890,10 @@ If(NOT FOG_BUILD_NOTHING)
     Set(BENCH_LIBRARIES "")
     Set(BENCH_INCLUDE "")
 
+    If(FOG_OS_MAC)
+      # Set(FOG_BENCH_CG True)
+    EndIf(FOG_OS_MAC)
+
     If(FOG_OS_WINDOWS)
       # Set(FOG_BENCH_GDIPLUS True)
     Else()
@@ -1932,6 +1910,8 @@ If(NOT FOG_BUILD_NOTHING)
       Bench/BenchApp.h
       Bench/BenchCairo.cpp
       Bench/BenchCairo.h
+      Bench/BenchCG.cpp
+      Bench/BenchCG.h
       Bench/BenchConfig.h
       Bench/BenchFog.cpp
       Bench/BenchFog.h
@@ -1965,24 +1945,15 @@ If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
     Set(FOG_EXAMPLE_SOURCES
       FogSvgView
-      FogTest
-      FogTestBezierOffset
-      FogTestPolyOffset
-      FogTestRegion
-      FogTestScale
-#     FogTestRle
+      FogTestApp
     )
 
     ForEach(file ${FOG_EXAMPLE_SOURCES})
-      Add_Executable(${file} WIN32 MACOSX_BUNDLE
-        Examples/${file}.cpp
-        Examples/Helpers.cpp
-        Examples/Helpers.h)
+      Add_Executable(${file} WIN32 MACOSX_BUNDLE Examples/${file}.cpp)
       Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
     EndForEach(file)
 
-    Add_Executable(FogTestSizeOf
-      Examples/FogTestSizeOf.cpp)
-    Target_Link_Libraries(FogTestSizeOf Fog ${FOG_LIBRARIES})
+    Add_Executable(FogSizeOf Examples/FogSizeOf.cpp)
+    Target_Link_Libraries(FogSizeOf Fog ${FOG_LIBRARIES})
   EndIf()
 EndIf()

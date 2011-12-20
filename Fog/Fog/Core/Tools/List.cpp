@@ -2268,7 +2268,10 @@ static void FOG_CDECL List_StringT_ctorSlice(ListUntyped* self, const ListUntype
 template<typename CharT>
 static void FOG_CDECL List_StringT_dtor(ListUntyped* self)
 {
-  List_Unknown_dRelease(self->_d, List_StringT_getVTable<CharT>());
+  ListUntypedData* d = self->_d;
+
+  if (d != NULL)
+    List_Unknown_dRelease(self->_d, List_StringT_getVTable<CharT>());
 }
 
 // ===========================================================================

@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
+#include <Fog/Core/Kernel/EventLoop.h>
 #include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Tools/String.h>
 
@@ -31,18 +32,47 @@ struct FOG_API Application : public Object
   // --------------------------------------------------------------------------
 
   //! @brief Application constructor.
-  Application(const StringW& type);
+  Application(const StringW& appType);
   //! @brief Application constructor that allows to set argc and argv[].
-  Application(const StringW& type, int argc, const char* argv[]);
+  Application(const StringW& appType, int argc, const char* argv[]);
 
+  //! @brief Application destroctor, called by Fog-Framework.
   virtual ~Application();
 
-private:
-  void _init(const StringW& type);
+  // --------------------------------------------------------------------------
+  // [Init]
+  // --------------------------------------------------------------------------
 
-public:
-  virtual err_t run();
-  virtual void quit();
+  void _init(const StringW& appType);
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_BUILD_UI)
+  //! @brief Get @ref UIEngine (can be NULL if UI is not initialized).
+  FOG_INLINE UIEngine* getUIEngine() const
+  {
+    return _uiEngine;
+  }
+#endif // FOG_BUILD_UI
+
+  // --------------------------------------------------------------------------
+  // [Run / Quit]
+  // --------------------------------------------------------------------------
+
+  err_t run();
+  err_t quit();
+
+  // --------------------------------------------------------------------------
+  // [Statics]
+  // --------------------------------------------------------------------------
+
+  static Application* _instance;
+
+  // --------------------------------------------------------------------------
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
 
   static FOG_INLINE Application* get() { return _instance; }
 
@@ -61,53 +91,41 @@ public:
   static err_t setWorkingDirectory(const StringW& dir);
 
   // --------------------------------------------------------------------------
-  // [FbEngine]
+  // [UIEngine]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_BUILD_UI)
-  //! @brief Get application @c GuiEngine (can be NULL if GUI is not used).
-  FOG_INLINE GuiEngine* getFbEngine() const { return _fbEngine; }
-  //! @brief Create @c GuiEngine based on @a name.
-  static GuiEngine* createFbEngine(const StringW& name);
+  //! @brief Create @c UIEngine based on @a name.
+  static UIEngine* createUIEngine(const StringW& name);
 
-  //! @brief Detect best @c GuiEngine for current platform and configuration.
-  static StringW detectFbEngine();
+  //! @brief Detect best @c UIEngine for current platform and configuration.
+  static StringW detectUIEngine();
 
-  static bool registerFbEngine(const StringW& name, FbEngineConstructor ctor);
-  static bool unregisterFbEngine(const StringW& name);
+  static bool registerUIEngine(const StringW& name, UIEngineConstructor ctor);
+  static bool unregisterUIEngine(const StringW& name);
 #endif // FOG_BUILD_UI
 
   // --------------------------------------------------------------------------
   // [EventLoop]
   // --------------------------------------------------------------------------
 
-  //! @brief Get application event loop (can be NULL).
-  FOG_INLINE EventLoop* getEventLoop() const { return _eventLoop; }
   //! @brief Create event loop.
-  static EventLoop* createEventLoop(const StringW& name);
+  static EventLoopImpl* createEventLoop(const StringW& name);
 
   static bool registerEventLoop(const StringW& name, EventLoopConstructor ctor);
   static bool unregisterEventLoop(const StringW& name);
 
   // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
-
-  static Application* _instance;
-
-  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  // TODO: Rename to FbEngine.
 #if defined(FOG_BUILD_UI)
-  GuiEngine* _fbEngine;
+  //! @brief UIEngine (can be @c NULL).
+  UIEngine* _uiEngine;
 #else
-  void* _fbEngine;
+  //! @brief For binary compatibility, always @c NULL if compiled without UI.
+  void* _uiEngine;
 #endif // FOG_BUILD_UI
-
-  //! @brief Application main event loop.
-  EventLoop* _eventLoop;
 
 private:
   _FOG_NO_COPY(Application)

@@ -35,6 +35,7 @@ namespace Fog {
 #define FOG_CAPI_CTOR(_Name_) void (FOG_CDECL* _Name_)
 #define FOG_CAPI_CRET(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 #define FOG_CAPI_DTOR(_Name_) void (FOG_CDECL* _Name_)
+
 #define FOG_CAPI_METHOD(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 #define FOG_CAPI_STATIC(_Ret_, _Name_) _Ret_ (FOG_CDECL* _Name_)
 
@@ -47,6 +48,40 @@ namespace Fog {
 //! @brief Fog-Framework C-API.
 struct FOG_NO_EXPORT Api
 {
+  // --------------------------------------------------------------------------
+  // [Core/Kernel - EventLoop]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(eventloop_ctor)(EventLoop* self);
+  FOG_CAPI_CTOR(eventloop_ctorCopy)(EventLoop* self, const EventLoop* other);
+  FOG_CAPI_DTOR(eventloop_dtor)(EventLoop* self);
+
+  FOG_CAPI_METHOD(err_t, eventloop_getType)(const EventLoop* self, StringW* dst);
+  FOG_CAPI_METHOD(int, eventloop_getDepth)(const EventLoop* self);
+  
+  FOG_CAPI_METHOD(bool, eventloop_isObservable)(const EventLoop* self);
+  FOG_CAPI_METHOD(err_t, eventloop_addObserver)(EventLoop* self, EventLoopObserver* obj);
+  FOG_CAPI_METHOD(err_t, eventloop_removeObserver)(EventLoop* self, EventLoopObserver* obj);
+
+  FOG_CAPI_METHOD(err_t, eventloop_run)(EventLoop* self);
+  FOG_CAPI_METHOD(err_t, eventloop_runAllPending)(EventLoop* self);
+  FOG_CAPI_METHOD(err_t, eventloop_quit)(EventLoop* self);
+  FOG_CAPI_METHOD(err_t, eventloop_postTask)(EventLoop* self, Task* task, bool nestable, uint32_t delay);
+
+  FOG_CAPI_METHOD(err_t, eventloop_copy)(EventLoop* self, const EventLoop* other);
+
+  // --------------------------------------------------------------------------
+  // [Core/Kernel - EventObserverList]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(eventloopobserverlist_ctor)(EventLoopObserverListBase* self);
+  FOG_CAPI_DTOR(eventloopobserverlist_dtor)(EventLoopObserverListBase* self);
+
+  FOG_CAPI_METHOD(err_t, eventloopobserverlist_add)(EventLoopObserverListBase* self, void* obj);
+  FOG_CAPI_METHOD(err_t, eventloopobserverlist_remove)(EventLoopObserverListBase* self, void* obj);
+  FOG_CAPI_METHOD(bool, eventloopobserverlist_contains)(const EventLoopObserverListBase* self, void* obj);
+  FOG_CAPI_METHOD(void, eventloopobserverlist_compact)(const EventLoopObserverListBase* self);
+
   // --------------------------------------------------------------------------
   // [Core/Math - Math]
   // --------------------------------------------------------------------------
@@ -2262,14 +2297,14 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_WINDOWS)
-  FOG_CAPI_METHOD(err_t, image_toWinBitmap)(const Image* self, HBITMAP* hBitmap);
-  FOG_CAPI_METHOD(err_t, image_fromWinBitmap)(Image* self, HBITMAP hBitmap);
+  FOG_CAPI_METHOD(err_t, image_toHBITMAP)(const Image* self, HBITMAP* hBitmap);
+  FOG_CAPI_METHOD(err_t, image_fromHBITMAP)(Image* self, HBITMAP hBitmap);
 
   FOG_CAPI_METHOD(err_t, image_getDC)(Image* self, HDC* hDC);
   FOG_CAPI_METHOD(err_t, image_releaseDC)(Image* self, HDC hDC);
 
-  FOG_CAPI_METHOD(err_t, region_hrgnFromRegion)(HRGN* dst, const Region* src);
-  FOG_CAPI_METHOD(err_t, region_regionFromHRGN)(Region* dst, HRGN src);
+  FOG_CAPI_METHOD(err_t, region_toHRGN)(const Region* self, HRGN* hrgn);
+  FOG_CAPI_METHOD(err_t, region_FromHRGN)(Region* self, HRGN hrgn);
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
@@ -2277,7 +2312,8 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_MAC)
-  
+  FOG_CAPI_METHOD(err_t, image_toCGImage)(const Image* self, CGImageRef* cgImage);
+  FOG_CAPI_METHOD(err_t, image_fromCGImage)(Image* self, CGImageRef cgImage);
 #endif // FOG_OS_MAC
 
   // --------------------------------------------------------------------------

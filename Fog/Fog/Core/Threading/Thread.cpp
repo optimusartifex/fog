@@ -335,7 +335,7 @@ Thread::Thread() :
   _id(0),
   _stackSize(0),
   _startupData(NULL),
-  _eventLoop(NULL)
+  _eventLoop()
 {
 }
 
@@ -361,7 +361,7 @@ err_t Thread::setStackSize(uint32_t stackSize)
 
 bool Thread::start(const StringW& eventLoopType)
 {
-  FOG_ASSERT(!_eventLoop);
+  FOG_ASSERT(!_eventLoop.isCreated());
 
   StartupData startupData(eventLoopType);
   _startupData = &startupData;
@@ -373,7 +373,7 @@ bool Thread::start(const StringW& eventLoopType)
     return false;
   }
 
-  // Wait for the thread to start and initialize _eventLoop
+  // Wait for the thread to start and initialize the _eventLoop.
   startupData.event.wait();
   return true;
 }
@@ -386,15 +386,16 @@ void Thread::stop()
   if (!isStarted())
     return;
 
-  // StopSoon may have already been called.
-  if (_eventLoop) _eventLoop->postTask(fog_new QuitTask());
+  // The stopSoon() method may have already been called.
+  if (_eventLoop.isCreated())
+    _eventLoop.postTask(fog_new QuitTask());
 
   // Wait for the thread to exit. It should already have terminated but make
   // sure this assumption is valid.
   _Thread_join(this);
 
-  // The thread can't receive messages anymore.
-  _eventLoop = NULL;
+  // The thread can't receive events anymore.
+  _eventLoop.reset();
 
   // The thread no longer needs to be joined.
   _startupData = NULL;
@@ -405,18 +406,13 @@ void Thread::stopSoon()
   // We should only be called on the same thread that started us.
   FOG_ASSERT(_id == getCurrentThreadId());
 
-  if (!_eventLoop)
+  if (!_eventLoop.isCreated())
     return;
 
-  // We had better have a event loop at this point!  If we do not, then it
-  // most likely means that the thread terminated unexpectedly, probably due
-  // to someone calling Quit() on our event loop directly.
-  FOG_ASSERT(_eventLoop);
+  _eventLoop.postTask(fog_new QuitTask());
 
-  _eventLoop->postTask(fog_new QuitTask());
-
-  // The thread can't receive messages anymore.
-  _eventLoop = NULL;
+  // The thread can't receive events anymore.
+  _eventLoop.reset();
 }
 
 void Thread::init()
@@ -432,13 +428,11 @@ void Thread::main()
   // Complete the initialization of our Thread object.
   _id = getCurrentThreadId();
 
+  // The event loop for this thread.
   if (!_startupData->eventLoopType.isEmpty())
-  {
-    // The event loop for this thread.
-    _eventLoop = Application::createEventLoop(_startupData->eventLoopType);
-  }
+    _eventLoop.adopt(Application::createEventLoop(_startupData->eventLoopType));
 
-  if (_eventLoop)
+  if (_eventLoop.isCreated())
   {
     // Event loop
     _startupData->event.signal();
@@ -449,14 +443,13 @@ void Thread::main()
     // Let the thread do extra initialization.
     init();
 
-    _eventLoop->run();
+    _eventLoop.run();
 
     // Let the thread do extra cleanup.
     cleanUp();
 
     // We can't receive messages anymore.
-    fog_delete(_eventLoop);
-    _eventLoop = NULL;
+    _eventLoop.reset();
   }
   else
   {

@@ -28,34 +28,16 @@
 //! @defgroup Fog_UI_Engine Engine
 //! @ingroup Fog_UI
 
-#include <Fog/UI/Engine/FbDisplayInfo.h>
-#include <Fog/UI/Engine/FbEngine.h>
-#include <Fog/UI/Engine/FbEvent.h>
-#include <Fog/UI/Engine/FbKeyboardState.h>
-#include <Fog/UI/Engine/FbMouseState.h>
-#include <Fog/UI/Engine/FbPaletteInfo.h>
-#include <Fog/UI/Engine/FbSecondary.h>
-#include <Fog/UI/Engine/FbWindow.h>
-
-#include <Fog/UI/Engine/GuiEngine.h>
-
-// ============================================================================
-// [Fog/UI/Layout]
-// ============================================================================
-
-//! @defgroup Fog_UI_Layout Layout management
-//! @ingroup Fog_UI
-
-#include <Fog/UI/Layout/BorderLayout.h>
-#include <Fog/UI/Layout/BoxLayout.h>
-#include <Fog/UI/Layout/FlowLayout.h>
-#include <Fog/UI/Layout/GridLayout.h>
-#include <Fog/UI/Layout/Layout.h>
-#include <Fog/UI/Layout/LayoutHint.h>
-#include <Fog/UI/Layout/LayoutItem.h>
-#include <Fog/UI/Layout/LayoutPolicy.h>
-#include <Fog/UI/Layout/LayoutUtil.h>
-#include <Fog/UI/Layout/Margin.h>
+#include <Fog/UI/Engine/UIEngine.h>
+#include <Fog/UI/Engine/UIEngineDisplayInfo.h>
+#include <Fog/UI/Engine/UIEngineEvent.h>
+#include <Fog/UI/Engine/UIEngineKeyboardInfo.h>
+#include <Fog/UI/Engine/UIEngineKeyboardState.h>
+#include <Fog/UI/Engine/UIEngineMouseInfo.h>
+#include <Fog/UI/Engine/UIEngineMouseState.h>
+#include <Fog/UI/Engine/UIEnginePaletteInfo.h>
+#include <Fog/UI/Engine/UIEngineSecondaryFB.h>
+#include <Fog/UI/Engine/UIEngineWindow.h>
 
 // ============================================================================
 // [Fog/UI/Tools]
@@ -64,18 +46,7 @@
 //! @defgroup Fog_UI_Tools Tools
 //! @ingroup Fog_UI
 
-#include <Fog/UI/Tools/KeyUtil.h>
-
-// ============================================================================
-// [Fog/UI/Widget]
-// ============================================================================
-
-//! @defgroup Fog_UI_Widget Widgets
-//! @ingroup Fog_UI
-
-#include <Fog/UI/Widget/Event.h>
-#include <Fog/UI/Widget/Widget.h>
-#include <Fog/UI/Widget/Window.h>
+#include <Fog/UI/Tools/UIUtil.h>
 
 // [Guard]
 #endif // _FOG_UI_H

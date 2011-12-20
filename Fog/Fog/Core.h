@@ -260,6 +260,8 @@
 #include <Fog/Core/Kernel/Delegate.h>
 #include <Fog/Core/Kernel/Event.h>
 #include <Fog/Core/Kernel/EventLoop.h>
+#include <Fog/Core/Kernel/EventLoopObserver.h>
+#include <Fog/Core/Kernel/EventLoopObserverList.h>
 #include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/Kernel/Timer.h>
 

@@ -12,7 +12,9 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Kernel/Application.h>
+#include <Fog/Core/Kernel/DefaultEventLoopImpl_p.h>
 #include <Fog/Core/Kernel/EventLoop.h>
+#include <Fog/Core/Kernel/EventLoopImpl.h>
 #include <Fog/Core/Kernel/Object.h>
 #include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/OS/Library.h>
@@ -26,24 +28,28 @@
 
 // [Dependencies - Windows]
 #if defined(FOG_OS_WINDOWS)
-# if defined(FOG_BUILD_UI)
-#  include <Fog/UI/Engine/WinGuiEngine.h>
-# endif // FOG_BUILD_UI
+# include <Fog/Core/Kernel/WinEventLoopImpl.h>
 # include <Fog/Core/OS/WinUtil.h>
 # include <io.h>
+# if defined(FOG_BUILD_UI)
+#  include <Fog/UI/Engine/WinUIEngine.h>
+#  include <Fog/UI/Engine/WinUIEventLoopImpl_p.h>
+# endif // FOG_BUILD_UI
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies - Mac]
 #if defined(FOG_OS_MAC)
+# include <Fog/Core/Kernel/MacEventLoopImpl.h>
 # if defined(FOG_BUILD_UI)
-#  include <Fog/UI/Engine/MacGuiEngine.h>
+#  include <Fog/UI/Engine/MacUIEngine.h>
+#  include <Fog/UI/Engine/MacUIEventLoopImpl_p.h>
 # endif // FOG_BUILD_UI
 #endif // FOG_OS_MAC
 
-// [Dependencies - Posix]
-#if defined(FOG_OS_POSIX)
+// [Dependencies - Posix, but not Mac]
+#if defined(FOG_OS_POSIX) && !defined(FOG_OS_MAC)
 # if defined(FOG_BUILD_UI)
-#  include <Fog/UI/Engine/GuiEngine.h>
+#  include <Fog/UI/Engine/UIEngine.h>
 # endif // FOG_BUILD_UI
 # include <errno.h>
 # include <unistd.h>
@@ -178,17 +184,17 @@ end:
 
 struct FOG_NO_EXPORT Application_Local
 {
-  typedef Hash<StringW, EventLoopConstructor> EventLoopHash;
 #if defined(FOG_BUILD_UI)
-  typedef Hash<StringW, FbEngineConstructor> FbEngineHash;
+  typedef Hash<StringW, UIEngineConstructor> UIEngineHash;
 #endif // FOG_BUILD_UI
+  typedef Hash<StringW, EventLoopConstructor> EventLoopHash;
 
   Lock lock;
 
-  EventLoopHash eventLoopHash;
 #if defined(FOG_BUILD_UI)
-  FbEngineHash fbEngineHash;
+  UIEngineHash uiEngineHash;
 #endif // FOG_BUILD_UI
+  EventLoopHash eventLoopHash;
 
   StringW applicationExecutable;
   List<StringW> applicationArguments;
@@ -196,10 +202,10 @@ struct FOG_NO_EXPORT Application_Local
   Application_Local();
   ~Application_Local();
 
-  EventLoop* createEventLoop(const StringW& name);
 #if defined(FOG_BUILD_UI)
-  GuiEngine* createFbEngine(const StringW& name);
+  UIEngine* createUIEngine(const StringW& name);
 #endif // FOG_BUILD_UI
+  EventLoopImpl* createEventLoop(const StringW& name);
 
   void applicationArgumentsWasSet();
 };
@@ -221,31 +227,30 @@ Application_Local::~Application_Local()
 }
 
 #if defined(FOG_BUILD_UI)
-GuiEngine* Application_Local::createFbEngine(const StringW& name)
+UIEngine* Application_Local::createUIEngine(const StringW& name)
 {
   if (name.startsWith(Ascii8("UI.")) && !Thread::isMainThread())
   {
-    Debug::dbgFunc("Fog::Application", "createFbEngine", "FbEngine can be created only by main thread.\n");
+    Debug::dbgFunc("Fog::Application", "createUIEngine", "UIEngine can be created only by main thread.\n");
     return NULL;
   }
 
   AutoLock locked(lock);
 
-  FbEngineConstructor ctor = fbEngineHash.get(name, NULL);
+  UIEngineConstructor ctor = uiEngineHash.get(name, NULL);
   return ctor ? ctor() : NULL;
 }
 #endif // FOG_BUILD_UI
 
-EventLoop* Application_Local::createEventLoop(const StringW& name)
+EventLoopImpl* Application_Local::createEventLoop(const StringW& name)
 {
   if (name.startsWith(Ascii8("UI.")) && !Thread::isMainThread())
   {
-    Debug::dbgFunc("Fog::Application", "createEventLoop", "FbEventLoop can be created only by main thread.\n");
+    Debug::dbgFunc("Fog::Application", "createEventLoop", "Event loop for UI can be created by main thread only.\n");
     return NULL;
   }
 
   AutoLock locked(lock);
-
   EventLoopConstructor ctor = eventLoopHash.get(name, NULL);
   return ctor ? ctor() : NULL;
 }
@@ -272,44 +277,41 @@ static Static<Application_Local> Application_local;
 
 Application* Application::_instance = NULL;
 
-Application::Application(const StringW& type)
+Application::Application(const StringW& appType)
 {
-  _init(type);
+  _init(appType);
 }
 
-Application::Application(const StringW& type, int argc, const char* argv[])
+Application::Application(const StringW& appType, int argc, const char* argv[])
 {
   ::fog_init_args(argc, argv);
 
-  _init(type);
+  _init(appType);
 }
 
-void Application::_init(const StringW& type)
+void Application::_init(const StringW& appType)
 {
-  _eventLoop = NULL;
-  _fbEngine = NULL;
+  _uiEngine = NULL;
 
-  if (type.startsWith(Ascii8("UI")))
+  if (appType.startsWith(Ascii8("UI")))
   {
 #if defined(FOG_BUILD_UI)
-    // Create the FbEngine by name.
-    _fbEngine = createFbEngine(type);
+    // Create the UIEngine by name.
+    _uiEngine = createUIEngine(appType);
 #else
-    // Requested to create the FbEngine, but Fog/UI is disabled.
+    // Requested to create the UIEngine, but Fog/UI is disabled.
 #endif
   }
 
-  // Create EventLoop by type.
-  _eventLoop = createEventLoop(type);
-  if (_eventLoop)
-    Thread::getMainThread()->_eventLoop = _eventLoop;
+  // Create EventLoop by of the required type.
+  EventLoopImpl* impl = createEventLoop(appType);
+
+  if (impl)
+    _homeThread->_eventLoop.adopt(impl);
 
   // Set global application instance (singleton).
   if (_instance == NULL)
     _instance = this;
-
-  // Set main thread event loop (can be NULL if no success).
-  Thread::getMainThread()->_eventLoop = _eventLoop;
 }
 
 Application::~Application()
@@ -320,25 +322,17 @@ Application::~Application()
   Library libraryToClose;
 
   // Delete UIEngine if associated.
-  if (_fbEngine)
+  if (_uiEngine)
   {
-    libraryToClose = _fbEngine->_library;
+    libraryToClose = _uiEngine->_library;
 
-    fog_delete(_fbEngine);
-    _fbEngine = NULL;
+    fog_delete(_uiEngine);
+    _uiEngine = NULL;
   }
 #endif // FOG_BUILD_UI
 
   // Delete EventLoop if associated.
-  if (_eventLoop)
-  {
-    fog_delete(_eventLoop);
-    _eventLoop = NULL;
-
-    // Unset main thread event loop (this is safe, we will destroy it later
-    // if it exists).
-    Thread::getMainThread()->_eventLoop = NULL;
-  }
+  Thread::getMainThread()->_eventLoop.reset();
 
   // Clear global application instance (singleton).
   if (_instance == this)
@@ -347,19 +341,12 @@ Application::~Application()
 
 err_t Application::run()
 {
-  if (!_eventLoop)
-    return ERR_RT_INVALID_HANDLE;
-
-  _eventLoop->run();
-  return ERR_OK;
+  return _homeThread->getEventLoop().run();
 }
 
-void Application::quit()
+err_t Application::quit()
 {
-  if (!_eventLoop)
-    return;
-
-  _eventLoop->quit();
+  return _homeThread->getEventLoop().quit();
 }
 
 // ============================================================================
@@ -455,18 +442,18 @@ err_t Application::setWorkingDirectory(const StringW& dir)
 // ============================================================================
 
 #if defined(FOG_BUILD_UI)
-GuiEngine* Application::createFbEngine(const StringW& _name)
+UIEngine* Application::createUIEngine(const StringW& _name)
 {
   StringW name(_name);
 
   // First try to detect UIEngine if not specified
   if (name == Ascii8("UI"))
-    name = detectFbEngine();
+    name = detectUIEngine();
 
   // Try to create registered native engine.
-  GuiEngine* fbEngine = Application_local->createFbEngine(name);
-  if (fbEngine)
-    return fbEngine;
+  UIEngine* engine = Application_local->createUIEngine(name);
+  if (engine)
+    return engine;
 
   // Otherwise try to load dynamically linked library (based on the UI engine name).
   if (!name.startsWith(Ascii8("UI.")))
@@ -477,23 +464,23 @@ GuiEngine* Application::createFbEngine(const StringW& _name)
   if (FOG_IS_ERROR(err))
     return NULL;
 
-  FbEngineConstructor ctor = (FbEngineConstructor)lib.getSymbol("createFbEngine");
+  UIEngineConstructor ctor = (UIEngineConstructor)lib.getSymbol("createUIEngine");
   if (FOG_IS_NULL(ctor))
     return NULL;
 
-  fbEngine = ctor();
-  if (FOG_IS_NULL(fbEngine))
+  engine = ctor();
+  if (FOG_IS_NULL(engine))
     return NULL;
 
   // Success.
-  fbEngine->_library = lib;
-  return fbEngine;
+  engine->_library = lib;
+  return engine;
 }
 
-StringW Application::detectFbEngine()
+StringW Application::detectUIEngine()
 {
 #if defined(FOG_OS_WINDOWS)
-  return StringW::fromAscii8("UI.Windows");
+  return StringW::fromAscii8("UI.Win");
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
@@ -511,16 +498,16 @@ StringW Application::detectFbEngine()
 // ============================================================================
 
 #if defined(FOG_BUILD_UI)
-bool Application::registerFbEngine(const StringW& name, FbEngineConstructor ctor)
+bool Application::registerUIEngine(const StringW& name, UIEngineConstructor ctor)
 {
   AutoLock locked(Application_local->lock);
-  return Application_local->fbEngineHash.put(name, ctor);
+  return Application_local->uiEngineHash.put(name, ctor);
 }
 
-bool Application::unregisterFbEngine(const StringW& name)
+bool Application::unregisterUIEngine(const StringW& name)
 {
   AutoLock locked(Application_local->lock);
-  return Application_local->fbEngineHash.remove(name);
+  return Application_local->uiEngineHash.remove(name);
 }
 #endif // FOG_BUILD_UI
 
@@ -544,14 +531,14 @@ bool Application::unregisterEventLoop(const StringW& name)
 // [Fog::Application - EventLoop - Access]
 // ============================================================================
 
-EventLoop* Application::createEventLoop(const StringW &_name)
+EventLoopImpl* Application::createEventLoop(const StringW &_name)
 {
   StringW name(_name);
 
 #if defined(FOG_BUILD_UI)
   // First try to detect UI event loop if not specified.
   if (name == Ascii8("UI"))
-    name = detectFbEngine();
+    name = detectUIEngine();
 #endif // FOG_BUILD_UI
 
   return Application_local->createEventLoop(name);
@@ -561,38 +548,61 @@ EventLoop* Application::createEventLoop(const StringW &_name)
 // [Init / Fini]
 // ============================================================================
 
-static EventLoop* FOG_CDECL Application_DefaultEventLoopConstructor() { return fog_new DefaultEventLoop(); }
+// [Default]
+static EventLoopImpl* FOG_CDECL Application_DefaultEventLoopConstructor() { return fog_new DefaultEventLoopImpl(); }
 
-#if defined(FOG_BUILD_UI) && defined(FOG_OS_WINDOWS)
-static GuiEngine* FOG_CDECL Application_WinFbEngineConstructor() { return fog_new WinGuiEngine(); }
-static EventLoop* FOG_CDECL Application_WinFbEventLoopConstructor() { return fog_new WinGuiEventLoop(); }
-#endif // FOG_BUILD_UI && FOG_OS_WINDOWS
+// [Windows]
+#if defined(FOG_OS_WINDOWS)
+static EventLoopImpl* FOG_CDECL Application_WinEventLoopConstructor() { return fog_new WinEventLoopImpl(); }
 
-#if defined(FOG_BUILD_UI) && defined(FOG_OS_MAC)
-static GuiEngine* FOG_CDECL Application_MacFbEngineConstructor() { return fog_new MacGuiEngine(); }
-static EventLoop* FOG_CDECL Application_MacFbEventLoopConstructor() { return fog_new MacMainEventLoop(); }
-#endif // FOG_BUILD_UI && FOG_OS_MAC
+#if defined(FOG_BUILD_UI)
+static UIEngine* FOG_CDECL Application_WinUIEngineConstructor() { return fog_new WinUIEngine(); }
+static EventLoopImpl* FOG_CDECL Application_WinUIEventLoopConstructor() { return fog_new WinUIEventLoopImpl(); }
+#endif // FOG_BUILD_UI
+#endif // FOG_OS_WINDOWS
+
+// [Mac]
+#if defined(FOG_OS_MAC)
+static EventLoopImpl* FOG_CDECL Application_MacEventLoopConstructor() { return fog_new MacEventLoopImpl(); }
+
+#if defined(FOG_BUILD_UI)
+static UIEngine* FOG_CDECL Application_MacUIEngineConstructor() { return fog_new MacUIEngine(); }
+static EventLoopImpl* FOG_CDECL Application_MacUIEventLoopConstructor() { return fog_new MacUIEventLoopImpl(); }
+#endif // FOG_BUILD_UI
+#endif // FOG_OS_MAC
 
 FOG_NO_EXPORT void Application_init(void)
 {
   Application_local.init();
   StringW type;
 
-  // Default event loop.
-  type.set(Ascii8("Default"));
+  // [Default].
+  type.set(FOG_STR_(APPLICATION_Core_Default));
   Application::registerEventLoop(type, Application_DefaultEventLoopConstructor);
 
-#if defined(FOG_BUILD_UI) && defined(FOG_OS_WINDOWS)
-  type.set(Ascii8("UI.Windows"));
-  Application::registerFbEngine(type, Application_WinFbEngineConstructor);
-  Application::registerEventLoop(type, Application_WinFbEventLoopConstructor);
-#endif // FOG_BUILD_UI && FOG_OS_WINDOWS
+  // [Windows].
+#if defined(FOG_OS_WINDOWS)
+  type.set(FOG_STR_(APPLICATION_Core_Win));
+  Application::registerEventLoop(type, Application_WinEventLoopConstructor);
 
-#if defined(FOG_BUILD_UI) && defined(FOG_OS_MAC)
-  type.set(Ascii8("UI.Mac"));
-  Application::registerFbEngine(type, Application_MacFbEngineConstructor);
-  Application::registerEventLoop(type, Application_MacFbEventLoopConstructor);
+#if defined(FOG_BUILD_UI)
+  type.set(FOG_STR_(APPLICATION_UI_Win));
+  Application::registerUIEngine(type, Application_WinUIEngineConstructor);
+  Application::registerEventLoop(type, Application_WinUIEventLoopConstructor);
+#endif // FOG_BUILD_UI
+#endif // FOG_OS_WINDOWS
+
+  // [Mac].
+#if defined(FOG_OS_MAC)
+  type.set(FOG_STR_(APPLICATION_Core_Mac));
+  Application::registerEventLoop(type, Application_MacEventLoopConstructor);
+
+#if defined(FOG_BUILD_UI)
+  type.set(FOG_STR_(APPLICATION_UI_Mac));
+  Application::registerUIEngine(type, Application_MacUIEngineConstructor);
+  Application::registerEventLoop(type, Application_MacUIEventLoopConstructor);
 #endif // FOG_BUILD_UI && FOG_OS_MAC
+#endif // FOG_OS_MAC
 }
 
 FOG_NO_EXPORT void Application_fini(void)

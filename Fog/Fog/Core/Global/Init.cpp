@@ -92,7 +92,8 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Stream_init();
 
   // [Core/Threading]
-  Thread_init();
+  EventLoop_init();
+  Thread_init();                 // Depends on EventLoop.
   ThreadPool_init();
 
   // [Core/Xml]
@@ -100,8 +101,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   // [Core/Kernel]
   Object_init();                 // Depends on String.
-
-  // [Core/Application]
+  EventLoopObserverList_init();  // Depends on List<>.
   Application_init();
 
   // [G2d/Tools]

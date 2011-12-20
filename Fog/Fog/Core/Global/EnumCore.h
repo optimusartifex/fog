@@ -1583,16 +1583,7 @@ enum OBJECT_FLAG
   OBJECT_FLAG_RELEASE_SCHEDULED = 0x00000004,
 
   OBJECT_FLAG_CHILDREN = 0x00000010,
-  OBJECT_FLAG_DYNAMIC_PROPERTIES = 0x00000020,
-
-  // --------------------------------------------------------------------------
-  // [Type]
-  // --------------------------------------------------------------------------
-
-  //! @brief The @ref Object instance is @ref Layout.
-  OBJECT_FLAG_IS_LAYOUT = 0x40000000,
-  //! @brief The @ref Object instance is @ref Widget.
-  OBJECT_FLAG_IS_WIDGET = 0x80000000
+  OBJECT_FLAG_DYNAMIC_PROPERTIES = 0x00000020
 };
 
 // ============================================================================
@@ -1784,6 +1775,22 @@ enum STR_CODE
 
   STR_OBJECT_id = 0,
   STR_OBJECT_name,
+
+  // --------------------------------------------------------------------------
+  // [Fog/Core - Application]
+  // --------------------------------------------------------------------------
+
+  // Used for both - EventLoop and UIEngine. Core event loops are only
+  // implemented for Windows and Mac, whereas UIEngine has implementation for
+  // Windows, Mac, and X11.
+
+  STR_APPLICATION_Core_Default,
+  STR_APPLICATION_Core_Win,
+  STR_APPLICATION_Core_Mac,
+
+  STR_APPLICATION_UI_Win,
+  STR_APPLICATION_UI_Mac,
+  STR_APPLICATION_UI_X11,
 
   // --------------------------------------------------------------------------
   // [Fog/Core - Xml]

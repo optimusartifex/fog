@@ -328,6 +328,10 @@ _FOG_TYPE_DECLARE(double                       , C(SIMPLE) | F(POD) | F(DOUBLE )
 // [Fog::TypeInfo - Fog]
 // ===========================================================================
 
+// [Fog/Core/Kernel]
+_FOG_TYPE_DECLARE(Fog::EventLoopObserverListBase,C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
+_FOG_TYPE_DECLARE(Fog::EventLoopPendingTask    , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ ))
+
 // [Fog/Core/Math]
 _FOG_TYPE_DECLARE(Fog::FloatBits               , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::DoubleBits              , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
@@ -515,13 +519,13 @@ _FOG_TYPE_DECLARE(Fog::Region                  , C(MOVABLE) | F(IMPLICIT) | F(NO
 
 #if defined(FOG_BUILD_UI)
 // [Fog/UI/Engine]
-_FOG_TYPE_DECLARE(Fog::FbDisplayInfo           , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
-_FOG_TYPE_DECLARE(Fog::FbEvent                 , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ ))
-_FOG_TYPE_DECLARE(Fog::FbKeyboardInfo          , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
-_FOG_TYPE_DECLARE(Fog::FbKeyboardState         , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
-_FOG_TYPE_DECLARE(Fog::FbMouseInfo             , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
-_FOG_TYPE_DECLARE(Fog::FbMouseState            , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
-_FOG_TYPE_DECLARE(Fog::FbPaletteInfo           , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::UIEngineDisplayInfo     , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::UIEngineEvent           , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ ))
+_FOG_TYPE_DECLARE(Fog::UIEngineKeyboardInfo    , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::UIEngineKeyboardState   , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::UIEngineMouseInfo       , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::UIEngineMouseState      , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::UIEnginePaletteInfo     , C(SIMPLE )               | F(NO_CMP ) | F(OWN_EQ))
 #endif // FOG_BUILD_UI
 
 // ===========================================================================

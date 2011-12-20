@@ -688,8 +688,15 @@ _SkipFirstCoalesce:
   if (srcCur == srcEnd)
     goto _End;
 
-  if (prevBand != NULL && prevBand->y1 == srcCur->y0)
+  if (dstCur[-1].y1 == srcCur->y0)
   {
+    if (prevBand == NULL)
+    {
+      prevBand = &dstCur[-1];
+      while (prevBand != dstBegin && prevBand[-1].y0 == prevBand[0].y0)
+        prevBand--;
+    }
+
     int y0 = srcCur->y0;
     int y1 = srcCur->y1;
 

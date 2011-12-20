@@ -23,6 +23,10 @@ namespace Fog {
 struct Application;
 struct Event;
 struct EventLoop;
+struct EventLoopImpl;
+struct EventLoopObserver;
+struct EventLoopObserverListBase;
+struct EventLoopPendingTask;
 struct MetaClass;
 struct Object;
 struct ObjectExtra;
@@ -304,25 +308,16 @@ struct RegionData;
 
 #if defined(FOG_BUILD_UI)
 // Fog/UI/Engine.
-struct FbDisplayInfo;
-struct FbEngine;
-struct FbEvent;
-struct FbKeyboardInfo;
-struct FbKeyboardState;
-struct FbMouseInfo;
-struct FbMouseState;
-struct FbPaletteInfo;
-struct FbWindow;
-
-// Fog/UI/Layout.
-struct Layout;
-
-// Fog/UI/Widget.
-struct Widget;
-
-// TODO: Remove
-struct GuiEngine;
-
+struct UIEngine;
+struct UIEngineDisplayInfo;
+struct UIEngineEvent;
+struct UIEngineKeyboardInfo;
+struct UIEngineKeyboardState;
+struct UIEngineMouseInfo;
+struct UIEngineMouseState;
+struct UIEnginePaletteInfo;
+struct UIEngineWindow;
+struct UIEngineWindowImpl;
 #endif // FOG_BUILD_UI
 
 // ============================================================================
@@ -359,11 +354,11 @@ typedef bool (FOG_CDECL *EqFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareExFunc)(const void* a, const void* b, const void* data);
 
-typedef EventLoop* (*EventLoopConstructor)();
+typedef EventLoopImpl* (*EventLoopConstructor)();
 
 #if defined(FOG_BUILD_UI)
-//! @brief Constructor used to create native @ref FbEngine instance.
-typedef GuiEngine* (*FbEngineConstructor)(void);
+//! @brief Constructor used to create native @ref UIEngine instance.
+typedef UIEngine* (*UIEngineConstructor)(void);
 #endif // FOG_BUILD_UI
 
 } // Fog namespace

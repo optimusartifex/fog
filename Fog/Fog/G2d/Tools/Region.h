@@ -414,12 +414,12 @@ struct FOG_NO_EXPORT Region
 #if defined(FOG_OS_WINDOWS)
   FOG_INLINE err_t toHRGN(HRGN* hrgn) const
   {
-    return fog_api.region_hrgnFromRegion(hrgn, this);
+    return fog_api.region_toHRGN(this, hrgn);
   }
 
   FOG_INLINE err_t fromHRGN(HRGN hrgn)
   {
-    return fog_api.region_regionFromHRGN(this, hrgn);
+    return fog_api.region_fromHRGN(this, hrgn);
   }
 #endif // FOG_OS_WINDOWS
 

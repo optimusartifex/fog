@@ -2304,7 +2304,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, image_releaseDC)(Image* self, HDC hDC);
 
   FOG_CAPI_METHOD(err_t, region_toHRGN)(const Region* self, HRGN* hrgn);
-  FOG_CAPI_METHOD(err_t, region_FromHRGN)(Region* self, HRGN hrgn);
+  FOG_CAPI_METHOD(err_t, region_fromHRGN)(Region* self, HRGN hrgn);
 #endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------

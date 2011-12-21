@@ -60,7 +60,7 @@ struct FOG_API WinUIEngine : public UIEngine
   uint32_t getUnicodeFromWinKey(WPARAM vk, UINT scancode) const;
 
   // --------------------------------------------------------------------------
-  // [ScheduleUpdate / DoUpdate]
+  // [DoUpdate]
   // --------------------------------------------------------------------------
 
   virtual void doBlitWindow(UIEngineWindow* window);

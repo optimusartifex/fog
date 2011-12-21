@@ -110,7 +110,7 @@ void SvgWindow::onPaint(Painter* p)
 FOG_UI_MAIN()
 {
   Application app(StringW::fromAscii8("UI"));
-  SvgWindow window(app.getUIEngine());
+  SvgWindow win(app.getUIEngine());
 
   List<StringW> arguments = Application::getApplicationArguments();
   StringW fileName;
@@ -152,14 +152,14 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/SVG/tiger.svg");
   }
 
-  err_t error = window.svgDocument.readFromFile(fileName);
-  SizeF size = window.svgDocument.getDocumentSize();
+  err_t err = win.svgDocument.readFromFile(fileName);
+  SizeF size = win.svgDocument.getDocumentSize();
 
   if (size.w < 800) size.w = 800;
   if (size.h < 500) size.h = 500;
 
-  window.setWindowSize(SizeI((int)size.w, (int)size.h));
-  window.show();
+  win.setWindowSize(SizeI((int)size.w, (int)size.h));
+  win.show();
 
   return app.run();
 }

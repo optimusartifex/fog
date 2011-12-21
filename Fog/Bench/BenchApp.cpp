@@ -424,7 +424,6 @@ void BenchApp::logBenchFooter(BenchModule* module, const BenchParams& params)
   for (size_t i = 0; i < module->sizeTime.getLength(); i++)
   {
     Fog::StringW cell;
-    uint32_t size = sizeList.getAt(i);
 
     cell.appendFormat("%u", module->sizeTime.getAt(i).getMilliseconds());
     cell.justify(7, Fog::CharW(' '), Fog::TEXT_JUSTIFY_RIGHT);

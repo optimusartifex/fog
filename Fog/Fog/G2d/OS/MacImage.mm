@@ -301,7 +301,6 @@ static err_t FOG_CDECL Image_toCGImage(const Image* self, CGImageRef* cgImage)
     case IMAGE_FORMAT_PRGB64:
       cgBPC = 16;
       cgBPP = 64;
-      cgFormat = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
 
       cgAMask = FOG_UINT64_C(0x000000000000FFFF);
       cgRMask = FOG_UINT64_C(0xFFFF000000000000);
@@ -314,7 +313,6 @@ static err_t FOG_CDECL Image_toCGImage(const Image* self, CGImageRef* cgImage)
     case IMAGE_FORMAT_RGB48:
       cgBPC = 16;
       cgBPP = 64;
-      cgFormat = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
       
       cgAMask = FOG_UINT64_C(0x0000000000000000);
       cgRMask = FOG_UINT64_C(0xFFFF000000000000);

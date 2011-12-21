@@ -34,7 +34,7 @@ namespace Fog {
 // [Fog::WinUIEngineWindowImpl]
 // ============================================================================
 
-//! @brief Frame-buffer window data (abstract)
+//! @brief Windows UIEngineWindow implementation.
 struct FOG_API WinUIEngineWindowImpl : public UIEngineWindowImpl
 {
   // --------------------------------------------------------------------------
@@ -119,6 +119,7 @@ struct FOG_API WinUIEngineWindowImpl : public UIEngineWindowImpl
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Private image which is created as @c IMAGE_TYPE_WIN_DIB.
   Image _bufferImage;
 
 private:

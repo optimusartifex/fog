@@ -150,6 +150,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/my/svg/Denis - map_v.0.2.svg");
     
     //fileName = Ascii8("/Users/petr/Workspace/SVG/tiger.svg");
+    fileName = Ascii8("/Users/petr/Workspace/SVG/EiffelTower.svg");
   }
 
   err_t err = win.svgDocument.readFromFile(fileName);

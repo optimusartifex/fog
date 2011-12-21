@@ -835,6 +835,7 @@ Set(FOG_CORE_TOOLS_SOURCES
   Fog/Core/Tools/Locale.cpp
   Fog/Core/Tools/Logger.cpp
   Fog/Core/Tools/ManagedString.cpp
+  Fog/Core/Tools/Random.cpp
   Fog/Core/Tools/Range.cpp
   Fog/Core/Tools/RegExp.cpp
   Fog/Core/Tools/Stream.cpp
@@ -868,6 +869,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/Locale.h
   Fog/Core/Tools/Logger.h
   Fog/Core/Tools/ManagedString.h
+  Fog/Core/Tools/Random.h
   Fog/Core/Tools/Range.h
   Fog/Core/Tools/RegExp.h
   Fog/Core/Tools/Stream.h

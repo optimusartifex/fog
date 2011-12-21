@@ -120,7 +120,9 @@ struct Static
 
 private:
   //! @brief Stack based storage.
-  char _storage[sizeof(Type)];
+  //!
+  //! TODO: Explain:
+  intptr_t _storage[(sizeof(Type) + sizeof(intptr_t) - 1) / sizeof(intptr_t)];
 };
 
 //! @}

@@ -72,6 +72,17 @@ void SampleWindow::onPaint(Painter* p)
 
 FOG_UI_MAIN()
 {
+  FloatBits f;
+  f.f = Math::getSNanF();
+  f.i32 |= 0x80000000;
+  printf("%X", f.i32);
+  f.f += 1.0f;
+  printf("%X", f.i32);
+  f.f += 1.0f;
+  printf("%X", f.i32);
+  return 0;
+
+
   Application app(StringW::fromAscii8("UI"));
   SampleWindow window(app.getUIEngine());
 

@@ -64,8 +64,8 @@
 # define _FOG_MATH_GET_QNAN_D() __builtin_nan("")
 # define _FOG_MATH_GET_PINF_F() __builtin_inff()
 # define _FOG_MATH_GET_PINF_D() __builtin_inf()
-# define _FOG_MATH_GET_NINF_F() ( -__builtin_inff() )
-# define _FOG_MATH_GET_NINF_D() ( -__builtin_inf() )
+# define _FOG_MATH_GET_NINF_F() (-__builtin_inff())
+# define _FOG_MATH_GET_NINF_D() (-__builtin_inf())
 
 # define _FOG_MATH_IS_FINITE_F(_Value_) __builtin_finitef(_Value_)
 # define _FOG_MATH_IS_FINITE_D(_Value_) __builtin_finite(_Value_)
@@ -73,7 +73,14 @@
 # define _FOG_MATH_IS_INFINITE_D(_Value_) __builtin_isinf(_Value_)
 # define _FOG_MATH_IS_NAN_F(_Value_) __builtin_isnanf(_Value_)
 # define _FOG_MATH_IS_NAN_D(_Value_) __builtin_isnan(_Value_)
-#endif // FOG_CC_GNU
+#endif // FOG_CC_GNU && !FOG_OS_MAC
+
+// Floating point storage layout:
+// 
+//                  | Sign |  Expponent | Fraction | Bias
+// -----------------+------+------------+----------+-----
+// Single Precision | 1[31]|  8 [30-23] |23 [22-00]|  127
+// Double Precision | 1[63]| 11 [62-52] |52 [51-00]| 1023
 
 namespace Fog {
 namespace Math {
@@ -117,7 +124,7 @@ static FOG_INLINE float getSNanF()
 #if defined(_FOG_MATH_GET_SNAN_F)
   return _FOG_MATH_GET_SNAN_F();
 #else
-  _FOG_MATH_DECLARE_CONST_F(_const_snan_f, 0x8F, 0xFF, 0xFF, 0xFF);
+  _FOG_MATH_DECLARE_CONST_F(_const_snan_f, 0x7F, 0x80, 0x00, 0x00);
   return _FOG_MATH_GET_CONST_F(_const_snan_f);
 #endif // _FOG_MATH_GET_SNAN_F
 }
@@ -127,7 +134,7 @@ static FOG_INLINE double getSNanD()
 #if defined(_FOG_MATH_GET_SNAN_D)
   return _FOG_MATH_GET_SNAN_D();
 #else
-  _FOG_MATH_DECLARE_CONST_D(_const_snan_d, 0x8F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+  _FOG_MATH_DECLARE_CONST_D(_const_snan_d, 0x7F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   return _FOG_MATH_GET_CONST_D(_const_snan_d);
 #endif // _FOG_MATH_GET_SNAN_D
 }
@@ -137,7 +144,7 @@ static FOG_INLINE float getQNanF()
 #if defined(_FOG_MATH_GET_QNAN_F)
   return _FOG_MATH_GET_QNAN_F();
 #else
-  _FOG_MATH_DECLARE_CONST_F(_const_qnan_f, 0xFF, 0xFF, 0xFF, 0xFF);
+  _FOG_MATH_DECLARE_CONST_F(_const_qnan_f, 0x7F, 0xC0, 0x00, 0x00);
   return _FOG_MATH_GET_CONST_F(_const_qnan_f);
 #endif // _FOG_MATH_GET_QNAN_F
 }
@@ -147,7 +154,7 @@ static FOG_INLINE double getQNanD()
 #if defined(_FOG_MATH_GET_QNAN_D)
   return _FOG_MATH_GET_QNAN_D();
 #else
-  _FOG_MATH_DECLARE_CONST_D(_const_qnan_d, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+  _FOG_MATH_DECLARE_CONST_D(_const_qnan_d, 0x7F, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
   return _FOG_MATH_GET_CONST_D(_const_qnan_d);
 #endif // _FOG_MATH_GET_QNAN_D
 }

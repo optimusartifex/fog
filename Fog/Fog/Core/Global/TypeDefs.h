@@ -102,6 +102,7 @@ struct LocaleData;
 struct ManagedStringW;
 struct ManagedStringCacheW;
 struct NTOAContext;
+struct Random;
 struct Range;
 struct RegExpA;
 struct RegExpW;

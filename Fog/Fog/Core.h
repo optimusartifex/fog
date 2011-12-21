@@ -356,6 +356,7 @@
 #include <Fog/Core/Tools/Locale.h>
 #include <Fog/Core/Tools/Logger.h>
 #include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/Random.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/Core/Tools/RegExp.h>
 #include <Fog/Core/Tools/Stream.h>

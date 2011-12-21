@@ -47,6 +47,8 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Math_init();                   // Depends on Cpu.
 
   // [Core/Tools]
+  Random_init();
+
   String_init();
   Var_init();
   RegExp_init();

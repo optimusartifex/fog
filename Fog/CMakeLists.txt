@@ -33,6 +33,9 @@ CMake_Minimum_Required(VERSION 2.8.4)
 # Whether to build FogExamples (default FALSE).
 # Set(FOG_BUILD_EXAMPLES FALSE)
 
+# Prefix of source files (the directory).
+Set(FOG_SOURCE_PREFIX "")
+
 # =============================================================================
 # [Project - Build]
 # =============================================================================
@@ -151,10 +154,24 @@ EndIf()
 Include_Directories(${FOG_DIR})
 
 # =============================================================================
+# [Project - Helpers]
+# =============================================================================
+
+Macro(FogAddSourceGroup group files)
+  Set(local_files "")
+
+  ForEach(file ${ARGN})
+    List(APPEND local_files "${FOG_SOURCE_PREFIX}${file}")
+  EndForEach()
+
+  Source_Group(${group} FILES ${local_files})
+EndMacro()
+
+# =============================================================================
 # [OS - Detect]
 # =============================================================================
 
-# Detects both x86, and x64 version, and maybe ARM version starting at Win-8.
+# Detects both x86, and x64 version, and maybe ARM version (Win8+).
 If(WIN32)
   Set(FOG_OS_WINDOWS TRUE)
 EndIf()
@@ -444,7 +461,7 @@ If (NOT FOG_OS_IOS)
   Set(FOG_OPTIMIZE_SSSE3 TRUE)
 EndIf()
 
-Macro(AddOptimizedSources dst optimization)
+Macro(FogAddOptimizedSources dst optimization)
   Set(local_condition "FOG_OPTIMIZE_${optimization}")
   Set(local_cflags "FOG_CXX_FLAGS_${optimization}")
 
@@ -888,7 +905,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Fog/Core/Tools/VarId.h
 )
 
-AddOptimizedSources(FOG_CORE_TOOLS_SOURCES SSE2
+FogAddOptimizedSources(FOG_CORE_TOOLS_SOURCES SSE2
   Fog/Core/Tools/List_SSE2.cpp
 )
 
@@ -930,18 +947,18 @@ Set(FOG_CORE_XML_HEADERS
 )
 
 # Source groups.
-Source_Group("Core"                 FILES ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
-Source_Group("Core/C++"             FILES ${FOG_CORE_CPP_SOURCES}             ${FOG_CORE_CPP_HEADERS}            )
-Source_Group("Core/Collection"      FILES ${FOG_CORE_COLLECTION_SOURCES}      ${FOG_CORE_COLLECTION_HEADERS}     )
-Source_Group("Core/Face"            FILES ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
-Source_Group("Core/Global"          FILES ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
-Source_Group("Core/Kernel"          FILES ${FOG_CORE_KERNEL_SOURCES}          ${FOG_CORE_KERNEL_HEADERS}         )
-Source_Group("Core/Math"            FILES ${FOG_CORE_MATH_SOURCES}            ${FOG_CORE_MATH_HEADERS}           )
-Source_Group("Core/Memory"          FILES ${FOG_CORE_MEMORY_SOURCES}          ${FOG_CORE_MEMORY_HEADERS}         )
-Source_Group("Core/OS"              FILES ${FOG_CORE_OS_SOURCES}              ${FOG_CORE_OS_HEADERS}             )
-Source_Group("Core/Threading"       FILES ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
-Source_Group("Core/Tools"           FILES ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
-Source_Group("Core/Xml"             FILES ${FOG_CORE_XML_SOURCES}             ${FOG_CORE_XML_HEADERS}            )
+FogAddSourceGroup("Core"                 ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
+FogAddSourceGroup("Core/C++"             ${FOG_CORE_CPP_SOURCES}             ${FOG_CORE_CPP_HEADERS}            )
+FogAddSourceGroup("Core/Collection"      ${FOG_CORE_COLLECTION_SOURCES}      ${FOG_CORE_COLLECTION_HEADERS}     )
+FogAddSourceGroup("Core/Face"            ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
+FogAddSourceGroup("Core/Global"          ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
+FogAddSourceGroup("Core/Kernel"          ${FOG_CORE_KERNEL_SOURCES}          ${FOG_CORE_KERNEL_HEADERS}         )
+FogAddSourceGroup("Core/Math"            ${FOG_CORE_MATH_SOURCES}            ${FOG_CORE_MATH_HEADERS}           )
+FogAddSourceGroup("Core/Memory"          ${FOG_CORE_MEMORY_SOURCES}          ${FOG_CORE_MEMORY_HEADERS}         )
+FogAddSourceGroup("Core/OS"              ${FOG_CORE_OS_SOURCES}              ${FOG_CORE_OS_HEADERS}             )
+FogAddSourceGroup("Core/Threading"       ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
+FogAddSourceGroup("Core/Tools"           ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
+FogAddSourceGroup("Core/Xml"             ${FOG_CORE_XML_SOURCES}             ${FOG_CORE_XML_HEADERS}            )
 
 # =============================================================================
 # [Fog/G2d]
@@ -1038,16 +1055,16 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Fog/G2d/Geometry/Triangle.h
 )
 
-AddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES 3DNOW
+FogAddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES 3DNOW
   Fog/G2d/Geometry/Transform_3dNow.cpp
 )
 
-AddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES SSE
+FogAddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES SSE
   Fog/G2d/Geometry/PathClipper_SSE.cpp
   Fog/G2d/Geometry/Transform_SSE.cpp
 )
 
-AddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES SSE2
+FogAddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES SSE2
   Fog/G2d/Geometry/PathClipper_SSE2.cpp
   Fog/G2d/Geometry/Transform_SSE2.cpp
 )
@@ -1086,7 +1103,7 @@ Set_Source_Files_Properties(
   PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
-AddOptimizedSources(FOG_G2D_IMAGING_SOURCES SSE2
+FogAddOptimizedSources(FOG_G2D_IMAGING_SOURCES SSE2
   Fog/G2d/Imaging/ImageResize_SSE2.cpp
 )
 
@@ -1135,7 +1152,7 @@ Set(FOG_G2D_IMAGING_FILTERS_HEADERS
   Fog/G2d/Imaging/Filters/FeMorphology.h
 )
 
-AddOptimizedSources(FOG_G2D_IMAGING_FILTERS_SOURCES SSE
+FogAddOptimizedSources(FOG_G2D_IMAGING_FILTERS_SOURCES SSE
   Fog/G2d/Imaging/Filters/FeColorMatrix_SSE.cpp
 )
 
@@ -1228,7 +1245,7 @@ Set_Source_Files_Properties(
   PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
-AddOptimizedSources(FOG_G2D_PAINTING_SOURCES SSE2
+FogAddOptimizedSources(FOG_G2D_PAINTING_SOURCES SSE2
   Fog/G2d/Painting/RasterPaintEngine_SSE2.cpp
 )
 
@@ -1275,7 +1292,7 @@ Set(FOG_G2D_SOURCE_SOURCES
   Fog/G2d/Source/Texture.cpp
 )
 
-AddOptimizedSources(FOG_G2D_SOURCE_SOURCES SSE2
+FogAddOptimizedSources(FOG_G2D_SOURCE_SOURCES SSE2
   Fog/G2d/Source/Color_SSE2.cpp
 )
 
@@ -1425,24 +1442,24 @@ Set(FOG_G2D_TOOLS_HEADERS
   Fog/G2d/Tools/RegionUtil_p.h
 )
 
-AddOptimizedSources(FOG_G2D_TOOLS_SOURCES SSE2
+FogAddOptimizedSources(FOG_G2D_TOOLS_SOURCES SSE2
   Fog/G2d/Tools/Region_SSE2.cpp
 )
 
 # Source groups.
-Source_Group("G2d"                  FILES ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
-Source_Group("G2d/Face"             FILES ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
-Source_Group("G2d/Geometry"         FILES ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
-Source_Group("G2d/Imaging"          FILES ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
-Source_Group("G2d/Imaging/Codecs"   FILES ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
-Source_Group("G2d/Imaging/Filters"  FILES ${FOG_G2D_IMAGING_FILTERS_SOURCES}  ${FOG_G2D_IMAGING_FILTERS_HEADERS} )
-Source_Group("G2d/OS"               FILES ${FOG_G2D_OS_SOURCES}               ${FOG_G2D_OS_HEADERS}              )
-Source_Group("G2d/Painting"         FILES ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
-Source_Group("G2d/Source"           FILES ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
-Source_Group("G2d/Text"             FILES ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
-Source_Group("G2d/Tools"            FILES ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
+FogAddSourceGroup("G2d"                  ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
+FogAddSourceGroup("G2d/Face"             ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
+FogAddSourceGroup("G2d/Geometry"         ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
+FogAddSourceGroup("G2d/Imaging"          ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
+FogAddSourceGroup("G2d/Imaging/Codecs"   ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
+FogAddSourceGroup("G2d/Imaging/Filters"  ${FOG_G2D_IMAGING_FILTERS_SOURCES}  ${FOG_G2D_IMAGING_FILTERS_HEADERS} )
+FogAddSourceGroup("G2d/OS"               ${FOG_G2D_OS_SOURCES}               ${FOG_G2D_OS_HEADERS}              )
+FogAddSourceGroup("G2d/Painting"         ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
+FogAddSourceGroup("G2d/Source"           ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
+FogAddSourceGroup("G2d/Text"             ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
+FogAddSourceGroup("G2d/Tools"            ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
 
-Source_Group("G2d/Painting/RasterOps_C" FILES
+FogAddSourceGroup("G2d/Painting/RasterOps_C"
   ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
   ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
 )
@@ -1581,10 +1598,10 @@ Set(FOG_SVG_TOOLS_HEADERS
 )
 
 # Source groups.
-Source_Group("Svg"                  FILES ${FOG_SVG_LIB_SOURCES}              ${FOG_SVG_LIB_HEADERS}             )
-Source_Group("Svg/Dom"              FILES ${FOG_SVG_DOM_SOURCES}              ${FOG_SVG_DOM_HEADERS}             )
-Source_Group("Svg/Tools"            FILES ${FOG_SVG_TOOLS_SOURCES}            ${FOG_SVG_TOOLS_HEADERS}           )
-Source_Group("Svg/Visit"            FILES ${FOG_SVG_VISIT_SOURCES}            ${FOG_SVG_VISIT_HEADERS}           )
+FogAddSourceGroup("Svg"                  ${FOG_SVG_LIB_SOURCES}              ${FOG_SVG_LIB_HEADERS}             )
+FogAddSourceGroup("Svg/Dom"              ${FOG_SVG_DOM_SOURCES}              ${FOG_SVG_DOM_HEADERS}             )
+FogAddSourceGroup("Svg/Tools"            ${FOG_SVG_TOOLS_SOURCES}            ${FOG_SVG_TOOLS_HEADERS}           )
+FogAddSourceGroup("Svg/Visit"            ${FOG_SVG_VISIT_SOURCES}            ${FOG_SVG_VISIT_HEADERS}           )
 
 # =============================================================================
 # [Fog/UI]
@@ -1681,12 +1698,12 @@ Set(FOG_UI_TOOLS_HEADERS
 )
 
 # Source groups.
-Source_Group("UI"                   FILES ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
-Source_Group("UI/Engine"            FILES ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
-                                          ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
-                                          ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
-                                          ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
-Source_Group("UI/Tools"             FILES ${FOG_UI_TOOLS_SOURCES}            ${FOG_UI_TOOLS_HEADERS}           )
+FogAddSourceGroup("UI"                   ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
+FogAddSourceGroup("UI/Engine"            ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
+                                         ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
+                                         ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
+                                         ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
+FogAddSourceGroup("UI/Tools"             ${FOG_UI_TOOLS_SOURCES}            ${FOG_UI_TOOLS_HEADERS}           )
 
 EndIf(FOG_BUILD_UI)
 

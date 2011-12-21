@@ -982,6 +982,20 @@ struct FOG_NO_EXPORT Api
   ManagedStringCacheW* managedstringcachew_oInstance;
 
   // --------------------------------------------------------------------------
+  // [Core/Tools - Random]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(random_ctor)(Random* self);
+
+  FOG_CAPI_METHOD(void, random_reset)(Random* self);
+
+  FOG_CAPI_METHOD(void, random_seed)(Random* self, uint64_t n);
+  FOG_CAPI_METHOD(void, random_rewind)(Random* self);
+
+  FOG_CAPI_METHOD(uint32_t, random_nextUInt32)(Random* self);
+  FOG_CAPI_METHOD(double, random_nextDouble)(Random* self);
+
+  // --------------------------------------------------------------------------
   // [Core/Tools - RegExpA]
   // --------------------------------------------------------------------------
 

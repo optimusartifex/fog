@@ -74,7 +74,15 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
   CGContextRef ctx = static_cast<CGContextRef>(
     [[NSGraphicsContext currentContext] graphicsPort]);
 
-  CGContextDrawImage(ctx, NSRectToCGRect(rect), cgImage);
+  int cacheW = float(_d->_bufferImage.getWidth());
+  int cacheH = float(_d->_bufferImage.getHeight());
+
+  CGRect cgRect = CGRectMake(0.0f, 0.0f, float(cacheW), float(cacheH));
+  float yTranslation = -float(cacheH - _d->_bufferData.size.h);
+
+  CGContextTranslateCTM(ctx, 0.0f, yTranslation);
+  CGContextDrawImage(ctx, cgRect, cgImage);
+  CGContextTranslateCTM(ctx, 0.0f, yTranslation);
 }
 @end
 
@@ -99,18 +107,19 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
 {
   if (self = [super initWithContentRect: frame styleMask: style backing: NSBackingStoreBuffered defer: NO])
   {
-    [self setContentView:view];
+    [self setContentView: view];
+    [view release];
 
     // Initialize notifications.
     NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
     
-    [center addObserver:self selector:@selector(windowBecameKey:)
+    [center addObserver:self selector:@selector(windowDidBecomeKey:)
             name:NSWindowDidBecomeKeyNotification object:self];
 
-    [center addObserver:self selector:@selector(windowMoved:)
+    [center addObserver:self selector:@selector(windowDidMove:)
             name:NSWindowDidMoveNotification object:self];
     
-    [center addObserver:self selector:@selector(windowResized:)
+    [center addObserver:self selector:@selector(windowDidResize:)
             name:NSWindowDidResizeNotification object:self];
     
     _d = d;
@@ -118,7 +127,7 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
   return self;
 }
 
-- (void)windowBecameKey:(NSNotification*)notification
+- (void)windowDidBecomeKey:(NSNotification*)notification
 {
   Fog::MacUIEngine* engine = reinterpret_cast<Fog::MacUIEngine*>(_d->_engine);
 
@@ -127,7 +136,14 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
     Fog::WINDOW_STATE_NORMAL);
 }
 
-- (void)windowMoved:(NSNotification*)notification
+- (void)windowDidResignKey:(NSNotification*)notification
+{
+  Fog::MacUIEngine* engine = reinterpret_cast<Fog::MacUIEngine*>(_d->_engine);
+  
+  // TODO:
+}
+
+- (void)windowDidMove:(NSNotification*)notification
 {
   Fog::MacUIEngine* engine = reinterpret_cast<Fog::MacUIEngine*>(_d->_engine);
 
@@ -141,7 +157,7 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
     Fog::RectI_fromNSRect(cr));
 }
 
-- (void)windowResized:(NSNotification*)notification
+- (void)windowDidResize:(NSNotification*)notification
 {
   Fog::MacUIEngine* engine = reinterpret_cast<Fog::MacUIEngine*>(_d->_engine);
 
@@ -165,6 +181,14 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
   // TODO:
 }
 
+- (void)mouseEntered:(NSEvent*)event
+{
+}
+
+- (void)mouseExited:(NSEvent*)event
+{
+}
+
 - (void)mouseMoved:(NSEvent*)event
 {
   Fog::MacUIEngine* engine = reinterpret_cast<Fog::MacUIEngine*>(_d->_engine);
@@ -182,20 +206,45 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
     mState->getButtonMask());
 }
 
-- (void)mouseUp:(NSEvent*)event
+- (void)mouseDragged:(NSEvent*)event
+{
+}
+
+- (void)rightMouseDragged:(NSEvent*)event
+{
+}
+
+- (void)otherMouseDragged:(NSEvent*)event
 {
 }
 
 - (void)mouseDown:(NSEvent*)event
 {
-}
-
-- (void)rightMouseUp:(NSEvent*)event
-{
+  
 }
 
 - (void)rightMouseDown:(NSEvent*)event
 {
+  [self mouseDown: event];
+}
+
+- (void)otherMouseDown:(NSEvent*)event
+{
+  [self mouseDown: event];
+}
+
+- (void)mouseUp:(NSEvent*)event
+{
+}
+
+- (void)rightMouseUp:(NSEvent*)event
+{
+  [self mouseUp: event];
+}
+
+- (void)otherMouseUp:(NSEvent*)event
+{
+  [self mouseUp: event];
 }
 
 - (Fog_MacNSView*)contentView
@@ -246,13 +295,14 @@ err_t MacUIEngineWindowImpl::create(uint32_t hints)
     NSClosableWindowMask       ;
   NSRect nsFrame = NSMakeRect(0, 0, 500, 500);    
 
-  Fog_MacNSWindow* window = [[Fog_MacNSWindow alloc] init: this
+  Fog_MacNSView* nsView = [[Fog_MacNSView alloc] init: this];
+  Fog_MacNSWindow* nsWindow = [[Fog_MacNSWindow alloc] init: this
     frame      : nsFrame
     styleMask  : nsStyleMask
-    contentView: [[Fog_MacNSView alloc] init: this]
+    contentView: nsView
   ];
 
-  _handle = window;
+  _handle = nsWindow;
   return ERR_OK;
 }
 

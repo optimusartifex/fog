@@ -20,10 +20,6 @@
 # include <Fog/Core/C++/IntrinSSE2.h>
 #endif // FOG_HARDCODE_SSE2
 
-#include <Fog/Core/Global/Types.h>
-#include <Fog/Core/Math/Constants.h>
-#include <Fog/Core/Math/FloatBits.h>
-
 // [Dependencies - C]
 #include <math.h>
 

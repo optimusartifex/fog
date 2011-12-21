@@ -88,15 +88,15 @@ namespace Math {
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
 // Little Endian.
 #define _FOG_MATH_DECLARE_CONST_F(_Var_, _V0_, _V1_, _V2_, _V3_) \
-  static const uint8_t _Var_[4] = { _V3_, _V2_, _V1_, _V0_ }
+  FOG_ALIGNED_VAR(static const uint8_t, _Var_[4], 4) = { _V3_, _V2_, _V1_, _V0_ }
 #define _FOG_MATH_DECLARE_CONST_D(_Var_, _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_) \
-  static const uint8_t _Var_[8] = { _V7_, _V6_, _V5_, _V4_, _V3_, _V2_, _V1_, _V0_ }
+  FOG_ALIGNED_VAR(static const uint8_t, _Var_[8], 8) = { _V7_, _V6_, _V5_, _V4_, _V3_, _V2_, _V1_, _V0_ }
 #else
 // Big Endian.
 #define _FOG_MATH_DECLARE_CONST_F(_Var_, _V0_, _V1_, _V2_, _V3_) \
-  static const uint8_t _Var_[4] = { _V0_, _V1_, _V2_, _V3_ }
+  FOG_ALIGNED_VAR(static const uint8_t, _Var_[4], 4) = { _V0_, _V1_, _V2_, _V3_ }
 #define _FOG_MATH_DECLARE_CONST_D(_Var_, _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_) \
-  static const uint8_t _Var_[8] = { _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_ }
+  FOG_ALIGNED_VAR(static const uint8_t, _Var_[8], 8) = { _V0_, _V1_, _V2_, _V3_, _V4_, _V5_, _V6_, _V7_ }
 #endif // FOG_BYTE_ORDER
 
 #define _FOG_MATH_GET_CONST_F(_Var_) reinterpret_cast<const float*>(_Var_)[0]

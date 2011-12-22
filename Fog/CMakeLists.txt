@@ -34,7 +34,9 @@ CMake_Minimum_Required(VERSION 2.8.4)
 # Set(FOG_BUILD_EXAMPLES FALSE)
 
 # Prefix of source files (the directory).
-Set(FOG_SOURCE_PREFIX "")
+If (NOT FOG_SOURCE_PREFIX)
+  Set(FOG_SOURCE_PREFIX "")
+EndIf(NOT FOG_SOURCE_PREFIX)
 
 # =============================================================================
 # [Project - Build]
@@ -157,7 +159,7 @@ Include_Directories(${FOG_DIR})
 # [Project - Helpers]
 # =============================================================================
 
-Macro(FogAddSourceGroup group files)
+Macro(FogAddSourceGroup group)
   Set(local_files "")
 
   ForEach(file ${ARGN})

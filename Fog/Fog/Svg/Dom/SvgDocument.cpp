@@ -123,10 +123,11 @@ err_t SvgDocument::setDpi(float dpi)
 
 SizeF SvgDocument::getDocumentSize() const
 {
+  XmlElement* root = getDocumentRoot();
   SizeF size(0.0f, 0.0f);
 
-  XmlElement* root = getDocumentRoot();
-  if (root == NULL || !root->isSvg()) return size;
+  if (root == NULL || !root->isSvg())
+    return size;
 
   if (reinterpret_cast<SvgElement*>(root)->getSvgType() == SVG_ELEMENT_SVG)
     size = reinterpret_cast<SvgRootElement*>(root)->getRootSize();
@@ -137,7 +138,9 @@ SizeF SvgDocument::getDocumentSize() const
 err_t SvgDocument::onProcess(SvgVisitor* visitor) const
 {
   XmlElement* root = getDocumentRoot();
-  if (root == NULL || !root->isSvgElement()) return ERR_OK;
+
+  if (root == NULL || !root->isSvgElement())
+    return ERR_OK;
 
   return visitor->onVisit(reinterpret_cast<SvgElement*>(root));
 }
@@ -151,7 +154,9 @@ err_t SvgDocument::render(Painter* painter) const
 List<SvgElement*> SvgDocument::hitTest(const PointF& pt, const TransformF* tr) const
 {
   SvgHitTest ctx(pt);
-  if (tr) ctx.setTransform(*tr);
+
+  if (tr != NULL)
+    ctx.setTransform(*tr);
 
   onProcess(&ctx);
   return ctx._result;

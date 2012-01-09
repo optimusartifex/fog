@@ -24,8 +24,11 @@ CMake_Minimum_Required(VERSION 2.8.4)
 # Whether to build Fog/UI (default FALSE).
 # Set(FOG_BUILD_UI FALSE)
 
-# Whether to build Fog/UI-X11 module (default FALSE).
+# Whether to build Fog/UI-X11 support (default FALSE).
 # Set(FOG_BUILD_UI_X11 FALSE)
+
+# Whether to build Fog/UI-X11 module (default FALSE).
+# Set(FOG_BUILD_UI_X11_MODULE FALSE)
 
 # Whether to build FogBench benchmarking tool (default FALSE).
 # Set(FOG_BUILD_BENCH FALSE)
@@ -153,7 +156,7 @@ Else()
   Include(FindThreads)
 EndIf()
 
-Include_Directories(${FOG_DIR})
+Include_Directories(${FOG_DIR}/Src)
 
 # =============================================================================
 # [Project - Helpers]
@@ -221,15 +224,10 @@ If (FOG_OS_IOS)
   # iOS forces to use little endian.
   Set(FOG_BYTE_ORDER     1)
 
-  # Hardcode everything we need normally to check-for.
-  If(IOS_PLATFORM MATCHES SIMULATOR)
-    Set(FOG_SIZEOF_LONG    4)
-    Set(FOG_SIZEOF_WCHAR_T 4)
-  Else()
-    Set(FOG_SIZEOF_LONG    4)
-    Set(FOG_SIZEOF_WCHAR_T 4)
-  EndIf()
+  # iOS runs on a 32-bit platform.
+  Set(FOG_SIZEOF_VOID    4)
 
+  # Hardcode everything we need normally to check-for.
   Set(FOG_HAVE_DLFCN_H   TRUE)
   Set(FOG_HAVE_FENV_H    TRUE)
   Set(FOG_HAVE_FLOAT_H   TRUE)
@@ -440,11 +438,6 @@ If (NOT DISABLE_COMPILER_CHECKS)
   EndIf()
 
   Check_Type_Size("void*" FOG_SIZEOF_VOID)
-  Check_Type_Size("long" FOG_SIZEOF_LONG)
-
-  Set(CMAKE_EXTRA_INCLUDE_FILES wchar.h)
-  Check_Type_Size("wchar_t" FOG_SIZEOF_WCHAR_T)
-  Set(CMAKE_EXTRA_INCLUDE_FILES)
 EndIf()
 
 # =============================================================================
@@ -562,7 +555,7 @@ Set(FOG_CORE_LIB_SOURCES
 )
 
 Set(FOG_CORE_LIB_HEADERS
-  Fog/Core.h
+  Src/Fog/Core.h
 )
 
 # [Fog/Core/C++]
@@ -570,397 +563,385 @@ Set(FOG_CORE_CPP_SOURCES
 )
 
 Set(FOG_CORE_CPP_HEADERS
-  Fog/Core/C++/Base.h
-  Fog/Core/C++/Compiler.h
-  Fog/Core/C++/CompilerBorland.h
-  Fog/Core/C++/CompilerClang.h
-  Fog/Core/C++/CompilerGnu.h
-  Fog/Core/C++/CompilerIde.h
-  Fog/Core/C++/CompilerMsc.h
-  Fog/Core/C++/ConfigCMake.h
-  Fog/Core/C++/Intrin3dNow.h
-  Fog/Core/C++/IntrinMMX.h
-  Fog/Core/C++/IntrinMMXExt.h
-  Fog/Core/C++/IntrinSSE.h
-  Fog/Core/C++/IntrinSSE2.h
-  Fog/Core/C++/IntrinSSE3.h
-  Fog/Core/C++/IntrinSSSE3.h
-  Fog/Core/C++/PackByte.h
-  Fog/Core/C++/PackWord.h
-  Fog/Core/C++/PackDWord.h
-  Fog/Core/C++/PackQWord.h
-  Fog/Core/C++/PackRestore.h
-  Fog/Core/C++/StdArch.h
-  Fog/Core/C++/StdDefs.h
-  Fog/Core/C++/StdHeaders.h
-  Fog/Core/C++/StdInt.h
-  Fog/Core/C++/StdNew.h
-  Fog/Core/C++/StdOS.h
+  Src/Fog/Core/C++/Base.h
+  Src/Fog/Core/C++/Compiler.h
+  Src/Fog/Core/C++/CompilerBorland.h
+  Src/Fog/Core/C++/CompilerClang.h
+  Src/Fog/Core/C++/CompilerGnu.h
+  Src/Fog/Core/C++/CompilerIde.h
+  Src/Fog/Core/C++/CompilerMsc.h
+  Src/Fog/Core/C++/ConfigCMake.h
+  Src/Fog/Core/C++/Intrin3dNow.h
+  Src/Fog/Core/C++/IntrinMMX.h
+  Src/Fog/Core/C++/IntrinMMXExt.h
+  Src/Fog/Core/C++/IntrinSSE.h
+  Src/Fog/Core/C++/IntrinSSE2.h
+  Src/Fog/Core/C++/IntrinSSE3.h
+  Src/Fog/Core/C++/IntrinSSSE3.h
+  Src/Fog/Core/C++/PackByte.h
+  Src/Fog/Core/C++/PackWord.h
+  Src/Fog/Core/C++/PackDWord.h
+  Src/Fog/Core/C++/PackQWord.h
+  Src/Fog/Core/C++/PackRestore.h
+  Src/Fog/Core/C++/StdArch.h
+  Src/Fog/Core/C++/StdDefs.h
+  Src/Fog/Core/C++/StdHeaders.h
+  Src/Fog/Core/C++/StdInt.h
+  Src/Fog/Core/C++/StdNew.h
+  Src/Fog/Core/C++/StdOS.h
 )
 
 # [Fog/Core/Collection]
 Set(FOG_CORE_COLLECTION_SOURCES
-  Fog/Core/Collection/Util.cpp
+  Src/Fog/Core/Collection/Util.cpp
 )
 
 Set(FOG_CORE_COLLECTION_HEADERS
-  Fog/Core/Collection/StackP.h
-  Fog/Core/Collection/Util.h
+  Src/Fog/Core/Collection/StackP.h
+  Src/Fog/Core/Collection/Util.h
 )
 
 # [Fog/Core/Face]
 Set(FOG_CORE_FACE_SOURCES
-  Fog/Core/Face/Constants.cpp
+  Src/Fog/Core/Face/Constants.cpp
 )
 
 Set(FOG_CORE_FACE_HEADERS
-  Fog/Core/Face/Constants.h
-  Fog/Core/Face/Face3dNow.h
-  Fog/Core/Face/Face3dNowExt.h
-  Fog/Core/Face/FaceC.h
-  Fog/Core/Face/FaceC_Asm.h
-  Fog/Core/Face/FaceC_P32.h
-  Fog/Core/Face/FaceC_P64.h
-  Fog/Core/Face/FaceC_Types.h
-  Fog/Core/Face/FaceMMX.h
-  Fog/Core/Face/FaceMMXExt.h
-  Fog/Core/Face/FaceMMXSSE.h
-  Fog/Core/Face/FaceMMXSSE2.h
-  Fog/Core/Face/FaceMMXSSSE3.h
-  Fog/Core/Face/FaceSSE.h
-  Fog/Core/Face/FaceSSE2.h
-  Fog/Core/Face/FaceSSE3.h
-  Fog/Core/Face/FaceSSSE3.h
-  Fog/Core/Face/Features.h
+  Src/Fog/Core/Face/Constants.h
+  Src/Fog/Core/Face/Face3dNow.h
+  Src/Fog/Core/Face/Face3dNowExt.h
+  Src/Fog/Core/Face/FaceC.h
+  Src/Fog/Core/Face/FaceMMX.h
+  Src/Fog/Core/Face/FaceMMXExt.h
+  Src/Fog/Core/Face/FaceMMXSSE.h
+  Src/Fog/Core/Face/FaceMMXSSE2.h
+  Src/Fog/Core/Face/FaceMMXSSSE3.h
+  Src/Fog/Core/Face/FaceSSE.h
+  Src/Fog/Core/Face/FaceSSE2.h
+  Src/Fog/Core/Face/FaceSSE3.h
+  Src/Fog/Core/Face/FaceSSSE3.h
 )
 
 # [Fog/Core/Global]
 Set(FOG_CORE_GLOBAL_SOURCES
-  Fog/Core/Global/Api.cpp
-  Fog/Core/Global/Assert.cpp
-  Fog/Core/Global/Debug.cpp
-  Fog/Core/Global/Init.cpp
+  Src/Fog/Core/Global/Api.cpp
+  Src/Fog/Core/Global/Assert.cpp
+  Src/Fog/Core/Global/Init.cpp
 )
 
 Set(FOG_CORE_GLOBAL_HEADERS
-  Fog/Core/Global/Api.h
-  Fog/Core/Global/Assert.h
-  Fog/Core/Global/Class.h
-  Fog/Core/Global/Enum.h
-  Fog/Core/Global/EnumCore.h
-  Fog/Core/Global/EnumEvent.h
-  Fog/Core/Global/EnumError.h
-  Fog/Core/Global/EnumG2d.h
-  Fog/Core/Global/EnumSvg.h
-  Fog/Core/Global/EnumUI.h
-  Fog/Core/Global/Debug.h
-  Fog/Core/Global/Global.h
-  Fog/Core/Global/Init.h
-  Fog/Core/Global/Init_p.h
-  Fog/Core/Global/Main.h
-  Fog/Core/Global/Private.h
-  Fog/Core/Global/Static.h
-  Fog/Core/Global/TypeDefs.h
-  Fog/Core/Global/TypeInfo.h
-  Fog/Core/Global/Types.h
-  Fog/Core/Global/Uninitialized.h
+  Src/Fog/Core/Global/Api.h
+  Src/Fog/Core/Global/Assert.h
+  Src/Fog/Core/Global/Class.h
+  Src/Fog/Core/Global/Enum.h
+  Src/Fog/Core/Global/EnumCore.h
+  Src/Fog/Core/Global/EnumEvent.h
+  Src/Fog/Core/Global/EnumError.h
+  Src/Fog/Core/Global/EnumG2d.h
+  Src/Fog/Core/Global/EnumUI.h
+  Src/Fog/Core/Global/Global.h
+  Src/Fog/Core/Global/Init.h
+  Src/Fog/Core/Global/Init_p.h
+  Src/Fog/Core/Global/Main.h
+  Src/Fog/Core/Global/Private.h
+  Src/Fog/Core/Global/Static.h
+  Src/Fog/Core/Global/TypeDefs.h
+  Src/Fog/Core/Global/TypeInfo.h
+  Src/Fog/Core/Global/Types.h
+  Src/Fog/Core/Global/Uninitialized.h
 )
 
 # [Fog/Core/Kernel]
 Set(FOG_CORE_KERNEL_SOURCES
-  Fog/Core/Kernel/Application.cpp
-  Fog/Core/Kernel/DefaultEventLoopImpl.cpp
-  Fog/Core/Kernel/Event.cpp
-  Fog/Core/Kernel/EventLoop.cpp
-  Fog/Core/Kernel/EventLoopImpl.cpp
-  Fog/Core/Kernel/EventLoopObserver.cpp
-  Fog/Core/Kernel/EventLoopObserverList.cpp
-  Fog/Core/Kernel/Object.cpp
-  Fog/Core/Kernel/Task.cpp
-  Fog/Core/Kernel/Timer.cpp
+  Src/Fog/Core/Kernel/Application.cpp
+  Src/Fog/Core/Kernel/DefaultEventLoopImpl.cpp
+  Src/Fog/Core/Kernel/Event.cpp
+  Src/Fog/Core/Kernel/EventLoop.cpp
+  Src/Fog/Core/Kernel/EventLoopImpl.cpp
+  Src/Fog/Core/Kernel/EventLoopObserver.cpp
+  Src/Fog/Core/Kernel/EventLoopObserverList.cpp
+  Src/Fog/Core/Kernel/Object.cpp
+  Src/Fog/Core/Kernel/Task.cpp
+  Src/Fog/Core/Kernel/Timer.cpp
 )
 
 Set(FOG_CORE_KERNEL_HEADERS
-  Fog/Core/Kernel/Application.h
-  Fog/Core/Kernel/DefaultEventLoopImpl_p.h
-  Fog/Core/Kernel/Delegate.h
-  Fog/Core/Kernel/Event.h
-  Fog/Core/Kernel/EventLoop.h
-  Fog/Core/Kernel/EventLoopImpl.h
-  Fog/Core/Kernel/EventLoopObserver.h
-  Fog/Core/Kernel/EventLoopObserverList.h
-  Fog/Core/Kernel/Object.h
-  Fog/Core/Kernel/Task.h
-  Fog/Core/Kernel/Timer.h
+  Src/Fog/Core/Kernel/Application.h
+  Src/Fog/Core/Kernel/DefaultEventLoopImpl_p.h
+  Src/Fog/Core/Kernel/Delegate.h
+  Src/Fog/Core/Kernel/Event.h
+  Src/Fog/Core/Kernel/EventLoop.h
+  Src/Fog/Core/Kernel/EventLoopImpl.h
+  Src/Fog/Core/Kernel/EventLoopObserver.h
+  Src/Fog/Core/Kernel/EventLoopObserverList.h
+  Src/Fog/Core/Kernel/Object.h
+  Src/Fog/Core/Kernel/Task.h
+  Src/Fog/Core/Kernel/Timer.h
 )
 
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_CORE_KERNEL_SOURCES
-    Fog/Core/Kernel/WinEventLoopImpl.cpp
+    Src/Fog/Core/Kernel/WinEventLoopImpl.cpp
   )
   List(APPEND FOG_CORE_KERNEL_HEADERS
-    Fog/Core/Kernel/WinEventLoopImpl.h
+    Src/Fog/Core/Kernel/WinEventLoopImpl.h
   )
 EndIf()
 
 If(FOG_OS_MAC)
   List(APPEND FOG_CORE_KERNEL_SOURCES
-    Fog/Core/Kernel/MacEventLoopImpl.mm
+    Src/Fog/Core/Kernel/MacEventLoopImpl.mm
   )
   List(APPEND FOG_CORE_KERNEL_HEADERS
-    Fog/Core/Kernel/MacEventLoopImpl.h
+    Src/Fog/Core/Kernel/MacEventLoopImpl.h
   )
 EndIf()
 
 # [Fog/Core/Math]
 Set(FOG_CORE_MATH_SOURCES
-  Fog/Core/Math/Function.cpp
-  Fog/Core/Math/Fuzzy.cpp
-  Fog/Core/Math/Integrate.cpp
-  Fog/Core/Math/Math.cpp
-  Fog/Core/Math/MathVec.cpp
-  Fog/Core/Math/Solve.cpp
-  Fog/Core/Math/Solve_Polynomial_Analytic.cpp
-  Fog/Core/Math/Solve_Polynomial_Eigen.cpp
-  Fog/Core/Math/Solve_Polynomial_JenkinsTraub.cpp
+  Src/Fog/Core/Math/Function.cpp
+  Src/Fog/Core/Math/Fuzzy.cpp
+  Src/Fog/Core/Math/Integrate.cpp
+  Src/Fog/Core/Math/Math.cpp
+  Src/Fog/Core/Math/MathVec.cpp
+  Src/Fog/Core/Math/Solve.cpp
+  Src/Fog/Core/Math/Solve_Polynomial_Analytic.cpp
+  Src/Fog/Core/Math/Solve_Polynomial_Eigen.cpp
+  Src/Fog/Core/Math/Solve_Polynomial_JenkinsTraub.cpp
 )
 
 Set(FOG_CORE_MATH_HEADERS
-  Fog/Core/Math/Cleanup.h
-  Fog/Core/Math/Constants.h
-  Fog/Core/Math/FloatBits.h
-  Fog/Core/Math/FloatControl.h
-  Fog/Core/Math/Function.h
-  Fog/Core/Math/Fuzzy.h
-  Fog/Core/Math/Integrate.h
-  Fog/Core/Math/Interval.h
-  Fog/Core/Math/Math.h
-  Fog/Core/Math/MathVec.h
-  Fog/Core/Math/Solve.h
+  Src/Fog/Core/Math/Cleanup.h
+  Src/Fog/Core/Math/Constants.h
+  Src/Fog/Core/Math/FloatControl.h
+  Src/Fog/Core/Math/Function.h
+  Src/Fog/Core/Math/Fuzzy.h
+  Src/Fog/Core/Math/Integrate.h
+  Src/Fog/Core/Math/Interval.h
+  Src/Fog/Core/Math/Math.h
+  Src/Fog/Core/Math/MathVec.h
+  Src/Fog/Core/Math/Solve.h
 )
 
 # [Fog/Core/Memory]
 Set(FOG_CORE_MEMORY_SOURCES
-  Fog/Core/Memory/MemDebug.cpp
-  Fog/Core/Memory/MemBlockAllocator.cpp
-  Fog/Core/Memory/MemMgr.cpp
-  Fog/Core/Memory/MemOps.cpp
-  Fog/Core/Memory/MemPool.cpp
-  Fog/Core/Memory/MemZoneAllocator.cpp
+  Src/Fog/Core/Memory/MemDebug.cpp
+  Src/Fog/Core/Memory/MemBlockAllocator.cpp
+  Src/Fog/Core/Memory/MemMgr.cpp
+  Src/Fog/Core/Memory/MemOps.cpp
+  Src/Fog/Core/Memory/MemPool.cpp
+  Src/Fog/Core/Memory/MemZoneAllocator.cpp
 )
 
 Set(FOG_CORE_MEMORY_HEADERS
-  Fog/Core/Memory/BSwap.h
-  Fog/Core/Memory/BSwap_gcc_pcc.h
-  Fog/Core/Memory/BSwap_gcc_x86x64.h
-  Fog/Core/Memory/BSwap_generic.h
-  Fog/Core/Memory/BSwap_msc_intrin.h
-  Fog/Core/Memory/BSwap_msc_x86.h
-  Fog/Core/Memory/MemBlockAllocator.h
-  Fog/Core/Memory/MemBuffer.h
-  Fog/Core/Memory/MemBufferTmp_p.h
-  Fog/Core/Memory/MemDebug_p.h
-  Fog/Core/Memory/MemMgr.h
-  Fog/Core/Memory/MemOps.h
-  Fog/Core/Memory/MemPool.h
-  Fog/Core/Memory/MemZoneAllocator.h
+  Src/Fog/Core/Memory/BSwap.h
+  Src/Fog/Core/Memory/MemBlockAllocator.h
+  Src/Fog/Core/Memory/MemBuffer.h
+  Src/Fog/Core/Memory/MemBufferTmp_p.h
+  Src/Fog/Core/Memory/MemDebug_p.h
+  Src/Fog/Core/Memory/MemMgr.h
+  Src/Fog/Core/Memory/MemOps.h
+  Src/Fog/Core/Memory/MemPool.h
+  Src/Fog/Core/Memory/MemZoneAllocator.h
 )
 
 # [Fog/Core/OS]
 Set(FOG_CORE_OS_SOURCES
-  Fog/Core/OS/DirIterator.cpp
-  Fog/Core/OS/Environment.cpp
-  Fog/Core/OS/FileInfo.cpp
-  Fog/Core/OS/FileMapping.cpp
-  Fog/Core/OS/FilePath.cpp
-  Fog/Core/OS/FileUtil.cpp
-  Fog/Core/OS/Library.cpp
-  Fog/Core/OS/OSInfo.cpp
-  Fog/Core/OS/OSUtil.cpp
-  Fog/Core/OS/UserUtil.cpp
+  Src/Fog/Core/OS/DirIterator.cpp
+  Src/Fog/Core/OS/Environment.cpp
+  Src/Fog/Core/OS/FileInfo.cpp
+  Src/Fog/Core/OS/FileMapping.cpp
+  Src/Fog/Core/OS/FilePath.cpp
+  Src/Fog/Core/OS/FileUtil.cpp
+  Src/Fog/Core/OS/Library.cpp
+  Src/Fog/Core/OS/OSInfo.cpp
+  Src/Fog/Core/OS/OSUtil.cpp
+  Src/Fog/Core/OS/UserUtil.cpp
 )
 
 Set(FOG_CORE_OS_HEADERS
-  Fog/Core/OS/DirIterator.h
-  Fog/Core/OS/Environment.h
-  Fog/Core/OS/FileInfo.h
-  Fog/Core/OS/FileMapping.h
-  Fog/Core/OS/FilePath.h
-  Fog/Core/OS/FileUtil.h
-  Fog/Core/OS/Library.h
-  Fog/Core/OS/OSInfo.h
-  Fog/Core/OS/OSUtil.h
-  Fog/Core/OS/UserUtil.h
+  Src/Fog/Core/OS/DirIterator.h
+  Src/Fog/Core/OS/Environment.h
+  Src/Fog/Core/OS/FileInfo.h
+  Src/Fog/Core/OS/FileMapping.h
+  Src/Fog/Core/OS/FilePath.h
+  Src/Fog/Core/OS/FileUtil.h
+  Src/Fog/Core/OS/Library.h
+  Src/Fog/Core/OS/OSInfo.h
+  Src/Fog/Core/OS/OSUtil.h
+  Src/Fog/Core/OS/UserUtil.h
 )
 
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_CORE_OS_SOURCES
-    Fog/Core/OS/WinCom.cpp
-    Fog/Core/OS/WinUtil.cpp
+    Src/Fog/Core/OS/WinCom.cpp
+    Src/Fog/Core/OS/WinUtil.cpp
   )
   List(APPEND FOG_CORE_OS_HEADERS
-    Fog/Core/OS/WinCom.h
-    Fog/Core/OS/WinUtil.h
+    Src/Fog/Core/OS/WinCom.h
+    Src/Fog/Core/OS/WinUtil.h
   )
 EndIf()
 
 If(FOG_OS_MAC)
   List(APPEND FOG_CORE_OS_SOURCES
-    Fog/Core/OS/MacScopedAutoReleasePool.mm
-    Fog/Core/OS/MacUtil.mm
+    Src/Fog/Core/OS/MacScopedAutoReleasePool.mm
+    Src/Fog/Core/OS/MacUtil.mm
   )
   List(APPEND FOG_CORE_OS_HEADERS
-    Fog/Core/OS/MacDefs.h
-    Fog/Core/OS/MacScopedAutoReleasePool.h
-    Fog/Core/OS/MacUtil.h
+    Src/Fog/Core/OS/MacDefs.h
+    Src/Fog/Core/OS/MacScopedAutoReleasePool.h
+    Src/Fog/Core/OS/MacUtil.h
   )
 EndIf()
 
 # [Fog/Core/Threading]
 Set(FOG_CORE_THREADING_SOURCES
-  Fog/Core/Threading/Lock.cpp
-  Fog/Core/Threading/Thread.cpp
-  Fog/Core/Threading/ThreadCondition.cpp
-  Fog/Core/Threading/ThreadEvent.cpp
-  Fog/Core/Threading/ThreadLocal.cpp
-  Fog/Core/Threading/ThreadPool.cpp
+  Src/Fog/Core/Threading/Lock.cpp
+  Src/Fog/Core/Threading/Thread.cpp
+  Src/Fog/Core/Threading/ThreadCondition.cpp
+  Src/Fog/Core/Threading/ThreadEvent.cpp
+  Src/Fog/Core/Threading/ThreadLocal.cpp
+  Src/Fog/Core/Threading/ThreadPool.cpp
 )
 
 Set(FOG_CORE_THREADING_HEADERS
-  Fog/Core/Threading/Atomic.h
-  Fog/Core/Threading/Atomic_gcc_intrin.h
-  Fog/Core/Threading/Atomic_gcc_x86x64.h
-  Fog/Core/Threading/Atomic_msc_intrin.h
-  Fog/Core/Threading/Atomic_msc_x86.h
-  Fog/Core/Threading/AtomicPadding.h
-  Fog/Core/Threading/Lock.h
-  Fog/Core/Threading/Thread.h
-  Fog/Core/Threading/ThreadCondition.h
-  Fog/Core/Threading/ThreadEvent.h
-  Fog/Core/Threading/ThreadLocal.h
-  Fog/Core/Threading/ThreadPool.h
+  Src/Fog/Core/Threading/Atomic.h
+  Src/Fog/Core/Threading/Atomic_gcc_intrin.h
+  Src/Fog/Core/Threading/Atomic_gcc_x86x64.h
+  Src/Fog/Core/Threading/Atomic_msc_intrin.h
+  Src/Fog/Core/Threading/Atomic_msc_x86.h
+  Src/Fog/Core/Threading/AtomicPadding.h
+  Src/Fog/Core/Threading/Lock.h
+  Src/Fog/Core/Threading/Thread.h
+  Src/Fog/Core/Threading/ThreadCondition.h
+  Src/Fog/Core/Threading/ThreadEvent.h
+  Src/Fog/Core/Threading/ThreadLocal.h
+  Src/Fog/Core/Threading/ThreadPool.h
 )
 
 # [Fog/Core/Tools]
 Set(FOG_CORE_TOOLS_SOURCES
-  Fog/Core/Tools/Algorithm.cpp
-  Fog/Core/Tools/Char.cpp
-  Fog/Core/Tools/CharData.cpp
-  Fog/Core/Tools/Cpu.cpp
-  Fog/Core/Tools/Date.cpp
-  Fog/Core/Tools/Hash.cpp
-  Fog/Core/Tools/HashUtil.cpp
-  Fog/Core/Tools/List.cpp
-  Fog/Core/Tools/Locale.cpp
-  Fog/Core/Tools/Logger.cpp
-  Fog/Core/Tools/ManagedString.cpp
-  Fog/Core/Tools/Random.cpp
-  Fog/Core/Tools/Range.cpp
-  Fog/Core/Tools/RegExp.cpp
-  Fog/Core/Tools/Stream.cpp
-  Fog/Core/Tools/String.cpp
-  Fog/Core/Tools/StringUtil.cpp
-  Fog/Core/Tools/StringUtil_dtoa.cpp
-  Fog/Core/Tools/Stub.cpp
-  Fog/Core/Tools/TextChunk.cpp
-  Fog/Core/Tools/TextCodec.cpp
-  Fog/Core/Tools/TextIterator.cpp
-  Fog/Core/Tools/Time.cpp
-  Fog/Core/Tools/Var.cpp
+  Src/Fog/Core/Tools/Algorithm.cpp
+  Src/Fog/Core/Tools/Char.cpp
+  Src/Fog/Core/Tools/CharData.cpp
+  Src/Fog/Core/Tools/CharUtil.cpp
+  Src/Fog/Core/Tools/Cpu.cpp
+  Src/Fog/Core/Tools/Date.cpp
+  Src/Fog/Core/Tools/Hash.cpp
+  Src/Fog/Core/Tools/HashUtil.cpp
+  Src/Fog/Core/Tools/List.cpp
+  Src/Fog/Core/Tools/Locale.cpp
+  Src/Fog/Core/Tools/Logger.cpp
+  Src/Fog/Core/Tools/ManagedString.cpp
+  Src/Fog/Core/Tools/Random.cpp
+  Src/Fog/Core/Tools/RegExp.cpp
+  Src/Fog/Core/Tools/Stream.cpp
+  Src/Fog/Core/Tools/String.cpp
+  Src/Fog/Core/Tools/StringUtil.cpp
+  Src/Fog/Core/Tools/StringUtil_dtoa.cpp
+  Src/Fog/Core/Tools/Stub.cpp
+  Src/Fog/Core/Tools/TextChunk.cpp
+  Src/Fog/Core/Tools/TextCodec.cpp
+  Src/Fog/Core/Tools/TextIterator.cpp
+  Src/Fog/Core/Tools/Time.cpp
+  Src/Fog/Core/Tools/Var.cpp
 )
 
 Set(FOG_CORE_TOOLS_HEADERS
-  Fog/Core/Tools/Algorithm.h
-  Fog/Core/Tools/Char.h
-  Fog/Core/Tools/CharData.h
-  Fog/Core/Tools/Cpu.h
-  Fog/Core/Tools/Date.h
-  Fog/Core/Tools/Hash.h
-  Fog/Core/Tools/HashString.h
-  Fog/Core/Tools/HashUInt.h
-  Fog/Core/Tools/HashUntyped.h
-  Fog/Core/Tools/HashUtil.h
-  Fog/Core/Tools/List.h
-  Fog/Core/Tools/ListReal.h
-  Fog/Core/Tools/ListString.h
-  Fog/Core/Tools/ListUntyped.h
-  Fog/Core/Tools/ListVar.h
-  Fog/Core/Tools/Locale.h
-  Fog/Core/Tools/Logger.h
-  Fog/Core/Tools/ManagedString.h
-  Fog/Core/Tools/Random.h
-  Fog/Core/Tools/Range.h
-  Fog/Core/Tools/RegExp.h
-  Fog/Core/Tools/Stream.h
-  Fog/Core/Tools/String.h
-  Fog/Core/Tools/StringTmp_p.h
-  Fog/Core/Tools/StringUtil.h
-  Fog/Core/Tools/StringUtil_dtoa_p.h
-  Fog/Core/Tools/Stub.h
-  Fog/Core/Tools/Swap.h
-  Fog/Core/Tools/TextChunk.h
-  Fog/Core/Tools/TextCodec.h
-  Fog/Core/Tools/TextCodec_Page8Tables_p.h
-  Fog/Core/Tools/TextIterator.h
-  Fog/Core/Tools/Time.h
-  Fog/Core/Tools/Var.h
-  Fog/Core/Tools/VarId.h
+  Src/Fog/Core/Tools/Algorithm.h
+  Src/Fog/Core/Tools/Char.h
+  Src/Fog/Core/Tools/CharData.h
+  Src/Fog/Core/Tools/CharUtil.h
+  Src/Fog/Core/Tools/CharUtilPrivate_p.h
+  Src/Fog/Core/Tools/Cpu.h
+  Src/Fog/Core/Tools/Date.h
+  Src/Fog/Core/Tools/Hash.h
+  Src/Fog/Core/Tools/HashString.h
+  Src/Fog/Core/Tools/HashUInt.h
+  Src/Fog/Core/Tools/HashUntyped.h
+  Src/Fog/Core/Tools/HashUtil.h
+  Src/Fog/Core/Tools/List.h
+  Src/Fog/Core/Tools/ListReal.h
+  Src/Fog/Core/Tools/ListString.h
+  Src/Fog/Core/Tools/ListUntyped.h
+  Src/Fog/Core/Tools/ListVar.h
+  Src/Fog/Core/Tools/Locale.h
+  Src/Fog/Core/Tools/Logger.h
+  Src/Fog/Core/Tools/ManagedString.h
+  Src/Fog/Core/Tools/Random.h
+  Src/Fog/Core/Tools/Range.h
+  Src/Fog/Core/Tools/RegExp.h
+  Src/Fog/Core/Tools/Stream.h
+  Src/Fog/Core/Tools/String.h
+  Src/Fog/Core/Tools/StringTmp_p.h
+  Src/Fog/Core/Tools/StringUtil.h
+  Src/Fog/Core/Tools/StringUtil_dtoa_p.h
+  Src/Fog/Core/Tools/Stub.h
+  Src/Fog/Core/Tools/Swap.h
+  Src/Fog/Core/Tools/TextChunk.h
+  Src/Fog/Core/Tools/TextCodec.h
+  Src/Fog/Core/Tools/TextCodec_Page8Tables_p.h
+  Src/Fog/Core/Tools/TextIterator.h
+  Src/Fog/Core/Tools/Time.h
+  Src/Fog/Core/Tools/Var.h
+  Src/Fog/Core/Tools/VarId.h
 )
 
 FogAddOptimizedSources(FOG_CORE_TOOLS_SOURCES SSE2
-  Fog/Core/Tools/List_SSE2.cpp
+  Src/Fog/Core/Tools/List_SSE2.cpp
 )
 
 # [Fog/Core/Xml]
 Set(FOG_CORE_XML_SOURCES
-  Fog/Core/Xml/XmlAttribute.cpp
-  Fog/Core/Xml/XmlCDATA.cpp
-  Fog/Core/Xml/XmlComment.cpp
-  Fog/Core/Xml/XmlDocument.cpp
-  Fog/Core/Xml/XmlDomReader.cpp
-  Fog/Core/Xml/XmlDomWriter.cpp
-  Fog/Core/Xml/XmlElement.cpp
-  Fog/Core/Xml/XmlEntity.cpp
-  Fog/Core/Xml/XmlIdAttribute.cpp
-  Fog/Core/Xml/XmlIdManager.cpp
-  Fog/Core/Xml/XmlNoText.cpp
-  Fog/Core/Xml/XmlPI.cpp
-  Fog/Core/Xml/XmlSaxReader.cpp
-  Fog/Core/Xml/XmlSaxWriter.cpp
-  Fog/Core/Xml/XmlText.cpp
+  Src/Fog/Core/Xml/XmlAttribute.cpp
+  Src/Fog/Core/Xml/XmlCDATA.cpp
+  Src/Fog/Core/Xml/XmlComment.cpp
+  Src/Fog/Core/Xml/XmlDocument.cpp
+  Src/Fog/Core/Xml/XmlDomReader.cpp
+  Src/Fog/Core/Xml/XmlDomWriter.cpp
+  Src/Fog/Core/Xml/XmlElement.cpp
+  Src/Fog/Core/Xml/XmlEntity.cpp
+  Src/Fog/Core/Xml/XmlIdAttribute.cpp
+  Src/Fog/Core/Xml/XmlIdManager.cpp
+  Src/Fog/Core/Xml/XmlNoText.cpp
+  Src/Fog/Core/Xml/XmlPI.cpp
+  Src/Fog/Core/Xml/XmlSaxReader.cpp
+  Src/Fog/Core/Xml/XmlSaxWriter.cpp
+  Src/Fog/Core/Xml/XmlText.cpp
 )
 
 Set(FOG_CORE_XML_HEADERS
-  Fog/Core/Xml/XmlAttribute.h
-  Fog/Core/Xml/XmlCDATA.h
-  Fog/Core/Xml/XmlComment.h
-  Fog/Core/Xml/XmlDocument.h
-  Fog/Core/Xml/XmlDomReader.h
-  Fog/Core/Xml/XmlDomWriter.h
-  Fog/Core/Xml/XmlElement.h
-  Fog/Core/Xml/XmlEntity_p.h
-  Fog/Core/Xml/XmlIdAttribute_p.h
-  Fog/Core/Xml/XmlIdManager.h
-  Fog/Core/Xml/XmlNoText.h
-  Fog/Core/Xml/XmlPI.h
-  Fog/Core/Xml/XmlSaxReader.h
-  Fog/Core/Xml/XmlSaxWriter.h
-  Fog/Core/Xml/XmlText.h
+  Src/Fog/Core/Xml/XmlAttribute.h
+  Src/Fog/Core/Xml/XmlCDATA.h
+  Src/Fog/Core/Xml/XmlComment.h
+  Src/Fog/Core/Xml/XmlDocument.h
+  Src/Fog/Core/Xml/XmlDomReader.h
+  Src/Fog/Core/Xml/XmlDomWriter.h
+  Src/Fog/Core/Xml/XmlElement.h
+  Src/Fog/Core/Xml/XmlEntity_p.h
+  Src/Fog/Core/Xml/XmlIdAttribute_p.h
+  Src/Fog/Core/Xml/XmlIdManager.h
+  Src/Fog/Core/Xml/XmlNoText.h
+  Src/Fog/Core/Xml/XmlPI.h
+  Src/Fog/Core/Xml/XmlSaxReader.h
+  Src/Fog/Core/Xml/XmlSaxWriter.h
+  Src/Fog/Core/Xml/XmlText.h
 )
 
 # Source groups.
-FogAddSourceGroup("Core"                 ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
-FogAddSourceGroup("Core/C++"             ${FOG_CORE_CPP_SOURCES}             ${FOG_CORE_CPP_HEADERS}            )
-FogAddSourceGroup("Core/Collection"      ${FOG_CORE_COLLECTION_SOURCES}      ${FOG_CORE_COLLECTION_HEADERS}     )
-FogAddSourceGroup("Core/Face"            ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
-FogAddSourceGroup("Core/Global"          ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
-FogAddSourceGroup("Core/Kernel"          ${FOG_CORE_KERNEL_SOURCES}          ${FOG_CORE_KERNEL_HEADERS}         )
-FogAddSourceGroup("Core/Math"            ${FOG_CORE_MATH_SOURCES}            ${FOG_CORE_MATH_HEADERS}           )
-FogAddSourceGroup("Core/Memory"          ${FOG_CORE_MEMORY_SOURCES}          ${FOG_CORE_MEMORY_HEADERS}         )
-FogAddSourceGroup("Core/OS"              ${FOG_CORE_OS_SOURCES}              ${FOG_CORE_OS_HEADERS}             )
-FogAddSourceGroup("Core/Threading"       ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
-FogAddSourceGroup("Core/Tools"           ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
-FogAddSourceGroup("Core/Xml"             ${FOG_CORE_XML_SOURCES}             ${FOG_CORE_XML_HEADERS}            )
+FogAddSourceGroup("Fog/Core"                 ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
+FogAddSourceGroup("Fog/Core/C++"             ${FOG_CORE_CPP_SOURCES}             ${FOG_CORE_CPP_HEADERS}            )
+FogAddSourceGroup("Fog/Core/Collection"      ${FOG_CORE_COLLECTION_SOURCES}      ${FOG_CORE_COLLECTION_HEADERS}     )
+FogAddSourceGroup("Fog/Core/Face"            ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
+FogAddSourceGroup("Fog/Core/Global"          ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
+FogAddSourceGroup("Fog/Core/Kernel"          ${FOG_CORE_KERNEL_SOURCES}          ${FOG_CORE_KERNEL_HEADERS}         )
+FogAddSourceGroup("Fog/Core/Math"            ${FOG_CORE_MATH_SOURCES}            ${FOG_CORE_MATH_HEADERS}           )
+FogAddSourceGroup("Fog/Core/Memory"          ${FOG_CORE_MEMORY_SOURCES}          ${FOG_CORE_MEMORY_HEADERS}         )
+FogAddSourceGroup("Fog/Core/OS"              ${FOG_CORE_OS_SOURCES}              ${FOG_CORE_OS_HEADERS}             )
+FogAddSourceGroup("Fog/Core/Threading"       ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
+FogAddSourceGroup("Fog/Core/Tools"           ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
+FogAddSourceGroup("Fog/Core/Xml"             ${FOG_CORE_XML_SOURCES}             ${FOG_CORE_XML_HEADERS}            )
 
 # =============================================================================
 # [Fog/G2d]
@@ -977,7 +958,7 @@ Set(FOG_G2D_LIB_SOURCES
 )
 
 Set(FOG_G2D_LIB_HEADERS
-  Fog/G2d.h
+  Src/Fog/G2d.h
 )
 
 # [Fog/G2d/Face]
@@ -985,177 +966,173 @@ Set(FOG_G2D_FACE_SOURCES
 )
 
 Set(FOG_G2D_FACE_HEADERS
-  Fog/G2d/Face/Face_Raster_C.h
-  Fog/G2d/Face/Face_Raster_MMX.h
-  Fog/G2d/Face/Face_Raster_MMX_Ext.h
-  Fog/G2d/Face/Face_Raster_SSE.h
-  Fog/G2d/Face/Face_Raster_SSE2.h
-  Fog/G2d/Face/Face_Raster_SSE3.h
-  Fog/G2d/Face/Face_Raster_SSSE3.h
+  Src/Fog/G2d/Face/Face_Raster_C.h
+  Src/Fog/G2d/Face/Face_Raster_MMX.h
+  Src/Fog/G2d/Face/Face_Raster_MMX_Ext.h
+  Src/Fog/G2d/Face/Face_Raster_SSE.h
+  Src/Fog/G2d/Face/Face_Raster_SSE2.h
+  Src/Fog/G2d/Face/Face_Raster_SSE3.h
+  Src/Fog/G2d/Face/Face_Raster_SSSE3.h
 )
 
 # [Fog/G2d/Geometry]
 Set(FOG_G2D_GEOMETRY_SOURCES
-  Fog/G2d/Geometry/Arc.cpp
-  Fog/G2d/Geometry/Box.cpp
-  Fog/G2d/Geometry/CBezier.cpp
-  Fog/G2d/Geometry/Chord.cpp
-  Fog/G2d/Geometry/Circle.cpp
-  Fog/G2d/Geometry/Coord.cpp
-  Fog/G2d/Geometry/Ellipse.cpp
-  Fog/G2d/Geometry/Line.cpp
-  Fog/G2d/Geometry/Math2d.cpp
-  Fog/G2d/Geometry/Path.cpp
-  Fog/G2d/Geometry/PathClipper.cpp
-  Fog/G2d/Geometry/PathEffect.cpp
-  Fog/G2d/Geometry/PathInfo.cpp
-  Fog/G2d/Geometry/PathOnPath.cpp
-  Fog/G2d/Geometry/PathStroker.cpp
-  Fog/G2d/Geometry/Pie.cpp
-  Fog/G2d/Geometry/Point.cpp
-  Fog/G2d/Geometry/Polygon.cpp
-  Fog/G2d/Geometry/QBezier.cpp
-  Fog/G2d/Geometry/Rect.cpp
-  Fog/G2d/Geometry/Round.cpp
-  Fog/G2d/Geometry/Shape.cpp
-  Fog/G2d/Geometry/Size.cpp
-  Fog/G2d/Geometry/Size.cpp
-  Fog/G2d/Geometry/Thickness.cpp
-  Fog/G2d/Geometry/Transform.cpp
-  Fog/G2d/Geometry/Triangle.cpp
+  Src/Fog/G2d/Geometry/Arc.cpp
+  Src/Fog/G2d/Geometry/CBezier.cpp
+  Src/Fog/G2d/Geometry/Chord.cpp
+  Src/Fog/G2d/Geometry/Circle.cpp
+  Src/Fog/G2d/Geometry/Ellipse.cpp
+  Src/Fog/G2d/Geometry/Line.cpp
+  Src/Fog/G2d/Geometry/Math2d.cpp
+  Src/Fog/G2d/Geometry/Path.cpp
+  Src/Fog/G2d/Geometry/PathClipper.cpp
+  Src/Fog/G2d/Geometry/PathEffect.cpp
+  Src/Fog/G2d/Geometry/PathInfo.cpp
+  Src/Fog/G2d/Geometry/PathOnPath.cpp
+  Src/Fog/G2d/Geometry/PathStroker.cpp
+  Src/Fog/G2d/Geometry/Pie.cpp
+  Src/Fog/G2d/Geometry/Point.cpp
+  Src/Fog/G2d/Geometry/Polygon.cpp
+  Src/Fog/G2d/Geometry/QBezier.cpp
+  Src/Fog/G2d/Geometry/Round.cpp
+  Src/Fog/G2d/Geometry/Shape.cpp
+  Src/Fog/G2d/Geometry/Size.cpp
+  Src/Fog/G2d/Geometry/Transform.cpp
+  Src/Fog/G2d/Geometry/Triangle.cpp
 )
 
 Set(FOG_G2D_GEOMETRY_HEADERS
-  Fog/G2d/Geometry/Arc.h
-  Fog/G2d/Geometry/Box.h
-  Fog/G2d/Geometry/CBezier.h
-  Fog/G2d/Geometry/Chord.h
-  Fog/G2d/Geometry/Circle.h
-  Fog/G2d/Geometry/Coord.h
-  Fog/G2d/Geometry/Ellipse.h
-  Fog/G2d/Geometry/Internals_p.h
-  Fog/G2d/Geometry/Line.h
-  Fog/G2d/Geometry/Math2d.h
-  Fog/G2d/Geometry/Path.h
-  Fog/G2d/Geometry/PathClipper.h
-  Fog/G2d/Geometry/PathEffect.h
-  Fog/G2d/Geometry/PathInfo.h
-  Fog/G2d/Geometry/PathOnPath.h
-  Fog/G2d/Geometry/PathStroker.h
-  Fog/G2d/Geometry/PathTmp_p.h
-  Fog/G2d/Geometry/Pie.h
-  Fog/G2d/Geometry/Point.h
-  Fog/G2d/Geometry/Polygon.h
-  Fog/G2d/Geometry/PolygonTmp_p.h
-  Fog/G2d/Geometry/QBezier.h
-  Fog/G2d/Geometry/Rect.h
-  Fog/G2d/Geometry/Round.h
-  Fog/G2d/Geometry/Shape.h
-  Fog/G2d/Geometry/Size.h
-  Fog/G2d/Geometry/Thickness.h
-  Fog/G2d/Geometry/Transform.h
-  Fog/G2d/Geometry/Triangle.h
+  Src/Fog/G2d/Geometry/Arc.h
+  Src/Fog/G2d/Geometry/Box.h
+  Src/Fog/G2d/Geometry/CBezier.h
+  Src/Fog/G2d/Geometry/Chord.h
+  Src/Fog/G2d/Geometry/Circle.h
+  Src/Fog/G2d/Geometry/Coord.h
+  Src/Fog/G2d/Geometry/Ellipse.h
+  Src/Fog/G2d/Geometry/Internals_p.h
+  Src/Fog/G2d/Geometry/Line.h
+  Src/Fog/G2d/Geometry/Math2d.h
+  Src/Fog/G2d/Geometry/Path.h
+  Src/Fog/G2d/Geometry/PathClipper.h
+  Src/Fog/G2d/Geometry/PathEffect.h
+  Src/Fog/G2d/Geometry/PathInfo.h
+  Src/Fog/G2d/Geometry/PathOnPath.h
+  Src/Fog/G2d/Geometry/PathStroker.h
+  Src/Fog/G2d/Geometry/PathTmp_p.h
+  Src/Fog/G2d/Geometry/Pie.h
+  Src/Fog/G2d/Geometry/Point.h
+  Src/Fog/G2d/Geometry/Polygon.h
+  Src/Fog/G2d/Geometry/PolygonTmp_p.h
+  Src/Fog/G2d/Geometry/QBezier.h
+  Src/Fog/G2d/Geometry/Rect.h
+  Src/Fog/G2d/Geometry/Round.h
+  Src/Fog/G2d/Geometry/Scaling.h
+  Src/Fog/G2d/Geometry/Shape.h
+  Src/Fog/G2d/Geometry/Size.h
+  Src/Fog/G2d/Geometry/Thickness.h
+  Src/Fog/G2d/Geometry/Transform.h
+  Src/Fog/G2d/Geometry/Triangle.h
 )
 
 FogAddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES 3DNOW
-  Fog/G2d/Geometry/Transform_3dNow.cpp
+  Src/Fog/G2d/Geometry/Transform_3dNow.cpp
 )
 
 FogAddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES SSE
-  Fog/G2d/Geometry/PathClipper_SSE.cpp
-  Fog/G2d/Geometry/Transform_SSE.cpp
+  Src/Fog/G2d/Geometry/PathClipper_SSE.cpp
+  Src/Fog/G2d/Geometry/Transform_SSE.cpp
 )
 
 FogAddOptimizedSources(FOG_G2D_GEOMETRY_SOURCES SSE2
-  Fog/G2d/Geometry/PathClipper_SSE2.cpp
-  Fog/G2d/Geometry/Transform_SSE2.cpp
+  Src/Fog/G2d/Geometry/PathClipper_SSE2.cpp
+  Src/Fog/G2d/Geometry/Transform_SSE2.cpp
 )
 
 # [Fog/G2d/Imaging]
 Set(FOG_G2D_IMAGING_SOURCES
-  Fog/G2d/Imaging/Image.cpp
-  Fog/G2d/Imaging/ImageCodec.cpp
-  Fog/G2d/Imaging/ImageCodecProvider.cpp
-  Fog/G2d/Imaging/ImageConverter.cpp
-  Fog/G2d/Imaging/ImageDecoder.cpp
-  Fog/G2d/Imaging/ImageEncoder.cpp
-  Fog/G2d/Imaging/ImageFilter.cpp
-  Fog/G2d/Imaging/ImageFormatDescription.cpp
-  Fog/G2d/Imaging/ImagePalette.cpp
-  Fog/G2d/Imaging/ImageResize.cpp
+  Src/Fog/G2d/Imaging/Image.cpp
+  Src/Fog/G2d/Imaging/ImageCodec.cpp
+  Src/Fog/G2d/Imaging/ImageCodecProvider.cpp
+  Src/Fog/G2d/Imaging/ImageConverter.cpp
+  Src/Fog/G2d/Imaging/ImageDecoder.cpp
+  Src/Fog/G2d/Imaging/ImageEncoder.cpp
+  Src/Fog/G2d/Imaging/ImageFilter.cpp
+  Src/Fog/G2d/Imaging/ImageFormatDescription.cpp
+  Src/Fog/G2d/Imaging/ImagePalette.cpp
+  Src/Fog/G2d/Imaging/ImageResize.cpp
 )
 
 Set(FOG_G2D_IMAGING_HEADERS
-  Fog/G2d/Imaging/Image.h
-  Fog/G2d/Imaging/ImageBits.h
-  Fog/G2d/Imaging/ImageCodec.h
-  Fog/G2d/Imaging/ImageCodecProvider.h
-  Fog/G2d/Imaging/ImageConverter.h
-  Fog/G2d/Imaging/ImageDecoder.h
-  Fog/G2d/Imaging/ImageEncoder.h
-  Fog/G2d/Imaging/ImageFilter.h
-  Fog/G2d/Imaging/ImageFormatDescription.h
-  Fog/G2d/Imaging/ImagePalette.h
-  Fog/G2d/Imaging/ImageResize_p.h
+  Src/Fog/G2d/Imaging/Image.h
+  Src/Fog/G2d/Imaging/ImageBits.h
+  Src/Fog/G2d/Imaging/ImageCodec.h
+  Src/Fog/G2d/Imaging/ImageCodecProvider.h
+  Src/Fog/G2d/Imaging/ImageConverter.h
+  Src/Fog/G2d/Imaging/ImageDecoder.h
+  Src/Fog/G2d/Imaging/ImageEncoder.h
+  Src/Fog/G2d/Imaging/ImageFilter.h
+  Src/Fog/G2d/Imaging/ImageFormatDescription.h
+  Src/Fog/G2d/Imaging/ImagePalette.h
+  Src/Fog/G2d/Imaging/ImageResize_p.h
 )
 
 Set_Source_Files_Properties(
-  Fog/G2d/Imaging/Image.cpp
-  Fog/G2d/Imaging/ImageResize.cpp
+  Src/Fog/G2d/Imaging/Image.cpp
+  Src/Fog/G2d/Imaging/ImageResize.cpp
   PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
 FogAddOptimizedSources(FOG_G2D_IMAGING_SOURCES SSE2
-  Fog/G2d/Imaging/ImageResize_SSE2.cpp
+  Src/Fog/G2d/Imaging/ImageResize_SSE2.cpp
 )
 
 Set(FOG_G2D_IMAGING_CODECS_SOURCES
-  Fog/G2d/Imaging/Codecs/BmpCodec.cpp
-  Fog/G2d/Imaging/Codecs/GdipCodec.cpp
-  Fog/G2d/Imaging/Codecs/GifCodec.cpp
-  Fog/G2d/Imaging/Codecs/IcoCodec.cpp
-  Fog/G2d/Imaging/Codecs/JpegCodec.cpp
-  Fog/G2d/Imaging/Codecs/PcxCodec.cpp
-  Fog/G2d/Imaging/Codecs/PngCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/BmpCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/GdipCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/GifCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/IcoCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/JpegCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/PcxCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/PngCodec.cpp
 )
 
 Set(FOG_G2D_IMAGING_CODECS_HEADERS
-  Fog/G2d/Imaging/Codecs/BmpCodec_p.h
-  Fog/G2d/Imaging/Codecs/GdipCodec_p.h
-  Fog/G2d/Imaging/Codecs/IcoCodec_p.h
-  Fog/G2d/Imaging/Codecs/JpegCodec_p.h
-  Fog/G2d/Imaging/Codecs/PcxCodec_p.h
-  Fog/G2d/Imaging/Codecs/PngCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/BmpCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/GdipCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/IcoCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/JpegCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/PcxCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/PngCodec_p.h
 )
 
 Set(FOG_G2D_IMAGING_FILTERS_SOURCES
-  Fog/G2d/Imaging/Filters/FeBlur.cpp
-  Fog/G2d/Imaging/Filters/FeColorLut.cpp
-  Fog/G2d/Imaging/Filters/FeColorLutArray.cpp
-  Fog/G2d/Imaging/Filters/FeColorMatrix.cpp
-  Fog/G2d/Imaging/Filters/FeComponentFunction.cpp
-  Fog/G2d/Imaging/Filters/FeComponentTransfer.cpp
-  Fog/G2d/Imaging/Filters/FeConvolveMatrix.cpp
-  Fog/G2d/Imaging/Filters/FeConvolveSeparable.cpp
-  Fog/G2d/Imaging/Filters/FeMorphology.cpp
+  Src/Fog/G2d/Imaging/Filters/FeBlur.cpp
+  Src/Fog/G2d/Imaging/Filters/FeColorLut.cpp
+  Src/Fog/G2d/Imaging/Filters/FeColorLutArray.cpp
+  Src/Fog/G2d/Imaging/Filters/FeColorMatrix.cpp
+  Src/Fog/G2d/Imaging/Filters/FeComponentFunction.cpp
+  Src/Fog/G2d/Imaging/Filters/FeComponentTransfer.cpp
+  Src/Fog/G2d/Imaging/Filters/FeConvolveMatrix.cpp
+  Src/Fog/G2d/Imaging/Filters/FeConvolveSeparable.cpp
+  Src/Fog/G2d/Imaging/Filters/FeMorphology.cpp
 )
 
 Set(FOG_G2D_IMAGING_FILTERS_HEADERS
-  Fog/G2d/Imaging/Filters/FeBorder.h
-  Fog/G2d/Imaging/Filters/FeBase.h
-  Fog/G2d/Imaging/Filters/FeBlur.h
-  Fog/G2d/Imaging/Filters/FeColorLut.h
-  Fog/G2d/Imaging/Filters/FeColorLutArray.h
-  Fog/G2d/Imaging/Filters/FeColorMatrix.h
-  Fog/G2d/Imaging/Filters/FeComponentFunction.h
-  Fog/G2d/Imaging/Filters/FeComponentTransfer.h
-  Fog/G2d/Imaging/Filters/FeConvolveMatrix.h
-  Fog/G2d/Imaging/Filters/FeConvolveSeparable.h
-  Fog/G2d/Imaging/Filters/FeMorphology.h
+  Src/Fog/G2d/Imaging/Filters/FeBorder.h
+  Src/Fog/G2d/Imaging/Filters/FeBase.h
+  Src/Fog/G2d/Imaging/Filters/FeBlur.h
+  Src/Fog/G2d/Imaging/Filters/FeColorLut.h
+  Src/Fog/G2d/Imaging/Filters/FeColorLutArray.h
+  Src/Fog/G2d/Imaging/Filters/FeColorMatrix.h
+  Src/Fog/G2d/Imaging/Filters/FeComponentFunction.h
+  Src/Fog/G2d/Imaging/Filters/FeComponentTransfer.h
+  Src/Fog/G2d/Imaging/Filters/FeConvolveMatrix.h
+  Src/Fog/G2d/Imaging/Filters/FeConvolveSeparable.h
+  Src/Fog/G2d/Imaging/Filters/FeMorphology.h
 )
 
 FogAddOptimizedSources(FOG_G2D_IMAGING_FILTERS_SOURCES SSE
-  Fog/G2d/Imaging/Filters/FeColorMatrix_SSE.cpp
+  Src/Fog/G2d/Imaging/Filters/FeColorMatrix_SSE.cpp
 )
 
 If(NOT FOG_HAVE_LIBJPEG)
@@ -1171,84 +1148,84 @@ Set(FOG_G2D_OS_SOURCES
 )
 
 Set(FOG_G2D_OS_HEADERS
-  Fog/G2d/OS/OSUtil.h
+  Src/Fog/G2d/OS/OSUtil.h
 )
 
 If(FOG_OS_WINDOWS)
   List(APPEND FOG_G2D_OS_SOURCES
-    Fog/G2d/OS/WinGdiPlus.cpp
-    Fog/G2d/OS/WinImage.cpp
-    Fog/G2d/OS/WinRegion.cpp
-    Fog/G2d/OS/WinUtil.cpp
-    Fog/G2d/OS/WinUxTheme.cpp
+    Src/Fog/G2d/OS/WinGdiPlus.cpp
+    Src/Fog/G2d/OS/WinImage.cpp
+    Src/Fog/G2d/OS/WinRegion.cpp
+    Src/Fog/G2d/OS/WinUtil.cpp
+    Src/Fog/G2d/OS/WinUxTheme.cpp
   )
   List(APPEND FOG_G2D_OS_HEADERS
-    Fog/G2d/OS/WinGdiPlus.h
-    Fog/G2d/OS/WinUtil.h
-    Fog/G2d/OS/WinUxTheme.h
+    Src/Fog/G2d/OS/WinGdiPlus.h
+    Src/Fog/G2d/OS/WinUtil.h
+    Src/Fog/G2d/OS/WinUxTheme.h
   )
 EndIf()
 
 If(FOG_OS_MAC)
   List(APPEND FOG_G2D_OS_SOURCES
-    Fog/G2d/OS/MacImage.mm
-    Fog/G2d/OS/MacUtil.mm
+    Src/Fog/G2d/OS/MacImage.mm
+    Src/Fog/G2d/OS/MacUtil.mm
   )
   List(APPEND FOG_G2D_OS_HEADERS
-    Fog/G2d/OS/MacUtil.h
+    Src/Fog/G2d/OS/MacUtil.h
   )
 EndIf()
 
 # [Fog/G2d/Painting]
 Set(FOG_G2D_PAINTING_SOURCES
-  Fog/G2d/Painting/NullPaintEngine.cpp
-  Fog/G2d/Painting/PaintDevice.cpp
-  Fog/G2d/Painting/PaintDeviceInfo.cpp
-  Fog/G2d/Painting/PaintEngine.cpp
-  Fog/G2d/Painting/PaintParams.cpp
-  Fog/G2d/Painting/PaintUtil.cpp
-  Fog/G2d/Painting/Painter.cpp
-  Fog/G2d/Painting/RasterApi.cpp
-  Fog/G2d/Painting/RasterConstants.cpp
-  Fog/G2d/Painting/RasterInit.cpp
-  Fog/G2d/Painting/RasterInit_C.cpp
-  Fog/G2d/Painting/RasterPaintContext.cpp
-  Fog/G2d/Painting/RasterPaintEngine.cpp
-  Fog/G2d/Painting/RasterPaintWork.cpp
-  Fog/G2d/Painting/RasterScanline.cpp
-  Fog/G2d/Painting/Rasterizer.cpp
+  Src/Fog/G2d/Painting/NullPaintEngine.cpp
+  Src/Fog/G2d/Painting/PaintDevice.cpp
+  Src/Fog/G2d/Painting/PaintDeviceInfo.cpp
+  Src/Fog/G2d/Painting/PaintEngine.cpp
+  Src/Fog/G2d/Painting/PaintParams.cpp
+  Src/Fog/G2d/Painting/PaintUtil.cpp
+  Src/Fog/G2d/Painting/Painter.cpp
+  Src/Fog/G2d/Painting/RasterApi.cpp
+  Src/Fog/G2d/Painting/RasterConstants.cpp
+  Src/Fog/G2d/Painting/RasterInit.cpp
+  Src/Fog/G2d/Painting/RasterInit_C.cpp
+  Src/Fog/G2d/Painting/RasterPaintContext.cpp
+  Src/Fog/G2d/Painting/RasterPaintEngine.cpp
+  Src/Fog/G2d/Painting/RasterPaintWork.cpp
+  Src/Fog/G2d/Painting/RasterScanline.cpp
+  Src/Fog/G2d/Painting/Rasterizer.cpp
 )
 
 Set(FOG_G2D_PAINTING_HEADERS
-  Fog/G2d/Painting/NullPaintEngine_p.h
-  Fog/G2d/Painting/PaintDevice.h
-  Fog/G2d/Painting/PaintDeviceInfo.h
-  Fog/G2d/Painting/PaintEngine.h
-  Fog/G2d/Painting/PaintParams.h
-  Fog/G2d/Painting/PaintUtil.h
-  Fog/G2d/Painting/Painter.h
-  Fog/G2d/Painting/RasterApi_p.h
-  Fog/G2d/Painting/RasterConstants_p.h
-  Fog/G2d/Painting/RasterInit_p.h
-  Fog/G2d/Painting/RasterPaintContext_p.h
-  Fog/G2d/Painting/RasterPaintEngine_p.h
-  Fog/G2d/Painting/RasterPaintStructs_p.h
-  Fog/G2d/Painting/RasterPaintWork_p.h
-  Fog/G2d/Painting/RasterScanline_p.h
-  Fog/G2d/Painting/RasterSpan_p.h
-  Fog/G2d/Painting/RasterState_p.h
-  Fog/G2d/Painting/RasterStructs_p.h
-  Fog/G2d/Painting/RasterUtil_p.h
-  Fog/G2d/Painting/Rasterizer_p.h
+  Src/Fog/G2d/Painting/NullPaintEngine_p.h
+  Src/Fog/G2d/Painting/PaintDevice.h
+  Src/Fog/G2d/Painting/PaintDeviceInfo.h
+  Src/Fog/G2d/Painting/PaintEngine.h
+  Src/Fog/G2d/Painting/PaintParams.h
+  Src/Fog/G2d/Painting/PaintUtil.h
+  Src/Fog/G2d/Painting/Painter.h
+  Src/Fog/G2d/Painting/RasterApi_p.h
+  Src/Fog/G2d/Painting/RasterConstants_p.h
+  Src/Fog/G2d/Painting/RasterInit_p.h
+  Src/Fog/G2d/Painting/RasterPaintContext_p.h
+  Src/Fog/G2d/Painting/RasterPaintEngine_p.h
+  Src/Fog/G2d/Painting/RasterPaintStructs_p.h
+  Src/Fog/G2d/Painting/RasterPaintWork_p.h
+  Src/Fog/G2d/Painting/RasterScanline_p.h
+  Src/Fog/G2d/Painting/RasterSpan_p.h
+  Src/Fog/G2d/Painting/RasterState_p.h
+  Src/Fog/G2d/Painting/RasterStructs_p.h
+  Src/Fog/G2d/Painting/RasterUtil_p.h
+  Src/Fog/G2d/Painting/Rasterizer_p.h
 )
 
 Set_Source_Files_Properties(
-  Fog/G2d/Painting/Rasterizer.cpp
+  Src/Fog/G2d/Painting/Rasterizer.cpp
   PROPERTIES COMPILE_FLAGS "${FOG_CXX_FLAGS_OPTIMIZE}"
 )
 
 FogAddOptimizedSources(FOG_G2D_PAINTING_SOURCES SSE2
-  Fog/G2d/Painting/RasterPaintEngine_SSE2.cpp
+  Src/Fog/G2d/Painting/RasterPaintEngine_SSE2.cpp
 )
 
 # [Fog/G2d/Painting/RasterOps_C]
@@ -1256,145 +1233,168 @@ Set(FOG_G2D_PAINTING_RASTEROPS_C_SOURCES
 )
 
 Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
-  Fog/G2d/Painting/RasterOps_C/BaseAccess_p.h
-  Fog/G2d/Painting/RasterOps_C/BaseConvert_p.h
-  Fog/G2d/Painting/RasterOps_C/BaseDefs_p.h
-  Fog/G2d/Painting/RasterOps_C/BaseHelpers_p.h
-  Fog/G2d/Painting/RasterOps_C/CompositeBase_p.h
-  Fog/G2d/Painting/RasterOps_C/CompositeClear_p.h
-  Fog/G2d/Painting/RasterOps_C/CompositeNop_p.h
-  Fog/G2d/Painting/RasterOps_C/CompositeSrc_p.h
-  Fog/G2d/Painting/RasterOps_C/CompositeSrcOver_p.h
-  Fog/G2d/Painting/RasterOps_C/GradientBase_p.h
-  Fog/G2d/Painting/RasterOps_C/GradientConical_p.h
-  Fog/G2d/Painting/RasterOps_C/GradientLinear_p.h
-  Fog/G2d/Painting/RasterOps_C/GradientRadial_p.h
-  Fog/G2d/Painting/RasterOps_C/GradientRectangular_p.h
-  Fog/G2d/Painting/RasterOps_C/TextureAffine_p.h
-  Fog/G2d/Painting/RasterOps_C/TextureBase_p.h
-  Fog/G2d/Painting/RasterOps_C/TextureProjection_p.h
-  Fog/G2d/Painting/RasterOps_C/TextureScale_p.h
-  Fog/G2d/Painting/RasterOps_C/TextureSimple_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/BaseAccess_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/BaseConvert_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/BaseDefs_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/BaseHelpers_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/CompositeBase_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/CompositeClear_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/CompositeNop_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/CompositeSrc_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/CompositeSrcOver_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/GradientBase_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/GradientConical_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/GradientLinear_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/GradientRadial_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/GradientRectangular_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/TextureAffine_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/TextureBase_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/TextureProjection_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/TextureScale_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/TextureSimple_p.h
 )
 
 # [Fog/G2d/Source]
 Set(FOG_G2D_SOURCE_SOURCES
-  Fog/G2d/Source/Color.cpp
-  Fog/G2d/Source/ColorBase.cpp
-  Fog/G2d/Source/ColorStop.cpp
-  Fog/G2d/Source/ColorStopCache.cpp
-  Fog/G2d/Source/ColorStopList.cpp
-  Fog/G2d/Source/ColorUtil.cpp
-  Fog/G2d/Source/ConicalGradient.cpp
-  Fog/G2d/Source/Gradient.cpp
-  Fog/G2d/Source/LinearGradient.cpp
-  Fog/G2d/Source/Pattern.cpp
-  Fog/G2d/Source/RadialGradient.cpp
-  Fog/G2d/Source/RectangularGradient.cpp
-  Fog/G2d/Source/Texture.cpp
+  Src/Fog/G2d/Source/Color.cpp
+  Src/Fog/G2d/Source/ColorBase.cpp
+  Src/Fog/G2d/Source/ColorStop.cpp
+  Src/Fog/G2d/Source/ColorStopCache.cpp
+  Src/Fog/G2d/Source/ColorStopList.cpp
+  Src/Fog/G2d/Source/ColorUtil.cpp
+  Src/Fog/G2d/Source/ConicalGradient.cpp
+  Src/Fog/G2d/Source/Gradient.cpp
+  Src/Fog/G2d/Source/LinearGradient.cpp
+  Src/Fog/G2d/Source/Pattern.cpp
+  Src/Fog/G2d/Source/RadialGradient.cpp
+  Src/Fog/G2d/Source/RectangularGradient.cpp
+  Src/Fog/G2d/Source/Texture.cpp
 )
 
 FogAddOptimizedSources(FOG_G2D_SOURCE_SOURCES SSE2
-  Fog/G2d/Source/Color_SSE2.cpp
+  Src/Fog/G2d/Source/Color_SSE2.cpp
 )
 
 Set(FOG_G2D_SOURCE_HEADERS
-  Fog/G2d/Source/Acmyk.h
-  Fog/G2d/Source/Ahsl.h
-  Fog/G2d/Source/Ahsv.h
-  Fog/G2d/Source/Argb.h
-  Fog/G2d/Source/Color.h
-  Fog/G2d/Source/ColorBase.h
-  Fog/G2d/Source/ColorStop.h
-  Fog/G2d/Source/ColorStopCache.h
-  Fog/G2d/Source/ColorStopList.h
-  Fog/G2d/Source/ColorUtil.h
-  Fog/G2d/Source/ConicalGradient.h
-  Fog/G2d/Source/Gradient.h
-  Fog/G2d/Source/LinearGradient.h
-  Fog/G2d/Source/Pattern.h
-  Fog/G2d/Source/RadialGradient.h
-  Fog/G2d/Source/RectangularGradient.h
-  Fog/G2d/Source/Texture.h
+  Src/Fog/G2d/Source/Acmyk.h
+  Src/Fog/G2d/Source/Ahsl.h
+  Src/Fog/G2d/Source/Ahsv.h
+  Src/Fog/G2d/Source/Argb.h
+  Src/Fog/G2d/Source/Color.h
+  Src/Fog/G2d/Source/ColorBase.h
+  Src/Fog/G2d/Source/ColorStop.h
+  Src/Fog/G2d/Source/ColorStopCache.h
+  Src/Fog/G2d/Source/ColorStopList.h
+  Src/Fog/G2d/Source/ColorUtil.h
+  Src/Fog/G2d/Source/ConicalGradient.h
+  Src/Fog/G2d/Source/Gradient.h
+  Src/Fog/G2d/Source/LinearGradient.h
+  Src/Fog/G2d/Source/Pattern.h
+  Src/Fog/G2d/Source/RadialGradient.h
+  Src/Fog/G2d/Source/RectangularGradient.h
+  Src/Fog/G2d/Source/Texture.h
+)
+
+# [Fog/G2d/Svg]
+Set(FOG_G2D_SVG_SOURCES
+  Src/Fog/G2d/Svg/SvgDocument.cpp
+  Src/Fog/G2d/Svg/SvgDom.cpp
+  Src/Fog/G2d/Svg/SvgElement.cpp
+  Src/Fog/G2d/Svg/SvgHitTest.cpp
+  Src/Fog/G2d/Svg/SvgMeasure.cpp
+  Src/Fog/G2d/Svg/SvgRender.cpp
+  Src/Fog/G2d/Svg/SvgUtil.cpp
+  Src/Fog/G2d/Svg/SvgVisitor.cpp
+)
+
+Set(FOG_G2D_SVG_HEADERS
+  Src/Fog/G2d/Svg/SvgDocument.h
+  Src/Fog/G2d/Svg/SvgDom_p.h
+  Src/Fog/G2d/Svg/SvgElement.h
+  Src/Fog/G2d/Svg/SvgHitTest.h
+  Src/Fog/G2d/Svg/SvgMeasure.h
+  Src/Fog/G2d/Svg/SvgRender.h
+  Src/Fog/G2d/Svg/SvgUtil.h
+  Src/Fog/G2d/Svg/SvgVisitor.h
 )
 
 # [Fog/G2d/Text]
 Set(FOG_G2D_TEXT_SOURCES
-  Fog/G2d/Text/Font.cpp
-  Fog/G2d/Text/FontFace.cpp
-  Fog/G2d/Text/FontFaceCache.cpp
-  Fog/G2d/Text/FontKerning.cpp
-  Fog/G2d/Text/FontManager.cpp
-  Fog/G2d/Text/FontProvider.cpp
-  Fog/G2d/Text/GlyphBitmap.cpp
-  Fog/G2d/Text/GlyphBitmapCache.cpp
-  Fog/G2d/Text/GlyphOutline.cpp
-  Fog/G2d/Text/GlyphOutlineCache.cpp
-  Fog/G2d/Text/NullFontFace.cpp
-  Fog/G2d/Text/TextExtents.cpp
-  Fog/G2d/Text/TextLayout.cpp
-  Fog/G2d/Text/TextRect.cpp
+  Src/Fog/G2d/Text/Font.cpp
+  Src/Fog/G2d/Text/FontFace.cpp
+  Src/Fog/G2d/Text/FontFaceCache.cpp
+  Src/Fog/G2d/Text/FontKerning.cpp
+  Src/Fog/G2d/Text/FontManager.cpp
+  Src/Fog/G2d/Text/FontProvider.cpp
+  Src/Fog/G2d/Text/GlyphBitmap.cpp
+  Src/Fog/G2d/Text/GlyphBitmapCache.cpp
+  Src/Fog/G2d/Text/GlyphOutline.cpp
+  Src/Fog/G2d/Text/GlyphOutlineCache.cpp
+  Src/Fog/G2d/Text/NullFontFace.cpp
+  Src/Fog/G2d/Text/TextExtents.cpp
+  Src/Fog/G2d/Text/TextLayout.cpp
+  Src/Fog/G2d/Text/TextRect.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS
-  Fog/G2d/Text/Font.h
-  Fog/G2d/Text/FontFace.h
-  Fog/G2d/Text/FontFaceCache.h
-  Fog/G2d/Text/FontHints.h
-  Fog/G2d/Text/FontKerning.h
-  Fog/G2d/Text/FontManager.h
-  Fog/G2d/Text/FontMetrics.h
-  Fog/G2d/Text/FontProvider.h
-  Fog/G2d/Text/GlyphBitmap.h
-  Fog/G2d/Text/GlyphBitmapCache.h
-  Fog/G2d/Text/GlyphMetrics.h
-  Fog/G2d/Text/GlyphOutline.h
-  Fog/G2d/Text/GlyphOutlineCache.h
-  Fog/G2d/Text/NullFontFace_p.h
-  Fog/G2d/Text/TextExtents.h
-  Fog/G2d/Text/TextHints.h
-  Fog/G2d/Text/TextLayout.h
-  Fog/G2d/Text/TextRect.h
+  Src/Fog/G2d/Text/Font.h
+  Src/Fog/G2d/Text/FontFace.h
+  Src/Fog/G2d/Text/FontFaceCache.h
+  Src/Fog/G2d/Text/FontHints.h
+  Src/Fog/G2d/Text/FontKerning.h
+  Src/Fog/G2d/Text/FontManager.h
+  Src/Fog/G2d/Text/FontMetrics.h
+  Src/Fog/G2d/Text/FontProvider.h
+  Src/Fog/G2d/Text/GlyphBitmap.h
+  Src/Fog/G2d/Text/GlyphBitmapCache.h
+  Src/Fog/G2d/Text/GlyphMetrics.h
+  Src/Fog/G2d/Text/GlyphOutline.h
+  Src/Fog/G2d/Text/GlyphOutlineCache.h
+  Src/Fog/G2d/Text/NullFontFace_p.h
+  Src/Fog/G2d/Text/TextExtents.h
+  Src/Fog/G2d/Text/TextHints.h
+  Src/Fog/G2d/Text/TextLayout.h
+  Src/Fog/G2d/Text/TextRect.h
 )
 
 # [Fog/G2d/Text - Windows]
 Set(FOG_G2D_TEXT_SOURCES_WIN
-  Fog/G2d/Text/WinFontFace.cpp
-  Fog/G2d/Text/WinFontMaster.cpp
-  Fog/G2d/Text/WinFontProvider.cpp
-  Fog/G2d/Text/WinFontUtil.cpp
+  Src/Fog/G2d/Text/WinFontFace.cpp
+  Src/Fog/G2d/Text/WinFontMaster.cpp
+  Src/Fog/G2d/Text/WinFontProvider.cpp
+  Src/Fog/G2d/Text/WinFontUtil.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS_WIN
-  Fog/G2d/Text/WinFontFace.h
-  Fog/G2d/Text/WinFontMaster.h
-  Fog/G2d/Text/WinFontProvider.h
-  Fog/G2d/Text/WinFontUtil_p.h
+  Src/Fog/G2d/Text/WinFontFace.h
+  Src/Fog/G2d/Text/WinFontMaster.h
+  Src/Fog/G2d/Text/WinFontProvider.h
+  Src/Fog/G2d/Text/WinFontUtil_p.h
 )
 
 # [Fog/G2d/Text - Mac]
 Set(FOG_G2D_TEXT_SOURCES_MAC
-  Fog/G2d/Text/MacFontFace.mm
-  Fog/G2d/Text/MacFontMaster.mm
-  Fog/G2d/Text/MacFontProvider.mm
+  Src/Fog/G2d/Text/MacFontFace.mm
+  Src/Fog/G2d/Text/MacFontMaster.mm
+  Src/Fog/G2d/Text/MacFontProvider.mm
 )
 Set(FOG_G2D_TEXT_HEADERS_MAC
-  Fog/G2d/Text/MacFontFace.h
-  Fog/G2d/Text/MacFontMaster.h
-  Fog/G2d/Text/MacFontProvider.h
+  Src/Fog/G2d/Text/MacFontFace.h
+  Src/Fog/G2d/Text/MacFontMaster.h
+  Src/Fog/G2d/Text/MacFontProvider.h
 )
 
 # [Fog/G2d/Text - FreeType]
 Set(FOG_G2D_TEXT_SOURCES_FREETYPE
-  Fog/G2d/Text/FTFontFace.cpp
-  Fog/G2d/Text/FTFontMaster.cpp
-  Fog/G2d/Text/FTFontProvider.cpp
+  Src/Fog/G2d/Text/FTFontFace.cpp
+  Src/Fog/G2d/Text/FTFontMaster.cpp
+  Src/Fog/G2d/Text/FTFontProvider.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS_FREETYPE
-  Fog/G2d/Text/FTFontFace.h
-  Fog/G2d/Text/FTFontMaster.h
-  Fog/G2d/Text/FTFontProvider.h
+  Src/Fog/G2d/Text/FTFontFace.h
+  Src/Fog/G2d/Text/FTFontMaster.h
+  Src/Fog/G2d/Text/FTFontProvider.h
 )
 
 # [Fog/G2d/Text - Detect]
@@ -1424,271 +1424,124 @@ EndIf()
 
 # [Fog/G2d/Tools]
 Set(FOG_G2D_TOOLS_SOURCES
-  Fog/G2d/Tools/ColorAnalyzer.cpp
-  Fog/G2d/Tools/DitherTable.cpp
-  Fog/G2d/Tools/Dpi.cpp
-  Fog/G2d/Tools/Matrix.cpp
-  Fog/G2d/Tools/Reduce.cpp
-  Fog/G2d/Tools/Region.cpp
-  Fog/G2d/Tools/RegionUtil.cpp
+  Src/Fog/G2d/Tools/ColorAnalyzer.cpp
+  Src/Fog/G2d/Tools/DitherTable.cpp
+  Src/Fog/G2d/Tools/Dpi.cpp
+  Src/Fog/G2d/Tools/Matrix.cpp
+  Src/Fog/G2d/Tools/Reduce.cpp
+  Src/Fog/G2d/Tools/Region.cpp
+  Src/Fog/G2d/Tools/RegionUtil.cpp
 )
 
 Set(FOG_G2D_TOOLS_HEADERS
-  Fog/G2d/Tools/ColorAnalyzer_p.h
-  Fog/G2d/Tools/DitherTable_p.h
-  Fog/G2d/Tools/Dpi.h
-  Fog/G2d/Tools/Matrix.h
-  Fog/G2d/Tools/Reduce_p.h
-  Fog/G2d/Tools/Region.h
-  Fog/G2d/Tools/RegionTmp_p.h
-  Fog/G2d/Tools/RegionUtil_p.h
+  Src/Fog/G2d/Tools/ColorAnalyzer_p.h
+  Src/Fog/G2d/Tools/DitherTable_p.h
+  Src/Fog/G2d/Tools/Dpi.h
+  Src/Fog/G2d/Tools/Matrix.h
+  Src/Fog/G2d/Tools/Reduce_p.h
+  Src/Fog/G2d/Tools/Region.h
+  Src/Fog/G2d/Tools/RegionTmp_p.h
+  Src/Fog/G2d/Tools/RegionUtil_p.h
 )
 
 FogAddOptimizedSources(FOG_G2D_TOOLS_SOURCES SSE2
-  Fog/G2d/Tools/Region_SSE2.cpp
+  Src/Fog/G2d/Tools/Region_SSE2.cpp
 )
 
 # Source groups.
-FogAddSourceGroup("G2d"                  ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
-FogAddSourceGroup("G2d/Face"             ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
-FogAddSourceGroup("G2d/Geometry"         ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
-FogAddSourceGroup("G2d/Imaging"          ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
-FogAddSourceGroup("G2d/Imaging/Codecs"   ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
-FogAddSourceGroup("G2d/Imaging/Filters"  ${FOG_G2D_IMAGING_FILTERS_SOURCES}  ${FOG_G2D_IMAGING_FILTERS_HEADERS} )
-FogAddSourceGroup("G2d/OS"               ${FOG_G2D_OS_SOURCES}               ${FOG_G2D_OS_HEADERS}              )
-FogAddSourceGroup("G2d/Painting"         ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
-FogAddSourceGroup("G2d/Source"           ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
-FogAddSourceGroup("G2d/Text"             ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
-FogAddSourceGroup("G2d/Tools"            ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
+FogAddSourceGroup("Fog/G2d"                  ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
+FogAddSourceGroup("Fog/G2d/Face"             ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
+FogAddSourceGroup("Fog/G2d/Geometry"         ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
+FogAddSourceGroup("Fog/G2d/Imaging"          ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
+FogAddSourceGroup("Fog/G2d/Imaging/Codecs"   ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
+FogAddSourceGroup("Fog/G2d/Imaging/Filters"  ${FOG_G2D_IMAGING_FILTERS_SOURCES}  ${FOG_G2D_IMAGING_FILTERS_HEADERS} )
+FogAddSourceGroup("Fog/G2d/OS"               ${FOG_G2D_OS_SOURCES}               ${FOG_G2D_OS_HEADERS}              )
+FogAddSourceGroup("Fog/G2d/Painting"         ${FOG_G2D_PAINTING_SOURCES}         ${FOG_G2D_PAINTING_HEADERS}        )
+FogAddSourceGroup("Fog/G2d/Source"           ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
+FogAddSourceGroup("Fog/G2d/Svg"              ${FOG_G2D_SVG_SOURCES}              ${FOG_G2D_SVG_HEADERS}             )
+FogAddSourceGroup("Fog/G2d/Text"             ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
+FogAddSourceGroup("Fog/G2d/Tools"            ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
 
-FogAddSourceGroup("G2d/Painting/RasterOps_C"
+FogAddSourceGroup("Fog/G2d/Painting/RasterOps_C"
   ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
   ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
 )
-
-# =============================================================================
-# [Fog/Svg]
-# =============================================================================
-
-Message("-- Configuring Fog/Svg")
-
-# =============================================================================
-# [Fog-Svg]
-# =============================================================================
-
-Set(FOG_SVG_LIB_SOURCES
-)
-
-Set(FOG_SVG_LIB_HEADERS
-  Fog/Svg.h
-)
-
-Set(FOG_SVG_DOM_SOURCES
-  Fog/Svg/Dom/SvgCoordAttribute.cpp
-  Fog/Svg/Dom/SvgEnumAttribute.cpp
-  Fog/Svg/Dom/SvgEnumItem.cpp
-  Fog/Svg/Dom/SvgImageLinkAttribute.cpp
-  Fog/Svg/Dom/SvgOffsetAttribute.cpp
-  Fog/Svg/Dom/SvgPathAttribute.cpp
-  Fog/Svg/Dom/SvgPointsAttribute.cpp
-  Fog/Svg/Dom/SvgStyleAttribute.cpp
-  Fog/Svg/Dom/SvgTransformAttribute.cpp
-
-  Fog/Svg/Dom/SvgAbstractGradientElement.cpp
-  Fog/Svg/Dom/SvgAElement.cpp
-  Fog/Svg/Dom/SvgCircleElement.cpp
-  Fog/Svg/Dom/SvgClipPathElement.cpp
-  Fog/Svg/Dom/SvgDefsElement.cpp
-  Fog/Svg/Dom/SvgDescElement.cpp
-  Fog/Svg/Dom/SvgDocument.cpp
-  Fog/Svg/Dom/SvgElement.cpp
-  Fog/Svg/Dom/SvgEllipseElement.cpp
-  Fog/Svg/Dom/SvgGElement.cpp
-  Fog/Svg/Dom/SvgImageElement.cpp
-  Fog/Svg/Dom/SvgLinearGradientElement.cpp
-  Fog/Svg/Dom/SvgLineElement.cpp
-  Fog/Svg/Dom/SvgMarkerElement.cpp
-  Fog/Svg/Dom/SvgMaskElement.cpp
-  Fog/Svg/Dom/SvgPathElement.cpp
-  Fog/Svg/Dom/SvgPatternElement.cpp
-  Fog/Svg/Dom/SvgPolygonElement.cpp
-  Fog/Svg/Dom/SvgPolylineElement.cpp
-  Fog/Svg/Dom/SvgRadialGradientElement.cpp
-  Fog/Svg/Dom/SvgRectElement.cpp
-  Fog/Svg/Dom/SvgRootElement.cpp
-  Fog/Svg/Dom/SvgSolidColorElement.cpp
-  Fog/Svg/Dom/SvgStopElement.cpp
-  Fog/Svg/Dom/SvgStyledElement.cpp
-  Fog/Svg/Dom/SvgSymbolElement.cpp
-  Fog/Svg/Dom/SvgTextElement.cpp
-  Fog/Svg/Dom/SvgTextPathElement.cpp
-  Fog/Svg/Dom/SvgTitleElement.cpp
-  Fog/Svg/Dom/SvgTRefElement.cpp
-  Fog/Svg/Dom/SvgTSpanElement.cpp
-  Fog/Svg/Dom/SvgUseElement.cpp
-  Fog/Svg/Dom/SvgViewElement.cpp
-  Fog/Svg/Dom/SvgViewBoxAttribute.cpp
-)
-
-Set(FOG_SVG_DOM_HEADERS
-  Fog/Svg/Dom/SvgCoordAttribute_p.h
-  Fog/Svg/Dom/SvgEnumAttribute_p.h
-  Fog/Svg/Dom/SvgEnumItem_p.h
-  Fog/Svg/Dom/SvgImageLinkAttribute_p.h
-  Fog/Svg/Dom/SvgOffsetAttribute_p.h
-  Fog/Svg/Dom/SvgPathAttribute_p.h
-  Fog/Svg/Dom/SvgPointsAttribute_p.h
-  Fog/Svg/Dom/SvgStyleAttribute_p.h
-  Fog/Svg/Dom/SvgTransformAttribute_p.h
-
-  Fog/Svg/Dom/SvgAbstractGradientElement_p.h
-  Fog/Svg/Dom/SvgAElement_p.h
-  Fog/Svg/Dom/SvgCircleElement_p.h
-  Fog/Svg/Dom/SvgClipPathElement_p.h
-  Fog/Svg/Dom/SvgDefsElement_p.h
-  Fog/Svg/Dom/SvgDescElement_p.h
-  Fog/Svg/Dom/SvgDocument.h
-  Fog/Svg/Dom/SvgElement.h
-  Fog/Svg/Dom/SvgEllipseElement_p.h
-  Fog/Svg/Dom/SvgGElement_p.h
-  Fog/Svg/Dom/SvgImageElement_p.h
-  Fog/Svg/Dom/SvgLinearGradientElement_p.h
-  Fog/Svg/Dom/SvgLineElement_p.h
-  Fog/Svg/Dom/SvgMarkerElement_p.h
-  Fog/Svg/Dom/SvgMaskElement_p.h
-  Fog/Svg/Dom/SvgPathElement_p.h
-  Fog/Svg/Dom/SvgPatternElement_p.h
-  Fog/Svg/Dom/SvgPolygonElement_p.h
-  Fog/Svg/Dom/SvgPolylineElement_p.h
-  Fog/Svg/Dom/SvgRadialGradientElement_p.h
-  Fog/Svg/Dom/SvgRectElement_p.h
-  Fog/Svg/Dom/SvgRootElement_p.h
-  Fog/Svg/Dom/SvgSolidColorElement_p.h
-  Fog/Svg/Dom/SvgStopElement_p.h
-  Fog/Svg/Dom/SvgStyledElement_p.h
-  Fog/Svg/Dom/SvgSymbolElement_p.h
-  Fog/Svg/Dom/SvgTextElement_p.h
-  Fog/Svg/Dom/SvgTextPathElement_p.h
-  Fog/Svg/Dom/SvgTitleElement_p.h
-  Fog/Svg/Dom/SvgTRefElement_p.h
-  Fog/Svg/Dom/SvgTSpanElement_p.h
-  Fog/Svg/Dom/SvgUseElement_p.h
-  Fog/Svg/Dom/SvgViewElement_p.h
-  Fog/Svg/Dom/SvgViewBoxAttribute_p.h
-)
-
-Set(FOG_SVG_VISIT_SOURCES
-  Fog/Svg/Visit/SvgHitTest.cpp
-  Fog/Svg/Visit/SvgMeasure.cpp
-  Fog/Svg/Visit/SvgRender.cpp
-  Fog/Svg/Visit/SvgVisitor.cpp
-)
-
-Set(FOG_SVG_VISIT_HEADERS
-  Fog/Svg/Visit/SvgHitTest.h
-  Fog/Svg/Visit/SvgMeasure.h
-  Fog/Svg/Visit/SvgRender.h
-  Fog/Svg/Visit/SvgVisitor.h
-)
-
-Set(FOG_SVG_TOOLS_SOURCES
-  Fog/Svg/Tools/SvgUtil.cpp
-)
-
-Set(FOG_SVG_TOOLS_HEADERS
-  Fog/Svg/Tools/SvgUtil.h
-)
-
-# Source groups.
-FogAddSourceGroup("Svg"                  ${FOG_SVG_LIB_SOURCES}              ${FOG_SVG_LIB_HEADERS}             )
-FogAddSourceGroup("Svg/Dom"              ${FOG_SVG_DOM_SOURCES}              ${FOG_SVG_DOM_HEADERS}             )
-FogAddSourceGroup("Svg/Tools"            ${FOG_SVG_TOOLS_SOURCES}            ${FOG_SVG_TOOLS_HEADERS}           )
-FogAddSourceGroup("Svg/Visit"            ${FOG_SVG_VISIT_SOURCES}            ${FOG_SVG_VISIT_HEADERS}           )
 
 # =============================================================================
 # [Fog/UI]
 # =============================================================================
 
 If(FOG_BUILD_UI)
-
 Message("-- Configuring Fog/UI")
 
 # =============================================================================
 # [Fog/UI - Files]
 # =============================================================================
 
-# UI Backends.
-If(FOG_OS_WINDOWS)
-  Set(FOG_UI_WINDOWS 1)
-ElseIf(FOG_OS_MAC)
-  Set(FOG_UI_MAC 1)
-Else()
-  Set(FOG_UI_X11 1)
-EndIf()
-
 # [Fog/UI]
 Set(FOG_UI_LIB_SOURCES
 )
 
 Set(FOG_UI_LIB_HEADERS
-  Fog/UI.h
+  Src/Fog/UI.h
 )
 
 # [Fog/UI/Engine]
 Set(FOG_UI_ENGINE_SOURCES
-  Fog/UI/Engine/UIEngine.cpp
-  Fog/UI/Engine/UIEngineEvent.cpp
-  Fog/UI/Engine/UIEngineWindow.cpp
+  Src/Fog/UI/Engine/UIEngine.cpp
+  Src/Fog/UI/Engine/UIEngineEvent.cpp
+  Src/Fog/UI/Engine/UIEngineWindow.cpp
 )
 
 Set(FOG_UI_ENGINE_HEADERS
-  Fog/UI/Engine/UIEngine.h
-  Fog/UI/Engine/UIEngineDisplayInfo.h
-  Fog/UI/Engine/UIEngineEvent.h
-  Fog/UI/Engine/UIEngineKeyboardInfo.h
-  Fog/UI/Engine/UIEngineKeyboardState.h
-  Fog/UI/Engine/UIEngineMouseInfo.h
-  Fog/UI/Engine/UIEngineMouseState.h
-  Fog/UI/Engine/UIEnginePaletteInfo.h
-  Fog/UI/Engine/UIEngineSecondaryFB.h
-  Fog/UI/Engine/UIEngineWindow.h
+  Src/Fog/UI/Engine/UIEngine.h
+  Src/Fog/UI/Engine/UIEngineDisplayInfo.h
+  Src/Fog/UI/Engine/UIEngineEvent.h
+  Src/Fog/UI/Engine/UIEngineKeyboardInfo.h
+  Src/Fog/UI/Engine/UIEngineKeyboardState.h
+  Src/Fog/UI/Engine/UIEngineMouseInfo.h
+  Src/Fog/UI/Engine/UIEngineMouseState.h
+  Src/Fog/UI/Engine/UIEnginePaletteInfo.h
+  Src/Fog/UI/Engine/UIEngineSecondaryFB.h
+  Src/Fog/UI/Engine/UIEngineWindow.h
 )
 
 Set(FOG_UI_ENGINE_MAC_SOURCES
-  Fog/UI/Engine/MacUIEngine.mm
-  Fog/UI/Engine/MacUIEngineWindow.mm
-  Fog/UI/Engine/MacUIEventLoopImpl.mm
+  Src/Fog/UI/Engine/MacUIEngine.mm
+  Src/Fog/UI/Engine/MacUIEngineWindow.mm
+  Src/Fog/UI/Engine/MacUIEventLoopImpl.mm
 )
 
 Set(FOG_UI_ENGINE_MAC_HEADERS
-  Fog/UI/Engine/MacUIEngine.h
-  Fog/UI/Engine/MacUIEngineWindow.h
-  Fog/UI/Engine/MacUIEventLoopImpl_p.h
+  Src/Fog/UI/Engine/MacUIEngine.h
+  Src/Fog/UI/Engine/MacUIEngineWindow.h
+  Src/Fog/UI/Engine/MacUIEventLoopImpl_p.h
 )
 
 Set(FOG_UI_ENGINE_WIN_SOURCES
-  Fog/UI/Engine/WinUIEngine.cpp
-  Fog/UI/Engine/WinUIEngineWindow.cpp
-  Fog/UI/Engine/WinUIEventLoopImpl.cpp
+  Src/Fog/UI/Engine/WinUIEngine.cpp
+  Src/Fog/UI/Engine/WinUIEngineWindow.cpp
+  Src/Fog/UI/Engine/WinUIEventLoopImpl.cpp
 )
 
 Set(FOG_UI_ENGINE_WIN_HEADERS
-  Fog/UI/Engine/WinUIEngine.h
-  Fog/UI/Engine/WinUIEngineWindow.h
-  Fog/UI/Engine/WinUIEventLoopImpl_p.h
+  Src/Fog/UI/Engine/WinUIEngine.h
+  Src/Fog/UI/Engine/WinUIEngineWindow.h
+  Src/Fog/UI/Engine/WinUIEventLoopImpl_p.h
 )
 
 Set(FOG_UI_ENGINE_X11_SOURCES
-  Fog/UI/Engine/X11UIEngine.cpp
-  Fog/UI/Engine/X11UIEngineWindow.cpp
-  Fog/UI/Engine/X11UIEventLoopImpl.cpp
+  Src/Fog/UI/Engine/X11UIEngine.cpp
+  Src/Fog/UI/Engine/X11UIEngineWindow.cpp
+  Src/Fog/UI/Engine/X11UIEventLoopImpl.cpp
 )
 
 Set(FOG_UI_ENGINE_X11_HEADERS
-  Fog/UI/Engine/X11UIEngine.h
-  Fog/UI/Engine/X11UIEngineWindow.h
-  Fog/UI/Engine/X11UIEventLoopImpl_p.h
-  Fog/UI/Engine/X11UIXlib.h
+  Src/Fog/UI/Engine/X11UIEngine.h
+  Src/Fog/UI/Engine/X11UIEngineConfig.h
+  Src/Fog/UI/Engine/X11UIEngineWindow.h
+  Src/Fog/UI/Engine/X11UIEngineXlib.h
+  Src/Fog/UI/Engine/X11UIEventLoopImpl_p.h
 )
 
 # [Fog/UI/Tools]
@@ -1696,16 +1549,16 @@ Set(FOG_UI_TOOLS_SOURCES
 )
 
 Set(FOG_UI_TOOLS_HEADERS
-  Fog/UI/Tools/UIUtil.h
+  Src/Fog/UI/Tools/UIUtil.h
 )
 
 # Source groups.
-FogAddSourceGroup("UI"                   ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
-FogAddSourceGroup("UI/Engine"            ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
-                                         ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
-                                         ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
-                                         ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
-FogAddSourceGroup("UI/Tools"             ${FOG_UI_TOOLS_SOURCES}            ${FOG_UI_TOOLS_HEADERS}           )
+FogAddSourceGroup("Fog/UI"                   ${FOG_UI_LIB_SOURCES}              ${FOG_UI_LIB_HEADERS}             )
+FogAddSourceGroup("Fog/UI/Engine"            ${FOG_UI_ENGINE_SOURCES}           ${FOG_UI_ENGINE_HEADERS}
+                                             ${FOG_UI_ENGINE_MAC_SOURCES}       ${FOG_UI_ENGINE_MAC_HEADERS}
+                                             ${FOG_UI_ENGINE_X11_SOURCES}       ${FOG_UI_ENGINE_X11_HEADERS}
+                                             ${FOG_UI_ENGINE_WIN_SOURCES}       ${FOG_UI_ENGINE_WIN_HEADERS}      )
+FogAddSourceGroup("Fog/UI/Tools"             ${FOG_UI_TOOLS_SOURCES}            ${FOG_UI_TOOLS_HEADERS}           )
 
 EndIf(FOG_BUILD_UI)
 
@@ -1738,13 +1591,9 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_PAINTING_SOURCES}
   ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
   ${FOG_G2D_SOURCE_SOURCES}
+  ${FOG_G2D_SVG_SOURCES}
   ${FOG_G2D_TEXT_SOURCES}
   ${FOG_G2D_TOOLS_SOURCES}
-  # Fog/Svg.
-  ${FOG_SVG_LIB_SOURCES}
-  ${FOG_SVG_DOM_SOURCES}
-  ${FOG_SVG_TOOLS_SOURCES}
-  ${FOG_SVG_VISIT_SOURCES}
 )
 
 Set(FOG_ALL_HEADERS
@@ -1773,13 +1622,9 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
   ${FOG_G2D_SOURCE_HEADERS}
+  ${FOG_G2D_SVG_HEADERS}
   ${FOG_G2D_TEXT_HEADERS}
   ${FOG_G2D_TOOLS_HEADERS}
-  # Fog/Svg.
-  ${FOG_SVG_LIB_HEADERS}
-  ${FOG_SVG_DOM_HEADERS}
-  ${FOG_SVG_TOOLS_HEADERS}
-  ${FOG_SVG_VISIT_HEADERS}
 )
 
 If(FOG_OS_WINDOWS)
@@ -1808,14 +1653,19 @@ If(FOG_BUILD_UI)
     ${FOG_UI_TOOLS_HEADERS}
   )
 
-  If(FOG_UI_WINDOWS)
+  If(FOG_OS_WINDOWS)
     List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_WIN_SOURCES})
     List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_WIN_HEADERS})
   EndIf()
 
-  If(FOG_UI_MAC)
+  If(FOG_OS_MAC)
     List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_MAC_SOURCES})
     List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_MAC_HEADERS})
+  EndIf()
+
+  If(FOG_BUILD_UI_X11 AND NOT FOG_BUILD_UI_X11_MODULE)
+    List(APPEND FOG_ALL_SOURCES ${FOG_UI_ENGINE_X11_SOURCES})
+    List(APPEND FOG_ALL_HEADERS ${FOG_UI_ENGINE_X11_HEADERS})
   EndIf()
 EndIf()
 
@@ -1832,12 +1682,12 @@ ForEach(i ${FOG_ALL_HEADERS})
 EndForEach()
 
 # =============================================================================
-# [Setup - Fog/Core/C++/ConfigCMake.h]
+# [Setup - Src/Fog/Core/C++/ConfigCMake.h]
 # =============================================================================
 
-# Write CMAKE_ #defines into Fog/Core/C++/ConfigCMake.h files
-Configure_File(${CMAKE_CURRENT_LIST_DIR}/Fog/Core/C++/ConfigCMake.h.cmake
-               ${CMAKE_CURRENT_LIST_DIR}/Fog/Core/C++/ConfigCMake.h)
+# Write CMAKE_ #defines into Src/Fog/Core/C++/ConfigCMake.h files
+Configure_File(${CMAKE_CURRENT_LIST_DIR}/Src/Fog/Core/C++/ConfigCMake.h.cmake
+               ${CMAKE_CURRENT_LIST_DIR}/Src/Fog/Core/C++/ConfigCMake.h)
 
 # =============================================================================
 # [Setup - Fix]
@@ -1860,23 +1710,23 @@ If(NOT FOG_BUILD_NOTHING)
     ForEach(i ${FOG_ALL_HEADERS})
       Get_Filename_Component(path ${i} PATH)
       Get_Filename_Component(name ${i} NAME)
-      If(NOT "${name}" MATCHES "_p.h$")
-        Install(FILES ${i} DESTINATION "include/${path}")
+      If(NOT "${name}" MATCHES "Src/3rdParty/")
+        If(NOT "${name}" MATCHES "_p.h$")
+          Install(FILES ${i} DESTINATION "include/${path}")
+        EndIf()
       EndIf()
     EndForEach()
   EndIf()
 EndIf()
 
 # =============================================================================
-# [Setup - Binary - Fog]
+# [Setup - Lib - Fog]
 # =============================================================================
 
 If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC)
     # Shared library.
-    Add_Library(Fog SHARED
-      ${FOG_ALL_SOURCES_CORRECTED}
-      ${FOG_ALL_HEADERS_CORRECTED})
+    Add_Library(Fog SHARED ${FOG_ALL_SOURCES_CORRECTED} ${FOG_ALL_HEADERS_CORRECTED})
     Target_Link_Libraries(Fog ${FOG_LIBRARIES})
     Install(TARGETS Fog DESTINATION lib)
   Else()
@@ -1889,31 +1739,25 @@ If(NOT FOG_BUILD_NOTHING)
 EndIf()
 
 # =============================================================================
-# [Setup - Binary - Fog/UI-X11]
+# [Setup - Lib - FogUI_X11]
 # =============================================================================
 
 If(NOT FOG_BUILD_NOTHING)
-  If(NOT FOG_BUILD_STATIC AND FOG_UI_X11 AND FOG_BUILD_UI_X11)
-    Add_Library(Fog_UI_X11 SHARED
-      ${FOG_UI_ENGINE_X11_SOURCES}
-      ${FOG_UI_ENGINE_X11_HEADERS})
-    Target_Link_Libraries(Fog_UI_X11 Fog ${FOG_LIBRARIES})
-    Install(TARGETS Fog_UI_X11 DESTINATION lib)
+  If(NOT FOG_BUILD_STATIC AND FOG_BUILD_UI_X11 AND FOG_BUILD_UI_X11_MODULE)
+    Add_Library(FogUI_X11 SHARED ${FOG_UI_ENGINE_X11_SOURCES} ${FOG_UI_ENGINE_X11_HEADERS})
+    Target_Link_Libraries(FogUI_X11 Fog ${FOG_LIBRARIES})
+    Install(TARGETS FogUI_X11 DESTINATION lib)
   EndIf()
 EndIf()
 
 # =============================================================================
-# [Setup - Binary - FogBench]
+# [Setup - App - FogBench]
 # =============================================================================
 
 If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_BENCH)
-    Set(BENCH_LIBRARIES "")
-    Set(BENCH_INCLUDE "")
-
-    If(FOG_OS_MAC)
-      # Set(FOG_BENCH_CG True)
-    EndIf(FOG_OS_MAC)
+    Set(FOG_BENCH_LIBRARIES "")
+    Set(FOG_BENCH_INCLUDE "")
 
     If(FOG_OS_WINDOWS)
       # Set(FOG_BENCH_GDIPLUS True)
@@ -1922,59 +1766,63 @@ If(NOT FOG_BUILD_NOTHING)
       # Set(FOG_BENCH_QT4 True)
     EndIf()
 
+    If(FOG_OS_MAC)
+      # Set(FOG_BENCH_CG True)
+    EndIf(FOG_OS_MAC)
+
     Configure_File(
-      ${CMAKE_CURRENT_LIST_DIR}/Bench/BenchConfig.h.cmake
-      ${CMAKE_CURRENT_LIST_DIR}/Bench/BenchConfig.h)
+      ${CMAKE_CURRENT_LIST_DIR}/Src/App/Bench/BenchConfig.h.cmake
+      ${CMAKE_CURRENT_LIST_DIR}/Src/App/Bench/BenchConfig.h)
 
     Set(FOG_BENCH_FILES
-      Bench/BenchApp.cpp
-      Bench/BenchApp.h
-      Bench/BenchCairo.cpp
-      Bench/BenchCairo.h
-      Bench/BenchCG.cpp
-      Bench/BenchCG.h
-      Bench/BenchConfig.h
-      Bench/BenchFog.cpp
-      Bench/BenchFog.h
-      Bench/BenchGdiPlus.cpp
-      Bench/BenchGdiPlus.h
-      Bench/BenchQt4.cpp
-      Bench/BenchQt4.h
+      Src/App/Bench/BenchApp.cpp
+      Src/App/Bench/BenchApp.h
+      Src/App/Bench/BenchCairo.cpp
+      Src/App/Bench/BenchCairo.h
+      Src/App/Bench/BenchCG.cpp
+      Src/App/Bench/BenchCG.h
+      Src/App/Bench/BenchConfig.h
+      Src/App/Bench/BenchFog.cpp
+      Src/App/Bench/BenchFog.h
+      Src/App/Bench/BenchGdiPlus.cpp
+      Src/App/Bench/BenchGdiPlus.h
+      Src/App/Bench/BenchQt4.cpp
+      Src/App/Bench/BenchQt4.h
     )
 
     If(FOG_BENCH_CAIRO)
       Include_Directories(/usr/include/cairo)
-      List(APPEND BENCH_LIBRARIES cairo)
-    EndIf(FOG_BENCH_CAIRO)
+      List(APPEND FOG_BENCH_LIBRARIES cairo)
+    EndIf()
 
     If(FOG_BENCH_QT4)
       Include_Directories(/usr/include/qt4)
       Link_Directories(/usr/lib/qt4)
-      List(APPEND BENCH_LIBRARIES QtCore QtGui)
-    EndIf(FOG_BENCH_QT4)
+      List(APPEND FOG_BENCH_LIBRARIES QtCore QtGui)
+    EndIf()
 
     Add_Executable(FogBench ${FOG_BENCH_FILES})
-    Target_Link_Libraries(FogBench Fog ${FOG_LIBRARIES} ${BENCH_LIBRARIES})
+    Target_Link_Libraries(FogBench Fog ${FOG_LIBRARIES} ${FOG_BENCH_LIBRARIES})
   EndIf()
 EndIf()
 
 # =============================================================================
-# [Setup - Binary - Examples]
+# [Setup - App - Samples]
 # =============================================================================
 
 If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
-    Set(FOG_EXAMPLE_SOURCES
+    Set(FOG_SAMPLE_SOURCES
       FogSvgView
       FogTestApp
     )
 
-    ForEach(file ${FOG_EXAMPLE_SOURCES})
-      Add_Executable(${file} WIN32 MACOSX_BUNDLE Examples/${file}.cpp)
+    ForEach(file ${FOG_SAMPLE_SOURCES})
+      Add_Executable(${file} WIN32 MACOSX_BUNDLE Src/App/Sample/${file}.cpp)
       Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
     EndForEach(file)
 
-    Add_Executable(FogSizeOf Examples/FogSizeOf.cpp)
+    Add_Executable(FogSizeOf Src/App/Sample/FogSizeOf.cpp)
     Target_Link_Libraries(FogSizeOf Fog ${FOG_LIBRARIES})
   EndIf()
 EndIf()

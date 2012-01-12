@@ -15,6 +15,8 @@
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageFilter.h>
+#include <Fog/G2d/Imaging/ImageFilterScale.h>
 #include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
@@ -86,6 +88,12 @@ struct FOG_NO_EXPORT RasterContext
     //! @brief Full opacity for float conversion. Depends on @c IMAGE_PRECISION.
     float f;
   } fullOpacity;
+
+  // --------------------------------------------------------------------------
+  // [Members - Filter]
+  // --------------------------------------------------------------------------
+
+  ImageFilterScaleD filterScale;
 
   // --------------------------------------------------------------------------
   // [Members - Layer]

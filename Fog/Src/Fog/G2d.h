@@ -48,7 +48,6 @@
 #include <Fog/G2d/Geometry/QBezier.h>
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Round.h>
-#include <Fog/G2d/Geometry/Scaling.h>
 #include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Thickness.h>
@@ -70,6 +69,7 @@
 #include <Fog/G2d/Imaging/ImageDecoder.h>
 #include <Fog/G2d/Imaging/ImageEncoder.h>
 #include <Fog/G2d/Imaging/ImageFilter.h>
+#include <Fog/G2d/Imaging/ImageFilterScale.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/G2d/Imaging/Filters/FeBase.h>

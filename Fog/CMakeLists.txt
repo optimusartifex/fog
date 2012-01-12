@@ -1026,7 +1026,6 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Src/Fog/G2d/Geometry/QBezier.h
   Src/Fog/G2d/Geometry/Rect.h
   Src/Fog/G2d/Geometry/Round.h
-  Src/Fog/G2d/Geometry/Scaling.h
   Src/Fog/G2d/Geometry/Shape.h
   Src/Fog/G2d/Geometry/Size.h
   Src/Fog/G2d/Geometry/Thickness.h
@@ -1071,6 +1070,7 @@ Set(FOG_G2D_IMAGING_HEADERS
   Src/Fog/G2d/Imaging/ImageDecoder.h
   Src/Fog/G2d/Imaging/ImageEncoder.h
   Src/Fog/G2d/Imaging/ImageFilter.h
+  Src/Fog/G2d/Imaging/ImageFilterScale.h
   Src/Fog/G2d/Imaging/ImageFormatDescription.h
   Src/Fog/G2d/Imaging/ImagePalette.h
   Src/Fog/G2d/Imaging/ImageResize_p.h
@@ -1242,6 +1242,13 @@ Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
   Src/Fog/G2d/Painting/RasterOps_C/CompositeNop_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeSrc_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeSrcOver_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterBlur_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterColorLut_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterColorMatrix_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterColorTransfer_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterConvolveMatrix_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterConvolveSeparable_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterMorphology_p.h
   Src/Fog/G2d/Painting/RasterOps_C/GradientBase_p.h
   Src/Fog/G2d/Painting/RasterOps_C/GradientConical_p.h
   Src/Fog/G2d/Painting/RasterOps_C/GradientLinear_p.h

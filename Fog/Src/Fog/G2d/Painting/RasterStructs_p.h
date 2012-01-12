@@ -710,6 +710,101 @@ struct FOG_NO_EXPORT RasterFiller
   SkipFunc _skip;
 };
 
+// ============================================================================
+// [Fog::RasterFilter]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterFilter
+{
+  // --------------------------------------------------------------------------
+  // [Members - ColorLut]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _ColorLut
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - ColorMatrix]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _ColorMatrix
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - ColorTransfer]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _ColorTransfer
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - Blur]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _Blur
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - ConvolveMatrix]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _ConvolveMatrix
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - ConvolveSeparable]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _ConvolveSeparable
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - Morphology]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _Morphology
+  {
+  };
+
+  // --------------------------------------------------------------------------
+  // [Members - Data]
+  // --------------------------------------------------------------------------
+
+  //! @brief Reference count.
+  Atomic<size_t> reference;
+
+  //! @brief Destroy filter.
+  RasterFilterDestroyFunc destroy;
+
+  //! @brief Filter rectangle.
+  RasterFilterDoRectFunc doRect;
+
+  //! @brief Filter single line (only for color/pixel based filters).
+  //!
+  //! This function is only available for color/pixel based filters. Any other
+  //! filters which need to access neighbor pixels (convolution) have this
+  //! function set to @c NULL.
+  RasterFilterDoLineFunc doLine;
+
+  union
+  {
+    _ColorLut colorLut;
+    _ColorMatrix colorMatrix;
+    _ColorTransfer colorTransfer;
+
+    _Blur blur;
+    _ConvolveMatrix convolveMatrix;
+    _ConvolveSeparable convolveSeparable;
+    _Morphology morphology;
+  };
+};
+
 //! @}
 
 } // Fog namespace

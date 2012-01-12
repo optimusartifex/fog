@@ -30,26 +30,35 @@ struct FOG_NO_EXPORT ImageBits
   // --------------------------------------------------------------------------
 
   FOG_INLINE ImageBits() :
-    data(NULL),
-    size(0, 0),
-    format(IMAGE_FORMAT_NULL),
-    stride(0)
+    _size(0, 0),
+    _format(IMAGE_FORMAT_NULL),
+#if FOG_ARCH_BITS >= 64
+    _padding_0_32(0),
+#endif // FOG_ARCH_BITS
+    _stride(0),
+    _data(NULL)
   {
   }
 
   FOG_INLINE ImageBits(const ImageBits& other) :
-    data(other.data),
-    size(other.size),
-    format(other.format),
-    stride(other.stride)
+    _size(other._size),
+    _format(other._format),
+#if FOG_ARCH_BITS >= 64
+    _padding_0_32(0),
+#endif // FOG_ARCH_BITS
+    _stride(other._stride),
+    _data(other._data)
   {
   }
 
-  FOG_INLINE ImageBits(uint8_t* data, const SizeI& size, uint32_t format, ssize_t stride) :
-    data(data),
-    size(size),
-    format(format),
-    stride(stride)
+  FOG_INLINE ImageBits(const SizeI& size, uint32_t format, ssize_t stride, uint8_t* data) :
+    _size(size),
+    _format(format),
+#if FOG_ARCH_BITS >= 64
+    _padding_0_32(0),
+#endif // FOG_ARCH_BITS
+    _stride(stride),
+    _data(data)
   {
   }
 
@@ -65,30 +74,35 @@ struct FOG_NO_EXPORT ImageBits
   //! dimensions using Fog supported pixel format.
   FOG_INLINE bool isValid() const
   {
-    return data != NULL &&
-           size.isValid() &&
-           format != IMAGE_FORMAT_NULL &&
-           format < IMAGE_FORMAT_COUNT;
+    return _size.isValid() &&
+           _data != NULL &&
+           _format != IMAGE_FORMAT_NULL &&
+           _format < IMAGE_FORMAT_COUNT;
   }
 
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setRaw(const ImageBits* raw)
+  FOG_INLINE const SizeI& getSize() const { return _size; }
+  FOG_INLINE uint32_t getFormat() const { return _format; }
+  FOG_INLINE ssize_t getStride() const { return _stride; }
+  FOG_INLINE uint8_t* getData() const { return _data; }
+
+  FOG_INLINE void setData(const ImageBits& other)
   {
-    this->data = raw->data;
-    this->size = raw->size;
-    this->format = raw->format;
-    this->stride = raw->stride;
+    _size = other._size;
+    _format = other._format;
+    _stride = other._stride;
+    _data = other._data;
   }
 
-  FOG_INLINE void setRaw(uint8_t* data, const SizeI& size, uint32_t format, ssize_t stride)
+  FOG_INLINE void setData(const SizeI& size, uint32_t format, ssize_t stride, uint8_t* data)
   {
-    this->data = data;
-    this->size = size;
-    this->format = format;
-    this->stride = stride;
+    _size = size;
+    _format = format;
+    _stride = stride;
+    _data = data;
   }
 
   // --------------------------------------------------------------------------
@@ -97,24 +111,29 @@ struct FOG_NO_EXPORT ImageBits
 
   FOG_INLINE void reset()
   {
-    data = NULL;
-    size.reset();
-    format = IMAGE_FORMAT_NULL;
-    stride = 0;
+    _size.reset();
+    _format = IMAGE_FORMAT_NULL;
+    _stride = 0;
+    _data = NULL;
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Pointer to the first image scanline.
-  uint8_t* data;
   //! @brief Image buffer size.
-  SizeI size;
+  SizeI _size;
   //! @brief Image buffer format.
-  uint32_t format;
+  uint32_t _format;
+
+#if FOG_ARCH_BITS >= 64
+  uint32_t _padding_0_32;
+#endif // FOG_ARCH_BITS
+
   //! @brief Image buffer stride (bytes per line).
-  ssize_t stride;
+  ssize_t _stride;
+  //! @brief Pointer to the first image scanline.
+  uint8_t* _data;
 };
 
 //! @}

@@ -682,22 +682,25 @@ enum FE_BLUR_LIMIT
 //! @brief Type of blur, see @c ImageFxFilter.
 enum FE_BLUR_TYPE
 {
-  //! @brief The box-blur effect (default).
+  //! @brief The box blur effect (default).
   //!
   //! The box-blur effect is low-level quality blur, but very efficient.
   FE_BLUR_TYPE_BOX = 0,
 
-  //! @brief The linear-blur effect.
+  //! @brief The exponential blur effect.
   //!
-  //! The Linear-blur effect quality is between box-blur and gaussian-blur.
-  //! The result and performance of this effect is optimal for the most
+  //! The exponential blur effect quality is between box-blur and gaussian-blur.
+  //! The result and the performance of this effect is optimal for the most
   //! operations.
-  FE_BLUR_TYPE_LINEAR = 1,
+  //!
+  //! @note The exponential blur is based on blur effect called StackBlur.
+  FE_BLUR_TYPE_EXPONENTIAL = 1,
 
   //! @brief The gaussian-blur type.
   //!
-  //! The gaussian-blur effect is high-quality blur, but computation intensive
-  //! (poor performance).
+  //! The gaussian-blur effect is high-quality blur, but computation very 
+  //! intensive, because the blur kernel can't be optimized using techniques
+  //! available for box blur and exponential blur.
   FE_BLUR_TYPE_GAUSSIAN = 2,
 
   //! @brief The default blur type.
@@ -2156,6 +2159,37 @@ enum PAINTER_INIT
 };
 
 // ============================================================================
+// [Fog::PAINTER_LAYER]
+// ============================================================================
+
+//! @brief Flags which can be passed to @c Painter::beginLayer() method.
+enum PAINTER_LAYER
+{
+  //! @brief No flags, used to create compatible layer with the destination
+  //! format.
+  //!
+  //! @note This is the default behavior always overridden by using @c
+  //! PAINTER_LAYER_ALPHA, @c PAINTER_LAYER_RGB, or both.
+  PAINTER_LAYER_DETECT = 0x00000000,
+
+  //! @brief Include alpha-channel in the layer.
+  PAINTER_LAYER_ALPHA = 0x00000001,
+
+  //! @brief Include RGB in the layer.
+  PAINTER_LAYER_RGB = 0x00000002,
+
+  //! @brief Include alpha-channel and RGB in the layer.
+  PAINTER_LAYER_ARGB = PAINTER_LAYER_ALPHA | PAINTER_LAYER_RGB,
+
+  //! @brief Always use high quality pixel format (16-bpc).
+  //!
+  //! This flag can improve quality when working with effects or when working
+  //! with gamma correction. Does nothing when used on vector-based destination
+  //! like PDF/PS/SVG.
+  PAINTER_LAYER_HIGH_QUALITY = 0x00000010
+};
+
+// ============================================================================
 // [Fog::PAINTER_MAP]
 // ============================================================================
 
@@ -2182,6 +2216,7 @@ enum PAINT_DEVICE
   PAINT_DEVICE_NULL = 0,
   //! @brief Same as @c PAINT_DEVICE_NULL.
   PAINT_DEVICE_UNKNOWN = 0,
+
   //! @brief Raster paint-device.
   PAINT_DEVICE_RASTER = 1,
 
@@ -2291,11 +2326,18 @@ enum PAINTER_PARAMETER
   PAINTER_PARAMETER_DASH_LIST_D = 33,
 
   // --------------------------------------------------------------------------
+  // [Filter Params]
+  // --------------------------------------------------------------------------
+
+  PAINTER_PARAMETER_FILTER_SCALE_F = 34,
+  PAINTER_PARAMETER_FILTER_SCALE_D = 35,
+
+  // --------------------------------------------------------------------------
   // [...]
   // --------------------------------------------------------------------------
 
   //! @brief Count of painter parameters.
-  PAINTER_PARAMETER_COUNT = 34
+  PAINTER_PARAMETER_COUNT = 36
 };
 
 // ============================================================================

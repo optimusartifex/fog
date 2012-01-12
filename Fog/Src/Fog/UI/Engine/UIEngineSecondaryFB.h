@@ -42,14 +42,15 @@ struct FOG_NO_EXPORT UIEngineSecondaryFB
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint8_t* getData() const { return _data; }
-  FOG_INLINE uint32_t getDepth() const { return _depth; }
   FOG_INLINE ssize_t getStride() const { return _stride; }
-  FOG_INLINE ImageConverterBlitLineFunc getConvertFunc() const { return _convertFunc; }
+  FOG_INLINE uint32_t getDepth() const { return _depth; }
+  FOG_INLINE uint8_t* getData() const { return _data; }
 
-  FOG_INLINE void setData(uint8_t* data) { _data = data; }
-  FOG_INLINE void setDepth(uint32_t depth) { _depth = depth; }
   FOG_INLINE void setStride(size_t stride) { _stride = stride; }
+  FOG_INLINE void setDepth(uint32_t depth) { _depth = depth; }
+  FOG_INLINE void setData(uint8_t* data) { _data = data; }
+
+  FOG_INLINE ImageConverterBlitLineFunc getConvertFunc() const { return _convertFunc; }
   FOG_INLINE void setConvertFunc(ImageConverterBlitLineFunc func) { _convertFunc = func; }
 
   // --------------------------------------------------------------------------
@@ -65,19 +66,20 @@ struct FOG_NO_EXPORT UIEngineSecondaryFB
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Secondary pixel array (native pixel format of target engine).
-  uint8_t* _data;
   //! @brief Secondary pixel stride.
   ssize_t _stride;
-
-  //! @brief Converter used to convert pixels primery to secondary buffer.
-  ImageConverterBlitLineFunc _convertFunc;
   //! @brief Secondary pixel depth.
   uint32_t _depth;
 
 #if FOG_ARCH_BITS >= 64
   uint32_t _padding;
 #endif // FOG_ARCH_BITS >= 64
+
+  //! @brief Secondary pixel array (native pixel format of target engine).
+  uint8_t* _data;
+
+  //! @brief Converter used to convert pixels primery to secondary buffer.
+  ImageConverterBlitLineFunc _convertFunc;
 };
 
 //! @}

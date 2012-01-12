@@ -537,10 +537,12 @@ err_t WinUIEngineWindowImpl::allocDoubleBuffer(const SizeI& size)
     : IMAGE_FORMAT_XRGB32;
 
   FOG_RETURN_ON_ERROR(_bufferImage.create(size, format, IMAGE_TYPE_WIN_DIB));
-  _bufferData.setRaw(_bufferImage.getDataX(),
+
+  _bufferData.setData(
     _bufferImage.getSize(),
     _bufferImage.getFormat(),
-    _bufferImage.getStride());
+    _bufferImage.getStride(),
+    _bufferImage.getDataX());
   _bufferType = UI_ENGINE_BUFFER_WIN_DIB;
 
   return ERR_OK;

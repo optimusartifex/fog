@@ -150,12 +150,12 @@ struct FOG_NO_EXPORT RasterLayer
   // [Members - Primary Format]
   // --------------------------------------------------------------------------
 
-  //! @brief Pointer to the first scanline, NEEDED FOR _setupLayer().
-  uint8_t* pixels;
   //! @brief The raster-layer size, NEEDED FOR _setupLayer().
   SizeI size;
   //! @brief The raster-layer stride, NEEDED FOR _setupLayer().
   ssize_t stride;
+  //! @brief Pointer to the first scanline, NEEDED FOR _setupLayer().
+  uint8_t* pixels;
   //! @brief The raster-layer format, NEEDED FOR _setupLayer().
   uint32_t primaryFormat;
   //! @brief The raster-layer bytes-per-pixel.

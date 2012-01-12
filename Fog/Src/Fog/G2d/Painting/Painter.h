@@ -820,6 +820,35 @@ struct FOG_NO_EXPORT Painter
   }
 
   // --------------------------------------------------------------------------
+  // [Parameters - Filter-Scale]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getFilterScale(ImageFilterScaleF& filterScale) const
+  {
+    return _vtable->getParameter(this, PAINTER_PARAMETER_FILTER_SCALE_F, &filterScale);
+  }
+
+  FOG_INLINE err_t getFilterScale(ImageFilterScaleD& filterScale) const
+  {
+    return _vtable->getParameter(this, PAINTER_PARAMETER_FILTER_SCALE_D, &filterScale);
+  }
+
+  FOG_INLINE err_t setFilterScale(ImageFilterScaleF& filterScale)
+  {
+    return _vtable->setParameter(this, PAINTER_PARAMETER_FILTER_SCALE_F, &filterScale);
+  }
+
+  FOG_INLINE err_t setFilterScale(ImageFilterScaleD& filterScale)
+  {
+    return _vtable->setParameter(this, PAINTER_PARAMETER_FILTER_SCALE_D, &filterScale);
+  }
+
+  FOG_INLINE err_t reserFilterScale()
+  {
+    return _vtable->resetParameter(this, PAINTER_PARAMETER_FILTER_SCALE_F);
+  }
+
+  // --------------------------------------------------------------------------
   // [Source - Type]
   // --------------------------------------------------------------------------
 
@@ -1375,6 +1404,24 @@ struct FOG_NO_EXPORT Painter
 
   //! @brief Reset clipping.
   FOG_INLINE err_t resetClip() { return _vtable->resetClip(this); }
+
+  // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t filterRect(const RectI& r, const ImageFilter& filter) { return _vtable->filterRectI(this, r, filter); }
+  FOG_INLINE err_t filterRect(const RectF& r, const ImageFilter& filter) { return _vtable->filterRectF(this, r, filter); }
+  FOG_INLINE err_t filterRect(const RectD& r, const ImageFilter& filter) { return _vtable->filterRectD(this, r, filter); }
+
+  FOG_INLINE err_t filterPath(const PathF& p, const ImageFilter& filter) { return _vtable->filterPathF(this, p, filter); }
+  FOG_INLINE err_t filterPath(const PathD& p, const ImageFilter& filter) { return _vtable->filterPathD(this, p, filter); }
+
+  // --------------------------------------------------------------------------
+  // [Layer]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t beginLayer(uint32_t layerFlags) { return _vtable->beginLayer(this, layerFlags); }
+  FOG_INLINE err_t endLayer() { return _vtable->endLayer(this); }
 
   // --------------------------------------------------------------------------
   // [Flush]

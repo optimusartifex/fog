@@ -128,7 +128,7 @@ err_t UIEngineWindowImpl::resizeDoubleBuffer(const SizeI& size)
   {
     if (size.w <= _bufferCacheSize.w && size.h <= _bufferCacheSize.h)
     {
-      _bufferData.size = size;
+      _bufferData._size = size;
       return ERR_OK;
     }
 
@@ -144,7 +144,7 @@ err_t UIEngineWindowImpl::resizeDoubleBuffer(const SizeI& size)
   FOG_RETURN_ON_ERROR(freeDoubleBuffer());
   FOG_RETURN_ON_ERROR(allocDoubleBuffer(SizeI(targetWidth, targetHeight)));
 
-  _bufferData.size = size;
+  _bufferData._size = size;
 
   _bufferCacheSize = SizeI(targetWidth, targetHeight);
   _bufferCacheCreated = TimeTicks::now();

@@ -385,10 +385,32 @@ struct FOG_NO_EXPORT PaintEngineVTable
   ResetClip resetClip;
 
   // --------------------------------------------------------------------------
+  // [Filter - Types]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *FilterRectI)(Painter* self, const RectI& r, const ImageFilter& filter);
+  typedef err_t (FOG_CDECL *FilterRectF)(Painter* self, const RectF& r, const ImageFilter& filter);
+  typedef err_t (FOG_CDECL *FilterRectD)(Painter* self, const RectD& r, const ImageFilter& filter);
+
+  typedef err_t (FOG_CDECL *FilterPathF)(Painter* self, const PathF& p, const ImageFilter& filter);
+  typedef err_t (FOG_CDECL *FilterPathD)(Painter* self, const PathD& p, const ImageFilter& filter);
+
+  // --------------------------------------------------------------------------
+  // [Filter - Funcs]
+  // --------------------------------------------------------------------------
+
+  FilterRectI filterRectI;
+  FilterRectF filterRectF;
+  FilterRectD filterRectD;
+
+  FilterPathF filterPathF;
+  FilterPathD filterPathD;
+
+  // --------------------------------------------------------------------------
   // [Layer - Types]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL *BeginLayer)(Painter* self);
+  typedef err_t (FOG_CDECL *BeginLayer)(Painter* self, uint32_t flags);
   typedef err_t (FOG_CDECL *EndLayer)(Painter* self);
 
   // --------------------------------------------------------------------------

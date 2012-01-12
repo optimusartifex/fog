@@ -614,12 +614,16 @@ enum RASTER_STATE
   //! @brief The painter clipping (clip region or mask).
   RASTER_STATE_CLIPPING = 0x00000008,
 
+  //! @brief The painter filter.
+  RASTER_STATE_FILTER = 0x00000010,
+
   //! @brief All states, used internally.
   RASTER_STATE_ALL =
     RASTER_STATE_SOURCE    |
     RASTER_STATE_STROKE    |
     RASTER_STATE_TRANSFORM |
-    RASTER_STATE_CLIPPING
+    RASTER_STATE_CLIPPING  |
+    RASTER_STATE_FILTER
 };
 
 // ============================================================================

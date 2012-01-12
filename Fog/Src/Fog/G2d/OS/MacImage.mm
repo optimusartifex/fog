@@ -171,7 +171,7 @@ static err_t FOG_CDECL Image_MacCG_create(ImageData** pd, const SizeI* size, uin
 // The reason why it's so complicated is that the ImageCGRef created by Fog can
 // be used by Mac after the last reference to Fog::ImageData was released. This
 // means that when running on Mac, you can create CGImageRef using Fog::Image
-// use it after the Fog::Image was released.
+// and use it after the original Fog::Image instance was released.
 static void FOG_CDECL Image_MacCG_destroy(ImageData* _d)
 {
   MacCGImageData* d = reinterpret_cast<MacCGImageData*>(_d);

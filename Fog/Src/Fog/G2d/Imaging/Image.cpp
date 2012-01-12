@@ -99,10 +99,9 @@ static err_t FOG_CDECL Image_Buffer_create(ImageData** pd, const SizeI* size, ui
   d->bytesPerPixel = desc.getBytesPerPixel();
   FOG_PADDING_ZERO_64(d->padding);
 
+  d->stride = stride;
   d->data = (uint8_t*)( ((size_t)d + sizeof(ImageData) + 15) & ~(size_t)15 );
   d->first = d->data;
-  d->stride = stride;
-
   d->palette.init();
 
   *pd = d;
@@ -299,7 +298,7 @@ static err_t FOG_CDECL Image_adopt(Image* self, const ImageBits* imageBits, uint
     return ERR_RT_INVALID_ARGUMENT;
   }
 
-  const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(imageBits->format);
+  const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(imageBits->_format);
 
   if (d->reference.get() == 1 &&
       d->type == IMAGE_TYPE_BUFFER &&
@@ -323,8 +322,8 @@ static err_t FOG_CDECL Image_adopt(Image* self, const ImageBits* imageBits, uint
     d->locked = 0;
 
     d->vtable = &Image_Buffer_vTable;
-    d->size = imageBits->size;
-    d->format = imageBits->format;
+    d->size = imageBits->_size;
+    d->format = imageBits->_format;
     d->type = IMAGE_TYPE_BUFFER;
     d->adopted = 1;
     d->colorKey = IMAGE_COLOR_KEY_NONE;
@@ -335,9 +334,9 @@ static err_t FOG_CDECL Image_adopt(Image* self, const ImageBits* imageBits, uint
     atomicPtrXchg(&self->_d, d)->release();
   }
 
-  d->data = imageBits->data;
-  d->first = imageBits->data;
-  d->stride = imageBits->stride;
+  d->stride = imageBits->_stride;
+  d->data = imageBits->_data;
+  d->first = imageBits->_data;
 
   // Bottom-to-top?
   if (adoptFlags & IMAGE_ADOPT_REVERSED)
@@ -1969,8 +1968,11 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
   uint32_t format = src_d->format;
 
   const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(format);
-  if ((desc.getComponentMask() & IMAGE_COMPONENT_ALPHA) == 0) channels &= COLOR_CHANNEL_RGB;
-  if ((desc.getComponentMask() & IMAGE_COMPONENT_RGB  ) == 0) channels &= COLOR_CHANNEL_ALPHA;
+
+  if ((desc.getComponentMask() & IMAGE_COMPONENT_ALPHA) == 0)
+    channels &= COLOR_CHANNEL_RGB;
+  if ((desc.getComponentMask() & IMAGE_COMPONENT_RGB  ) == 0)
+    channels &= COLOR_CHANNEL_ALPHA;
 
   if (w == src_d->size.w && h == src_d->size.h)
   {

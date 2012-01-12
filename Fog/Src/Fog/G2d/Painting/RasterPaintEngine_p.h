@@ -80,6 +80,16 @@ struct FOG_NO_EXPORT RasterSerializer
   typedef err_t (FOG_FASTCALL *ClipNormalizedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF& path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *ClipNormalizedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD& path, uint32_t fillRule);
 
+  typedef err_t (FOG_FASTCALL *FilterPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule, const ImageFilter& filter);
+  typedef err_t (FOG_FASTCALL *FilterPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule, const ImageFilter& filter);
+
+  typedef err_t (FOG_FASTCALL *FilterNormalizedBoxI)(RasterPaintEngine* engine, const BoxI& box, const ImageFilter& filter);
+  typedef err_t (FOG_FASTCALL *FilterNormalizedBoxF)(RasterPaintEngine* engine, const BoxF& box, const ImageFilter& filter);
+  typedef err_t (FOG_FASTCALL *FilterNormalizedBoxD)(RasterPaintEngine* engine, const BoxD& box, const ImageFilter& filter);
+
+  typedef err_t (FOG_FASTCALL *FilterNormalizedPathF)(RasterPaintEngine* engine, const PathF& path, uint32_t fillRule, const ImageFilter& filter);
+  typedef err_t (FOG_FASTCALL *FilterNormalizedPathD)(RasterPaintEngine* engine, const PathD& path, uint32_t fillRule, const ImageFilter& filter);
+
   // --------------------------------------------------------------------------
   // [Funcs]
   // --------------------------------------------------------------------------
@@ -113,6 +123,16 @@ struct FOG_NO_EXPORT RasterSerializer
 
   ClipNormalizedPathF clipNormalizedPathF;
   ClipNormalizedPathD clipNormalizedPathD;
+
+  FilterPathF filterPathF;
+  FilterPathD filterPathD;
+
+  FilterNormalizedBoxI filterNormalizedBoxI;
+  FilterNormalizedBoxF filterNormalizedBoxF;
+  FilterNormalizedBoxD filterNormalizedBoxD;
+
+  FilterNormalizedPathF filterNormalizedPathF;
+  FilterNormalizedPathD filterNormalizedPathD;
 };
 
 // ============================================================================
@@ -239,6 +259,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   void saveStroke();
   void saveTransform();
   void saveClipping();
+  void saveFilter();
 
   void discardStates();
 

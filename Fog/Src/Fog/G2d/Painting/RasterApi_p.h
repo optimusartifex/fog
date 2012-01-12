@@ -58,6 +58,8 @@ union RasterSolid;
 struct RasterPattern;
 struct RasterPatternFetcher;
 
+struct RasterFilter;
+
 // ============================================================================
 // [Fog::Raster - TypeDefs - RasterClosure]
 // ============================================================================
@@ -131,9 +133,8 @@ typedef void (FOG_FASTCALL *RasterVBlitSpanFunc)(
   const RasterSpan* span,
   const RasterClosure* closure);
 
-
 // ============================================================================
-// [Fog::Raster - Prototype - Pattern - Create]
+// [Fog::Raster - TypeDefs - Pattern - Create]
 // ============================================================================
 
 //! @internal
@@ -155,7 +156,7 @@ typedef err_t (FOG_FASTCALL *RasterGradientCreateFunc)(
   uint32_t gradientQuality);
 
 // ============================================================================
-// [Fog::Raster - Prototype - Pattern - Destroy]
+// [Fog::Raster - TypeDefs - Pattern - Destroy]
 // ============================================================================
 
 //! @internal
@@ -163,7 +164,7 @@ typedef void (FOG_FASTCALL *RasterPatternDestroyFunc)(
   RasterPattern* ctx);
 
 // ============================================================================
-// [Fog::Raster - Prototype - Pattern - Prepare]
+// [Fog::Raster - TypeDefs - Pattern - Prepare]
 // ============================================================================
 
 //! @internal
@@ -172,7 +173,7 @@ typedef void (FOG_FASTCALL *RasterPatternPrepareFunc)(
   RasterPatternFetcher* fetcher, int y, int delta, uint32_t mode);
 
 // ============================================================================
-// [Fog::Raster - Prototype - Pattern - Fetch / Skip]
+// [Fog::Raster - TypeDefs - Pattern - Fetch / Skip]
 // ============================================================================
 
 //! @internal
@@ -184,12 +185,48 @@ typedef void (FOG_FASTCALL *RasterPatternSkipFunc)(
   RasterPatternFetcher* fetcher, int step);
 
 // ============================================================================
-// [Fog::Raster - Prototype - Pattern - Gradient]
+// [Fog::Raster - TypeDefs - Pattern - Gradient]
 // ============================================================================
 
 //! @internal
 typedef void (FOG_FASTCALL *RasterGradientInterpolateFunc)(
   uint8_t* dst, int w, const ColorStop* stops, size_t length);
+
+// ============================================================================
+// [Fog::Raster - TypeDefs - Filter - Create]
+// ============================================================================
+
+//! @internal
+typedef err_t (FOG_FASTCALL *RasterFilterCreateFunc)(
+  RasterFilter* ctx,
+  const ImageFilter* filter,
+  const ImageFilterScaleD* scale,
+  uint32_t dstFormat,
+  uint32_t srcFormat);
+
+// ============================================================================
+// [Fog::Raster - TypeDefs - Filter - Destroy]
+// ============================================================================
+
+//! @internal
+typedef err_t (FOG_FASTCALL *RasterFilterDestroyFunc)(
+  RasterFilter* ctx);
+
+// ============================================================================
+// [Fog::Raster - TypeDefs - Filter - DoLine]
+// ============================================================================
+
+typedef err_t (FOG_FASTCALL *RasterFilterDoLineFunc)(
+  RasterFilter* ctx, uint8_t* dst, const uint8_t* src, int w);
+
+// ============================================================================
+// [Fog::Raster - TypeDefs - Filter - DoRect]
+// ============================================================================
+
+typedef err_t (FOG_FASTCALL *RasterFilterDoRectFunc)(
+  RasterFilter* ctx,
+  uint8_t* dst, ssize_t dstStride, const PointI* dstPos,
+  const uint8_t* src, ssize_t srcStride, const RectI* srcRect);
 
 // ============================================================================
 // [Fog::RasterConvertFuncs]
@@ -339,6 +376,20 @@ struct FOG_NO_EXPORT RasterGradientFuncs
 };
 
 // ============================================================================
+// [Fog::RasterFilterFuncs]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterFilterFuncs
+{
+  RasterFilterCreateFunc create[FE_TYPE_COUNT];
+
+  struct _Blur
+  {
+    RasterFilterDoRectFunc doRect[IMAGE_FORMAT_COUNT];
+  } blur;
+};
+
+// ============================================================================
 // [Fog::ApiRaster]
 // ============================================================================
 
@@ -463,6 +514,7 @@ struct FOG_NO_EXPORT ApiRaster
   RasterSolidFuncs solid;
   RasterTextureFuncs texture;
   RasterGradientFuncs gradient;
+  RasterFilterFuncs filter;
 };
 
 extern FOG_API ApiRaster _api_raster;

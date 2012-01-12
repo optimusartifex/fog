@@ -430,8 +430,6 @@ _FOG_TYPE_DECLARE(Fog::RectF                   , C(SIMPLE )               | F(NO
 _FOG_TYPE_DECLARE(Fog::RectD                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::RoundF                  , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::RoundD                  , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::ScalingF                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::ScalingD                , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::SizeI                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::SizeF                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::SizeD                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
@@ -449,6 +447,8 @@ _FOG_TYPE_DECLARE(Fog::ImageBits               , C(SIMPLE )               | F(NO
 _FOG_TYPE_DECLARE(Fog::ImageConverter          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImageDither8Params      , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ) )
 _FOG_TYPE_DECLARE(Fog::ImageFilter             , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::ImageFilterScaleF       , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::ImageFilterScaleD       , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::ImageFormatDescription  , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::ImagePalette            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 

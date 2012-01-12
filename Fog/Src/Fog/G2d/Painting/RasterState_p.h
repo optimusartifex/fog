@@ -128,6 +128,12 @@ struct FOG_NO_EXPORT RasterState
   //Region ctxClipRegion;
   //! @brief The clip-box.
   //BoxI ctxClipBox;
+
+  // ------------------------------------------------------------------------
+  // [RASTER_STATE_FILTER]
+  // ------------------------------------------------------------------------
+
+  Static<ImageFilterScaleD> filterScale;
 };
 
 //! @}

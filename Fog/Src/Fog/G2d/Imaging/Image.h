@@ -151,6 +151,9 @@ struct FOG_NO_EXPORT ImageData
   uint32_t padding;
 #endif // FOG_ARCH_BITS >= 64
 
+  //! @brief Image stride.
+  ssize_t stride;
+
   //! @brief Original data pointer (in the most cases compatible with
   uint8_t* data;
   //! @brief Base pointer to the first scanline, in most cases it's equal to
@@ -160,9 +163,6 @@ struct FOG_NO_EXPORT ImageData
   //! pixels are mirrored (buttom-to-top). In this case @b first points to
   //! last scanline and @c stride is negative.
   uint8_t* first;
-
-  //! @brief Image stride.
-  ssize_t stride;
 
   //! @brief Image palette (used only by 8-bit indexed images).
   Static<ImagePalette> palette;

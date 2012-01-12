@@ -423,8 +423,8 @@ void UIEngine::doUpdateAll()
       continue;
     d->_shouldUpdate = false;
 
-    if (d->_bufferData.size.w != d->_clientGeometry.w ||
-        d->_bufferData.size.h != d->_clientGeometry.h)
+    if (d->_bufferData._size.w != d->_clientGeometry.w ||
+        d->_bufferData._size.h != d->_clientGeometry.h)
     {
       err_t err = d->resizeDoubleBuffer(SizeI(d->_clientGeometry.w, d->_clientGeometry.h));
 

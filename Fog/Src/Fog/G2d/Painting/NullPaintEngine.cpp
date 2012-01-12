@@ -700,10 +700,44 @@ static err_t FOG_CDECL MyPaintEngine_resetClip(Painter* self)
 }
 
 // ============================================================================
+// [Fog::MyPaintEngine - Filter]
+// ============================================================================
+
+static err_t FOG_CDECL MyPaintEngine_filterRectI(Painter* self, const RectI& rect, const ImageFilter& filter)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterRectF(Painter* self, const RectF& rect, const ImageFilter& filter)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterRectD(Painter* self, const RectD& rect, const ImageFilter& filter)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterPathF(Painter* self, const PathF& rect, const ImageFilter& filter)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterPathD(Painter* self, const PathD& rect, const ImageFilter& filter)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
 // [Fog::MyPaintEngine - Layer]
 // ============================================================================
 
-static err_t FOG_CDECL MyPaintEngine_beginLayer(Painter* self)
+static err_t FOG_CDECL MyPaintEngine_beginLayer(Painter* self, uint32_t layerFlags)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -930,6 +964,17 @@ static void MyPaintEngine_init()
   v.clipRegion = MyPaintEngine_clipRegion;
 
   v.resetClip = MyPaintEngine_resetClip;
+
+  // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  v.filterRectI = MyPaintEngine_filterRectI;
+  v.filterRectF = MyPaintEngine_filterRectF;
+  v.filterRectD = MyPaintEngine_filterRectD;
+
+  v.filterPathF = MyPaintEngine_filterPathF;
+  v.filterPathD = MyPaintEngine_filterPathD;
 
   // --------------------------------------------------------------------------
   // [Layer]
@@ -1256,7 +1301,16 @@ static err_t FOG_CDECL NullPaintEngine_resetClip(Painter* self)
 // [Fog::NullPaintEngine - Layer]
 // ============================================================================
 
-static err_t FOG_CDECL NullPaintEngine_beginLayer(Painter* self)
+static err_t FOG_CDECL NullPaintEngine_filterAny(Painter* self, const Any& p, const ImageFilter& filter)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
+// ============================================================================
+// [Fog::NullPaintEngine - Layer]
+// ============================================================================
+
+static err_t FOG_CDECL NullPaintEngine_beginLayer(Painter* self, uint32_t layerFlags)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1487,6 +1541,17 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.clipRegion = NullPaintEngine_clipRegion;
 
   v.resetClip = NullPaintEngine_resetClip;
+
+  // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  v.filterRectI = (PaintEngineVTable::FilterRectI)NullPaintEngine_filterAny;
+  v.filterRectF = (PaintEngineVTable::FilterRectF)NullPaintEngine_filterAny;
+  v.filterRectD = (PaintEngineVTable::FilterRectD)NullPaintEngine_filterAny;
+
+  v.filterPathF = (PaintEngineVTable::FilterPathF)NullPaintEngine_filterAny;
+  v.filterPathD = (PaintEngineVTable::FilterPathD)NullPaintEngine_filterAny;
 
   // --------------------------------------------------------------------------
   // [Layer]

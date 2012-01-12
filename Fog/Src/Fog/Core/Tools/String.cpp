@@ -5016,7 +5016,6 @@ _Next:
     else
     {
       cB = sData[0];
-      uint32_t cLength = 0;
 
       if (CharW::isHiSurrogate(cA) && CharW::isLoSurrogate(cB))
       {

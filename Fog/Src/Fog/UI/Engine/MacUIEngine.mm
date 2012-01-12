@@ -123,13 +123,7 @@ void MacUIEngine::setMouseWheelLines(uint32_t lines)
 void MacUIEngine::doBlitWindow(UIEngineWindow* window)
 {
   MacUIEngineWindowImpl* d = reinterpret_cast<MacUIEngineWindowImpl*>(window->_d);
-
-  if (d->_bufferImage.isEmpty())
-    return;
-
-  if (d->_regionOfInterest.isEmpty())
-    return;
-
+  d->blit();
 }
 
 // ============================================================================

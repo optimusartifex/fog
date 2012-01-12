@@ -196,7 +196,10 @@ void Logger::emitRecord(const LoggerRecord& record)
 
   buf.append(Logger_severityMsg[record.getSeverity()]);
   buf.append(' ');
-  buf.appendInt(record.getThreadId(), 
+  
+  // FIXME: Casted to uint64_t, because it's ambigious. There should be
+  // long/ulong version in StringA/StringW to fix this issue.
+  buf.appendInt((uint64_t)record.getThreadId(), 
     FormatInt(16, STRING_FORMAT_CAPITALIZE | STRING_FORMAT_ZERO_PAD, 0, sizeof(void*) * 2));
   buf.append(' ');
   TextCodec::local8().encode(buf, record.getMessage());

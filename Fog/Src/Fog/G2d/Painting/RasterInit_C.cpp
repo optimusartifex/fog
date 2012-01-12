@@ -32,6 +32,14 @@
 #include <Fog/G2d/Painting/RasterOps_C/GradientRadial_p.h>
 #include <Fog/G2d/Painting/RasterOps_C/GradientRectangular_p.h>
 
+#include <Fog/G2d/Painting/RasterOps_C/FilterBlur_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterColorLut_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterColorMatrix_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterComponentTransfer_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterConvolveMatrix_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterConvolveSeparable_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterMorphology_p.h>
+
 #include <Fog/G2d/Painting/RasterOps_C/TextureBase_p.h>
 #include <Fog/G2d/Painting/RasterOps_C/TextureAffine_p.h>
 #include <Fog/G2d/Painting/RasterOps_C/TextureProjection_p.h>
@@ -436,7 +444,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     solid.fetch[IMAGE_FORMAT_RGB48 ] = RasterOps_C::Helpers::p_solid_fetch_rgb48;
     solid.fetch[IMAGE_FORMAT_A16   ] = RasterOps_C::Helpers::p_solid_fetch_a16;
   }
-#endif
+#endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
   // [RasterOps - Gradient - API]
@@ -451,7 +459,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #if defined(FOG_RASTER_INIT_C)
   gradient.interpolate[IMAGE_FORMAT_PRGB32] = RasterOps_C::PGradientBase::interpolate_prgb32;
   gradient.interpolate[IMAGE_FORMAT_XRGB32] = RasterOps_C::PGradientBase::interpolate_prgb32;
-#endif
+#endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
   // [RasterOps - Gradient - Linear]
@@ -483,7 +491,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.linear.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientLinear::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
-#endif
+#endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
   // [RasterOps - Gradient - Radial]
@@ -515,7 +523,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.radial.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRadial::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
-#endif
+#endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
   // [RasterOps - Gradient - Conical]
@@ -527,7 +535,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_PRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
   gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_XRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
   gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_A8    ] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Base>;
-#endif
+#endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
   // [RasterOps - Gradient - Rectangular]
@@ -559,7 +567,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
-#endif
+#endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
   // [RasterOps - Texture - API]
@@ -728,7 +736,26 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 
   // TODO:
 
-#endif
+#endif // FOG_RASTER_INIT_C
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Filter - API]
+  // --------------------------------------------------------------------------
+
+  RasterFilterFuncs& filter = api.filter;
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Filter - Blur]
+  // --------------------------------------------------------------------------
+
+  filter.create[FE_TYPE_BLUR] = RasterOps_C::FBlur::create;
+
+  filter.blur.box.convolve_h[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_h_prgb32;
+  filter.blur.box.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_v_prgb32;
+
+  // TODO: Need special function, just for testing.
+  filter.blur.box.convolve_h[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_h_prgb32;
+  filter.blur.box.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_v_prgb32;
 }
 
 } // Fog namespace

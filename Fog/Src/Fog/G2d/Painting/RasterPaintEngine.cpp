@@ -5800,12 +5800,19 @@ static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxI_st(
   // Destination and source formats are the same.
   FOG_RETURN_ON_ERROR(_api_raster.filter.create[filter.getFeType()](&ctx,
     &filter, &engine->ctx.filterScale,
+    &engine->ctx.buffer,
     engine->ctx.layer.primaryFormat,
     engine->ctx.layer.primaryFormat));
 
+  PointI dstPos(box.x0, box.y0);
+  RectI srcRect(box.x0, box.y0, box.x1, box.y1);
 
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  ctx.doRect(&ctx,
+    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &dstPos,
+    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &srcRect);
+
+  ctx.destroy(&ctx);
+  return ERR_OK;
 }
 
 static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxF_st(

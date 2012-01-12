@@ -32,15 +32,18 @@ namespace Fog {
 
 static FOG_INLINE Fog::RectI RectI_fromNSRect(const NSRect& nsRect)
 {
-  return RectI(int(nsRect.origin.x),
-               int(nsRect.origin.y),
-               int(nsRect.size.width),
-               int(nsRect.size.height));
+  return RectI(
+    int(nsRect.origin.x),
+    int(nsRect.origin.y),
+    int(nsRect.size.width),
+    int(nsRect.size.height));
 }
 
 static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
 {
-  return PointI(int(nsPoint.x), int(nsPoint.y));
+  return PointI(
+    int(nsPoint.x),
+    int(nsPoint.y));
 }
 
 } // Fog namespace
@@ -54,6 +57,7 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
 @public
   Fog::MacUIEngineWindowImpl* _d;
 }
+- (void)blitRect:(NSRect)rect;
 @end
 
 @implementation Fog_MacNSView
@@ -70,15 +74,24 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
 
 - (void)drawRect:(NSRect)rect
 {
+  //if (_d->_shouldUpdate || _d->_shouldPaint)
+  //  return;
+
+  [self blitRect: rect];
+}
+
+- (void)blitRect:(NSRect)rect
+{
   CGImageRef cgImage = static_cast<CGImageRef>(_d->_bufferImage.getHandle());
+
   CGContextRef ctx = static_cast<CGContextRef>(
     [[NSGraphicsContext currentContext] graphicsPort]);
 
-  int cacheW = float(_d->_bufferImage.getWidth());
-  int cacheH = float(_d->_bufferImage.getHeight());
+  int cacheW = _d->_bufferImage.getWidth();
+  int cacheH = _d->_bufferImage.getHeight();
 
-  CGRect cgRect = CGRectMake(0.0f, 0.0f, float(cacheW), float(cacheH));
-  float yTranslation = -float(cacheH - _d->_bufferData.size.h);
+  CGRect cgRect = CGRectMake(CGFloat(0.0), CGFloat(0.0), CGFloat(cacheW), CGFloat(cacheH));
+  CGFloat yTranslation = -float(cacheH - _d->_bufferData._size.h);
 
   CGContextTranslateCTM(ctx, 0.0f, yTranslation);
   CGContextDrawImage(ctx, cgRect, cgImage);
@@ -513,11 +526,12 @@ err_t MacUIEngineWindowImpl::allocDoubleBuffer(const SizeI& size)
     : IMAGE_FORMAT_XRGB32;
 
   FOG_RETURN_ON_ERROR(_bufferImage.create(size, format, IMAGE_TYPE_MAC_CG));
-  _bufferData.setRaw(_bufferImage.getDataX(),
+  _bufferData.setData(
     _bufferImage.getSize(),
     _bufferImage.getFormat(),
-    _bufferImage.getStride());
-  _bufferType = UI_ENGINE_BUFFER_WIN_DIB;
+    _bufferImage.getStride(),
+    _bufferImage.getDataX());
+  _bufferType = UI_ENGINE_BUFFER_MAC_CGIMAGE;
 
   return ERR_OK;
 }
@@ -534,6 +548,27 @@ err_t MacUIEngineWindowImpl::freeDoubleBuffer()
   _bufferCacheExpire.reset();
 
   return ERR_OK;
+}
+
+void MacUIEngineWindowImpl::blit()
+{
+  if (_bufferImage.isEmpty())
+    return;
+
+  if (_blitRegion.isEmpty())
+    return;
+
+  BoxI bbox = _blitRegion.getBoundingBox();
+  NSRect nsRect;
+
+  nsRect.origin.x    = CGFloat(bbox.x0);
+  nsRect.origin.y    = CGFloat(bbox.y0);
+  nsRect.size.width  = CGFloat(bbox.x1 - bbox.x0);
+  nsRect.size.height = CGFloat(bbox.y1 - bbox.y0);
+
+  Fog_MacNSWindow* window = static_cast<Fog_MacNSWindow*>(_handle);
+  //[[window contentView] setNeedsDisplayInRect:nsRect];
+  [[window contentView] blitRect: nsRect];
 }
 
 } // Fog namespace

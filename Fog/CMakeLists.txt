@@ -1245,7 +1245,7 @@ Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
   Src/Fog/G2d/Painting/RasterOps_C/FilterBlur_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterColorLut_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterColorMatrix_p.h
-  Src/Fog/G2d/Painting/RasterOps_C/FilterColorTransfer_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterComponentTransfer_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterConvolveMatrix_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterConvolveSeparable_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterMorphology_p.h

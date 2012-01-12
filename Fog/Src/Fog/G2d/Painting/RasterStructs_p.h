@@ -733,10 +733,10 @@ struct FOG_NO_EXPORT RasterFilter
   };
 
   // --------------------------------------------------------------------------
-  // [Members - ColorTransfer]
+  // [Members - ComponentTransfer]
   // --------------------------------------------------------------------------
 
-  struct FOG_NO_EXPORT _ColorTransfer
+  struct FOG_NO_EXPORT _ComponentTransfer
   {
   };
 
@@ -746,6 +746,11 @@ struct FOG_NO_EXPORT RasterFilter
 
   struct FOG_NO_EXPORT _Blur
   {
+    int hRadius;
+    int vRadius;
+
+    RasterFilterDoConvolveFunc hConvolve;
+    RasterFilterDoConvolveFunc vConvolve;
   };
 
   // --------------------------------------------------------------------------
@@ -792,17 +797,52 @@ struct FOG_NO_EXPORT RasterFilter
   //! function set to @c NULL.
   RasterFilterDoLineFunc doLine;
 
+  //! @brief Memory buffer instance which can be used as temporary storage.
+  MemBuffer* memBuffer;
+
+  //! @brief Destination pixel format.
+  uint32_t dstFormat;
+  //! @brief Source pixel format.
+  uint32_t srcFormat;
+
   union
   {
     _ColorLut colorLut;
     _ColorMatrix colorMatrix;
-    _ColorTransfer colorTransfer;
+    _ComponentTransfer componentTransfer;
 
     _Blur blur;
     _ConvolveMatrix convolveMatrix;
     _ConvolveSeparable convolveSeparable;
     _Morphology morphology;
   };
+};
+
+// ============================================================================
+// [Fog::RasterConvolveData]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterConvolve
+{
+  //! @brief Filter context (immutable at this place).
+  RasterFilter* filterCtx;
+
+  //! @brief A table data.
+  ssize_t* aTableData;
+  //! @brief B table data.
+  ssize_t* bTableData;
+
+  //! @brief A size.
+  int aTableSize;
+  //! @brief B size.
+  int bTableSize;
+  //! @brief Run size.
+  int runSize;
+
+  //! @brief Radius.
+  int radius;
+  //! @brief Kernel size.
+  int kernelSize;
 };
 
 //! @}

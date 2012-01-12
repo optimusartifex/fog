@@ -205,7 +205,7 @@ static bool FOG_CDECL ImageFilter_eq(const ImageFilter* a, const ImageFilter* b)
 
 #define FOG_FE_CREATE(_Type_) \
   FOG_ASSERT(dSize == sizeof(ImageFilterData) + sizeof(_Type_)); \
-  fog_new_p(d->getFeData()) _Type_(*reinterpret_cast<const _Type_*>(d->getFeData()))
+  fog_new_p(d->getFeData()) _Type_(*reinterpret_cast<const _Type_*>(feData))
 
 static ImageFilterData* FOG_CDECL ImageFilter_dCreate(const FeBase* feData)
 {

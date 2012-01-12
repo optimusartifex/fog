@@ -8,7 +8,7 @@
 #define _FOG_CORE_MEMORY_BSWAP_H
 
 // [Dependencies]
-#include <Fog/Core/C++/Base.h>
+#include <Fog/Core/Global/Global.h>
 
 #if defined(FOG_CC_MSC)
 # pragma intrinsic (_byteswap_ushort)

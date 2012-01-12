@@ -65,6 +65,18 @@ void AppWindow::onPaint(Painter* _p)
   
   p.setSource(Argb32(0xFF000000));
   p.fillCircle(CircleF(160.0f, 120.0f, 50.0f));
+  
+  PathF path;
+  Font font;
+  font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(100.0f, 100.0f), StringW::fromAscii8("Test string"));
+  
+  //p.setSource(Argb32(0xFFFF0000));
+  //p.drawPath(path);
+
+  ImageFilter filter;
+  filter.setData(FeBlur(FE_BLUR_TYPE_BOX, 10.0f));
+
+  p.filterRect(RectI(60, 20, 200, 200), filter);
 
   // SvgDocument svg;
   // err_t err = svg.readFromFile(StringW::fromAscii8("C:/my/svg/tiger.svg"));
@@ -84,24 +96,12 @@ void AppWindow::onPaint(Painter* _p)
 
 FOG_UI_MAIN()
 {
-  StringW str;
-  str.append(CharW(0x1E9B));
-  str.append(CharW(0x0323));
-  str.normalize(CHAR_NFKC);
-
-  uint16_t data[16];
-  for (size_t i = 0; i < str.getLength(); i++)
-    data[i] = str.getAt(i);
-  
-  //uint16_t data[3] = { 0x0071, 0x307, 0x323 };
-  //StringUtil::makeCanonical(data, 3, CHAR_UNICODE_VERSION_DEFAULT);
-
   Application app(StringW::fromAscii8("UI"));
   AppWindow wnd(app.getUIEngine());
 
   wnd.setWindowTitle(StringW::fromAscii8("FogTestApp"));
   wnd.setWindowSize(SizeI(340, 240));
-  wnd.setWindowOpacity(0.5f);
+  //wnd.setWindowOpacity(0.5f);
   wnd.show();
 
   return app.run();

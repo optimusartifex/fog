@@ -12,6 +12,7 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBuffer.h>
+#include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Swap.h>
@@ -19,7 +20,16 @@
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageFilter.h>
+#include <Fog/G2d/Imaging/ImageFilterScale.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
+#include <Fog/G2d/Imaging/Filters/FeBlur.h>
+#include <Fog/G2d/Imaging/Filters/FeColorLut.h>
+#include <Fog/G2d/Imaging/Filters/FeColorMatrix.h>
+#include <Fog/G2d/Imaging/Filters/FeComponentTransfer.h>
+#include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
+#include <Fog/G2d/Imaging/Filters/FeConvolveSeparable.h>
+#include <Fog/G2d/Imaging/Filters/FeMorphology.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>

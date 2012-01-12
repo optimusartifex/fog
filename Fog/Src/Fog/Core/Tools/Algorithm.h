@@ -86,7 +86,7 @@ _Repeat:
 
   for (;;)
   {
-    size_t cmp;
+    ssize_t cmp;
     while (pb <= pc && (cmp = TypeT::_compare(pb, base)) <= 0)
     {
       if (cmp == 0)

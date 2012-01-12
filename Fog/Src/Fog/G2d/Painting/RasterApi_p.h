@@ -59,6 +59,7 @@ struct RasterPattern;
 struct RasterPatternFetcher;
 
 struct RasterFilter;
+struct RasterConvolve;
 
 // ============================================================================
 // [Fog::Raster - TypeDefs - RasterClosure]
@@ -201,6 +202,7 @@ typedef err_t (FOG_FASTCALL *RasterFilterCreateFunc)(
   RasterFilter* ctx,
   const ImageFilter* filter,
   const ImageFilterScaleD* scale,
+  MemBuffer* memBuffer,
   uint32_t dstFormat,
   uint32_t srcFormat);
 
@@ -209,24 +211,29 @@ typedef err_t (FOG_FASTCALL *RasterFilterCreateFunc)(
 // ============================================================================
 
 //! @internal
-typedef err_t (FOG_FASTCALL *RasterFilterDestroyFunc)(
+typedef void (FOG_FASTCALL *RasterFilterDestroyFunc)(
   RasterFilter* ctx);
 
 // ============================================================================
 // [Fog::Raster - TypeDefs - Filter - DoLine]
 // ============================================================================
 
-typedef err_t (FOG_FASTCALL *RasterFilterDoLineFunc)(
+typedef void (FOG_FASTCALL *RasterFilterDoLineFunc)(
   RasterFilter* ctx, uint8_t* dst, const uint8_t* src, int w);
 
 // ============================================================================
 // [Fog::Raster - TypeDefs - Filter - DoRect]
 // ============================================================================
 
-typedef err_t (FOG_FASTCALL *RasterFilterDoRectFunc)(
+typedef void (FOG_FASTCALL *RasterFilterDoRectFunc)(
   RasterFilter* ctx,
-  uint8_t* dst, ssize_t dstStride, const PointI* dstPos,
-  const uint8_t* src, ssize_t srcStride, const RectI* srcRect);
+  uint8_t*       dst, ssize_t dstStride, const SizeI* dstSize, const PointI* dstPos,
+  const uint8_t* src, ssize_t srcStride, const SizeI* srcSize, const RectI* srcRect);
+
+typedef void (FOG_FASTCALL *RasterFilterDoConvolveFunc)(
+  RasterConvolve* ctx,
+  uint8_t*       dst, ssize_t dstStride,
+  const uint8_t* src, ssize_t srcStride, int w, int h);
 
 // ============================================================================
 // [Fog::RasterConvertFuncs]
@@ -385,7 +392,11 @@ struct FOG_NO_EXPORT RasterFilterFuncs
 
   struct _Blur
   {
-    RasterFilterDoRectFunc doRect[IMAGE_FORMAT_COUNT];
+    struct _Box
+    {
+      RasterFilterDoConvolveFunc convolve_h[IMAGE_FORMAT_COUNT];
+      RasterFilterDoConvolveFunc convolve_v[IMAGE_FORMAT_COUNT];
+    } box;
   } blur;
 };
 
@@ -514,6 +525,7 @@ struct FOG_NO_EXPORT ApiRaster
   RasterSolidFuncs solid;
   RasterTextureFuncs texture;
   RasterGradientFuncs gradient;
+
   RasterFilterFuncs filter;
 };
 

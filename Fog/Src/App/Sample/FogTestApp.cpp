@@ -76,7 +76,7 @@ void AppWindow::onPaint(Painter* _p)
   ImageFilter filter;
   filter.setData(FeBlur(FE_BLUR_TYPE_BOX, 20.0f));
 
-  p.filterRect(RectI(60, 20, 200, 200), filter);
+  p.filterRect(RectI(60, 20, 500, 500), filter);
 
   // SvgDocument svg;
   // err_t err = svg.readFromFile(StringW::fromAscii8("C:/my/svg/tiger.svg"));

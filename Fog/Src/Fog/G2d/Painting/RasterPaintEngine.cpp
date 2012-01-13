@@ -4943,6 +4943,8 @@ static err_t FOG_FASTCALL RasterSerializer_strokeAndFillPathD_st(
 static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxI_st(
   RasterPaintEngine* engine, const BoxI& box)
 {
+  FOG_ASSERT(box.isValid());
+
   switch (engine->ctx.precision)
   {
     case IMAGE_PRECISION_BYTE:
@@ -5603,6 +5605,7 @@ static err_t FOG_FASTCALL RasterSerializer_clipNormalizedBoxI_st(
   RasterPaintEngine* engine, uint32_t clipOp, const BoxI& box)
 {
   FOG_ASSERT((clipOp & CLIP_OP_STROKE) == 0);
+  FOG_ASSERT(box.isValid());
 
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
@@ -5796,6 +5799,7 @@ static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxI_st(
   RasterPaintEngine* engine, const BoxI& box, const ImageFilter& filter)
 {
   RasterFilter ctx;
+  FOG_ASSERT(box.isValid());
 
   // Destination and source formats are the same.
   FOG_RETURN_ON_ERROR(_api_raster.filter.create[filter.getFeType()](&ctx,
@@ -5805,14 +5809,14 @@ static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxI_st(
     engine->ctx.layer.primaryFormat));
 
   PointI dstPos(box.x0, box.y0);
-  RectI srcRect(box.x0, box.y0, box.x1, box.y1);
+  RectI srcRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
 
-  ctx.doRect(&ctx,
+  err_t err = ctx.doRect(&ctx,
     engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &dstPos,
     engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &srcRect);
 
   ctx.destroy(&ctx);
-  return ERR_OK;
+  return err;
 }
 
 static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxF_st(

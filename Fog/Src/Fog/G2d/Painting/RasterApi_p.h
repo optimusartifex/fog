@@ -225,15 +225,13 @@ typedef void (FOG_FASTCALL *RasterFilterDoLineFunc)(
 // [Fog::Raster - TypeDefs - Filter - DoRect]
 // ============================================================================
 
-typedef void (FOG_FASTCALL *RasterFilterDoRectFunc)(
+typedef err_t (FOG_FASTCALL *RasterFilterDoRectFunc)(
   RasterFilter* ctx,
   uint8_t*       dst, ssize_t dstStride, const SizeI* dstSize, const PointI* dstPos,
   const uint8_t* src, ssize_t srcStride, const SizeI* srcSize, const RectI* srcRect);
 
 typedef void (FOG_FASTCALL *RasterFilterDoConvolveFunc)(
-  RasterConvolve* ctx,
-  uint8_t*       dst, ssize_t dstStride,
-  const uint8_t* src, ssize_t srcStride, int w, int h);
+  RasterConvolve* ctx);
 
 // ============================================================================
 // [Fog::RasterConvertFuncs]

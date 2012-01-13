@@ -827,22 +827,47 @@ struct FOG_NO_EXPORT RasterConvolve
   //! @brief Filter context (immutable at this place).
   RasterFilter* filterCtx;
 
+#if FOG_ARCH_BITS == 32
+  uint32_t padding_0_32;
+#endif // FOG_ARCH_BITS
+
+  //! @brief Destination data.
+  uint8_t* dstData;
+  //! @brief Destination stride.
+  ssize_t dstStride;
+
+  //! @brief Source data.
+  uint8_t* srcData;
+  //! @brief Source stride.
+  ssize_t srcStride;
+
   //! @brief A table data.
   ssize_t* aTableData;
   //! @brief B table data.
   ssize_t* bTableData;
 
-  //! @brief A size.
-  int aTableSize;
-  //! @brief B size.
-  int bTableSize;
-  //! @brief Run size.
-  int runSize;
+  //! @brief Border pixel.
+  UInt64Bits borderPixel;
 
-  //! @brief Radius.
-  int radius;
-  //! @brief Kernel size.
-  int kernelSize;
+  //! @brief Size of A border.
+  uint aBorderSize;
+  //! @brief Size of B border.
+  uint bBorderSize;
+
+  //! @brief Size of A table.
+  uint aTableSize;
+  //! @brief Size of B table.
+  uint bTableSize;
+
+  //! @brief Run size.
+  uint runSize;
+  //! @brief Run offset.
+  uint runOffset;
+
+  //! @brief How many rows or columns to process.
+  uint rowSize;
+  //! @brief Size of kernel (radius * 2 + 1).
+  uint kernelSize;
 };
 
 //! @}

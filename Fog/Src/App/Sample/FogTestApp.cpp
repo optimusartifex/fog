@@ -62,7 +62,7 @@ void AppWindow::onPaint(Painter* _p)
 
   p.setSource(Argb32(0xFFFFFFFF));
   p.fillAll();
-  
+
   p.setSource(Argb32(0xFF000000));
   p.fillCircle(CircleF(160.0f, 120.0f, 50.0f));
   
@@ -74,7 +74,7 @@ void AppWindow::onPaint(Painter* _p)
   //p.drawPath(path);
 
   ImageFilter filter;
-  filter.setData(FeBlur(FE_BLUR_TYPE_BOX, 10.0f));
+  filter.setData(FeBlur(FE_BLUR_TYPE_BOX, 20.0f));
 
   p.filterRect(RectI(60, 20, 200, 200), filter);
 

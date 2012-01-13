@@ -144,6 +144,7 @@ struct FOG_NO_EXPORT FBlur
     conv.bTableSize = Math::max<int>(srcRect->x + srcRect->w + radius - srcSize->w, 0);
     conv.runSize    = srcRect->w - conv.bTableSize; //Math::max<int>(srcSize->w - (srcRect->x + radius + 1), 0);
     conv.kernelSize = size;
+    conv.radius     = radius;
 
     FOG_ASSERT(conv.aTableSize + conv.bTableSize + conv.runSize == srcRect->w + size);
 

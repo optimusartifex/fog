@@ -287,7 +287,7 @@ struct FOG_NO_EXPORT FBlur
 
     i = srcSize->h - srcRect->y;
     conv.runSize     = Math::max(Math::min(srcRect->h, i), 1);
-    conv.runOffset   = (radius + 1) * conv.srcStride;
+    conv.runOffset   = 0;
 
     conv.aTableSize  = size;
     conv.bTableSize  = srcRect->h - conv.runSize;

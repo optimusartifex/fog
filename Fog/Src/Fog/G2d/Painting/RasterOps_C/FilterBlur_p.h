@@ -345,17 +345,17 @@ _End:
           t = tMin;
         }
 
-        if (t + ctx->aTableSize > tMax)
+        if (t + ctx->aTableSize > tMax + 1)
         {
-          ctx->aBorderTailSize = (t + ctx->aTableSize) - tMax;
+          ctx->aBorderTailSize = (t + ctx->aTableSize) - (tMax + 1);
           ctx->aTableSize -= ctx->aBorderTailSize;
 
           ctx->bBorderTailSize = ctx->bTableSize;
           ctx->bTableSize = 0;
         }
-        else if (t + ctx->runSize > tMax)
+        else if (t + ctx->runSize > tMax + 1)
         {
-          ctx->bBorderTailSize = tMax - (t + ctx->runSize);
+          ctx->bBorderTailSize = (t + ctx->runSize) - (tMax + 1);
           ctx->bTableSize -= ctx->bBorderTailSize;
         }
 
@@ -377,10 +377,7 @@ _Repeat:
           ctx->aTableData[i] = t * tMul;
 
           if (++t > tMax)
-          {
-            FOG_ASSERT(ctx->extendType == FE_EXTEND_REPEAT);
             t = tMin;
-          }
         }
 
         t += ctx->runSize;
@@ -392,10 +389,7 @@ _Repeat:
           ctx->bTableData[i] = t * tMul;
 
           if (++t > tMax)
-          {
-            FOG_ASSERT(ctx->extendType == FE_EXTEND_REPEAT);
             t = tMin;
-          }
         }
         break;
 

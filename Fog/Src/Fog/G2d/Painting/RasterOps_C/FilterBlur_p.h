@@ -342,6 +342,7 @@ _End:
     {
       case FE_EXTEND_COLOR:
       case FE_EXTEND_PAD:
+      {
         // Catch each pixel which is outside of the raster and setup sizes of
         // lead and tail borders. We need to decrease size of aTableSize every
         // time we set the border lead/tail size.
@@ -352,6 +353,8 @@ _End:
           t = tMin;
         }
 
+        i = t + ctx->kernelRadius + ctx->runSize + 1;
+        
         if (t + ctx->aTableSize > tMax + 1)
         {
           ctx->aBorderTailSize = (t + ctx->aTableSize) - (tMax + 1);
@@ -360,16 +363,18 @@ _End:
           ctx->bBorderTailSize = ctx->bTableSize;
           ctx->bTableSize = 0;
         }
-        else if (t + ctx->bTableSize + ctx->runSize > tMax)
+        else if (i > tMax)
         {
-          ctx->bBorderTailSize = Math::min((t + ctx->bTableSize + ctx->runSize) - tMax, ctx->bTableSize);
+          ctx->bBorderTailSize = Math::min<int>(i - tMax, int(ctx->bTableSize));
           ctx->bTableSize -= ctx->bBorderTailSize;
         }
 
         // Now it's safe to continue using Repeat mode.
         goto _Repeat;
+      }
 
       case FE_EXTEND_REPEAT:
+      {
         // Repeat 't'.
         t -= tMin;
         t %= tRepeat;
@@ -398,6 +403,7 @@ _Repeat:
             t = tMin;
         }
         break;
+      }
 
       case FE_EXTEND_REFLECT:
       {

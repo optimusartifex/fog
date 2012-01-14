@@ -28,10 +28,11 @@ struct FOG_NO_EXPORT FeBorder : public FeBase
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getExtendType() const { return _extendType; }
-  FOG_INLINE const Color& getExtendColor() const { return _extendColor(); }
-
   FOG_INLINE void setExtendType(uint32_t type) { _extendType = type; }
+
+  FOG_INLINE const Color& getExtendColor() const { return _extendColor(); }
   FOG_INLINE void setExtendColor(const Color& color) { _extendColor() = color; }
+  FOG_INLINE void setExtendColor(const Argb32& argb32) { _extendColor() = argb32; }
 
   // --------------------------------------------------------------------------
   // [Members]

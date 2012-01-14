@@ -71,12 +71,13 @@ void AppWindow::onPaint(Painter* _p)
   Font font;
   font.setHeight(50.0f, UNIT_PX);
   font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(100.0f, 100.0f), StringW::fromAscii8("Test string"));
-  
+
   p.setSource(Argb32(0xFFFF0000));
   p.drawPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_BOX, 2.0f);
-  feBlur.setExtendType(FE_EXTEND_PAD);
+  FeBlur feBlur(FE_BLUR_TYPE_BOX, 20.0f);
+  feBlur.setExtendType(FE_EXTEND_COLOR);
+  feBlur.setExtendColor(Argb32(0xFF00FF00));
 
   //p.filterRect(RectI(60, 60, 140, 100), ImageFilter(feBlur));
   p.filterAll(ImageFilter(feBlur));
@@ -84,6 +85,12 @@ void AppWindow::onPaint(Painter* _p)
   p.setOpacity(0.15f);
   p.setSource(Argb32(0xFF0000FF));
   p.fillRect(RectI(60, 60, 140, 100));
+  
+  p.resetOpacity();
+  p.setSource(Argb32(0xFF00FF00));
+  
+  RectI geom = getWindowGeometry();
+  p.drawRect(0.5f, 0.5f, float(geom.w) - 0.5f, float(geom.h) - 0.5f);
 
   // SvgDocument svg;
   // err_t err = svg.readFromFile(StringW::fromAscii8("C:/my/svg/tiger.svg"));

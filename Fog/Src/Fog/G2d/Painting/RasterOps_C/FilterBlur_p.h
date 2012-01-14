@@ -169,8 +169,13 @@ struct FOG_NO_EXPORT FBlur
     uint8_t*       dst, ssize_t dstStride, const SizeI* dstSize, const PointI* dstPos,
     const uint8_t* src, ssize_t srcStride, const SizeI* srcSize, const RectI* srcRect)
   {
-    err_t err = ERR_RT_OUT_OF_MEMORY;
+    FOG_ASSERT(srcRect->x >= 0);
+    FOG_ASSERT(srcRect->y >= 0);
+    FOG_ASSERT(srcRect->x + srcRect->w <= srcSize->w);
+    FOG_ASSERT(srcRect->y + srcRect->h <= srcSize->h);
 
+    err_t err = ERR_RT_OUT_OF_MEMORY;
+    
     MemBufferTmp<1024> memBufferTmp;
     MemBuffer* memBuffer = &memBufferTmp;
 
@@ -237,21 +242,18 @@ struct FOG_NO_EXPORT FBlur
     conv.srcStride = srcStride;
 
     i = srcSize->w - srcRect->x;
+    conv.rowSize     = srcRect->h + tmpExtendTop + tmpExtendBottom;
     conv.runSize     = (radius < i) ? Math::min(srcRect->w, i - radius) : 1;
     conv.runOffset   = (srcRect->x + radius + 1) * (int)srcDesc.getBytesPerPixel();
 
     conv.aTableSize  = size;
     conv.bTableSize  = srcRect->w - conv.runSize;
 
-    conv.rowSize     = srcRect->h + tmpExtendTop + tmpExtendBottom;
+    conv.kernelRadius= radius;
     conv.kernelSize  = size;
 
     conv.srcFirstOffset = 0;
     conv.srcLastOffset  = (srcSize->w - 1) * (int)srcDesc.getBytesPerPixel();
-
-    // It have to match only here, later we can adjust border-size in case that
-    // FE_EXTEND_COLOR or FE_EXTEND_PAD extend-type is used. See fillBorderTable().
-    FOG_ASSERT(conv.aTableSize + conv.bTableSize + conv.runSize == srcRect->w + size);
 
     conv.aTableData = static_cast<ssize_t*>(
       ctx->memBuffer->alloc((conv.aTableSize + conv.bTableSize) * sizeof(ssize_t)));
@@ -260,7 +262,11 @@ struct FOG_NO_EXPORT FBlur
     if (FOG_IS_NULL(conv.aTableData))
       goto _End;
 
-    fillBorderTables(&conv, srcRect->x - radius, 0, srcSize->w - 1, srcDesc.getBytesPerPixel());
+    doFillBorderTables(&conv, srcRect->x - radius, 0, srcSize->w - 1, srcDesc.getBytesPerPixel());
+  
+    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == size);
+    FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->w);
+
     ctx->blur.hConvolve(&conv);
 
     // ------------------------------------------------------------------------
@@ -276,31 +282,28 @@ struct FOG_NO_EXPORT FBlur
 
     if (tmpBuffer)
     {
-      conv.srcData = tmpBuffer + tmpExtendTop * tmpStride;
+      conv.srcData = tmpBuffer;
       conv.srcStride = tmpStride;
     }
     else
     {
-      conv.srcData = const_cast<uint8_t*>(dst) + dstPos->y * dstStride;
+      conv.srcData = const_cast<uint8_t*>(dst) + dstPos->y * dstStride + dstPos->x * (int)dstDesc.getBytesPerPixel();
       conv.srcStride = dstStride;
     }
 
     i = srcSize->h - srcRect->y;
+    conv.rowSize     = srcRect->w;
     conv.runSize     = Math::max(Math::min(srcRect->h, i), 1);
-    conv.runOffset   = 0;
+    conv.runOffset   = (tmpExtendTop + radius + 1) * conv.srcStride;
 
     conv.aTableSize  = size;
     conv.bTableSize  = srcRect->h - conv.runSize;
 
-    conv.rowSize     = srcRect->w;
+    conv.kernelRadius= radius;
     conv.kernelSize  = size;
 
-    conv.srcFirstOffset = -tmpExtendTop * (ssize_t)conv.srcStride;
-    conv.srcLastOffset  = (srcSize->h + tmpExtendBottom - 1) * (ssize_t)conv.srcStride;
-
-    // It have to match only here, later we can adjust border-size in case that
-    // FE_EXTEND_COLOR or FE_EXTEND_PAD extend-type is used. See fillBorderTable().
-    FOG_ASSERT(conv.aTableSize + conv.bTableSize + conv.runSize == srcRect->h + size);
+    conv.srcFirstOffset = 0;
+    conv.srcLastOffset  = (srcSize->h - 1 + tmpExtendTop + tmpExtendBottom) * conv.srcStride;
 
     conv.aTableData = static_cast<ssize_t*>(
       ctx->memBuffer->alloc((conv.aTableSize + conv.bTableSize) * sizeof(ssize_t)));
@@ -309,7 +312,11 @@ struct FOG_NO_EXPORT FBlur
     if (FOG_IS_NULL(conv.aTableData))
       goto _End;
 
-    fillBorderTables(&conv, 0, -tmpExtendTop, srcRect->h - 1 + tmpExtendBottom, conv.srcStride);
+    doFillBorderTables(&conv, tmpExtendTop, 0, srcRect->h - 1 + tmpExtendTop + tmpExtendBottom, conv.srcStride);
+
+    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == size);
+    FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->h);
+
     ctx->blur.vConvolve(&conv);
 
     err = ERR_OK;
@@ -321,7 +328,7 @@ _End:
     return err;
   }
   
-  static void FOG_FASTCALL fillBorderTables(
+  static void FOG_FASTCALL doFillBorderTables(
     RasterConvolve* ctx, int t, int tMin, int tMax, ssize_t tMul)
   {
     int tRepeat = tMax - tMin + 1;
@@ -353,14 +360,13 @@ _End:
           ctx->bBorderTailSize = ctx->bTableSize;
           ctx->bTableSize = 0;
         }
-        else if (t + ctx->runSize > tMax + 1)
+        else if (t + ctx->bTableSize + ctx->runSize > tMax)
         {
-          ctx->bBorderTailSize = (t + ctx->runSize) - (tMax + 1);
+          ctx->bBorderTailSize = Math::min((t + ctx->bTableSize + ctx->runSize) - tMax, ctx->bTableSize);
           ctx->bTableSize -= ctx->bBorderTailSize;
         }
 
-        // Continue using repeat mode, it will not hit the 't > tMax' condition.
-        ctx->aTableSize -= ctx->aBorderLeadSize;
+        // Now it's safe to continue using Repeat mode.
         goto _Repeat;
 
       case FE_EXTEND_REPEAT:
@@ -668,54 +674,6 @@ _First:
   static void FOG_FASTCALL do_rect_box_v_prgb32(
     RasterConvolve* ctx)
   {
-#if 0
-    uint8_t* dst = ctx->dstData;
-    uint8_t* src = ctx->srcData;
-
-    ssize_t dstStride = ctx->dstStride;
-    ssize_t srcStride = ctx->srcStride;
-
-    uint width = ctx->rowSize;
-    uint runSize = ctx->runSize;
-
-    uint32_t sumMul = getReciprocal(ctx->kernelSize);
-    uint8_t sumShr = 16;
-
-    uint32_t stackBuffer[512];
-    uint32_t* stackEnd = stackBuffer + ctx->kernelSize;
-
-    ssize_t* aTableData = ctx->aTableData;
-    ssize_t* bTableData = ctx->bTableData;
-    
-    uint aBorderLeadSize = ctx->aBorderLeadSize;
-    uint aBorderTailSize = ctx->aBorderTailSize;
-    uint bBorderTailSize = ctx->bBorderTailSize;
-
-    uint aTableSize = ctx->aTableSize;
-    uint bTableSize = ctx->bTableSize;
-
-    uint i, x;
-    for (x = 0; x < width; x++)
-    {
-      
-    }
-
-    for (i = 0; i < runSize; i++)
-    {
-      memcpy(dst, src, width * 4);
-      dst += dstStride;
-      src += srcStride;
-    }
-#endif
-    
-    
-    
-    
-    
-    
-    
-    
-    
     uint8_t* dst = ctx->dstData;
     uint8_t* src = ctx->srcData;
 

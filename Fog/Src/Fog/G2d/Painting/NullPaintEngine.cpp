@@ -703,6 +703,12 @@ static err_t FOG_CDECL MyPaintEngine_resetClip(Painter* self)
 // [Fog::MyPaintEngine - Filter]
 // ============================================================================
 
+static err_t FOG_CDECL MyPaintEngine_filterAll(Painter* self, const ImageFilter& filter)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
 static err_t FOG_CDECL MyPaintEngine_filterRectI(Painter* self, const RectI& rect, const ImageFilter& filter)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
@@ -969,6 +975,7 @@ static void MyPaintEngine_init()
   // [Filter]
   // --------------------------------------------------------------------------
 
+  v.filterAll = MyPaintEngine_filterAll;
   v.filterRectI = MyPaintEngine_filterRectI;
   v.filterRectF = MyPaintEngine_filterRectF;
   v.filterRectD = MyPaintEngine_filterRectD;
@@ -1301,6 +1308,11 @@ static err_t FOG_CDECL NullPaintEngine_resetClip(Painter* self)
 // [Fog::NullPaintEngine - Layer]
 // ============================================================================
 
+static err_t FOG_CDECL NullPaintEngine_filterAll(Painter* self, const ImageFilter& filter)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
 static err_t FOG_CDECL NullPaintEngine_filterAny(Painter* self, const Any& p, const ImageFilter& filter)
 {
   return ERR_RT_INVALID_STATE;
@@ -1545,6 +1557,8 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   // --------------------------------------------------------------------------
   // [Filter]
   // --------------------------------------------------------------------------
+
+  v.filterAll = NullPaintEngine_filterAll;
 
   v.filterRectI = (PaintEngineVTable::FilterRectI)NullPaintEngine_filterAny;
   v.filterRectF = (PaintEngineVTable::FilterRectF)NullPaintEngine_filterAny;

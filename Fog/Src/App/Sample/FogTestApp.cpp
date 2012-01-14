@@ -64,21 +64,26 @@ void AppWindow::onPaint(Painter* _p)
   p.fillAll();
 
   p.setSource(Argb32(0xFF000000));
-  p.fillRect(100, 100, 100, 100);
-  //p.fillCircle(CircleF(160.0f, 120.0f, 50.0f));
+  //p.fillRect(100, 100, 100, 100);
+  p.fillCircle(CircleF(160.0f, 120.0f, 50.0f));
   
   PathF path;
   Font font;
-  font.setHeight(20.0f, UNIT_PX);
+  font.setHeight(50.0f, UNIT_PX);
   font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(100.0f, 100.0f), StringW::fromAscii8("Test string"));
   
-  //p.setSource(Argb32(0xFFFF0000));
-  //p.drawPath(path);
+  p.setSource(Argb32(0xFFFF0000));
+  p.drawPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_BOX, 20.0f);
+  FeBlur feBlur(FE_BLUR_TYPE_BOX, 2.0f);
   feBlur.setExtendType(FE_EXTEND_PAD);
 
-  p.filterRect(RectI(60, 20, 500, 500), ImageFilter(feBlur));
+  //p.filterRect(RectI(60, 60, 140, 100), ImageFilter(feBlur));
+  p.filterAll(ImageFilter(feBlur));
+
+  p.setOpacity(0.15f);
+  p.setSource(Argb32(0xFF0000FF));
+  p.fillRect(RectI(60, 60, 140, 100));
 
   // SvgDocument svg;
   // err_t err = svg.readFromFile(StringW::fromAscii8("C:/my/svg/tiger.svg"));

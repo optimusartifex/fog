@@ -868,21 +868,16 @@ struct FOG_NO_EXPORT RasterConvolve
   //! @brief Last offset to the last src pixel (fog FE_EXTEND_PAD).
   ssize_t srcLastOffset;
 
+  //! @brief Run offset.
+  ssize_t runOffset;
+
   // This mess is here to align extendPixel to 64-bits, because it can be
   // accessed by 8-byte load instruction under 64-bit mode.
 
-#if FOG_ARCH_BITS == 32
-  //! @brief Extend type.
-  uint32_t extendType;
-#endif // FOG_ARCH_BITS
-
   //! @brief Extend color.
   RasterSolid extendColor;
-
-#if FOG_ARCH_BITS != 32
   //! @brief Extend type.
   uint32_t extendType;
-#endif // FOG_ARCH_BITS
 
   //! @brief Size of A border (lead).
   uint aBorderLeadSize;
@@ -896,14 +891,14 @@ struct FOG_NO_EXPORT RasterConvolve
   //! @brief Size of B table.
   uint bTableSize;
 
-  //! @brief Run size.
-  uint runSize;
-  //! @brief Run offset.
-  uint runOffset;
-
   //! @brief How many rows or columns to process.
   uint rowSize;
-  //! @brief Size of kernel (radius * 2 + 1).
+  //! @brief Run size.
+  uint runSize;
+
+  //! @brief Kernel radius
+  uint kernelRadius;
+  //! @brief Kernel size (radius * 2 + 1).
   uint kernelSize;
 };
 

@@ -388,6 +388,8 @@ struct FOG_NO_EXPORT PaintEngineVTable
   // [Filter - Types]
   // --------------------------------------------------------------------------
 
+  typedef err_t (FOG_CDECL *FilterAll)(Painter* self, const ImageFilter& filter);
+
   typedef err_t (FOG_CDECL *FilterRectI)(Painter* self, const RectI& r, const ImageFilter& filter);
   typedef err_t (FOG_CDECL *FilterRectF)(Painter* self, const RectF& r, const ImageFilter& filter);
   typedef err_t (FOG_CDECL *FilterRectD)(Painter* self, const RectD& r, const ImageFilter& filter);
@@ -398,6 +400,8 @@ struct FOG_NO_EXPORT PaintEngineVTable
   // --------------------------------------------------------------------------
   // [Filter - Funcs]
   // --------------------------------------------------------------------------
+
+  FilterAll filterAll;
 
   FilterRectI filterRectI;
   FilterRectF filterRectF;

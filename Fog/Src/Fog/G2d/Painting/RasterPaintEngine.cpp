@@ -129,6 +129,15 @@ static const uint32_t RasterPaintEngine_clipAllFlags[CLIP_OP_COUNT] =
     } \
   FOG_MACRO_END
 
+#define _FOG_RASTER_ENTER_FILTER_FUNC() \
+  FOG_MACRO_BEGIN \
+    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
+                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
+    { \
+      return ERR_OK; \
+    } \
+  FOG_MACRO_END
+
 #define _PARAM_C(_Type_) (*reinterpret_cast<const _Type_*>(value))
 #define _PARAM_M(_Type_) (*reinterpret_cast<_Type_*>(value))
 
@@ -3700,9 +3709,18 @@ static err_t FOG_CDECL RasterPaintEngine_resetClip(Painter* self)
 // [Fog::RasterPaintEngine - Filter]
 // ============================================================================
 
+static err_t FOG_CDECL RasterPaintEngine_filterAll(Painter* self, const ImageFilter& filter)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  return engine->serializer->filterNormalizedBoxI(engine, engine->ctx.clipBoxI, filter);
+}
+
 static err_t FOG_CDECL RasterPaintEngine_filterRectI(Painter* self, const RectI& r, const ImageFilter& filter)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
 
   if (engine->isIntegralTransform())
   {
@@ -3724,6 +3742,7 @@ static err_t FOG_CDECL RasterPaintEngine_filterRectI(Painter* self, const RectI&
 static err_t FOG_CDECL RasterPaintEngine_filterRectF(Painter* self, const RectF& r, const ImageFilter& filter)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
 
   BoxF box(r);
   if (engine->ensureFinalTransformF())
@@ -3747,6 +3766,7 @@ static err_t FOG_CDECL RasterPaintEngine_filterRectF(Painter* self, const RectF&
 static err_t FOG_CDECL RasterPaintEngine_filterRectD(Painter* self, const RectD& r, const ImageFilter& filter)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
 
   BoxD box(r);
   if (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY)
@@ -3770,12 +3790,16 @@ static err_t FOG_CDECL RasterPaintEngine_filterRectD(Painter* self, const RectD&
 static err_t FOG_CDECL RasterPaintEngine_filterPathF(Painter* self, const PathF& p, const ImageFilter& filter)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
   return engine->serializer->fillPathF(engine, p, engine->ctx.paintHints.fillRule);
 }
 
 static err_t FOG_CDECL RasterPaintEngine_filterPathD(Painter* self, const PathD& p, const ImageFilter& filter)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
   return engine->serializer->fillPathD(engine, p, engine->ctx.paintHints.fillRule);
 }
 
@@ -6054,6 +6078,8 @@ static void RasterPaintEngine_init_vtable()
   // --------------------------------------------------------------------------
   // [Filter]
   // --------------------------------------------------------------------------
+
+  v->filterAll = RasterPaintEngine_filterAll;
 
   v->filterRectI = RasterPaintEngine_filterRectI;
   v->filterRectF = RasterPaintEngine_filterRectF;

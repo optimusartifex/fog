@@ -1409,6 +1409,8 @@ struct FOG_NO_EXPORT Painter
   // [Filter]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE err_t filterAll(const ImageFilter& filter) { return _vtable->filterAll(this, filter); }
+
   FOG_INLINE err_t filterRect(const RectI& r, const ImageFilter& filter) { return _vtable->filterRectI(this, r, filter); }
   FOG_INLINE err_t filterRect(const RectF& r, const ImageFilter& filter) { return _vtable->filterRectF(this, r, filter); }
   FOG_INLINE err_t filterRect(const RectD& r, const ImageFilter& filter) { return _vtable->filterRectD(this, r, filter); }

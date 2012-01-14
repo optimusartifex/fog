@@ -171,6 +171,24 @@ struct FOG_NO_EXPORT RasterConvertMulti
 //! @brief Solid color for 32-bit and 64-bit rendering.
 union RasterSolid
 {
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+#if FOG_ARCH_BITS >= 64
+    prgb64.u64 = 0;
+#else
+    prgb64.u32[0] = 0;
+    prgb64.u32[1] = 0;
+#endif // FOG_ARCH_BITS
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
   ArgbBase64 prgb64;
   ArgbBase32 prgb32;
 };
@@ -746,6 +764,9 @@ struct FOG_NO_EXPORT RasterFilter
 
   struct FOG_NO_EXPORT _Blur
   {
+    RasterSolid extendColor;
+    uint32_t extendType;
+
     int hRadius;
     int vRadius;
 
@@ -827,10 +848,6 @@ struct FOG_NO_EXPORT RasterConvolve
   //! @brief Filter context (immutable at this place).
   RasterFilter* filterCtx;
 
-#if FOG_ARCH_BITS == 32
-  uint32_t padding_0_32;
-#endif // FOG_ARCH_BITS
-
   //! @brief Destination data.
   uint8_t* dstData;
   //! @brief Destination stride.
@@ -846,13 +863,33 @@ struct FOG_NO_EXPORT RasterConvolve
   //! @brief B table data.
   ssize_t* bTableData;
 
-  //! @brief Border pixel.
-  UInt64Bits borderPixel;
+  //! @brief Offset to the first src pixel (for FE_EXTEND_PAD).
+  ssize_t srcFirstOffset;
+  //! @brief Last offset to the last src pixel (fog FE_EXTEND_PAD).
+  ssize_t srcLastOffset;
 
-  //! @brief Size of A border.
-  uint aBorderSize;
-  //! @brief Size of B border.
-  uint bBorderSize;
+  // This mess is here to align extendPixel to 64-bits, because it can be
+  // accessed by 8-byte load instruction under 64-bit mode.
+
+#if FOG_ARCH_BITS == 32
+  //! @brief Extend type.
+  uint32_t extendType;
+#endif // FOG_ARCH_BITS
+
+  //! @brief Extend color.
+  RasterSolid extendColor;
+
+#if FOG_ARCH_BITS != 32
+  //! @brief Extend type.
+  uint32_t extendType;
+#endif // FOG_ARCH_BITS
+
+  //! @brief Size of A border (lead).
+  uint aBorderLeadSize;
+  //! @brief Size of A border (tail).
+  uint aBorderTailSize;
+  //! @brief Size of B border (tail, there is no lead b-border).
+  uint bBorderTailSize;
 
   //! @brief Size of A table.
   uint aTableSize;

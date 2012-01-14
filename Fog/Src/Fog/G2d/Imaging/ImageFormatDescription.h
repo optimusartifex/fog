@@ -55,6 +55,8 @@ struct FOG_NO_EXPORT ImageFormatDescription
 
   //! @brief Get whether the unused bits should be filled by ones.
   FOG_INLINE uint32_t fillUnusedBits() const { return _fillUnusedBits; }
+  
+  FOG_INLINE bool is16Bpc() const { return _is16Bpc; }
 
   //! @brief Get the unused bits mask (32-bit).
   FOG_INLINE uint32_t getUnusedBits32() const { return ~(0xFFFFFFFFU << _depth) & ((uint32_t)_aMask | (uint32_t)_rMask | (uint32_t)_gMask | (uint32_t)_bMask); }
@@ -190,8 +192,10 @@ struct FOG_NO_EXPORT ImageFormatDescription
   uint8_t _hasAlignedComponents : 1;
   //! @brief Whether to fill all unused bits (internal).
   uint8_t _fillUnusedBits : 1;
+  //! @brief Whether the format uses 16-bits per component.
+  uint8_t _is16Bpc : 1;
   //! @brief Reserved bits, currently unused.
-  uint8_t _reservedBits : 3;
+  uint8_t _reservedBits : 2;
 
   //! @brief The 'Alpha' component position in bits (0...63).
   uint8_t _aPos;

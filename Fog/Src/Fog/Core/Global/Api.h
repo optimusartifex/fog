@@ -2128,6 +2128,7 @@ struct FOG_NO_EXPORT Api
 
   FOG_CAPI_CTOR(imagefilter_ctor)(ImageFilter* self);
   FOG_CAPI_CTOR(imagefilter_ctorCopy)(ImageFilter* self, const ImageFilter* other);
+  FOG_CAPI_CTOR(imagefilter_ctorData)(ImageFilter* self, const FeBase* feData);
   FOG_CAPI_DTOR(imagefilter_dtor)(ImageFilter* self);
 
   FOG_CAPI_METHOD(err_t, imagefilter_getData)(const ImageFilter* self, FeBase* feData);

@@ -37,24 +37,33 @@ namespace RasterOps_C {
 // So in general the blur effector contains five different loops, processed in
 // the current order:
 //
-//   1. Process the initial border pixels (zero border is common).
+//   1. 'aBorderLeadSize' - Process the leading border pixels, used only by 
+//      FE_EXTEND_COLOR or FE_EXTEND_PAD).
 //      - No data is write at this step.
 //
-//   2. Process the initial part of the blur.
+//   2. 'aTableSize' - Process the pixels which offset is stored in aTableData.
 //      - No data is write at this step, ATable is used for indices to pixels.
 //
-//   3. Run-loop.
-//      - One pixel is loaded and one stored.
+//   3. 'aBorderTailSize' - Process the tailing border pixels, used only by
+//      FE_EXTEND_COLOR or FE_EXTEND_PAD as a special case where it's needed
+//      to process pixels from the second border.
+//      - No data is write at this step.
 //
-//   4. Process the tail part of the blur.
-//      - BTable is used for indices to pixels.
+//   4. 'runSize - Standard run-loop, which should do the most of the work.
+//      - One pixel is read and stored per loop iteration.
+//      - No checking for borders, generally the fastest loop.
 //
-//   5. Process the tail border piexls (zero border is common).
+//   5. 'bTableSize' - Process the pixels which offset is stored in bTableData,
+//      - One pixel is read and stored per loop iteration.
+//
+//   6. 'bBorderTailSize' - Process the tailing border pixels.
 //      - No data is read at this step.
 //
 // The naming convention is strict. For initial processing the prefix 'a' is
-// used (aBorderSize, aTableSize). For tail processing the prefix 'b' is used
-// (bBorderSize, bTableSize).
+// used (aBorderSize, aTableSize, ...). For final processing the prefix 'b' is
+// used (bBorderSize, bTableSize, ...).
+//
+// For SSE2 version please see RasterOps_SSE2 directory.
 
 //! @internal
 struct FOG_NO_EXPORT FBlur
@@ -68,7 +77,7 @@ struct FOG_NO_EXPORT FBlur
   {
     return (val + 65535) / val;
   }
-
+  
   // ==========================================================================
   // [Blur - Create]
   // ==========================================================================
@@ -99,6 +108,23 @@ struct FOG_NO_EXPORT FBlur
     ctx->memBuffer = memBuffer;
     ctx->dstFormat = dstFormat;
     ctx->srcFormat = srcFormat;
+
+    ctx->blur.extendColor.reset();
+    ctx->blur.extendType = feData->_extendType;
+
+    if (ctx->blur.extendType == FE_EXTEND_COLOR)
+    {
+      if (ImageFormatDescription::getByFormat(dstFormat).is16Bpc())
+      {
+        Argb64 argb64 = feData->_extendColor().getArgb64();
+        Face::p64PRGB64FromARGB64(ctx->blur.extendColor.prgb64.p64, argb64.p64);
+      }
+      else
+      {
+        Argb32 argb32 = feData->_extendColor().getArgb32();
+        Face::p32PRGB32FromARGB32(ctx->blur.extendColor.prgb32.p32, argb32.p32);
+      }
+    }
 
     float hRadiusScale = 1.0f;
     float vRadiusScale = 1.0f;
@@ -155,7 +181,7 @@ struct FOG_NO_EXPORT FBlur
     conv.filterCtx = ctx;
 
     int radius, size;
-    int i, p;
+    int i;
 
     const ImageFormatDescription& dstDesc = ImageFormatDescription::getByFormat(ctx->dstFormat);
     const ImageFormatDescription& srcDesc = ImageFormatDescription::getByFormat(ctx->srcFormat);
@@ -171,9 +197,6 @@ struct FOG_NO_EXPORT FBlur
     // [Base]
     // ------------------------------------------------------------------------
 
-    conv.dstStride = dstStride;
-    conv.srcStride = srcStride;
-
     tmpExtendTop = Math::min(ctx->blur.vRadius, srcRect->y);
     tmpExtendBottom = Math::min(ctx->blur.vRadius, srcSize->h - srcRect->y - srcRect->h);
     
@@ -187,6 +210,10 @@ struct FOG_NO_EXPORT FBlur
         goto _End;
     }
 
+    // Move to closer location.
+    conv.extendType = ctx->blur.extendType;
+    conv.extendColor.prgb64.p64 = ctx->blur.extendColor.prgb64.p64;
+
     // ------------------------------------------------------------------------
     // [Horizontal]
     // ------------------------------------------------------------------------
@@ -195,15 +222,19 @@ struct FOG_NO_EXPORT FBlur
     size = radius * 2 + 1;
 
     if (tmpBuffer)
+    {
       conv.dstData = tmpBuffer;
+      conv.dstStride = tmpStride;
+    }
     else
+    {
       conv.dstData = dst + dstPos->y * dstStride +
                            dstPos->x * (int)dstDesc.getBytesPerPixel();
+      conv.dstStride = dstStride;
+    }
 
     conv.srcData = const_cast<uint8_t*>(src) + (srcRect->y - tmpExtendTop) * srcStride;
-
-    conv.aBorderSize = 0;
-    conv.bBorderSize = 0;
+    conv.srcStride = srcStride;
 
     i = srcSize->w - srcRect->x;
     conv.runSize     = (radius < i) ? Math::min(srcRect->w, i - radius) : 1;
@@ -215,8 +246,12 @@ struct FOG_NO_EXPORT FBlur
     conv.rowSize     = srcRect->h + tmpExtendTop + tmpExtendBottom;
     conv.kernelSize  = size;
 
-    FOG_ASSERT(conv.aBorderSize + conv.aTableSize + 
-               conv.bBorderSize + conv.bTableSize + conv.runSize == srcRect->w + size);
+    conv.srcFirstOffset = 0;
+    conv.srcLastOffset  = (srcSize->w - 1) * (int)srcDesc.getBytesPerPixel();
+
+    // It have to match only here, later we can adjust border-size in case that
+    // FE_EXTEND_COLOR or FE_EXTEND_PAD extend-type is used. See fillBorderTable().
+    FOG_ASSERT(conv.aTableSize + conv.bTableSize + conv.runSize == srcRect->w + size);
 
     conv.aTableData = static_cast<ssize_t*>(
       ctx->memBuffer->alloc((conv.aTableSize + conv.bTableSize) * sizeof(ssize_t)));
@@ -225,25 +260,7 @@ struct FOG_NO_EXPORT FBlur
     if (FOG_IS_NULL(conv.aTableData))
       goto _End;
 
-    {
-      int minX = 0;
-      int maxX = srcSize->w - 1;
-
-      p = srcRect->x - radius;
-      for (i = 0; i < conv.aTableSize; i++)
-      {
-        conv.aTableData[i] = Math::bound<int>(p, minX, maxX) * (int)srcDesc.getBytesPerPixel();
-        p++;
-      }
-
-      p += conv.runSize;
-      for (i = 0; i < conv.bTableSize; i++)
-      {
-        conv.bTableData[i] = Math::bound<int>(p, minX, maxX) * (int)srcDesc.getBytesPerPixel();
-        p++;
-      }
-    }
-
+    fillBorderTables(&conv, srcRect->x - radius, 0, srcSize->w - 1, srcDesc.getBytesPerPixel());
     ctx->blur.hConvolve(&conv);
 
     // ------------------------------------------------------------------------
@@ -255,18 +272,22 @@ struct FOG_NO_EXPORT FBlur
 
     conv.dstData = dst + dstPos->y * dstStride +
                          dstPos->x * (int)dstDesc.getBytesPerPixel();
+    conv.dstStride = dstStride;
 
     if (tmpBuffer)
+    {
       conv.srcData = tmpBuffer + tmpExtendTop * tmpStride;
+      conv.srcStride = tmpStride;
+    }
     else
-      conv.srcData = const_cast<uint8_t*>(src) + srcRect->y * srcStride;
-
-    conv.aBorderSize = 0;
-    conv.bBorderSize = 0;
+    {
+      conv.srcData = const_cast<uint8_t*>(dst) + dstPos->y * dstStride;
+      conv.srcStride = dstStride;
+    }
 
     i = srcSize->h - srcRect->y;
-    conv.runSize     = (radius < i) ? Math::min(srcRect->h, i - radius) : 1;
-    conv.runOffset   = (srcRect->y + radius + 1) * (int)srcDesc.getBytesPerPixel();
+    conv.runSize     = Math::max(Math::min(srcRect->h, i), 1);
+    conv.runOffset   = (radius + 1) * conv.srcStride;
 
     conv.aTableSize  = size;
     conv.bTableSize  = srcRect->h - conv.runSize;
@@ -274,8 +295,12 @@ struct FOG_NO_EXPORT FBlur
     conv.rowSize     = srcRect->w;
     conv.kernelSize  = size;
 
-    FOG_ASSERT(conv.aBorderSize + conv.aTableSize + 
-               conv.bBorderSize + conv.bTableSize + conv.runSize == srcRect->h + size);
+    conv.srcFirstOffset = -tmpExtendTop * (ssize_t)conv.srcStride;
+    conv.srcLastOffset  = (srcSize->h + tmpExtendBottom - 1) * (ssize_t)conv.srcStride;
+
+    // It have to match only here, later we can adjust border-size in case that
+    // FE_EXTEND_COLOR or FE_EXTEND_PAD extend-type is used. See fillBorderTable().
+    FOG_ASSERT(conv.aTableSize + conv.bTableSize + conv.runSize == srcRect->h + size);
 
     conv.aTableData = static_cast<ssize_t*>(
       ctx->memBuffer->alloc((conv.aTableSize + conv.bTableSize) * sizeof(ssize_t)));
@@ -284,29 +309,11 @@ struct FOG_NO_EXPORT FBlur
     if (FOG_IS_NULL(conv.aTableData))
       goto _End;
 
-    {
-      int minY = -tmpExtendTop;
-      int maxY = srcSize->h - 1 + tmpExtendBottom;
-
-      p = srcRect->y - radius;
-      for (i = 0; i < conv.aTableSize; i++)
-      {
-        conv.aTableData[i] = Math::bound<int>(p, minY, maxY) * srcStride;
-        p++;
-      }
-
-      p += conv.runSize;
-      for (i = 0; i < conv.bTableSize; i++)
-      {
-        conv.bTableData[i] = Math::bound<int>(p, minY, maxY) * srcStride;
-        p++;
-      }
-    }
-
+    fillBorderTables(&conv, 0, -tmpExtendTop, srcRect->h - 1 + tmpExtendBottom, conv.srcStride);
     ctx->blur.vConvolve(&conv);
 
     err = ERR_OK;
-    
+
 _End:
     if (tmpBuffer != NULL)
       MemMgr::free(tmpBuffer);
@@ -314,6 +321,115 @@ _End:
     return err;
   }
   
+  static void FOG_FASTCALL fillBorderTables(
+    RasterConvolve* ctx, int t, int tMin, int tMax, ssize_t tMul)
+  {
+    int tRepeat = tMax - tMin + 1;
+    int i;
+
+    ctx->aBorderLeadSize = 0;
+    ctx->aBorderTailSize = 0;
+    ctx->bBorderTailSize = 0;
+
+    switch (ctx->extendType)
+    {
+      case FE_EXTEND_COLOR:
+      case FE_EXTEND_PAD:
+        // Catch each pixel which is outside of the raster and setup sizes of
+        // lead and tail borders. We need to decrease size of aTableSize every
+        // time we set the border lead/tail size.
+        if (t < tMin)
+        {
+          ctx->aBorderLeadSize = tMin - t;
+          ctx->aTableSize -= ctx->aBorderLeadSize;
+          t = tMin;
+        }
+
+        if (t + ctx->aTableSize > tMax)
+        {
+          ctx->aBorderTailSize = (t + ctx->aTableSize) - tMax;
+          ctx->aTableSize -= ctx->aBorderTailSize;
+
+          ctx->bBorderTailSize = ctx->bTableSize;
+          ctx->bTableSize = 0;
+        }
+        else if (t + ctx->runSize > tMax)
+        {
+          ctx->bBorderTailSize = tMax - (t + ctx->runSize);
+          ctx->bTableSize -= ctx->bBorderTailSize;
+        }
+
+        // Continue using repeat mode, it will not hit the 't > tMax' condition.
+        ctx->aTableSize -= ctx->aBorderLeadSize;
+        goto _Repeat;
+
+      case FE_EXTEND_REPEAT:
+        // Repeat 't'.
+        t -= tMin;
+        t %= tRepeat;
+        if (t < 0)
+          t += tRepeat;
+        t += tMin;
+
+_Repeat:
+        for (i = 0; i < ctx->aTableSize; i++)
+        {
+          ctx->aTableData[i] = t * tMul;
+
+          if (++t > tMax)
+          {
+            FOG_ASSERT(ctx->extendType == FE_EXTEND_REPEAT);
+            t = tMin;
+          }
+        }
+
+        t += ctx->runSize;
+        if (t >= tMax)
+          t -= tRepeat;
+
+        for (i = 0; i < ctx->bTableSize; i++)
+        {
+          ctx->bTableData[i] = t * tMul;
+
+          if (++t > tMax)
+          {
+            FOG_ASSERT(ctx->extendType == FE_EXTEND_REPEAT);
+            t = tMin;
+          }
+        }
+        break;
+
+      case FE_EXTEND_REFLECT:
+      {
+        // Reflect 't'.
+        int tRepeat2 = tRepeat * 2;
+        
+        t -= tMin;
+        t %= tRepeat2;
+        if (t < 0)
+          t += tRepeat2;
+
+        for (i = 0; i < ctx->aTableSize; i++)
+        {
+          ctx->aTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
+          if (++t > tRepeat2)
+            t = 0;
+        }
+
+        t += ctx->runSize;
+        t %= tRepeat2;
+
+        for (i = 0; i < ctx->bTableSize; i++)
+        {
+          ctx->bTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
+          if (++t > tRepeat2)
+            t = 0;
+        }
+        break;
+      }
+    }
+  }
+
   // ==========================================================================
   // [Blur - DoRect - Box]
   // ==========================================================================
@@ -321,11 +437,17 @@ _End:
   static void FOG_FASTCALL do_rect_box_h_prgb32(
     RasterConvolve* ctx)
   {
+    uint8_t* dst = ctx->dstData;
+    uint8_t* src = ctx->srcData;
+
+    ssize_t dstStride = ctx->dstStride;
+    ssize_t srcStride = ctx->srcStride;
+
     uint height = ctx->rowSize;
     uint runSize = ctx->runSize;
 
     uint32_t sumMul = getReciprocal(ctx->kernelSize);
-    uint8_t  sumShr = 16;
+    uint8_t sumShr = 16;
 
     uint32_t stackBuffer[512];
     uint32_t* stackEnd = stackBuffer + ctx->kernelSize;
@@ -333,14 +455,9 @@ _End:
     ssize_t* aTableData = ctx->aTableData;
     ssize_t* bTableData = ctx->bTableData;
     
-    uint8_t* dst = ctx->dstData;
-    uint8_t* src = ctx->srcData;
-
-    ssize_t dstStride = ctx->dstStride;
-    ssize_t srcStride = ctx->srcStride;
-
-    uint aBorderSize = ctx->aBorderSize;
-    uint bBorderSize = ctx->bBorderSize;
+    uint aBorderLeadSize = ctx->aBorderLeadSize;
+    uint aBorderTailSize = ctx->aBorderTailSize;
+    uint bBorderTailSize = ctx->bBorderTailSize;
 
     uint aTableSize = ctx->aTableSize;
     uint bTableSize = ctx->bTableSize;
@@ -353,6 +470,10 @@ _End:
       uint32_t* stackPtr = stackBuffer;
 
 #if defined(FOG_DEBUG)
+      // NOTE: Code which uses these variables need to be #ifdefed too,
+      // because assertions can be also enabled in release (not normal,
+      // but possible to catch different types of bugs). So please put
+      // assertions related to bounds checking to #ifdef block.
       uint8_t* srcEnd = src + srcStride;
       uint8_t* dstEnd = dst + dstStride;
 #endif // FOG_DEBUG
@@ -363,14 +484,17 @@ _End:
       uint32_t sumG = 0;
       uint32_t sumB = 0;
 
-      i = aBorderSize;
+      i = aBorderLeadSize;
       if (i != 0)
       {
-        pix0 = ctx->borderPixel.u32Lo;
-        sumA += ((pix0 >> 24)       ) * aBorderSize;
-        sumR += ((pix0 >> 16) & 0xFF) * aBorderSize;
-        sumG += ((pix0 >>  8) & 0xFF) * aBorderSize;
-        sumB += ((pix0      ) & 0xFF) * aBorderSize;
+        pix0 = ctx->extendColor.prgb32.p32;
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Face::p32Load4a(pix0, srcPtr + ctx->srcFirstOffset);
+
+        sumA += ((pix0 >> 24)       ) * i;
+        sumR += ((pix0 >> 16) & 0xFF) * i;
+        sumG += ((pix0 >>  8) & 0xFF) * i;
+        sumB += ((pix0      ) & 0xFF) * i;
 
         do {
           FOG_ASSERT(stackPtr < stackEnd);
@@ -395,6 +519,25 @@ _End:
         sumR += (pix0 >> 16) & 0xFF;
         sumG += (pix0 >>  8) & 0xFF;
         sumB += (pix0      ) & 0xFF;
+      }
+
+      i = aBorderTailSize;
+      if (i != 0)
+      {
+        pix0 = ctx->extendColor.prgb32.p32;
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Face::p32Load4a(pix0, srcPtr + ctx->srcLastOffset);
+
+        sumA += ((pix0 >> 24)       ) * i;
+        sumR += ((pix0 >> 16) & 0xFF) * i;
+        sumG += ((pix0 >>  8) & 0xFF) * i;
+        sumB += ((pix0      ) & 0xFF) * i;
+
+        do {
+          FOG_ASSERT(stackPtr < stackEnd);
+          stackPtr[0] = pix0;
+          stackPtr++;
+        } while (--i);
       }
 
       FOG_ASSERT(stackPtr == stackEnd);
@@ -480,9 +623,47 @@ _First:
         dstPtr += 4;
       }
       
-      i = bBorderSize;
+      i = bBorderTailSize;
       if (i != 0)
       {
+        uint32_t pixZ = ctx->extendColor.prgb32.p32;
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Face::p32Load4a(pix0, srcPtr + ctx->srcLastOffset);
+
+        uint32_t pixA = ((pix0 >> 24)       );
+        uint32_t pixR = ((pix0 >> 16) & 0xFF);
+        uint32_t pixG = ((pix0 >>  8) & 0xFF);
+        uint32_t pixB = ((pix0      ) & 0xFF);
+
+        do {
+          Face::p32Load4a(pix0, stackPtr);
+          sumA -= (pix0 >> 24);
+          sumR -= (pix0 >> 16) & 0xFF;
+          sumG -= (pix0 >>  8) & 0xFF;
+          sumB -= (pix0      ) & 0xFF;
+
+          FOG_ASSERT(stackPtr < stackEnd);
+          stackPtr[0] = pixZ;
+          if (++stackPtr == stackEnd)
+            stackPtr = stackBuffer;
+
+          sumA += pixA;
+          sumR += pixR;
+          sumG += pixG;
+          sumB += pixB;
+
+          pix0 = 
+            (((sumA * sumMul) >> sumShr) << 24) |
+            (((sumR * sumMul) >> sumShr) << 16) |
+            (((sumG * sumMul) >> sumShr) <<  8) |
+            (((sumB * sumMul) >> sumShr)      ) ;
+
+#if defined(FOG_DEBUG)
+          FOG_ASSERT(dstPtr < dstEnd);
+#endif // FOG_DEBUG
+          Face::p32Store4a(dstPtr, pix0);
+          dstPtr += 4;
+        } while (--i);
       }
 
       dst += dstStride;
@@ -493,6 +674,257 @@ _First:
   static void FOG_FASTCALL do_rect_box_v_prgb32(
     RasterConvolve* ctx)
   {
+#if 0
+    uint8_t* dst = ctx->dstData;
+    uint8_t* src = ctx->srcData;
+
+    ssize_t dstStride = ctx->dstStride;
+    ssize_t srcStride = ctx->srcStride;
+
+    uint width = ctx->rowSize;
+    uint runSize = ctx->runSize;
+
+    uint32_t sumMul = getReciprocal(ctx->kernelSize);
+    uint8_t sumShr = 16;
+
+    uint32_t stackBuffer[512];
+    uint32_t* stackEnd = stackBuffer + ctx->kernelSize;
+
+    ssize_t* aTableData = ctx->aTableData;
+    ssize_t* bTableData = ctx->bTableData;
+    
+    uint aBorderLeadSize = ctx->aBorderLeadSize;
+    uint aBorderTailSize = ctx->aBorderTailSize;
+    uint bBorderTailSize = ctx->bBorderTailSize;
+
+    uint aTableSize = ctx->aTableSize;
+    uint bTableSize = ctx->bTableSize;
+
+    uint i, x;
+    for (x = 0; x < width; x++)
+    {
+      
+    }
+
+    for (i = 0; i < runSize; i++)
+    {
+      memcpy(dst, src, width * 4);
+      dst += dstStride;
+      src += srcStride;
+    }
+#endif
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    uint8_t* dst = ctx->dstData;
+    uint8_t* src = ctx->srcData;
+
+    ssize_t dstStride = ctx->dstStride;
+    ssize_t srcStride = ctx->srcStride;
+
+    uint width = ctx->rowSize;
+    uint runSize = ctx->runSize;
+
+    uint32_t sumMul = getReciprocal(ctx->kernelSize);
+    uint8_t sumShr = 16;
+
+    uint32_t stackBuffer[512];
+    uint32_t* stackEnd = stackBuffer + ctx->kernelSize;
+
+    ssize_t* aTableData = ctx->aTableData;
+    ssize_t* bTableData = ctx->bTableData;
+    
+    uint aBorderLeadSize = ctx->aBorderLeadSize;
+    uint aBorderTailSize = ctx->aBorderTailSize;
+    uint bBorderTailSize = ctx->bBorderTailSize;
+
+    uint aTableSize = ctx->aTableSize;
+    uint bTableSize = ctx->bTableSize;
+
+    uint i, x;
+    for (x = 0; x < width; x++)
+    {
+      uint8_t* dstPtr = dst;
+      uint8_t* srcPtr = src;
+      uint32_t* stackPtr = stackBuffer;
+
+      uint32_t pix0;
+      uint32_t sumA = 0;
+      uint32_t sumR = 0;
+      uint32_t sumG = 0;
+      uint32_t sumB = 0;
+
+      i = aBorderLeadSize;
+      if (i != 0)
+      {
+        pix0 = ctx->extendColor.prgb32.p32;
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Face::p32Load4a(pix0, srcPtr + ctx->srcFirstOffset);
+
+        sumA += ((pix0 >> 24)       ) * i;
+        sumR += ((pix0 >> 16) & 0xFF) * i;
+        sumG += ((pix0 >>  8) & 0xFF) * i;
+        sumB += ((pix0      ) & 0xFF) * i;
+
+        do {
+          FOG_ASSERT(stackPtr < stackEnd);
+          stackPtr[0] = pix0;
+          stackPtr++;
+        } while (--i);
+      }
+
+      for (i = 0; i < aTableSize; i++)
+      {
+        Face::p32Load4a(pix0, srcPtr + aTableData[i]);
+
+        FOG_ASSERT(stackPtr < stackEnd);
+        stackPtr[0] = pix0;
+        stackPtr++;
+
+        sumA += (pix0 >> 24);
+        sumR += (pix0 >> 16) & 0xFF;
+        sumG += (pix0 >>  8) & 0xFF;
+        sumB += (pix0      ) & 0xFF;
+      }
+
+      i = aBorderTailSize;
+      if (i != 0)
+      {
+        pix0 = ctx->extendColor.prgb32.p32;
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Face::p32Load4a(pix0, srcPtr + ctx->srcLastOffset);
+
+        sumA += ((pix0 >> 24)       ) * i;
+        sumR += ((pix0 >> 16) & 0xFF) * i;
+        sumG += ((pix0 >>  8) & 0xFF) * i;
+        sumB += ((pix0      ) & 0xFF) * i;
+
+        do {
+          FOG_ASSERT(stackPtr < stackEnd);
+          stackPtr[0] = pix0;
+          stackPtr++;
+        } while (--i);
+      }
+
+      FOG_ASSERT(stackPtr == stackEnd);
+      stackPtr = stackBuffer;
+      srcPtr += ctx->runOffset;
+
+      i = runSize;
+      FOG_ASSERT(i != 0);
+
+      goto _First;
+      do {
+        Face::p32Load4a(pix0, stackPtr);
+        sumA -= (pix0 >> 24);
+        sumR -= (pix0 >> 16) & 0xFF;
+        sumG -= (pix0 >>  8) & 0xFF;
+        sumB -= (pix0      ) & 0xFF;
+
+        Face::p32Load4a(pix0, srcPtr);
+        srcPtr += srcStride;
+
+        FOG_ASSERT(stackPtr < stackEnd);
+        stackPtr[0] = pix0;
+        if (++stackPtr == stackEnd)
+          stackPtr = stackBuffer;
+
+        sumA += (pix0 >> 24);
+        sumR += (pix0 >> 16) & 0xFF;
+        sumG += (pix0 >>  8) & 0xFF;
+        sumB += (pix0      ) & 0xFF;
+
+_First:
+        pix0 = 
+          (((sumA * sumMul) >> sumShr) << 24) |
+          (((sumR * sumMul) >> sumShr) << 16) |
+          (((sumG * sumMul) >> sumShr) <<  8) |
+          (((sumB * sumMul) >> sumShr)      ) ;
+
+        Face::p32Store4a(dstPtr, pix0);
+        dstPtr += dstStride;
+      } while (--i);
+
+      srcPtr = src;
+      for (i = 0; i < bTableSize; i++)
+      {
+        Face::p32Load4a(pix0, stackPtr);
+        sumA -= (pix0 >> 24);
+        sumR -= (pix0 >> 16) & 0xFF;
+        sumG -= (pix0 >>  8) & 0xFF;
+        sumB -= (pix0      ) & 0xFF;
+
+        Face::p32Load4a(pix0, srcPtr + bTableData[i]);
+
+        FOG_ASSERT(stackPtr < stackEnd);
+        stackPtr[0] = pix0;
+        if (++stackPtr == stackEnd)
+          stackPtr = stackBuffer;
+
+        sumA += (pix0 >> 24);
+        sumR += (pix0 >> 16) & 0xFF;
+        sumG += (pix0 >>  8) & 0xFF;
+        sumB += (pix0      ) & 0xFF;
+
+        pix0 = 
+          (((sumA * sumMul) >> sumShr) << 24) |
+          (((sumR * sumMul) >> sumShr) << 16) |
+          (((sumG * sumMul) >> sumShr) <<  8) |
+          (((sumB * sumMul) >> sumShr)      ) ;
+
+        Face::p32Store4a(dstPtr, pix0);
+        dstPtr += dstStride;
+      }
+      
+      i = bBorderTailSize;
+      if (i != 0)
+      {
+        uint32_t pixZ = ctx->extendColor.prgb32.p32;
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Face::p32Load4a(pix0, srcPtr + ctx->srcLastOffset);
+
+        uint32_t pixA = ((pix0 >> 24)       );
+        uint32_t pixR = ((pix0 >> 16) & 0xFF);
+        uint32_t pixG = ((pix0 >>  8) & 0xFF);
+        uint32_t pixB = ((pix0      ) & 0xFF);
+
+        do {
+          Face::p32Load4a(pix0, stackPtr);
+          sumA -= (pix0 >> 24);
+          sumR -= (pix0 >> 16) & 0xFF;
+          sumG -= (pix0 >>  8) & 0xFF;
+          sumB -= (pix0      ) & 0xFF;
+
+          FOG_ASSERT(stackPtr < stackEnd);
+          stackPtr[0] = pixZ;
+          if (++stackPtr == stackEnd)
+            stackPtr = stackBuffer;
+
+          sumA += pixA;
+          sumR += pixR;
+          sumG += pixG;
+          sumB += pixB;
+
+          pix0 = 
+            (((sumA * sumMul) >> sumShr) << 24) |
+            (((sumR * sumMul) >> sumShr) << 16) |
+            (((sumG * sumMul) >> sumShr) <<  8) |
+            (((sumB * sumMul) >> sumShr)      ) ;
+
+          Face::p32Store4a(dstPtr, pix0);
+          dstPtr += dstStride;
+        } while (--i);
+      }
+
+      dst += 4;
+      src += 4;
+    }
   }
 
   // ==========================================================================

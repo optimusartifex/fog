@@ -67,6 +67,15 @@ static void FOG_CDECL ImageFilter_ctorCopy(ImageFilter* self, const ImageFilter*
   self->_d = other->_d->addRef();
 }
 
+static void FOG_CDECL ImageFilter_ctorData(ImageFilter* self, const FeBase* feData)
+{
+  ImageFilterData* d = fog_api.imagefilter_dCreate(feData);
+  if (FOG_IS_NULL(d))
+    d = ImageFilter_dNull->addRef();
+
+  self->_d = d;
+}
+
 static void FOG_CDECL ImageFilter_dtor(ImageFilter* self)
 {
   ImageFilterData* d = self->_d;
@@ -281,6 +290,7 @@ FOG_NO_EXPORT void ImageFilter_init(void)
 
   fog_api.imagefilter_ctor = ImageFilter_ctor;
   fog_api.imagefilter_ctorCopy = ImageFilter_ctorCopy;
+  fog_api.imagefilter_ctorData = ImageFilter_ctorData;
   fog_api.imagefilter_dtor = ImageFilter_dtor;
 
   fog_api.imagefilter_getData = ImageFilter_getData;

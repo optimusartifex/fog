@@ -1242,6 +1242,7 @@ Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
   Src/Fog/G2d/Painting/RasterOps_C/CompositeNop_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeSrc_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeSrcOver_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/FilterBase_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterBlur_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterColorLut_p.h
   Src/Fog/G2d/Painting/RasterOps_C/FilterColorMatrix_p.h

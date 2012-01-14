@@ -346,6 +346,7 @@ static err_t FOG_CDECL ImageFormatDescription_createArgb(
   _AlignedComponents_, \
   0, \
   _FillUnusedBits_, \
+  (_ASize_ > 8) || (_RSize_ > 8) || (_GSize_ > 8) || (_BSize_ > 8), \
   \
   _APos_, \
   _RPos_, \
@@ -371,6 +372,7 @@ static err_t FOG_CDECL ImageFormatDescription_createArgb(
   IMAGE_PRECISION_BYTE, \
   IMAGE_COMPONENT_RGB, \
   \
+  0, \
   0, \
   0, \
   0, \
@@ -419,7 +421,7 @@ const ImageFormatDescription ImageFormatDescription_list[IMAGE_FORMAT_COUNT + 1]
     IMAGE_PRECISION_BYTE,
     IMAGE_COMPONENT_NONE,
 
-    0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0,
 
     0, 0, 0, 0,
     0, 0, 0, 0,

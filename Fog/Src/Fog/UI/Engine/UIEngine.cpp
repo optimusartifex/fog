@@ -299,7 +299,9 @@ void UIEngine::doGeometryAction(UIEngineWindow* window,
   window->onEngineEvent(&engineEvent);
 
   if ((geometryFlags & updateFlags) != 0)
+  {
     scheduleWindowUpdate(window, RectI(0, 0, clientGeometry.w, clientGeometry.h));
+  }
 }
 
 uint32_t UIEngine::doKeyAction(UIEngineWindow* window,
@@ -500,6 +502,8 @@ void UIEngine::doUpdateAll()
 
     d->_blitRegion.union_(d->_paintRegion);
     d->_paintRegion.clear();
+
+    d->_shouldBlit = true;
   }
 
   if (isPainterUsed >= 0)

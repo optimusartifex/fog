@@ -17,7 +17,7 @@
 
 namespace Fog {
 
-#define WM_FOG_UPDATE_POS WM_USER
+#define WM_FOG_UPDATE_GEOMETRY WM_USER
 
 // ============================================================================
 // [Fog::WinUIEngineWindowImpl - Helpers]
@@ -363,7 +363,7 @@ err_t WinUIEngineWindowImpl::setState(uint32_t state)
         ::ShowWindow(static_cast<HWND>(_handle), SW_SHOWMAXIMIZED);
 
         if (updatePosition)
-          ::SendMessageW(static_cast<HWND>(_handle), WM_FOG_UPDATE_POS, 0, 0);
+          ::SendMessageW(static_cast<HWND>(_handle), WM_FOG_UPDATE_GEOMETRY, 0, 0);
       }
       return ERR_OK;
 
@@ -881,7 +881,7 @@ LRESULT WinUIEngineWindowImpl::onWinMsg(UINT msg, WPARAM wParam, LPARAM lParam)
 
     // Message is sent to create a onGeometryAction on maximized application
     // start.
-    case WM_FOG_UPDATE_POS:
+    case WM_FOG_UPDATE_GEOMETRY:
 _UpdateGeometry:
     {
       RectI wr, cr;

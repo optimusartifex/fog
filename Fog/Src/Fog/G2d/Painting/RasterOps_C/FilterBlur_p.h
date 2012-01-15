@@ -65,6 +65,13 @@ namespace RasterOps_C {
 //
 // For SSE2 version please see RasterOps_SSE2 directory.
 
+// How many pixels to process horizontally in BlurV. The problem here is that
+// when using the standard way (1 pixel per run) then there is unpredicted
+// random memory access, which is costly. So we process several pixels in the
+// same memory location to reduce the effect of random memory access. Higher
+// value means more memory used by blur stack, but should increase performance.
+enum { BLUR_HLINE_COUNT = 16 };
+
 // ============================================================================
 // [Fog::RasterOps_C - Filter - Base - Component - PRGB32]
 // ============================================================================
@@ -83,6 +90,18 @@ struct FOG_NO_EXPORT FBlurComponent_PRGB32
     b = 0;
   }
   
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void set(const FBlurComponent_PRGB32& other)
+  {
+    a = other.a;
+    r = other.r;
+    g = other.g;
+    b = other.b;
+  }
+
   // --------------------------------------------------------------------------
   // [Ops]
   // --------------------------------------------------------------------------
@@ -211,6 +230,17 @@ struct FOG_NO_EXPORT FBlurComponent_XRGB32
   }
   
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void set(const FBlurComponent_XRGB32& other)
+  {
+    r = other.r;
+    g = other.g;
+    b = other.b;
+  }
+
+  // --------------------------------------------------------------------------
   // [Ops]
   // --------------------------------------------------------------------------
 
@@ -332,6 +362,17 @@ struct FOG_NO_EXPORT FBlurComponent_RGB24
   }
   
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void set(const FBlurComponent_RGB24& other)
+  {
+    r = other.r;
+    g = other.g;
+    b = other.b;
+  }
+
+  // --------------------------------------------------------------------------
   // [Ops]
   // --------------------------------------------------------------------------
 
@@ -447,6 +488,15 @@ struct FOG_NO_EXPORT FBlurComponent_A8
     a = 0;
   }
   
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void set(const FBlurComponent_A8& other)
+  {
+    a = other.a;
+  }
+
   // --------------------------------------------------------------------------
   // [Ops]
   // --------------------------------------------------------------------------
@@ -925,7 +975,7 @@ _Repeat:
     ssize_t dstStride = ctx->dstStride;
     ssize_t srcStride = ctx->srcStride;
 
-    uint height = ctx->rowSize;
+    uint runHeight = ctx->rowSize;
     uint runSize = ctx->runSize;
 
     uint32_t sumMul = getReciprocal(ctx->kernelSize);
@@ -944,8 +994,8 @@ _Repeat:
     uint aTableSize = ctx->aTableSize;
     uint bTableSize = ctx->bTableSize;
 
-    uint i, y;
-    for (y = 0; y < height; y++)
+    uint i, r;
+    for (r = 0; r < runHeight; r++)
     {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
@@ -1050,6 +1100,9 @@ _First:
         dstPtr += Accessor::PIXEL_BPP;
       } while (--i);
 
+      // From here it's not needed to store pixels to the stack, because
+      // 'bTableSize + bTableTailSize' shouldn't be larger than kernelSize.
+
       srcPtr = src;
       for (i = 0; i < bTableSize; i++)
       {
@@ -1062,7 +1115,8 @@ _First:
         sum0.sub(pix0);
 
         Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
-        Accessor::storeStack(stackPtr, pix0);
+        // Doesn't need to store into stack.
+        // Accessor::storeStack(stackPtr, pix0);
         sum0.add(pix0);
 
         stackPtr += Accessor::STACK_BPP;
@@ -1076,7 +1130,7 @@ _First:
         Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
         dstPtr += Accessor::PIXEL_BPP;
       }
-      
+
       i = bBorderTailSize;
       if (i != 0)
       {
@@ -1095,7 +1149,8 @@ _First:
           Accessor::fetchStack(pix0, stackPtr);
           sum0.sub(pix0);
 
-          Accessor::storeStack(stackPtr, pixB);
+          // Doesn't need to store into stack.
+          // Accessor::storeStack(stackPtr, pixB);
           sum0.add(compB);
 
           stackPtr += Accessor::STACK_BPP;
@@ -1126,14 +1181,11 @@ _First:
     ssize_t dstStride = ctx->dstStride;
     ssize_t srcStride = ctx->srcStride;
 
-    uint width = ctx->rowSize;
+    uint runWidth = ctx->rowSize;
     uint runSize = ctx->runSize;
 
     uint32_t sumMul = getReciprocal(ctx->kernelSize);
     uint32_t sumShr = 16;
-
-    uint8_t stackBuffer[512 * Accessor::STACK_BPP];
-    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
 
     ssize_t* aTableData = ctx->aTableData;
     ssize_t* bTableData = ctx->bTableData;
@@ -1145,61 +1197,146 @@ _First:
     uint aTableSize = ctx->aTableSize;
     uint bTableSize = ctx->bTableSize;
 
-    uint i, x;
-    for (x = 0; x < width; x++)
-    {
+    uint i, r = 0;
+    uint8_t stackBuffer[512 * BLUR_HLINE_COUNT * Accessor::STACK_BPP];
+
+    do {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
       uint8_t* stackPtr = stackBuffer;
 
-      typename Accessor::Component sum0;
+      typename Accessor::Component sum[BLUR_HLINE_COUNT];
       typename Accessor::Pixel pix0;
 
-      sum0.reset();
+      uint xLength = Math::min<uint>(runWidth - r, BLUR_HLINE_COUNT);
+      uint x;
+
+      uint8_t* stackEnd = stackBuffer + ctx->kernelSize * xLength * Accessor::STACK_BPP;
 
       i = aBorderLeadSize;
       if (i != 0)
       {
-        Accessor::fetchSolid(pix0, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pix0, srcPtr + ctx->srcFirstOffset);
+        if (ctx->extendType == FE_EXTEND_COLOR)
+        {
+          Accessor::fetchSolid(pix0, ctx->extendColor);
+          sum[0].reset();
+          sum[0].addN(pix0, i);
 
-        sum0.addN(pix0, i);
+          for (x = 1; x < xLength; x++)
+          {
+            sum[x].set(sum[0]);
+          }
 
-        do {
-          FOG_ASSERT(stackPtr < stackEnd);
+          i *= xLength;
+          do {
+            FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::storeStack(stackPtr, pix0);
-          stackPtr += Accessor::STACK_BPP;
-        } while (--i);
+            Accessor::storeStack(stackPtr, pix0);
+            stackPtr += Accessor::STACK_BPP;
+          } while (--i);
+        }
+        else
+        {
+          uint8_t* srcBase = srcPtr + ctx->srcFirstOffset;
+          uint8_t* stackBase = stackPtr;
+
+          for (x = 0; x < xLength; x++)
+          {
+            FOG_ASSERT(stackPtr < stackEnd);
+
+            Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
+            sum[x].reset();
+            sum[x].addN(pix0, i);
+
+            Accessor::storeStack(stackPtr, pix0);
+            stackPtr += Accessor::STACK_BPP;
+          }
+
+          while (--i)
+          {
+            for (x = 0; x < xLength; x++)
+            {
+              FOG_ASSERT(stackPtr < stackEnd);
+
+              Accessor::fetchStack(pix0, stackBase + x * Accessor::STACK_BPP);
+              Accessor::storeStack(stackPtr, pix0);
+              stackPtr += Accessor::STACK_BPP;
+            }
+          }
+        }
+      }
+      else
+      {
+        for (x = 0; x < xLength; x++)
+        {
+          sum[x].reset();
+        }
       }
 
       for (i = 0; i < aTableSize; i++)
       {
-        FOG_ASSERT(stackPtr < stackEnd);
+        uint8_t* srcTab = srcPtr + aTableData[i];
 
-        Accessor::fetchPixel(pix0, srcPtr + aTableData[i]);
-        Accessor::storeStack(stackPtr, pix0);
+        for (x = 0; x < xLength; x++)
+        {
+          FOG_ASSERT(stackPtr < stackEnd);
 
-        stackPtr += Accessor::STACK_BPP;
-        sum0.add(pix0);
+          Accessor::fetchPixel(pix0, srcTab + x * Accessor::PIXEL_BPP);
+          Accessor::storeStack(stackPtr, pix0);
+
+          stackPtr += Accessor::STACK_BPP;
+          sum[x].add(pix0);
+        }
       }
 
       i = aBorderTailSize;
       if (i != 0)
       {
-        Accessor::fetchSolid(pix0, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pix0, srcPtr + ctx->srcLastOffset);
+        if (ctx->extendType == FE_EXTEND_COLOR)
+        {
+          Accessor::fetchSolid(pix0, ctx->extendColor);
 
-        sum0.addN(pix0, i);
+          for (x = 0; x < xLength; x++)
+          {
+            sum[x].addN(pix0, i);
+          }
 
-        do {
-          FOG_ASSERT(stackPtr < stackEnd);
+          i *= xLength;
+          do {
+            FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::storeStack(stackPtr, pix0);
-          stackPtr += Accessor::STACK_BPP;
-        } while (--i);
+            Accessor::storeStack(stackPtr, pix0);
+            stackPtr += Accessor::STACK_BPP;
+          } while (--i);
+        }
+        else
+        {
+          uint8_t* srcBase = srcPtr + ctx->srcLastOffset;
+          uint8_t* stackBase = stackPtr;
+
+          for (x = 0; x < xLength; x++)
+          {
+            FOG_ASSERT(stackPtr < stackEnd);
+
+            Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
+            sum[x].addN(pix0, i);
+
+            Accessor::storeStack(stackPtr, pix0);
+            stackPtr += Accessor::STACK_BPP;
+          }
+
+          while (--i)
+          {
+            for (x = 0; x < xLength; x++)
+            {
+              FOG_ASSERT(stackPtr < stackEnd);
+
+              Accessor::fetchStack(pix0, stackBase + x * Accessor::STACK_BPP);
+              Accessor::storeStack(stackPtr, pix0);
+              stackPtr += Accessor::STACK_BPP;
+            }
+          }
+        }
       }
 
       FOG_ASSERT(stackPtr == stackEnd);
@@ -1208,83 +1345,137 @@ _First:
       stackPtr = stackBuffer;
       srcPtr += ctx->runOffset;
 
+      for (x = 0; x < xLength; x++)
+      {
+        Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sum[x], sumMul, sumShr);
+      }
+
+      dstPtr += dstStride;
       i = runSize;
-      goto _First;
 
-      do {
-        FOG_ASSERT(stackPtr < stackEnd);
+      while (--i)
+      {
+        for (x = 0; x < xLength; x++)
+        {
+          FOG_ASSERT(stackPtr < stackEnd);
 
-        Accessor::fetchStack(pix0, stackPtr);
-        sum0.sub(pix0);
+          Accessor::fetchStack(pix0, stackPtr);
+          sum[x].sub(pix0);
 
-        Accessor::fetchPixel(pix0, srcPtr);
-        Accessor::storeStack(stackPtr, pix0);
-        sum0.add(pix0);
+          Accessor::fetchPixel(pix0, srcPtr + x * Accessor::PIXEL_BPP);
+          Accessor::storeStack(stackPtr, pix0);
+          sum[x].add(pix0);
 
-        srcPtr += srcStride;
-        stackPtr += Accessor::STACK_BPP;
+          stackPtr += Accessor::STACK_BPP;
+
+          Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sum[x], sumMul, sumShr);
+        }
 
         if (stackPtr == stackEnd)
           stackPtr = stackBuffer;
 
-_First:
-        Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
+        srcPtr += srcStride;
         dstPtr += dstStride;
-      } while (--i);
+      }
+      
+      // From here it's not needed to store pixels to the stack, because
+      // 'bTableSize + bTableTailSize' shouldn't be larger than kernelSize.
 
       srcPtr = src;
       for (i = 0; i < bTableSize; i++)
       {
-        FOG_ASSERT(stackPtr < stackEnd);
+        uint8_t* srcBase = srcPtr + bTableData[i];
 
-        Accessor::fetchStack(pix0, stackPtr);
-        sum0.sub(pix0);
+        for (x = 0; x < xLength; x++)
+        {
+          FOG_ASSERT(stackPtr < stackEnd);
 
-        Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
-        Accessor::storeStack(stackPtr, pix0);
-        sum0.add(pix0);
+          Accessor::fetchStack(pix0, stackPtr);
+          sum[x].sub(pix0);
 
-        stackPtr += Accessor::STACK_BPP;
+          Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
+          // Doesn't need to store into stack.
+          // Accessor::storeStack(stackPtr, pix0);
+          sum[x].add(pix0);
+
+          stackPtr += Accessor::STACK_BPP;
+            
+          Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sum[x], sumMul, sumShr);
+        }
+
         if (stackPtr == stackEnd)
           stackPtr = stackBuffer;
-          
-        Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
+
         dstPtr += dstStride;
       }
       
       i = bBorderTailSize;
       if (i != 0)
       {
-        typename Accessor::Pixel pixB;
-        Accessor::fetchSolid(pixB, ctx->extendColor);
+        if (ctx->extendType == FE_EXTEND_COLOR)
+        {
+          typename Accessor::Pixel pixB;
+          Accessor::fetchSolid(pixB, ctx->extendColor);
 
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pixB, srcPtr + ctx->srcLastOffset);
+          typename Accessor::Component compB;
+          Accessor::unpack(compB, pixB);
 
-        typename Accessor::Component compB;
-        Accessor::unpack(compB, pixB);
+          do {
+            for (x = 0; x < xLength; x++)
+            {
+              FOG_ASSERT(stackPtr < stackEnd);
 
-        do {
-          FOG_ASSERT(stackPtr < stackEnd);
+              Accessor::fetchStack(pix0, stackPtr);
+              sum[x].sub(pix0);
 
-          Accessor::fetchStack(pix0, stackPtr);
-          sum0.sub(pix0);
+              // Doesn't need to store into stack.
+              // Accessor::storeStack(stackPtr, pixB);
+              sum[x].add(compB);
 
-          Accessor::storeStack(stackPtr, pixB);
-          sum0.add(compB);
+              stackPtr += Accessor::STACK_BPP;
+              Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sum[x], sumMul, sumShr);
+            }
 
-          stackPtr += Accessor::STACK_BPP;
-          if (stackPtr == stackEnd)
-            stackPtr = stackBuffer;
+            if (stackPtr == stackEnd)
+              stackPtr = stackBuffer;
 
-          Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
-          dstPtr += dstStride;
-        } while (--i);
+            dstPtr += dstStride;
+          } while (--i);
+        }
+        else
+        {
+          uint8_t* srcBase = srcPtr + ctx->srcLastOffset;
+          
+          do {
+            for (x = 0; x < xLength; x++)
+            {
+              FOG_ASSERT(stackPtr < stackEnd);
+
+              Accessor::fetchStack(pix0, stackPtr);
+              sum[x].sub(pix0);
+
+              Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
+              // Doesn't need to store into stack.
+              // Accessor::storeStack(stackPtr, pix0);
+              sum[x].add(pix0);
+
+              stackPtr += Accessor::STACK_BPP;
+              Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sum[x], sumMul, sumShr);
+            }
+
+            if (stackPtr == stackEnd)
+              stackPtr = stackBuffer;
+
+            dstPtr += dstStride;
+          } while (--i);
+        }
       }
 
-      dst += Accessor::PIXEL_BPP;
-      src += Accessor::PIXEL_BPP;
-    }
+      dst += xLength * Accessor::PIXEL_BPP;
+      src += xLength * Accessor::PIXEL_BPP;
+
+      r += xLength;
+    } while (r < runWidth);
   }
 
   // ==========================================================================

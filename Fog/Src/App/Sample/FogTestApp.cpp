@@ -81,7 +81,7 @@ void AppWindow::onPaint(Painter* _p)
   p.setLineWidth(3.0f);
   p.fillPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_BOX, 3.0f);
+  FeBlur feBlur(FE_BLUR_TYPE_BOX, 8.0f);
   feBlur.setExtendType(FE_EXTEND_COLOR);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
 

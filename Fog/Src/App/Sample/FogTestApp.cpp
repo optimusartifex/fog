@@ -66,11 +66,11 @@ void AppWindow::onPaint(Painter* _p)
 
   p.setSource(Argb32(0xFF000000));
   //p.fillRect(100, 100, 100, 100);
-  p.fillCircle(CircleF(160.0f, 120.0f, 50.0f));
-  
+  p.fillCircle(CircleF(160.0f, 120.0f, 85.0f));
+
   PathF path;
   Font font;
-  font.setHeight(50.0f, UNIT_PX);
+  font.setHeight(10.0f, UNIT_PX);
 
   StringW msg;
   msg.format("Size: %d %d", geom.w, geom.h);
@@ -79,9 +79,9 @@ void AppWindow::onPaint(Painter* _p)
 
   p.setSource(Argb32(0xFFFF0000));
   p.setLineWidth(3.0f);
-  p.drawPath(path);
+  p.fillPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_BOX, 5.0f);
+  FeBlur feBlur(FE_BLUR_TYPE_BOX, 3.0f);
   feBlur.setExtendType(FE_EXTEND_COLOR);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
 

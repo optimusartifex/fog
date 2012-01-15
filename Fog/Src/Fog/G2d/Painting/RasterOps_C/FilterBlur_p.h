@@ -8,13 +8,13 @@
 #define _FOG_G2D_PAINTING_RASTEROPS_C_FILTERBLUR_P_H
 
 // [Dependencies]
-#include <Fog/G2d/Painting/RasterOps_C/BaseDefs_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/FilterBase_p.h>
 
 namespace Fog {
 namespace RasterOps_C {
 
 // ============================================================================
-// [Fog::RasterOps_C - Filter - Blur]
+// [Fog::RasterOps_C - Filter - Blur - Base]
 // ============================================================================
 
 // The Stack Blur Algorithm was invented by Mario Klingemann,
@@ -64,6 +64,479 @@ namespace RasterOps_C {
 // used (bBorderSize, bTableSize, ...).
 //
 // For SSE2 version please see RasterOps_SSE2 directory.
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Component - PRGB32]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurComponent_PRGB32
+{
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    a = 0;
+    r = 0;
+    g = 0;
+    b = 0;
+  }
+  
+  // --------------------------------------------------------------------------
+  // [Ops]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void add(uint32_t pix0)
+  {
+    a += (pix0 >> 24);
+    r += (pix0 >> 16) & 0xFF;
+    g += (pix0 >>  8) & 0xFF;
+    b += (pix0      ) & 0xFF;
+  }
+
+  FOG_INLINE void sub(uint32_t pix0)
+  {
+    a -= (pix0 >> 24);
+    r -= (pix0 >> 16) & 0xFF;
+    g -= (pix0 >>  8) & 0xFF;
+    b -= (pix0      ) & 0xFF;
+  }
+
+  FOG_INLINE void addN(uint32_t pix0, uint32_t mul)
+  {
+    a += ((pix0 >> 24)       ) * mul;
+    r += ((pix0 >> 16) & 0xFF) * mul;
+    g += ((pix0 >>  8) & 0xFF) * mul;
+    b += ((pix0      ) & 0xFF) * mul;
+  }
+
+  FOG_INLINE void add(const FBlurComponent_PRGB32& other)
+  {
+    a += other.a;
+    r += other.r;
+    g += other.g;
+    b += other.b;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint32_t a;
+  uint32_t r;
+  uint32_t g;
+  uint32_t b;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Accessor - PRGB32]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurAccessor_PRGB32
+{
+  // --------------------------------------------------------------------------
+  // [Defs]
+  // --------------------------------------------------------------------------
+
+  typedef uint32_t Pixel;
+  typedef FBlurComponent_PRGB32 Component;
+
+  enum { PIXEL_BPP = 4 };
+  enum { STACK_BPP = 4 };
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  {
+    dst = src.prgb32.p32;
+  }
+
+  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  {
+    Face::p32Load4a(dst, src);
+  }
+  
+  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  {
+    Face::p32Load4a(dst, src);
+  }
+
+  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  {
+    Face::p32Store4a(dst, src);
+  }
+
+  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
+  {
+    Face::p32Store4a(dst, src);
+  }
+  
+  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
+  {
+    uint32_t pix = _FOG_FACE_COMBINE_4(
+      ((src.a * mul) >> shift) << 24,
+      ((src.r * mul) >> shift) << 16,
+      ((src.g * mul) >> shift) <<  8,
+      ((src.b * mul) >> shift)      );
+    storePixel(dst, pix);
+  }
+
+  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
+  {
+    dst.a = (src >> 24);
+    dst.r = (src >> 16) & 0xFF;
+    dst.g = (src >>  8) & 0xFF;
+    dst.b = (src      ) & 0xFF;
+  }
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Component - XRGB32]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurComponent_XRGB32
+{
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    r = 0;
+    g = 0;
+    b = 0;
+  }
+  
+  // --------------------------------------------------------------------------
+  // [Ops]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void add(uint32_t pix0)
+  {
+    r += (pix0 >> 16) & 0xFF;
+    g += (pix0 >>  8) & 0xFF;
+    b += (pix0      ) & 0xFF;
+  }
+
+  FOG_INLINE void sub(uint32_t pix0)
+  {
+    r -= (pix0 >> 16) & 0xFF;
+    g -= (pix0 >>  8) & 0xFF;
+    b -= (pix0      ) & 0xFF;
+  }
+
+  FOG_INLINE void addN(uint32_t pix0, uint32_t mul)
+  {
+    r += ((pix0 >> 16) & 0xFF) * mul;
+    g += ((pix0 >>  8) & 0xFF) * mul;
+    b += ((pix0      ) & 0xFF) * mul;
+  }
+
+  FOG_INLINE void add(const FBlurComponent_XRGB32& other)
+  {
+    r += other.r;
+    g += other.g;
+    b += other.b;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint32_t r;
+  uint32_t g;
+  uint32_t b;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Accessor - XRGB32]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurAccessor_XRGB32
+{
+  // --------------------------------------------------------------------------
+  // [Defs]
+  // --------------------------------------------------------------------------
+
+  typedef uint32_t Pixel;
+  typedef FBlurComponent_XRGB32 Component;
+
+  enum { PIXEL_BPP = 4 };
+  enum { STACK_BPP = 4 };
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  {
+    dst = src.prgb32.p32;
+  }
+
+  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  {
+    Face::p32Load4a(dst, src);
+  }
+
+  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  {
+    Face::p32Load4a(dst, src);
+  }
+
+  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  {
+    Face::p32Store4a(dst, src);
+  }
+  
+  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
+  {
+    Face::p32Store4a(dst, src);
+  }
+
+  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
+  {
+    uint32_t pix = _FOG_FACE_COMBINE_4(
+      0xFF000000,
+      ((src.r * mul) >> shift) << 16,
+      ((src.g * mul) >> shift) <<  8,
+      ((src.b * mul) >> shift)      );
+    storePixel(dst, pix);
+  }
+
+  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
+  {
+    dst.r = (src >> 16) & 0xFF;
+    dst.g = (src >>  8) & 0xFF;
+    dst.b = (src      ) & 0xFF;
+  }
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Component - RGB24]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurComponent_RGB24
+{
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    r = 0;
+    g = 0;
+    b = 0;
+  }
+  
+  // --------------------------------------------------------------------------
+  // [Ops]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void add(uint32_t pix0)
+  {
+    r += (pix0 >> 16) & 0xFF;
+    g += (pix0 >>  8) & 0xFF;
+    b += (pix0      ) & 0xFF;
+  }
+
+  FOG_INLINE void sub(uint32_t pix0)
+  {
+    r -= (pix0 >> 16) & 0xFF;
+    g -= (pix0 >>  8) & 0xFF;
+    b -= (pix0      ) & 0xFF;
+  }
+
+  FOG_INLINE void addN(uint32_t pix0, uint32_t mul)
+  {
+    r += ((pix0 >> 16) & 0xFF) * mul;
+    g += ((pix0 >>  8) & 0xFF) * mul;
+    b += ((pix0      ) & 0xFF) * mul;
+  }
+
+  FOG_INLINE void add(const FBlurComponent_RGB24& other)
+  {
+    r += other.r;
+    g += other.g;
+    b += other.b;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint32_t r;
+  uint32_t g;
+  uint32_t b;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Accessor - RGB24]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurAccessor_RGB24
+{
+  // --------------------------------------------------------------------------
+  // [Defs]
+  // --------------------------------------------------------------------------
+
+  typedef uint32_t Pixel;
+  typedef FBlurComponent_RGB24 Component;
+
+  enum { PIXEL_BPP = 3 };
+  enum { STACK_BPP = 4 };
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  {
+    dst = src.prgb32.p32;
+  }
+
+  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  {
+    Face::p32Load3b(dst, src);
+  }
+
+  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  {
+    Face::p32Load4a(dst, src);
+  }
+
+  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  {
+    Face::p32Store3b(dst, src);
+  }
+  
+  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
+  {
+    Face::p32Store4a(dst, src);
+  }
+
+  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
+  {
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_R] = ((src.r * mul) >> shift);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_G] = ((src.g * mul) >> shift);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_B] = ((src.b * mul) >> shift);
+  }
+
+  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
+  {
+    dst.r = (src >> 16) & 0xFF;
+    dst.g = (src >>  8) & 0xFF;
+    dst.b = (src      ) & 0xFF;
+  }
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Component - A8]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurComponent_A8
+{
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    a = 0;
+  }
+  
+  // --------------------------------------------------------------------------
+  // [Ops]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void add(uint8_t pix0)
+  {
+    a = uint32_t(pix0);
+  }
+
+  FOG_INLINE void sub(uint8_t pix0)
+  {
+    a -= uint32_t(pix0);
+  }
+
+  FOG_INLINE void addN(uint8_t pix0, uint32_t mul)
+  {
+    a += uint32_t(pix0) * mul;
+  }
+
+  FOG_INLINE void add(const FBlurComponent_A8& other)
+  {
+    a += other.a;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint32_t a;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Base - Accessor - A8]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurAccessor_A8
+{
+  // --------------------------------------------------------------------------
+  // [Defs]
+  // --------------------------------------------------------------------------
+
+  typedef uint8_t Pixel;
+  typedef FBlurComponent_A8 Component;
+
+  enum { PIXEL_BPP = 1 };
+  enum { STACK_BPP = 1 };
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  {
+    dst = src.prgb32.a;
+  }
+
+  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  {
+    Face::p8Load1b(dst, src);
+  }
+
+  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  {
+    Face::p8Load1b(dst, src);
+  }
+
+  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  {
+    Face::p8Store1b(dst, src);
+  }
+  
+  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
+  {
+    Face::p8Store1b(dst, src);
+  }
+
+  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
+  {
+    Face::p32Store1b(dst, (src.a * mul) >> shift);
+  }
+
+  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
+  {
+    dst.a = uint32_t(src);
+  }
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur]
+// ============================================================================
 
 //! @internal
 struct FOG_NO_EXPORT FBlur
@@ -442,7 +915,8 @@ _Repeat:
   // [Blur - DoRect - Box]
   // ==========================================================================
 
-  static void FOG_FASTCALL do_rect_box_h_prgb32(
+  template<typename Accessor>
+  static void FOG_FASTCALL do_rect_box_h(
     RasterConvolve* ctx)
   {
     uint8_t* dst = ctx->dstData;
@@ -455,10 +929,10 @@ _Repeat:
     uint runSize = ctx->runSize;
 
     uint32_t sumMul = getReciprocal(ctx->kernelSize);
-    uint8_t sumShr = 16;
+    uint32_t sumShr = 16;
 
-    uint32_t stackBuffer[512];
-    uint32_t* stackEnd = stackBuffer + ctx->kernelSize;
+    uint8_t stackBuffer[512 * Accessor::STACK_BPP];
+    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
 
     ssize_t* aTableData = ctx->aTableData;
     ssize_t* bTableData = ctx->bTableData;
@@ -475,7 +949,12 @@ _Repeat:
     {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
-      uint32_t* stackPtr = stackBuffer;
+      uint8_t* stackPtr = stackBuffer;
+
+      typename Accessor::Component sum0;
+      typename Accessor::Pixel pix0;
+
+      sum0.reset();
 
 #if defined(FOG_DEBUG)
       // NOTE: Code which uses these variables need to be #ifdefed too,
@@ -486,28 +965,20 @@ _Repeat:
       uint8_t* dstEnd = dst + dstStride;
 #endif // FOG_DEBUG
 
-      uint32_t pix0;
-      uint32_t sumA = 0;
-      uint32_t sumR = 0;
-      uint32_t sumG = 0;
-      uint32_t sumB = 0;
-
       i = aBorderLeadSize;
       if (i != 0)
       {
-        pix0 = ctx->extendColor.prgb32.p32;
+        Accessor::fetchSolid(pix0, ctx->extendColor);
         if (ctx->extendType == FE_EXTEND_PAD)
-          Face::p32Load4a(pix0, srcPtr + ctx->srcFirstOffset);
+          Accessor::fetchPixel(pix0, srcPtr + ctx->srcFirstOffset);
 
-        sumA += ((pix0 >> 24)       ) * i;
-        sumR += ((pix0 >> 16) & 0xFF) * i;
-        sumG += ((pix0 >>  8) & 0xFF) * i;
-        sumB += ((pix0      ) & 0xFF) * i;
+        sum0.addN(pix0, i);
 
         do {
           FOG_ASSERT(stackPtr < stackEnd);
-          stackPtr[0] = pix0;
-          stackPtr++;
+
+          Accessor::storeStack(stackPtr, pix0);
+          stackPtr += Accessor::STACK_BPP;
         } while (--i);
       }
 
@@ -516,159 +987,127 @@ _Repeat:
 #if defined(FOG_DEBUG)
         FOG_ASSERT(srcPtr + aTableData[i] >= src && srcPtr + aTableData[i] < srcEnd);
 #endif // FOG_DEBUG
-        Face::p32Load4a(pix0, srcPtr + aTableData[i]);
-
         FOG_ASSERT(stackPtr < stackEnd);
-        stackPtr[0] = pix0;
-        stackPtr++;
 
-        sumA += (pix0 >> 24);
-        sumR += (pix0 >> 16) & 0xFF;
-        sumG += (pix0 >>  8) & 0xFF;
-        sumB += (pix0      ) & 0xFF;
+        Accessor::fetchPixel(pix0, srcPtr + aTableData[i]);
+        Accessor::storeStack(stackPtr, pix0);
+
+        stackPtr += Accessor::STACK_BPP;
+        sum0.add(pix0);
       }
 
       i = aBorderTailSize;
       if (i != 0)
       {
-        pix0 = ctx->extendColor.prgb32.p32;
+        Accessor::fetchSolid(pix0, ctx->extendColor);
         if (ctx->extendType == FE_EXTEND_PAD)
-          Face::p32Load4a(pix0, srcPtr + ctx->srcLastOffset);
+          Accessor::fetchPixel(pix0, srcPtr + ctx->srcLastOffset);
 
-        sumA += ((pix0 >> 24)       ) * i;
-        sumR += ((pix0 >> 16) & 0xFF) * i;
-        sumG += ((pix0 >>  8) & 0xFF) * i;
-        sumB += ((pix0      ) & 0xFF) * i;
+        sum0.addN(pix0, i);
 
         do {
           FOG_ASSERT(stackPtr < stackEnd);
-          stackPtr[0] = pix0;
-          stackPtr++;
+
+          Accessor::storeStack(stackPtr, pix0);
+          stackPtr += Accessor::STACK_BPP;
         } while (--i);
       }
 
       FOG_ASSERT(stackPtr == stackEnd);
+      FOG_ASSERT(runSize != 0);
+
       stackPtr = stackBuffer;
       srcPtr += ctx->runOffset;
 
       i = runSize;
-      FOG_ASSERT(i != 0);
-
       goto _First;
-      do {
-        Face::p32Load4a(pix0, stackPtr);
-        sumA -= (pix0 >> 24);
-        sumR -= (pix0 >> 16) & 0xFF;
-        sumG -= (pix0 >>  8) & 0xFF;
-        sumB -= (pix0      ) & 0xFF;
 
+      do {
 #if defined(FOG_DEBUG)
         FOG_ASSERT(srcPtr < srcEnd);
 #endif // FOG_DEBUG
-        Face::p32Load4a(pix0, srcPtr);
-        srcPtr += 4;
-
         FOG_ASSERT(stackPtr < stackEnd);
-        stackPtr[0] = pix0;
-        if (++stackPtr == stackEnd)
+
+        Accessor::fetchStack(pix0, stackPtr);
+        sum0.sub(pix0);
+
+        Accessor::fetchPixel(pix0, srcPtr);
+        Accessor::storeStack(stackPtr, pix0);
+        sum0.add(pix0);
+
+        srcPtr += Accessor::PIXEL_BPP;
+        stackPtr += Accessor::STACK_BPP;
+
+        if (stackPtr == stackEnd)
           stackPtr = stackBuffer;
 
-        sumA += (pix0 >> 24);
-        sumR += (pix0 >> 16) & 0xFF;
-        sumG += (pix0 >>  8) & 0xFF;
-        sumB += (pix0      ) & 0xFF;
-
 _First:
-        pix0 = 
-          (((sumA * sumMul) >> sumShr) << 24) |
-          (((sumR * sumMul) >> sumShr) << 16) |
-          (((sumG * sumMul) >> sumShr) <<  8) |
-          (((sumB * sumMul) >> sumShr)      ) ;
-
 #if defined(FOG_DEBUG)
         FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
-        Face::p32Store4a(dstPtr, pix0);
-        dstPtr += 4;
+
+        Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
+        dstPtr += Accessor::PIXEL_BPP;
       } while (--i);
 
       srcPtr = src;
       for (i = 0; i < bTableSize; i++)
       {
-        Face::p32Load4a(pix0, stackPtr);
-        sumA -= (pix0 >> 24);
-        sumR -= (pix0 >> 16) & 0xFF;
-        sumG -= (pix0 >>  8) & 0xFF;
-        sumB -= (pix0      ) & 0xFF;
-
 #if defined(FOG_DEBUG)
         FOG_ASSERT(srcPtr + bTableData[i] >= src && srcPtr + bTableData[i] < srcEnd);
 #endif // FOG_DEBUG
-        Face::p32Load4a(pix0, srcPtr + bTableData[i]);
-
         FOG_ASSERT(stackPtr < stackEnd);
-        stackPtr[0] = pix0;
-        if (++stackPtr == stackEnd)
+
+        Accessor::fetchStack(pix0, stackPtr);
+        sum0.sub(pix0);
+
+        Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
+        Accessor::storeStack(stackPtr, pix0);
+        sum0.add(pix0);
+
+        stackPtr += Accessor::STACK_BPP;
+        if (stackPtr == stackEnd)
           stackPtr = stackBuffer;
-
-        sumA += (pix0 >> 24);
-        sumR += (pix0 >> 16) & 0xFF;
-        sumG += (pix0 >>  8) & 0xFF;
-        sumB += (pix0      ) & 0xFF;
-
-        pix0 = 
-          (((sumA * sumMul) >> sumShr) << 24) |
-          (((sumR * sumMul) >> sumShr) << 16) |
-          (((sumG * sumMul) >> sumShr) <<  8) |
-          (((sumB * sumMul) >> sumShr)      ) ;
 
 #if defined(FOG_DEBUG)
         FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
-        Face::p32Store4a(dstPtr, pix0);
-        dstPtr += 4;
+
+        Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
+        dstPtr += Accessor::PIXEL_BPP;
       }
       
       i = bBorderTailSize;
       if (i != 0)
       {
-        uint32_t pixZ = ctx->extendColor.prgb32.p32;
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Face::p32Load4a(pixZ, srcPtr + ctx->srcLastOffset);
+        typename Accessor::Pixel pixB;
+        Accessor::fetchSolid(pixB, ctx->extendColor);
 
-        uint32_t pixA = ((pixZ >> 24)       );
-        uint32_t pixR = ((pixZ >> 16) & 0xFF);
-        uint32_t pixG = ((pixZ >>  8) & 0xFF);
-        uint32_t pixB = ((pixZ      ) & 0xFF);
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Accessor::fetchPixel(pixB, srcPtr + ctx->srcLastOffset);
+
+        typename Accessor::Component compB;
+        Accessor::unpack(compB, pixB);
 
         do {
-          Face::p32Load4a(pix0, stackPtr);
-          sumA -= (pix0 >> 24);
-          sumR -= (pix0 >> 16) & 0xFF;
-          sumG -= (pix0 >>  8) & 0xFF;
-          sumB -= (pix0      ) & 0xFF;
-
           FOG_ASSERT(stackPtr < stackEnd);
-          stackPtr[0] = pixZ;
-          if (++stackPtr == stackEnd)
+
+          Accessor::fetchStack(pix0, stackPtr);
+          sum0.sub(pix0);
+
+          Accessor::storeStack(stackPtr, pixB);
+          sum0.add(compB);
+
+          stackPtr += Accessor::STACK_BPP;
+          if (stackPtr == stackEnd)
             stackPtr = stackBuffer;
-
-          sumA += pixA;
-          sumR += pixR;
-          sumG += pixG;
-          sumB += pixB;
-
-          pix0 = 
-            (((sumA * sumMul) >> sumShr) << 24) |
-            (((sumR * sumMul) >> sumShr) << 16) |
-            (((sumG * sumMul) >> sumShr) <<  8) |
-            (((sumB * sumMul) >> sumShr)      ) ;
 
 #if defined(FOG_DEBUG)
           FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
-          Face::p32Store4a(dstPtr, pix0);
-          dstPtr += 4;
+
+          Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
+          dstPtr += Accessor::PIXEL_BPP;
         } while (--i);
       }
 
@@ -677,7 +1116,8 @@ _First:
     }
   }
 
-  static void FOG_FASTCALL do_rect_box_v_prgb32(
+  template<typename Accessor>
+  static void FOG_FASTCALL do_rect_box_v(
     RasterConvolve* ctx)
   {
     uint8_t* dst = ctx->dstData;
@@ -690,10 +1130,10 @@ _First:
     uint runSize = ctx->runSize;
 
     uint32_t sumMul = getReciprocal(ctx->kernelSize);
-    uint8_t sumShr = 16;
+    uint32_t sumShr = 16;
 
-    uint32_t stackBuffer[512];
-    uint32_t* stackEnd = stackBuffer + ctx->kernelSize;
+    uint8_t stackBuffer[512 * Accessor::STACK_BPP];
+    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
 
     ssize_t* aTableData = ctx->aTableData;
     ssize_t* bTableData = ctx->bTableData;
@@ -710,178 +1150,140 @@ _First:
     {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
-      uint32_t* stackPtr = stackBuffer;
+      uint8_t* stackPtr = stackBuffer;
 
-      uint32_t pix0;
-      uint32_t sumA = 0;
-      uint32_t sumR = 0;
-      uint32_t sumG = 0;
-      uint32_t sumB = 0;
+      typename Accessor::Component sum0;
+      typename Accessor::Pixel pix0;
+
+      sum0.reset();
 
       i = aBorderLeadSize;
       if (i != 0)
       {
-        pix0 = ctx->extendColor.prgb32.p32;
+        Accessor::fetchSolid(pix0, ctx->extendColor);
         if (ctx->extendType == FE_EXTEND_PAD)
-          Face::p32Load4a(pix0, srcPtr + ctx->srcFirstOffset);
+          Accessor::fetchPixel(pix0, srcPtr + ctx->srcFirstOffset);
 
-        sumA += ((pix0 >> 24)       ) * i;
-        sumR += ((pix0 >> 16) & 0xFF) * i;
-        sumG += ((pix0 >>  8) & 0xFF) * i;
-        sumB += ((pix0      ) & 0xFF) * i;
+        sum0.addN(pix0, i);
 
         do {
           FOG_ASSERT(stackPtr < stackEnd);
-          stackPtr[0] = pix0;
-          stackPtr++;
+
+          Accessor::storeStack(stackPtr, pix0);
+          stackPtr += Accessor::STACK_BPP;
         } while (--i);
       }
 
       for (i = 0; i < aTableSize; i++)
       {
-        Face::p32Load4a(pix0, srcPtr + aTableData[i]);
-
         FOG_ASSERT(stackPtr < stackEnd);
-        stackPtr[0] = pix0;
-        stackPtr++;
 
-        sumA += (pix0 >> 24);
-        sumR += (pix0 >> 16) & 0xFF;
-        sumG += (pix0 >>  8) & 0xFF;
-        sumB += (pix0      ) & 0xFF;
+        Accessor::fetchPixel(pix0, srcPtr + aTableData[i]);
+        Accessor::storeStack(stackPtr, pix0);
+
+        stackPtr += Accessor::STACK_BPP;
+        sum0.add(pix0);
       }
 
       i = aBorderTailSize;
       if (i != 0)
       {
-        pix0 = ctx->extendColor.prgb32.p32;
+        Accessor::fetchSolid(pix0, ctx->extendColor);
         if (ctx->extendType == FE_EXTEND_PAD)
-          Face::p32Load4a(pix0, srcPtr + ctx->srcLastOffset);
+          Accessor::fetchPixel(pix0, srcPtr + ctx->srcLastOffset);
 
-        sumA += ((pix0 >> 24)       ) * i;
-        sumR += ((pix0 >> 16) & 0xFF) * i;
-        sumG += ((pix0 >>  8) & 0xFF) * i;
-        sumB += ((pix0      ) & 0xFF) * i;
+        sum0.addN(pix0, i);
 
         do {
           FOG_ASSERT(stackPtr < stackEnd);
-          stackPtr[0] = pix0;
-          stackPtr++;
+
+          Accessor::storeStack(stackPtr, pix0);
+          stackPtr += Accessor::STACK_BPP;
         } while (--i);
       }
 
       FOG_ASSERT(stackPtr == stackEnd);
+      FOG_ASSERT(runSize != 0);
+
       stackPtr = stackBuffer;
       srcPtr += ctx->runOffset;
 
       i = runSize;
-      FOG_ASSERT(i != 0);
-
       goto _First;
+
       do {
-        Face::p32Load4a(pix0, stackPtr);
-        sumA -= (pix0 >> 24);
-        sumR -= (pix0 >> 16) & 0xFF;
-        sumG -= (pix0 >>  8) & 0xFF;
-        sumB -= (pix0      ) & 0xFF;
-
-        Face::p32Load4a(pix0, srcPtr);
-        srcPtr += srcStride;
-
         FOG_ASSERT(stackPtr < stackEnd);
-        stackPtr[0] = pix0;
-        if (++stackPtr == stackEnd)
+
+        Accessor::fetchStack(pix0, stackPtr);
+        sum0.sub(pix0);
+
+        Accessor::fetchPixel(pix0, srcPtr);
+        Accessor::storeStack(stackPtr, pix0);
+        sum0.add(pix0);
+
+        srcPtr += srcStride;
+        stackPtr += Accessor::STACK_BPP;
+
+        if (stackPtr == stackEnd)
           stackPtr = stackBuffer;
 
-        sumA += (pix0 >> 24);
-        sumR += (pix0 >> 16) & 0xFF;
-        sumG += (pix0 >>  8) & 0xFF;
-        sumB += (pix0      ) & 0xFF;
-
 _First:
-        pix0 = 
-          (((sumA * sumMul) >> sumShr) << 24) |
-          (((sumR * sumMul) >> sumShr) << 16) |
-          (((sumG * sumMul) >> sumShr) <<  8) |
-          (((sumB * sumMul) >> sumShr)      ) ;
-
-        Face::p32Store4a(dstPtr, pix0);
+        Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
         dstPtr += dstStride;
       } while (--i);
 
       srcPtr = src;
       for (i = 0; i < bTableSize; i++)
       {
-        Face::p32Load4a(pix0, stackPtr);
-        sumA -= (pix0 >> 24);
-        sumR -= (pix0 >> 16) & 0xFF;
-        sumG -= (pix0 >>  8) & 0xFF;
-        sumB -= (pix0      ) & 0xFF;
-
-        Face::p32Load4a(pix0, srcPtr + bTableData[i]);
-
         FOG_ASSERT(stackPtr < stackEnd);
-        stackPtr[0] = pix0;
-        if (++stackPtr == stackEnd)
+
+        Accessor::fetchStack(pix0, stackPtr);
+        sum0.sub(pix0);
+
+        Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
+        Accessor::storeStack(stackPtr, pix0);
+        sum0.add(pix0);
+
+        stackPtr += Accessor::STACK_BPP;
+        if (stackPtr == stackEnd)
           stackPtr = stackBuffer;
-
-        sumA += (pix0 >> 24);
-        sumR += (pix0 >> 16) & 0xFF;
-        sumG += (pix0 >>  8) & 0xFF;
-        sumB += (pix0      ) & 0xFF;
-
-        pix0 = 
-          (((sumA * sumMul) >> sumShr) << 24) |
-          (((sumR * sumMul) >> sumShr) << 16) |
-          (((sumG * sumMul) >> sumShr) <<  8) |
-          (((sumB * sumMul) >> sumShr)      ) ;
-
-        Face::p32Store4a(dstPtr, pix0);
+          
+        Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
         dstPtr += dstStride;
       }
       
       i = bBorderTailSize;
       if (i != 0)
       {
-        uint32_t pixZ = ctx->extendColor.prgb32.p32;
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Face::p32Load4a(pixZ, srcPtr + ctx->srcLastOffset);
+        typename Accessor::Pixel pixB;
+        Accessor::fetchSolid(pixB, ctx->extendColor);
 
-        uint32_t pixA = ((pixZ >> 24)       );
-        uint32_t pixR = ((pixZ >> 16) & 0xFF);
-        uint32_t pixG = ((pixZ >>  8) & 0xFF);
-        uint32_t pixB = ((pixZ      ) & 0xFF);
+        if (ctx->extendType == FE_EXTEND_PAD)
+          Accessor::fetchPixel(pixB, srcPtr + ctx->srcLastOffset);
+
+        typename Accessor::Component compB;
+        Accessor::unpack(compB, pixB);
 
         do {
-          Face::p32Load4a(pix0, stackPtr);
-          sumA -= (pix0 >> 24);
-          sumR -= (pix0 >> 16) & 0xFF;
-          sumG -= (pix0 >>  8) & 0xFF;
-          sumB -= (pix0      ) & 0xFF;
-
           FOG_ASSERT(stackPtr < stackEnd);
-          stackPtr[0] = pixZ;
-          if (++stackPtr == stackEnd)
+
+          Accessor::fetchStack(pix0, stackPtr);
+          sum0.sub(pix0);
+
+          Accessor::storeStack(stackPtr, pixB);
+          sum0.add(compB);
+
+          stackPtr += Accessor::STACK_BPP;
+          if (stackPtr == stackEnd)
             stackPtr = stackBuffer;
 
-          sumA += pixA;
-          sumR += pixR;
-          sumG += pixG;
-          sumB += pixB;
-
-          pix0 = 
-            (((sumA * sumMul) >> sumShr) << 24) |
-            (((sumR * sumMul) >> sumShr) << 16) |
-            (((sumG * sumMul) >> sumShr) <<  8) |
-            (((sumB * sumMul) >> sumShr)      ) ;
-
-          Face::p32Store4a(dstPtr, pix0);
+          Accessor::storeMulShr(dstPtr, sum0, sumMul, sumShr);
           dstPtr += dstStride;
         } while (--i);
       }
 
-      dst += 4;
-      src += 4;
+      dst += Accessor::PIXEL_BPP;
+      src += Accessor::PIXEL_BPP;
     }
   }
 

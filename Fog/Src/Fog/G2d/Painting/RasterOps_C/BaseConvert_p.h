@@ -3132,9 +3132,9 @@ struct FOG_NO_EXPORT DibC
       dith3 = DitherTable::shf_dither(d, DitherTable::shf_arg(3));
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       if (((r0 & 0x3F) >= dith2) && (r0 < 0xC0)) r0 += 64;
       if (((g0 & 0x1F) >= dith3) && (g0 < 0xE0)) g0 += 32;
@@ -3162,9 +3162,9 @@ struct FOG_NO_EXPORT DibC
       dith2 = DitherTable::shf_dither(dt[dx & DitherTable::MASK], DitherTable::shf_arg(2)) * 4 / 3;
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       // c = c / 85
       r0t = (r0 * 0x00030000) >> 16;
@@ -3195,9 +3195,9 @@ struct FOG_NO_EXPORT DibC
       dith1 = DitherTable::shf_dither(dt[dx & DitherTable::MASK], DitherTable::shf_arg(0));
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       if (r0 > dith1) r0 = 255;
       if (g0 > dith1) g0 = 255;
@@ -3225,9 +3225,9 @@ struct FOG_NO_EXPORT DibC
       uint32_t r0, g0, b0, dith;
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       dith = DitherTable::shf_dither(dt[dx & DitherTable::MASK], DitherTable::shf_arg(5));
       if (((r0 & 7) >= dith) && (r0 < 0xF8)) r0 += 8;
@@ -3253,9 +3253,9 @@ struct FOG_NO_EXPORT DibC
       uint32_t r0, g0, b0, d, dith5, dith6;
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       d = dt[dx & DitherTable::MASK];
       dith5 = DitherTable::shf_dither(d, DitherTable::shf_arg(5));
@@ -3283,9 +3283,9 @@ struct FOG_NO_EXPORT DibC
       uint32_t r0, g0, b0, dith;
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       dith = DitherTable::shf_dither(dt[dx & DitherTable::MASK], DitherTable::shf_arg(5));
       if (((r0 & 7) >= dith) && (r0 < 0xF8)) r0 += 8;
@@ -3311,9 +3311,9 @@ struct FOG_NO_EXPORT DibC
       uint32_t r0, g0, b0, d, dith5, dith6;
 
       c0 = ((uint32_t *)src)[0];
-      r0 = (c0 & 0x00FF0000) >> 16;
-      g0 = (c0 & 0x0000FF00) >> 8;
-      b0 = (c0 & 0x000000FFU);
+      r0 = (c0 >> 16) & 0xFF;
+      g0 = (c0 >>  8) & 0xFF;
+      b0 = (c0      ) & 0xFF);
 
       d = dt[dx & DitherTable::MASK];
       dith5 = DitherTable::shf_dither(d, DitherTable::shf_arg(5));

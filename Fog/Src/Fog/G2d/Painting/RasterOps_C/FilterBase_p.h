@@ -13,10 +13,6 @@
 namespace Fog {
 namespace RasterOps_C {
 
-// ============================================================================
-// [Fog::RasterOps_C - Filter - Base]
-// ============================================================================
-
 } // RasterOps_C namespace
 } // Fog namespace
 

@@ -61,7 +61,8 @@ void UIEngineUpdateTask::run()
   if (!_scheduled)
     return;
 
-  // We need to clear this flag here, becuase doUpdateAll() can schedule again.
+  // We need to clear this flag here, becuase doUpdateAll() can do schedule 
+  // again.
   _scheduled = false;
 
   // Run doUpdateAll() which is the only way to make UIEngineWindow content
@@ -311,6 +312,8 @@ uint32_t UIEngine::doKeyAction(UIEngineWindow* window,
 {
   UIEngineWindowImpl* d = window->_d;
 
+  // TODO:
+
   return NO_FLAGS;
 }
 
@@ -327,6 +330,7 @@ uint32_t UIEngine::doMouseAction(UIEngineWindow* window,
   engineEvent._button = buttonCode;
   engineEvent._buttonMask = buttonMask;
   engineEvent._position = position;
+  // TODO:
   // engineEvent._offset = ;
 
   window->onEngineEvent(&engineEvent);

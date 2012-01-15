@@ -312,7 +312,7 @@ struct FOG_NO_EXPORT FBlur
     if (FOG_IS_NULL(conv.aTableData))
       goto _End;
 
-    doFillBorderTables(&conv, tmpExtendTop, 0, srcRect->h - 1 + tmpExtendTop + tmpExtendBottom, conv.srcStride);
+    doFillBorderTables(&conv, tmpExtendTop - radius, 0, srcRect->h - 1 + tmpExtendTop + tmpExtendBottom, conv.srcStride);
 
     FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == size);
     FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->h);
@@ -331,8 +331,8 @@ _End:
   static void FOG_FASTCALL doFillBorderTables(
     RasterConvolve* ctx, int t, int tMin, int tMax, ssize_t tMul)
   {
+    uint i;
     int tRepeat = tMax - tMin + 1;
-    int i;
 
     ctx->aBorderLeadSize = 0;
     ctx->aBorderTailSize = 0;
@@ -352,10 +352,8 @@ _End:
           ctx->aTableSize -= ctx->aBorderLeadSize;
           t = tMin;
         }
-
-        i = t + ctx->kernelSize + ctx->runSize;
         
-        if (t + ctx->aTableSize > tMax + 1)
+        if (t + int(ctx->aTableSize) > tMax + 1)
         {
           ctx->aBorderTailSize = (t + ctx->aTableSize) - (tMax + 1);
           ctx->aTableSize -= ctx->aBorderTailSize;
@@ -363,10 +361,14 @@ _End:
           ctx->bBorderTailSize = ctx->bTableSize;
           ctx->bTableSize = 0;
         }
-        else if (i > tMax)
+        else 
         {
-          ctx->bBorderTailSize = Math::min<int>(i - tMax, int(ctx->bTableSize));
-          ctx->bTableSize -= ctx->bBorderTailSize;
+          int m = t + int(ctx->kernelSize) + int(ctx->runSize);
+          if (m > tMax)
+          {
+            ctx->bBorderTailSize = Math::min<int>(m - tMax, int(ctx->bTableSize));
+            ctx->bTableSize -= ctx->bBorderTailSize;
+          }
         }
 
         // Now it's safe to continue using Repeat mode.

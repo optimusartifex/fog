@@ -15,7 +15,7 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::UIEngineWindowimpl]
+// [Fog::UIEngineWindowImpl - Construction / Destruction]
 // ============================================================================
 
 UIEngineWindowImpl::UIEngineWindowImpl(UIEngine* engine, UIEngineWindow* window) :
@@ -71,7 +71,7 @@ UIEngineWindowImpl::~UIEngineWindowImpl()
 }
 
 // ============================================================================
-// [Fog::UIEngineWindow - Create / Destroy]
+// [Fog::UIEngineWindowImpl - Create / Destroy]
 // ============================================================================
 
 void UIEngineWindowImpl::destroyed()
@@ -111,7 +111,7 @@ void UIEngineWindowImpl::destroyed()
 }
 
 // ============================================================================
-// [Fog::UIEngineWindow - Window - Double-Buffer]
+// [Fog::UIEngineWindowImpl - Window - Double-Buffer]
 // ============================================================================
 
 err_t UIEngineWindowImpl::resizeDoubleBuffer(const SizeI& size)

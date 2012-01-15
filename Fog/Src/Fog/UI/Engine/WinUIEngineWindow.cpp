@@ -879,8 +879,6 @@ LRESULT WinUIEngineWindowImpl::onWinMsg(UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_ERASEBKGND:
       return 1;
 
-    // TODO: I'd like to use our message id.
-    //
     // Message is sent to create a onGeometryAction on maximized application
     // start.
     case WM_FOG_UPDATE_POS:

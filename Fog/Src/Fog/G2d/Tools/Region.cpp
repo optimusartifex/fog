@@ -793,7 +793,9 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
 
   FOG_ASSERT(d->capacity >= length);
   BoxI* dCur = d->data;
+#if defined(FOG_DEBUG)
   BoxI* dEnd = d->data + d->length;
+#endif // FOG_DEBUG
 
   BoxI* dPrevBand = NULL;
   BoxI* dCurBand;
@@ -844,7 +846,9 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
       y1 = Math::min(sCur->y1, cy1);
 
       // First box.
+#if defined(FOG_DEBUG)
       FOG_ASSERT(dCur != dEnd);
+#endif // FOG_DEBUG
       dCur->setBox(Math::max(sCur->x0, cx0), y0, Math::min(sCur->x1, cx1), y1);
       dCur++;
 
@@ -854,7 +858,9 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
       // Inner boxes.
       while (sCur->x1 <= cx1)
       {
+#if defined(FOG_DEBUG)
         FOG_ASSERT(dCur != dEnd);
+#endif // FOG_DEBUG
         FOG_ASSERT(sCur->x0 >= cx0 && sCur->x1 <= cx1);
 
         dCur->setBox(sCur->x0, y0, sCur->x1, y1);
@@ -867,7 +873,9 @@ static err_t FOG_CDECL Region_clip(Region* dst, const Region* src, const BoxI* c
       // Last box.
       if (sCur->x0 < cx1)
       {
+#if defined(FOG_DEBUG)
         FOG_ASSERT(dCur != dEnd);
+#endif // FOG_DEBUG
         FOG_ASSERT(sCur->x0 >= cx0);
 
         dCur->setBox(sCur->x0, y0, Math::min(sCur->x1, cx1), y1);

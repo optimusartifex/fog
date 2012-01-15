@@ -75,13 +75,13 @@ void AppWindow::onPaint(Painter* _p)
   StringW msg;
   msg.format("Size: %d %d", geom.w, geom.h);
 
-  font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(100.0f, 100.0f), msg);
+  font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(250.0f, 100.0f), msg);
 
   p.setSource(Argb32(0xFFFF0000));
   p.setLineWidth(3.0f);
   p.fillPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_BOX, 8.0f);
+  FeBlur feBlur(FE_BLUR_TYPE_BOX, 2.0f);
   feBlur.setExtendType(FE_EXTEND_COLOR);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
 
@@ -91,10 +91,10 @@ void AppWindow::onPaint(Painter* _p)
   //p.setOpacity(0.15f);
   //p.setSource(Argb32(0xFF0000FF));
   //p.fillRect(RectI(60, 60, 140, 100));
-  
+
   //p.resetOpacity();
   //p.setSource(Argb32(0xFF00FF00));
-  
+
   //p.drawRect(0.5f, 0.5f, float(geom.w) - 1.0f, float(geom.h) - 1.0f);
 
   // SvgDocument svg;

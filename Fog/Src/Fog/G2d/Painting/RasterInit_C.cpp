@@ -51,7 +51,7 @@
 # define FOG_RASTER_INIT_C
 #endif // FOG_HARDCODE_SSE2
 
-// TODO:
+// TODO: At the moment there is no SSE2 pipeline.
 # define FOG_RASTER_INIT_C
 
 namespace Fog {
@@ -754,10 +754,10 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   filter.blur.box.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_PRGB32>;
   filter.blur.box.convolve_h[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_XRGB32>;
   filter.blur.box.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_XRGB32>;
-  filter.blur.box.convolve_h[IMAGE_FORMAT_RGB24]  = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_RGB24]  = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.box.convolve_h[IMAGE_FORMAT_A8]     = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_A8    >;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_A8]     = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_A8    >;
+  filter.blur.box.convolve_h[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_RGB24 >;
+  filter.blur.box.convolve_v[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_RGB24 >;
+  filter.blur.box.convolve_h[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_A8    >;
+  filter.blur.box.convolve_v[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_A8    >;
 }
 
 } // Fog namespace

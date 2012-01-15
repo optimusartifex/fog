@@ -70,7 +70,7 @@ namespace RasterOps_C {
 // random memory access, which is costly. So we process several pixels in the
 // same memory location to reduce the effect of random memory access. Higher
 // value means more memory used by blur stack, but should increase performance.
-enum { BLUR_HLINE_COUNT = 16 };
+enum { BLUR_RECT_V_HLINE_COUNT = 16 };
 
 // ============================================================================
 // [Fog::RasterOps_C - Filter - Base - Component - PRGB32]
@@ -595,7 +595,10 @@ struct FOG_NO_EXPORT FBlur
   // [Blur - Helpers]
   // ==========================================================================
 
-  // Get reciprocal for 16-bit value @a val.
+  //! @brief Get reciprocal for 16-bit value @a val.
+  //!
+  //! Used to scale SUM of A, R, G, B pixels into the final pixels, which is
+  //! stored to the destination buffer.
   static FOG_INLINE int getReciprocal(int val)
   {
     return (val + 65535) / val;
@@ -708,7 +711,8 @@ struct FOG_NO_EXPORT FBlur
     RasterConvolve conv;
     conv.filterCtx = ctx;
 
-    int radius, size;
+    int kernelRadius;
+    int kernelSize;
     int i;
 
     const ImageFormatDescription& dstDesc = ImageFormatDescription::getByFormat(ctx->dstFormat);
@@ -720,20 +724,20 @@ struct FOG_NO_EXPORT FBlur
 
     ssize_t tmpStride = 0;
     uint8_t* tmpBuffer = NULL;
-  
+
     // ------------------------------------------------------------------------
     // [Base]
     // ------------------------------------------------------------------------
 
     tmpExtendTop = Math::min(ctx->blur.vRadius, srcRect->y);
     tmpExtendBottom = Math::min(ctx->blur.vRadius, srcSize->h - srcRect->y - srcRect->h);
-    
+
     if ((tmpExtendTop | tmpExtendBottom) != 0)
     {
       tmpHeight = srcRect->h + tmpExtendTop + tmpExtendBottom;
-      tmpStride = srcRect->w * 4;
+      tmpStride = srcRect->w * dstDesc.getBytesPerPixel();
       tmpBuffer = reinterpret_cast<uint8_t*>(MemMgr::alloc(tmpHeight * tmpStride));
-      
+
       if (FOG_IS_NULL(tmpBuffer))
         goto _End;
     }
@@ -746,8 +750,8 @@ struct FOG_NO_EXPORT FBlur
     // [Horizontal]
     // ------------------------------------------------------------------------
 
-    radius = ctx->blur.hRadius;
-    size = radius * 2 + 1;
+    kernelRadius = ctx->blur.hRadius;
+    kernelSize = kernelRadius * 2 + 1;
 
     if (tmpBuffer)
     {
@@ -766,28 +770,35 @@ struct FOG_NO_EXPORT FBlur
 
     i = Math::max(srcSize->w - srcRect->x, 0);
     conv.rowSize     = srcRect->h + tmpExtendTop + tmpExtendBottom;
-    conv.runSize     = (i > radius) ? Math::min(i - radius, srcRect->w) : 1;
-    conv.runOffset   = (srcRect->x + radius + 1) * (int)srcDesc.getBytesPerPixel();
+    conv.runSize     = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->w) : 1;
+    conv.runOffset   = (srcRect->x + kernelRadius + 1) * (int)srcDesc.getBytesPerPixel();
 
-    conv.aTableSize  = size;
-    conv.bTableSize  = Math::min<int>(srcRect->w - conv.runSize, radius);
+    conv.aTableSize  = kernelSize;
+    conv.bTableSize  = Math::min<int>(srcRect->w - conv.runSize, kernelRadius);
 
-    conv.kernelRadius= radius;
-    conv.kernelSize  = size;
+    conv.kernelRadius= kernelRadius;
+    conv.kernelSize  = kernelSize;
 
     conv.srcFirstOffset = 0;
     conv.srcLastOffset  = (srcSize->w - 1) * (int)srcDesc.getBytesPerPixel();
 
-    conv.aTableData = static_cast<ssize_t*>(
-      ctx->memBuffer->alloc((conv.aTableSize + conv.bTableSize) * sizeof(ssize_t)));
+    if (memBuffer->alloc(
+      (conv.aTableSize + conv.bTableSize) * sizeof(ssize_t) + 
+      kernelSize * dstDesc.getBytesPerPixel()) == NULL)
+    {
+      goto _End;
+    }
+
+    conv.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
     conv.bTableData = conv.aTableData + conv.aTableSize;
+    conv.stack = reinterpret_cast<uint8_t*>(conv.bTableData + conv.bTableSize);
 
     if (FOG_IS_NULL(conv.aTableData))
       goto _End;
 
-    doFillBorderTables(&conv, srcRect->x - radius, 0, srcSize->w - 1, srcDesc.getBytesPerPixel());
+    doFillBorderTables(&conv, srcRect->x - kernelRadius, 0, srcSize->w - 1, srcDesc.getBytesPerPixel());
   
-    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == size);
+    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == kernelSize);
     FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->w);
 
     ctx->blur.hConvolve(&conv);
@@ -796,8 +807,8 @@ struct FOG_NO_EXPORT FBlur
     // [Vertical]
     // ------------------------------------------------------------------------
 
-    radius = ctx->blur.vRadius;
-    size = radius * 2 + 1;
+    kernelRadius = ctx->blur.vRadius;
+    kernelSize = kernelRadius * 2 + 1;
 
     conv.dstData = dst + dstPos->y * dstStride +
                          dstPos->x * (int)dstDesc.getBytesPerPixel();
@@ -816,28 +827,32 @@ struct FOG_NO_EXPORT FBlur
 
     i = Math::max(srcSize->h - srcRect->y, 0);
     conv.rowSize     = srcRect->w;
-    conv.runSize     = (i > radius) ? Math::min(i - radius, srcRect->h) : 1;
-    conv.runOffset   = (tmpExtendTop + radius + 1) * conv.srcStride;
+    conv.runSize     = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->h) : 1;
+    conv.runOffset   = (tmpExtendTop + kernelRadius + 1) * conv.srcStride;
 
-    conv.aTableSize  = size;
-    conv.bTableSize  = Math::min<int>(srcRect->h - conv.runSize, radius);
+    conv.aTableSize  = kernelSize;
+    conv.bTableSize  = Math::min<int>(srcRect->h - conv.runSize, kernelRadius);
 
-    conv.kernelRadius= radius;
-    conv.kernelSize  = size;
+    conv.kernelRadius= kernelRadius;
+    conv.kernelSize  = kernelSize;
 
     conv.srcFirstOffset = 0;
     conv.srcLastOffset  = (srcRect->h - 1 + tmpExtendTop + tmpExtendBottom) * conv.srcStride;
 
-    conv.aTableData = static_cast<ssize_t*>(
-      ctx->memBuffer->alloc((conv.aTableSize + conv.bTableSize) * sizeof(ssize_t)));
-    conv.bTableData = conv.aTableData + conv.aTableSize;
-
-    if (FOG_IS_NULL(conv.aTableData))
+    if (memBuffer->alloc(
+      (conv.aTableSize + conv.bTableSize) * sizeof(ssize_t) + 
+      kernelSize * BLUR_RECT_V_HLINE_COUNT * dstDesc.getBytesPerPixel()) == NULL)
+    {
       goto _End;
+    }
 
-    doFillBorderTables(&conv, tmpExtendTop - radius, 0, srcRect->h - 1 + tmpExtendTop + tmpExtendBottom, conv.srcStride);
+    conv.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
+    conv.bTableData = conv.aTableData + conv.aTableSize;
+    conv.stack = reinterpret_cast<uint8_t*>(conv.bTableData + conv.bTableSize);
 
-    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == size);
+    doFillBorderTables(&conv, tmpExtendTop - kernelRadius, 0, srcRect->h - 1 + tmpExtendTop + tmpExtendBottom, conv.srcStride);
+
+    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == kernelSize);
     FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->h);
 
     ctx->blur.vConvolve(&conv);
@@ -981,11 +996,10 @@ _Repeat:
     uint32_t sumMul = getReciprocal(ctx->kernelSize);
     uint32_t sumShr = 16;
 
-    uint8_t stackBuffer[512 * Accessor::STACK_BPP];
-    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
-
     ssize_t* aTableData = ctx->aTableData;
     ssize_t* bTableData = ctx->bTableData;
+    uint8_t* stackBuffer = ctx->stack;
+    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
     
     uint aBorderLeadSize = ctx->aBorderLeadSize;
     uint aBorderTailSize = ctx->aBorderTailSize;
@@ -1189,6 +1203,7 @@ _First:
 
     ssize_t* aTableData = ctx->aTableData;
     ssize_t* bTableData = ctx->bTableData;
+    uint8_t* stackBuffer = ctx->stack;
     
     uint aBorderLeadSize = ctx->aBorderLeadSize;
     uint aBorderTailSize = ctx->aBorderTailSize;
@@ -1198,17 +1213,16 @@ _First:
     uint bTableSize = ctx->bTableSize;
 
     uint i, r = 0;
-    uint8_t stackBuffer[512 * BLUR_HLINE_COUNT * Accessor::STACK_BPP];
 
     do {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
       uint8_t* stackPtr = stackBuffer;
 
-      typename Accessor::Component sum[BLUR_HLINE_COUNT];
+      typename Accessor::Component sum[BLUR_RECT_V_HLINE_COUNT];
       typename Accessor::Pixel pix0;
 
-      uint xLength = Math::min<uint>(runWidth - r, BLUR_HLINE_COUNT);
+      uint xLength = Math::min<uint>(runWidth - r, BLUR_RECT_V_HLINE_COUNT);
       uint x;
 
       uint8_t* stackEnd = stackBuffer + ctx->kernelSize * xLength * Accessor::STACK_BPP;

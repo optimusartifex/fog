@@ -900,6 +900,9 @@ struct FOG_NO_EXPORT RasterConvolve
   uint kernelRadius;
   //! @brief Kernel size (radius * 2 + 1).
   uint kernelSize;
+
+  //! @brief Stack.
+  uint8_t* stack;
 };
 
 //! @}

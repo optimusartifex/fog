@@ -200,8 +200,8 @@ typedef void (FOG_FASTCALL *RasterGradientInterpolateFunc)(
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterFilterCreateFunc)(
   RasterFilter* ctx,
-  const ImageFilter* filter,
-  const ImageFilterScaleD* scale,
+  const FeBase* feBase,
+  const ImageFilterScaleD* feScale,
   MemBuffer* memBuffer,
   uint32_t dstFormat,
   uint32_t srcFormat);

@@ -57,7 +57,7 @@ namespace RasterOps_C {
 //      - One pixel is read and stored per loop iteration.
 //
 //   6. 'bBorderTailSize' - Process the tailing border pixels.
-//      - No data is read at this step.
+//      - No data is read at this step, one pixel is stored per iteration.
 //
 // The naming convention is strict. For initial processing the prefix 'a' is
 // used (aBorderSize, aTableSize, ...). For final processing the prefix 'b' is
@@ -66,10 +66,14 @@ namespace RasterOps_C {
 // For SSE2 version please see RasterOps_SSE2 directory.
 
 // How many pixels to process horizontally in BlurV. The problem here is that
-// when using the standard way (1 pixel per run) then there is unpredicted
+// when using the standard way (1 pixel per run) then there is unpredictable
 // random memory access, which is costly. So we process several pixels in the
-// same memory location to reduce the effect of random memory access. Higher
-// value means more memory used by blur stack, but should increase performance.
+// same memory location to reduce the effect of random memory access, but of
+// course we do more memory reads/writes, but these should be fast, because the
+// reads/writes are continuous and should be already in L1/L2 cache.
+//
+// Higher value means more memory used by blur stack, but should increase 
+// performance. Experiments are welcome.
 enum { BLUR_RECT_V_HLINE_COUNT = 16 };
 
 // ============================================================================
@@ -610,8 +614,8 @@ struct FOG_NO_EXPORT FBlur
 
   static err_t FOG_FASTCALL create(
     RasterFilter* ctx,
-    const ImageFilter* filter,
-    const ImageFilterScaleD* scale,
+    const FeBase* feBase,
+    const ImageFilterScaleD* feScale,
     MemBuffer* memBuffer,
     uint32_t dstFormat,
     uint32_t srcFormat)
@@ -623,7 +627,8 @@ struct FOG_NO_EXPORT FBlur
     if (dstFormat != srcFormat)
       return ERR_IMAGE_INVALID_FORMAT;
 
-    const FeBlur* feData = reinterpret_cast<const FeBlur*>(filter->_d->getFeData());
+    FOG_ASSERT(feBase->getFeType() == FE_TYPE_BLUR);
+    const FeBlur* feData = static_cast<const FeBlur*>(feBase);
 
     ctx->reference.init(1);
     ctx->destroy = destroy;
@@ -655,16 +660,16 @@ struct FOG_NO_EXPORT FBlur
     float hRadiusScale = 1.0f;
     float vRadiusScale = 1.0f;
 
-    if (scale != NULL)
+    if (feScale != NULL)
     {
-      hRadiusScale = float(scale->_pt.x);
-      vRadiusScale = float(scale->_pt.y);
+      hRadiusScale = float(feScale->_pt.x);
+      vRadiusScale = float(feScale->_pt.y);
     }
 
     ctx->blur.hRadius = Math::bound<int>(Math::abs(Math::iround(feData->_hRadius * hRadiusScale)), 0, 254);
     ctx->blur.vRadius = Math::bound<int>(Math::abs(Math::iround(feData->_vRadius * vRadiusScale)), 0, 254);
 
-    if (scale != NULL && scale->isSwapped())
+    if (feScale != NULL && feScale->isSwapped())
       swap(ctx->blur.hRadius, ctx->blur.vRadius);
 
     ctx->blur.hConvolve = _api_raster.filter.blur.box.convolve_h[srcFormat];
@@ -801,6 +806,20 @@ struct FOG_NO_EXPORT FBlur
     FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == kernelSize);
     FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->w);
 
+    // Logger::debug("Fog::RasterOps_C::FBlur", "do_rect", "RectH | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
+    //   dstPos->x,
+    //   dstPos->y,
+    //   srcRect->x,
+    //   srcRect->y,
+    //   srcRect->w,
+    //   srcRect->h,
+    //   conv.aBorderLeadSize,
+    //   conv.aTableSize,
+    //   conv.aBorderTailSize,
+    //   conv.runSize,
+    //   conv.bTableSize,
+    //   conv.bBorderTailSize);
+
     ctx->blur.hConvolve(&conv);
 
     // ------------------------------------------------------------------------
@@ -855,6 +874,20 @@ struct FOG_NO_EXPORT FBlur
     FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == kernelSize);
     FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->h);
 
+    // Logger::debug("Fog::RasterOps_C::FBlur", "do_rect", "RectV | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
+    //   dstPos->x,
+    //   dstPos->y,
+    //   srcRect->x,
+    //   srcRect->y,
+    //   srcRect->w,
+    //   srcRect->h,
+    //   conv.aBorderLeadSize,
+    //   conv.aTableSize,
+    //   conv.aBorderTailSize,
+    //   conv.runSize,
+    //   conv.bTableSize,
+    //   conv.bBorderTailSize);
+
     ctx->blur.vConvolve(&conv);
 
     err = ERR_OK;
@@ -866,6 +899,10 @@ _End:
     return err;
   }
   
+  // ==========================================================================
+  // [Blur - DoRect - FillBorderTables]
+  // ==========================================================================
+
   static void FOG_FASTCALL doFillBorderTables(
     RasterConvolve* ctx, int t, int tMin, int tMax, ssize_t tMul)
   {
@@ -901,7 +938,7 @@ _End:
         }
         else 
         {
-          int m = t + int(ctx->kernelSize) + int(ctx->runSize);
+          int m = t + int(ctx->kernelSize) + int(ctx->runSize) + int(ctx->bTableSize);
           if (m > tMax)
           {
             ctx->bBorderTailSize = Math::min<int>(m - tMax, int(ctx->bTableSize));
@@ -977,7 +1014,7 @@ _Repeat:
   }
 
   // ==========================================================================
-  // [Blur - DoRect - Box]
+  // [Blur - DoRect - BoxH]
   // ==========================================================================
 
   template<typename Accessor>
@@ -1184,6 +1221,10 @@ _First:
       src += srcStride;
     }
   }
+
+  // ==========================================================================
+  // [Blur - DoRect - BoxV]
+  // ==========================================================================
 
   template<typename Accessor>
   static void FOG_FASTCALL do_rect_box_v(

@@ -15,6 +15,7 @@
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/Logger.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>
 #include <Fog/G2d/Geometry/Math2d.h>

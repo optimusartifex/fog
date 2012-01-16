@@ -49,14 +49,16 @@ struct FOG_NO_EXPORT ImageFilterData
       reinterpret_cast<const uint8_t*>(this) + sizeof(ImageFilterData));
   }
 
-  FOG_INLINE const void* getFeData() const
+  FOG_INLINE const FeBase* getFeData() const
   {
-    return reinterpret_cast<const uint8_t*>(this) + sizeof(ImageFilterData);
+    return reinterpret_cast<const FeBase*>(
+      reinterpret_cast<const uint8_t*>(this) + sizeof(ImageFilterData));
   }
 
-  FOG_INLINE void* getFeData()
+  FOG_INLINE FeBase* getFeData()
   {
-    return reinterpret_cast<uint8_t*>(this) + sizeof(ImageFilterData);
+    return reinterpret_cast<FeBase*>(
+      reinterpret_cast<uint8_t*>(this) + sizeof(ImageFilterData));
   }
 
   // --------------------------------------------------------------------------
@@ -145,6 +147,11 @@ struct FOG_NO_EXPORT ImageFilter
   FOG_INLINE uint32_t getFeType() const
   {
     return _d->getFeType();
+  }
+  
+  FOG_INLINE const FeBase* getFeData() const
+  {
+    return _d->getFeData();
   }
 
   FOG_INLINE err_t getData(FeBase& fe) const

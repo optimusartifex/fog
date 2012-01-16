@@ -24,8 +24,10 @@
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
+#include <Fog/G2d/Imaging/Filters/FeBase.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
@@ -3408,6 +3410,104 @@ static err_t FOG_CDECL RasterPaintEngine_blitMaskedImageInD(Painter* self, const
 }
 
 // ============================================================================
+// [Fog::RasterPaintEngine - Filter]
+// ============================================================================
+
+static err_t FOG_CDECL RasterPaintEngine_filterAll(Painter* self, const FeBase* feBase)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  return engine->serializer->filterNormalizedBoxI(engine, feBase, engine->ctx.clipBoxI);
+}
+
+static err_t FOG_CDECL RasterPaintEngine_filterRectI(Painter* self, const FeBase* feBase, const RectI& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  if (engine->isIntegralTransform())
+  {
+    BoxI box(UNINITIALIZED);
+    if (engine->doIntegralTransformAndClip(box, r, engine->ctx.clipBoxI))
+      return engine->serializer->filterNormalizedBoxI(engine, feBase, box);
+    else
+      return ERR_OK;
+  }
+  else
+  {
+    if (!engine->ctx.paintHints.geometricPrecision)
+      return engine->vtable->filterRectF(self, feBase, RectF(r));
+    else
+      return engine->vtable->filterRectD(self, feBase, RectD(r));
+  }
+}
+
+static err_t FOG_CDECL RasterPaintEngine_filterRectF(Painter* self, const FeBase* feBase, const RectF& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  BoxF box(r);
+  if (engine->ensureFinalTransformF())
+  {
+    if (!engine->ctx.rasterHints.rectToRectTransform)
+    {
+      PathF& path = engine->ctx.tmpPathF[0];
+      path.clear();
+      path.rect(r, PATH_DIRECTION_CW);
+      return engine->serializer->filterPathF(engine, feBase, path, FILL_RULE_NON_ZERO);
+    }
+    engine->getFinalTransformF().mapBox(box, box);
+  }
+
+  if (!BoxF::intersect(box, box, engine->getClipBoxF()))
+    return ERR_OK;
+
+  return engine->serializer->filterNormalizedBoxF(engine, feBase, box);
+}
+
+static err_t FOG_CDECL RasterPaintEngine_filterRectD(Painter* self, const FeBase* feBase, const RectD& r)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  BoxD box(r);
+  if (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY)
+  {
+    if (!engine->ctx.rasterHints.rectToRectTransform)
+    {
+      PathD& path = engine->ctx.tmpPathD[0];
+      path.clear();
+      path.rect(r, PATH_DIRECTION_CW);
+      return engine->serializer->filterPathD(engine, feBase, path, FILL_RULE_NON_ZERO);
+    }
+    engine->getFinalTransformD().mapBox(box, box);
+  }
+
+  if (!BoxD::intersect(box, box, engine->getClipBoxD()))
+    return ERR_OK;
+
+  return engine->serializer->filterNormalizedBoxD(engine, feBase, box);
+}
+
+static err_t FOG_CDECL RasterPaintEngine_filterPathF(Painter* self, const FeBase* feBase, const PathF& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  return engine->serializer->filterPathF(engine, feBase, p, engine->ctx.paintHints.fillRule);
+}
+
+static err_t FOG_CDECL RasterPaintEngine_filterPathD(Painter* self, const FeBase* feBase, const PathD& p)
+{
+  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILTER_FUNC();
+
+  return engine->serializer->filterPathD(engine, feBase, p, engine->ctx.paintHints.fillRule);
+}
+
+// ============================================================================
 // [Fog::RasterPaintEngine - Clip]
 // ============================================================================
 
@@ -3703,104 +3803,6 @@ static err_t FOG_CDECL RasterPaintEngine_resetClip(Painter* self)
 
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPaintEngine - Filter]
-// ============================================================================
-
-static err_t FOG_CDECL RasterPaintEngine_filterAll(Painter* self, const ImageFilter& filter)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILTER_FUNC();
-
-  return engine->serializer->filterNormalizedBoxI(engine, engine->ctx.clipBoxI, filter);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_filterRectI(Painter* self, const RectI& r, const ImageFilter& filter)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILTER_FUNC();
-
-  if (engine->isIntegralTransform())
-  {
-    BoxI box(UNINITIALIZED);
-    if (engine->doIntegralTransformAndClip(box, r, engine->ctx.clipBoxI))
-      return engine->serializer->filterNormalizedBoxI(engine, box, filter);
-    else
-      return ERR_OK;
-  }
-  else
-  {
-    if (!engine->ctx.paintHints.geometricPrecision)
-      return engine->vtable->filterRectF(self, RectF(r), filter);
-    else
-      return engine->vtable->filterRectD(self, RectD(r), filter);
-  }
-}
-
-static err_t FOG_CDECL RasterPaintEngine_filterRectF(Painter* self, const RectF& r, const ImageFilter& filter)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILTER_FUNC();
-
-  BoxF box(r);
-  if (engine->ensureFinalTransformF())
-  {
-    if (!engine->ctx.rasterHints.rectToRectTransform)
-    {
-      PathF& path = engine->ctx.tmpPathF[0];
-      path.clear();
-      path.rect(r, PATH_DIRECTION_CW);
-      return engine->serializer->filterPathF(engine, path, FILL_RULE_NON_ZERO, filter);
-    }
-    engine->getFinalTransformF().mapBox(box, box);
-  }
-
-  if (!BoxF::intersect(box, box, engine->getClipBoxF()))
-    return ERR_OK;
-
-  return engine->serializer->filterNormalizedBoxF(engine, box, filter);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_filterRectD(Painter* self, const RectD& r, const ImageFilter& filter)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILTER_FUNC();
-
-  BoxD box(r);
-  if (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY)
-  {
-    if (!engine->ctx.rasterHints.rectToRectTransform)
-    {
-      PathD& path = engine->ctx.tmpPathD[0];
-      path.clear();
-      path.rect(r, PATH_DIRECTION_CW);
-      return engine->serializer->filterPathD(engine, path, FILL_RULE_NON_ZERO, filter);
-    }
-    engine->getFinalTransformD().mapBox(box, box);
-  }
-
-  if (!BoxD::intersect(box, box, engine->getClipBoxD()))
-    return ERR_OK;
-
-  return engine->serializer->filterNormalizedBoxD(engine, box, filter);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_filterPathF(Painter* self, const PathF& p, const ImageFilter& filter)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILTER_FUNC();
-
-  return engine->serializer->fillPathF(engine, p, engine->ctx.paintHints.fillRule);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_filterPathD(Painter* self, const PathD& p, const ImageFilter& filter)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILTER_FUNC();
-
-  return engine->serializer->fillPathD(engine, p, engine->ctx.paintHints.fillRule);
 }
 
 // ============================================================================
@@ -5493,6 +5495,140 @@ static err_t FOG_FASTCALL RasterSerializer_blitNormalizedImageD_st(
 }
 
 // ============================================================================
+// [Fog::RasterSerializer - FilterPath]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterSerializer_filterPathF_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const PathF& path, uint32_t fillRule)
+{
+  PathF& tmp = engine->ctx.tmpPathF[1];
+
+  bool hasTransform = engine->ensureFinalTransformF();
+  PathClipperF clipper(engine->getClipBoxF());
+
+  if (!hasTransform)
+  {
+    switch (clipper.measurePath(path))
+    {
+      case PATH_CLIPPER_MEASURE_BOUNDED:
+        engine->serializer->filterNormalizedPathF(engine, feBase, path, fillRule);
+        return ERR_OK;
+
+      case PATH_CLIPPER_MEASURE_UNBOUNDED:
+        tmp.clear();
+        FOG_RETURN_ON_ERROR(clipper.continuePath(tmp, path));
+        engine->serializer->filterNormalizedPathF(engine, feBase, tmp, fillRule);
+        return ERR_OK;
+
+      default:
+        return ERR_GEOMETRY_INVALID;
+    }
+  }
+  else
+  {
+    tmp.clear();
+    FOG_RETURN_ON_ERROR(clipper.clipPath(tmp, path, engine->getFinalTransformF()));
+    engine->serializer->filterNormalizedPathF(engine, feBase, tmp, fillRule);
+    return ERR_OK;
+  }
+}
+
+static err_t FOG_FASTCALL RasterSerializer_filterPathD_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const PathD& path, uint32_t fillRule)
+{
+  PathD& tmp = engine->ctx.tmpPathD[1];
+
+  bool hasTransform = (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY);
+  PathClipperD clipper(engine->getClipBoxD());
+
+  if (!hasTransform)
+  {
+    switch (clipper.measurePath(path))
+    {
+      case PATH_CLIPPER_MEASURE_BOUNDED:
+        engine->serializer->filterNormalizedPathD(engine, feBase, path, fillRule);
+        return ERR_OK;
+
+      case PATH_CLIPPER_MEASURE_UNBOUNDED:
+        tmp.clear();
+        FOG_RETURN_ON_ERROR(clipper.continuePath(tmp, path));
+        engine->serializer->filterNormalizedPathD(engine, feBase, tmp, fillRule);
+        return ERR_OK;
+
+      default:
+        return ERR_GEOMETRY_INVALID;
+    }
+  }
+  else
+  {
+    tmp.clear();
+    FOG_RETURN_ON_ERROR(clipper.clipPath(tmp, path, engine->getFinalTransformD()));
+    engine->serializer->filterNormalizedPathD(engine, feBase, tmp, fillRule);
+    return ERR_OK;
+  }
+}
+
+// ============================================================================
+// [Fog::RasterSerializer - FilterNormalizedBox]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxI_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const BoxI& box)
+{
+  RasterFilter ctx;
+  FOG_ASSERT(box.isValid());
+
+  // Destination and source formats are the same.
+  FOG_RETURN_ON_ERROR(_api_raster.filter.create[feBase->getFeType()](&ctx,
+    feBase, &engine->ctx.filterScale,
+    &engine->ctx.buffer,
+    engine->ctx.layer.primaryFormat,
+    engine->ctx.layer.primaryFormat));
+
+  PointI dstPos(box.x0, box.y0);
+  RectI srcRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
+
+  err_t err = ctx.doRect(&ctx,
+    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &dstPos,
+    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &srcRect);
+
+  ctx.destroy(&ctx);
+  return err;
+}
+
+static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxF_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const BoxF& box)
+{
+  // TODO: Raster paint-engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxD_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const BoxD& box)
+{
+  // TODO: Raster paint-engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::RasterSerializer - FilterNormalizedPath]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterSerializer_filterNormalizedPathF_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const PathF& path, uint32_t fillRule)
+{
+  // TODO: Raster paint-engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterSerializer_filterNormalizedPathD_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const PathD& path, uint32_t fillRule)
+{
+  // TODO: Raster paint-engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
 // [Fog::RasterSerializer - ClipAll (st)]
 // ============================================================================
 
@@ -5742,140 +5878,6 @@ static err_t FOG_FASTCALL RasterSerializer_clipNormalizedPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterSerializer - FilterPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterSerializer_filterPathF_st(
-  RasterPaintEngine* engine, const PathF& path, uint32_t fillRule, const ImageFilter& filter)
-{
-  PathF& tmp = engine->ctx.tmpPathF[1];
-
-  bool hasTransform = engine->ensureFinalTransformF();
-  PathClipperF clipper(engine->getClipBoxF());
-
-  if (!hasTransform)
-  {
-    switch (clipper.measurePath(path))
-    {
-      case PATH_CLIPPER_MEASURE_BOUNDED:
-        engine->serializer->filterNormalizedPathF(engine, path, fillRule, filter);
-        return ERR_OK;
-
-      case PATH_CLIPPER_MEASURE_UNBOUNDED:
-        tmp.clear();
-        FOG_RETURN_ON_ERROR(clipper.continuePath(tmp, path));
-        engine->serializer->filterNormalizedPathF(engine, tmp, fillRule, filter);
-        return ERR_OK;
-
-      default:
-        return ERR_GEOMETRY_INVALID;
-    }
-  }
-  else
-  {
-    tmp.clear();
-    FOG_RETURN_ON_ERROR(clipper.clipPath(tmp, path, engine->getFinalTransformF()));
-    engine->serializer->filterNormalizedPathF(engine, tmp, fillRule, filter);
-    return ERR_OK;
-  }
-}
-
-static err_t FOG_FASTCALL RasterSerializer_filterPathD_st(
-  RasterPaintEngine* engine, const PathD& path, uint32_t fillRule, const ImageFilter& filter)
-{
-  PathD& tmp = engine->ctx.tmpPathD[1];
-
-  bool hasTransform = (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY);
-  PathClipperD clipper(engine->getClipBoxD());
-
-  if (!hasTransform)
-  {
-    switch (clipper.measurePath(path))
-    {
-      case PATH_CLIPPER_MEASURE_BOUNDED:
-        engine->serializer->filterNormalizedPathD(engine, path, fillRule, filter);
-        return ERR_OK;
-
-      case PATH_CLIPPER_MEASURE_UNBOUNDED:
-        tmp.clear();
-        FOG_RETURN_ON_ERROR(clipper.continuePath(tmp, path));
-        engine->serializer->filterNormalizedPathD(engine, tmp, fillRule, filter);
-        return ERR_OK;
-
-      default:
-        return ERR_GEOMETRY_INVALID;
-    }
-  }
-  else
-  {
-    tmp.clear();
-    FOG_RETURN_ON_ERROR(clipper.clipPath(tmp, path, engine->getFinalTransformD()));
-    engine->serializer->filterNormalizedPathD(engine, tmp, fillRule, filter);
-    return ERR_OK;
-  }
-}
-
-// ============================================================================
-// [Fog::RasterSerializer - FilterNormalizedBox]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxI_st(
-  RasterPaintEngine* engine, const BoxI& box, const ImageFilter& filter)
-{
-  RasterFilter ctx;
-  FOG_ASSERT(box.isValid());
-
-  // Destination and source formats are the same.
-  FOG_RETURN_ON_ERROR(_api_raster.filter.create[filter.getFeType()](&ctx,
-    &filter, &engine->ctx.filterScale,
-    &engine->ctx.buffer,
-    engine->ctx.layer.primaryFormat,
-    engine->ctx.layer.primaryFormat));
-
-  PointI dstPos(box.x0, box.y0);
-  RectI srcRect(box.x0, box.y0, box.x1 - box.x0, box.y1 - box.y0);
-
-  err_t err = ctx.doRect(&ctx,
-    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &dstPos,
-    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &srcRect);
-
-  ctx.destroy(&ctx);
-  return err;
-}
-
-static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxF_st(
-  RasterPaintEngine* engine, const BoxF& box, const ImageFilter& filter)
-{
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxD_st(
-  RasterPaintEngine* engine, const BoxD& box, const ImageFilter& filter)
-{
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterSerializer - FilterNormalizedPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterSerializer_filterNormalizedPathF_st(
-  RasterPaintEngine* engine, const PathF& path, uint32_t fillRule, const ImageFilter& filter)
-{
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterSerializer_filterNormalizedPathD_st(
-  RasterPaintEngine* engine, const PathD& path, uint32_t fillRule, const ImageFilter& filter)
-{
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
 // [Fog::RasterPaintEngine - Init / Fini]
 // ============================================================================
 
@@ -6034,6 +6036,19 @@ static void RasterPaintEngine_init_vtable()
   v->blitMaskedImageInD = RasterPaintEngine_blitMaskedImageInD;
 
   // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  v->filterAll = RasterPaintEngine_filterAll;
+
+  v->filterRectI = RasterPaintEngine_filterRectI;
+  v->filterRectF = RasterPaintEngine_filterRectF;
+  v->filterRectD = RasterPaintEngine_filterRectD;
+
+  v->filterPathF = RasterPaintEngine_filterPathF;
+  v->filterPathD = RasterPaintEngine_filterPathD;
+
+  // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
@@ -6076,19 +6091,6 @@ static void RasterPaintEngine_init_vtable()
   v->resetClip = RasterPaintEngine_resetClip;
 
   // --------------------------------------------------------------------------
-  // [Filter]
-  // --------------------------------------------------------------------------
-
-  v->filterAll = RasterPaintEngine_filterAll;
-
-  v->filterRectI = RasterPaintEngine_filterRectI;
-  v->filterRectF = RasterPaintEngine_filterRectF;
-  v->filterRectD = RasterPaintEngine_filterRectD;
-
-  v->filterPathF = RasterPaintEngine_filterPathF;
-  v->filterPathD = RasterPaintEngine_filterPathD;
-
-  // --------------------------------------------------------------------------
   // [Layer]
   // --------------------------------------------------------------------------
 
@@ -6128,6 +6130,15 @@ static void RasterPaintEngine_init_serializer()
   s->blitNormalizedImageI = RasterSerializer_blitNormalizedImageI_st;
   s->blitNormalizedImageD = RasterSerializer_blitNormalizedImageD_st;
 
+  s->filterPathF = RasterSerializer_filterPathF_st;
+  s->filterPathD = RasterSerializer_filterPathD_st;
+
+  s->filterNormalizedBoxI = RasterSerializer_filterNormalizedBoxI_st;
+  s->filterNormalizedBoxF = RasterSerializer_filterNormalizedBoxF_st;
+  s->filterNormalizedBoxD = RasterSerializer_filterNormalizedBoxD_st;
+  s->filterNormalizedPathF = RasterSerializer_filterNormalizedPathF_st;
+  s->filterNormalizedPathD = RasterSerializer_filterNormalizedPathD_st;
+
   s->clipAll = RasterSerializer_clipAll_st;
   s->clipPathF = RasterSerializer_clipPathF;
   s->clipPathD = RasterSerializer_clipPathD;
@@ -6139,15 +6150,6 @@ static void RasterPaintEngine_init_serializer()
   s->clipNormalizedBoxD = RasterSerializer_clipNormalizedBoxD_st;
   s->clipNormalizedPathF = RasterSerializer_clipNormalizedPathF_st;
   s->clipNormalizedPathD = RasterSerializer_clipNormalizedPathD_st;
-
-  s->filterPathF = RasterSerializer_filterPathF_st;
-  s->filterPathD = RasterSerializer_filterPathD_st;
-
-  s->filterNormalizedBoxI = RasterSerializer_filterNormalizedBoxI_st;
-  s->filterNormalizedBoxF = RasterSerializer_filterNormalizedBoxF_st;
-  s->filterNormalizedBoxD = RasterSerializer_filterNormalizedBoxD_st;
-  s->filterNormalizedPathF = RasterSerializer_filterNormalizedPathF_st;
-  s->filterNormalizedPathD = RasterSerializer_filterNormalizedPathD_st;
 
   // --------------------------------------------------------------------------
   // [Serializer - mt]

@@ -534,6 +534,46 @@ static err_t FOG_CDECL MyPaintEngine_blitMaskedImageInD(Painter* self, const Rec
 }
 
 // ============================================================================
+// [Fog::MyPaintEngine - Filter]
+// ============================================================================
+
+static err_t FOG_CDECL MyPaintEngine_filterAll(Painter* self, const FeBase* fe)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterRectI(Painter* self, const FeBase* fe, const RectI& rect)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterRectF(Painter* self, const FeBase* fe, const RectF& rect)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterRectD(Painter* self, const FeBase* fe, const RectD& rect)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterPathF(Painter* self, const FeBase* fe, const PathF& rect)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterPathD(Painter* self, const FeBase* fe, const PathD& rect)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
 // [Fog::MyPaintEngine - Clip]
 // ============================================================================
 
@@ -694,46 +734,6 @@ static err_t FOG_CDECL MyPaintEngine_clipRegion(Painter* self, uint32_t clipOp, 
 }
 
 static err_t FOG_CDECL MyPaintEngine_resetClip(Painter* self)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::MyPaintEngine - Filter]
-// ============================================================================
-
-static err_t FOG_CDECL MyPaintEngine_filterAll(Painter* self, const ImageFilter& filter)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_filterRectI(Painter* self, const RectI& rect, const ImageFilter& filter)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_filterRectF(Painter* self, const RectF& rect, const ImageFilter& filter)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_filterRectD(Painter* self, const RectD& rect, const ImageFilter& filter)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_filterPathF(Painter* self, const PathF& rect, const ImageFilter& filter)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_filterPathD(Painter* self, const PathD& rect, const ImageFilter& filter)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -930,6 +930,18 @@ static void MyPaintEngine_init()
   v.blitMaskedImageInD = MyPaintEngine_blitMaskedImageInD;
 
   // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  v.filterAll = MyPaintEngine_filterAll;
+  v.filterRectI = MyPaintEngine_filterRectI;
+  v.filterRectF = MyPaintEngine_filterRectF;
+  v.filterRectD = MyPaintEngine_filterRectD;
+
+  v.filterPathF = MyPaintEngine_filterPathF;
+  v.filterPathD = MyPaintEngine_filterPathD;
+
+  // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
@@ -970,18 +982,6 @@ static void MyPaintEngine_init()
   v.clipRegion = MyPaintEngine_clipRegion;
 
   v.resetClip = MyPaintEngine_resetClip;
-
-  // --------------------------------------------------------------------------
-  // [Filter]
-  // --------------------------------------------------------------------------
-
-  v.filterAll = MyPaintEngine_filterAll;
-  v.filterRectI = MyPaintEngine_filterRectI;
-  v.filterRectF = MyPaintEngine_filterRectF;
-  v.filterRectD = MyPaintEngine_filterRectD;
-
-  v.filterPathF = MyPaintEngine_filterPathF;
-  v.filterPathD = MyPaintEngine_filterPathD;
 
   // --------------------------------------------------------------------------
   // [Layer]
@@ -1256,6 +1256,20 @@ static err_t FOG_CDECL NullPaintEngine_blitMaskedImage(Painter* self, const Any&
 }
 
 // ============================================================================
+// [Fog::NullPaintEngine - Layer]
+// ============================================================================
+
+static err_t FOG_CDECL NullPaintEngine_filterAll(Painter* self, const FeBase* fe)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
+static err_t FOG_CDECL NullPaintEngine_filterAny(Painter* self, const FeBase* fe, const Any& p)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
+// ============================================================================
 // [Fog::NullPaintEngine - Clip]
 // ============================================================================
 
@@ -1300,20 +1314,6 @@ static err_t FOG_CDECL NullPaintEngine_clipRegion(Painter* self, uint32_t clipOp
 }
 
 static err_t FOG_CDECL NullPaintEngine_resetClip(Painter* self)
-{
-  return ERR_RT_INVALID_STATE;
-}
-
-// ============================================================================
-// [Fog::NullPaintEngine - Layer]
-// ============================================================================
-
-static err_t FOG_CDECL NullPaintEngine_filterAll(Painter* self, const ImageFilter& filter)
-{
-  return ERR_RT_INVALID_STATE;
-}
-
-static err_t FOG_CDECL NullPaintEngine_filterAny(Painter* self, const Any& p, const ImageFilter& filter)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1513,6 +1513,19 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.blitMaskedImageInD = (PaintEngineVTable::BlitMaskedImageInD)NullPaintEngine_blitMaskedImage;
 
   // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  v.filterAll = NullPaintEngine_filterAll;
+
+  v.filterRectI = (PaintEngineVTable::FilterRectI)NullPaintEngine_filterAny;
+  v.filterRectF = (PaintEngineVTable::FilterRectF)NullPaintEngine_filterAny;
+  v.filterRectD = (PaintEngineVTable::FilterRectD)NullPaintEngine_filterAny;
+
+  v.filterPathF = (PaintEngineVTable::FilterPathF)NullPaintEngine_filterAny;
+  v.filterPathD = (PaintEngineVTable::FilterPathD)NullPaintEngine_filterAny;
+
+  // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
@@ -1553,19 +1566,6 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v.clipRegion = NullPaintEngine_clipRegion;
 
   v.resetClip = NullPaintEngine_resetClip;
-
-  // --------------------------------------------------------------------------
-  // [Filter]
-  // --------------------------------------------------------------------------
-
-  v.filterAll = NullPaintEngine_filterAll;
-
-  v.filterRectI = (PaintEngineVTable::FilterRectI)NullPaintEngine_filterAny;
-  v.filterRectF = (PaintEngineVTable::FilterRectF)NullPaintEngine_filterAny;
-  v.filterRectD = (PaintEngineVTable::FilterRectD)NullPaintEngine_filterAny;
-
-  v.filterPathF = (PaintEngineVTable::FilterPathF)NullPaintEngine_filterAny;
-  v.filterPathD = (PaintEngineVTable::FilterPathD)NullPaintEngine_filterAny;
 
   // --------------------------------------------------------------------------
   // [Layer]

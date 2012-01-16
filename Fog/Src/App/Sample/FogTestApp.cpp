@@ -78,15 +78,14 @@ void AppWindow::onPaint(Painter* _p)
   font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(250.0f, 100.0f), msg);
 
   p.setSource(Argb32(0xFFFF0000));
-  p.setLineWidth(3.0f);
   p.fillPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_BOX, 2.0f);
+  FeBlur feBlur(FE_BLUR_TYPE_BOX, 5.0f);
   feBlur.setExtendType(FE_EXTEND_COLOR);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
 
-  //p.filterRect(RectI(60, 60, 140, 100), ImageFilter(feBlur));
-  p.filterAll(ImageFilter(feBlur));
+  //p.filterRect(feBlur, RectI(60, 60, 200, 200));
+  p.filterAll(feBlur);
 
   //p.setOpacity(0.15f);
   //p.setSource(Argb32(0xFF0000FF));

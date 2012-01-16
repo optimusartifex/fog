@@ -31,19 +31,19 @@ namespace Fog {
 struct FOG_NO_EXPORT PaintEngineVTable
 {
   // --------------------------------------------------------------------------
-  // [AddRef / Release - Types]
+  // [Types - AddRef / Release]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *Release)(Painter* self);
 
   // --------------------------------------------------------------------------
-  // [AddRef / Release - Funcs]
+  // [Funcs - AddRef / Release]
   // --------------------------------------------------------------------------
 
   Release release;
 
   // --------------------------------------------------------------------------
-  // [Parameters - Types]
+  // [Types - Parameters]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *GetMetaParams)(const Painter* self, Region& region, PointI& origin);
@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *ResetParameter)(Painter* self, uint32_t parameterId);
 
   // --------------------------------------------------------------------------
-  // [Parameters - Funcs]
+  // [Funcs - Parameters]
   // --------------------------------------------------------------------------
 
   GetMetaParams getMetaParams;
@@ -67,7 +67,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   ResetParameter resetParameter;
 
   // --------------------------------------------------------------------------
-  // [Source - Types]
+  // [Types - Source]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *GetSourceType)(const Painter* self, uint32_t& val);
@@ -82,7 +82,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *SetSourceAbstract)(Painter* self, uint32_t sourceId, const void* value, const void* tr);
 
   // --------------------------------------------------------------------------
-  // [Source - Funcs]
+  // [Funcs - Source]
   // --------------------------------------------------------------------------
 
   GetSourceType getSourceType;
@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   SetSourceAbstract setSourceAbstract;
 
   // --------------------------------------------------------------------------
-  // [Transform - Types]
+  // [Types - Transform]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *GetTransformF)(const Painter* self, TransformF& tr);
@@ -110,7 +110,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *ResetTransform)(Painter* self);
 
   // --------------------------------------------------------------------------
-  // [Transform - Funcs]
+  // [Funcs - Transform]
   // --------------------------------------------------------------------------
 
   GetTransformF getTransformF;
@@ -123,35 +123,35 @@ struct FOG_NO_EXPORT PaintEngineVTable
   ResetTransform resetTransform;
 
   // --------------------------------------------------------------------------
-  // [State - Types]
+  // [Types - State]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *Save)(Painter* self);
   typedef err_t (FOG_CDECL *Restore)(Painter* self);
 
   // --------------------------------------------------------------------------
-  // [State - Funcs]
+  // [Funcs - State]
   // --------------------------------------------------------------------------
 
   Save save;
   Restore restore;
 
   // --------------------------------------------------------------------------
-  // [Map - Types]
+  // [Types - Map]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *MapPointF)(const Painter* self, uint32_t mapOp, PointF& pt);
   typedef err_t (FOG_CDECL *MapPointD)(const Painter* self, uint32_t mapOp, PointD& pt);
 
   // --------------------------------------------------------------------------
-  // [Map - Funcs]
+  // [Funcs - Map]
   // --------------------------------------------------------------------------
 
   MapPointF mapPointF;
   MapPointD mapPointD;
 
   // --------------------------------------------------------------------------
-  // [Paint - Types]
+  // [Types - Fill/Stroke]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *FillAll)(Painter* self);
@@ -197,7 +197,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *PaintRegion)(Painter* self, const Region& r);
 
   // --------------------------------------------------------------------------
-  // [Paint - Draw]
+  // [Funcs - Stroke]
   // --------------------------------------------------------------------------
 
   PaintRectI drawRectI;
@@ -219,7 +219,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   PaintPathD drawPathD;
 
   // --------------------------------------------------------------------------
-  // [Paint - Fill]
+  // [Funcs - Fill]
   // --------------------------------------------------------------------------
 
   FillAll fillAll;
@@ -261,7 +261,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   PaintRegion fillRegion;
 
   // --------------------------------------------------------------------------
-  // [Blit - Types]
+  // [Types - Blit]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *BlitImageAtI)(Painter* self, const PointI& p, const Image& src, const RectI* sFragment);
@@ -281,7 +281,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *BlitMaskedImageInD)(Painter* self, const RectD& r, const Image& src, const Image& mask, const RectI* sFragment, const RectI* mFragment);
 
   // --------------------------------------------------------------------------
-  // [Blit - Funcs]
+  // [Funcs - Blit]
   // --------------------------------------------------------------------------
 
   BlitImageAtI blitImageAtI;
@@ -301,7 +301,33 @@ struct FOG_NO_EXPORT PaintEngineVTable
   BlitMaskedImageInD blitMaskedImageInD;
 
   // --------------------------------------------------------------------------
-  // [Clip - Types]
+  // [Types - Filter]
+  // --------------------------------------------------------------------------
+
+  typedef err_t (FOG_CDECL *FilterAll)(Painter* self, const FeBase* fe);
+
+  typedef err_t (FOG_CDECL *FilterRectI)(Painter* self, const FeBase* fe, const RectI& r);
+  typedef err_t (FOG_CDECL *FilterRectF)(Painter* self, const FeBase* fe, const RectF& r);
+  typedef err_t (FOG_CDECL *FilterRectD)(Painter* self, const FeBase* fe, const RectD& r);
+
+  typedef err_t (FOG_CDECL *FilterPathF)(Painter* self, const FeBase* fe, const PathF& p);
+  typedef err_t (FOG_CDECL *FilterPathD)(Painter* self, const FeBase* fe, const PathD& p);
+
+  // --------------------------------------------------------------------------
+  // [Funcs - Filter]
+  // --------------------------------------------------------------------------
+
+  FilterAll filterAll;
+
+  FilterRectI filterRectI;
+  FilterRectF filterRectF;
+  FilterRectD filterRectD;
+
+  FilterPathF filterPathF;
+  FilterPathD filterPathD;
+
+  // --------------------------------------------------------------------------
+  // [Types - Clip]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *ClipRectI)(Painter* self, uint32_t clipOp, const RectI& r);
@@ -343,7 +369,7 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *ResetClip)(Painter* self);
 
   // --------------------------------------------------------------------------
-  // [Clip - Funcs]
+  // [Funcs - Clip]
   // --------------------------------------------------------------------------
 
   ClipRectI clipRectI;
@@ -385,53 +411,27 @@ struct FOG_NO_EXPORT PaintEngineVTable
   ResetClip resetClip;
 
   // --------------------------------------------------------------------------
-  // [Filter - Types]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_CDECL *FilterAll)(Painter* self, const ImageFilter& filter);
-
-  typedef err_t (FOG_CDECL *FilterRectI)(Painter* self, const RectI& r, const ImageFilter& filter);
-  typedef err_t (FOG_CDECL *FilterRectF)(Painter* self, const RectF& r, const ImageFilter& filter);
-  typedef err_t (FOG_CDECL *FilterRectD)(Painter* self, const RectD& r, const ImageFilter& filter);
-
-  typedef err_t (FOG_CDECL *FilterPathF)(Painter* self, const PathF& p, const ImageFilter& filter);
-  typedef err_t (FOG_CDECL *FilterPathD)(Painter* self, const PathD& p, const ImageFilter& filter);
-
-  // --------------------------------------------------------------------------
-  // [Filter - Funcs]
-  // --------------------------------------------------------------------------
-
-  FilterAll filterAll;
-
-  FilterRectI filterRectI;
-  FilterRectF filterRectF;
-  FilterRectD filterRectD;
-
-  FilterPathF filterPathF;
-  FilterPathD filterPathD;
-
-  // --------------------------------------------------------------------------
-  // [Layer - Types]
+  // [Types - Layer]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *BeginLayer)(Painter* self, uint32_t flags);
   typedef err_t (FOG_CDECL *EndLayer)(Painter* self);
 
   // --------------------------------------------------------------------------
-  // [Layer - Funcs]
+  // [Funcs - Layer]
   // --------------------------------------------------------------------------
 
   BeginLayer beginLayer;
   EndLayer endLayer;
 
   // --------------------------------------------------------------------------
-  // [Flush - Types]
+  // [Types - Flush]
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_CDECL *Flush)(Painter* self, uint32_t flags);
 
   // --------------------------------------------------------------------------
-  // [Flush - Funcs]
+  // [Funcs - Flush]
   // --------------------------------------------------------------------------
 
   Flush flush;

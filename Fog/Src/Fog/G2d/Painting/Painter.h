@@ -11,6 +11,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/PaintParams.h>
 
@@ -1321,6 +1322,27 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInD(this, r, src, mask, &sFragment, &mFragment); }
 
   // --------------------------------------------------------------------------
+  // [Filter]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t filterAll(const ImageFilter& filter) { return _vtable->filterAll(this, filter.getFeData()); }
+  FOG_INLINE err_t filterAll(const FeBase& feBase) { return _vtable->filterAll(this, &feBase); }
+
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectI& r) { return _vtable->filterRectI(this, filter.getFeData(), r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectF& r) { return _vtable->filterRectF(this, filter.getFeData(), r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectD& r) { return _vtable->filterRectD(this, filter.getFeData(), r); }
+
+  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectI& r) { return _vtable->filterRectI(this, &feBase, r); }
+  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectF& r) { return _vtable->filterRectF(this, &feBase, r); }
+  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectD& r) { return _vtable->filterRectD(this, &feBase, r); }
+
+  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterPathF(this, filter.getFeData(), p); }
+  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterPathD(this, filter.getFeData(), p); }
+
+  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathF& p) { return _vtable->filterPathF(this, &feBase, p); }
+  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathD& p) { return _vtable->filterPathD(this, &feBase, p); }
+
+  // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
@@ -1404,19 +1426,6 @@ struct FOG_NO_EXPORT Painter
 
   //! @brief Reset clipping.
   FOG_INLINE err_t resetClip() { return _vtable->resetClip(this); }
-
-  // --------------------------------------------------------------------------
-  // [Filter]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t filterAll(const ImageFilter& filter) { return _vtable->filterAll(this, filter); }
-
-  FOG_INLINE err_t filterRect(const RectI& r, const ImageFilter& filter) { return _vtable->filterRectI(this, r, filter); }
-  FOG_INLINE err_t filterRect(const RectF& r, const ImageFilter& filter) { return _vtable->filterRectF(this, r, filter); }
-  FOG_INLINE err_t filterRect(const RectD& r, const ImageFilter& filter) { return _vtable->filterRectD(this, r, filter); }
-
-  FOG_INLINE err_t filterPath(const PathF& p, const ImageFilter& filter) { return _vtable->filterPathF(this, p, filter); }
-  FOG_INLINE err_t filterPath(const PathD& p, const ImageFilter& filter) { return _vtable->filterPathD(this, p, filter); }
 
   // --------------------------------------------------------------------------
   // [Layer]

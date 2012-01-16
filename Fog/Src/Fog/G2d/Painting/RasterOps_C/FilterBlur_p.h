@@ -460,9 +460,9 @@ struct FOG_NO_EXPORT FBlurAccessor_RGB24
 
   static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
   {
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_R] = ((src.r * mul) >> shift);
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_G] = ((src.g * mul) >> shift);
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_B] = ((src.b * mul) >> shift);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_R] = static_cast<uint8_t>((src.r * mul) >> shift);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_G] = static_cast<uint8_t>((src.g * mul) >> shift);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_B] = static_cast<uint8_t>((src.b * mul) >> shift);
   }
 
   static FOG_INLINE void unpack(Component& dst, const Pixel& src)
@@ -1129,7 +1129,7 @@ _First:
         sum0.sub(pix0);
 
         Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
-        // Doesn't need to store into stack.
+        // Doesn't need to store into the stack.
         // Accessor::storeStack(stackPtr, pix0);
         sum0.add(pix0);
 
@@ -1163,7 +1163,7 @@ _First:
           Accessor::fetchStack(pix0, stackPtr);
           sum0.sub(pix0);
 
-          // Doesn't need to store into stack.
+          // Doesn't need to store into the stack.
           // Accessor::storeStack(stackPtr, pixB);
           sum0.add(compB);
 
@@ -1408,7 +1408,7 @@ _First:
           sum[x].sub(pix0);
 
           Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-          // Doesn't need to store into stack.
+          // Doesn't need to store into the stack.
           // Accessor::storeStack(stackPtr, pix0);
           sum[x].add(pix0);
 
@@ -1442,7 +1442,7 @@ _First:
               Accessor::fetchStack(pix0, stackPtr);
               sum[x].sub(pix0);
 
-              // Doesn't need to store into stack.
+              // Doesn't need to store into the stack.
               // Accessor::storeStack(stackPtr, pixB);
               sum[x].add(compB);
 
@@ -1469,7 +1469,7 @@ _First:
               sum[x].sub(pix0);
 
               Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-              // Doesn't need to store into stack.
+              // Doesn't need to store into the stack.
               // Accessor::storeStack(stackPtr, pix0);
               sum[x].add(pix0);
 

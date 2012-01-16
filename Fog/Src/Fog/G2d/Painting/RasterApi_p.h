@@ -141,19 +141,19 @@ typedef void (FOG_FASTCALL *RasterVBlitSpanFunc)(
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterSolidCreateFunc)(
   RasterPattern* ctx, uint32_t dstFormat,
-  const RasterSolid& solid);
+  const RasterSolid* solid);
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterTextureCreateFunc)(
-  RasterPattern* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const Image& srcImage, const RectI& srcFragment, const TransformD& tr,
-  const Color& clampColor, uint32_t tileMode,
+  RasterPattern* ctx, uint32_t dstFormat, const BoxI* boundingBox,
+  const Image* srcImage, const RectI* srcFragment, const TransformD* tr,
+  const Color* clampColor, uint32_t tileMode,
   uint32_t imageQuality);
 
 //! @internal
 typedef err_t (FOG_FASTCALL *RasterGradientCreateFunc)(
-  RasterPattern* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-  const GradientD& gradient, const TransformD& tr,
+  RasterPattern* ctx, uint32_t dstFormat, const BoxI* boundingBox,
+  const GradientD* gradient, const TransformD* tr,
   uint32_t gradientQuality);
 
 // ============================================================================
@@ -395,6 +395,12 @@ struct FOG_NO_EXPORT RasterFilterFuncs
       RasterFilterDoConvolveFunc convolve_h[IMAGE_FORMAT_COUNT];
       RasterFilterDoConvolveFunc convolve_v[IMAGE_FORMAT_COUNT];
     } box;
+
+    struct _Exp
+    {
+      RasterFilterDoConvolveFunc convolve_h[IMAGE_FORMAT_COUNT];
+      RasterFilterDoConvolveFunc convolve_v[IMAGE_FORMAT_COUNT];
+    } exp;
   } blur;
 };
 

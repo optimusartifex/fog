@@ -161,8 +161,8 @@ struct FOG_NO_EXPORT PGradientBase
   // ==========================================================================
 
   static err_t FOG_FASTCALL create(
-    RasterPattern* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-    uint32_t spread, const ColorStopList& stops)
+    RasterPattern* ctx, uint32_t dstFormat, const BoxI* boundingBox,
+    uint32_t spread, const ColorStopList* stops)
   {
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
 
@@ -173,12 +173,12 @@ struct FOG_NO_EXPORT PGradientBase
       case IMAGE_FORMAT_RGB24:
       {
         // Get whether the gradient is opaque or not.
-        bool isOpaque = stops.isOpaqueARGB32();
+        bool isOpaque = stops->isOpaqueARGB32();
         // Decide which pixel format to use.
         uint32_t srcFormat = isOpaque ? IMAGE_FORMAT_XRGB32 : IMAGE_FORMAT_PRGB32;
 
         // Get or create the color-table (ColorStopCache instance).
-        ColorStopCache* cache = AtomicCore<ColorStopCache*>::get(&stops._d->stopCachePrgb32);
+        ColorStopCache* cache = AtomicCore<ColorStopCache*>::get(&stops->_d->stopCachePrgb32);
         if (cache != NULL)
         {
           cache->reference.inc();
@@ -192,7 +192,7 @@ struct FOG_NO_EXPORT PGradientBase
           cache->reference.init(2);
 
           _api_raster.gradient.interpolate[srcFormat](
-            reinterpret_cast<uint8_t*>(cache->getData()), cache->getLength(), stops.getList(), stops.getLength());
+            reinterpret_cast<uint8_t*>(cache->getData()), cache->getLength(), stops->getList(), stops->getLength());
 
           // Assign also the end point.
           uint32_t* table = reinterpret_cast<uint32_t*>(cache->getData());
@@ -201,7 +201,7 @@ struct FOG_NO_EXPORT PGradientBase
           // Try to add it back to the ColorStopList instance. If we failed then
           // some other thread was faster than us, in this case it's needed to
           // decrease the reference count of the instance we created.
-          if (!AtomicCore<ColorStopCache*>::cmpXchg(&stops._d->stopCachePrgb32, (ColorStopCache*)NULL, cache))
+          if (!AtomicCore<ColorStopCache*>::cmpXchg(&stops->_d->stopCachePrgb32, (ColorStopCache*)NULL, cache))
             cache->reference.dec();
         }
 
@@ -209,7 +209,7 @@ struct FOG_NO_EXPORT PGradientBase
         ctx->_initDst(dstFormat);
         ctx->_srcFormat = srcFormat;
         ctx->_srcBPP = 4;
-        ctx->_boundingBox = boundingBox;
+        ctx->_boundingBox = *boundingBox;
 
         ctx->_d.gradient.base.cache = cache;
         ctx->_d.gradient.base.table = cache->getData();
@@ -239,19 +239,19 @@ struct FOG_NO_EXPORT PGradientBase
   // [Helpers - Cache]
   // ==========================================================================
 
-  static int FOG_FASTCALL get_optimal_cache_length(const ColorStopList& stops)
+  static int FOG_FASTCALL get_optimal_cache_length(const ColorStopList* stops)
   {
-    size_t len = stops.getLength();
+    size_t len = stops->getLength();
     if (len == 2)
     {
-      float diff = stops.getAt(1).getOffset() - stops.getAt(0).getOffset();
+      float diff = stops->getAt(1).getOffset() - stops->getAt(0).getOffset();
       return (diff == 1.0f) ? 128 : (diff >= 0.5f) ? 256 : 512;
     }
     else if (len == 3)
     {
-      return (stops.getAt(0).getOffset() == 0.0f &&
-              stops.getAt(1).getOffset() == 0.5f &&
-              stops.getAt(2).getOffset() == 1.0f) ? 256 : 512;
+      return (stops->getAt(0).getOffset() == 0.0f &&
+              stops->getAt(1).getOffset() == 0.5f &&
+              stops->getAt(2).getOffset() == 1.0f) ? 256 : 512;
     }
     else
     {
@@ -261,7 +261,7 @@ struct FOG_NO_EXPORT PGradientBase
       // First get the minimal difference between stops.
       for (size_t i = 0; i < len; i++)
       {
-        float oStop = stops.getAt(i).getOffset();
+        float oStop = stops->getAt(i).getOffset();
         float oDiff = oStop - oPrev;
         if (maxDiff > oDiff) maxDiff = oDiff;
       }

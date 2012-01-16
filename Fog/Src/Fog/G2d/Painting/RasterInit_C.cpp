@@ -751,13 +751,24 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   filter.create[FE_TYPE_BLUR] = RasterOps_C::FBlur::create;
 
   filter.blur.box.convolve_h[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_PRGB32>;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_PRGB32>;
   filter.blur.box.convolve_h[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_XRGB32>;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_XRGB32>;
   filter.blur.box.convolve_h[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_RGB24 >;
   filter.blur.box.convolve_h[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_A8    >;
+
+  filter.blur.box.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_PRGB32>;
+  filter.blur.box.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_XRGB32>;
+  filter.blur.box.convolve_v[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_RGB24 >;
   filter.blur.box.convolve_v[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_A8    >;
+
+  filter.blur.exp.convolve_h[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_PRGB32>;
+  filter.blur.exp.convolve_h[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_XRGB32>;
+  filter.blur.exp.convolve_h[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_RGB24 >;
+  filter.blur.exp.convolve_h[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_A8    >;
+
+  filter.blur.exp.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_PRGB32>;
+  filter.blur.exp.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_XRGB32>;
+  filter.blur.exp.convolve_v[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_RGB24 >;
+  filter.blur.exp.convolve_v[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_A8    >;
 }
 
 } // Fog namespace

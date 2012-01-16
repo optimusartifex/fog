@@ -127,7 +127,7 @@ struct FOG_NO_EXPORT Helpers
   // ==========================================================================
 
   static err_t FOG_FASTCALL p_solid_create_color(
-    RasterPattern* ctx, uint32_t dstFormat, const Color& color)
+    RasterPattern* ctx, uint32_t dstFormat, const Color* color)
   {
     RasterSolid solid;
 
@@ -139,24 +139,24 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_RGB24:
       case IMAGE_FORMAT_A8:
       case IMAGE_FORMAT_I8:
-        solid.prgb32.p32 = color.getArgb32().p32;
+        solid.prgb32.p32 = color->getArgb32().p32;
         Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
         break;
 
       case IMAGE_FORMAT_PRGB64:
       case IMAGE_FORMAT_RGB48:
       case IMAGE_FORMAT_A16:
-        solid.prgb64.p64 = color.getArgb64().p64;
+        solid.prgb64.p64 = color->getArgb64().p64;
         Face::p64PRGB64FromARGB64(solid.prgb64.p64, solid.prgb64.p64);
         break;
     }
     //! ${IMAGE_FORMAT:END}
 
-    return p_solid_create_solid(ctx, dstFormat, solid);
+    return p_solid_create_solid(ctx, dstFormat, &solid);
   }
 
   static err_t FOG_FASTCALL p_solid_create_solid(
-    RasterPattern* ctx, uint32_t dstFormat, const RasterSolid& solid)
+    RasterPattern* ctx, uint32_t dstFormat, const RasterSolid* solid)
   {
     ctx->_initDst(dstFormat);
     ctx->_destroy = _api_raster.solid.destroy;
@@ -168,7 +168,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_XRGB32:
       case IMAGE_FORMAT_RGB24:
       {
-        if (Face::p32PRGB32IsAlphaFF(solid.prgb32.p32))
+        if (Face::p32PRGB32IsAlphaFF(solid->prgb32.p32))
         {
           ctx->_srcFormat = IMAGE_FORMAT_XRGB32;
           ctx->_srcBPP = 4;
@@ -191,7 +191,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_PRGB64:
       case IMAGE_FORMAT_RGB48:
       {
-        if (Face::p64PRGB64IsAlphaFFFF(solid.prgb64.p64))
+        if (Face::p64PRGB64IsAlphaFFFF(solid->prgb64.p64))
         {
           ctx->_srcFormat = IMAGE_FORMAT_RGB48;
           ctx->_srcBPP = 6;

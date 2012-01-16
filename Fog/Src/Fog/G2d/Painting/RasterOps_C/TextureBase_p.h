@@ -26,55 +26,55 @@ struct FOG_NO_EXPORT PTextureBase
   // ==========================================================================
 
   static err_t FOG_FASTCALL create(
-    RasterPattern* ctx, uint32_t dstFormat, const BoxI& boundingBox,
-    const Image& srcImage, const RectI& srcFragment, const TransformD& tr,
-    const Color& clampColor, uint32_t tileMode,
+    RasterPattern* ctx, uint32_t dstFormat, const BoxI* boundingBox,
+    const Image* srcImage, const RectI* srcFragment, const TransformD* tr,
+    const Color* clampColor, uint32_t tileMode,
     uint32_t imageQuality)
   {
     // ------------------------------------------------------------------------
     // [Asserts]
     // ------------------------------------------------------------------------
 
-    FOG_ASSERT(!srcImage.isEmpty());
+    FOG_ASSERT(!srcImage->isEmpty());
     FOG_ASSERT(tileMode < TEXTURE_TILE_COUNT);
 
     // ------------------------------------------------------------------------
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    uint32_t transformType = tr.getType();
+    uint32_t transformType = tr->getType();
     TransformD inv(UNINITIALIZED);
 
-    if (transformType > TRANSFORM_TYPE_TRANSLATION && !TransformD::invert(inv, tr))
+    if (transformType > TRANSFORM_TYPE_TRANSLATION && !TransformD::invert(inv, *tr))
     {
       return Helpers::p_solid_create_color(ctx, dstFormat, clampColor);
     }
 
-    uint32_t srcFormat = srcImage.getFormat();
-    uint32_t srcBPP = srcImage.getBytesPerPixel();
-    uint32_t srcHasAlpha = (srcImage.getFormatDescription().getComponentMask() & IMAGE_COMPONENT_ALPHA) != 0;
-    ssize_t srcStride = srcImage.getStride();
+    uint32_t srcFormat = srcImage->getFormat();
+    uint32_t srcBPP = srcImage->getBytesPerPixel();
+    uint32_t srcHasAlpha = (srcImage->getFormatDescription().getComponentMask() & IMAGE_COMPONENT_ALPHA) != 0;
+    ssize_t srcStride = srcImage->getStride();
 
     if (tileMode == TEXTURE_TILE_CLAMP)
     {
-      srcHasAlpha |= !clampColor.isOpaque();
+      srcHasAlpha |= !clampColor->isOpaque();
     }
 
     // Setup the context.
     ctx->_initDst(dstFormat);
-    ctx->_boundingBox = boundingBox;
+    ctx->_boundingBox = *boundingBox;
 
     // Initialize base variables, including shallow copy of a given image.
-    ctx->_d.texture.base.texture.initCustom1(srcImage);
-    ctx->_d.texture.base.pixels = srcImage.getFirst() +
-                                  (ssize_t)srcFragment.y * srcStride +
-                                  (ssize_t)srcFragment.x * srcBPP;
+    ctx->_d.texture.base.texture.initCustom1(*srcImage);
+    ctx->_d.texture.base.pixels = srcImage->getFirst() +
+                                  (ssize_t)srcFragment->y * srcStride +
+                                  (ssize_t)srcFragment->x * srcBPP;
 
     ctx->_d.texture.base.pal = (srcFormat == IMAGE_FORMAT_I8)
-      ? reinterpret_cast<const uint32_t*>(srcImage.getPalette().getData())
+      ? reinterpret_cast<const uint32_t*>(srcImage->getPalette().getData())
       : NULL;
-    ctx->_d.texture.base.w = srcFragment.w;
-    ctx->_d.texture.base.h = srcFragment.h;
+    ctx->_d.texture.base.w = srcFragment->w;
+    ctx->_d.texture.base.h = srcFragment->h;
     ctx->_d.texture.base.stride = srcStride;
 
     ctx->_destroy = destroy;
@@ -112,7 +112,7 @@ struct FOG_NO_EXPORT PTextureBase
 _Has8BPC:
         if (tileMode == TEXTURE_TILE_CLAMP)
         {
-          Face::p32PRGB32FromARGB32(ctx->_d.texture.base.clamp.prgb32.p32, clampColor.getArgb32().p32);
+          Face::p32PRGB32FromARGB32(ctx->_d.texture.base.clamp.prgb32.p32, clampColor->getArgb32().p32);
         }
         break;
 
@@ -141,7 +141,7 @@ _Has8BPC:
 _Has16BPC:
         if (tileMode == TEXTURE_TILE_CLAMP)
         {
-          Face::p64PRGB64FromARGB64(ctx->_d.texture.base.clamp.prgb64.p64, clampColor.getArgb64().p64);
+          Face::p64PRGB64FromARGB64(ctx->_d.texture.base.clamp.prgb64.p64, clampColor->getArgb64().p64);
         }
         break;
 
@@ -184,8 +184,8 @@ _Has16BPC:
 
       if (transformType == TRANSFORM_TYPE_TRANSLATION)
       {
-        int64_t tx48x16 = Math::fixed48x16FromFloat(tr._20);
-        int64_t ty48x16 = Math::fixed48x16FromFloat(tr._21);
+        int64_t tx48x16 = Math::fixed48x16FromFloat(tr->_20);
+        int64_t ty48x16 = Math::fixed48x16FromFloat(tr->_21);
 
         tx = -(int)(tx48x16 >> 16);
         ty = -(int)(ty48x16 >> 16);

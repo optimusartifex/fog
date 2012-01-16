@@ -684,16 +684,24 @@ enum FE_BLUR_TYPE
 {
   //! @brief The box blur effect (default).
   //!
-  //! The box-blur effect is low-level quality blur, but very efficient.
+  //! The box-blur effect is low-level quality blur, but very efficient. Radius
+  //! has generally no effect on performance (or only little effect to process
+  //! edge cases).
   FE_BLUR_TYPE_BOX = 0,
 
   //! @brief The exponential blur effect.
   //!
-  //! The exponential blur effect quality is between box-blur and gaussian-blur.
-  //! The result and the performance of this effect is optimal for the most
-  //! operations.
+  //! The exponential blur effect`s quality is between box blur and gaussian
+  //! blur. The result and the performance is optimal for the most operations,
+  //! because like box blur, the radius has no effect on the blur performance.
   //!
-  //! @note The exponential blur is based on blur effect called StackBlur.
+  //! @note The exponential blur is based on blur effect originally called
+  //! StackBlur written by Mario Klingemann, see:
+  //!
+  //!   - http://incubator.quasimondo.com/processing/fast_blur_deluxe.php
+  //!   - http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
+  //!
+  //! Please fix the documentation in case that the links are invalid.
   FE_BLUR_TYPE_EXPONENTIAL = 1,
 
   //! @brief The gaussian-blur type.
@@ -885,97 +893,6 @@ enum FE_EXTEND
 
   //! @brief Count of border extend types (for error checking).
   FE_EXTEND_COUNT = 4
-};
-
-// ============================================================================
-// [Fog::FE_FLAG]
-// ============================================================================
-
-// TODO:
-
-//! @brief Characteristics of image filter.
-//!
-//! Characteristics can be used to improve performance of filters by @c Painter.
-enum FE_FLAG
-{
-  //! @brief Image filter does only color transformations.
-  //!
-  //! This flag must set all color filter, because it's very useful hint that
-  //! enables very good code optimizations inside @c Painter and @c Image
-  //! classes.
-  FE_FLAG_COLOR_TRANSFORM = 0x0001,
-
-  //! @brief Image filter can extend image boundary (convolution based filters).
-  FE_FLAG_CAN_EXTEND = 0x0002,
-
-  //! @brief Image filter constains standard processing mechanism - one pass.
-  FE_FLAG_ENTIRE_PROCESSING = 0x0004,
-
-  //! @brief When doing entire processing the destination and source buffers
-  //! can be shared (dst and src pointers can point to same location).
-  FE_FLAG_ENTIRE_MEM_EQUAL = 0x0008,
-
-  //! @brief Image filter does vertical processing of an image.
-  //!
-  //! This bit is set for all blur/convolution filters. Performance of filter
-  //! is usually degraded, because filter processing function needs to access
-  //!  pixels in different scanlines (cache misses, etc...).
-  //!
-  //! @note Vertical processing can be combined with horizontal processing and
-  //! painter tries to make this combination efficient.
-  FE_FLAG_VERT_PROCESSING = 0x0010,
-
-  //! @brief When doing vertical processing the destination and source buffers
-  //! can be shared (dst and src pointers can point to same location).
-  FE_FLAG_VERT_MEM_EQUAL = 0x0020,
-
-  //! @brief Image filter does horizontal processing of image.
-  //!
-  //! If filter needs only horizontal (no IMAGE_EFFECT_VERT_PROCESSING bit is
-  //! set) then processing it can be very efficient in multithreaded painter
-  //! engine.
-  FE_FLAG_HORZ_PROCESSING = 0x0040,
-
-  //! @brief When doing vertical processing the destination and source buffers
-  //! can be shared (dst and src pointers can point to same location).
-  FE_FLAG_HORZ_MEM_EQUAL = 0x0080,
-
-  //! @brief Contains both, @c IMAGE_EFFECT_VERT_PROCESSING and
-  //! @c IMAGE_EFFECT_HORZ_PROCESSING flags.
-  FE_FLAG_HV_PROCESSING = FE_FLAG_VERT_PROCESSING | FE_FLAG_HORZ_PROCESSING,
-
-  //! @brief Image filter supports @c IMAGE_FORMAT_PRGB32.
-  FE_FLAG_SUPPORTS_PRGB32 = 0x0100,
-
-  //! @brief Image filter supports @c IMAGE_FORMAT_XRGB32.
-  //!
-  //! @note This flag should be always set!
-  FE_FLAG_SUPPORTS_XRGB32 = 0x0400,
-
-  //! @brief Image filter supports @c IMAGE_FORMAT_A8.
-  //!
-  //! @note This flag should be always set!
-  FE_FLAG_SUPPORTS_A8 = 0x0800,
-
-  //! @brief Image filter supports alpha-channel promotion. This means that
-  //! source image without alpha-channel can be converted to an image with
-  //! alpha-channel.
-  //!
-  //! This operation is supported by all blur-filters (and should be supported
-  //! generally by all filters that extend image boundary).
-  FE_FLAG_PROMOTE_ALPHA = 0x1000
-};
-
-// ============================================================================
-// [Fog::FE_MODE]
-// ============================================================================
-
-// TODO:
-
-enum FE_MODE
-{
-  IMAGE_EFFECT_MODE_NORMAL,
-  IMAGE_EFFECT_MODE_ALPHA
 };
 
 // ============================================================================

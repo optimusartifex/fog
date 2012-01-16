@@ -476,10 +476,10 @@ extern FOG_API uint32_t _raster_combineProperties[COMPOSITE_COUNT];
 // ============================================================================
 
 //! @internal
-extern FOG_NO_EXPORT const uint16_t _raster_linear_blur8_mul[255];
+extern FOG_NO_EXPORT const uint16_t _raster_blur_exp8_mul[256];
 
 //! @internal
-extern FOG_NO_EXPORT const uint8_t _raster_linear_blur8_shr[255];
+extern FOG_NO_EXPORT const uint8_t _raster_blur_exp8_shr[256];
 
 // ============================================================================
 // [Fog::Raster - Data - CompatibleFormat]

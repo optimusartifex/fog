@@ -25,30 +25,31 @@ struct FOG_NO_EXPORT PGradientConical
 
   // TODO: 16-bit rasterizer.
   static err_t FOG_FASTCALL create(
-    RasterPattern* ctx, uint32_t dstFormat, const BoxI& clipBox,
-    const GradientD& gradient,
-    const TransformD& tr,
+    RasterPattern* ctx, uint32_t dstFormat, const BoxI* clipBox,
+    const GradientD* gradient,
+    const TransformD* tr,
     uint32_t gradientQuality)
   {
-    const ColorStopList& stops = gradient.getStops();
-    uint32_t spread = gradient.getGradientSpread();
+    const ColorStopList& stops = gradient->getStops();
+    uint32_t spread = gradient->getGradientSpread();
 
-    FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_CONICAL);
+    FOG_ASSERT(gradient->getGradientType() == GRADIENT_TYPE_CONICAL);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
 
     if (stops.isEmpty())
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, Color(Argb32(0x00000000)));
+      Color color(Argb32(0x00000000));
+      return Helpers::p_solid_create_color(ctx, dstFormat, &color);
     }
 
     // ------------------------------------------------------------------------
     // [Transform input matrix to get the center point at (0, 0)].
     // ------------------------------------------------------------------------
 
-    TransformD t(tr);
+    TransformD t(*tr);
 
-    double cx = gradient._pts[0].x;
-    double cy = gradient._pts[0].y;
+    double cx = gradient->_pts[0].x;
+    double cy = gradient->_pts[0].y;
     t.translate(PointD(cx, cy));
 
     TransformD inv(UNINITIALIZED);
@@ -60,20 +61,21 @@ struct FOG_NO_EXPORT PGradientConical
 
     if (stops.getLength() < 2 || !isInverted)
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
+      const ColorStop& stop = stops.getAt(stops.getLength() - 1);
+      return Helpers::p_solid_create_color(ctx, dstFormat, &stop._color);
     }
 
     // ------------------------------------------------------------------------
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
+    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, &stops));
     int tableLength = ctx->_d.gradient.base.len;
 
     // TODO:
     uint32_t srcFormat = IMAGE_FORMAT_PRGB32;
 
-    double angle = Math::repeat(gradient._pts[1].x * MATH_1_DIV_TWO_PI, 1.0);
+    double angle = Math::repeat(gradient->_pts[1].x * MATH_1_DIV_TWO_PI, 1.0);
 
     // There is no such concept like conical gradient using perspective
     // transform, because the function atan2(y/w, x/w) can be simplified to

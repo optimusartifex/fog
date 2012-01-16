@@ -71,7 +71,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32_byte_SSE2(Painter* self
   return ERR_OK;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self, const Argb64& argb64)
+static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self, const Argb64* argb64)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   FOG_ASSERT(engine->ctx.precision == IMAGE_PRECISION_BYTE);
@@ -92,7 +92,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self
   __m128i xmmAAAA32;
   __m128f xmmARGBF;
 
-  Face::m128iLoad8(xmmARGB64, &argb64);
+  Face::m128iLoad8(xmmARGB64, argb64);
   Face::m128iRShiftPU32<8>(xmmARGB32, xmmARGB64);
 
   Face::m128iUnpackPI32FromPI16Lo(xmmARGB64, xmmARGB64);
@@ -126,7 +126,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self
   return ERR_OK;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_setSourceColor_byte_SSE2(Painter* self, const Color& color)
+static err_t FOG_CDECL RasterPaintEngine_setSourceColor_byte_SSE2(Painter* self, const Color* color)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   FOG_ASSERT(engine->ctx.precision == IMAGE_PRECISION_BYTE);
@@ -148,16 +148,16 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceColor_byte_SSE2(Painter* self,
   __m128i xmmAAAA32;
   __m128i xmmARGB32;
 
-  Face::m128iLoad4(xmmARGB32, reinterpret_cast<const char*>(&color) + 24);
-  Face::m128iLoad8(xmm2, reinterpret_cast<const char*>(&color) + 16);
+  Face::m128iLoad4(xmmARGB32, reinterpret_cast<const char*>(color) + 24);
+  Face::m128iLoad8(xmm2, reinterpret_cast<const char*>(color) + 16);
   Face::m128iStore4(reinterpret_cast<char*>(&engine->source.color) + 24, xmmARGB32);
 
   Face::m128iUnpackPI16FromPI8Lo(xmmARGB32, xmmARGB32);
 
-  Face::m128iLoad8(xmm1, reinterpret_cast<const char*>(&color) +  8);
+  Face::m128iLoad8(xmm1, reinterpret_cast<const char*>(color) +  8);
   Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAAAA32, xmmARGB32);
 
-  Face::m128iLoad8(xmm0, reinterpret_cast<const char*>(&color) +  0);
+  Face::m128iLoad8(xmm0, reinterpret_cast<const char*>(color) +  0);
   Face::m128iFillPBWi<3>(xmmARGB32, xmmARGB32);
 
   Face::m128iStore8(reinterpret_cast<char*>(&engine->source.color) +  0, xmm0);

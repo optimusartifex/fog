@@ -25,40 +25,41 @@ struct FOG_NO_EXPORT PGradientRadial
 
   // TODO: 16-bit rasterizer.
   static err_t FOG_FASTCALL create(
-    RasterPattern* ctx, uint32_t dstFormat, const BoxI& clipBox,
-    const GradientD& gradient,
-    const TransformD& tr,
+    RasterPattern* ctx, uint32_t dstFormat, const BoxI* clipBox,
+    const GradientD* gradient,
+    const TransformD* tr,
     uint32_t gradientQuality)
   {
-    const ColorStopList& stops = gradient.getStops();
-    uint32_t spread = gradient.getGradientSpread();
+    const ColorStopList& stops = gradient->getStops();
+    uint32_t spread = gradient->getGradientSpread();
 
-    FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_RADIAL);
+    FOG_ASSERT(gradient->getGradientType() == GRADIENT_TYPE_RADIAL);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
 
     if (stops.isEmpty())
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, Color(Argb32(0x00000000)));
+      Color color(Argb32(0x00000000));
+      return Helpers::p_solid_create_color(ctx, dstFormat, &color);
     }
 
     // ------------------------------------------------------------------------
     // [Transform elliptic shape to a circle]
     // ------------------------------------------------------------------------
 
-    TransformD t(tr);
+    TransformD t(*tr);
 
-    double cx = gradient._pts[0].x;
-    double cy = gradient._pts[0].y;
-    double fx = gradient._pts[1].x;
-    double fy = gradient._pts[1].y;
-    double r  = gradient._pts[2].x;
+    double cx = gradient->_pts[0].x;
+    double cy = gradient->_pts[0].y;
+    double fx = gradient->_pts[1].x;
+    double fy = gradient->_pts[1].y;
+    double r  = gradient->_pts[2].x;
 
-    bool zeroRadius = Math::isFuzzyZero(gradient._pts[2].x) ||
-                      Math::isFuzzyZero(gradient._pts[2].y);
+    bool zeroRadius = Math::isFuzzyZero(gradient->_pts[2].x) ||
+                      Math::isFuzzyZero(gradient->_pts[2].y);
 
-    if (r != gradient._pts[2].y && !zeroRadius)
+    if (r != gradient->_pts[2].y && !zeroRadius)
     {
-      double s = gradient._pts[2].y / r;
+      double s = gradient->_pts[2].y / r;
 
       t.translate(PointD(cx, cy));
       t.scale(PointD(1.0, s));
@@ -76,14 +77,15 @@ struct FOG_NO_EXPORT PGradientRadial
 
     if (stops.getLength() < 2 || !isInverted || zeroRadius)
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
+      const ColorStop& stop = stops.getAt(stops.getLength()-1);
+      return Helpers::p_solid_create_color(ctx, dstFormat, &stop._color);
     }
 
     // ------------------------------------------------------------------------
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
+    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, &stops));
     int tableLength = ctx->_d.gradient.base.len;
 
     // TODO:

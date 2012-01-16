@@ -214,7 +214,7 @@ struct FOG_NO_EXPORT Painter
   //! @brief Get meta variables (meta origin and meta region).
   FOG_INLINE err_t getMetaParams(Region& region, PointI& origin) const
   {
-    return _vtable->getMetaParams(this, region, origin);
+    return _vtable->getMetaParams(this, &region, &origin);
   }
 
   //! @brief Set painter meta variables (meta origin and meta region).
@@ -227,7 +227,7 @@ struct FOG_NO_EXPORT Painter
   //! (usually called per widget.
   FOG_INLINE err_t setMetaParams(const Region& region, const PointI& origin)
   {
-    return _vtable->setMetaParams(this, region, origin);
+    return _vtable->setMetaParams(this, &region, &origin);
   }
 
   //! @brief Reset meta variables (setting meta region to infinite and meta
@@ -856,7 +856,7 @@ struct FOG_NO_EXPORT Painter
   //! @brief Get the source type (see @c PATTERN_TYPE).
   FOG_INLINE err_t getSourceType(uint32_t& val) const
   {
-    return _vtable->getSourceType(this, val);
+    return _vtable->getSourceType(this, &val);
   }
 
   // --------------------------------------------------------------------------
@@ -866,13 +866,13 @@ struct FOG_NO_EXPORT Painter
   //! @brief Get the source color into @a val (see @c Color).
   FOG_INLINE err_t getSource(Color& val) const
   {
-    return _vtable->getSourceColor(this, val);
+    return _vtable->getSourceColor(this, &val);
   }
 
   //! @brief Get the source pattern into @a val (see @c Pattern).
   FOG_INLINE err_t getSource(Pattern& val) const
   {
-    return _vtable->getSourcePattern(this, val);
+    return _vtable->getSourcePattern(this, &val);
   }
 
   // --------------------------------------------------------------------------
@@ -893,13 +893,13 @@ struct FOG_NO_EXPORT Painter
   //! @brief Set the painter source color to a given @c Argb64 color @a val.
   FOG_INLINE err_t setSource(const Argb64& val)
   {
-    return _vtable->setSourceArgb64(this, val);
+    return _vtable->setSourceArgb64(this, &val);
   }
 
   //! @brief Set the painter source to a @c Color @a val.
   FOG_INLINE err_t setSource(const Color& val)
   {
-    return _vtable->setSourceColor(this, val);
+    return _vtable->setSourceColor(this, &val);
   }
 
   //! @brief Set the painter source to a @c Texture @a val.
@@ -947,7 +947,7 @@ struct FOG_NO_EXPORT Painter
   //! @brief Set the painter source to a Pattern @a val.
   FOG_INLINE err_t setSource(const Pattern& val)
   {
-    return _vtable->setSourcePattern(this, val);
+    return _vtable->setSourcePattern(this, &val);
   }
 
   // --------------------------------------------------------------------------
@@ -957,25 +957,25 @@ struct FOG_NO_EXPORT Painter
   //! @brief Get the user transformation matrix into @a tr.
   FOG_INLINE err_t getTransform(TransformF& tr) const
   {
-    return _vtable->getTransformF(this, tr);
+    return _vtable->getTransformF(this, &tr);
   }
 
   //! @overload
   FOG_INLINE err_t getTransform(TransformD& tr) const
   {
-    return _vtable->getTransformD(this, tr);
+    return _vtable->getTransformD(this, &tr);
   }
 
   //! @brief Set the transformation matrix to @a tr.
   FOG_INLINE err_t setTransform(const TransformF& tr)
   {
-    return _vtable->setTransformF(this, tr);
+    return _vtable->setTransformF(this, &tr);
   }
 
   //! @overload
   FOG_INLINE err_t setTransform(const TransformD& tr)
   {
-    return _vtable->setTransformD(this, tr);
+    return _vtable->setTransformD(this, &tr);
   }
 
   // --------------------------------------------------------------------------
@@ -1093,25 +1093,25 @@ struct FOG_NO_EXPORT Painter
   //! @brief Convert the world coordinate into the screen coordinates.
   FOG_INLINE err_t mapUserToDevice(PointF& p) const
   {
-    return _vtable->mapPointF(this, PAINTER_MAP_USER_TO_DEVICE, p);
+    return _vtable->mapPointF(this, PAINTER_MAP_USER_TO_DEVICE, &p);
   };
 
   //! @overload
   FOG_INLINE err_t mapUserToDevice(PointD& p) const
   {
-    return _vtable->mapPointD(this, PAINTER_MAP_USER_TO_DEVICE, p);
+    return _vtable->mapPointD(this, PAINTER_MAP_USER_TO_DEVICE, &p);
   };
 
   //! @brief Convert the screen coordinate into the world coordinates.
   FOG_INLINE err_t mapDeviceToUser(PointF& p) const
   {
-    return _vtable->mapPointF(this, PAINTER_MAP_DEVICE_TO_USER, p);
+    return _vtable->mapPointF(this, PAINTER_MAP_DEVICE_TO_USER, &p);
   };
 
   //! @overload
   FOG_INLINE err_t mapDeviceToUser(PointD& p) const
   {
-    return _vtable->mapPointD(this, PAINTER_MAP_DEVICE_TO_USER, p);
+    return _vtable->mapPointD(this, PAINTER_MAP_DEVICE_TO_USER, &p);
   };
 
   // --------------------------------------------------------------------------
@@ -1126,9 +1126,9 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawBox(float x0, float y0, float x1, float y1) { return drawRect(RectF(x0, y0, x1 - x0, y1 - y0)); }
   FOG_INLINE err_t drawBox(double x0, double y0, double x1, double y1) { return drawRect(RectD(x0, y0, x1 - x0, y1 - y0)); }
 
-  FOG_INLINE err_t drawRect(const RectI& r) { return _vtable->drawRectI(this, r); }
-  FOG_INLINE err_t drawRect(const RectF& r) { return _vtable->drawRectF(this, r); }
-  FOG_INLINE err_t drawRect(const RectD& r) { return _vtable->drawRectD(this, r); }
+  FOG_INLINE err_t drawRect(const RectI& r) { return _vtable->drawRectI(this, &r); }
+  FOG_INLINE err_t drawRect(const RectF& r) { return _vtable->drawRectF(this, &r); }
+  FOG_INLINE err_t drawRect(const RectD& r) { return _vtable->drawRectD(this, &r); }
 
   FOG_INLINE err_t drawRect(int x, int y, int w, int h) { return drawRect(RectI(x, y, w, h)); }
   FOG_INLINE err_t drawRect(float x, float y, float w, float h) { return drawRect(RectF(x, y, w, h)); }
@@ -1187,8 +1187,8 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawShape(const ShapeF& shape) { return _vtable->drawShapeF(this, shape.getType(), shape.getData()); }
   FOG_INLINE err_t drawShape(const ShapeD& shape) { return _vtable->drawShapeD(this, shape.getType(), shape.getData()); }
 
-  FOG_INLINE err_t drawPath(const PathF& p) { return _vtable->drawPathF(this, p); }
-  FOG_INLINE err_t drawPath(const PathD& p) { return _vtable->drawPathD(this, p); }
+  FOG_INLINE err_t drawPath(const PathF& p) { return _vtable->drawPathF(this, &p); }
+  FOG_INLINE err_t drawPath(const PathD& p) { return _vtable->drawPathD(this, &p); }
 
   // --------------------------------------------------------------------------
   // [Fill]
@@ -1204,9 +1204,9 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillBox(float x0, float y0, float x1, float y1) { return fillRect(RectF(x0, y0, x1 - x0, y1 - y0)); }
   FOG_INLINE err_t fillBox(double x0, double y0, double x1, double y1) { return fillRect(RectD(x0, y0, x1 - x0, y1 - y0)); }
 
-  FOG_INLINE err_t fillRect(const RectI& r) { return _vtable->fillRectI(this, r); }
-  FOG_INLINE err_t fillRect(const RectF& r) { return _vtable->fillRectF(this, r); }
-  FOG_INLINE err_t fillRect(const RectD& r) { return _vtable->fillRectD(this, r); }
+  FOG_INLINE err_t fillRect(const RectI& r) { return _vtable->fillRectI(this, &r); }
+  FOG_INLINE err_t fillRect(const RectF& r) { return _vtable->fillRectF(this, &r); }
+  FOG_INLINE err_t fillRect(const RectD& r) { return _vtable->fillRectD(this, &r); }
 
   FOG_INLINE err_t fillRect(int x, int y, int w, int h) { return fillRect(RectI(x, y, w, h)); }
   FOG_INLINE err_t fillRect(float x, float y, float w, float h) { return fillRect(RectF(x, y, w, h)); }
@@ -1256,70 +1256,70 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillShape(const ShapeF& shape) { return _vtable->fillShapeF(this, shape.getType(), shape.getData()); }
   FOG_INLINE err_t fillShape(const ShapeD& shape) { return _vtable->fillShapeD(this, shape.getType(), shape.getData()); }
 
-  FOG_INLINE err_t fillPath(const PathF& p) { return _vtable->fillPathF(this, p); }
-  FOG_INLINE err_t fillPath(const PathD& p) { return _vtable->fillPathD(this, p); }
+  FOG_INLINE err_t fillPath(const PathF& p) { return _vtable->fillPathF(this, &p); }
+  FOG_INLINE err_t fillPath(const PathD& p) { return _vtable->fillPathD(this, &p); }
 
-  FOG_INLINE err_t fillText(const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextAtI(this, p, text, font, clip); }
-  FOG_INLINE err_t fillText(const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextAtF(this, p, text, font, clip); }
-  FOG_INLINE err_t fillText(const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextAtD(this, p, text, font, clip); }
+  FOG_INLINE err_t fillText(const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextAtI(this, &p, &text, &font, clip); }
+  FOG_INLINE err_t fillText(const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextAtF(this, &p, &text, &font, clip); }
+  FOG_INLINE err_t fillText(const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextAtD(this, &p, &text, &font, clip); }
 
-  FOG_INLINE err_t fillText(const TextRectI& r, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextInI(this, r, text, font, clip); }
-  FOG_INLINE err_t fillText(const TextRectF& r, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextInF(this, r, text, font, clip); }
-  FOG_INLINE err_t fillText(const TextRectD& r, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextInD(this, r, text, font, clip); }
+  FOG_INLINE err_t fillText(const TextRectI& r, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextInI(this, &r, &text, &font, clip); }
+  FOG_INLINE err_t fillText(const TextRectF& r, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextInF(this, &r, &text, &font, clip); }
+  FOG_INLINE err_t fillText(const TextRectD& r, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextInD(this, &r, &text, &font, clip); }
 
-  FOG_INLINE err_t fillMask(const PointI& p, const Image& mask) { return _vtable->fillMaskAtI(this, p, mask, NULL); }
-  FOG_INLINE err_t fillMask(const PointF& p, const Image& mask) { return _vtable->fillMaskAtF(this, p, mask, NULL); }
-  FOG_INLINE err_t fillMask(const PointD& p, const Image& mask) { return _vtable->fillMaskAtD(this, p, mask, NULL); }
+  FOG_INLINE err_t fillMask(const PointI& p, const Image& mask) { return _vtable->fillMaskAtI(this, &p, &mask, NULL); }
+  FOG_INLINE err_t fillMask(const PointF& p, const Image& mask) { return _vtable->fillMaskAtF(this, &p, &mask, NULL); }
+  FOG_INLINE err_t fillMask(const PointD& p, const Image& mask) { return _vtable->fillMaskAtD(this, &p, &mask, NULL); }
 
-  FOG_INLINE err_t fillMask(const PointI& p, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskAtI(this, p, mask, &mFragment); }
-  FOG_INLINE err_t fillMask(const PointF& p, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskAtF(this, p, mask, &mFragment); }
-  FOG_INLINE err_t fillMask(const PointD& p, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskAtD(this, p, mask, &mFragment); }
+  FOG_INLINE err_t fillMask(const PointI& p, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskAtI(this, &p, &mask, &mFragment); }
+  FOG_INLINE err_t fillMask(const PointF& p, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskAtF(this, &p, &mask, &mFragment); }
+  FOG_INLINE err_t fillMask(const PointD& p, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskAtD(this, &p, &mask, &mFragment); }
 
-  FOG_INLINE err_t fillMask(const RectI& r, const Image& mask) { return _vtable->fillMaskInI(this, r, mask, NULL); }
-  FOG_INLINE err_t fillMask(const RectF& r, const Image& mask) { return _vtable->fillMaskInF(this, r, mask, NULL); }
-  FOG_INLINE err_t fillMask(const RectD& r, const Image& mask) { return _vtable->fillMaskInD(this, r, mask, NULL); }
+  FOG_INLINE err_t fillMask(const RectI& r, const Image& mask) { return _vtable->fillMaskInI(this, &r, &mask, NULL); }
+  FOG_INLINE err_t fillMask(const RectF& r, const Image& mask) { return _vtable->fillMaskInF(this, &r, &mask, NULL); }
+  FOG_INLINE err_t fillMask(const RectD& r, const Image& mask) { return _vtable->fillMaskInD(this, &r, &mask, NULL); }
 
-  FOG_INLINE err_t fillMask(const RectI& r, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskInI(this, r, mask, &mFragment); }
-  FOG_INLINE err_t fillMask(const RectF& r, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskInF(this, r, mask, &mFragment); }
-  FOG_INLINE err_t fillMask(const RectD& r, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskInD(this, r, mask, &mFragment); }
+  FOG_INLINE err_t fillMask(const RectI& r, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskInI(this, &r, &mask, &mFragment); }
+  FOG_INLINE err_t fillMask(const RectF& r, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskInF(this, &r, &mask, &mFragment); }
+  FOG_INLINE err_t fillMask(const RectD& r, const Image& mask, const RectI& mFragment) { return _vtable->fillMaskInD(this, &r, &mask, &mFragment); }
 
-  FOG_INLINE err_t fillRegion(const Region& r) { return _vtable->fillRegion(this, r); }
+  FOG_INLINE err_t fillRegion(const Region& r) { return _vtable->fillRegion(this, &r); }
 
   // --------------------------------------------------------------------------
   // [Blit]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t blitImage(const PointI& p, const Image& src) { return _vtable->blitImageAtI(this, p, src, NULL); }
-  FOG_INLINE err_t blitImage(const PointF& p, const Image& src) { return _vtable->blitImageAtF(this, p, src, NULL); }
-  FOG_INLINE err_t blitImage(const PointD& p, const Image& src) { return _vtable->blitImageAtD(this, p, src, NULL); }
+  FOG_INLINE err_t blitImage(const PointI& p, const Image& src) { return _vtable->blitImageAtI(this, &p, &src, NULL); }
+  FOG_INLINE err_t blitImage(const PointF& p, const Image& src) { return _vtable->blitImageAtF(this, &p, &src, NULL); }
+  FOG_INLINE err_t blitImage(const PointD& p, const Image& src) { return _vtable->blitImageAtD(this, &p, &src, NULL); }
 
-  FOG_INLINE err_t blitImage(const RectI& r, const Image& src) { return _vtable->blitImageInI(this, r, src, NULL); }
-  FOG_INLINE err_t blitImage(const RectF& r, const Image& src) { return _vtable->blitImageInF(this, r, src, NULL); }
-  FOG_INLINE err_t blitImage(const RectD& r, const Image& src) { return _vtable->blitImageInD(this, r, src, NULL); }
+  FOG_INLINE err_t blitImage(const RectI& r, const Image& src) { return _vtable->blitImageInI(this, &r, &src, NULL); }
+  FOG_INLINE err_t blitImage(const RectF& r, const Image& src) { return _vtable->blitImageInF(this, &r, &src, NULL); }
+  FOG_INLINE err_t blitImage(const RectD& r, const Image& src) { return _vtable->blitImageInD(this, &r, &src, NULL); }
 
-  FOG_INLINE err_t blitImage(const PointI& p, const Image& src, const RectI& sFragment) { return _vtable->blitImageAtI(this, p, src, &sFragment); }
-  FOG_INLINE err_t blitImage(const PointF& p, const Image& src, const RectI& sFragment) { return _vtable->blitImageAtF(this, p, src, &sFragment); }
-  FOG_INLINE err_t blitImage(const PointD& p, const Image& src, const RectI& sFragment) { return _vtable->blitImageAtD(this, p, src, &sFragment); }
+  FOG_INLINE err_t blitImage(const PointI& p, const Image& src, const RectI& sFragment) { return _vtable->blitImageAtI(this, &p, &src, &sFragment); }
+  FOG_INLINE err_t blitImage(const PointF& p, const Image& src, const RectI& sFragment) { return _vtable->blitImageAtF(this, &p, &src, &sFragment); }
+  FOG_INLINE err_t blitImage(const PointD& p, const Image& src, const RectI& sFragment) { return _vtable->blitImageAtD(this, &p, &src, &sFragment); }
 
-  FOG_INLINE err_t blitImage(const RectI& r, const Image& src, const RectI& sFragment) { return _vtable->blitImageInI(this, r, src, &sFragment); }
-  FOG_INLINE err_t blitImage(const RectF& r, const Image& src, const RectI& sFragment) { return _vtable->blitImageInF(this, r, src, &sFragment); }
-  FOG_INLINE err_t blitImage(const RectD& r, const Image& src, const RectI& sFragment) { return _vtable->blitImageInD(this, r, src, &sFragment); }
+  FOG_INLINE err_t blitImage(const RectI& r, const Image& src, const RectI& sFragment) { return _vtable->blitImageInI(this, &r, &src, &sFragment); }
+  FOG_INLINE err_t blitImage(const RectF& r, const Image& src, const RectI& sFragment) { return _vtable->blitImageInF(this, &r, &src, &sFragment); }
+  FOG_INLINE err_t blitImage(const RectD& r, const Image& src, const RectI& sFragment) { return _vtable->blitImageInD(this, &r, &src, &sFragment); }
 
-  FOG_INLINE err_t blitMaskedImage(const PointI& p, const Image& src, const Image& mask) { return _vtable->blitMaskedImageAtI(this, p, src, mask, NULL, NULL); }
-  FOG_INLINE err_t blitMaskedImage(const PointF& p, const Image& src, const Image& mask) { return _vtable->blitMaskedImageAtF(this, p, src, mask, NULL, NULL); }
-  FOG_INLINE err_t blitMaskedImage(const PointD& p, const Image& src, const Image& mask) { return _vtable->blitMaskedImageAtD(this, p, src, mask, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const PointI& p, const Image& src, const Image& mask) { return _vtable->blitMaskedImageAtI(this, &p, &src, &mask, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const PointF& p, const Image& src, const Image& mask) { return _vtable->blitMaskedImageAtF(this, &p, &src, &mask, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const PointD& p, const Image& src, const Image& mask) { return _vtable->blitMaskedImageAtD(this, &p, &src, &mask, NULL, NULL); }
 
-  FOG_INLINE err_t blitMaskedImage(const RectI& r, const Image& src, const Image& mask) { return _vtable->blitMaskedImageInI(this, r, src, mask, NULL, NULL); }
-  FOG_INLINE err_t blitMaskedImage(const RectF& r, const Image& src, const Image& mask) { return _vtable->blitMaskedImageInF(this, r, src, mask, NULL, NULL); }
-  FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& src, const Image& mask) { return _vtable->blitMaskedImageInD(this, r, src, mask, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const RectI& r, const Image& src, const Image& mask) { return _vtable->blitMaskedImageInI(this, &r, &src, &mask, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const RectF& r, const Image& src, const Image& mask) { return _vtable->blitMaskedImageInF(this, &r, &src, &mask, NULL, NULL); }
+  FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& src, const Image& mask) { return _vtable->blitMaskedImageInD(this, &r, &src, &mask, NULL, NULL); }
 
-  FOG_INLINE err_t blitMaskedImage(const PointI& p, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageAtI(this, p, src, mask, &sFragment, &mFragment); }
-  FOG_INLINE err_t blitMaskedImage(const PointF& p, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageAtF(this, p, src, mask, &sFragment, &mFragment); }
-  FOG_INLINE err_t blitMaskedImage(const PointD& p, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageAtD(this, p, src, mask, &sFragment, &mFragment); }
+  FOG_INLINE err_t blitMaskedImage(const PointI& p, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageAtI(this, &p, &src, &mask, &sFragment, &mFragment); }
+  FOG_INLINE err_t blitMaskedImage(const PointF& p, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageAtF(this, &p, &src, &mask, &sFragment, &mFragment); }
+  FOG_INLINE err_t blitMaskedImage(const PointD& p, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageAtD(this, &p, &src, &mask, &sFragment, &mFragment); }
 
-  FOG_INLINE err_t blitMaskedImage(const RectI& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInI(this, r, src, mask, &sFragment, &mFragment); }
-  FOG_INLINE err_t blitMaskedImage(const RectF& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInF(this, r, src, mask, &sFragment, &mFragment); }
-  FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInD(this, r, src, mask, &sFragment, &mFragment); }
+  FOG_INLINE err_t blitMaskedImage(const RectI& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInI(this, &r, &src, &mask, &sFragment, &mFragment); }
+  FOG_INLINE err_t blitMaskedImage(const RectF& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInF(this, &r, &src, &mask, &sFragment, &mFragment); }
+  FOG_INLINE err_t blitMaskedImage(const RectD& r, const Image& src, const Image& mask, const RectI& sFragment, const RectI& mFragment) { return _vtable->blitMaskedImageInD(this, &r, &src, &mask, &sFragment, &mFragment); }
 
   // --------------------------------------------------------------------------
   // [Filter]
@@ -1328,31 +1328,31 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t filterAll(const ImageFilter& filter) { return _vtable->filterAll(this, filter.getFeData()); }
   FOG_INLINE err_t filterAll(const FeBase& feBase) { return _vtable->filterAll(this, &feBase); }
 
-  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectI& r) { return _vtable->filterRectI(this, filter.getFeData(), r); }
-  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectF& r) { return _vtable->filterRectF(this, filter.getFeData(), r); }
-  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectD& r) { return _vtable->filterRectD(this, filter.getFeData(), r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectI& r) { return _vtable->filterRectI(this, filter.getFeData(), &r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectF& r) { return _vtable->filterRectF(this, filter.getFeData(), &r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectD& r) { return _vtable->filterRectD(this, filter.getFeData(), &r); }
 
-  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectI& r) { return _vtable->filterRectI(this, &feBase, r); }
-  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectF& r) { return _vtable->filterRectF(this, &feBase, r); }
-  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectD& r) { return _vtable->filterRectD(this, &feBase, r); }
+  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectI& r) { return _vtable->filterRectI(this, &feBase, &r); }
+  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectF& r) { return _vtable->filterRectF(this, &feBase, &r); }
+  FOG_INLINE err_t filterRect(const FeBase& feBase, const RectD& r) { return _vtable->filterRectD(this, &feBase, &r); }
 
-  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterPathF(this, filter.getFeData(), p); }
-  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterPathD(this, filter.getFeData(), p); }
+  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterPathF(this, filter.getFeData(), &p); }
+  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterPathD(this, filter.getFeData(), &p); }
 
-  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathF& p) { return _vtable->filterPathF(this, &feBase, p); }
-  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathD& p) { return _vtable->filterPathD(this, &feBase, p); }
+  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathF& p) { return _vtable->filterPathF(this, &feBase, &p); }
+  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathD& p) { return _vtable->filterPathD(this, &feBase, &p); }
 
   // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxI& r) { return _vtable->clipRectI(this, clipOp, RectI(r)); }
-  FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxF& r) { return _vtable->clipRectF(this, clipOp, RectF(r)); }
-  FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxD& r) { return _vtable->clipRectD(this, clipOp, RectD(r)); }
+  FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxI& r) { return clipRect(clipOp, RectI(r)); }
+  FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxF& r) { return clipRect(clipOp, RectF(r)); }
+  FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxD& r) { return clipRect(clipOp, RectD(r)); }
 
-  FOG_INLINE err_t clipRect(uint32_t clipOp, const RectI& r) { return _vtable->clipRectI(this, clipOp, r); }
-  FOG_INLINE err_t clipRect(uint32_t clipOp, const RectF& r) { return _vtable->clipRectF(this, clipOp, r); }
-  FOG_INLINE err_t clipRect(uint32_t clipOp, const RectD& r) { return _vtable->clipRectD(this, clipOp, r); }
+  FOG_INLINE err_t clipRect(uint32_t clipOp, const RectI& r) { return _vtable->clipRectI(this, clipOp, &r); }
+  FOG_INLINE err_t clipRect(uint32_t clipOp, const RectF& r) { return _vtable->clipRectF(this, clipOp, &r); }
+  FOG_INLINE err_t clipRect(uint32_t clipOp, const RectD& r) { return _vtable->clipRectD(this, clipOp, &r); }
 
   FOG_INLINE err_t clipRects(uint32_t clipOp, const RectI* r, size_t count) { return _vtable->clipRectsI(this, clipOp, r, count); }
   FOG_INLINE err_t clipRects(uint32_t clipOp, const RectF* r, size_t count) { return _vtable->clipRectsF(this, clipOp, r, count); }
@@ -1395,34 +1395,34 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeF& shape) { return _vtable->clipShapeF(this, clipOp, shape.getType(), shape.getData()); }
   FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeD& shape) { return _vtable->clipShapeD(this, clipOp, shape.getType(), shape.getData()); }
 
-  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathF& p) { return _vtable->clipPathF(this, clipOp, p); }
-  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathD& p) { return _vtable->clipPathD(this, clipOp, p); }
+  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathF& p) { return _vtable->clipPathF(this, clipOp, &p); }
+  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathD& p) { return _vtable->clipPathD(this, clipOp, &p); }
 
-  FOG_INLINE err_t clipText(uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextAtI(this, clipOp, p, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextAtF(this, clipOp, p, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextAtD(this, clipOp, p, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextAtI(this, clipOp, &p, &text, &font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextAtF(this, clipOp, &p, &text, &font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextAtD(this, clipOp, &p, &text, &font, clip); }
 
-  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextInI(this, clipOp, r, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextInF(this, clipOp, r, text, font, clip); }
-  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextInD(this, clipOp, r, text, font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectI& r, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextInI(this, clipOp, &r, &text, &font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectF& r, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextInF(this, clipOp, &r, &text, &font, clip); }
+  FOG_INLINE err_t clipText(uint32_t clipOp, const TextRectD& r, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->clipTextInD(this, clipOp, &r, &text, &font, clip); }
 
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointI& p, const Image& mask) { return _vtable->clipMaskAtI(this, clipOp, p, mask, NULL); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointF& p, const Image& mask) { return _vtable->clipMaskAtF(this, clipOp, p, mask, NULL); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointD& p, const Image& mask) { return _vtable->clipMaskAtD(this, clipOp, p, mask, NULL); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointI& p, const Image& mask) { return _vtable->clipMaskAtI(this, clipOp, &p, &mask, NULL); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointF& p, const Image& mask) { return _vtable->clipMaskAtF(this, clipOp, &p, &mask, NULL); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointD& p, const Image& mask) { return _vtable->clipMaskAtD(this, clipOp, &p, &mask, NULL); }
 
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointI& p, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskAtI(this, clipOp, p, mask, &mFragment); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointF& p, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskAtF(this, clipOp, p, mask, &mFragment); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointD& p, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskAtD(this, clipOp, p, mask, &mFragment); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointI& p, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskAtI(this, clipOp, &p, &mask, &mFragment); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointF& p, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskAtF(this, clipOp, &p, &mask, &mFragment); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const PointD& p, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskAtD(this, clipOp, &p, &mask, &mFragment); }
 
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectI& r, const Image& mask) { return _vtable->clipMaskInI(this, clipOp, r, mask, NULL); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectF& r, const Image& mask) { return _vtable->clipMaskInF(this, clipOp, r, mask, NULL); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectD& r, const Image& mask) { return _vtable->clipMaskInD(this, clipOp, r, mask, NULL); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectI& r, const Image& mask) { return _vtable->clipMaskInI(this, clipOp, &r, &mask, NULL); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectF& r, const Image& mask) { return _vtable->clipMaskInF(this, clipOp, &r, &mask, NULL); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectD& r, const Image& mask) { return _vtable->clipMaskInD(this, clipOp, &r, &mask, NULL); }
 
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectI& r, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskInI(this, clipOp, r, mask, &mFragment); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectF& r, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskInF(this, clipOp, r, mask, &mFragment); }
-  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectD& r, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskInD(this, clipOp, r, mask, &mFragment); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectI& r, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskInI(this, clipOp, &r, &mask, &mFragment); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectF& r, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskInF(this, clipOp, &r, &mask, &mFragment); }
+  FOG_INLINE err_t clipMask(uint32_t clipOp, const RectD& r, const Image& mask, const RectI& mFragment) { return _vtable->clipMaskInD(this, clipOp, &r, &mask, &mFragment); }
 
-  FOG_INLINE err_t clipRegion(uint32_t clipOp, const Region& r) { return _vtable->clipRegion(this, clipOp, r); }
+  FOG_INLINE err_t clipRegion(uint32_t clipOp, const Region& r) { return _vtable->clipRegion(this, clipOp, &r); }
 
   //! @brief Reset clipping.
   FOG_INLINE err_t resetClip() { return _vtable->resetClip(this); }

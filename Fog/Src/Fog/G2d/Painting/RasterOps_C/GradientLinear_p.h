@@ -25,19 +25,19 @@ struct FOG_NO_EXPORT PGradientLinear
 
   // TODO: 16-bit rasterizer.
   static err_t FOG_FASTCALL create(
-    RasterPattern* ctx, uint32_t dstFormat, const BoxI& clipBox,
-    const GradientD& gradient,
-    const TransformD& tr,
+    RasterPattern* ctx, uint32_t dstFormat, const BoxI* clipBox,
+    const GradientD* gradient,
+    const TransformD* tr,
     uint32_t gradientQuality)
   {
-    const ColorStopList& stops = gradient.getStops();
-    uint32_t spread = gradient.getGradientSpread();
+    const ColorStopList& stops = gradient->getStops();
+    uint32_t spread = gradient->getGradientSpread();
 
-    FOG_ASSERT(gradient.getGradientType() == GRADIENT_TYPE_LINEAR);
+    FOG_ASSERT(gradient->getGradientType() == GRADIENT_TYPE_LINEAR);
     FOG_ASSERT(spread < GRADIENT_SPREAD_COUNT);
 
     TransformD inv(UNINITIALIZED);
-    bool isInverted = TransformD::invert(inv, tr);
+    bool isInverted = TransformD::invert(inv, *tr);
 
     // ------------------------------------------------------------------------
     // [Solid]
@@ -45,12 +45,14 @@ struct FOG_NO_EXPORT PGradientLinear
 
     if (stops.isEmpty())
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, Color(Argb32(0x00000000)));
+      Color color(Argb32(0x00000000));
+      return Helpers::p_solid_create_color(ctx, dstFormat, &color);
     }
 
     if (stops.getLength() < 2 || !isInverted)
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
+      const ColorStop& stop = stops.getAt(stops.getLength() - 1);
+      return Helpers::p_solid_create_color(ctx, dstFormat, &stop._color);
     }
 
     // ------------------------------------------------------------------------
@@ -58,7 +60,7 @@ struct FOG_NO_EXPORT PGradientLinear
     // ------------------------------------------------------------------------
 
     PointD origin;
-    PointD pd = gradient._pts[1] - gradient._pts[0];
+    PointD pd = gradient->_pts[1] - gradient->_pts[0];
 
     double pd_x2y2 = pd.x * pd.x + pd.y * pd.y;
     double pd_dist = Math::sqrt(pd_x2y2);
@@ -68,10 +70,11 @@ struct FOG_NO_EXPORT PGradientLinear
     // with SVG.
     if (pd_dist < MATH_EPSILON_F)
     {
-      return Helpers::p_solid_create_color(ctx, dstFormat, stops.getAt(stops.getLength()-1).getColor());
+      const ColorStop& stop = stops.getAt(stops.getLength() - 1);
+      return Helpers::p_solid_create_color(ctx, dstFormat, &stop._color);
     }
 
-    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, stops));
+    FOG_RETURN_ON_ERROR(PGradientBase::create(ctx, dstFormat, clipBox, spread, &stops));
     int tableLength = ctx->_d.gradient.base.len;
 
     // TODO:
@@ -81,11 +84,11 @@ struct FOG_NO_EXPORT PGradientLinear
     // [Simple]
     // ------------------------------------------------------------------------
 
-    if (tr.getType() <= TRANSFORM_TYPE_AFFINE)
+    if (tr->getType() <= TRANSFORM_TYPE_AFFINE)
     {
       // Negate and adjust the origin by 0.5 to move it to the center of
       // the pixel.
-      tr.mapPoint(origin, gradient._pts[0]);
+      tr->mapPoint(origin, gradient->_pts[0]);
       origin.x = -origin.x + 0.5;
       origin.y = -origin.y + 0.5;
 
@@ -121,7 +124,7 @@ struct FOG_NO_EXPORT PGradientLinear
       double dx = ax * (double)tableLength / pd_x2y2;
       double dy = ay * (double)tableLength / pd_x2y2;
 
-      ctx->_d.gradient.linear.proj.offset = -gradient._pts[0].x * dx + -gradient._pts[0].y * dy;
+      ctx->_d.gradient.linear.proj.offset = -gradient->_pts[0].x * dx + -gradient->_pts[0].y * dy;
 
       ctx->_d.gradient.linear.proj.xx = dx * inv._00 + dy * inv._01;
       ctx->_d.gradient.linear.proj.xy = dx * inv._10 + dy * inv._11;

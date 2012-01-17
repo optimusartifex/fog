@@ -719,8 +719,8 @@ struct FOG_NO_EXPORT FBlur
       vRadiusScale = float(feScale->_pt.y);
     }
 
-    ctx->blur.hRadius = Math::bound<int>(Math::abs(Math::iround(feData->_hRadius * hRadiusScale)), 0, 254);
-    ctx->blur.vRadius = Math::bound<int>(Math::abs(Math::iround(feData->_vRadius * vRadiusScale)), 0, 254);
+    ctx->blur.hRadius = Math::bound<int>(Math::abs(Math::iround(feData->_hRadius * hRadiusScale)), 0, FE_BLUR_LIMIT_RADIUS);
+    ctx->blur.vRadius = Math::bound<int>(Math::abs(Math::iround(feData->_vRadius * vRadiusScale)), 0, FE_BLUR_LIMIT_RADIUS);
 
     if (feScale != NULL && feScale->isSwapped())
       swap(ctx->blur.hRadius, ctx->blur.vRadius);

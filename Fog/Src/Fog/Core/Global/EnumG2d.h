@@ -672,7 +672,7 @@ enum DITHER_TYPE
 enum FE_BLUR_LIMIT
 {
   //! @brief Maximum blur filter radius.
-  FE_BLUR_LIMIT_RADIUS = 255
+  FE_BLUR_LIMIT_RADIUS = 254
 };
 
 // ============================================================================
@@ -687,6 +687,16 @@ enum FE_BLUR_TYPE
   //! The box-blur effect is low-level quality blur, but very efficient. Radius
   //! has generally no effect on performance (or only little effect to process
   //! edge cases).
+  //!
+  //! The kernel of box blur is constant, for example the 5x5 kernel would be:
+  //!
+  //! @verbatim
+  //!     | 1 1 1 1 1 |   | 1 |
+  //!     | 1 1 1 1 1 |   | 1 |
+  //! K = | 1 1 1 1 1 | = | 1 | * | 1 1 1 1 1 |
+  //!     | 1 1 1 1 1 |   | 1 |
+  //!     | 1 1 1 1 1 |   | 1 |
+  //! @endverbatim
   FE_BLUR_TYPE_BOX = 0,
 
   //! @brief The exponential blur effect.
@@ -694,6 +704,16 @@ enum FE_BLUR_TYPE
   //! The exponential blur effect`s quality is between box blur and gaussian
   //! blur. The result and the performance is optimal for the most operations,
   //! because like box blur, the radius has no effect on the blur performance.
+  //!
+  //! The kernel of box blur is (TODO), for example the 5x5 kernel would be:
+  //!
+  //! @verbatim
+  //!     | 1 2 3 2 1 |   | 1 |
+  //!     | 2 4 6 4 2 |   | 2 |
+  //! K = | 3 6 9 6 3 | = | 3 | * | 1 2 3 2 1 |
+  //!     | 2 4 6 4 2 |   | 2 |
+  //!     | 1 2 3 2 1 |   | 1 |
+  //! @endverbatim
   //!
   //! @note The exponential blur is based on blur effect originally called
   //! StackBlur written by Mario Klingemann, see:

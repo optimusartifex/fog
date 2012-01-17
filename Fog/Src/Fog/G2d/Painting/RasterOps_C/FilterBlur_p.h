@@ -77,12 +77,22 @@ namespace RasterOps_C {
 // performance. Experiments are welcome.
 enum { BLUR_RECT_V_HLINE_COUNT = 16 };
 
+// A-Precision of alpha parameter in exponential blur (fixed point 0.A).
+enum { BLUR_APREC = 12 };
+
+// Z-Precision of state parameter in exponential blur (fixed point 8.Z).
+enum { BLUR_ZPREC = 10 };
+
 // ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Component - PRGB32]
+// [Fog::RasterOps_C - Filter - Blur - Run - PRGB32]
 // ============================================================================
 
-struct FOG_NO_EXPORT FBlurComponent_PRGB32
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurRun_PRGB32
 {
+  typedef FBlurRun_PRGB32 Run;
+  typedef FBaseAccessor_PRGB32::Pixel Pixel;
+
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
@@ -94,151 +104,80 @@ struct FOG_NO_EXPORT FBlurComponent_PRGB32
     g = 0;
     b = 0;
   }
-  
+
   // --------------------------------------------------------------------------
   // [Set]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void set(const FBlurComponent_PRGB32& other)
+  FOG_INLINE void set(const Run& run, IntT scale = 1)
   {
-    a = other.a;
-    r = other.r;
-    g = other.g;
-    b = other.b;
+    a = run.a * scale;
+    r = run.r * scale;
+    g = run.g * scale;
+    b = run.b * scale;
+  }
+  
+  FOG_INLINE void set(const Pixel& pix, IntT scale = 1)
+  {
+    a = static_cast<IntT>((pix >> 24)       ) * scale;
+    r = static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g = static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b = static_cast<IntT>((pix      ) & 0xFF) * scale;
   }
 
   // --------------------------------------------------------------------------
   // [Ops]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void add(uint32_t pix0)
+  FOG_INLINE void add(const Pixel& pix, IntT scale = 1)
   {
-    a += (pix0 >> 24);
-    r += (pix0 >> 16) & 0xFF;
-    g += (pix0 >>  8) & 0xFF;
-    b += (pix0      ) & 0xFF;
+    a += static_cast<IntT>((pix >> 24)       ) * scale;
+    r += static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g += static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b += static_cast<IntT>((pix      ) & 0xFF) * scale;
   }
 
-  FOG_INLINE void addN(uint32_t pix0, uint32_t mul)
+  FOG_INLINE void add(const Run& run, IntT scale = 1)
   {
-    a += ((pix0 >> 24)       ) * mul;
-    r += ((pix0 >> 16) & 0xFF) * mul;
-    g += ((pix0 >>  8) & 0xFF) * mul;
-    b += ((pix0      ) & 0xFF) * mul;
+    a += run.a * scale;
+    r += run.r * scale;
+    g += run.g * scale;
+    b += run.b * scale;
   }
 
-  FOG_INLINE void add(const FBlurComponent_PRGB32& other)
+  FOG_INLINE void sub(const Pixel& pix, IntT scale = 1)
   {
-    a += other.a;
-    r += other.r;
-    g += other.g;
-    b += other.b;
+    a -= static_cast<IntT>((pix >> 24)       ) * scale;
+    r -= static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g -= static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b -= static_cast<IntT>((pix      ) & 0xFF) * scale;
   }
 
-  FOG_INLINE void addN(const FBlurComponent_PRGB32& other, uint32_t mul)
+  FOG_INLINE void sub(const Run& run, IntT scale = 1)
   {
-    a += other.a * mul;
-    r += other.r * mul;
-    g += other.g * mul;
-    b += other.b * mul;
-  }
-
-  FOG_INLINE void sub(uint32_t pix0)
-  {
-    a -= (pix0 >> 24);
-    r -= (pix0 >> 16) & 0xFF;
-    g -= (pix0 >>  8) & 0xFF;
-    b -= (pix0      ) & 0xFF;
-  }
-
-  FOG_INLINE void sub(const FBlurComponent_PRGB32& other)
-  {
-    a -= other.a;
-    r -= other.r;
-    g -= other.g;
-    b -= other.b;
+    a -= run.a * scale;
+    r -= run.r * scale;
+    g -= run.g * scale;
+    b -= run.b * scale;
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t a;
-  uint32_t r;
-  uint32_t g;
-  uint32_t b;
+  IntT a, r, g, b;
 };
 
 // ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Accessor - PRGB32]
+// [Fog::RasterOps_C - Filter - Blur - Run - XRGB32]
 // ============================================================================
 
-struct FOG_NO_EXPORT FBlurAccessor_PRGB32
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurRun_XRGB32
 {
-  // --------------------------------------------------------------------------
-  // [Defs]
-  // --------------------------------------------------------------------------
+  typedef FBlurRun_XRGB32 Run;
+  typedef FBaseAccessor_XRGB32::Pixel Pixel;
 
-  typedef uint32_t Pixel;
-  typedef FBlurComponent_PRGB32 Component;
-
-  enum { PIXEL_BPP = 4 };
-  enum { STACK_BPP = 4 };
-
-  // --------------------------------------------------------------------------
-  // [Methods]
-  // --------------------------------------------------------------------------
-
-  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
-  {
-    dst = src.prgb32.p32;
-  }
-
-  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
-  {
-    Face::p32Load4a(dst, src);
-  }
-  
-  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
-  {
-    Face::p32Load4a(dst, src);
-  }
-
-  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
-  {
-    Face::p32Store4a(dst, src);
-  }
-
-  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
-  {
-    Face::p32Store4a(dst, src);
-  }
-  
-  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
-  {
-    uint32_t pix = _FOG_FACE_COMBINE_4(
-      ((src.a * mul) >> shift) << 24,
-      ((src.r * mul) >> shift) << 16,
-      ((src.g * mul) >> shift) <<  8,
-      ((src.b * mul) >> shift)      );
-    storePixel(dst, pix);
-  }
-
-  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
-  {
-    dst.a = (src >> 24);
-    dst.r = (src >> 16) & 0xFF;
-    dst.g = (src >>  8) & 0xFF;
-    dst.b = (src      ) & 0xFF;
-  }
-};
-
-// ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Component - XRGB32]
-// ============================================================================
-
-struct FOG_NO_EXPORT FBlurComponent_XRGB32
-{
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
@@ -249,397 +188,555 @@ struct FOG_NO_EXPORT FBlurComponent_XRGB32
     g = 0;
     b = 0;
   }
-  
+
   // --------------------------------------------------------------------------
   // [Set]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void set(const FBlurComponent_XRGB32& other)
+  FOG_INLINE void set(const Run& run, IntT scale = 1)
   {
-    r = other.r;
-    g = other.g;
-    b = other.b;
+    r = run.r * scale;
+    g = run.g * scale;
+    b = run.b * scale;
+  }
+
+  FOG_INLINE void set(const Pixel& pix, IntT scale = 1)
+  {
+    r = static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g = static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b = static_cast<IntT>((pix      ) & 0xFF) * scale;
   }
 
   // --------------------------------------------------------------------------
   // [Ops]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void add(uint32_t pix0)
+  FOG_INLINE void add(const Pixel& pix, IntT scale = 1)
   {
-    r += (pix0 >> 16) & 0xFF;
-    g += (pix0 >>  8) & 0xFF;
-    b += (pix0      ) & 0xFF;
+    r += static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g += static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b += static_cast<IntT>((pix      ) & 0xFF) * scale;
   }
 
-  FOG_INLINE void addN(uint32_t pix0, uint32_t mul)
+  FOG_INLINE void add(const Run& run, IntT scale = 1)
   {
-    r += ((pix0 >> 16) & 0xFF) * mul;
-    g += ((pix0 >>  8) & 0xFF) * mul;
-    b += ((pix0      ) & 0xFF) * mul;
+    r += run.r * scale;
+    g += run.g * scale;
+    b += run.b * scale;
   }
 
-  FOG_INLINE void add(const FBlurComponent_XRGB32& other)
+  FOG_INLINE void sub(const Pixel& pix, IntT scale = 1)
   {
-    r += other.r;
-    g += other.g;
-    b += other.b;
+    r -= static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g -= static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b -= static_cast<IntT>((pix      ) & 0xFF) * scale;
   }
 
-  FOG_INLINE void addN(const FBlurComponent_XRGB32& other, uint32_t mul)
+  FOG_INLINE void sub(const Run& run, IntT scale = 1)
   {
-    r += other.r * mul;
-    g += other.g * mul;
-    b += other.b * mul;
-  }
-
-  FOG_INLINE void sub(uint32_t pix0)
-  {
-    r -= (pix0 >> 16) & 0xFF;
-    g -= (pix0 >>  8) & 0xFF;
-    b -= (pix0      ) & 0xFF;
-  }
-
-  FOG_INLINE void sub(const FBlurComponent_XRGB32& other)
-  {
-    r -= other.r;
-    g -= other.g;
-    b -= other.b;
+    r -= run.r * scale;
+    g -= run.g * scale;
+    b -= run.b * scale;
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t r;
-  uint32_t g;
-  uint32_t b;
+  IntT r, g, b;
 };
 
 // ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Accessor - XRGB32]
+// [Fog::RasterOps_C - Filter - Blur - Run - RGB24]
 // ============================================================================
 
-struct FOG_NO_EXPORT FBlurAccessor_XRGB32
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurRun_RGB24
 {
+  typedef FBlurRun_RGB24 Run;
+  typedef FBaseAccessor_RGB24::Pixel Pixel;
+
   // --------------------------------------------------------------------------
-  // [Defs]
+  // [Reset]
   // --------------------------------------------------------------------------
 
-  typedef uint32_t Pixel;
-  typedef FBlurComponent_XRGB32 Component;
+  FOG_INLINE void reset()
+  {
+    r = 0;
+    g = 0;
+    b = 0;
+  }
 
-  enum { PIXEL_BPP = 4 };
-  enum { STACK_BPP = 4 };
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void set(const Run& run, IntT scale = 1)
+  {
+    r = run.r * scale;
+    g = run.g * scale;
+    b = run.b * scale;
+  }
+
+  FOG_INLINE void set(const Pixel& pix, IntT scale = 1)
+  {
+    r = static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g = static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b = static_cast<IntT>((pix      ) & 0xFF) * scale;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Ops]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void add(const Pixel& pix, IntT scale = 1)
+  {
+    r += static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g += static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b += static_cast<IntT>((pix      ) & 0xFF) * scale;
+  }
+
+  FOG_INLINE void add(const Run& run, IntT scale = 1)
+  {
+    r += run.r * scale;
+    g += run.g * scale;
+    b += run.b * scale;
+  }
+
+  FOG_INLINE void sub(const Pixel& pix, IntT scale = 1)
+  {
+    r -= static_cast<IntT>((pix >> 16) & 0xFF) * scale;
+    g -= static_cast<IntT>((pix >>  8) & 0xFF) * scale;
+    b -= static_cast<IntT>((pix      ) & 0xFF) * scale;
+  }
+
+  FOG_INLINE void sub(const Run& run, IntT scale = 1)
+  {
+    r -= run.r * scale;
+    g -= run.g * scale;
+    b -= run.b * scale;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  IntT r, g, b;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur - Run - A8]
+// ============================================================================
+
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurRun_A8
+{
+  typedef FBlurRun_A8 Run;
+  typedef FBaseAccessor_A8::Pixel Pixel;
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    a = 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void set(const Run& run, IntT scale = 1)
+  {
+    a = run.a * scale;
+  }
+
+  FOG_INLINE void set(const Pixel& pix, IntT scale = 1)
+  {
+    a = static_cast<IntT>(pix) * scale;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Ops]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void add(const Pixel& pix, IntT scale = 1)
+  {
+    a += static_cast<IntT>(pix) * scale;
+  }
+
+  FOG_INLINE void add(const Run& run, IntT scale = 1)
+  {
+    a += run.a * scale;
+  }
+
+  FOG_INLINE void sub(const Pixel& pix, IntT scale = 1)
+  {
+    a -= static_cast<IntT>(pix) * scale;
+  }
+
+  FOG_INLINE void sub(const Run& run, IntT scale = 1)
+  {
+    a -= run.a * scale;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  IntT a;
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur - Simple - Accessor - PRGB32]
+// ============================================================================
+
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurBaseAccessor_PRGB32 : public FBaseAccessor_PRGB32
+{
+  typedef FBlurRun_PRGB32<IntT> Run;
 
   // --------------------------------------------------------------------------
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  static FOG_INLINE void fetchRunM(const Run& run, const uint8_t* src)
   {
-    dst = src.prgb32.p32;
+    uint32_t pix;
+    Face::p32Load4a(pix, src);
+    run.set(pix);
   }
 
-  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  static FOG_INLINE void fetchRunT(const Run& run, const uint8_t* src)
   {
-    Face::p32Load4a(dst, src);
+    fetchRunM(run, src);
   }
 
-  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    Face::p32Load4a(dst, src);
+    uint32_t pix = _FOG_FACE_COMBINE_4(
+      static_cast<uint32_t>((run.a * scale) >> shift) << 24,
+      static_cast<uint32_t>((run.r * scale) >> shift) << 16,
+      static_cast<uint32_t>((run.g * scale) >> shift) <<  8,
+      static_cast<uint32_t>((run.b * scale) >> shift)      );
+    Face::p32Store4a(dst, pix);
   }
 
-  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    Face::p32Store4a(dst, src);
+    storeRunM(dst, run, scale, shift);
   }
-  
-  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur - Simple - Accessor - XRGB32]
+// ============================================================================
+
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurBaseAccessor_XRGB32 : public FBaseAccessor_XRGB32
+{
+  typedef FBlurRun_XRGB32<IntT> Run;
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void fetchRunM(const Run& run, const uint8_t* src)
   {
-    Face::p32Store4a(dst, src);
+    uint32_t pix;
+    Face::p32Load4a(pix, src);
+    run.set(pix);
   }
 
-  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
+  static FOG_INLINE void fetchRunT(const Run& run, const uint8_t* src)
+  {
+    fetchRunM(run, src);
+  }
+
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
     uint32_t pix = _FOG_FACE_COMBINE_4(
       0xFF000000,
-      ((src.r * mul) >> shift) << 16,
-      ((src.g * mul) >> shift) <<  8,
-      ((src.b * mul) >> shift)      );
-    storePixel(dst, pix);
+      static_cast<uint32_t>((run.r * scale) >> shift) << 16,
+      static_cast<uint32_t>((run.g * scale) >> shift) <<  8,
+      static_cast<uint32_t>((run.b * scale) >> shift)      );
+    Face::p32Store4a(dst, pix);
   }
 
-  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    dst.r = (src >> 16) & 0xFF;
-    dst.g = (src >>  8) & 0xFF;
-    dst.b = (src      ) & 0xFF;
+    storeRunM(dst, run, scale, shift);
   }
 };
 
 // ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Component - RGB24]
+// [Fog::RasterOps_C - Filter - Blur - Simple - Accessor - RGB24]
 // ============================================================================
 
-struct FOG_NO_EXPORT FBlurComponent_RGB24
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurBaseAccessor_RGB24 : public FBaseAccessor_RGB24
 {
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset()
-  {
-    r = 0;
-    g = 0;
-    b = 0;
-  }
-  
-  // --------------------------------------------------------------------------
-  // [Set]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void set(const FBlurComponent_RGB24& other)
-  {
-    r = other.r;
-    g = other.g;
-    b = other.b;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Ops]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void add(uint32_t pix0)
-  {
-    r += (pix0 >> 16) & 0xFF;
-    g += (pix0 >>  8) & 0xFF;
-    b += (pix0      ) & 0xFF;
-  }
-
-  FOG_INLINE void addN(uint32_t pix0, uint32_t mul)
-  {
-    r += ((pix0 >> 16) & 0xFF) * mul;
-    g += ((pix0 >>  8) & 0xFF) * mul;
-    b += ((pix0      ) & 0xFF) * mul;
-  }
-
-  FOG_INLINE void add(const FBlurComponent_RGB24& other)
-  {
-    r += other.r;
-    g += other.g;
-    b += other.b;
-  }
-
-  FOG_INLINE void addN(const FBlurComponent_RGB24& other, uint32_t mul)
-  {
-    r += other.r * mul;
-    g += other.g * mul;
-    b += other.b * mul;
-  }
-
-  FOG_INLINE void sub(uint32_t pix0)
-  {
-    r -= (pix0 >> 16) & 0xFF;
-    g -= (pix0 >>  8) & 0xFF;
-    b -= (pix0      ) & 0xFF;
-  }
-
-  FOG_INLINE void sub(const FBlurComponent_RGB24& other)
-  {
-    r -= other.r;
-    g -= other.g;
-    b -= other.b;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  uint32_t r;
-  uint32_t g;
-  uint32_t b;
-};
-
-// ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Accessor - RGB24]
-// ============================================================================
-
-struct FOG_NO_EXPORT FBlurAccessor_RGB24
-{
-  // --------------------------------------------------------------------------
-  // [Defs]
-  // --------------------------------------------------------------------------
-
-  typedef uint32_t Pixel;
-  typedef FBlurComponent_RGB24 Component;
-
-  enum { PIXEL_BPP = 3 };
-  enum { STACK_BPP = 4 };
+  typedef FBlurRun_RGB24<IntT> Run;
 
   // --------------------------------------------------------------------------
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  static FOG_INLINE void fetchRunM(const Run& run, const uint8_t* src)
   {
-    dst = src.prgb32.p32;
+    run.r = static_cast<IntT>(src[PIXEL_RGB24_POS_R]);
+    run.g = static_cast<IntT>(src[PIXEL_RGB24_POS_G]);
+    run.b = static_cast<IntT>(src[PIXEL_RGB24_POS_B]);
   }
 
-  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  static FOG_INLINE void fetchRunT(const Run& run, const uint8_t* src)
   {
-    Face::p32Load3b(dst, src);
+    uint32_t pix;
+    Face::p32Load4a(pix, src);
+    run.set(pix);
   }
 
-  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    Face::p32Load4a(dst, src);
+    dst[PIXEL_RGB24_POS_R] = static_cast<uint8_t>((run.r * scale) >> shift);
+    dst[PIXEL_RGB24_POS_G] = static_cast<uint8_t>((run.g * scale) >> shift);
+    dst[PIXEL_RGB24_POS_B] = static_cast<uint8_t>((run.b * scale) >> shift);
   }
 
-  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    Face::p32Store3b(dst, src);
-  }
-  
-  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
-  {
-    Face::p32Store4a(dst, src);
-  }
-
-  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
-  {
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_R] = static_cast<uint8_t>((src.r * mul) >> shift);
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_G] = static_cast<uint8_t>((src.g * mul) >> shift);
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_B] = static_cast<uint8_t>((src.b * mul) >> shift);
-  }
-
-  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
-  {
-    dst.r = (src >> 16) & 0xFF;
-    dst.g = (src >>  8) & 0xFF;
-    dst.b = (src      ) & 0xFF;
+    uint32_t pix = _FOG_FACE_COMBINE_3(
+      static_cast<uint32_t>((run.r * scale) >> shift) << 16,
+      static_cast<uint32_t>((run.g * scale) >> shift) <<  8,
+      static_cast<uint32_t>((run.b * scale) >> shift)      );
+    Face::p32Store4a(dst, pix);
   }
 };
 
 // ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Component - A8]
+// [Fog::RasterOps_C - Filter - Blur - Simple - Accessor - A8]
 // ============================================================================
 
-struct FOG_NO_EXPORT FBlurComponent_A8
+template<typename IntT>
+struct FOG_NO_EXPORT FBlurBaseAccessor_A8 : public FBaseAccessor_A8
 {
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset()
-  {
-    a = 0;
-  }
-  
-  // --------------------------------------------------------------------------
-  // [Set]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void set(const FBlurComponent_A8& other)
-  {
-    a = other.a;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Ops]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void add(uint8_t pix0)
-  {
-    a = uint32_t(pix0);
-  }
-
-  FOG_INLINE void addN(uint8_t pix0, uint32_t mul)
-  {
-    a += uint32_t(pix0) * mul;
-  }
-
-  FOG_INLINE void add(const FBlurComponent_A8& other)
-  {
-    a += other.a;
-  }
-
-  FOG_INLINE void addN(const FBlurComponent_A8& other, uint32_t mul)
-  {
-    a += other.a * mul;
-  }
-
-  FOG_INLINE void sub(uint8_t pix0)
-  {
-    a -= uint32_t(pix0);
-  }
-
-  FOG_INLINE void sub(const FBlurComponent_A8& other)
-  {
-    a -= other.a;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  uint32_t a;
-};
-
-// ============================================================================
-// [Fog::RasterOps_C - Filter - Base - Accessor - A8]
-// ============================================================================
-
-struct FOG_NO_EXPORT FBlurAccessor_A8
-{
-  // --------------------------------------------------------------------------
-  // [Defs]
-  // --------------------------------------------------------------------------
-
-  typedef uint8_t Pixel;
-  typedef FBlurComponent_A8 Component;
-
-  enum { PIXEL_BPP = 1 };
-  enum { STACK_BPP = 1 };
+  typedef FBlurRun_A8<IntT> Run;
 
   // --------------------------------------------------------------------------
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& src)
+  static FOG_INLINE void fetchRunM(const Run& run, uint8_t* src)
   {
-    dst = src.prgb32.a;
+    run.r = static_cast<IntT>(src[0]);
   }
 
-  static FOG_INLINE void fetchPixel(Pixel& dst, const void* src)
+  static FOG_INLINE void fetchRunT(const Run& run, uint8_t* src)
   {
-    Face::p8Load1b(dst, src);
+    fethRunM(run, src);
   }
 
-  static FOG_INLINE void fetchStack(Pixel& dst, const void* src)
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    Face::p8Load1b(dst, src);
+    dst[0] = static_cast<uint8_t>((run.a * scale) >> shift);
   }
 
-  static FOG_INLINE void storePixel(void* dst, const Pixel& src)
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    Face::p8Store1b(dst, src);
+    storeRunM(dst, run, scale, shift);
+  }
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur - Box - Accessors]
+// ============================================================================
+
+typedef FBlurBaseAccessor_PRGB32<uint32_t> FBlurBoxAccessor_PRGB32;
+typedef FBlurBaseAccessor_XRGB32<uint32_t> FBlurBoxAccessor_XRGB32;
+typedef FBlurBaseAccessor_RGB24 <uint32_t> FBlurBoxAccessor_RGB24;
+typedef FBlurBaseAccessor_A8    <uint32_t> FBlurBoxAccessor_A8;
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur - Stack - Accessors]
+// ============================================================================
+
+typedef FBlurBaseAccessor_PRGB32<uint32_t> FBlurStackAccessor_PRGB32;
+typedef FBlurBaseAccessor_XRGB32<uint32_t> FBlurStackAccessor_XRGB32;
+typedef FBlurBaseAccessor_RGB24 <uint32_t> FBlurStackAccessor_RGB24;
+typedef FBlurBaseAccessor_A8    <uint32_t> FBlurStackAccessor_A8;
+
+// ============================================================================
+// [Fog::RasterOps_C - Filter - Blur - Exponential - Accessors]
+// ============================================================================
+
+struct FOG_NO_EXPORT FBlurExpAccessor_PRGB32 : public FBlurBaseAccessor_PRGB32<int32_t>
+{
+  static FOG_INLINE void blurPixel(Run& run, const Pixel& pix, int32_t aValue)
+  {
+    run.a += (aValue * (static_cast<int32_t>(Math::shift<uint32_t, 24 - BLUR_ZPREC>(pix & 0xFF000000)) - run.a)) >> BLUR_APREC;
+    run.r += (aValue * (static_cast<int32_t>(Math::shift<uint32_t, 16 - BLUR_ZPREC>(pix & 0x00FF0000)) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * (static_cast<int32_t>(Math::shift<uint32_t,  8 - BLUR_ZPREC>(pix & 0x0000FF00)) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * (static_cast<int32_t>(Math::shift<uint32_t,  0 - BLUR_ZPREC>(pix & 0x000000FF)) - run.b)) >> BLUR_APREC;
   }
   
-  static FOG_INLINE void storeStack(void* dst, const Pixel& src)
+  static FOG_INLINE void blurPixel(Run& run, const Run& src, int32_t aValue)
   {
-    Face::p8Store1b(dst, src);
+    run.a += (aValue * ((src.a << BLUR_ZPREC) - run.a)) >> BLUR_APREC;
+    run.r += (aValue * ((src.r << BLUR_ZPREC) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * ((src.g << BLUR_ZPREC) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * ((src.b << BLUR_ZPREC) - run.b)) >> BLUR_APREC;
   }
 
-  static FOG_INLINE void storeMulShr(void* dst, const Component& src, uint32_t mul, uint32_t shift)
+  static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
   {
-    Face::p32Store1b(dst, (src.a * mul) >> shift);
+    uint32_t pix;
+    Face::p32Load4a(pix, src);
+    blurPixel(run, pix, aValue);
   }
 
-  static FOG_INLINE void unpack(Component& dst, const Pixel& src)
+  static FOG_INLINE void blurRunT(Run& run, const uint8_t* src, int32_t aValue)
   {
-    dst.a = uint32_t(src);
+    blurRunM(run, src, aValue);
+  }
+  
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
+  {
+    uint32_t pix = _FOG_FACE_COMBINE_4(
+      (run.a >> BLUR_ZPREC) << 24,
+      (run.r >> BLUR_ZPREC) << 16,
+      (run.g >> BLUR_ZPREC) <<  8,
+      (run.b >> BLUR_ZPREC) <<  0);
+    Face::p32Store4a(dst, pix);
+  }
+
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
+  {
+    storeRunM(dst, run);
+  }
+};
+
+struct FOG_NO_EXPORT FBlurExpAccessor_XRGB32 : public FBlurBaseAccessor_XRGB32<int32_t>
+{
+  static FOG_INLINE void blurPixel(Run& run, const Pixel& pix, int32_t aValue)
+  {
+    run.r += (aValue * (static_cast<int32_t>(Math::shift<uint32_t, 16 - BLUR_ZPREC>(pix & 0x00FF0000)) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * (static_cast<int32_t>(Math::shift<uint32_t,  8 - BLUR_ZPREC>(pix & 0x0000FF00)) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * (static_cast<int32_t>(Math::shift<uint32_t,  0 - BLUR_ZPREC>(pix & 0x000000FF)) - run.b)) >> BLUR_APREC;
+  }
+  
+  static FOG_INLINE void blurPixel(Run& run, const Run& src, int32_t aValue)
+  {
+    run.r += (aValue * ((src.r << BLUR_ZPREC) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * ((src.g << BLUR_ZPREC) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * ((src.b << BLUR_ZPREC) - run.b)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
+  {
+    uint32_t pix;
+    Face::p32Load4a(pix, src);
+    blurPixel(run, pix, aValue);
+  }
+
+  static FOG_INLINE void blurRunT(Run& run, const uint8_t* src, int32_t aValue)
+  {
+    blurRunM(run, src, aValue);
+  }
+  
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
+  {
+    uint32_t pix = _FOG_FACE_COMBINE_4(
+      0xFF000000,
+      (run.r >> BLUR_ZPREC) << 16,
+      (run.g >> BLUR_ZPREC) <<  8,
+      (run.b >> BLUR_ZPREC) <<  0);
+    Face::p32Store4a(dst, pix);
+  }
+
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
+  {
+    storeRunM(dst, run);
+  }
+};
+
+struct FOG_NO_EXPORT FBlurExpAccessor_RGB24 : public FBlurBaseAccessor_RGB24<int32_t>
+{
+  static FOG_INLINE void blurPixel(Run& run, const Pixel& pix, int32_t aValue)
+  {
+    run.r += (aValue * (static_cast<int32_t>(Math::shift<uint32_t, 16 - BLUR_ZPREC>(pix & 0x00FF0000)) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * (static_cast<int32_t>(Math::shift<uint32_t,  8 - BLUR_ZPREC>(pix & 0x0000FF00)) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * (static_cast<int32_t>(Math::shift<uint32_t,  0 - BLUR_ZPREC>(pix & 0x000000FF)) - run.b)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurPixel(Run& run, const Run& src, int32_t aValue)
+  {
+    run.r += (aValue * ((src.r << BLUR_ZPREC) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * ((src.g << BLUR_ZPREC) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * ((src.b << BLUR_ZPREC) - run.b)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
+  {
+    run.r += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_POS_R]) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_POS_G]) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_POS_B]) - run.b)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurRunT(Run& run, const uint8_t* src, int32_t aValue)
+  {
+    uint32_t pix;
+    Face::p32Load4a(pix, src);
+    blurPixel(run, pix, aValue);
+  }
+
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
+  {
+    dst[PIXEL_RGB24_POS_R] = static_cast<uint8_t>(run.r >> BLUR_ZPREC);
+    dst[PIXEL_RGB24_POS_G] = static_cast<uint8_t>(run.g >> BLUR_ZPREC);
+    dst[PIXEL_RGB24_POS_B] = static_cast<uint8_t>(run.b >> BLUR_ZPREC);
+  }
+  
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
+  {
+    uint32_t pix = _FOG_FACE_COMBINE_3(
+      (run.r >> BLUR_ZPREC) << 16,
+      (run.g >> BLUR_ZPREC) <<  8,
+      (run.b >> BLUR_ZPREC) <<  0);
+    Face::p32Store4a(dst, pix);
+  }
+};
+
+struct FOG_NO_EXPORT FBlurExpAccessor_A8 : public FBlurBaseAccessor_A8<int32_t>
+{
+  static FOG_INLINE void blurPixel(Run& run, const Pixel& pix, int32_t aValue)
+  {
+    run.a += (aValue * (static_cast<int32_t>(pix << BLUR_ZPREC) - run.a)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurPixel(Run& run, const Run& src, int32_t aValue)
+  {
+    run.a += (aValue * ((src.a << BLUR_ZPREC) - run.a)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
+  {
+    run.a += (aValue * (static_cast<int32_t>(src[0]) - run.a)) >> BLUR_APREC;
+  }
+
+  static FOG_INLINE void blurRunT(Run& run, const uint8_t* src, int32_t aValue)
+  {
+    blurRunM(run, src, aValue);
+  }
+
+  static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
+  {
+    dst[0] = static_cast<uint8_t>(run.a >> BLUR_ZPREC);
+  }
+
+  static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
+  {
+    storeRunM(dst, run);
   }
 };
 
@@ -650,19 +747,6 @@ struct FOG_NO_EXPORT FBlurAccessor_A8
 //! @internal
 struct FOG_NO_EXPORT FBlur
 {
-  // ==========================================================================
-  // [Blur - Helpers]
-  // ==========================================================================
-
-  //! @brief Get reciprocal for 16-bit value @a val.
-  //!
-  //! Used to scale SUM of A, R, G, B pixels into the final pixels, which is
-  //! stored to the destination buffer.
-  static FOG_INLINE int getReciprocal(int val)
-  {
-    return (val + 65535) / val;
-  }
-
   // ==========================================================================
   // [Blur - Create]
   // ==========================================================================
@@ -683,16 +767,19 @@ struct FOG_NO_EXPORT FBlur
     FOG_ASSERT(feBase->getFeType() == FE_TYPE_BLUR);
     const FeBlur* feData = static_cast<const FeBlur*>(feBase);
 
+    uint32_t blurType = feData->_blurType;
+
     ctx->reference.init(1);
     ctx->destroy = destroy;
 
-    ctx->doRect = do_rect;
+    ctx->doRect = doRect;
     ctx->doLine = NULL;
 
     ctx->memBuffer = memBuffer;
     ctx->dstFormat = dstFormat;
     ctx->srcFormat = srcFormat;
 
+    ctx->blur.blurType = blurType;
     ctx->blur.extendColor.reset();
     ctx->blur.extendType = feData->_extendType;
 
@@ -719,23 +806,31 @@ struct FOG_NO_EXPORT FBlur
       vRadiusScale = float(feScale->_pt.y);
     }
 
-    ctx->blur.hRadius = Math::bound<int>(Math::abs(Math::iround(feData->_hRadius * hRadiusScale)), 0, FE_BLUR_LIMIT_RADIUS);
-    ctx->blur.vRadius = Math::bound<int>(Math::abs(Math::iround(feData->_vRadius * vRadiusScale)), 0, FE_BLUR_LIMIT_RADIUS);
+    float hRadius = Math::bound<float>(Math::abs(feData->_hRadius * hRadiusScale), 0.0f, FE_BLUR_LIMIT_RADIUS);
+    float vRadius = Math::bound<float>(Math::abs(feData->_vRadius * vRadiusScale), 0.0f, FE_BLUR_LIMIT_RADIUS);
 
     if (feScale != NULL && feScale->isSwapped())
-      swap(ctx->blur.hRadius, ctx->blur.vRadius);
+      swap(hRadius, vRadius);
 
-    switch (feData->_blurType)
+    ctx->blur.hRadius = hRadius;
+    ctx->blur.vRadius = vRadius;
+
+    switch (blurType)
     {
       case FE_BLUR_TYPE_BOX:
       default:
-        ctx->blur.hConvolve = _api_raster.filter.blur.box.convolve_h[srcFormat];
-        ctx->blur.vConvolve = _api_raster.filter.blur.box.convolve_v[srcFormat];
+        ctx->blur.hConvolve = _api_raster.filter.blur.box.h[srcFormat];
+        ctx->blur.vConvolve = _api_raster.filter.blur.box.v[srcFormat];
+        break;
+
+      case FE_BLUR_TYPE_STACK:
+        ctx->blur.hConvolve = _api_raster.filter.blur.stack.h[srcFormat];
+        ctx->blur.vConvolve = _api_raster.filter.blur.stack.v[srcFormat];
         break;
 
       case FE_BLUR_TYPE_EXPONENTIAL:
-        ctx->blur.hConvolve = _api_raster.filter.blur.exp.convolve_h[srcFormat];
-        ctx->blur.vConvolve = _api_raster.filter.blur.exp.convolve_v[srcFormat];
+        ctx->blur.hConvolve = _api_raster.filter.blur.exponential.h[srcFormat];
+        ctx->blur.vConvolve = _api_raster.filter.blur.exponential.v[srcFormat];
         break;
     }
 
@@ -756,228 +851,279 @@ struct FOG_NO_EXPORT FBlur
   }
 
   // ==========================================================================
-  // [Blur - DoRect]
+  // [Blur - DoSimpleRect]
   // ==========================================================================
 
-  static err_t FOG_FASTCALL do_rect(
+  static err_t FOG_FASTCALL doRect(
     RasterFilter* ctx,
-    uint8_t*       dst, ssize_t dstStride, const SizeI* dstSize, const PointI* dstPos,
-    const uint8_t* src, ssize_t srcStride, const SizeI* srcSize, const RectI* srcRect)
+    RasterFilterImage* dst, const PointI* dstPos,
+    RasterFilterImage* src, const RectI* srcRect,
+    MemBuffer* intermediateBuffer)
   {
     FOG_ASSERT(srcRect->x >= 0);
     FOG_ASSERT(srcRect->y >= 0);
-    FOG_ASSERT(srcRect->x + srcRect->w <= srcSize->w);
-    FOG_ASSERT(srcRect->y + srcRect->h <= srcSize->h);
+    FOG_ASSERT(srcRect->x + srcRect->w <= src->size.w);
+    FOG_ASSERT(srcRect->y + srcRect->h <= src->size.h);
 
-    err_t err = ERR_RT_OUT_OF_MEMORY;
-    
     MemBufferTmp<1024> memBufferTmp;
     MemBuffer* memBuffer = &memBufferTmp;
 
-    if (ctx->memBuffer)
-      memBuffer = ctx->memBuffer;
-
-    RasterConvolve conv;
-    conv.filterCtx = ctx;
-
+    int i;
     int kernelRadius;
     int kernelSize;
-    int i;
 
     const ImageFormatDescription& dstDesc = ImageFormatDescription::getByFormat(ctx->dstFormat);
     const ImageFormatDescription& srcDesc = ImageFormatDescription::getByFormat(ctx->srcFormat);
 
-    int tmpExtendTop;
-    int tmpExtendBottom;
-    int tmpHeight;
+    int intermediateHeight;
+    int extendTop;
+    int extendBottom;
 
-    ssize_t tmpStride = 0;
-    uint8_t* tmpBuffer = NULL;
+    ssize_t intermediateStride = 0;
+    uint8_t* intermediateData = NULL;
+
+    // Always use 4 bytes of stack storage per pixel when working with 24-bit.
+    int stackBpp = srcDesc.getBytesPerPixel();
+    if (stackBpp == 3)
+      stackBpp = 4;
+
+    RasterFilterBlur blurCtx;
+    blurCtx.filterCtx = ctx;
+
+    if (ctx->memBuffer)
+      memBuffer = ctx->memBuffer;
 
     // ------------------------------------------------------------------------
     // [Base]
     // ------------------------------------------------------------------------
 
-    tmpExtendTop = Math::min(ctx->blur.vRadius, srcRect->y);
-    tmpExtendBottom = Math::min(ctx->blur.vRadius, srcSize->h - srcRect->y - srcRect->h);
+    int vRadiusInt = Math::iround(ctx->blur.vRadius);
 
-    if ((tmpExtendTop | tmpExtendBottom) != 0)
+    extendTop = Math::min(vRadiusInt, srcRect->y);
+    extendBottom = Math::min(vRadiusInt, src->size.h - srcRect->y - srcRect->h);
+
+    if ((extendTop | extendBottom) != 0)
     {
-      tmpHeight = srcRect->h + tmpExtendTop + tmpExtendBottom;
-      tmpStride = srcRect->w * dstDesc.getBytesPerPixel();
-      tmpBuffer = reinterpret_cast<uint8_t*>(MemMgr::alloc(tmpHeight * tmpStride));
+      intermediateHeight = srcRect->h + extendTop + extendBottom;
+      intermediateStride = srcRect->w * dstDesc.getBytesPerPixel();
+      intermediateData = reinterpret_cast<uint8_t*>(intermediateBuffer->alloc(intermediateHeight * intermediateStride));
 
-      if (FOG_IS_NULL(tmpBuffer))
-        goto _End;
+      if (FOG_IS_NULL(intermediateData))
+        return ERR_RT_OUT_OF_MEMORY;
     }
 
-    // Move to closer location.
-    conv.extendType = ctx->blur.extendType;
-    conv.extendColor.prgb64.p64 = ctx->blur.extendColor.prgb64.p64;
+    // Move closer.
+    blurCtx.extendType = ctx->blur.extendType;
+    blurCtx.extendColor.prgb64.p64 = ctx->blur.extendColor.prgb64.p64;
 
     // ------------------------------------------------------------------------
     // [Horizontal]
     // ------------------------------------------------------------------------
 
-    kernelRadius = ctx->blur.hRadius;
+    kernelRadius = Math::iround(ctx->blur.hRadius);
     kernelSize = kernelRadius * 2 + 1;
 
-    if (tmpBuffer)
+    if (intermediateData)
     {
-      conv.dstData = tmpBuffer;
-      conv.dstStride = tmpStride;
+      blurCtx.dstData = intermediateData;
+      blurCtx.dstStride = intermediateStride;
     }
     else
     {
-      conv.dstData = dst + dstPos->y * dstStride +
-                           dstPos->x * (int)dstDesc.getBytesPerPixel();
-      conv.dstStride = dstStride;
+      blurCtx.dstData = dst->data + dstPos->y * dst->stride +
+                        dstPos->x * (int)dstDesc.getBytesPerPixel();
+      blurCtx.dstStride = dst->stride;
     }
 
-    conv.srcData = const_cast<uint8_t*>(src) + (srcRect->y - tmpExtendTop) * srcStride;
-    conv.srcStride = srcStride;
+    blurCtx.srcData = src->data + (srcRect->y - extendTop) * src->stride;
+    blurCtx.srcStride = src->stride;
 
-    i = Math::max(srcSize->w - srcRect->x, 0);
-    conv.rowSize     = srcRect->h + tmpExtendTop + tmpExtendBottom;
-    conv.runSize     = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->w) : 1;
-    conv.runOffset   = (srcRect->x + kernelRadius + 1) * (int)srcDesc.getBytesPerPixel();
+    i = Math::max(src->size.w - srcRect->x, 0);
+    blurCtx.rowSize = srcRect->h + extendTop + extendBottom;
 
-    conv.aTableSize  = kernelSize;
-    conv.bTableSize  = Math::min<int>(srcRect->w - conv.runSize, kernelRadius);
-
-    conv.kernelRadius= kernelRadius;
-    conv.kernelSize  = kernelSize;
-
-    conv.srcFirstOffset = 0;
-    conv.srcLastOffset  = (srcSize->w - 1) * (int)srcDesc.getBytesPerPixel();
-
-    if (memBuffer->alloc(
-      (conv.aTableSize + conv.bTableSize) * sizeof(ssize_t) + 
-      kernelSize * dstDesc.getBytesPerPixel()) == NULL)
+    if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
     {
-      goto _End;
+      // BoxBlur and StackBlur use different approach than ExpBlur.
+      FOG_ASSERT(ctx->blur.blurType == FE_BLUR_TYPE_BOX ||
+                 ctx->blur.blurType == FE_BLUR_TYPE_STACK);
+
+      blurCtx.runSize      = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->w) : 1;
+      blurCtx.runOffset    = (srcRect->x + kernelRadius + 1) * (int)srcDesc.getBytesPerPixel();
+
+      blurCtx.aTableSize   = kernelSize;
+      blurCtx.bTableSize   = Math::min<int>(srcRect->w - blurCtx.runSize, kernelRadius);
+
+      blurCtx.kernelRadius = kernelRadius;
+      blurCtx.kernelSize   = kernelSize;
+    }
+    else
+    {
+      blurCtx.runSize      = i;
+      blurCtx.runOffset    = 0;
+
+      blurCtx.aTableSize   = kernelRadius;
+      blurCtx.bTableSize   = kernelRadius;
+
+      blurCtx.kernelRadius = kernelRadius;
+      blurCtx.kernelSize   = kernelSize;
+    }
+  
+    blurCtx.srcFirstOffset = 0;
+    blurCtx.srcLastOffset  = (src->size.w - 1) * (int)srcDesc.getBytesPerPixel();
+
+    if (memBuffer->alloc((blurCtx.aTableSize + blurCtx.bTableSize) * sizeof(ssize_t) + 
+                         (kernelSize * stackBpp)) == NULL)
+    {
+      return ERR_RT_OUT_OF_MEMORY;
     }
 
-    conv.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
-    conv.bTableData = conv.aTableData + conv.aTableSize;
-    conv.stack = reinterpret_cast<uint8_t*>(conv.bTableData + conv.bTableSize);
+    blurCtx.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
+    blurCtx.bTableData = blurCtx.aTableData + blurCtx.aTableSize;
+    blurCtx.stack = reinterpret_cast<uint8_t*>(blurCtx.bTableData + blurCtx.bTableSize);
 
-    if (FOG_IS_NULL(conv.aTableData))
-      goto _End;
+    if (FOG_IS_NULL(blurCtx.aTableData))
+      return ERR_RT_OUT_OF_MEMORY;
 
-    doFillBorderTables(&conv, srcRect->x - kernelRadius, 0, srcSize->w - 1, srcDesc.getBytesPerPixel());
+    fillSimpleBorderTables(&blurCtx, srcRect->x - kernelRadius, 0, src->size.w - 1, srcDesc.getBytesPerPixel());
   
-    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == kernelSize);
-    FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->w);
+    if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
+    {
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize + blurCtx.aBorderTailSize == kernelSize);
+      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->w);
+    }
+    else
+    {
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize +
+                 blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->w + kernelRadius * 2);
+    }
 
-    // Logger::debug("Fog::RasterOps_C::FBlur", "do_rect", "RectH | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
+    // Logger::debug("Fog::RasterOps_C::FBlur", "doRect", "RectH | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
     //   dstPos->x,
     //   dstPos->y,
     //   srcRect->x,
     //   srcRect->y,
     //   srcRect->w,
     //   srcRect->h,
-    //   conv.aBorderLeadSize,
-    //   conv.aTableSize,
-    //   conv.aBorderTailSize,
-    //   conv.runSize,
-    //   conv.bTableSize,
-    //   conv.bBorderTailSize);
+    //   blurCtx.aBorderLeadSize,
+    //   blurCtx.aTableSize,
+    //   blurCtx.aBorderTailSize,
+    //   blurCtx.runSize,
+    //   blurCtx.bTableSize,
+    //   blurCtx.bBorderTailSize);
 
-    ctx->blur.hConvolve(&conv);
+    ctx->blur.hConvolve(&blurCtx);
 
     // ------------------------------------------------------------------------
     // [Vertical]
     // ------------------------------------------------------------------------
 
-    kernelRadius = ctx->blur.vRadius;
+    kernelRadius = Math::iround(ctx->blur.vRadius);
     kernelSize = kernelRadius * 2 + 1;
 
-    conv.dstData = dst + dstPos->y * dstStride +
-                         dstPos->x * (int)dstDesc.getBytesPerPixel();
-    conv.dstStride = dstStride;
+    blurCtx.dstData = dst->data + dstPos->y * dst->stride +
+                                  dstPos->x * (int)dstDesc.getBytesPerPixel();
+    blurCtx.dstStride = dst->stride;
 
-    if (tmpBuffer)
+    if (intermediateData)
     {
-      conv.srcData = tmpBuffer;
-      conv.srcStride = tmpStride;
+      blurCtx.srcData = intermediateData;
+      blurCtx.srcStride = intermediateStride;
     }
     else
     {
-      conv.srcData = const_cast<uint8_t*>(dst) + dstPos->y * dstStride + dstPos->x * (int)dstDesc.getBytesPerPixel();
-      conv.srcStride = dstStride;
+      blurCtx.srcData = dst->data + dstPos->y * dst->stride + dstPos->x * (int)dstDesc.getBytesPerPixel();
+      blurCtx.srcStride = dst->stride;
     }
 
-    i = Math::max(srcSize->h - srcRect->y, 0);
-    conv.rowSize     = srcRect->w;
-    conv.runSize     = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->h) : 1;
-    conv.runOffset   = (tmpExtendTop + kernelRadius + 1) * conv.srcStride;
+    i = Math::max(src->size.h - srcRect->y, 0);
+    blurCtx.rowSize = srcRect->w;
 
-    conv.aTableSize  = kernelSize;
-    conv.bTableSize  = Math::min<int>(srcRect->h - conv.runSize, kernelRadius);
-
-    conv.kernelRadius= kernelRadius;
-    conv.kernelSize  = kernelSize;
-
-    conv.srcFirstOffset = 0;
-    conv.srcLastOffset  = (srcRect->h - 1 + tmpExtendTop + tmpExtendBottom) * conv.srcStride;
-
-    if (memBuffer->alloc(
-      (conv.aTableSize + conv.bTableSize) * sizeof(ssize_t) + 
-      kernelSize * BLUR_RECT_V_HLINE_COUNT * dstDesc.getBytesPerPixel()) == NULL)
+    if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
     {
-      goto _End;
+      // BoxBlur and StackBlur use different approach than ExpBlur.
+      FOG_ASSERT(ctx->blur.blurType == FE_BLUR_TYPE_BOX ||
+                 ctx->blur.blurType == FE_BLUR_TYPE_STACK);
+
+      blurCtx.runSize      = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->h) : 1;
+      blurCtx.runOffset    = (extendTop + kernelRadius + 1) * blurCtx.srcStride;
+
+      blurCtx.aTableSize   = kernelSize;
+      blurCtx.bTableSize   = Math::min<int>(srcRect->h - blurCtx.runSize, kernelRadius);
+
+      blurCtx.kernelRadius = kernelRadius;
+      blurCtx.kernelSize   = kernelSize;
+    }
+    else
+    {
+      blurCtx.runSize      = i;
+      blurCtx.runOffset    = 0;
+
+      blurCtx.aTableSize   = kernelRadius;
+      blurCtx.bTableSize   = kernelRadius;
+
+      blurCtx.kernelRadius = kernelRadius;
+      blurCtx.kernelSize   = kernelSize;
     }
 
-    conv.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
-    conv.bTableData = conv.aTableData + conv.aTableSize;
-    conv.stack = reinterpret_cast<uint8_t*>(conv.bTableData + conv.bTableSize);
+    blurCtx.srcFirstOffset = 0;
+    blurCtx.srcLastOffset  = (srcRect->h - 1 + extendTop + extendBottom) * blurCtx.srcStride;
 
-    doFillBorderTables(&conv, tmpExtendTop - kernelRadius, 0, srcRect->h - 1 + tmpExtendTop + tmpExtendBottom, conv.srcStride);
+    if (memBuffer->alloc((blurCtx.aTableSize + blurCtx.bTableSize) * sizeof(ssize_t) +
+                         (kernelSize * stackBpp) * BLUR_RECT_V_HLINE_COUNT) == NULL)
+    {
+      return ERR_RT_OUT_OF_MEMORY;
+    }
 
-    FOG_ASSERT(conv.aTableSize + conv.aBorderLeadSize + conv.aBorderTailSize == kernelSize);
-    FOG_ASSERT(conv.bTableSize + conv.bBorderTailSize + conv.runSize == srcRect->h);
+    blurCtx.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
+    blurCtx.bTableData = blurCtx.aTableData + blurCtx.aTableSize;
+    blurCtx.stack = reinterpret_cast<uint8_t*>(blurCtx.bTableData + blurCtx.bTableSize);
 
-    // Logger::debug("Fog::RasterOps_C::FBlur", "do_rect", "RectV | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
+    fillSimpleBorderTables(&blurCtx, extendTop - kernelRadius, 0, srcRect->h - 1 + extendTop + extendBottom, blurCtx.srcStride);
+
+    if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
+    {
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize + blurCtx.aBorderTailSize == kernelSize);
+      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->h);
+    }
+    else
+    {
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize +
+                 blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->h + kernelRadius * 2);
+    }
+
+    // Logger::debug("Fog::RasterOps_C::FBlur", "doRect", "RectV | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
     //   dstPos->x,
     //   dstPos->y,
     //   srcRect->x,
     //   srcRect->y,
     //   srcRect->w,
     //   srcRect->h,
-    //   conv.aBorderLeadSize,
-    //   conv.aTableSize,
-    //   conv.aBorderTailSize,
-    //   conv.runSize,
-    //   conv.bTableSize,
-    //   conv.bBorderTailSize);
+    //   blurCtx.aBorderLeadSize,
+    //   blurCtx.aTableSize,
+    //   blurCtx.aBorderTailSize,
+    //   blurCtx.runSize,
+    //   blurCtx.bTableSize,
+    //   blurCtx.bBorderTailSize);
 
-    ctx->blur.vConvolve(&conv);
-
-    err = ERR_OK;
-
-_End:
-    if (tmpBuffer != NULL)
-      MemMgr::free(tmpBuffer);
-
-    return err;
+    ctx->blur.vConvolve(&blurCtx);
+    return ERR_OK;
   }
-  
+
   // ==========================================================================
-  // [Blur - DoRect - FillBorderTables]
+  // [Blur - DoSimpleRect - FillBorderTables]
   // ==========================================================================
 
-  static void FOG_FASTCALL doFillBorderTables(
-    RasterConvolve* ctx, int t, int tMin, int tMax, ssize_t tMul)
+  static void FOG_FASTCALL fillSimpleBorderTables(
+    RasterFilterBlur* blurCtx, int t, int tMin, int tMax, ssize_t tMul)
   {
     uint i;
     int tRepeat = tMax - tMin + 1;
 
-    ctx->aBorderLeadSize = 0;
-    ctx->aBorderTailSize = 0;
-    ctx->bBorderTailSize = 0;
+    blurCtx->aBorderLeadSize = 0;
+    blurCtx->aBorderTailSize = 0;
+    blurCtx->bBorderTailSize = 0;
 
-    switch (ctx->extendType)
+    switch (blurCtx->extendType)
     {
       case FE_EXTEND_COLOR:
       case FE_EXTEND_PAD:
@@ -987,26 +1133,26 @@ _End:
         // time we set the border lead/tail size.
         if (t < tMin)
         {
-          ctx->aBorderLeadSize = tMin - t;
-          ctx->aTableSize -= ctx->aBorderLeadSize;
+          blurCtx->aBorderLeadSize = tMin - t;
+          blurCtx->aTableSize -= blurCtx->aBorderLeadSize;
           t = tMin;
         }
         
-        if (t + int(ctx->aTableSize) > tMax + 1)
+        if (t + int(blurCtx->aTableSize) > tMax + 1)
         {
-          ctx->aBorderTailSize = (t + ctx->aTableSize) - (tMax + 1);
-          ctx->aTableSize -= ctx->aBorderTailSize;
+          blurCtx->aBorderTailSize = (t + blurCtx->aTableSize) - (tMax + 1);
+          blurCtx->aTableSize -= blurCtx->aBorderTailSize;
 
-          ctx->bBorderTailSize = ctx->bTableSize;
-          ctx->bTableSize = 0;
+          blurCtx->bBorderTailSize = blurCtx->bTableSize;
+          blurCtx->bTableSize = 0;
         }
         else 
         {
-          int m = t + int(ctx->kernelSize) + int(ctx->runSize) + int(ctx->bTableSize);
+          int m = t + int(blurCtx->kernelSize) + int(blurCtx->runSize) + int(blurCtx->bTableSize);
           if (m > tMax)
           {
-            ctx->bBorderTailSize = Math::min<int>(m - tMax, int(ctx->bTableSize));
-            ctx->bTableSize -= ctx->bBorderTailSize;
+            blurCtx->bBorderTailSize = Math::min<int>(m - tMax, int(blurCtx->bTableSize));
+            blurCtx->bTableSize -= blurCtx->bBorderTailSize;
           }
         }
 
@@ -1024,21 +1170,21 @@ _End:
         t += tMin;
 
 _Repeat:
-        for (i = 0; i < ctx->aTableSize; i++)
+        for (i = 0; i < blurCtx->aTableSize; i++)
         {
-          ctx->aTableData[i] = t * tMul;
+          blurCtx->aTableData[i] = t * tMul;
 
           if (++t > tMax)
             t = tMin;
         }
 
-        t += ctx->runSize;
+        t += blurCtx->runSize;
         if (t >= tMax)
           t -= tRepeat;
 
-        for (i = 0; i < ctx->bTableSize; i++)
+        for (i = 0; i < blurCtx->bTableSize; i++)
         {
-          ctx->bTableData[i] = t * tMul;
+          blurCtx->bTableData[i] = t * tMul;
 
           if (++t > tMax)
             t = tMin;
@@ -1056,19 +1202,19 @@ _Repeat:
         if (t < 0)
           t += tRepeat2;
 
-        for (i = 0; i < ctx->aTableSize; i++)
+        for (i = 0; i < blurCtx->aTableSize; i++)
         {
-          ctx->aTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
+          blurCtx->aTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
           if (++t > tRepeat2)
             t = 0;
         }
 
-        t += ctx->runSize;
+        t += blurCtx->runSize;
         t %= tRepeat2;
 
-        for (i = 0; i < ctx->bTableSize; i++)
+        for (i = 0; i < blurCtx->bTableSize; i++)
         {
-          ctx->bTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
+          blurCtx->bTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
           if (++t > tRepeat2)
             t = 0;
         }
@@ -1078,48 +1224,55 @@ _Repeat:
   }
 
   // ==========================================================================
-  // [Blur - DoRect - Box-H]
+  // [Blur - Box - Helpers]
+  // ==========================================================================
+
+  //! @brief Get reciprocal for 16-bit value @a val.
+  //!
+  //! Used to scale SUM of A, R, G, B pixels into the final pixels, which is
+  //! stored to the destination buffer.
+  static FOG_INLINE int getBoxBlurReciprocal(int val)
+  {
+    return (val + 65535) / val;
+  }
+
+  // ==========================================================================
+  // [Blur - Box - Horizontal]
   // ==========================================================================
 
   template<typename Accessor>
-  static void FOG_FASTCALL do_rect_box_h(
-    RasterConvolve* ctx)
+  static void FOG_FASTCALL doBoxH(
+    RasterFilterBlur* blurCtx)
   {
-    uint8_t* dst = ctx->dstData;
-    uint8_t* src = ctx->srcData;
+    uint8_t* dst = blurCtx->dstData;
+    uint8_t* src = blurCtx->srcData;
 
-    ssize_t dstStride = ctx->dstStride;
-    ssize_t srcStride = ctx->srcStride;
+    ssize_t dstStride = blurCtx->dstStride;
+    ssize_t srcStride = blurCtx->srcStride;
 
-    uint runHeight = ctx->rowSize;
-    uint runSize = ctx->runSize;
+    uint runHeight = blurCtx->rowSize;
+    uint runSize = blurCtx->runSize;
 
-    uint32_t sumMul = getReciprocal(ctx->kernelSize);
+    uint32_t sumMul = getBoxBlurReciprocal(blurCtx->kernelSize);
     uint32_t sumShr = 16;
 
-    ssize_t* aTableData = ctx->aTableData;
-    ssize_t* bTableData = ctx->bTableData;
-    uint8_t* stackBuffer = ctx->stack;
-    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
+    ssize_t* aTableData = blurCtx->aTableData;
+    ssize_t* bTableData = blurCtx->bTableData;
+    uint8_t* stackBuf = blurCtx->stack;
+    uint8_t* stackEnd = stackBuf + blurCtx->kernelSize * Accessor::STACK_BPP;
     
-    uint aBorderLeadSize = ctx->aBorderLeadSize;
-    uint aBorderTailSize = ctx->aBorderTailSize;
-    uint bBorderTailSize = ctx->bBorderTailSize;
+    uint aBorderLeadSize = blurCtx->aBorderLeadSize;
+    uint aBorderTailSize = blurCtx->aBorderTailSize;
+    uint bBorderTailSize = blurCtx->bBorderTailSize;
 
-    uint aTableSize = ctx->aTableSize;
-    uint bTableSize = ctx->bTableSize;
+    uint aTableSize = blurCtx->aTableSize;
+    uint bTableSize = blurCtx->bTableSize;
 
     uint i, r;
     for (r = 0; r < runHeight; r++)
     {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
-      uint8_t* stackPtr = stackBuffer;
-
-      typename Accessor::Component sumP;
-      typename Accessor::Pixel pix0;
-
-      sumP.reset();
 
 #if defined(FOG_DEBUG)
       // NOTE: Code which uses these variables need to be #ifdefed too,
@@ -1130,6 +1283,13 @@ _Repeat:
       uint8_t* dstEnd = dst + dstStride;
 #endif // FOG_DEBUG
 
+      uint8_t* stackPtr = stackBuf;
+
+      typename Accessor::Run run;
+      typename Accessor::Pixel pix;
+
+      run.reset();
+
       // ----------------------------------------------------------------------
       // [A-Border - Lead]
       // ----------------------------------------------------------------------
@@ -1137,15 +1297,16 @@ _Repeat:
       i = aBorderLeadSize;
       if (i != 0)
       {
-        Accessor::fetchSolid(pix0, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pix0, srcPtr + ctx->srcFirstOffset);
-        sumP.addN(pix0, i);
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcFirstOffset);
 
+        run.add(pix, i);
         do {
           FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::storeStack(stackPtr, pix0);
+          Accessor::storePixelT(stackPtr, pix);
           stackPtr += Accessor::STACK_BPP;
         } while (--i);
       }
@@ -1161,11 +1322,11 @@ _Repeat:
 #endif // FOG_DEBUG
         FOG_ASSERT(stackPtr < stackEnd);
 
-        Accessor::fetchPixel(pix0, srcPtr + aTableData[i]);
-        Accessor::storeStack(stackPtr, pix0);
+        Accessor::fetchPixelM(pix, srcPtr + aTableData[i]);
+        Accessor::storePixelT(stackPtr, pix);
+        run.add(pix);
 
         stackPtr += Accessor::STACK_BPP;
-        sumP.add(pix0);
       }
 
       // ----------------------------------------------------------------------
@@ -1175,15 +1336,16 @@ _Repeat:
       i = aBorderTailSize;
       if (i != 0)
       {
-        Accessor::fetchSolid(pix0, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pix0, srcPtr + ctx->srcLastOffset);
-        sumP.addN(pix0, i);
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcLastOffset);
 
+        run.add(pix, i);
         do {
           FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::storeStack(stackPtr, pix0);
+          Accessor::storePixelT(stackPtr, pix);
           stackPtr += Accessor::STACK_BPP;
         } while (--i);
       }
@@ -1195,8 +1357,8 @@ _Repeat:
       FOG_ASSERT(stackPtr == stackEnd);
       FOG_ASSERT(runSize != 0);
 
-      stackPtr = stackBuffer;
-      srcPtr += ctx->runOffset;
+      stackPtr = stackBuf;
+      srcPtr += blurCtx->runOffset;
 
       i = runSize;
       goto _First;
@@ -1207,25 +1369,25 @@ _Repeat:
 #endif // FOG_DEBUG
         FOG_ASSERT(stackPtr < stackEnd);
 
-        Accessor::fetchStack(pix0, stackPtr);
-        sumP.sub(pix0);
+        Accessor::fetchPixelT(pix, stackPtr);
+        run.sub(pix);
 
-        Accessor::fetchPixel(pix0, srcPtr);
-        Accessor::storeStack(stackPtr, pix0);
-        sumP.add(pix0);
+        Accessor::fetchPixelM(pix, srcPtr);
+        Accessor::storePixelT(stackPtr, pix);
+        run.add(pix);
 
         srcPtr += Accessor::PIXEL_BPP;
         stackPtr += Accessor::STACK_BPP;
 
         if (stackPtr == stackEnd)
-          stackPtr = stackBuffer;
+          stackPtr = stackBuf;
 
 _First:
 #if defined(FOG_DEBUG)
         FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
 
-        Accessor::storeMulShr(dstPtr, sumP, sumMul, sumShr);
+        Accessor::storeRunM(dstPtr, run, sumMul, sumShr);
         dstPtr += Accessor::PIXEL_BPP;
       } while (--i);
 
@@ -1238,26 +1400,23 @@ _First:
       {
 #if defined(FOG_DEBUG)
         FOG_ASSERT(srcPtr + bTableData[i] >= src && srcPtr + bTableData[i] < srcEnd);
+        FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
         FOG_ASSERT(stackPtr < stackEnd);
 
-        Accessor::fetchStack(pix0, stackPtr);
-        sumP.sub(pix0);
+        Accessor::fetchPixelT(pix, stackPtr);
+        run.sub(pix);
 
-        Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
-        Accessor::storeStack(stackPtr, pix0);
-        sumP.add(pix0);
+        Accessor::fetchPixelM(pix, srcPtr + bTableData[i]);
+        Accessor::storePixelT(stackPtr, pix);
+        run.add(pix);
+        Accessor::storeRunM(dstPtr, run, sumMul, sumShr);
 
         stackPtr += Accessor::STACK_BPP;
-        if (stackPtr == stackEnd)
-          stackPtr = stackBuffer;
-
-#if defined(FOG_DEBUG)
-        FOG_ASSERT(dstPtr < dstEnd);
-#endif // FOG_DEBUG
-
-        Accessor::storeMulShr(dstPtr, sumP, sumMul, sumShr);
         dstPtr += Accessor::PIXEL_BPP;
+
+        if (stackPtr == stackEnd)
+          stackPtr = stackBuf;
       }
 
       // ----------------------------------------------------------------------
@@ -1268,32 +1427,32 @@ _First:
       if (i != 0)
       {
         typename Accessor::Pixel pixB;
-        typename Accessor::Component cmpB;
+        typename Accessor::Run cmpB;
 
-        Accessor::fetchSolid(pixB, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pixB, srcPtr + ctx->srcLastOffset);
-        Accessor::unpack(cmpB, pixB);
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pixB, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pixB, srcPtr + blurCtx->srcLastOffset);
 
+        cmpB.set(pixB);
         do {
-          FOG_ASSERT(stackPtr < stackEnd);
-
-          Accessor::fetchStack(pix0, stackPtr);
-          sumP.sub(pix0);
-
-          Accessor::storeStack(stackPtr, pixB);
-          sumP.add(cmpB);
-
-          stackPtr += Accessor::STACK_BPP;
-          if (stackPtr == stackEnd)
-            stackPtr = stackBuffer;
-
 #if defined(FOG_DEBUG)
           FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
+          FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::storeMulShr(dstPtr, sumP, sumMul, sumShr);
+          Accessor::fetchPixelT(pix, stackPtr);
+          Accessor::storePixelT(stackPtr, pixB);
+          run.sub(pix);
+          run.add(cmpB);
+
+          Accessor::storeRunM(dstPtr, run, sumMul, sumShr);
+
           dstPtr += Accessor::PIXEL_BPP;
+          stackPtr += Accessor::STACK_BPP;
+
+          if (stackPtr == stackEnd)
+            stackPtr = stackBuf;
         } while (--i);
       }
 
@@ -1303,50 +1462,50 @@ _First:
   }
 
   // ==========================================================================
-  // [Blur - DoRect - Box-V]
+  // [Blur - Box - Vertical]
   // ==========================================================================
 
   template<typename Accessor>
-  static void FOG_FASTCALL do_rect_box_v(
-    RasterConvolve* ctx)
+  static void FOG_FASTCALL doBoxV(
+    RasterFilterBlur* blurCtx)
   {
-    uint8_t* dst = ctx->dstData;
-    uint8_t* src = ctx->srcData;
+    uint8_t* dst = blurCtx->dstData;
+    uint8_t* src = blurCtx->srcData;
 
-    ssize_t dstStride = ctx->dstStride;
-    ssize_t srcStride = ctx->srcStride;
+    ssize_t dstStride = blurCtx->dstStride;
+    ssize_t srcStride = blurCtx->srcStride;
 
-    uint runWidth = ctx->rowSize;
-    uint runSize = ctx->runSize;
+    uint runWidth = blurCtx->rowSize;
+    uint runSize = blurCtx->runSize;
 
-    uint32_t sumMul = getReciprocal(ctx->kernelSize);
+    uint32_t sumMul = getBoxBlurReciprocal(blurCtx->kernelSize);
     uint32_t sumShr = 16;
 
-    ssize_t* aTableData = ctx->aTableData;
-    ssize_t* bTableData = ctx->bTableData;
-    uint8_t* stackBuffer = ctx->stack;
+    ssize_t* aTableData = blurCtx->aTableData;
+    ssize_t* bTableData = blurCtx->bTableData;
+    uint8_t* stackBuf = blurCtx->stack;
     
-    uint aBorderLeadSize = ctx->aBorderLeadSize;
-    uint aBorderTailSize = ctx->aBorderTailSize;
-    uint bBorderTailSize = ctx->bBorderTailSize;
+    uint aBorderLeadSize = blurCtx->aBorderLeadSize;
+    uint aBorderTailSize = blurCtx->aBorderTailSize;
+    uint bBorderTailSize = blurCtx->bBorderTailSize;
 
-    uint aTableSize = ctx->aTableSize;
-    uint bTableSize = ctx->bTableSize;
+    uint aTableSize = blurCtx->aTableSize;
+    uint bTableSize = blurCtx->bTableSize;
 
     uint i, r = 0;
 
     do {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
-      uint8_t* stackPtr = stackBuffer;
+      uint8_t* stackPtr = stackBuf;
 
-      typename Accessor::Component sumP[BLUR_RECT_V_HLINE_COUNT];
-      typename Accessor::Pixel pix0;
+      typename Accessor::Run run[BLUR_RECT_V_HLINE_COUNT];
+      typename Accessor::Pixel pix;
 
       uint xLength = Math::min<uint>(runWidth - r, BLUR_RECT_V_HLINE_COUNT);
       uint x;
 
-      uint8_t* stackEnd = stackBuffer + ctx->kernelSize * xLength * Accessor::STACK_BPP;
+      uint8_t* stackEnd = stackBuf + blurCtx->kernelSize * xLength * Accessor::STACK_BPP;
 
       // ----------------------------------------------------------------------
       // [A-Border - Lead]
@@ -1355,39 +1514,39 @@ _First:
       i = aBorderLeadSize;
       if (i != 0)
       {
-        if (ctx->extendType == FE_EXTEND_COLOR)
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
         {
-          Accessor::fetchSolid(pix0, ctx->extendColor);
-          sumP[0].reset();
-          sumP[0].addN(pix0, i);
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+          run[0].reset();
+          run[0].add(pix, i);
 
           for (x = 1; x < xLength; x++)
           {
-            sumP[x].set(sumP[0]);
+            run[x].set(run[0]);
           }
 
           i *= xLength;
           do {
             FOG_ASSERT(stackPtr < stackEnd);
 
-            Accessor::storeStack(stackPtr, pix0);
+            Accessor::storePixelT(stackPtr, pix);
             stackPtr += Accessor::STACK_BPP;
           } while (--i);
         }
         else
         {
-          uint8_t* srcBase = srcPtr + ctx->srcFirstOffset;
+          uint8_t* srcBase = srcPtr + blurCtx->srcFirstOffset;
           uint8_t* stackBase = stackPtr;
 
           for (x = 0; x < xLength; x++)
           {
             FOG_ASSERT(stackPtr < stackEnd);
 
-            Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-            sumP[x].reset();
-            sumP[x].addN(pix0, i);
+            Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+            run[x].reset();
+            run[x].add(pix, i);
 
-            Accessor::storeStack(stackPtr, pix0);
+            Accessor::storePixelT(stackPtr, pix);
             stackPtr += Accessor::STACK_BPP;
           }
 
@@ -1397,8 +1556,9 @@ _First:
             {
               FOG_ASSERT(stackPtr < stackEnd);
 
-              Accessor::fetchStack(pix0, stackBase + x * Accessor::STACK_BPP);
-              Accessor::storeStack(stackPtr, pix0);
+              Accessor::fetchPixelT(pix, stackBase + x * Accessor::STACK_BPP);
+              Accessor::storePixelT(stackPtr, pix);
+
               stackPtr += Accessor::STACK_BPP;
             }
           }
@@ -1408,7 +1568,7 @@ _First:
       {
         for (x = 0; x < xLength; x++)
         {
-          sumP[x].reset();
+          run[x].reset();
         }
       }
 
@@ -1424,11 +1584,11 @@ _First:
         {
           FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::fetchPixel(pix0, srcTab + x * Accessor::PIXEL_BPP);
-          Accessor::storeStack(stackPtr, pix0);
+          Accessor::fetchPixelM(pix, srcTab + x * Accessor::PIXEL_BPP);
+          Accessor::storePixelT(stackPtr, pix);
+          run[x].add(pix);
 
           stackPtr += Accessor::STACK_BPP;
-          sumP[x].add(pix0);
         }
       }
 
@@ -1439,36 +1599,36 @@ _First:
       i = aBorderTailSize;
       if (i != 0)
       {
-        if (ctx->extendType == FE_EXTEND_COLOR)
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
         {
-          Accessor::fetchSolid(pix0, ctx->extendColor);
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
 
           for (x = 0; x < xLength; x++)
           {
-            sumP[x].addN(pix0, i);
+            run[x].add(pix, i);
           }
 
           i *= xLength;
           do {
             FOG_ASSERT(stackPtr < stackEnd);
 
-            Accessor::storeStack(stackPtr, pix0);
+            Accessor::storePixelT(stackPtr, pix);
             stackPtr += Accessor::STACK_BPP;
           } while (--i);
         }
         else
         {
-          uint8_t* srcBase = srcPtr + ctx->srcLastOffset;
+          uint8_t* srcBase = srcPtr + blurCtx->srcLastOffset;
           uint8_t* stackBase = stackPtr;
 
           for (x = 0; x < xLength; x++)
           {
             FOG_ASSERT(stackPtr < stackEnd);
 
-            Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-            sumP[x].addN(pix0, i);
+            Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+            Accessor::storePixelT(stackPtr, pix);
+            run[x].add(pix, i);
 
-            Accessor::storeStack(stackPtr, pix0);
             stackPtr += Accessor::STACK_BPP;
           }
 
@@ -1478,8 +1638,9 @@ _First:
             {
               FOG_ASSERT(stackPtr < stackEnd);
 
-              Accessor::fetchStack(pix0, stackBase + x * Accessor::STACK_BPP);
-              Accessor::storeStack(stackPtr, pix0);
+              Accessor::fetchPixelT(pix, stackBase + x * Accessor::STACK_BPP);
+              Accessor::storePixelT(stackPtr, pix);
+
               stackPtr += Accessor::STACK_BPP;
             }
           }
@@ -1493,12 +1654,12 @@ _First:
       FOG_ASSERT(stackPtr == stackEnd);
       FOG_ASSERT(runSize != 0);
 
-      stackPtr = stackBuffer;
-      srcPtr += ctx->runOffset;
+      stackPtr = stackBuf;
+      srcPtr += blurCtx->runOffset;
 
       for (x = 0; x < xLength; x++)
       {
-        Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
+        Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
       }
 
       dstPtr += dstStride;
@@ -1510,20 +1671,19 @@ _First:
         {
           FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::fetchStack(pix0, stackPtr);
-          sumP[x].sub(pix0);
+          Accessor::fetchPixelT(pix, stackPtr);
+          run[x].sub(pix);
 
-          Accessor::fetchPixel(pix0, srcPtr + x * Accessor::PIXEL_BPP);
-          Accessor::storeStack(stackPtr, pix0);
-          sumP[x].add(pix0);
+          Accessor::fetchPixelM(pix, srcPtr + x * Accessor::PIXEL_BPP);
+          Accessor::storePixelT(stackPtr, pix);
+          run[x].add(pix);
 
+          Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
           stackPtr += Accessor::STACK_BPP;
-
-          Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
         }
 
         if (stackPtr == stackEnd)
-          stackPtr = stackBuffer;
+          stackPtr = stackBuf;
 
         srcPtr += srcStride;
         dstPtr += dstStride;
@@ -1542,20 +1702,19 @@ _First:
         {
           FOG_ASSERT(stackPtr < stackEnd);
 
-          Accessor::fetchStack(pix0, stackPtr);
-          sumP[x].sub(pix0);
+          Accessor::fetchPixelT(pix, stackPtr);
+          run[x].sub(pix);
 
-          Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-          Accessor::storeStack(stackPtr, pix0);
-          sumP[x].add(pix0);
+          Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+          Accessor::storePixelT(stackPtr, pix);
+          run[x].add(pix);
 
+          Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
           stackPtr += Accessor::STACK_BPP;
-            
-          Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
         }
 
         if (stackPtr == stackEnd)
-          stackPtr = stackBuffer;
+          stackPtr = stackBuf;
 
         dstPtr += dstStride;
       }
@@ -1567,58 +1726,56 @@ _First:
       i = bBorderTailSize;
       if (i != 0)
       {
-        if (ctx->extendType == FE_EXTEND_COLOR)
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
         {
           typename Accessor::Pixel pixB;
-          Accessor::fetchSolid(pixB, ctx->extendColor);
+          typename Accessor::Run cmpB;
 
-          typename Accessor::Component cmpB;
-          Accessor::unpack(cmpB, pixB);
+          Accessor::fetchPixelS(pixB, blurCtx->extendColor);
+          cmpB.set(pixB);
 
           do {
             for (x = 0; x < xLength; x++)
             {
               FOG_ASSERT(stackPtr < stackEnd);
 
-              Accessor::fetchStack(pix0, stackPtr);
-              sumP[x].sub(pix0);
+              Accessor::fetchPixelT(pix, stackPtr);
+              Accessor::storePixelT(stackPtr, pixB);
+              run[x].sub(pix);
+              run[x].add(cmpB);
 
-              // Doesn't need to store into the stack.
-              // Accessor::storeStack(stackPtr, pixB);
-              sumP[x].add(cmpB);
-
+              Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
               stackPtr += Accessor::STACK_BPP;
-              Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
             }
 
             if (stackPtr == stackEnd)
-              stackPtr = stackBuffer;
+              stackPtr = stackBuf;
 
             dstPtr += dstStride;
           } while (--i);
         }
         else
         {
-          uint8_t* srcBase = srcPtr + ctx->srcLastOffset;
+          uint8_t* srcBase = srcPtr + blurCtx->srcLastOffset;
           
           do {
             for (x = 0; x < xLength; x++)
             {
               FOG_ASSERT(stackPtr < stackEnd);
 
-              Accessor::fetchStack(pix0, stackPtr);
-              sumP[x].sub(pix0);
+              Accessor::fetchPixelT(pix, stackPtr);
+              run[x].sub(pix);
 
-              Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-              Accessor::storeStack(stackPtr, pix0);
-              sumP[x].add(pix0);
+              Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+              Accessor::storePixelT(stackPtr, pix);
+              run[x].add(pix);
 
+              Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
               stackPtr += Accessor::STACK_BPP;
-              Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
             }
 
             if (stackPtr == stackEnd)
-              stackPtr = stackBuffer;
+              stackPtr = stackBuf;
 
             dstPtr += dstStride;
           } while (--i);
@@ -1633,10 +1790,10 @@ _First:
   }
 
   // ==========================================================================
-  // [Blur - DoRect - Exp-H]
+  // [Blur - Stack - Horizontal]
   // ==========================================================================
 
-  static FOG_INLINE uint do_rect_exp_get_alead_const(uint sz)
+  static FOG_INLINE uint getStackBlurALeadConst(uint sz)
   {
     uint i = sz;
     while (sz)
@@ -1647,59 +1804,45 @@ _First:
   }
 
   template<typename Accessor>
-  static void FOG_FASTCALL do_rect_exp_h(
-    RasterConvolve* ctx)
+  static void FOG_FASTCALL doStackH(
+    RasterFilterBlur* blurCtx)
   {
-    uint8_t* dst = ctx->dstData;
-    uint8_t* src = ctx->srcData;
+    uint8_t* dst = blurCtx->dstData;
+    uint8_t* src = blurCtx->srcData;
 
-    ssize_t dstStride = ctx->dstStride;
-    ssize_t srcStride = ctx->srcStride;
+    ssize_t dstStride = blurCtx->dstStride;
+    ssize_t srcStride = blurCtx->srcStride;
 
-    uint runHeight = ctx->rowSize;
-    uint runSize = ctx->runSize;
+    uint runHeight = blurCtx->rowSize;
+    uint runSize = blurCtx->runSize;
 
-    uint32_t sumMul = _raster_blur_exp8_mul[ctx->kernelRadius];
-    uint32_t sumShr = _raster_blur_exp8_shr[ctx->kernelRadius];
+    uint32_t sumMul = _raster_blur_stack_8_mul[blurCtx->kernelRadius];
+    uint32_t sumShr = _raster_blur_stack_8_shr[blurCtx->kernelRadius];
 
-    ssize_t* aTableData = ctx->aTableData;
-    ssize_t* bTableData = ctx->bTableData;
-    uint8_t* stackBuffer = ctx->stack;
-    uint8_t* stackEnd = stackBuffer + ctx->kernelSize * Accessor::STACK_BPP;
+    ssize_t* aTableData = blurCtx->aTableData;
+    ssize_t* bTableData = blurCtx->bTableData;
+    uint8_t* stackBuf = blurCtx->stack;
+    uint8_t* stackEnd = stackBuf + blurCtx->kernelSize * Accessor::STACK_BPP;
     
-    uint aBorderLeadSize = ctx->aBorderLeadSize;
-    uint aBorderLeadMul = do_rect_exp_get_alead_const(aBorderLeadSize);
+    uint aBorderLeadSize = blurCtx->aBorderLeadSize;
+    uint aBorderLeadMul = getStackBlurALeadConst(aBorderLeadSize);
 
-    uint aBorderTailSize = ctx->aBorderTailSize;
-    uint aBorderTailMul = do_rect_exp_get_alead_const(aBorderTailSize);
+    uint aBorderTailSize = blurCtx->aBorderTailSize;
+    uint aBorderTailMul = getStackBlurALeadConst(aBorderTailSize);
 
-    uint bBorderTailSize = ctx->bBorderTailSize;
+    uint bBorderTailSize = blurCtx->bBorderTailSize;
 
-    uint aTableSize = ctx->aTableSize;
-    uint bTableSize = ctx->bTableSize;
+    uint aTableSize = blurCtx->aTableSize;
+    uint bTableSize = blurCtx->bTableSize;
 
-    uint kernelRadius = ctx->kernelRadius;
-    uint kernelSize = ctx->kernelSize;
+    uint kernelRadius = blurCtx->kernelRadius;
+    uint kernelSize = blurCtx->kernelSize;
 
     uint i, r;
     for (r = 0; r < runHeight; r++)
     {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
-
-      uint8_t* stackA = stackBuffer;
-      uint8_t* stackB = NULL;
-
-      typename Accessor::Component sumP;
-      typename Accessor::Component sumA;
-      typename Accessor::Component sumB;
-
-      typename Accessor::Pixel pix0;
-      typename Accessor::Component cmp0;
-
-      sumP.reset();
-      sumA.reset();
-      sumB.reset();
 
 #if defined(FOG_DEBUG)
       // NOTE: Code which uses these variables need to be #ifdefed too,
@@ -1710,6 +1853,20 @@ _First:
       uint8_t* dstEnd = dst + dstStride;
 #endif // FOG_DEBUG
 
+      uint8_t* stackA = stackBuf;
+      uint8_t* stackB = NULL;
+
+      typename Accessor::Run run;
+      typename Accessor::Run runA;
+      typename Accessor::Run runB;
+
+      typename Accessor::Pixel pix;
+      typename Accessor::Run cmp0;
+
+      run.reset();
+      runA.reset();
+      runB.reset();
+
       // ----------------------------------------------------------------------
       // [A-Border - Lead]
       // ----------------------------------------------------------------------
@@ -1719,19 +1876,20 @@ _First:
 
       if (i != 0)
       {
-        Accessor::fetchSolid(pix0, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pix0, srcPtr + ctx->srcFirstOffset);
-        Accessor::unpack(cmp0, pix0);
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcFirstOffset);
 
-        sumB.addN(cmp0, i);
-        sumP.addN(cmp0, aBorderLeadMul);
+        cmp0.set(pix);
+        runB.add(cmp0, i);
+        run.add(cmp0, aBorderLeadMul);
 
         pos += i;
         do {
           FOG_ASSERT(stackA < stackEnd);
 
-          Accessor::storeStack(stackA, pix0);
+          Accessor::storePixelT(stackA, pix);
           stackA += Accessor::STACK_BPP;
         } while (--i);
       }
@@ -1747,23 +1905,23 @@ _First:
 #endif // FOG_DEBUG
         FOG_ASSERT(stackA < stackEnd);
 
-        Accessor::fetchPixel(pix0, srcPtr + aTableData[i]);
-        Accessor::storeStack(stackA, pix0);
-        Accessor::unpack(cmp0, pix0);
-
+        Accessor::fetchPixelM(pix, srcPtr + aTableData[i]);
+        Accessor::storePixelT(stackA, pix);
+        
+        cmp0.set(pix);
         stackA += Accessor::STACK_BPP;
 
         if (pos > kernelRadius)
         {
-          sumA.add(cmp0);
-          sumP.addN(cmp0, kernelSize - pos);
+          runA.add(cmp0);
+          run.add(cmp0, kernelSize - pos);
           pos++;
         }
         else
         {
           pos++;
-          sumB.add(cmp0);
-          sumP.addN(cmp0, pos);
+          runB.add(cmp0);
+          run.add(cmp0, pos);
         }
       }
 
@@ -1774,18 +1932,19 @@ _First:
       i = aBorderTailSize;
       if (i != 0)
       {
-        Accessor::fetchSolid(pix0, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pix0, srcPtr + ctx->srcLastOffset);
-        Accessor::unpack(cmp0, pix0);
-
-        sumA.addN(cmp0, i);
-        sumP.addN(cmp0, aBorderTailMul);
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcLastOffset);
+        
+        cmp0.set(pix);
+        runA.add(cmp0, i);
+        run.add(cmp0, aBorderTailMul);
 
         do {
           FOG_ASSERT(stackA < stackEnd);
 
-          Accessor::storeStack(stackA, pix0);
+          Accessor::storePixelT(stackA, pix);
           stackA += Accessor::STACK_BPP;
         } while (--i);
       }
@@ -1797,9 +1956,9 @@ _First:
       FOG_ASSERT(stackA == stackEnd);
       FOG_ASSERT(runSize != 0);
 
-      stackA = stackBuffer;
-      stackB = stackBuffer + (kernelRadius + 1) * Accessor::STACK_BPP;
-      srcPtr += ctx->runOffset;
+      stackA = stackBuf;
+      stackB = stackBuf + (kernelRadius + 1) * Accessor::STACK_BPP;
+      srcPtr += blurCtx->runOffset;
 
       i = runSize;
       goto _First;
@@ -1811,35 +1970,35 @@ _First:
         FOG_ASSERT(stackA < stackEnd);
         FOG_ASSERT(stackB < stackEnd);
 
-        Accessor::fetchStack(pix0, stackA);
-        sumP.sub(sumB);
-        sumB.sub(pix0);
+        Accessor::fetchPixelT(pix, stackA);
+        run.sub(runB);
+        runB.sub(pix);
 
-        Accessor::fetchPixel(pix0, srcPtr);
-        Accessor::storeStack(stackA, pix0);
-        sumA.add(pix0);
-        sumP.add(sumA);
+        Accessor::fetchPixelM(pix, srcPtr);
+        Accessor::storePixelT(stackA, pix);
+        runA.add(pix);
+        run.add(runA);
 
-        Accessor::fetchStack(pix0, stackB);
-        Accessor::unpack(cmp0, pix0);
-        sumB.add(cmp0);
-        sumA.sub(cmp0);
+        Accessor::fetchPixelT(pix, stackB);
+        cmp0.set(pix);
+        runB.add(cmp0);
+        runA.sub(cmp0);
 
         srcPtr += Accessor::PIXEL_BPP;
         stackA += Accessor::STACK_BPP;
         stackB += Accessor::STACK_BPP;
 
         if (stackA == stackEnd)
-          stackA = stackBuffer;
+          stackA = stackBuf;
         if (stackB == stackEnd)
-          stackB = stackBuffer;
+          stackB = stackBuf;
 
 _First:
 #if defined(FOG_DEBUG)
         FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
 
-        Accessor::storeMulShr(dstPtr, sumP, sumMul, sumShr);
+        Accessor::storeRunM(dstPtr, run, sumMul, sumShr);
         dstPtr += Accessor::PIXEL_BPP;
       } while (--i);
 
@@ -1856,34 +2015,34 @@ _First:
         FOG_ASSERT(stackA < stackEnd);
         FOG_ASSERT(stackB < stackEnd);
 
-        Accessor::fetchStack(pix0, stackA);
-        sumP.sub(sumB);
-        sumB.sub(pix0);
+        Accessor::fetchPixelT(pix, stackA);
+        run.sub(runB);
+        runB.sub(pix);
 
-        Accessor::fetchPixel(pix0, srcPtr + bTableData[i]);
-        Accessor::storeStack(stackA, pix0);
-        sumA.add(pix0);
-        sumP.add(sumA);
+        Accessor::fetchPixelM(pix, srcPtr + bTableData[i]);
+        Accessor::storePixelT(stackA, pix);
+        runA.add(pix);
+        run.add(runA);
 
-        Accessor::fetchStack(pix0, stackB);
-        Accessor::unpack(cmp0, pix0);
-        sumB.add(cmp0);
-        sumA.sub(cmp0);
+        Accessor::fetchPixelT(pix, stackB);
+        cmp0.set(pix);
+        runB.add(cmp0);
+        runA.sub(cmp0);
 
         srcPtr += Accessor::PIXEL_BPP;
         stackA += Accessor::STACK_BPP;
         stackB += Accessor::STACK_BPP;
 
         if (stackA == stackEnd)
-          stackA = stackBuffer;
+          stackA = stackBuf;
         if (stackB == stackEnd)
-          stackB = stackBuffer;
+          stackB = stackBuf;
 
 #if defined(FOG_DEBUG)
         FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
 
-        Accessor::storeMulShr(dstPtr, sumP, sumMul, sumShr);
+        Accessor::storeRunM(dstPtr, run, sumMul, sumShr);
         dstPtr += Accessor::PIXEL_BPP;
       }
 
@@ -1895,44 +2054,45 @@ _First:
       if (i != 0)
       {
         typename Accessor::Pixel pixB;
-        typename Accessor::Component cmpB;
+        typename Accessor::Run cmpB;
 
-        Accessor::fetchSolid(pixB, ctx->extendColor);
-        if (ctx->extendType == FE_EXTEND_PAD)
-          Accessor::fetchPixel(pixB, srcPtr + ctx->srcLastOffset);
-        Accessor::unpack(cmpB, pixB);
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pixB, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pixB, srcPtr + blurCtx->srcLastOffset);
 
+        cmpB.set(pixB);
         do {
           FOG_ASSERT(stackA < stackEnd);
           FOG_ASSERT(stackB < stackEnd);
 
-          Accessor::fetchStack(pix0, stackA);
-          sumP.sub(sumB);
-          sumB.sub(pix0);
+          Accessor::fetchPixelT(pix, stackA);
+          run.sub(runB);
+          runB.sub(pix);
 
-          Accessor::storeStack(stackA, pixB);
-          sumA.add(cmpB);
-          sumP.add(sumA);
+          Accessor::storePixelT(stackA, pixB);
+          runA.add(cmpB);
+          run.add(runA);
 
-          Accessor::fetchStack(pix0, stackB);
-          Accessor::unpack(cmp0, pix0);
-          sumB.add(cmp0);
-          sumA.sub(cmp0);
+          Accessor::fetchPixelT(pix, stackB);
+          cmp0.set(pix);
+          runB.add(cmp0);
+          runA.sub(cmp0);
 
           srcPtr += Accessor::PIXEL_BPP;
           stackA += Accessor::STACK_BPP;
           stackB += Accessor::STACK_BPP;
 
           if (stackA == stackEnd)
-            stackA = stackBuffer;
+            stackA = stackBuf;
           if (stackB == stackEnd)
-            stackB = stackBuffer;
+            stackB = stackBuf;
 
 #if defined(FOG_DEBUG)
           FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
 
-          Accessor::storeMulShr(dstPtr, sumP, sumMul, sumShr);
+          Accessor::storeRunM(dstPtr, run, sumMul, sumShr);
           dstPtr += Accessor::PIXEL_BPP;
         } while (--i);
       }
@@ -1943,42 +2103,42 @@ _First:
   }
 
   // ==========================================================================
-  // [Blur - DoRect - Exp-V]
+  // [Blur - Stack - Vertical]
   // ==========================================================================
 
   template<typename Accessor>
-  static void FOG_FASTCALL do_rect_exp_v(
-    RasterConvolve* ctx)
+  static void FOG_FASTCALL doStackV(
+    RasterFilterBlur* blurCtx)
   {
-    uint8_t* dst = ctx->dstData;
-    uint8_t* src = ctx->srcData;
+    uint8_t* dst = blurCtx->dstData;
+    uint8_t* src = blurCtx->srcData;
 
-    ssize_t dstStride = ctx->dstStride;
-    ssize_t srcStride = ctx->srcStride;
+    ssize_t dstStride = blurCtx->dstStride;
+    ssize_t srcStride = blurCtx->srcStride;
 
-    uint runWidth = ctx->rowSize;
-    uint runSize = ctx->runSize;
+    uint runWidth = blurCtx->rowSize;
+    uint runSize = blurCtx->runSize;
 
-    uint32_t sumMul = _raster_blur_exp8_mul[ctx->kernelRadius];
-    uint32_t sumShr = _raster_blur_exp8_shr[ctx->kernelRadius];
+    uint32_t sumMul = _raster_blur_stack_8_mul[blurCtx->kernelRadius];
+    uint32_t sumShr = _raster_blur_stack_8_shr[blurCtx->kernelRadius];
 
-    ssize_t* aTableData = ctx->aTableData;
-    ssize_t* bTableData = ctx->bTableData;
-    uint8_t* stackBuffer = ctx->stack;
+    ssize_t* aTableData = blurCtx->aTableData;
+    ssize_t* bTableData = blurCtx->bTableData;
+    uint8_t* stackBuf = blurCtx->stack;
     
-    uint aBorderLeadSize = ctx->aBorderLeadSize;
-    uint aBorderLeadMul = do_rect_exp_get_alead_const(aBorderLeadSize);
+    uint aBorderLeadSize = blurCtx->aBorderLeadSize;
+    uint aBorderLeadMul = getStackBlurALeadConst(aBorderLeadSize);
 
-    uint aBorderTailSize = ctx->aBorderTailSize;
-    uint aBorderTailMul = do_rect_exp_get_alead_const(aBorderTailSize);
+    uint aBorderTailSize = blurCtx->aBorderTailSize;
+    uint aBorderTailMul = getStackBlurALeadConst(aBorderTailSize);
 
-    uint bBorderTailSize = ctx->bBorderTailSize;
+    uint bBorderTailSize = blurCtx->bBorderTailSize;
 
-    uint aTableSize = ctx->aTableSize;
-    uint bTableSize = ctx->bTableSize;
+    uint aTableSize = blurCtx->aTableSize;
+    uint bTableSize = blurCtx->bTableSize;
 
-    uint kernelRadius = ctx->kernelRadius;
-    uint kernelSize = ctx->kernelSize;
+    uint kernelRadius = blurCtx->kernelRadius;
+    uint kernelSize = blurCtx->kernelSize;
 
     uint i, r = 0;
 
@@ -1986,26 +2146,26 @@ _First:
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
 
-      uint8_t* stackA = stackBuffer;
+      uint8_t* stackA = stackBuf;
       uint8_t* stackB = NULL;
 
-      typename Accessor::Component sumP[BLUR_RECT_V_HLINE_COUNT];
-      typename Accessor::Component sumA[BLUR_RECT_V_HLINE_COUNT];
-      typename Accessor::Component sumB[BLUR_RECT_V_HLINE_COUNT];
+      typename Accessor::Run run[BLUR_RECT_V_HLINE_COUNT];
+      typename Accessor::Run runA[BLUR_RECT_V_HLINE_COUNT];
+      typename Accessor::Run runB[BLUR_RECT_V_HLINE_COUNT];
 
-      typename Accessor::Pixel pix0;
-      typename Accessor::Component cmp0;
+      typename Accessor::Pixel pix;
+      typename Accessor::Run cmp0;
 
       uint xLength = Math::min<uint>(runWidth - r, BLUR_RECT_V_HLINE_COUNT);
       uint x;
 
-      uint8_t* stackEnd = stackBuffer + ctx->kernelSize * xLength * Accessor::STACK_BPP;
+      uint8_t* stackEnd = stackBuf + blurCtx->kernelSize * xLength * Accessor::STACK_BPP;
 
       for (x = 0; x < xLength; x++)
       {
-        sumP[x].reset();
-        sumA[x].reset();
-        sumB[x].reset();
+        run[x].reset();
+        runA[x].reset();
+        runB[x].reset();
       }
 
       // ----------------------------------------------------------------------
@@ -2017,18 +2177,18 @@ _First:
 
       if (i != 0)
       {
-        if (ctx->extendType == FE_EXTEND_COLOR)
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
         {
-          Accessor::fetchSolid(pix0, ctx->extendColor);
-          Accessor::unpack(cmp0, pix0);
-
-          sumB[0].addN(cmp0, i);
-          sumP[0].addN(cmp0, aBorderLeadMul);
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+          
+          cmp0.set(pix);
+          runB[0].add(cmp0, i);
+          run[0].add(cmp0, aBorderLeadMul);
 
           for (x = 1; x < xLength; x++)
           {
-            sumB[x].set(sumB[0]);
-            sumP[x].set(sumP[0]);
+            runB[x].set(runB[0]);
+            run[x].set(run[0]);
           }
 
           pos += i;
@@ -2037,26 +2197,26 @@ _First:
           do {
             FOG_ASSERT(stackA < stackEnd);
 
-            Accessor::storeStack(stackA, pix0);
+            Accessor::storePixelT(stackA, pix);
             stackA += Accessor::STACK_BPP;
           } while (--i);
         }
         else
         {
-          uint8_t* srcBase = srcPtr + ctx->srcFirstOffset;
+          uint8_t* srcBase = srcPtr + blurCtx->srcFirstOffset;
           uint8_t* stackBase = stackA;
 
           for (x = 0; x < xLength; x++)
           {
             FOG_ASSERT(stackA < stackEnd);
 
-            Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-            Accessor::unpack(cmp0, pix0);
+            Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+            cmp0.set(pix);
 
-            sumB[x].addN(cmp0, i);
-            sumP[x].addN(cmp0, aBorderLeadMul);
+            runB[x].add(cmp0, i);
+            run[x].add(cmp0, aBorderLeadMul);
 
-            Accessor::storeStack(stackA, pix0);
+            Accessor::storePixelT(stackA, pix);
             stackA += Accessor::STACK_BPP;
           }
 
@@ -2066,8 +2226,8 @@ _First:
             {
               FOG_ASSERT(stackA < stackEnd);
 
-              Accessor::fetchStack(pix0, stackBase + x * Accessor::STACK_BPP);
-              Accessor::storeStack(stackA, pix0);
+              Accessor::fetchPixelT(pix, stackBase + x * Accessor::STACK_BPP);
+              Accessor::storePixelT(stackA, pix);
               stackA += Accessor::STACK_BPP;
             }
           }
@@ -2086,21 +2246,21 @@ _First:
         {
           FOG_ASSERT(stackA < stackEnd);
 
-          Accessor::fetchPixel(pix0, srcTab + x * Accessor::PIXEL_BPP);
-          Accessor::storeStack(stackA, pix0);
-          Accessor::unpack(cmp0, pix0);
-
+          Accessor::fetchPixelM(pix, srcTab + x * Accessor::PIXEL_BPP);
+          Accessor::storePixelT(stackA, pix);
+          
+          cmp0.set(pix);
           stackA += Accessor::STACK_BPP;
 
           if (pos > kernelRadius)
           {
-            sumA[x].add(cmp0);
-            sumP[x].addN(cmp0, kernelSize - pos);
+            runA[x].add(cmp0);
+            run[x].add(cmp0, kernelSize - pos);
           }
           else
           {
-            sumB[x].add(cmp0);
-            sumP[x].addN(cmp0, pos + 1);
+            runB[x].add(cmp0);
+            run[x].add(cmp0, pos + 1);
           }
         }
         pos++;
@@ -2113,41 +2273,41 @@ _First:
       i = aBorderTailSize;
       if (i != 0)
       {
-        if (ctx->extendType == FE_EXTEND_COLOR)
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
         {
-          Accessor::fetchSolid(pix0, ctx->extendColor);
-          Accessor::unpack(cmp0, pix0);
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+          cmp0.set(pix);
 
           for (x = 0; x < xLength; x++)
           {
-            sumA[x].addN(cmp0, i);
-            sumP[x].addN(cmp0, aBorderTailMul);
+            runA[x].add(cmp0, i);
+            run[x].add(cmp0, aBorderTailMul);
           }
 
           i *= xLength;
           do {
             FOG_ASSERT(stackA < stackEnd);
 
-            Accessor::storeStack(stackA, pix0);
+            Accessor::storePixelT(stackA, pix);
             stackA += Accessor::STACK_BPP;
           } while (--i);
         }
         else
         {
-          uint8_t* srcBase = srcPtr + ctx->srcLastOffset;
+          uint8_t* srcBase = srcPtr + blurCtx->srcLastOffset;
           uint8_t* stackBase = stackA;
 
           for (x = 0; x < xLength; x++)
           {
             FOG_ASSERT(stackA < stackEnd);
 
-            Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-            Accessor::unpack(cmp0, pix0);
+            Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+            cmp0.set(pix);
 
-            sumA[x].addN(cmp0, i);
-            sumP[x].addN(cmp0, aBorderTailMul);
+            runA[x].add(cmp0, i);
+            run[x].add(cmp0, aBorderTailMul);
 
-            Accessor::storeStack(stackA, pix0);
+            Accessor::storePixelT(stackA, pix);
             stackA += Accessor::STACK_BPP;
           }
 
@@ -2157,8 +2317,8 @@ _First:
             {
               FOG_ASSERT(stackA < stackEnd);
 
-              Accessor::fetchStack(pix0, stackBase + x * Accessor::STACK_BPP);
-              Accessor::storeStack(stackA, pix0);
+              Accessor::fetchPixelT(pix, stackBase + x * Accessor::STACK_BPP);
+              Accessor::storePixelT(stackA, pix);
               stackA += Accessor::STACK_BPP;
             }
           }
@@ -2172,13 +2332,13 @@ _First:
       FOG_ASSERT(stackA == stackEnd);
       FOG_ASSERT(runSize != 0);
 
-      stackA = stackBuffer;
-      stackB = stackBuffer + (kernelRadius + 1) * xLength * Accessor::STACK_BPP;
-      srcPtr += ctx->runOffset;
+      stackA = stackBuf;
+      stackB = stackBuf + (kernelRadius + 1) * xLength * Accessor::STACK_BPP;
+      srcPtr += blurCtx->runOffset;
 
       for (x = 0; x < xLength; x++)
       {
-        Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
+        Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
       }
 
       dstPtr += dstStride;
@@ -2191,30 +2351,29 @@ _First:
           FOG_ASSERT(stackA < stackEnd);
           FOG_ASSERT(stackB < stackEnd);
 
-          Accessor::fetchStack(pix0, stackA);
-          sumP[x].sub(sumB[x]);
-          sumB[x].sub(pix0);
+          Accessor::fetchPixelT(pix, stackA);
+          run[x].sub(runB[x]);
+          runB[x].sub(pix);
 
-          Accessor::fetchPixel(pix0, srcPtr + x * Accessor::PIXEL_BPP);
-          Accessor::storeStack(stackA, pix0);
-          sumA[x].add(pix0);
-          sumP[x].add(sumA[x]);
+          Accessor::fetchPixelM(pix, srcPtr + x * Accessor::PIXEL_BPP);
+          Accessor::storePixelT(stackA, pix);
+          runA[x].add(pix);
+          run[x].add(runA[x]);
 
-          Accessor::fetchStack(pix0, stackB);
-          Accessor::unpack(cmp0, pix0);
-          sumB[x].add(cmp0);
-          sumA[x].sub(cmp0);
+          Accessor::fetchPixelT(pix, stackB);
+          cmp0.set(pix);
+          runB[x].add(cmp0);
+          runA[x].sub(cmp0);
 
+          Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
           stackA += Accessor::STACK_BPP;
           stackB += Accessor::STACK_BPP;
-
-          Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
         }
 
         if (stackA == stackEnd)
-          stackA = stackBuffer;
+          stackA = stackBuf;
         if (stackB == stackEnd)
-          stackB = stackBuffer;
+          stackB = stackBuf;
 
         srcPtr += srcStride;
         dstPtr += dstStride;
@@ -2234,31 +2393,30 @@ _First:
           FOG_ASSERT(stackA < stackEnd);
           FOG_ASSERT(stackB < stackEnd);
 
-          Accessor::fetchStack(pix0, stackA);
-          sumP[x].sub(sumB[x]);
-          sumB[x].sub(pix0);
+          Accessor::fetchPixelT(pix, stackA);
+          run[x].sub(runB[x]);
+          runB[x].sub(pix);
 
-          Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-          Accessor::storeStack(stackA, pix0);
-          sumA[x].add(pix0);
-          sumP[x].add(sumA[x]);
+          Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+          Accessor::storePixelT(stackA, pix);
+          runA[x].add(pix);
+          run[x].add(runA[x]);
 
-          Accessor::fetchStack(pix0, stackB);
-          Accessor::unpack(cmp0, pix0);
-          sumB[x].add(cmp0);
-          sumA[x].sub(cmp0);
+          Accessor::fetchPixelT(pix, stackB);
+          cmp0.set(pix);
+          runB[x].add(cmp0);
+          runA[x].sub(cmp0);
 
+          Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
           srcPtr += Accessor::PIXEL_BPP;
           stackA += Accessor::STACK_BPP;
           stackB += Accessor::STACK_BPP;
-
-          Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
         }
 
         if (stackA == stackEnd)
-          stackA = stackBuffer;
+          stackA = stackBuf;
         if (stackB == stackEnd)
-          stackB = stackBuffer;
+          stackB = stackBuf;
 
         dstPtr += dstStride;
       }
@@ -2270,13 +2428,13 @@ _First:
       i = bBorderTailSize;
       if (i != 0)
       {
-        if (ctx->extendType == FE_EXTEND_COLOR)
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
         {
           typename Accessor::Pixel pixB;
-          Accessor::fetchSolid(pixB, ctx->extendColor);
+          typename Accessor::Run cmpB;
 
-          typename Accessor::Component cmpB;
-          Accessor::unpack(cmpB, pixB);
+          Accessor::fetchPixelS(pixB, blurCtx->extendColor);
+          cmpB.set(pixB);
 
           do {
             for (x = 0; x < xLength; x++)
@@ -2284,37 +2442,36 @@ _First:
               FOG_ASSERT(stackA < stackEnd);
               FOG_ASSERT(stackB < stackEnd);
 
-              Accessor::fetchStack(pix0, stackA);
-              sumP[x].sub(sumB[x]);
-              sumB[x].sub(pix0);
+              Accessor::fetchPixelT(pix, stackA);
+              run[x].sub(runB[x]);
+              runB[x].sub(pix);
 
-              Accessor::storeStack(stackA, pixB);
-              sumA[x].add(cmpB);
-              sumP[x].add(sumA[x]);
+              Accessor::storePixelT(stackA, pixB);
+              runA[x].add(cmpB);
+              run[x].add(runA[x]);
 
-              Accessor::fetchStack(pix0, stackB);
-              Accessor::unpack(cmp0, pix0);
-              sumB[x].add(cmp0);
-              sumA[x].sub(cmp0);
+              Accessor::fetchPixelT(pix, stackB);
+              cmp0.set(pix);
+              runB[x].add(cmp0);
+              runA[x].sub(cmp0);
 
+              Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
               srcPtr += Accessor::PIXEL_BPP;
               stackA += Accessor::STACK_BPP;
               stackB += Accessor::STACK_BPP;
-
-              Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
             }
 
             if (stackA == stackEnd)
-              stackA = stackBuffer;
+              stackA = stackBuf;
             if (stackB == stackEnd)
-              stackB = stackBuffer;
+              stackB = stackBuf;
 
             dstPtr += dstStride;
           } while (--i);
         }
         else
         {
-          uint8_t* srcBase = srcPtr + ctx->srcLastOffset;
+          uint8_t* srcBase = srcPtr + blurCtx->srcLastOffset;
           
           do {
             for (x = 0; x < xLength; x++)
@@ -2322,31 +2479,31 @@ _First:
               FOG_ASSERT(stackA < stackEnd);
               FOG_ASSERT(stackB < stackEnd);
 
-              Accessor::fetchStack(pix0, stackA);
-              sumP[x].sub(sumB[x]);
-              sumB[x].sub(pix0);
+              Accessor::fetchPixelT(pix, stackA);
+              run[x].sub(runB[x]);
+              runB[x].sub(pix);
 
-              Accessor::fetchPixel(pix0, srcBase + x * Accessor::PIXEL_BPP);
-              Accessor::storeStack(stackA, pix0);
-              sumA[x].add(pix0);
-              sumP[x].add(sumA[x]);
+              Accessor::fetchPixelM(pix, srcBase + x * Accessor::PIXEL_BPP);
+              Accessor::storePixelT(stackA, pix);
+              runA[x].add(pix);
+              run[x].add(runA[x]);
 
-              Accessor::fetchStack(pix0, stackB);
-              Accessor::unpack(cmp0, pix0);
-              sumB[x].add(cmp0);
-              sumA[x].sub(cmp0);
+              Accessor::fetchPixelT(pix, stackB);
+              cmp0.set(pix);
+              runB[x].add(cmp0);
+              runA[x].sub(cmp0);
+
+              Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x], sumMul, sumShr);
 
               srcPtr += Accessor::PIXEL_BPP;
               stackA += Accessor::STACK_BPP;
               stackB += Accessor::STACK_BPP;
-
-              Accessor::storeMulShr(dstPtr + x * Accessor::PIXEL_BPP, sumP[x], sumMul, sumShr);
             }
 
             if (stackA == stackEnd)
-              stackA = stackBuffer;
+              stackA = stackBuf;
             if (stackB == stackEnd)
-              stackB = stackBuffer;
+              stackB = stackBuf;
 
             dstPtr += dstStride;
           } while (--i);
@@ -2358,6 +2515,338 @@ _First:
 
       r += xLength;
     } while (r < runWidth);
+  }
+
+  // ==========================================================================
+  // [Blur - Exponential - Horizontal]
+  // ==========================================================================
+
+  template<typename Accessor>
+  static void FOG_FASTCALL doExpH(
+    RasterFilterBlur* blurCtx)
+  {
+    uint8_t* dst = blurCtx->dstData;
+    uint8_t* src = blurCtx->srcData;
+
+    ssize_t dstStride = blurCtx->dstStride;
+    ssize_t srcStride = blurCtx->srcStride;
+
+    uint runHeight = blurCtx->rowSize;
+    uint runSize = blurCtx->runSize;
+
+    int aValue = (int)((1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.hRadius + 1.f))));
+
+    ssize_t* aTableData = blurCtx->aTableData;
+    ssize_t* bTableData = blurCtx->bTableData;
+
+    uint8_t* stackBuf = blurCtx->stack;                               
+
+    uint aBorderSize = blurCtx->aBorderLeadSize;
+    uint bBorderSize = blurCtx->bBorderTailSize;
+
+    uint aTableSize = blurCtx->aTableSize;
+    uint bTableSize = blurCtx->bTableSize;
+
+    uint i, r;
+    for (r = 0; r < runHeight; r++)
+    {
+      uint8_t* dstPtr = dst;
+      uint8_t* srcPtr = src;
+
+#if defined(FOG_DEBUG)
+      // NOTE: Code which uses these variables need to be #ifdefed too,
+      // because assertions can be also enabled in release (not normal,
+      // but possible to catch different types of bugs). So please put
+      // assertions related to bounds checking to #ifdef block.
+      uint8_t* srcEnd = src + srcStride;
+      uint8_t* dstEnd = dst + dstStride;
+#endif // FOG_DEBUG
+
+      uint8_t* stackPtr = stackBuf;
+
+      typename Accessor::Run run;
+      typename Accessor::Pixel pix;
+
+      run.reset();
+
+      // ----------------------------------------------------------------------
+      // [A-Border - Lead]
+      // ----------------------------------------------------------------------
+
+      i = aBorderSize;
+      if (i != 0)
+      {
+        typename Accessor::Run border;
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcFirstOffset);
+
+        border.set(pix);
+        do {
+          Accessor::blurPixel(run, border, aValue);
+        } while (--i);
+      }
+
+      // ----------------------------------------------------------------------
+      // [A-Border - Table]
+      // ----------------------------------------------------------------------
+
+      for (i = 0; i < aTableSize; i++)
+      {
+#if defined(FOG_DEBUG)
+        FOG_ASSERT(srcPtr + aTableData[i] >= src && srcPtr + aTableData[i] < srcEnd);
+#endif // FOG_DEBUG
+
+        Accessor::blurRunM(run, srcPtr + aTableData[i], aValue);
+      }
+
+      // ----------------------------------------------------------------------
+      // [Run-Loop]
+      // ----------------------------------------------------------------------
+
+      FOG_ASSERT(runSize != 0);
+      i = runSize;
+
+      do {
+#if defined(FOG_DEBUG)
+        FOG_ASSERT(srcPtr < srcEnd);
+        FOG_ASSERT(dstPtr < dstEnd);
+#endif // FOG_DEBUG
+
+        Accessor::blurRunM(run, srcPtr, aValue);
+        Accessor::storeRunM(dstPtr, run);
+
+        srcPtr += Accessor::PIXEL_BPP;
+        dstPtr += Accessor::PIXEL_BPP;
+      } while (--i);
+
+      // ----------------------------------------------------------------------
+      // [B-Border - Table]
+      // ----------------------------------------------------------------------
+
+      srcPtr = src;
+      for (i = 0; i < bTableSize; i++)
+      {
+#if defined(FOG_DEBUG)
+        FOG_ASSERT(srcPtr + bTableData[i] >= src && srcPtr + bTableData[i] < srcEnd);
+        FOG_ASSERT(dstPtr < dstEnd);
+#endif // FOG_DEBUG
+
+        Accessor::blurRunM(run, srcPtr + bTableData[i], aValue);
+        Accessor::storeRunT(stackPtr, run);
+
+        stackPtr += Accessor::STACK_BPP;
+      }
+
+      // ----------------------------------------------------------------------
+      // [B-Border - Tail]
+      // ----------------------------------------------------------------------
+
+      i = bBorderSize;
+      if (i != 0)
+      {
+        typename Accessor::Run border;
+
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcLastOffset);
+
+        border.set(pix);
+        do {
+#if defined(FOG_DEBUG)
+          FOG_ASSERT(dstPtr < dstEnd);
+#endif // FOG_DEBUG
+
+          Accessor::blurPixel(run, border, aValue);
+          Accessor::storeRunT(stackPtr, run);
+          stackPtr += Accessor::STACK_BPP;
+        } while (--i);
+      }
+
+      // ----------------------------------------------------------------------
+      // [B-Border - Secondary]
+      // ----------------------------------------------------------------------
+
+      for (i = bTableSize + bBorderSize; i; i--)
+      {
+        stackPtr -= Accessor::STACK_BPP;
+        Accessor::blurRunT(run, stackPtr, aValue);
+      }
+
+      // ----------------------------------------------------------------------
+      // [Run-Loop - Secondary]
+      // ----------------------------------------------------------------------
+
+      FOG_ASSERT(runSize != 0);
+      i = runSize;
+
+      do {
+        dstPtr -= Accessor::PIXEL_BPP;
+
+#if defined(FOG_DEBUG)
+        FOG_ASSERT(srcPtr < srcEnd);
+        FOG_ASSERT(dstPtr < dstEnd);
+#endif // FOG_DEBUG
+
+        Accessor::blurRunM(run, dstPtr, aValue);
+        Accessor::storeRunM(dstPtr, run);
+      } while (--i);
+
+      dst += dstStride;
+      src += srcStride;
+    }
+  }
+
+  // ==========================================================================
+  // [Blur - Exponential - Vertical]
+  // ==========================================================================
+
+  template<typename Accessor>
+  static void FOG_FASTCALL doExpV(
+    RasterFilterBlur* blurCtx)
+  {
+    uint8_t* dst = blurCtx->dstData;
+    uint8_t* src = blurCtx->srcData;
+
+    ssize_t dstStride = blurCtx->dstStride;
+    ssize_t srcStride = blurCtx->srcStride;
+
+    uint runHeight = blurCtx->rowSize;
+    uint runSize = blurCtx->runSize;
+
+    int aValue = (int)((1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.hRadius + 1.f))));
+
+    ssize_t* aTableData = blurCtx->aTableData;
+    ssize_t* bTableData = blurCtx->bTableData;
+
+    uint8_t* stackBuf = blurCtx->stack;                               
+
+    uint aBorderSize = blurCtx->aBorderLeadSize;
+    uint bBorderSize = blurCtx->bBorderTailSize;
+
+    uint aTableSize = blurCtx->aTableSize;
+    uint bTableSize = blurCtx->bTableSize;
+
+    uint i, r;
+    for (r = 0; r < runHeight; r++)
+    {
+      uint8_t* dstPtr = dst;
+      uint8_t* srcPtr = src;
+
+      uint8_t* stackPtr = stackBuf;
+
+      typename Accessor::Run run;
+      typename Accessor::Pixel pix;
+
+      run.reset();
+
+      // ----------------------------------------------------------------------
+      // [A-Border - Lead]
+      // ----------------------------------------------------------------------
+
+      i = aBorderSize;
+      if (i != 0)
+      {
+        typename Accessor::Run border;
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcFirstOffset);
+
+        border.set(pix);
+        do {
+          Accessor::blurPixel(run, border, aValue);
+        } while (--i);
+      }
+
+      // ----------------------------------------------------------------------
+      // [A-Border - Table]
+      // ----------------------------------------------------------------------
+
+      for (i = 0; i < aTableSize; i++)
+      {
+        Accessor::blurRunM(run, srcPtr + aTableData[i], aValue);
+      }
+
+      // ----------------------------------------------------------------------
+      // [Run-Loop]
+      // ----------------------------------------------------------------------
+
+      FOG_ASSERT(runSize != 0);
+      i = runSize;
+
+      do {
+        Accessor::blurRunM(run, srcPtr, aValue);
+        Accessor::storeRunM(dstPtr, run);
+
+        srcPtr += srcStride;
+        dstPtr += dstStride;
+      } while (--i);
+
+      // ----------------------------------------------------------------------
+      // [B-Border - Table]
+      // ----------------------------------------------------------------------
+
+      srcPtr = src;
+      for (i = 0; i < bTableSize; i++)
+      {
+        Accessor::blurRunM(run, srcPtr + bTableData[i], aValue);
+        Accessor::storeRunT(stackPtr, run);
+
+        stackPtr += Accessor::STACK_BPP;
+      }
+
+      // ----------------------------------------------------------------------
+      // [B-Border - Tail]
+      // ----------------------------------------------------------------------
+
+      i = bBorderSize;
+      if (i != 0)
+      {
+        typename Accessor::Run border;
+
+        if (blurCtx->extendType == FE_EXTEND_COLOR)
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+        else
+          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcLastOffset);
+
+        border.set(pix);
+        do {
+          Accessor::blurPixel(run, border, aValue);
+          Accessor::storeRunT(stackPtr, run);
+          stackPtr += Accessor::STACK_BPP;
+        } while (--i);
+      }
+
+      // ----------------------------------------------------------------------
+      // [B-Border - Secondary]
+      // ----------------------------------------------------------------------
+
+      for (i = bTableSize + bBorderSize; i; i--)
+      {
+        stackPtr -= Accessor::STACK_BPP;
+        Accessor::blurRunT(run, stackPtr, aValue);
+      }
+
+      // ----------------------------------------------------------------------
+      // [Run-Loop - Secondary]
+      // ----------------------------------------------------------------------
+
+      FOG_ASSERT(runSize != 0);
+      i = runSize;
+
+      do {
+        dstPtr -= dstStride;
+
+        Accessor::blurRunM(run, dstPtr, aValue);
+        Accessor::storeRunM(dstPtr, run);
+      } while (--i);
+
+      dst += Accessor::PIXEL_BPP;
+      src += Accessor::PIXEL_BPP;
+    }
   }
 };
 

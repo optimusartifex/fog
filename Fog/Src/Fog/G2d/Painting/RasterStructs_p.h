@@ -12,6 +12,7 @@
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImagePalette.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
@@ -178,7 +179,7 @@ union RasterSolid
   FOG_INLINE void reset()
   {
 #if FOG_ARCH_BITS >= 64
-    prgb64.u64 = 0;
+    prgb64.u64 = FOG_UINT64_C(0);
 #else
     prgb64.u32[0] = 0;
     prgb64.u32[1] = 0;
@@ -729,9 +730,96 @@ struct FOG_NO_EXPORT RasterFiller
 };
 
 // ============================================================================
+// [Fog::RasterFilterImage]
+// ============================================================================
+
+//! @internal
+//! 
+//! @brief Image bits used by raster-filter engine.
+struct FOG_NO_EXPORT RasterFilterImage
+{
+  SizeI size;
+  ssize_t stride;
+  uint8_t* data;
+};
+
+// ============================================================================
+// [Fog::RasterFilterBlur]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterFilterBlur
+{
+  //! @brief Filter context (immutable at this place).
+  const RasterFilter* filterCtx;
+
+  //! @brief Destination data.
+  uint8_t* dstData;
+  //! @brief Destination stride.
+  ssize_t dstStride;
+
+  //! @brief Source data.
+  uint8_t* srcData;
+  //! @brief Source stride.
+  ssize_t srcStride;
+
+  //! @brief A table data.
+  ssize_t* aTableData;
+  //! @brief B table data.
+  ssize_t* bTableData;
+
+  //! @brief Offset to the first src pixel (for FE_EXTEND_PAD).
+  ssize_t srcFirstOffset;
+  //! @brief Last offset to the last src pixel (fog FE_EXTEND_PAD).
+  ssize_t srcLastOffset;
+
+  //! @brief Run offset.
+  ssize_t runOffset;
+
+  //! @brief Extend color.
+  RasterSolid extendColor;
+  //! @brief Extend type.
+  uint32_t extendType;
+
+  //! @brief Size of A border (lead).
+  uint aBorderLeadSize;
+  //! @brief Size of A border (tail).
+  uint aBorderTailSize;
+  //! @brief Size of B border (tail, there is no lead b-border).
+  uint bBorderTailSize;
+
+  //! @brief Size of A table.
+  uint aTableSize;
+  //! @brief Size of B table.
+  uint bTableSize;
+
+  //! @brief How many rows or columns to process.
+  uint rowSize;
+  //! @brief Run size.
+  uint runSize;
+
+  //! @brief Kernel radius
+  uint kernelRadius;
+  //! @brief Kernel size (radius * 2 + 1).
+  uint kernelSize;
+
+  //! @brief Stack (must contain space for the whole scanline).
+  uint8_t* stack;
+};
+
+// ============================================================================
 // [Fog::RasterFilter]
 // ============================================================================
 
+//! @internal
+//!
+//! @brief Raster filter context.
+//!
+//! Raster filter context is created from @ref ImageFilter (or directly through
+//! instance derived from @ref FeBase) and contains all members needed to
+//! filter image in a given pixel format. Results of any calculations related
+//! to target pixel format are here, because @ref ImageFilter or @ref FeBase
+//! classes are immutable when used as parameter to @ref Painter or @ref
+//! PaintEngine
 struct FOG_NO_EXPORT RasterFilter
 {
   // --------------------------------------------------------------------------
@@ -764,14 +852,16 @@ struct FOG_NO_EXPORT RasterFilter
 
   struct FOG_NO_EXPORT _Blur
   {
-    RasterSolid extendColor;
+    uint32_t blurType;
+
     uint32_t extendType;
+    RasterSolid extendColor;
 
-    int hRadius;
-    int vRadius;
+    float hRadius;
+    float vRadius;
 
-    RasterFilterDoConvolveFunc hConvolve;
-    RasterFilterDoConvolveFunc vConvolve;
+    RasterFilterDoBlurFunc hConvolve;
+    RasterFilterDoBlurFunc vConvolve;
   };
 
   // --------------------------------------------------------------------------
@@ -818,7 +908,8 @@ struct FOG_NO_EXPORT RasterFilter
   //! function set to @c NULL.
   RasterFilterDoLineFunc doLine;
 
-  //! @brief Memory buffer instance which can be used as temporary storage.
+  //! @brief Memory buffer instance which can be used as temporary storage for
+  //! temporary variables / buffers, but not for temporary (second) image.
   MemBuffer* memBuffer;
 
   //! @brief Destination pixel format.
@@ -833,76 +924,11 @@ struct FOG_NO_EXPORT RasterFilter
     _ComponentTransfer componentTransfer;
 
     _Blur blur;
+
     _ConvolveMatrix convolveMatrix;
     _ConvolveSeparable convolveSeparable;
     _Morphology morphology;
   };
-};
-
-// ============================================================================
-// [Fog::RasterConvolveData]
-// ============================================================================
-
-struct FOG_NO_EXPORT RasterConvolve
-{
-  //! @brief Filter context (immutable at this place).
-  RasterFilter* filterCtx;
-
-  //! @brief Destination data.
-  uint8_t* dstData;
-  //! @brief Destination stride.
-  ssize_t dstStride;
-
-  //! @brief Source data.
-  uint8_t* srcData;
-  //! @brief Source stride.
-  ssize_t srcStride;
-
-  //! @brief A table data.
-  ssize_t* aTableData;
-  //! @brief B table data.
-  ssize_t* bTableData;
-
-  //! @brief Offset to the first src pixel (for FE_EXTEND_PAD).
-  ssize_t srcFirstOffset;
-  //! @brief Last offset to the last src pixel (fog FE_EXTEND_PAD).
-  ssize_t srcLastOffset;
-
-  //! @brief Run offset.
-  ssize_t runOffset;
-
-  // This mess is here to align extendPixel to 64-bits, because it can be
-  // accessed by 8-byte load instruction under 64-bit mode.
-
-  //! @brief Extend color.
-  RasterSolid extendColor;
-  //! @brief Extend type.
-  uint32_t extendType;
-
-  //! @brief Size of A border (lead).
-  uint aBorderLeadSize;
-  //! @brief Size of A border (tail).
-  uint aBorderTailSize;
-  //! @brief Size of B border (tail, there is no lead b-border).
-  uint bBorderTailSize;
-
-  //! @brief Size of A table.
-  uint aTableSize;
-  //! @brief Size of B table.
-  uint bTableSize;
-
-  //! @brief How many rows or columns to process.
-  uint rowSize;
-  //! @brief Run size.
-  uint runSize;
-
-  //! @brief Kernel radius
-  uint kernelRadius;
-  //! @brief Kernel size (radius * 2 + 1).
-  uint kernelSize;
-
-  //! @brief Stack.
-  uint8_t* stack;
 };
 
 //! @}

@@ -390,6 +390,19 @@ static FOG_INLINE uint32_t uroundToWord65536(float x) { return uround(x * 65536.
 static FOG_INLINE uint32_t uroundToWord65536(double x) { return uround(x * 65536.0); }
 
 // ============================================================================
+// [Fog::Math - Shift]
+// ============================================================================
+
+template<typename T, int Y>
+static FOG_INLINE T shift(const T& x)
+{
+  if (Y < 0)
+    return x << (-Y);
+  else
+    return x >> Y;
+}
+
+// ============================================================================
 // [Fog::Math - FixedFromFloat]
 // ============================================================================
 

@@ -5138,6 +5138,9 @@ static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxI_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxF_st(
@@ -5176,6 +5179,9 @@ static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxF_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxD_st(
@@ -5215,6 +5221,9 @@ static err_t FOG_FASTCALL RasterSerializer_fillNormalizedBoxD_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 // ============================================================================
@@ -5255,6 +5264,9 @@ static err_t FOG_FASTCALL RasterSerializer_fillNormalizedPathF_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 static err_t FOG_FASTCALL RasterSerializer_fillNormalizedPathD_st(
@@ -5291,6 +5303,9 @@ static err_t FOG_FASTCALL RasterSerializer_fillNormalizedPathD_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 // ============================================================================
@@ -5513,6 +5528,9 @@ _BlitImageA8_Alpha:
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 // ============================================================================
@@ -5660,13 +5678,21 @@ static err_t FOG_FASTCALL RasterSerializer_filterNormalizedBoxI_st(
     engine->ctx.layer.primaryFormat,
     engine->ctx.layer.primaryFormat));
 
+  RasterFilterImage dImage;
+  dImage.size = engine->ctx.layer.size;
+  dImage.stride = engine->ctx.layer.stride;
+  dImage.data = engine->ctx.layer.pixels;
+
+  RasterFilterImage sImage;
+  sImage.size = engine->ctx.layer.size;
+  sImage.stride = engine->ctx.layer.stride;
+  sImage.data = engine->ctx.layer.pixels;
+
   PointI dPos(box->x0, box->y0);
   RectI sRect(box->x0, box->y0, box->x1 - box->x0, box->y1 - box->y0);
 
-  err_t err = ctx.doRect(&ctx,
-    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &dPos,
-    engine->ctx.layer.pixels, engine->ctx.layer.stride, &engine->ctx.layer.size, &sRect);
-
+  MemBuffer intermediateBuffer;
+  err_t err = ctx.doRect(&ctx, &dImage, &dPos, &sImage, &sRect, &intermediateBuffer);
   ctx.destroy(&ctx);
   return err;
 }
@@ -5886,6 +5912,9 @@ static err_t FOG_FASTCALL RasterSerializer_clipNormalizedBoxF_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 static err_t FOG_FASTCALL RasterSerializer_clipNormalizedBoxD_st(
@@ -5928,6 +5957,9 @@ static err_t FOG_FASTCALL RasterSerializer_clipNormalizedBoxD_st(
     default:
       FOG_ASSERT_NOT_REACHED();
   }
+
+  // Dead code to avoid warning.
+  return ERR_RT_INVALID_STATE;
 }
 
 // ============================================================================

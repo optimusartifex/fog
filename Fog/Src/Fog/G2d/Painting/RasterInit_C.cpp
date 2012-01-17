@@ -750,25 +750,35 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 
   filter.create[FE_TYPE_BLUR] = RasterOps_C::FBlur::create;
 
-  filter.blur.box.convolve_h[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_PRGB32>;
-  filter.blur.box.convolve_h[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_XRGB32>;
-  filter.blur.box.convolve_h[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.box.convolve_h[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_box_h<RasterOps_C::FBlurAccessor_A8    >;
+  filter.blur.box.h[IMAGE_FORMAT_PRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxH<RasterOps_C::FBlurBoxAccessor_PRGB32>;
+  filter.blur.box.h[IMAGE_FORMAT_XRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxH<RasterOps_C::FBlurBoxAccessor_XRGB32>;
+  filter.blur.box.h[IMAGE_FORMAT_RGB24 ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxH<RasterOps_C::FBlurBoxAccessor_RGB24 >;
+  filter.blur.box.h[IMAGE_FORMAT_A8    ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxH<RasterOps_C::FBlurBoxAccessor_A8    >;
 
-  filter.blur.box.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_PRGB32>;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_XRGB32>;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.box.convolve_v[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_box_v<RasterOps_C::FBlurAccessor_A8    >;
+  filter.blur.box.v[IMAGE_FORMAT_PRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxV<RasterOps_C::FBlurBoxAccessor_PRGB32>;
+  filter.blur.box.v[IMAGE_FORMAT_XRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxV<RasterOps_C::FBlurBoxAccessor_XRGB32>;
+  filter.blur.box.v[IMAGE_FORMAT_RGB24 ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxV<RasterOps_C::FBlurBoxAccessor_RGB24 >;
+  filter.blur.box.v[IMAGE_FORMAT_A8    ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doBoxV<RasterOps_C::FBlurBoxAccessor_A8    >;
 
-  filter.blur.exp.convolve_h[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_PRGB32>;
-  filter.blur.exp.convolve_h[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_XRGB32>;
-  filter.blur.exp.convolve_h[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.exp.convolve_h[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_exp_h<RasterOps_C::FBlurAccessor_A8    >;
+  filter.blur.stack.h[IMAGE_FORMAT_PRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackH<RasterOps_C::FBlurStackAccessor_PRGB32>;
+  filter.blur.stack.h[IMAGE_FORMAT_XRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackH<RasterOps_C::FBlurStackAccessor_XRGB32>;
+  filter.blur.stack.h[IMAGE_FORMAT_RGB24 ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackH<RasterOps_C::FBlurStackAccessor_RGB24 >;
+  filter.blur.stack.h[IMAGE_FORMAT_A8    ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackH<RasterOps_C::FBlurStackAccessor_A8    >;
 
-  filter.blur.exp.convolve_v[IMAGE_FORMAT_PRGB32] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_PRGB32>;
-  filter.blur.exp.convolve_v[IMAGE_FORMAT_XRGB32] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_XRGB32>;
-  filter.blur.exp.convolve_v[IMAGE_FORMAT_RGB24 ] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_RGB24 >;
-  filter.blur.exp.convolve_v[IMAGE_FORMAT_A8    ] = RasterOps_C::FBlur::do_rect_exp_v<RasterOps_C::FBlurAccessor_A8    >;
+  filter.blur.stack.v[IMAGE_FORMAT_PRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackV<RasterOps_C::FBlurStackAccessor_PRGB32>;
+  filter.blur.stack.v[IMAGE_FORMAT_XRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackV<RasterOps_C::FBlurStackAccessor_XRGB32>;
+  filter.blur.stack.v[IMAGE_FORMAT_RGB24 ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackV<RasterOps_C::FBlurStackAccessor_RGB24 >;
+  filter.blur.stack.v[IMAGE_FORMAT_A8    ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doStackV<RasterOps_C::FBlurStackAccessor_A8    >;
+
+  filter.blur.exponential.h[IMAGE_FORMAT_PRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpH<RasterOps_C::FBlurExpAccessor_PRGB32>;
+  filter.blur.exponential.h[IMAGE_FORMAT_XRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpH<RasterOps_C::FBlurExpAccessor_XRGB32>;
+  filter.blur.exponential.h[IMAGE_FORMAT_RGB24 ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpH<RasterOps_C::FBlurExpAccessor_RGB24 >;
+  filter.blur.exponential.h[IMAGE_FORMAT_A8    ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpH<RasterOps_C::FBlurExpAccessor_A8    >;
+
+  filter.blur.exponential.v[IMAGE_FORMAT_PRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpV<RasterOps_C::FBlurExpAccessor_PRGB32>;
+  filter.blur.exponential.v[IMAGE_FORMAT_XRGB32] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpV<RasterOps_C::FBlurExpAccessor_XRGB32>;
+  filter.blur.exponential.v[IMAGE_FORMAT_RGB24 ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpV<RasterOps_C::FBlurExpAccessor_RGB24 >;
+  filter.blur.exponential.v[IMAGE_FORMAT_A8    ] = (RasterFilterDoBlurFunc)RasterOps_C::FBlur::doExpV<RasterOps_C::FBlurExpAccessor_A8    >;
 }
 
 } // Fog namespace

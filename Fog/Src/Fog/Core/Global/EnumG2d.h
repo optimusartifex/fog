@@ -682,7 +682,7 @@ enum FE_BLUR_LIMIT
 //! @brief Type of blur, see @c ImageFxFilter.
 enum FE_BLUR_TYPE
 {
-  //! @brief The box blur effect (default).
+  //! @brief Box blur effect (default).
   //!
   //! The box-blur effect is low-level quality blur, but very efficient. Radius
   //! has generally no effect on performance (or only little effect to process
@@ -699,13 +699,13 @@ enum FE_BLUR_TYPE
   //! @endverbatim
   FE_BLUR_TYPE_BOX = 0,
 
-  //! @brief The exponential blur effect.
+  //! @brief Stack blur effect.
   //!
-  //! The exponential blur effect`s quality is between box blur and gaussian
-  //! blur. The result and the performance is optimal for the most operations,
+  //! The stack blur effect`s quality is between box blur and gaussian blur.
+  //! The result and the performance is optimal for the most operations,
   //! because like box blur, the radius has no effect on the blur performance.
   //!
-  //! The kernel of box blur is (TODO), for example the 5x5 kernel would be:
+  //! The kernel of stack box looks like:
   //!
   //! @verbatim
   //!     | 1 2 3 2 1 |   | 1 |
@@ -715,27 +715,29 @@ enum FE_BLUR_TYPE
   //!     | 1 2 3 2 1 |   | 1 |
   //! @endverbatim
   //!
-  //! @note The exponential blur is based on blur effect originally called
-  //! StackBlur written by Mario Klingemann, see:
+  //! @note The stack blur was invented by Mario Klingemann, see:
   //!
   //!   - http://incubator.quasimondo.com/processing/fast_blur_deluxe.php
   //!   - http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
   //!
   //! Please fix the documentation in case that the links are invalid.
-  FE_BLUR_TYPE_EXPONENTIAL = 1,
+  FE_BLUR_TYPE_STACK = 1,
 
-  //! @brief The gaussian-blur type.
+  //! @brief Exponential blur effect.
+  FE_BLUR_TYPE_EXPONENTIAL = 2,
+
+  //! @brief Gaussian blur effect.
   //!
   //! The gaussian-blur effect is high-quality blur, but computation very 
   //! intensive, because the blur kernel can't be optimized using techniques
   //! available for box blur and exponential blur.
-  FE_BLUR_TYPE_GAUSSIAN = 2,
+  FE_BLUR_TYPE_GAUSSIAN = 3,
 
   //! @brief The default blur type.
   FE_BLUR_TYPE_DEFAULT = FE_BLUR_TYPE_BOX,
 
   //! @brief Count of blur effects.
-  FE_BLUR_TYPE_COUNT = 3
+  FE_BLUR_TYPE_COUNT = 4
 };
 
 // ============================================================================

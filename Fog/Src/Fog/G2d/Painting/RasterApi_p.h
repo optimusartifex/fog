@@ -59,7 +59,8 @@ struct RasterPattern;
 struct RasterPatternFetcher;
 
 struct RasterFilter;
-struct RasterConvolve;
+struct RasterFilterBlur;
+struct RasterFilterImage;
 
 // ============================================================================
 // [Fog::Raster - TypeDefs - RasterClosure]
@@ -227,11 +228,12 @@ typedef void (FOG_FASTCALL *RasterFilterDoLineFunc)(
 
 typedef err_t (FOG_FASTCALL *RasterFilterDoRectFunc)(
   RasterFilter* ctx,
-  uint8_t*       dst, ssize_t dstStride, const SizeI* dstSize, const PointI* dstPos,
-  const uint8_t* src, ssize_t srcStride, const SizeI* srcSize, const RectI* srcRect);
+  RasterFilterImage* dst, const PointI* dstPos,
+  RasterFilterImage* src, const RectI* srcRect,
+  MemBuffer* intermediateBuffer);
 
-typedef void (FOG_FASTCALL *RasterFilterDoConvolveFunc)(
-  RasterConvolve* ctx);
+typedef void (FOG_FASTCALL *RasterFilterDoBlurFunc)(
+  RasterFilterBlur* ctx);
 
 // ============================================================================
 // [Fog::RasterConvertFuncs]
@@ -392,15 +394,21 @@ struct FOG_NO_EXPORT RasterFilterFuncs
   {
     struct _Box
     {
-      RasterFilterDoConvolveFunc convolve_h[IMAGE_FORMAT_COUNT];
-      RasterFilterDoConvolveFunc convolve_v[IMAGE_FORMAT_COUNT];
+      RasterFilterDoBlurFunc h[IMAGE_FORMAT_COUNT];
+      RasterFilterDoBlurFunc v[IMAGE_FORMAT_COUNT];
     } box;
 
-    struct _Exp
+    struct _Stack
     {
-      RasterFilterDoConvolveFunc convolve_h[IMAGE_FORMAT_COUNT];
-      RasterFilterDoConvolveFunc convolve_v[IMAGE_FORMAT_COUNT];
-    } exp;
+      RasterFilterDoBlurFunc h[IMAGE_FORMAT_COUNT];
+      RasterFilterDoBlurFunc v[IMAGE_FORMAT_COUNT];
+    } stack;
+
+    struct _Exponential
+    {
+      RasterFilterDoBlurFunc h[IMAGE_FORMAT_COUNT];
+      RasterFilterDoBlurFunc v[IMAGE_FORMAT_COUNT];
+    } exponential;
   } blur;
 };
 

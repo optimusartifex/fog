@@ -119,7 +119,7 @@ struct FOG_NO_EXPORT ImageFilter
   FOG_INLINE ImageFilter(ImageFilter&& other) : _d(other._d) { other._d = NULL; }
 #endif // FOG_CC_HAS_RVALUE
 
-  FOG_INLINE ImageFilter(const FeBase& fe)
+  explicit FOG_INLINE ImageFilter(const FeBase& fe)
   {
     fog_api.imagefilter_ctorData(this, &fe);
   }

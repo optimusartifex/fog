@@ -2630,7 +2630,6 @@ _First:
       {
 #if defined(FOG_DEBUG)
         FOG_ASSERT(srcPtr + bTableData[i] >= src && srcPtr + bTableData[i] < srcEnd);
-        FOG_ASSERT(dstPtr < dstEnd);
 #endif // FOG_DEBUG
 
         Accessor::blurRunM(run, srcPtr + bTableData[i], aValue);
@@ -2655,10 +2654,6 @@ _First:
 
         border.set(pix);
         do {
-#if defined(FOG_DEBUG)
-          FOG_ASSERT(dstPtr < dstEnd);
-#endif // FOG_DEBUG
-
           Accessor::blurPixel(run, border, aValue);
           Accessor::storeRunT(stackPtr, run);
           stackPtr += Accessor::STACK_BPP;

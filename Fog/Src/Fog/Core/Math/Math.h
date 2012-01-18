@@ -393,13 +393,17 @@ static FOG_INLINE uint32_t uroundToWord65536(double x) { return uround(x * 65536
 // [Fog::Math - Shift]
 // ============================================================================
 
+template<typename T, int Y, int Direction>
+struct _ShiftHelper { static FOG_INLINE T shift(const T& x) { return x; } };
 template<typename T, int Y>
-static FOG_INLINE T shift(const T& x)
+struct _ShiftHelper<T, Y, 1> { static FOG_INLINE T shift(const T& x) { return x >> Y; } };
+template<typename T, int Y>
+struct _ShiftHelper<T, Y,-1> { static FOG_INLINE T shift(const T& x) { return x << Y; } };
+
+template<typename T, int Y>
+FOG_STATIC_INLINE_T T shift(const T& x)
 {
-  if (Y < 0)
-    return x << (-Y);
-  else
-    return x >> Y;
+  return _ShiftHelper<T, (Y > 0) ? Y : -Y, (Y > 0) ? 1 : (Y < 0) ? -1 : 0>::shift(x);
 }
 
 // ============================================================================

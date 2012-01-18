@@ -2534,7 +2534,7 @@ _First:
     uint runHeight = blurCtx->rowSize;
     uint runSize = blurCtx->runSize;
 
-    int aValue = (int)((1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.hRadius + 1.f))));
+    int aValue = (int)(float(1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.hRadius + 1.0f))));
 
     ssize_t* aTableData = blurCtx->aTableData;
     ssize_t* bTableData = blurCtx->bTableData;
@@ -2716,7 +2716,7 @@ _First:
     uint runHeight = blurCtx->rowSize;
     uint runSize = blurCtx->runSize;
 
-    int aValue = (int)((1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.hRadius + 1.f))));
+    int aValue = (int)(float(1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.vRadius + 1.0f))));
 
     ssize_t* aTableData = blurCtx->aTableData;
     ssize_t* bTableData = blurCtx->bTableData;

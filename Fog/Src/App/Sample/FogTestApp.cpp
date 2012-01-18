@@ -64,9 +64,11 @@ void AppWindow::onPaint(Painter* _p)
   p.setSource(Argb32(0xFFFFFFFF));
   p.fillAll();
 
+  TimeTicks startTime = TimeTicks::now();
+
   p.setSource(Argb32(0xFF000000));
   //p.fillRect(100, 100, 100, 100);
-  p.fillCircle(CircleF(160.0f, 120.0f, 85.0f));
+  p.fillCircle(CircleF(320.0f, 240.0f, 85.0f));
 
   PathF path;
   Font font;
@@ -106,6 +108,12 @@ void AppWindow::onPaint(Painter* _p)
   // p.scale(PointF(0.35f, 0.35f));
   // p.translate(PointF(140.0f, 0.0f));
   // svg.render(&p);
+
+  TimeDelta t = TimeTicks::now() - startTime;
+
+  StringW text;
+  text.format("Render: %g [ms]", t.getMillisecondsD());
+  setWindowTitle(text);
 }
 
 // ============================================================================
@@ -118,7 +126,7 @@ FOG_UI_MAIN()
   AppWindow wnd(app.getUIEngine());
 
   wnd.setWindowTitle(StringW::fromAscii8("FogTestApp"));
-  wnd.setWindowSize(SizeI(340, 240));
+  wnd.setWindowSize(SizeI(640, 480));
   //wnd.setWindowOpacity(0.5f);
   wnd.show();
 

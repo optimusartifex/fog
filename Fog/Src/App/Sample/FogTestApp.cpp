@@ -83,7 +83,7 @@ void AppWindow::onPaint(Painter* _p)
   //p.fillPath(path);
 
   FeBlur feBlur(FE_BLUR_TYPE_EXPONENTIAL, 50.0f);
-  feBlur.setExtendType(FE_EXTEND_REPEAT);
+  feBlur.setExtendType(FE_EXTEND_COLOR);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
 
   path.clear();

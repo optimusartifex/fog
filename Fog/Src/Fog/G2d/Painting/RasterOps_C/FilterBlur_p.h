@@ -1181,6 +1181,7 @@ struct FOG_NO_EXPORT FBlur
     {
       blurCtx->aBorderLeadSize = tBegin - t;
       blurCtx->aTableSize -= blurCtx->aBorderLeadSize;
+
       t = tBegin;
     }
 
@@ -1221,6 +1222,8 @@ struct FOG_NO_EXPORT FBlur
     {
       blurCtx->aBorderLeadSize = tBegin - t;
       blurCtx->aTableSize -= blurCtx->aBorderLeadSize;
+
+      t = tBegin;
     }
 
     if (tRight > tEnd)

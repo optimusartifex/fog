@@ -237,31 +237,7 @@ static err_t FOG_CDECL MyPaintEngine_drawPolylineI(Painter* self, const PointI* 
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_drawPolylineF(Painter* self, const PointF* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_drawPolylineD(Painter* self, const PointD* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
 static err_t FOG_CDECL MyPaintEngine_drawPolygonI(Painter* self, const PointI* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_drawPolygonF(Painter* self, const PointF* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_drawPolygonD(Painter* self, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -274,18 +250,6 @@ static err_t FOG_CDECL MyPaintEngine_drawShapeF(Painter* self, uint32_t shapeTyp
 }
 
 static err_t FOG_CDECL MyPaintEngine_drawShapeD(Painter* self, uint32_t shapeType, const void* shapeData)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_drawPathF(Painter* self, const PathF* p)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_drawPathD(Painter* self, const PathD* p)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -325,31 +289,7 @@ static err_t FOG_CDECL MyPaintEngine_fillRectsI(Painter* self, const RectI* r, s
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillRectsF(Painter* self, const RectF* r, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_fillRectsD(Painter* self, const RectD* r, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
 static err_t FOG_CDECL MyPaintEngine_fillPolygonI(Painter* self, const PointI* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_fillPolygonF(Painter* self, const PointF* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_fillPolygonD(Painter* self, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -362,18 +302,6 @@ static err_t FOG_CDECL MyPaintEngine_fillShapeF(Painter* self, uint32_t shapeTyp
 }
 
 static err_t FOG_CDECL MyPaintEngine_fillShapeD(Painter* self, uint32_t shapeType, const void* shapeData)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_fillPathF(Painter* self, const PathF* p)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_fillPathD(Painter* self, const PathD* p)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -561,13 +489,13 @@ static err_t FOG_CDECL MyPaintEngine_filterRectD(Painter* self, const FeBase* fe
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_filterPathF(Painter* self, const FeBase* fe, const PathF* rect)
+static err_t FOG_CDECL MyPaintEngine_filterShapeF(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_filterPathD(Painter* self, const FeBase* fe, const PathD* rect)
+static err_t FOG_CDECL MyPaintEngine_filterShapeD(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -601,31 +529,7 @@ static err_t FOG_CDECL MyPaintEngine_clipRectsI(Painter* self, uint32_t clipOp, 
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipRectsF(Painter* self, uint32_t clipOp, const RectF* r, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_clipRectsD(Painter* self, uint32_t clipOp, const RectD* r, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
 static err_t FOG_CDECL MyPaintEngine_clipPolygonI(Painter* self, uint32_t clipOp, const PointI* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_clipPolygonF(Painter* self, uint32_t clipOp, const PointF* p, size_t count)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_clipPolygonD(Painter* self, uint32_t clipOp, const PointD* p, size_t count)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -638,18 +542,6 @@ static err_t FOG_CDECL MyPaintEngine_clipShapeF(Painter* self, uint32_t clipOp, 
 }
 
 static err_t FOG_CDECL MyPaintEngine_clipShapeD(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_clipPathF(Painter* self, uint32_t clipOp, const PathF* p)
-{
-  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL MyPaintEngine_clipPathD(Painter* self, uint32_t clipOp, const PathD* p)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -854,18 +746,10 @@ static void MyPaintEngine_init()
   v->drawRectD = MyPaintEngine_drawRectD;
 
   v->drawPolylineI = MyPaintEngine_drawPolylineI;
-  v->drawPolylineF = MyPaintEngine_drawPolylineF;
-  v->drawPolylineD = MyPaintEngine_drawPolylineD;
-
   v->drawPolygonI = MyPaintEngine_drawPolygonI;
-  v->drawPolygonF = MyPaintEngine_drawPolygonF;
-  v->drawPolygonD = MyPaintEngine_drawPolygonD;
 
   v->drawShapeF = MyPaintEngine_drawShapeF;
   v->drawShapeD = MyPaintEngine_drawShapeD;
-
-  v->drawPathF = MyPaintEngine_drawPathF;
-  v->drawPathD = MyPaintEngine_drawPathD;
 
   // --------------------------------------------------------------------------
   // [Fill]
@@ -878,18 +762,10 @@ static void MyPaintEngine_init()
   v->fillRectD = MyPaintEngine_fillRectD;
 
   v->fillRectsI = MyPaintEngine_fillRectsI;
-  v->fillRectsF = MyPaintEngine_fillRectsF;
-  v->fillRectsD = MyPaintEngine_fillRectsD;
-
   v->fillPolygonI = MyPaintEngine_fillPolygonI;
-  v->fillPolygonF = MyPaintEngine_fillPolygonF;
-  v->fillPolygonD = MyPaintEngine_fillPolygonD;
 
   v->fillShapeF = MyPaintEngine_fillShapeF;
   v->fillShapeD = MyPaintEngine_fillShapeD;
-
-  v->fillPathF = MyPaintEngine_fillPathF;
-  v->fillPathD = MyPaintEngine_fillPathD;
 
   v->fillTextAtI = MyPaintEngine_fillTextAtI;
   v->fillTextAtF = MyPaintEngine_fillTextAtF;
@@ -938,8 +814,8 @@ static void MyPaintEngine_init()
   v->filterRectF = MyPaintEngine_filterRectF;
   v->filterRectD = MyPaintEngine_filterRectD;
 
-  v->filterPathF = MyPaintEngine_filterPathF;
-  v->filterPathD = MyPaintEngine_filterPathD;
+  v->filterShapeF = MyPaintEngine_filterShapeF;
+  v->filterShapeD = MyPaintEngine_filterShapeD;
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -950,18 +826,10 @@ static void MyPaintEngine_init()
   v->clipRectD = MyPaintEngine_clipRectD;
 
   v->clipRectsI = MyPaintEngine_clipRectsI;
-  v->clipRectsF = MyPaintEngine_clipRectsF;
-  v->clipRectsD = MyPaintEngine_clipRectsD;
-
   v->clipPolygonI = MyPaintEngine_clipPolygonI;
-  v->clipPolygonF = MyPaintEngine_clipPolygonF;
-  v->clipPolygonD = MyPaintEngine_clipPolygonD;
 
   v->clipShapeF = MyPaintEngine_clipShapeF;
   v->clipShapeD = MyPaintEngine_clipShapeD;
-
-  v->clipPathF = MyPaintEngine_clipPathF;
-  v->clipPathD = MyPaintEngine_clipPathD;
 
   v->clipTextAtI = MyPaintEngine_clipTextAtI;
   v->clipTextAtF = MyPaintEngine_clipTextAtF;
@@ -980,7 +848,6 @@ static void MyPaintEngine_init()
   v->clipMaskInD = MyPaintEngine_clipMaskInD;
 
   v->clipRegion = MyPaintEngine_clipRegion;
-
   v->resetClip = MyPaintEngine_resetClip;
 
   // --------------------------------------------------------------------------
@@ -1269,6 +1136,11 @@ static err_t FOG_CDECL NullPaintEngine_filterAny(Painter* self, const FeBase* fe
   return ERR_RT_INVALID_STATE;
 }
 
+static err_t FOG_CDECL NullPaintEngine_filterShape(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
 // ============================================================================
 // [Fog::NullPaintEngine - Clip]
 // ============================================================================
@@ -1278,12 +1150,12 @@ static err_t FOG_CDECL NullPaintEngine_clipRect(Painter* self, uint32_t clipOp, 
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_clipRects(Painter* self, uint32_t clipOp, const Any* r, size_t count)
+static err_t FOG_CDECL NullPaintEngine_clipRectsI(Painter* self, uint32_t clipOp, const RectI* r, size_t count)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_clipPoly(Painter* self, uint32_t clipOp, const Any* p, size_t count)
+static err_t FOG_CDECL NullPaintEngine_clipPolyI(Painter* self, uint32_t clipOp, const PointI* p, size_t count)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1437,18 +1309,10 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v->drawRectD = (PaintEngineVTable::PaintRectD)NullPaintEngine_doRect;
 
   v->drawPolylineI = (PaintEngineVTable::PaintPolylineI)NullPaintEngine_doPoly;
-  v->drawPolylineF = (PaintEngineVTable::PaintPolylineF)NullPaintEngine_doPoly;
-  v->drawPolylineD = (PaintEngineVTable::PaintPolylineD)NullPaintEngine_doPoly;
-
   v->drawPolygonI = (PaintEngineVTable::PaintPolygonI)NullPaintEngine_doPoly;
-  v->drawPolygonF = (PaintEngineVTable::PaintPolygonF)NullPaintEngine_doPoly;
-  v->drawPolygonD = (PaintEngineVTable::PaintPolygonD)NullPaintEngine_doPoly;
 
   v->drawShapeF = (PaintEngineVTable::PaintShapeF)NullPaintEngine_doShape;
   v->drawShapeD = (PaintEngineVTable::PaintShapeD)NullPaintEngine_doShape;
-
-  v->drawPathF = (PaintEngineVTable::PaintPathF)NullPaintEngine_doPath;
-  v->drawPathD = (PaintEngineVTable::PaintPathD)NullPaintEngine_doPath;
 
   // --------------------------------------------------------------------------
   // [Fill]
@@ -1461,18 +1325,10 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v->fillRectD = (PaintEngineVTable::PaintRectD)NullPaintEngine_doRect;
 
   v->fillRectsI = (PaintEngineVTable::PaintRectsI)NullPaintEngine_doRects;
-  v->fillRectsF = (PaintEngineVTable::PaintRectsF)NullPaintEngine_doRects;
-  v->fillRectsD = (PaintEngineVTable::PaintRectsD)NullPaintEngine_doRects;
-
   v->fillPolygonI = (PaintEngineVTable::PaintPolygonI)NullPaintEngine_doPoly;
-  v->fillPolygonF = (PaintEngineVTable::PaintPolygonF)NullPaintEngine_doPoly;
-  v->fillPolygonD = (PaintEngineVTable::PaintPolygonD)NullPaintEngine_doPoly;
 
   v->fillShapeF = (PaintEngineVTable::PaintShapeF)NullPaintEngine_doShape;
   v->fillShapeD = (PaintEngineVTable::PaintShapeD)NullPaintEngine_doShape;
-
-  v->fillPathF = (PaintEngineVTable::PaintPathF)NullPaintEngine_doPath;
-  v->fillPathD = (PaintEngineVTable::PaintPathD)NullPaintEngine_doPath;
 
   v->fillTextAtI = (PaintEngineVTable::PaintTextAtI)NullPaintEngine_doText;
   v->fillTextAtF = (PaintEngineVTable::PaintTextAtF)NullPaintEngine_doText;
@@ -1522,8 +1378,8 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v->filterRectF = (PaintEngineVTable::FilterRectF)NullPaintEngine_filterAny;
   v->filterRectD = (PaintEngineVTable::FilterRectD)NullPaintEngine_filterAny;
 
-  v->filterPathF = (PaintEngineVTable::FilterPathF)NullPaintEngine_filterAny;
-  v->filterPathD = (PaintEngineVTable::FilterPathD)NullPaintEngine_filterAny;
+  v->filterShapeF = (PaintEngineVTable::FilterShapeF)NullPaintEngine_filterShape;
+  v->filterShapeD = (PaintEngineVTable::FilterShapeD)NullPaintEngine_filterShape;
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -1533,19 +1389,11 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v->clipRectF = (PaintEngineVTable::ClipRectF)NullPaintEngine_clipRect;
   v->clipRectD = (PaintEngineVTable::ClipRectD)NullPaintEngine_clipRect;
 
-  v->clipRectsI = (PaintEngineVTable::ClipRectsI)NullPaintEngine_clipRects;
-  v->clipRectsF = (PaintEngineVTable::ClipRectsF)NullPaintEngine_clipRects;
-  v->clipRectsD = (PaintEngineVTable::ClipRectsD)NullPaintEngine_clipRects;
-
-  v->clipPolygonI = (PaintEngineVTable::ClipPolygonI)NullPaintEngine_clipPoly;
-  v->clipPolygonF = (PaintEngineVTable::ClipPolygonF)NullPaintEngine_clipPoly;
-  v->clipPolygonD = (PaintEngineVTable::ClipPolygonD)NullPaintEngine_clipPoly;
+  v->clipRectsI = (PaintEngineVTable::ClipRectsI)NullPaintEngine_clipRectsI;
+  v->clipPolygonI = (PaintEngineVTable::ClipPolygonI)NullPaintEngine_clipPolyI;
 
   v->clipShapeF = (PaintEngineVTable::ClipShapeF)NullPaintEngine_clipShape;
   v->clipShapeD = (PaintEngineVTable::ClipShapeD)NullPaintEngine_clipShape;
-
-  v->clipPathF = (PaintEngineVTable::ClipPathF)NullPaintEngine_clipPath;
-  v->clipPathD = (PaintEngineVTable::ClipPathD)NullPaintEngine_clipPath;
 
   v->clipTextAtI = (PaintEngineVTable::ClipTextAtI)NullPaintEngine_clipText;
   v->clipTextAtF = (PaintEngineVTable::ClipTextAtF)NullPaintEngine_clipText;

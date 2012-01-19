@@ -10,6 +10,22 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/List.h>
+#include <Fog/G2d/Geometry/Arc.h>
+#include <Fog/G2d/Geometry/Box.h>
+#include <Fog/G2d/Geometry/Circle.h>
+#include <Fog/G2d/Geometry/CBezier.h>
+#include <Fog/G2d/Geometry/Chord.h>
+#include <Fog/G2d/Geometry/Ellipse.h>
+#include <Fog/G2d/Geometry/Line.h>
+#include <Fog/G2d/Geometry/Path.h>
+#include <Fog/G2d/Geometry/Pie.h>
+#include <Fog/G2d/Geometry/Point.h>
+#include <Fog/G2d/Geometry/PointArray.h>
+#include <Fog/G2d/Geometry/QBezier.h>
+#include <Fog/G2d/Geometry/Rect.h>
+#include <Fog/G2d/Geometry/RectArray.h>
+#include <Fog/G2d/Geometry/Round.h>
+#include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
@@ -1118,6 +1134,9 @@ struct FOG_NO_EXPORT Painter
   // [Draw]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE err_t drawShape(const ShapeF& shape) { return _vtable->drawShapeF(this, shape.getType(), shape.getData()); }
+  FOG_INLINE err_t drawShape(const ShapeD& shape) { return _vtable->drawShapeD(this, shape.getType(), shape.getData()); }
+
   FOG_INLINE err_t drawBox(const BoxI& box) { return drawRect(RectI(box)); }
   FOG_INLINE err_t drawBox(const BoxF& box) { return drawRect(RectF(box)); }
   FOG_INLINE err_t drawBox(const BoxD& box) { return drawRect(RectD(box)); }
@@ -1126,21 +1145,34 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawBox(float x0, float y0, float x1, float y1) { return drawRect(RectF(x0, y0, x1 - x0, y1 - y0)); }
   FOG_INLINE err_t drawBox(double x0, double y0, double x1, double y1) { return drawRect(RectD(x0, y0, x1 - x0, y1 - y0)); }
 
-  FOG_INLINE err_t drawRect(const RectI& r) { return _vtable->drawRectI(this, &r); }
-  FOG_INLINE err_t drawRect(const RectF& r) { return _vtable->drawRectF(this, &r); }
-  FOG_INLINE err_t drawRect(const RectD& r) { return _vtable->drawRectD(this, &r); }
+  FOG_INLINE err_t drawRect(const RectI& rect) { return _vtable->drawRectI(this, &rect); }
+  FOG_INLINE err_t drawRect(const RectF& rect) { return _vtable->drawRectF(this, &rect); }
+  FOG_INLINE err_t drawRect(const RectD& rect) { return _vtable->drawRectD(this, &rect); }
 
   FOG_INLINE err_t drawRect(int x, int y, int w, int h) { return drawRect(RectI(x, y, w, h)); }
   FOG_INLINE err_t drawRect(float x, float y, float w, float h) { return drawRect(RectF(x, y, w, h)); }
   FOG_INLINE err_t drawRect(double x, double y, double w, double h) { return drawRect(RectD(x, y, w, h)); }
 
-  FOG_INLINE err_t drawPolyline(const PointI* p, size_t count) { return _vtable->drawPolylineI(this, p, count); }
-  FOG_INLINE err_t drawPolyline(const PointF* p, size_t count) { return _vtable->drawPolylineF(this, p, count); }
-  FOG_INLINE err_t drawPolyline(const PointD* p, size_t count) { return _vtable->drawPolylineD(this, p, count); }
+  FOG_INLINE err_t drawRects(const RectArrayF& rects) { return _vtable->drawShapeF(this, SHAPE_TYPE_RECT_ARRAY, &rects); }
+  FOG_INLINE err_t drawRects(const RectArrayD& rects) { return _vtable->drawShapeD(this, SHAPE_TYPE_RECT_ARRAY, &rects); }
 
-  FOG_INLINE err_t drawPolygon(const PointI* p, size_t count) { return _vtable->drawPolygonI(this, p, count); }
-  FOG_INLINE err_t drawPolygon(const PointF* p, size_t count) { return _vtable->drawPolygonF(this, p, count); }
-  FOG_INLINE err_t drawPolygon(const PointD* p, size_t count) { return _vtable->drawPolygonD(this, p, count); }
+  FOG_INLINE err_t drawRects(const RectF* pts, size_t count) { return drawRects(RectArrayF(pts, count)); }
+  FOG_INLINE err_t drawRects(const RectD* pts, size_t count) { return drawRects(RectArrayD(pts, count)); }
+
+  FOG_INLINE err_t drawPolyline(const PointI* pts, size_t count) { return _vtable->drawPolylineI(this, pts, count); }
+  FOG_INLINE err_t drawPolygon(const PointI* pts, size_t count) { return _vtable->drawPolygonI(this, pts, count); }
+
+  FOG_INLINE err_t drawPolyline(const PointArrayF& pta) { return _vtable->drawShapeF(this, SHAPE_TYPE_POLYLINE, &pta); }
+  FOG_INLINE err_t drawPolyline(const PointArrayD& pta) { return _vtable->drawShapeD(this, SHAPE_TYPE_POLYLINE, &pta); }
+
+  FOG_INLINE err_t drawPolyline(const PointF* pts, size_t count) { return drawPolyline(PointArrayF(pts, count)); }
+  FOG_INLINE err_t drawPolyline(const PointD* pts, size_t count) { return drawPolyline(PointArrayD(pts, count)); }
+
+  FOG_INLINE err_t drawPolygon(const PointArrayF& pta) { return _vtable->drawShapeF(this, SHAPE_TYPE_POLYGON, &pta); }
+  FOG_INLINE err_t drawPolygon(const PointArrayD& pta) { return _vtable->drawShapeD(this, SHAPE_TYPE_POLYGON, &pta); }
+
+  FOG_INLINE err_t drawPolygon(const PointF* pts, size_t count) { return drawPolygon(PointArrayF(pts, count)); }
+  FOG_INLINE err_t drawPolygon(const PointD* pts, size_t count) { return drawPolygon(PointArrayD(pts, count)); }
 
   FOG_INLINE err_t drawLine(const LineF& line) { return _vtable->drawShapeF(this, SHAPE_TYPE_LINE, &line); }
   FOG_INLINE err_t drawLine(const LineD& line) { return _vtable->drawShapeD(this, SHAPE_TYPE_LINE, &line); }
@@ -1184,17 +1216,17 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t drawTriangle(const TriangleF& triangle) { return _vtable->drawShapeF(this, SHAPE_TYPE_TRIANGLE, &triangle); }
   FOG_INLINE err_t drawTriangle(const TriangleD& triangle) { return _vtable->drawShapeD(this, SHAPE_TYPE_TRIANGLE, &triangle); }
 
-  FOG_INLINE err_t drawShape(const ShapeF& shape) { return _vtable->drawShapeF(this, shape.getType(), shape.getData()); }
-  FOG_INLINE err_t drawShape(const ShapeD& shape) { return _vtable->drawShapeD(this, shape.getType(), shape.getData()); }
-
-  FOG_INLINE err_t drawPath(const PathF& p) { return _vtable->drawPathF(this, &p); }
-  FOG_INLINE err_t drawPath(const PathD& p) { return _vtable->drawPathD(this, &p); }
+  FOG_INLINE err_t drawPath(const PathF& p) { return _vtable->drawShapeF(this, SHAPE_TYPE_PATH, &p); }
+  FOG_INLINE err_t drawPath(const PathD& p) { return _vtable->drawShapeD(this, SHAPE_TYPE_PATH, &p); }
 
   // --------------------------------------------------------------------------
   // [Fill]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t fillAll() { return _vtable->fillAll(this); }
+
+  FOG_INLINE err_t fillShape(const ShapeF& shape) { return _vtable->fillShapeF(this, shape.getType(), shape.getData()); }
+  FOG_INLINE err_t fillShape(const ShapeD& shape) { return _vtable->fillShapeD(this, shape.getType(), shape.getData()); }
 
   FOG_INLINE err_t fillBox(const BoxI& box) { return fillRect(RectI(box)); }
   FOG_INLINE err_t fillBox(const BoxF& box) { return fillRect(RectF(box)); }
@@ -1204,21 +1236,30 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillBox(float x0, float y0, float x1, float y1) { return fillRect(RectF(x0, y0, x1 - x0, y1 - y0)); }
   FOG_INLINE err_t fillBox(double x0, double y0, double x1, double y1) { return fillRect(RectD(x0, y0, x1 - x0, y1 - y0)); }
 
-  FOG_INLINE err_t fillRect(const RectI& r) { return _vtable->fillRectI(this, &r); }
-  FOG_INLINE err_t fillRect(const RectF& r) { return _vtable->fillRectF(this, &r); }
-  FOG_INLINE err_t fillRect(const RectD& r) { return _vtable->fillRectD(this, &r); }
+  FOG_INLINE err_t fillRect(const RectI& rect) { return _vtable->fillRectI(this, &rect); }
+  FOG_INLINE err_t fillRect(const RectF& rect) { return _vtable->fillRectF(this, &rect); }
+  FOG_INLINE err_t fillRect(const RectD& rect) { return _vtable->fillRectD(this, &rect); }
 
   FOG_INLINE err_t fillRect(int x, int y, int w, int h) { return fillRect(RectI(x, y, w, h)); }
   FOG_INLINE err_t fillRect(float x, float y, float w, float h) { return fillRect(RectF(x, y, w, h)); }
   FOG_INLINE err_t fillRect(double x, double y, double w, double h) { return fillRect(RectD(x, y, w, h)); }
 
   FOG_INLINE err_t fillRects(const RectI* r, size_t count) { return _vtable->fillRectsI(this, r, count); }
-  FOG_INLINE err_t fillRects(const RectF* r, size_t count) { return _vtable->fillRectsF(this, r, count); }
-  FOG_INLINE err_t fillRects(const RectD* r, size_t count) { return _vtable->fillRectsD(this, r, count); }
+  FOG_INLINE err_t fillRects(const RectArrayI& rects) { return fillRects(rects.getData(), rects.getLength()); }
 
-  FOG_INLINE err_t fillPolygon(const PointI* p, size_t count) { return _vtable->fillPolygonI(this, p, count); }
-  FOG_INLINE err_t fillPolygon(const PointF* p, size_t count) { return _vtable->fillPolygonF(this, p, count); }
-  FOG_INLINE err_t fillPolygon(const PointD* p, size_t count) { return _vtable->fillPolygonD(this, p, count); }
+  FOG_INLINE err_t fillRects(const RectArrayF& rects) { return _vtable->fillShapeF(this, SHAPE_TYPE_RECT_ARRAY, &rects); }
+  FOG_INLINE err_t fillRects(const RectArrayD& rects) { return _vtable->fillShapeD(this, SHAPE_TYPE_RECT_ARRAY, &rects); }
+
+  FOG_INLINE err_t fillRects(const RectF* pts, size_t count) { return fillRects(RectArrayF(pts, count)); }
+  FOG_INLINE err_t fillRects(const RectD* pts, size_t count) { return fillRects(RectArrayD(pts, count)); }
+
+  FOG_INLINE err_t fillPolygon(const PointI* pts, size_t count) { return _vtable->fillPolygonI(this, pts, count); }
+
+  FOG_INLINE err_t fillPolygon(const PointArrayF& pta) { return _vtable->fillShapeF(this, SHAPE_TYPE_POLYGON, &pta); }
+  FOG_INLINE err_t fillPolygon(const PointArrayD& pta) { return _vtable->fillShapeD(this, SHAPE_TYPE_POLYGON, &pta); }
+
+  FOG_INLINE err_t fillPolygon(const PointF* pts, size_t count) { return fillPolygon(PointArrayF(pts, count)); }
+  FOG_INLINE err_t fillPolygon(const PointD* pts, size_t count) { return fillPolygon(PointArrayD(pts, count)); }
 
   FOG_INLINE err_t fillQBezier(const QBezierF& quad) { return _vtable->fillShapeF(this, SHAPE_TYPE_QBEZIER, &quad); }
   FOG_INLINE err_t fillQBezier(const QBezierD& quad) { return _vtable->fillShapeD(this, SHAPE_TYPE_QBEZIER, &quad); }
@@ -1253,11 +1294,8 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillTriangle(const TriangleF& triangle) { return _vtable->fillShapeF(this, SHAPE_TYPE_TRIANGLE, &triangle); }
   FOG_INLINE err_t fillTriangle(const TriangleD& triangle) { return _vtable->fillShapeD(this, SHAPE_TYPE_TRIANGLE, &triangle); }
 
-  FOG_INLINE err_t fillShape(const ShapeF& shape) { return _vtable->fillShapeF(this, shape.getType(), shape.getData()); }
-  FOG_INLINE err_t fillShape(const ShapeD& shape) { return _vtable->fillShapeD(this, shape.getType(), shape.getData()); }
-
-  FOG_INLINE err_t fillPath(const PathF& p) { return _vtable->fillPathF(this, &p); }
-  FOG_INLINE err_t fillPath(const PathD& p) { return _vtable->fillPathD(this, &p); }
+  FOG_INLINE err_t fillPath(const PathF& p) { return _vtable->fillShapeF(this, SHAPE_TYPE_PATH, &p); }
+  FOG_INLINE err_t fillPath(const PathD& p) { return _vtable->fillShapeD(this, SHAPE_TYPE_PATH, &p); }
 
   FOG_INLINE err_t fillText(const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextAtI(this, &p, &text, &font, clip); }
   FOG_INLINE err_t fillText(const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextAtF(this, &p, &text, &font, clip); }
@@ -1325,26 +1363,35 @@ struct FOG_NO_EXPORT Painter
   // [Filter]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t filterAll(const ImageFilter& filter) { return _vtable->filterAll(this, filter.getFeData()); }
   FOG_INLINE err_t filterAll(const FeBase& feBase) { return _vtable->filterAll(this, &feBase); }
+  FOG_INLINE err_t filterAll(const ImageFilter& filter) { return _vtable->filterAll(this, filter.getFeData()); }
 
-  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectI& r) { return _vtable->filterRectI(this, filter.getFeData(), &r); }
-  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectF& r) { return _vtable->filterRectF(this, filter.getFeData(), &r); }
-  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectD& r) { return _vtable->filterRectD(this, filter.getFeData(), &r); }
+  FOG_INLINE err_t filterShape(const FeBase& feBase, const ShapeF& shape) { return _vtable->filterShapeF(this, &feBase, shape.getType(), shape.getData()); }
+  FOG_INLINE err_t filterShape(const FeBase& feBase, const ShapeD& shape) { return _vtable->filterShapeD(this, &feBase, shape.getType(), shape.getData()); }
+
+  FOG_INLINE err_t filterShape(const ImageFilter& filter, const ShapeF& shape) { return _vtable->filterShapeF(this, filter.getFeData(), shape.getType(), shape.getData()); }
+  FOG_INLINE err_t filterShape(const ImageFilter& filter, const ShapeD& shape) { return _vtable->filterShapeD(this, filter.getFeData(), shape.getType(), shape.getData()); }
 
   FOG_INLINE err_t filterRect(const FeBase& feBase, const RectI& r) { return _vtable->filterRectI(this, &feBase, &r); }
   FOG_INLINE err_t filterRect(const FeBase& feBase, const RectF& r) { return _vtable->filterRectF(this, &feBase, &r); }
   FOG_INLINE err_t filterRect(const FeBase& feBase, const RectD& r) { return _vtable->filterRectD(this, &feBase, &r); }
 
-  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterPathF(this, filter.getFeData(), &p); }
-  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterPathD(this, filter.getFeData(), &p); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectI& r) { return _vtable->filterRectI(this, filter.getFeData(), &r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectF& r) { return _vtable->filterRectF(this, filter.getFeData(), &r); }
+  FOG_INLINE err_t filterRect(const ImageFilter& filter, const RectD& r) { return _vtable->filterRectD(this, filter.getFeData(), &r); }
 
-  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathF& p) { return _vtable->filterPathF(this, &feBase, &p); }
-  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathD& p) { return _vtable->filterPathD(this, &feBase, &p); }
+  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathF& p) { return _vtable->filterShapeF(this, &feBase, SHAPE_TYPE_PATH, &p); }
+  FOG_INLINE err_t filterPath(const FeBase& feBase, const PathD& p) { return _vtable->filterShapeD(this, &feBase, SHAPE_TYPE_PATH, &p); }
+
+  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterShapeF(this, filter.getFeData(), SHAPE_TYPE_PATH, &p); }
+  FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterShapeD(this, filter.getFeData(), SHAPE_TYPE_PATH, &p); }
 
   // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeF& shape) { return _vtable->clipShapeF(this, clipOp, shape.getType(), shape.getData()); }
+  FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeD& shape) { return _vtable->clipShapeD(this, clipOp, shape.getType(), shape.getData()); }
 
   FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxI& r) { return clipRect(clipOp, RectI(r)); }
   FOG_INLINE err_t clipBox(uint32_t clipOp, const BoxF& r) { return clipRect(clipOp, RectF(r)); }
@@ -1354,25 +1401,20 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipRect(uint32_t clipOp, const RectF& r) { return _vtable->clipRectF(this, clipOp, &r); }
   FOG_INLINE err_t clipRect(uint32_t clipOp, const RectD& r) { return _vtable->clipRectD(this, clipOp, &r); }
 
-  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectI* r, size_t count) { return _vtable->clipRectsI(this, clipOp, r, count); }
-  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectF* r, size_t count) { return _vtable->clipRectsF(this, clipOp, r, count); }
-  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectD* r, size_t count) { return _vtable->clipRectsD(this, clipOp, r, count); }
-
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectI* rects, size_t count) { return _vtable->clipRectsI(this, clipOp, rects, count); }
   FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointI* p, size_t count) { return _vtable->clipPolygonI(this, clipOp, p, count); }
-  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointF* p, size_t count) { return _vtable->clipPolygonF(this, clipOp, p, count); }
-  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointD* p, size_t count) { return _vtable->clipPolygonD(this, clipOp, p, count); }
 
-  FOG_INLINE err_t clipLine(uint32_t clipOp, const LineF& line) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_LINE, &line); }
-  FOG_INLINE err_t clipLine(uint32_t clipOp, const LineD& line) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_LINE, &line); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectArrayF& rects) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_RECT_ARRAY, &rects); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectArrayD& rects) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_RECT_ARRAY, &rects); }
 
-  FOG_INLINE err_t clipQBezier(uint32_t clipOp, const QBezierF& quad) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_QBEZIER, &quad); }
-  FOG_INLINE err_t clipQBezier(uint32_t clipOp, const QBezierD& quad) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_QBEZIER, &quad); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectF* rects, size_t count) { return clipRects(clipOp, RectArrayF(rects, count)); }
+  FOG_INLINE err_t clipRects(uint32_t clipOp, const RectD* rects, size_t count) { return clipRects(clipOp, RectArrayD(rects, count)); }
 
-  FOG_INLINE err_t clipCBezier(uint32_t clipOp, const CBezierF& cubic) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_CBEZIER, &cubic); }
-  FOG_INLINE err_t clipCBezier(uint32_t clipOp, const CBezierD& cubic) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_CBEZIER, &cubic); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointArrayF& pta) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_POLYGON, &pta); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointArrayD& pta) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_POLYGON, &pta); }
 
-  FOG_INLINE err_t clipArc(uint32_t clipOp, const ArcF& arc) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_ARC, &arc); }
-  FOG_INLINE err_t clipArc(uint32_t clipOp, const ArcD& arc) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_ARC, &arc); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointF* pts, size_t count) { return clipPolygon(clipOp, PointArrayF(pts, count)); }
+  FOG_INLINE err_t clipPolygon(uint32_t clipOp, const PointD* pts, size_t count) { return clipPolygon(clipOp, PointArrayD(pts, count)); }
 
   FOG_INLINE err_t clipCircle(uint32_t clipOp, const CircleF& circle) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_CIRCLE, &circle); }
   FOG_INLINE err_t clipCircle(uint32_t clipOp, const CircleD& circle) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_CIRCLE, &circle); }
@@ -1392,11 +1434,8 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t clipTriangle(uint32_t clipOp, const TriangleF& triangle) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_TRIANGLE, &triangle); }
   FOG_INLINE err_t clipTriangle(uint32_t clipOp, const TriangleD& triangle) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_TRIANGLE, &triangle); }
 
-  FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeF& shape) { return _vtable->clipShapeF(this, clipOp, shape.getType(), shape.getData()); }
-  FOG_INLINE err_t clipShape(uint32_t clipOp, const ShapeD& shape) { return _vtable->clipShapeD(this, clipOp, shape.getType(), shape.getData()); }
-
-  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathF& p) { return _vtable->clipPathF(this, clipOp, &p); }
-  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathD& p) { return _vtable->clipPathD(this, clipOp, &p); }
+  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathF& path) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_PATH, &path); }
+  FOG_INLINE err_t clipPath(uint32_t clipOp, const PathD& path) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_PATH, &path); }
 
   FOG_INLINE err_t clipText(uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextAtI(this, clipOp, &p, &text, &font, clip); }
   FOG_INLINE err_t clipText(uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextAtF(this, clipOp, &p, &text, &font, clip); }
@@ -1448,8 +1487,10 @@ struct FOG_NO_EXPORT Painter
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The painter virtual-table (it's link to _engine->vtable for faster
-  //! access).
+  //! @brief The painter virtual-table.
+  //!
+  //! It's a link to _engine->vtable for faster access. It's also the first 
+  //! member, because it's heavily used when painting.
   const PaintEngineVTable* _vtable;
 
   //! @brief The painter engine.

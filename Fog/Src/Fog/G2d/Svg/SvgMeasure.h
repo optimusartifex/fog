@@ -65,7 +65,6 @@ struct FOG_API SvgMeasure : public SvgVisitor
   // --------------------------------------------------------------------------
 
   virtual err_t onShape(SvgElement* obj, const ShapeF& shape);
-  virtual err_t onPath(SvgElement* obj, const PathF& path);
   virtual err_t onImage(SvgElement* obj, const PointF& pt, const Image& image);
 
   // --------------------------------------------------------------------------

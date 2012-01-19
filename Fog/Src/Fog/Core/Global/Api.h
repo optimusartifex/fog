@@ -1933,14 +1933,14 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
   FOG_CAPI_METHOD(err_t, shapef_getBoundingBox)(uint32_t shapeType, const void* shapeData, BoxF* dst, const TransformF* transform);
-  FOG_CAPI_METHOD(bool, shapef_hitTest)(uint32_t shapeType, const void* shapeData, const PointF* pt);
+  FOG_CAPI_METHOD(err_t, shaped_getBoundingBox)(uint32_t shapeType, const void* shapeData, BoxD* dst, const TransformD* transform);
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - ShapeD]
   // --------------------------------------------------------------------------
 
+  FOG_CAPI_METHOD(bool, shapef_hitTest)(uint32_t shapeType, const void* shapeData, const PointF* pt);
   FOG_CAPI_METHOD(bool, shaped_hitTest)(uint32_t shapeType, const void* shapeData, const PointD* pt);
-  FOG_CAPI_METHOD(err_t, shaped_getBoundingBox)(uint32_t shapeType, const void* shapeData, BoxD* dst, const TransformD* transform);
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - TransformF]

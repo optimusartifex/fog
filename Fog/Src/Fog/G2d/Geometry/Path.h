@@ -832,16 +832,14 @@ struct FOG_NO_EXPORT PathF
     return fog_api.pathf_shape(this, shapeType, shapeData, direction, tr);
   }
 
-  //! @brief Add a shape object to the path.
-  FOG_INLINE err_t shape(const ShapeF& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t shape(const ShapeF& shape, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(object.getType(), object.getData(), direction, NULL);
+    return fog_api.pathf_shape(this, shape.getType(), shape.getData(), direction, NULL);
   }
 
-  //! @overload
-  FOG_INLINE err_t shape(const ShapeF& object, uint32_t direction, const TransformF& tr)
+  FOG_INLINE err_t shape(const ShapeF& shape, uint32_t direction, const TransformF& tr)
   {
-    return _shape(object.getType(), object.getData(), direction, &tr);
+    return fog_api.pathf_shape(this, shape.getType(), shape.getData(), direction, &tr);
   }
 
   //! @brief Add an unclosed line to the path.
@@ -1874,16 +1872,14 @@ struct FOG_NO_EXPORT PathD
     return fog_api.pathd_shape(this, shapeType, shapeData, direction, tr);
   }
 
-  //! @brief Add a shape object to the path.
-  FOG_INLINE err_t shape(const ShapeD& object, uint32_t direction = PATH_DIRECTION_CW)
+  FOG_INLINE err_t shape(const ShapeD& shape, uint32_t direction = PATH_DIRECTION_CW)
   {
-    return _shape(object.getType(), object.getData(), direction, NULL);
+    return fog_api.pathd_shape(this, shape.getType(), shape.getData(), direction, NULL);
   }
 
-  //! @overload
-  FOG_INLINE err_t shape(const ShapeD& object, uint32_t direction, const TransformD& tr)
+  FOG_INLINE err_t shape(const ShapeD& shape, uint32_t direction, const TransformD& tr)
   {
-    return _shape(object.getType(), object.getData(), direction, &tr);
+    return fog_api.pathd_shape(this, shape.getType(), shape.getData(), direction, &tr);
   }
 
   //! @brief Add an unclosed line to the path.

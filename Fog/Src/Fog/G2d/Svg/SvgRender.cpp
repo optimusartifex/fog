@@ -97,20 +97,11 @@ err_t SvgRender::onShape(SvgElement* obj, const ShapeF& shape)
   _painter->save();
   _painter->transform(_transform);
 
-  if (shape.isClosed() && SvgRender_setupFill(this)) _painter->fillShape(shape);
-  if (SvgRender_setupStroke(this)) _painter->drawShape(shape);
+  if (shape.isClosed() && SvgRender_setupFill(this))
+    _painter->fillShape(shape);
 
-  _painter->restore();
-  return ERR_OK;
-}
-
-err_t SvgRender::onPath(SvgElement* obj, const PathF& path)
-{
-  _painter->save();
-  _painter->transform(_transform);
-
-  if (SvgRender_setupFill(this)) _painter->fillPath(path);
-  if (SvgRender_setupStroke(this)) _painter->drawPath(path);
+  if (SvgRender_setupStroke(this))
+    _painter->drawShape(shape);
 
   _painter->restore();
   return ERR_OK;

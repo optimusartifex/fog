@@ -44,9 +44,11 @@
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Pie.h>
 #include <Fog/G2d/Geometry/Point.h>
+#include <Fog/G2d/Geometry/PointArray.h>
 #include <Fog/G2d/Geometry/Polygon.h>
 #include <Fog/G2d/Geometry/QBezier.h>
 #include <Fog/G2d/Geometry/Rect.h>
+#include <Fog/G2d/Geometry/RectArray.h>
 #include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Geometry/Size.h>

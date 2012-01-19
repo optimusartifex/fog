@@ -39,40 +39,21 @@ err_t SvgHitTest::onShape(SvgElement* obj, const ShapeF& shape)
 
   if (_fillStyle.isPaintable())
   {
-    if (shape.hitTest(_invPoint)) return _result.append(obj);
+    if (shape.hitTest(_invPoint))
+      return _result.append(obj);
   }
 
   if (_strokeStyle.isPaintable())
   {
     PathStrokerF stroker(_strokeParams);
     _pathTmp.clear();
-    stroker.strokeShape(_pathTmp, shape.getType(), shape.getData());
-    if (_pathTmp.hitTest(_invPoint, FILL_RULE_NON_ZERO)) return _result.append(obj);
-  }
 
-  return ERR_OK;
-}
+    err_t err = stroker.strokeShape(_pathTmp, shape);
+    if (err == ERR_GEOMETRY_NONE)
+      return ERR_OK;
 
-err_t SvgHitTest::onPath(SvgElement* obj, const PathF& path)
-{
-  if (_transformDirty)
-  {
-    if (!TransformF::invert(_invTransform, _transform)) return ERR_OK;
-    _invTransform.mapPoint(_invPoint, _point);
-    _transformDirty = false;
-  }
-
-  if (_fillStyle.isPaintable())
-  {
-    if (path.hitTest(_invPoint, _fillRule)) return _result.append(obj);
-  }
-
-  if (_strokeStyle.isPaintable())
-  {
-    PathStrokerF stroker(_strokeParams);
-    _pathTmp.clear();
-    stroker.strokePath(_pathTmp, path);
-    if (_pathTmp.hitTest(_invPoint, FILL_RULE_NON_ZERO)) return _result.append(obj);
+    if (_pathTmp.hitTest(_invPoint, FILL_RULE_NON_ZERO))
+      return _result.append(obj);
   }
 
   return ERR_OK;

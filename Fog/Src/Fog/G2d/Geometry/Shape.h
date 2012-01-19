@@ -4,51 +4,25 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_GEOMETRY_SHAPE_TYPE_H
-#define _FOG_G2D_GEOMETRY_SHAPE_TYPE_H
+#ifndef _FOG_G2D_GEOMETRY_SHAPE_H
+#define _FOG_G2D_GEOMETRY_SHAPE_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Geometry/Arc.h>
+#include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/CBezier.h>
 #include <Fog/G2d/Geometry/Chord.h>
 #include <Fog/G2d/Geometry/Circle.h>
 #include <Fog/G2d/Geometry/Ellipse.h>
 #include <Fog/G2d/Geometry/Line.h>
 #include <Fog/G2d/Geometry/Pie.h>
+#include <Fog/G2d/Geometry/Point.h>
+#include <Fog/G2d/Geometry/PointArray.h>
 #include <Fog/G2d/Geometry/QBezier.h>
 #include <Fog/G2d/Geometry/Rect.h>
+#include <Fog/G2d/Geometry/RectArray.h>
 #include <Fog/G2d/Geometry/Round.h>
-#include <Fog/G2d/Geometry/Triangle.h>
-
-// Common geometric structures:
-//
-//   - Point      - [x , y ].
-//   - Size       - [w , h ].
-//
-//   - Line       - [x0, y0] -> [x1, y1].
-//   - QBezier    - [x0, y0], [x1, y1], [x2, y2] - Quadric Bezier curve.
-//   - CBezier    - [x0, y0], [x1, y1], [x2, y2], [x3, y3] - Cubic Bezier curve.
-//
-//   - Box        - [x0, y0] -> [x1, y1].
-//   - Rect       - [x , y ] -> [w , h ].
-//   - Round      - [x , y ] -> [w , h ] && [rx, ry].
-//
-//   - Circle     - [cx, cy] && [r].
-//   - Ellipse    - [cx, cy] && [rx, ry].
-//   - Arc        - [cx, cy] && [rx, ry] && angle and sweep.
-//   - Chord      - [cx, cy] && [rx, ry] && angle and sweep.
-//   - Pie        - [cx, cy] && [rx, ry] && angle and sweep.
-//   - Triangle   - [x0, y0] -> [x1, y1] -> [x2, y2]
-//
-// The implementation for several data-types exists:
-//   - I - All members as 32-bit integers - int.
-//   - F - All members as 32-bit floats   - float.
-//   - D - All members as 64-bit floats   - double.
-//
-// Each datatype contains implicit conversion from less-precision and
-// high-precision types. These structures are very simple so the members
-// are not prefixed with underscore and all members are public.
+#include <Fog/G2d/Geometry/Transform.h>
 
 namespace Fog {
 
@@ -56,190 +30,85 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::ShapeDataF]
-// ============================================================================
-
-union ShapeDataF
-{
-  // --------------------------------------------------------------------------
-  // [Unclosed]
-  // --------------------------------------------------------------------------
-
-  Static<LineF> line;
-  Static<QBezierF> qbezier;
-  Static<CBezierF> cbezier;
-  Static<ArcF> arc;
-
-  // --------------------------------------------------------------------------
-  // [Closed]
-  // --------------------------------------------------------------------------
-
-  Static<RectF> rect;
-  Static<RoundF> round;
-  Static<CircleF> circle;
-  Static<EllipseF> ellipse;
-  Static<ChordF> chord;
-  Static<PieF> pie;
-  Static<TriangleF> triangle;
-};
-
-// ============================================================================
-// [Fog::ShapeDataD]
-// ============================================================================
-
-union ShapeDataD
-{
-  // --------------------------------------------------------------------------
-  // [Unclosed]
-  // --------------------------------------------------------------------------
-
-  Static<LineD> line;
-  Static<QBezierD> qbezier;
-  Static<CBezierD> cbezier;
-  Static<ArcD> arc;
-
-  // --------------------------------------------------------------------------
-  // [Closed]
-  // --------------------------------------------------------------------------
-
-  Static<RectD> rect;
-  Static<RoundD> round;
-  Static<CircleD> circle;
-  Static<EllipseD> ellipse;
-  Static<ChordD> chord;
-  Static<PieD> pie;
-  Static<TriangleD> triangle;
-};
-
-// ============================================================================
 // [Fog::ShapeF]
 // ============================================================================
 
-//! @brief Shape is data structure that can hold any geometric primitive.
 struct FOG_NO_EXPORT ShapeF
 {
   // --------------------------------------------------------------------------
-  // [Construction & Destruction]
+  // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ShapeF() { _type = SHAPE_TYPE_NONE; }
-  FOG_INLINE ShapeF(const ShapeF& other) { _type = other._type; MemOps::copy(&_data, &other._data, sizeof(ShapeDataF)); }
+  FOG_INLINE ShapeF() :
+    _type(SHAPE_TYPE_NONE),
+    _data(NULL)
+  {
+  }
 
-  explicit FOG_INLINE ShapeF(_Uninitialized) {}
+  FOG_INLINE ShapeF(uint32_t type, const void* data) :
+    _type(type),
+    _data(data)
+  {
+  }
 
-  explicit FOG_INLINE ShapeF(const LineF& line) { _type = SHAPE_TYPE_LINE; _data.line() = line; }
-  explicit FOG_INLINE ShapeF(const QBezierF& qbezier) { _type = SHAPE_TYPE_QBEZIER; _data.qbezier() = qbezier; }
-  explicit FOG_INLINE ShapeF(const CBezierF& cbezier) { _type = SHAPE_TYPE_CBEZIER; _data.cbezier() = cbezier; }
-  explicit FOG_INLINE ShapeF(const ArcF& arc) { _type = SHAPE_TYPE_ARC; _data.arc() = arc; }
-
-  explicit FOG_INLINE ShapeF(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect() = box; }
-  explicit FOG_INLINE ShapeF(const RectF& rect) { _type = SHAPE_TYPE_RECT; _data.rect() = rect; }
-  explicit FOG_INLINE ShapeF(const RoundF& round) { _type = SHAPE_TYPE_ROUND; _data.round() = round; }
-  explicit FOG_INLINE ShapeF(const CircleF& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle() = circle; }
-  explicit FOG_INLINE ShapeF(const EllipseF& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse() = ellipse; }
-  explicit FOG_INLINE ShapeF(const ChordF& chord) { _type = SHAPE_TYPE_CHORD; _data.chord() = chord; }
-  explicit FOG_INLINE ShapeF(const PieF& pie) { _type = SHAPE_TYPE_PIE; _data.pie() = pie; }
-  explicit FOG_INLINE ShapeF(const TriangleF& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle() = triangle; }
+  explicit ShapeF(const LineF*     data) : _type(SHAPE_TYPE_LINE    ), _data(data) {}
+  explicit ShapeF(const QBezierF*  data) : _type(SHAPE_TYPE_QBEZIER ), _data(data) {}
+  explicit ShapeF(const CBezierF*  data) : _type(SHAPE_TYPE_CBEZIER ), _data(data) {}
+  explicit ShapeF(const ArcF*      data) : _type(SHAPE_TYPE_ARC     ), _data(data) {}
+  explicit ShapeF(const RectF*     data) : _type(SHAPE_TYPE_RECT    ), _data(data) {}
+  explicit ShapeF(const RoundF*    data) : _type(SHAPE_TYPE_ROUND   ), _data(data) {}
+  explicit ShapeF(const CircleF*   data) : _type(SHAPE_TYPE_CIRCLE  ), _data(data) {}
+  explicit ShapeF(const EllipseF*  data) : _type(SHAPE_TYPE_ELLIPSE ), _data(data) {}
+  explicit ShapeF(const ChordF*    data) : _type(SHAPE_TYPE_CHORD   ), _data(data) {}
+  explicit ShapeF(const PieF*      data) : _type(SHAPE_TYPE_PIE     ), _data(data) {}
+  explicit ShapeF(const TriangleF* data) : _type(SHAPE_TYPE_TRIANGLE), _data(data) {}
+  explicit ShapeF(const PathF*     data) : _type(SHAPE_TYPE_PATH    ), _data(data) {}
 
   // --------------------------------------------------------------------------
-  // [Accessors - Type]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getType() const { return _type; }
   FOG_INLINE bool isClosed() const { return _type >= SHAPE_TYPE_RECT; }
 
-  // --------------------------------------------------------------------------
-  // [Accessors - Data]
-  // --------------------------------------------------------------------------
+  FOG_INLINE const void* getData() const { return _data; }
 
-  FOG_INLINE const ShapeDataF* getData() const { return &_data; }
-  FOG_INLINE ShapeDataF* getData() { return &_data; }
-
-  // --------------------------------------------------------------------------
-  // [Accessors - Unclosed]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE LineF& getLine() { return _data.line(); }
-  FOG_INLINE const LineF& getLine() const { return _data.line(); }
-
-  FOG_INLINE QBezierF& getQBezier() { return _data.qbezier(); }
-  FOG_INLINE const QBezierF& getQBezier() const { return _data.qbezier(); }
-
-  FOG_INLINE CBezierF& getCBezier() { return _data.cbezier(); }
-  FOG_INLINE const CBezierF& getCBezier() const { return _data.cbezier(); }
-
-  FOG_INLINE ArcF& getArc() { return _data.arc(); }
-  FOG_INLINE const ArcF& getArc() const { return _data.arc(); }
-
-  FOG_INLINE void setLine(const LineF& line) { _type = SHAPE_TYPE_LINE; _data.line() = line; }
-  FOG_INLINE void setQBezier(const QBezierF& quad) { _type = SHAPE_TYPE_LINE; _data.qbezier() = quad; }
-  FOG_INLINE void setCBezier(const CBezierF& cubic) { _type = SHAPE_TYPE_LINE; _data.cbezier() = cubic; }
-  FOG_INLINE void setArc(const ArcF& arc) { _type = SHAPE_TYPE_ARC; _data.arc() = arc; }
+  FOG_INLINE void setShape(uint32_t type, const void* data)
+  {
+    _type = type;
+    _data = data;
+  }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Closed]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE RectF& getRect() { return _data.rect(); }
-  FOG_INLINE const RectF& getRect() const { return _data.rect(); }
-
-  FOG_INLINE RoundF& getRound() { return _data.round(); }
-  FOG_INLINE const RoundF& getRound() const { return _data.round(); }
-
-  FOG_INLINE CircleF& getCircle() { return _data.circle(); }
-  FOG_INLINE const CircleF& getCircle() const { return _data.circle(); }
-
-  FOG_INLINE EllipseF& getEllipse() { return _data.ellipse(); }
-  FOG_INLINE const EllipseF& getEllipse() const { return _data.ellipse(); }
-
-  FOG_INLINE ChordF& getChord() { return _data.chord(); }
-  FOG_INLINE const ChordF& getChord() const { return _data.chord(); }
-
-  FOG_INLINE PieF& getPie() { return _data.pie(); }
-  FOG_INLINE const PieF& getPie() const { return _data.pie(); }
-
-  FOG_INLINE TriangleF& getTriangle() { return _data.triangle(); }
-  FOG_INLINE const TriangleF& getTriangle() const { return _data.triangle(); }
-
-  FOG_INLINE void setBox(const BoxF& box) { _type = SHAPE_TYPE_RECT; _data.rect() = box; }
-  FOG_INLINE void setRect(const RectF& rect) { _type = SHAPE_TYPE_RECT; _data.rect() = rect; }
-  FOG_INLINE void setRound(const RoundF& round) { _type = SHAPE_TYPE_ROUND; _data.round() = round; }
-  FOG_INLINE void setCircle(const CircleF& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle() = circle; }
-  FOG_INLINE void setEllipse(const EllipseF& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse() = ellipse; }
-  FOG_INLINE void setChord(const ChordF& chord) { _type = SHAPE_TYPE_CHORD; _data.chord() = chord; }
-  FOG_INLINE void setPie(const PieF& pie) { _type = SHAPE_TYPE_PIE; _data.pie() = pie; }
-  FOG_INLINE void setTriangle(const TriangleF& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle() = triangle; }
-
-  // --------------------------------------------------------------------------
-  // [BoundingBox / BoundingRect]
+  // [BoundingBox]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t getBoundingBox(BoxF& dst) const
   {
-    return _getBoundingBox(dst, NULL);
+    return fog_api.shapef_getBoundingBox(_type, _data, &dst, NULL);
   }
 
   FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF& tr) const
   {
-    return _getBoundingBox(dst, &tr);
+    return fog_api.shapef_getBoundingBox(_type, _data, &dst, &tr);
+  }
+
+  FOG_INLINE err_t getBoundingBox(BoxF& dst, const TransformF* tr) const
+  {
+    return fog_api.shapef_getBoundingBox(_type, _data, &dst, tr);
   }
 
   FOG_INLINE err_t getBoundingRect(RectF& dst) const
   {
-    return _getBoundingRect(dst, NULL);
+    return getBoundingRect(dst, NULL);
   }
 
   FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF& tr) const
   {
-    return _getBoundingRect(dst, &tr);
+    return getBoundingRect(dst, &tr);
   }
 
-  FOG_INLINE err_t _getBoundingBox(BoxF& dst, const TransformF* tr) const
-  {
-    return fog_api.shapef_getBoundingBox(_type, &_data, &dst, tr);
-  }
-
-  FOG_INLINE err_t _getBoundingRect(RectF& dst, const TransformF* tr) const
+  FOG_INLINE err_t getBoundingRect(RectF& dst, const TransformF* tr) const
   {
     err_t err = fog_api.shapef_getBoundingBox(_type, &_data, reinterpret_cast<BoxF*>(&dst), tr);
     dst.w -= dst.x;
@@ -253,18 +122,23 @@ struct FOG_NO_EXPORT ShapeF
 
   FOG_INLINE bool hitTest(const PointF& pt) const
   {
-    return fog_api.shapef_hitTest(_type, &_data, &pt);
+    return fog_api.shapef_hitTest(_type, _data, &pt);
   }
 
   // --------------------------------------------------------------------------
-  // [Operator Overload]
+  // [Statics]
   // --------------------------------------------------------------------------
 
-  ShapeF& operator=(const ShapeF& other)
+  static FOG_INLINE err_t getBoundingBox(uint32_t shapeType, const void* shapeData,
+    BoxF* dst, const TransformF* transform = NULL)
   {
-    _type = other._type;
-    MemOps::copy(&_data, &other._data, sizeof(ShapeDataF));
-    return *this;
+    return fog_api.shapef_getBoundingBox(shapeType, shapeData, dst, transform);
+  }
+
+  static FOG_INLINE bool hitTest(uint32_t shapeType, const void* shapeData,
+    const PointF* pt)
+  {
+    return fog_api.shapef_hitTest(shapeType, shapeData, pt);
   }
 
   // --------------------------------------------------------------------------
@@ -272,139 +146,84 @@ struct FOG_NO_EXPORT ShapeF
   // --------------------------------------------------------------------------
 
   uint32_t _type;
-  ShapeDataF _data;
+  const void* _data;
 };
 
 // ============================================================================
 // [Fog::ShapeD]
 // ============================================================================
 
-//! @brief Shape is data structure that can hold any geometric primitive.
 struct FOG_NO_EXPORT ShapeD
 {
   // --------------------------------------------------------------------------
-  // [Construction & Destruction]
+  // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE ShapeD() { _type = SHAPE_TYPE_NONE; }
-  FOG_INLINE ShapeD(const ShapeD& other) { _type = other._type; MemOps::copy(&_data, &other._data, sizeof(ShapeDataD)); }
+  FOG_INLINE ShapeD() :
+    _type(SHAPE_TYPE_NONE),
+    _data(NULL)
+  {
+  }
 
-  explicit FOG_INLINE ShapeD(_Uninitialized) {}
+  FOG_INLINE ShapeD(uint32_t type, const void* data) :
+    _type(type),
+    _data(data)
+  {
+  }
 
-  explicit FOG_INLINE ShapeD(const LineD& line) { _type = SHAPE_TYPE_LINE; _data.line() = line; }
-  explicit FOG_INLINE ShapeD(const QBezierD& quad) { _type = SHAPE_TYPE_LINE; _data.qbezier() = quad; }
-  explicit FOG_INLINE ShapeD(const CBezierD& cubic) { _type = SHAPE_TYPE_LINE; _data.cbezier() = cubic; }
-  explicit FOG_INLINE ShapeD(const ArcD& arc) { _type = SHAPE_TYPE_ARC; _data.arc() = arc; }
-
-  explicit FOG_INLINE ShapeD(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect() = box; }
-  explicit FOG_INLINE ShapeD(const RectD& rect) { _type = SHAPE_TYPE_RECT; _data.rect() = rect; }
-  explicit FOG_INLINE ShapeD(const RoundD& round) { _type = SHAPE_TYPE_ROUND; _data.round() = round; }
-  explicit FOG_INLINE ShapeD(const CircleD& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle() = circle; }
-  explicit FOG_INLINE ShapeD(const EllipseD& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse() = ellipse; }
-  explicit FOG_INLINE ShapeD(const ChordD& chord) { _type = SHAPE_TYPE_CHORD; _data.chord() = chord; }
-  explicit FOG_INLINE ShapeD(const PieD& pie) { _type = SHAPE_TYPE_PIE; _data.pie() = pie; }
-  explicit FOG_INLINE ShapeD(const TriangleD& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle() = triangle; }
+  explicit ShapeD(const LineD*     data) : _type(SHAPE_TYPE_LINE    ), _data(data) {}
+  explicit ShapeD(const QBezierD*  data) : _type(SHAPE_TYPE_QBEZIER ), _data(data) {}
+  explicit ShapeD(const CBezierD*  data) : _type(SHAPE_TYPE_CBEZIER ), _data(data) {}
+  explicit ShapeD(const ArcD*      data) : _type(SHAPE_TYPE_ARC     ), _data(data) {}
+  explicit ShapeD(const RectD*     data) : _type(SHAPE_TYPE_RECT    ), _data(data) {}
+  explicit ShapeD(const RoundD*    data) : _type(SHAPE_TYPE_ROUND   ), _data(data) {}
+  explicit ShapeD(const CircleD*   data) : _type(SHAPE_TYPE_CIRCLE  ), _data(data) {}
+  explicit ShapeD(const EllipseD*  data) : _type(SHAPE_TYPE_ELLIPSE ), _data(data) {}
+  explicit ShapeD(const ChordD*    data) : _type(SHAPE_TYPE_CHORD   ), _data(data) {}
+  explicit ShapeD(const PieD*      data) : _type(SHAPE_TYPE_PIE     ), _data(data) {}
+  explicit ShapeD(const TriangleD* data) : _type(SHAPE_TYPE_TRIANGLE), _data(data) {}
+  explicit ShapeD(const PathD*     data) : _type(SHAPE_TYPE_PATH    ), _data(data) {}
 
   // --------------------------------------------------------------------------
-  // [Accessors - Type]
+  // [Accessors]
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getType() const { return _type; }
   FOG_INLINE bool isClosed() const { return _type >= SHAPE_TYPE_RECT; }
 
-  // --------------------------------------------------------------------------
-  // [Accessors - Data]
-  // --------------------------------------------------------------------------
+  FOG_INLINE const void* getData() const { return _data; }
 
-  FOG_INLINE const ShapeDataD* getData() const { return &_data; }
-  FOG_INLINE ShapeDataD* getData() { return &_data; }
-
-  // --------------------------------------------------------------------------
-  // [Accessors - Unclosed]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE LineD& getLine() { return _data.line(); }
-  FOG_INLINE const LineD& getLine() const { return _data.line(); }
-
-  FOG_INLINE QBezierD& getQBezier() { return _data.qbezier(); }
-  FOG_INLINE const QBezierD& getQBezier() const { return _data.qbezier(); }
-
-  FOG_INLINE CBezierD& getCBezier() { return _data.cbezier(); }
-  FOG_INLINE const CBezierD& getCBezier() const { return _data.cbezier(); }
-
-  FOG_INLINE ArcD& getArc() { return _data.arc(); }
-  FOG_INLINE const ArcD& getArc() const { return _data.arc(); }
-
-  FOG_INLINE void setLine(const LineD& line) { _type = SHAPE_TYPE_LINE; _data.line() = line; }
-  FOG_INLINE void setQBezier(const QBezierD& quad) { _type = SHAPE_TYPE_QBEZIER; _data.qbezier() = quad; }
-  FOG_INLINE void setCBezier(const CBezierD& cubic) { _type = SHAPE_TYPE_CBEZIER; _data.cbezier() = cubic; }
-  FOG_INLINE void setArc(const ArcD& arc) { _type = SHAPE_TYPE_ARC; _data.arc() = arc; }
+  FOG_INLINE void setShape(uint32_t type, const void* data)
+  {
+    _type = type;
+    _data = data;
+  }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Closed]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE RectD& getRect() { return _data.rect(); }
-  FOG_INLINE const RectD& getRect() const { return _data.rect(); }
-
-  FOG_INLINE RoundD& getRound() { return _data.round(); }
-  FOG_INLINE const RoundD& getRound() const { return _data.round(); }
-
-  FOG_INLINE CircleD& getCircle() { return _data.circle(); }
-  FOG_INLINE const CircleD& getCircle() const { return _data.circle(); }
-
-  FOG_INLINE EllipseD& getEllipse() { return _data.ellipse(); }
-  FOG_INLINE const EllipseD& getEllipse() const { return _data.ellipse(); }
-
-  FOG_INLINE ChordD& getChord() { return _data.chord(); }
-  FOG_INLINE const ChordD& getChord() const { return _data.chord(); }
-
-  FOG_INLINE PieD& getPie() { return _data.pie(); }
-  FOG_INLINE const PieD& getPie() const { return _data.pie(); }
-
-  FOG_INLINE TriangleD& getTriangle() { return _data.triangle(); }
-  FOG_INLINE const TriangleD& getTriangle() const { return _data.triangle(); }
-
-  FOG_INLINE void setBox(const BoxD& box) { _type = SHAPE_TYPE_RECT; _data.rect() = box; }
-  FOG_INLINE void setRect(const RectD& rect) { _type = SHAPE_TYPE_RECT; _data.rect() = rect; }
-  FOG_INLINE void setRound(const RoundD& round) { _type = SHAPE_TYPE_ROUND; _data.round() = round; }
-
-  FOG_INLINE void setCircle(const CircleD& circle) { _type = SHAPE_TYPE_CIRCLE; _data.circle() = circle; }
-  FOG_INLINE void setEllipse(const EllipseD& ellipse) { _type = SHAPE_TYPE_ELLIPSE; _data.ellipse() = ellipse; }
-  FOG_INLINE void setChord(const ChordD& chord) { _type = SHAPE_TYPE_CHORD; _data.chord() = chord; }
-  FOG_INLINE void setPie(const PieD& pie) { _type = SHAPE_TYPE_PIE; _data.pie() = pie; }
-  FOG_INLINE void setTriangle(const TriangleD& triangle) { _type = SHAPE_TYPE_TRIANGLE; _data.triangle() = triangle; }
-
-  // --------------------------------------------------------------------------
-  // [BoundingBox / BoundingRect]
+  // [BoundingBox]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t getBoundingBox(BoxD& dst) const
   {
-    return _getBoundingBox(dst, NULL);
+    return fog_api.shaped_getBoundingBox(_type, _data, &dst, NULL);
   }
 
-  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& tr) const
+  FOG_INLINE err_t getBoundingBox(BoxD& dst, const TransformD& transform) const
   {
-    return _getBoundingBox(dst, &tr);
+    return fog_api.shaped_getBoundingBox(_type, _data, &dst, &transform);
   }
 
   FOG_INLINE err_t getBoundingRect(RectD& dst) const
   {
-    return _getBoundingRect(dst, NULL);
+    return getBoundingRect(dst, NULL);
   }
 
   FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD& tr) const
   {
-    return _getBoundingRect(dst, &tr);
+    return getBoundingRect(dst, &tr);
   }
 
-  FOG_INLINE err_t _getBoundingBox(BoxD& dst, const TransformD* tr) const
-  {
-    return fog_api.shaped_getBoundingBox(_type, &_data, &dst, tr);
-  }
-
-  FOG_INLINE err_t _getBoundingRect(RectD& dst, const TransformD* tr) const
+  FOG_INLINE err_t getBoundingRect(RectD& dst, const TransformD* tr) const
   {
     err_t err = fog_api.shaped_getBoundingBox(_type, &_data, reinterpret_cast<BoxD*>(&dst), tr);
     dst.w -= dst.x;
@@ -418,18 +237,23 @@ struct FOG_NO_EXPORT ShapeD
 
   FOG_INLINE bool hitTest(const PointD& pt) const
   {
-    return fog_api.shaped_hitTest(_type, &_data, &pt);
+    return fog_api.shaped_hitTest(_type, _data, &pt);
   }
 
   // --------------------------------------------------------------------------
-  // [Operator Overload]
+  // [Statics]
   // --------------------------------------------------------------------------
 
-  ShapeD& operator=(const ShapeD& other)
+  static FOG_INLINE err_t getBoundingBox(uint32_t shapeType, const void* shapeData,
+    BoxD* dst, const TransformD* transform = NULL)
   {
-    _type = other._type;
-    MemOps::copy(&_data, &other._data, sizeof(ShapeDataD));
-    return *this;
+    return fog_api.shaped_getBoundingBox(shapeType, shapeData, dst, transform);
+  }
+
+  static FOG_INLINE bool hitTest(uint32_t shapeType, const void* shapeData,
+    const PointD* pt)
+  {
+    return fog_api.shaped_hitTest(shapeType, shapeData, pt);
   }
 
   // --------------------------------------------------------------------------
@@ -437,7 +261,7 @@ struct FOG_NO_EXPORT ShapeD
   // --------------------------------------------------------------------------
 
   uint32_t _type;
-  ShapeDataD _data;
+  const void* _data;
 };
 
 // ============================================================================
@@ -453,4 +277,4 @@ _FOG_NUM_D(Shape)
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_GEOMETRY_SHAPE_TYPE_H
+#endif // _FOG_G2D_GEOMETRY_SHAPE_H

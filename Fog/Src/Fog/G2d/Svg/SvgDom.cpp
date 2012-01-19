@@ -1986,8 +1986,8 @@ err_t SvgCircleElement::onProcess(SvgVisitor* visitor) const
 
     if (r <= 0.0f) return ERR_OK;
 
-    ShapeF shape(CircleF(PointF(cx, cy), r));
-    return visitor->onShape((SvgElement*)this, shape);
+    CircleF circle(cx, cy, r);
+    return visitor->onShape((SvgElement*)this, ShapeF(&circle));
   }
 
   return ERR_OK;
@@ -2050,8 +2050,8 @@ err_t SvgEllipseElement::onProcess(SvgVisitor* visitor) const
 
     if (rx <= 0.0f || ry <= 0.0f) return ERR_OK;
 
-    ShapeF shape(EllipseF(PointF(cx, cy), PointF(rx, ry)));
-    return visitor->onShape((SvgElement*)this, shape);
+    EllipseF ellipse(cx, cy, rx, ry);
+    return visitor->onShape((SvgElement*)this, ShapeF(&ellipse));
   }
 
   return ERR_OK;
@@ -2164,8 +2164,8 @@ err_t SvgLineElement::onProcess(SvgVisitor* visitor) const
   float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
   float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
 
-  ShapeF shape(LineF(x1, y1, x2, y2));
-  return visitor->onShape((SvgElement*)this, shape);
+  LineF line(x1, y1, x2, y2);
+  return visitor->onShape((SvgElement*)this, ShapeF(&line));
 }
 
 err_t SvgLineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -2215,7 +2215,7 @@ err_t SvgPathElement::onProcess(SvgVisitor* visitor) const
   if (!a_d.isAssigned()) return ERR_OK;
 
   const PathF& path = a_d.getPath();
-  return visitor->onPath((SvgElement*)this, path);
+  return visitor->onShape((SvgElement*)this, ShapeF(&path));
 }
 
 err_t SvgPathElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -2259,7 +2259,7 @@ err_t SvgPolygonElement::onProcess(SvgVisitor* visitor) const
   if (!a_points.isAssigned()) return ERR_OK;
 
   const PathF& path = a_points.getPath();
-  return visitor->onPath((SvgElement*)this, path);
+  return visitor->onShape((SvgElement*)this, ShapeF(&path));
 }
 
 err_t SvgPolygonElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -2303,7 +2303,7 @@ err_t SvgPolylineElement::onProcess(SvgVisitor* visitor) const
   if (!a_points.isAssigned()) return ERR_OK;
 
   const PathF& path = a_points.getPath();
-  return visitor->onPath((SvgElement*)this, path);
+  return visitor->onShape((SvgElement*)this, ShapeF(&path));
 }
 
 err_t SvgPolylineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -2369,13 +2369,16 @@ err_t SvgRectElement::onProcess(SvgVisitor* visitor) const
     if (!a_rx.isAssigned() && a_ry.isAssigned()) radx = rady;
     if (!a_ry.isAssigned() && a_rx.isAssigned()) rady = radx;
 
-    ShapeF shape;
-
     if (radx <= float(0.0) || rady <= float(0.0))
-      shape.setRect(RectF(rx, ry, rw, rh));
+    {
+      RectF rect(rx, ry, rw, rh);
+      return visitor->onShape((SvgElement*)this, ShapeF(&rect));
+    }
     else
-      shape.setRound(RoundF(rx, ry, rw, rh, radx, rady));
-    return visitor->onShape((SvgElement*)this, shape);
+    {
+      RoundF round(rx, ry, rw, rh, radx, rady);
+      return visitor->onShape((SvgElement*)this, ShapeF(&round));
+    }
   }
 
   return ERR_OK;
@@ -2470,7 +2473,7 @@ err_t SvgTextElement::onProcess(SvgVisitor* visitor) const
       PathF path;
       visitor->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
 
-      err = visitor->onPath((SvgElement*)this, path);
+      err = visitor->onShape((SvgElement*)this, ShapeF(&path));
       if (FOG_IS_ERROR(err)) break;
     }
   }
@@ -2547,7 +2550,7 @@ err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
   err = visitor->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
   if (FOG_IS_ERROR(err)) return err;
 
-  err = visitor->onPath((SvgElement*)this, path);
+  err = visitor->onShape((SvgElement*)this, ShapeF(&path));
   visitor->_textCursor.set(x, y);
   return err;
 }

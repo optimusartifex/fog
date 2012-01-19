@@ -165,18 +165,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *PaintRectsD)(Painter* self, const RectD* r, size_t count);
 
   typedef err_t (FOG_CDECL *PaintPolylineI)(Painter* self, const PointI* p, size_t count);
-  typedef err_t (FOG_CDECL *PaintPolylineF)(Painter* self, const PointF* p, size_t count);
-  typedef err_t (FOG_CDECL *PaintPolylineD)(Painter* self, const PointD* p, size_t count);
-
   typedef err_t (FOG_CDECL *PaintPolygonI)(Painter* self, const PointI* p, size_t count);
-  typedef err_t (FOG_CDECL *PaintPolygonF)(Painter* self, const PointF* p, size_t count);
-  typedef err_t (FOG_CDECL *PaintPolygonD)(Painter* self, const PointD* p, size_t count);
 
   typedef err_t (FOG_CDECL *PaintShapeF)(Painter* self, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *PaintShapeD)(Painter* self, uint32_t shapeType, const void* shapeData);
-
-  typedef err_t (FOG_CDECL *PaintPathF)(Painter* self, const PathF* p);
-  typedef err_t (FOG_CDECL *PaintPathD)(Painter* self, const PathD* p);
 
   typedef err_t (FOG_CDECL *PaintTextAtI)(Painter* self, const PointI* p, const StringW* text, const Font* font, const RectI* clip);
   typedef err_t (FOG_CDECL *PaintTextAtF)(Painter* self, const PointF* p, const StringW* text, const Font* font, const RectF* clip);
@@ -205,18 +197,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
   PaintRectD drawRectD;
 
   PaintPolylineI drawPolylineI;
-  PaintPolylineF drawPolylineF;
-  PaintPolylineD drawPolylineD;
-
   PaintPolygonI drawPolygonI;
-  PaintPolygonF drawPolygonF;
-  PaintPolygonD drawPolygonD;
 
   PaintShapeF drawShapeF;
   PaintShapeD drawShapeD;
-
-  PaintPathF drawPathF;
-  PaintPathD drawPathD;
 
   // --------------------------------------------------------------------------
   // [Funcs - Fill]
@@ -229,18 +213,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
   PaintRectD fillRectD;
 
   PaintRectsI fillRectsI;
-  PaintRectsF fillRectsF;
-  PaintRectsD fillRectsD;
-
   PaintPolygonI fillPolygonI;
-  PaintPolygonF fillPolygonF;
-  PaintPolygonD fillPolygonD;
 
   PaintShapeF fillShapeF;
   PaintShapeD fillShapeD;
-
-  PaintPathF fillPathF;
-  PaintPathD fillPathD;
 
   PaintTextAtI fillTextAtI;
   PaintTextAtF fillTextAtF;
@@ -310,8 +286,8 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *FilterRectF)(Painter* self, const FeBase* fe, const RectF* r);
   typedef err_t (FOG_CDECL *FilterRectD)(Painter* self, const FeBase* fe, const RectD* r);
 
-  typedef err_t (FOG_CDECL *FilterPathF)(Painter* self, const FeBase* fe, const PathF* p);
-  typedef err_t (FOG_CDECL *FilterPathD)(Painter* self, const FeBase* fe, const PathD* p);
+  typedef err_t (FOG_CDECL *FilterShapeF)(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData);
+  typedef err_t (FOG_CDECL *FilterShapeD)(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData);
 
   // --------------------------------------------------------------------------
   // [Funcs - Filter]
@@ -323,8 +299,8 @@ struct FOG_NO_EXPORT PaintEngineVTable
   FilterRectF filterRectF;
   FilterRectD filterRectD;
 
-  FilterPathF filterPathF;
-  FilterPathD filterPathD;
+  FilterShapeF filterShapeF;
+  FilterShapeD filterShapeD;
 
   // --------------------------------------------------------------------------
   // [Types - Clip]
@@ -335,18 +311,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *ClipRectD)(Painter* self, uint32_t clipOp, const RectD* r);
 
   typedef err_t (FOG_CDECL *ClipRectsI)(Painter* self, uint32_t clipOp, const RectI* r, size_t count);
-  typedef err_t (FOG_CDECL *ClipRectsF)(Painter* self, uint32_t clipOp, const RectF* r, size_t count);
-  typedef err_t (FOG_CDECL *ClipRectsD)(Painter* self, uint32_t clipOp, const RectD* r, size_t count);
-
   typedef err_t (FOG_CDECL *ClipPolygonI)(Painter* self, uint32_t clipOp, const PointI* p, size_t count);
-  typedef err_t (FOG_CDECL *ClipPolygonF)(Painter* self, uint32_t clipOp, const PointF* p, size_t count);
-  typedef err_t (FOG_CDECL *ClipPolygonD)(Painter* self, uint32_t clipOp, const PointD* p, size_t count);
 
   typedef err_t (FOG_CDECL *ClipShapeF)(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *ClipShapeD)(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
-
-  typedef err_t (FOG_CDECL *ClipPathF)(Painter* self, uint32_t clipOp, const PathF* p);
-  typedef err_t (FOG_CDECL *ClipPathD)(Painter* self, uint32_t clipOp, const PathD* p);
 
   typedef err_t (FOG_CDECL *ClipTextAtI)(Painter* self, uint32_t clipOp, const PointI* p, const StringW* text, const Font* font, const RectI* clip);
   typedef err_t (FOG_CDECL *ClipTextAtF)(Painter* self, uint32_t clipOp, const PointF* p, const StringW* text, const Font* font, const RectF* clip);
@@ -377,18 +345,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
   ClipRectD clipRectD;
 
   ClipRectsI clipRectsI;
-  ClipRectsF clipRectsF;
-  ClipRectsD clipRectsD;
-
   ClipPolygonI clipPolygonI;
-  ClipPolygonF clipPolygonF;
-  ClipPolygonD clipPolygonD;
 
   ClipShapeF clipShapeF;
   ClipShapeD clipShapeD;
-
-  ClipPathF clipPathF;
-  ClipPathD clipPathD;
 
   ClipTextAtI clipTextAtI;
   ClipTextAtF clipTextAtF;

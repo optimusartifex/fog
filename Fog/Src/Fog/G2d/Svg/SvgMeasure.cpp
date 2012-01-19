@@ -35,7 +35,8 @@ err_t SvgMeasure::onShape(SvgElement* obj, const ShapeF& shape)
 
   if (_fillStyle.isPaintable())
   {
-    if (shape.getBoundingBox(b, _transform) == ERR_OK) boundWith(b);
+    if (shape.getBoundingBox(b, _transform) == ERR_OK)
+      boundWith(b);
   }
 
   if (_strokeStyle.isPaintable())
@@ -43,28 +44,7 @@ err_t SvgMeasure::onShape(SvgElement* obj, const ShapeF& shape)
     PathStrokerF stroker(_strokeParams);
 
     _pathTmp.clear();
-    stroker.strokeShape(_pathTmp, shape.getType(), shape.getData());
-    if (_pathTmp.getBoundingBox(b, _transform) == ERR_OK) boundWith(b);
-  }
-
-  return ERR_OK;
-}
-
-err_t SvgMeasure::onPath(SvgElement* obj, const PathF& path)
-{
-  BoxF b;
-
-  if (_fillStyle.isPaintable())
-  {
-    if (path.getBoundingBox(b, _transform) == ERR_OK) boundWith(b);
-  }
-
-  if (_strokeStyle.isPaintable())
-  {
-    PathStrokerF stroker(_strokeParams);
-
-    _pathTmp.clear();
-    stroker.strokePath(_pathTmp, path);
+    stroker.strokeShape(_pathTmp, shape);
     if (_pathTmp.getBoundingBox(b, _transform) == ERR_OK) boundWith(b);
   }
 

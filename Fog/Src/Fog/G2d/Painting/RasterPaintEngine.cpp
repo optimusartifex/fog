@@ -2513,28 +2513,6 @@ static err_t FOG_CDECL RasterPaintEngine_drawPolylineI(Painter* self, const Poin
   }
 }
 
-static err_t FOG_CDECL RasterPaintEngine_drawPolylineF(Painter* self, const PointF* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathF* path = &engine->ctx.tmpPathF[2];
-  path->clear();
-  path->polyline(p, count);
-  return engine->serializer->strokeAndFillPathF(engine, path);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_drawPolylineD(Painter* self, const PointD* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathD* path = &engine->ctx.tmpPathD[2];
-  path->clear();
-  path->polyline(p, count);
-  return engine->serializer->strokeAndFillPathD(engine, path);
-}
-
 static err_t FOG_CDECL RasterPaintEngine_drawPolygonI(Painter* self, const PointI* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
@@ -2556,37 +2534,32 @@ static err_t FOG_CDECL RasterPaintEngine_drawPolygonI(Painter* self, const Point
   }
 }
 
-static err_t FOG_CDECL RasterPaintEngine_drawPolygonF(Painter* self, const PointF* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathF* path = &engine->ctx.tmpPathF[2];
-  path->clear();
-  path->polygon(p, count);
-  return engine->serializer->strokeAndFillPathF(engine, path);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_drawPolygonD(Painter* self, const PointD* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  PathD* path = &engine->ctx.tmpPathD[2];
-  path->clear();
-  path->polygon(p, count);
-  return engine->serializer->strokeAndFillPathD(engine, path);
-}
-
 static err_t FOG_CDECL RasterPaintEngine_drawShapeF(Painter* self, uint32_t shapeType, const void* shapeData)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
 
-  PathF* path = &engine->ctx.tmpPathF[2];
-  path->clear();
-  path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return engine->serializer->strokeAndFillPathF(engine, path);
+  switch (shapeType)
+  {
+    case SHAPE_TYPE_NONE:
+    {
+      return ERR_GEOMETRY_NONE;
+    }
+  
+    case SHAPE_TYPE_PATH:
+    {
+      const PathF* path = reinterpret_cast<const PathF*>(shapeData);
+      return engine->serializer->strokeAndFillPathF(engine, path);
+    }
+
+    default:
+    {
+      PathF* path = &engine->ctx.tmpPathF[2];
+      path->clear();
+      path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+      return engine->serializer->strokeAndFillPathF(engine, path);
+    }
+  }
 }
 
 static err_t FOG_CDECL RasterPaintEngine_drawShapeD(Painter* self, uint32_t shapeType, const void* shapeData)
@@ -2594,26 +2567,27 @@ static err_t FOG_CDECL RasterPaintEngine_drawShapeD(Painter* self, uint32_t shap
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_STROKE_FUNC();
 
-  PathD* path = &engine->ctx.tmpPathD[2];
-  path->clear();
-  path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return engine->serializer->strokeAndFillPathD(engine, path);
-}
+  switch (shapeType)
+  {
+    case SHAPE_TYPE_NONE:
+    {
+      return ERR_GEOMETRY_NONE;
+    }
+  
+    case SHAPE_TYPE_PATH:
+    {
+      const PathD* path = reinterpret_cast<const PathD*>(shapeData);
+      return engine->serializer->strokeAndFillPathD(engine, path);
+    }
 
-static err_t FOG_CDECL RasterPaintEngine_drawPathF(Painter* self, const PathF* p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  return engine->serializer->strokeAndFillPathF(engine, p);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_drawPathD(Painter* self, const PathD* p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_STROKE_FUNC();
-
-  return engine->serializer->strokeAndFillPathD(engine, p);
+    default:
+    {
+      PathD* path = &engine->ctx.tmpPathD[2];
+      path->clear();
+      path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+      return engine->serializer->strokeAndFillPathD(engine, path);
+    }
+  }
 }
 
 // ============================================================================
@@ -2696,9 +2670,6 @@ static err_t FOG_CDECL RasterPaintEngine_fillRectD(Painter* self, const RectD* r
   return engine->serializer->fillNormalizedBoxD(engine, &box);
 }
 
-// TODO: It's easy to clip rectangles, so clip them here and call
-// doFillNormalizedPath() instead.
-
 static err_t FOG_CDECL RasterPaintEngine_fillRectsI(Painter* self, const RectI* r, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
@@ -2719,43 +2690,6 @@ static err_t FOG_CDECL RasterPaintEngine_fillRectsI(Painter* self, const RectI* 
     return engine->serializer->fillPathD(engine, path, FILL_RULE_NON_ZERO);
   }
 }
-
-static err_t FOG_CDECL RasterPaintEngine_fillRectsF(Painter* self, const RectF* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  if (count == 0)
-    return ERR_OK;
-
-  if (count == 1)
-    return engine->vtable->fillRectF(self, r);
-
-  PathF* path = &engine->ctx.tmpPathF[0];
-  path->clear();
-  path->rects(r, count, PATH_DIRECTION_CW);
-
-  return engine->serializer->fillPathF(engine, path, FILL_RULE_NON_ZERO);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_fillRectsD(Painter* self, const RectD* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  if (count == 0)
-    return ERR_OK;
-
-  if (count == 1)
-    return engine->vtable->fillRectD(self, r);
-
-  PathD* path = &engine->ctx.tmpPathD[0];
-  path->clear();
-  path->rects(r, count, PATH_DIRECTION_CW);
-  return engine->serializer->fillPathD(engine, path, FILL_RULE_NON_ZERO);
-}
-
-// TODO: It's easy to clip polygon, do it here, PathClipper should be enabled to do that.
 
 static err_t FOG_CDECL RasterPaintEngine_fillPolygonI(Painter* self, const PointI* p, size_t count)
 {
@@ -2778,70 +2712,80 @@ static err_t FOG_CDECL RasterPaintEngine_fillPolygonI(Painter* self, const Point
   }
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillPolygonF(Painter* self, const PointF* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  PathF* path = &engine->ctx.tmpPathF[0];
-  path->clear();
-  path->polygon(p, count, PATH_DIRECTION_CW);
-  return engine->serializer->fillPathF(engine, path, engine->ctx.paintHints.fillRule);
-}
-
-static err_t FOG_CDECL RasterPaintEngine_fillPolygonD(Painter* self, const PointD* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  PathD* path = &engine->ctx.tmpPathD[0];
-  path->clear();
-  path->polygon(p, count, PATH_DIRECTION_CW);
-  return engine->serializer->fillPathD(engine, path, engine->ctx.paintHints.fillRule);
-}
-
 static err_t FOG_CDECL RasterPaintEngine_fillShapeF(Painter* self, uint32_t shapeType, const void* shapeData)
 {
-  if (shapeType == SHAPE_TYPE_RECT)
-    return self->_vtable->fillRectF(self, static_cast<const RectF*>(shapeData));
-
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  PathF* path = &engine->ctx.tmpPathF[0];
-  path->clear();
-  path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return engine->serializer->fillPathF(engine, path, engine->ctx.paintHints.fillRule);
+  switch (shapeType)
+  {
+    case SHAPE_TYPE_RECT:
+    {
+      return self->_vtable->fillRectF(self, static_cast<const RectF*>(shapeData));
+    }
+
+    case SHAPE_TYPE_RECT_ARRAY:
+    {
+      const RectArrayF* rects = reinterpret_cast<const RectArrayF*>(shapeData);
+      if (rects->getLength() == 1)
+        return self->_vtable->fillRectF(self, rects->getData());
+      else
+        goto _Default;
+    }
+
+    case SHAPE_TYPE_PATH:
+    {
+      const PathF* path = reinterpret_cast<const PathF*>(shapeData);
+      return engine->serializer->fillPathF(engine, path, engine->ctx.paintHints.fillRule);
+    }
+
+    default:
+    {
+_Default:
+      PathF* path = &engine->ctx.tmpPathF[0];
+      path->clear();
+      path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+      return engine->serializer->fillPathF(engine, path, engine->ctx.paintHints.fillRule);
+    }
+  }
 }
 
 static err_t FOG_CDECL RasterPaintEngine_fillShapeD(Painter* self, uint32_t shapeType, const void* shapeData)
 {
-  if (shapeType == SHAPE_TYPE_RECT)
-    return self->_vtable->fillRectD(self, static_cast<const RectD*>(shapeData));
-
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  PathD* path = &engine->ctx.tmpPathD[0];
-  path->clear();
-  path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
-  return engine->serializer->fillPathD(engine, path, engine->ctx.paintHints.fillRule);
-}
+  switch (shapeType)
+  {
+    case SHAPE_TYPE_RECT:
+    {
+      return self->_vtable->fillRectD(self, static_cast<const RectD*>(shapeData));
+    }
 
-static err_t FOG_CDECL RasterPaintEngine_fillPathF(Painter* self, const PathF* p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
+    case SHAPE_TYPE_RECT_ARRAY:
+    {
+      const RectArrayD* rects = reinterpret_cast<const RectArrayD*>(shapeData);
+      if (rects->getLength() == 1)
+        return self->_vtable->fillRectD(self, rects->getData());
+      else
+        goto _Default;
+    }
 
-  return engine->serializer->fillPathF(engine, p, engine->ctx.paintHints.fillRule);
-}
+    case SHAPE_TYPE_PATH:
+    {
+      const PathD* path = reinterpret_cast<const PathD*>(shapeData);
+      return engine->serializer->fillPathD(engine, path, engine->ctx.paintHints.fillRule);
+    }
 
-static err_t FOG_CDECL RasterPaintEngine_fillPathD(Painter* self, const PathD* p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-  _FOG_RASTER_ENTER_FILL_FUNC();
-
-  return engine->serializer->fillPathD(engine, p, engine->ctx.paintHints.fillRule);
+    default:
+    {
+_Default:
+      PathD* path = &engine->ctx.tmpPathD[0];
+      path->clear();
+      path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+      return engine->serializer->fillPathD(engine, path, engine->ctx.paintHints.fillRule);
+    }
+  }
 }
 
 static err_t FOG_CDECL RasterPaintEngine_fillTextAtI(Painter* self, const PointI* p, const StringW* text, const Font* font, const RectI* clip)
@@ -3562,7 +3506,7 @@ static err_t FOG_CDECL RasterPaintEngine_filterRectD(Painter* self, const FeBase
   return engine->serializer->filterNormalizedBoxD(engine, feBase, &box);
 }
 
-static err_t FOG_CDECL RasterPaintEngine_filterPathF(Painter* self, const FeBase* feBase, const PathF* p)
+static err_t FOG_CDECL RasterPaintEngine_filterShapeF(Painter* self, const FeBase* feBase, uint32_t shapeType, const void* shapeData)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILTER_FUNC();
@@ -3570,10 +3514,45 @@ static err_t FOG_CDECL RasterPaintEngine_filterPathF(Painter* self, const FeBase
   if (feBase->getFeType() == FE_TYPE_NONE)
     return ERR_OK;
 
-  return engine->serializer->filterPathF(engine, feBase, p, engine->ctx.paintHints.fillRule);
+  switch (shapeType)
+  {
+    case SHAPE_TYPE_NONE:
+    {
+      return ERR_GEOMETRY_NONE;
+    }
+  
+    case SHAPE_TYPE_RECT:
+    {
+      return self->_vtable->filterRectF(self, feBase, static_cast<const RectF*>(shapeData));
+    }
+
+    case SHAPE_TYPE_RECT_ARRAY:
+    {
+      const RectArrayF* rects = reinterpret_cast<const RectArrayF*>(shapeData);
+      if (rects->getLength() == 1)
+        return engine->vtable->filterRectF(self, feBase, rects->getData());
+      else
+        goto _Default;
+    }
+
+    case SHAPE_TYPE_PATH:
+    {
+      const PathF* path = reinterpret_cast<const PathF*>(shapeData);
+      return engine->serializer->filterPathF(engine, feBase, path, engine->ctx.paintHints.fillRule);
+    }
+
+    default:
+    {
+_Default:
+      PathF* path = &engine->ctx.tmpPathF[0];
+      path->clear();
+      path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+      return engine->serializer->filterPathF(engine, feBase, path, engine->ctx.paintHints.fillRule);
+    }
+  }
 }
 
-static err_t FOG_CDECL RasterPaintEngine_filterPathD(Painter* self, const FeBase* feBase, const PathD* p)
+static err_t FOG_CDECL RasterPaintEngine_filterShapeD(Painter* self, const FeBase* feBase, uint32_t shapeType, const void* shapeData)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILTER_FUNC();
@@ -3581,7 +3560,42 @@ static err_t FOG_CDECL RasterPaintEngine_filterPathD(Painter* self, const FeBase
   if (feBase->getFeType() == FE_TYPE_NONE)
     return ERR_OK;
 
-  return engine->serializer->filterPathD(engine, feBase, p, engine->ctx.paintHints.fillRule);
+  switch (shapeType)
+  {
+    case SHAPE_TYPE_NONE:
+    {
+      return ERR_GEOMETRY_NONE;
+    }
+  
+    case SHAPE_TYPE_RECT:
+    {
+      return self->_vtable->filterRectD(self, feBase, static_cast<const RectD*>(shapeData));
+    }
+
+    case SHAPE_TYPE_RECT_ARRAY:
+    {
+      const RectArrayD* rects = reinterpret_cast<const RectArrayD*>(shapeData);
+      if (rects->getLength() == 1)
+        return engine->vtable->filterRectD(self, feBase, rects->getData());
+      else
+        goto _Default;
+    }
+
+    case SHAPE_TYPE_PATH:
+    {
+      const PathD* path = reinterpret_cast<const PathD*>(shapeData);
+      return engine->serializer->filterPathD(engine, feBase, path, engine->ctx.paintHints.fillRule);
+    }
+
+    default:
+    {
+_Default:
+      PathD* path = &engine->ctx.tmpPathD[0];
+      path->clear();
+      path->_shape(shapeType, shapeData, PATH_DIRECTION_CW, NULL);
+      return engine->serializer->filterPathD(engine, feBase, path, engine->ctx.paintHints.fillRule);
+    }
+  }
 }
 
 // ============================================================================
@@ -3699,39 +3713,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipRectsI(Painter* self, uint32_t clip
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipRectsF(Painter* self, uint32_t clipOp, const RectF* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_clipRectsD(Painter* self, uint32_t clipOp, const RectD* r, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
 static err_t FOG_CDECL RasterPaintEngine_clipPolygonI(Painter* self, uint32_t clipOp, const PointI* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_clipPolygonF(Painter* self, uint32_t clipOp, const PointF* p, size_t count)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_clipPolygonD(Painter* self, uint32_t clipOp, const PointD* p, size_t count)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
 
@@ -3748,22 +3730,6 @@ static err_t FOG_CDECL RasterPaintEngine_clipShapeF(Painter* self, uint32_t clip
 }
 
 static err_t FOG_CDECL RasterPaintEngine_clipShapeD(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_clipPathF(Painter* self, uint32_t clipOp, const PathF* p)
-{
-  RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
-
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_CDECL RasterPaintEngine_clipPathD(Painter* self, uint32_t clipOp, const PathD* p)
 {
   RasterPaintEngine* engine = reinterpret_cast<RasterPaintEngine*>(self->_engine);
 
@@ -4839,18 +4805,10 @@ static void RasterPaintEngine_init_vtable()
   v->drawRectD = RasterPaintEngine_drawRectD;
 
   v->drawPolylineI = RasterPaintEngine_drawPolylineI;
-  v->drawPolylineF = RasterPaintEngine_drawPolylineF;
-  v->drawPolylineD = RasterPaintEngine_drawPolylineD;
-
   v->drawPolygonI = RasterPaintEngine_drawPolygonI;
-  v->drawPolygonF = RasterPaintEngine_drawPolygonF;
-  v->drawPolygonD = RasterPaintEngine_drawPolygonD;
 
   v->drawShapeF = RasterPaintEngine_drawShapeF;
   v->drawShapeD = RasterPaintEngine_drawShapeD;
-
-  v->drawPathF = RasterPaintEngine_drawPathF;
-  v->drawPathD = RasterPaintEngine_drawPathD;
 
   // --------------------------------------------------------------------------
   // [Fill]
@@ -4863,18 +4821,10 @@ static void RasterPaintEngine_init_vtable()
   v->fillRectD = RasterPaintEngine_fillRectD;
 
   v->fillRectsI = RasterPaintEngine_fillRectsI;
-  v->fillRectsF = RasterPaintEngine_fillRectsF;
-  v->fillRectsD = RasterPaintEngine_fillRectsD;
-
   v->fillPolygonI = RasterPaintEngine_fillPolygonI;
-  v->fillPolygonF = RasterPaintEngine_fillPolygonF;
-  v->fillPolygonD = RasterPaintEngine_fillPolygonD;
 
   v->fillShapeF = RasterPaintEngine_fillShapeF;
   v->fillShapeD = RasterPaintEngine_fillShapeD;
-
-  v->fillPathF = RasterPaintEngine_fillPathF;
-  v->fillPathD = RasterPaintEngine_fillPathD;
 
   v->fillTextAtI = RasterPaintEngine_fillTextAtI;
   v->fillTextAtF = RasterPaintEngine_fillTextAtF;
@@ -4924,8 +4874,8 @@ static void RasterPaintEngine_init_vtable()
   v->filterRectF = RasterPaintEngine_filterRectF;
   v->filterRectD = RasterPaintEngine_filterRectD;
 
-  v->filterPathF = RasterPaintEngine_filterPathF;
-  v->filterPathD = RasterPaintEngine_filterPathD;
+  v->filterShapeF = RasterPaintEngine_filterShapeF;
+  v->filterShapeD = RasterPaintEngine_filterShapeD;
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -4936,18 +4886,10 @@ static void RasterPaintEngine_init_vtable()
   v->clipRectD = RasterPaintEngine_clipRectD;
 
   v->clipRectsI = RasterPaintEngine_clipRectsI;
-  v->clipRectsF = RasterPaintEngine_clipRectsF;
-  v->clipRectsD = RasterPaintEngine_clipRectsD;
-
   v->clipPolygonI = RasterPaintEngine_clipPolygonI;
-  v->clipPolygonF = RasterPaintEngine_clipPolygonF;
-  v->clipPolygonD = RasterPaintEngine_clipPolygonD;
 
   v->clipShapeF = RasterPaintEngine_clipShapeF;
   v->clipShapeD = RasterPaintEngine_clipShapeD;
-
-  v->clipPathF = RasterPaintEngine_clipPathF;
-  v->clipPathD = RasterPaintEngine_clipPathD;
 
   v->clipTextAtI = RasterPaintEngine_clipTextAtI;
   v->clipTextAtF = RasterPaintEngine_clipTextAtF;

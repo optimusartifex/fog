@@ -16,7 +16,6 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Round.h>
-#include <Fog/G2d/Geometry/Shape.h>
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Text/Font.h>
@@ -259,7 +258,6 @@ struct FOG_API SvgVisitor
   virtual err_t onVisit(SvgElement* obj);
 
   virtual err_t onShape(SvgElement* obj, const ShapeF& shape) = 0;
-  virtual err_t onPath(SvgElement* obj, const PathF& path) = 0;
   virtual err_t onImage(SvgElement* obj, const PointF& pt, const Image& image) = 0;
 
   // --------------------------------------------------------------------------

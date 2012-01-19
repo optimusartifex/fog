@@ -26,9 +26,12 @@
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/PathInfo.h>
 #include <Fog/G2d/Geometry/Point.h>
+#include <Fog/G2d/Geometry/PointArray.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Rect.h>
+#include <Fog/G2d/Geometry/RectArray.h>
+#include <Fog/G2d/Geometry/Round.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Tools/Region.h>
 
@@ -1488,20 +1491,24 @@ static err_t FOG_CDECL PathT_polygonT(NumT_(Path)* self, const NumT_(Point)* pts
 // ============================================================================
 
 // ${SHAPE_TYPE:BEGIN}
-static const uint8_t PathT_shapeSize[] =
+static const uint8_t PathT_shapeDataSize[] =
 {
-  /* 00: SHAPE_TYPE_NONE    */ 0,
-  /* 01: SHAPE_TYPE_LINE    */ 2,
-  /* 02: SHAPE_TYPE_QBEZIER */ 3,
-  /* 03: SHAPE_TYPE_CBEZIER */ 4,
-  /* 04: SHAPE_TYPE_ARC     */ 13,
-  /* 05: SHAPE_TYPE_RECT    */ 5,
-  /* 06: SHAPE_TYPE_ROUND   */ 18,
-  /* 07: SHAPE_TYPE_CIRCLE  */ 14,
-  /* 08: SHAPE_TYPE_ELLIPSE */ 14,
-  /* 09: SHAPE_TYPE_CHORD   */ 20,
-  /* 10: SHAPE_TYPE_PIE     */ 20,
-  /* 11: SHAPE_TYPE_TRIANGLE*/ 4
+  /* 00: SHAPE_TYPE_NONE            */ 0,
+  /* 01: SHAPE_TYPE_LINE            */ 2,
+  /* 02: SHAPE_TYPE_QBEZIER         */ 3,
+  /* 03: SHAPE_TYPE_CBEZIER         */ 4,
+  /* 04: SHAPE_TYPE_ARC             */ 13,
+  /* 05: SHAPE_TYPE_RECT            */ 5,
+  /* 06: SHAPE_TYPE_ROUND           */ 18,
+  /* 07: SHAPE_TYPE_CIRCLE          */ 14,
+  /* 08: SHAPE_TYPE_ELLIPSE         */ 14,
+  /* 09: SHAPE_TYPE_CHORD           */ 20,
+  /* 10: SHAPE_TYPE_PIE             */ 20,
+  /* 11: SHAPE_TYPE_TRIANGLE        */ 4,
+  /* 12: SHAPE_TYPE_POLYLINE        */ 0,
+  /* 13: SHAPE_TYPE_POLYGON         */ 0,
+  /* 13: SHAPE_TYPE_RECT_ARRAY      */ 0,
+  /* 14: SHAPE_TYPE_PATH            */ 0
 };
 // ${SHAPE_TYPE:END}
 
@@ -1521,12 +1528,54 @@ static err_t FOG_CDECL PathT_shape(
       return ERR_GEOMETRY_DEGENERATE;
 
     NumT_T1(PathTmp, 32) tmp;
-    FOG_RETURN_ON_ERROR(tmp._shape(shapeType, shapeData, direction));
+    FOG_RETURN_ON_ERROR(tmp._shape(shapeType, shapeData, direction, NULL));
     return self->appendTransformed(tmp, *tr);
   }
 
-  size_t pos = self->_add(PathT_shapeSize[shapeType]);
-  if (pos == INVALID_INDEX) return ERR_RT_OUT_OF_MEMORY;
+  size_t shapeDataSize = PathT_shapeDataSize[shapeType];
+  if (shapeDataSize == 0)
+  {
+    switch (shapeType)
+    {
+      case SHAPE_TYPE_NONE:
+      {
+        return ERR_GEOMETRY_NONE;
+      }
+      
+      case SHAPE_TYPE_POLYLINE:
+      {
+        const NumT_(PointArray)* poly = reinterpret_cast<const NumT_(PointArray)*>(shapeData);
+        return self->polyline(poly->getData(), poly->getLength(), direction);
+      }
+
+      case SHAPE_TYPE_POLYGON:
+      {
+        const NumT_(PointArray)* poly = reinterpret_cast<const NumT_(PointArray)*>(shapeData);
+        return self->polygon(poly->getData(), poly->getLength(), direction);
+      }
+
+      case SHAPE_TYPE_RECT_ARRAY:
+      {
+        const NumT_(RectArray)* rects = reinterpret_cast<const NumT_(RectArray)*>(shapeData);
+        return self->rects(rects->getData(), rects->getLength(), direction);
+      }
+
+      case SHAPE_TYPE_PATH:
+      {
+        const NumT_(Path)* path = reinterpret_cast<const NumT_(Path)*>(shapeData);
+
+        // TODO: Direction!
+        return self->append(*path);
+      }
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+  }
+
+  size_t pos = self->_add(shapeDataSize);
+  if (pos == INVALID_INDEX)
+    return ERR_RT_OUT_OF_MEMORY;
 
   uint8_t* dstCmd = self->_d->commands + pos;
   NumT_(Point)* dstPts = self->_d->vertices + pos;
@@ -1538,11 +1587,6 @@ static err_t FOG_CDECL PathT_shape(
 
   switch (shapeType)
   {
-    case SHAPE_TYPE_NONE:
-    {
-      return ERR_GEOMETRY_NONE;
-    }
-
     // --------------------------------------------------------------------------
     // [Unclosed]
     // --------------------------------------------------------------------------
@@ -1729,7 +1773,13 @@ _ShapeRect:
       NumT ryKappaInv = ry * NumT(MATH_1_MINUS_KAPPA);
 
       if (Math::isFuzzyZero(rx) || Math::isFuzzyZero(ry))
+      {
+        // 13 == difference between vertices needed by SHAPE_TYPE_ROUND
+        // and SHAPE_TYPE_RECT.
+        self->_d->length -= 13;
+
         goto _ShapeRect;
+      }
 
       NumT x0 = r.x;
       NumT y0 = r.y;

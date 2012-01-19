@@ -372,9 +372,9 @@ struct FOG_NO_EXPORT PathStrokerF
   // [Stroke]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t strokeShape(PathF& dst, uint32_t shapeType, const void* shapeData) const
+  FOG_INLINE err_t strokeShape(PathF& dst, const ShapeF& shape) const
   {
-    return fog_api.pathstrokerf_strokeShape(this, &dst, shapeType, shapeData);
+    return fog_api.pathstrokerf_strokeShape(this, &dst, shape.getType(), shape.getData());
   }
 
   FOG_INLINE err_t strokeRect(PathF& dst, const RectF& rect) const
@@ -568,9 +568,9 @@ struct FOG_NO_EXPORT PathStrokerD
   // [Stroke]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t strokeShape(PathD& dst, uint32_t shapeType, const void* shapeData) const
+  FOG_INLINE err_t strokeShape(PathD& dst, const ShapeD& shape) const
   {
-    return fog_api.pathstrokerd_strokeShape(this, &dst, shapeType, shapeData);
+    return fog_api.pathstrokerd_strokeShape(this, &dst, shape.getType(), shape.getData());
   }
 
   FOG_INLINE err_t strokeRect(PathD& dst, const RectD& rect) const

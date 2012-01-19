@@ -1021,10 +1021,12 @@ Set(FOG_G2D_GEOMETRY_HEADERS
   Src/Fog/G2d/Geometry/PathTmp_p.h
   Src/Fog/G2d/Geometry/Pie.h
   Src/Fog/G2d/Geometry/Point.h
+  Src/Fog/G2d/Geometry/PointArray.h
   Src/Fog/G2d/Geometry/Polygon.h
   Src/Fog/G2d/Geometry/PolygonTmp_p.h
   Src/Fog/G2d/Geometry/QBezier.h
   Src/Fog/G2d/Geometry/Rect.h
+  Src/Fog/G2d/Geometry/RectArray.h
   Src/Fog/G2d/Geometry/Round.h
   Src/Fog/G2d/Geometry/Shape.h
   Src/Fog/G2d/Geometry/Size.h

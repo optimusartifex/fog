@@ -212,7 +212,7 @@ _Has16BPC:
           // |10|11| - Y1/X0 and Y1/X1
           // +--+--+
 
-          // TODO: 16-bit rasterizer requires weight in 16-bit fixed point.
+          // TODO: 16-bit image rasterizer requires weight in 16-bit fixed point.
           ctx->_d.texture.simple.fY0X0 = ((      fy) * (      fx)) >> 8;
           ctx->_d.texture.simple.fY0X1 = ((      fy) * (256 - fx)) >> 8;
           ctx->_d.texture.simple.fY1X0 = ((256 - fy) * (      fx)) >> 8;

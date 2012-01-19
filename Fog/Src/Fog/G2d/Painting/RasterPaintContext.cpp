@@ -86,7 +86,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         break;
 
       case IMAGE_PRECISION_WORD:
-        // TODO: 16-bit rasterizer.
+        // TODO: 16-bit image processing.
         // boxRasterizer16.destroy();
         // pathRasterizer16.destroy();
         // scanline16.destroy();
@@ -114,7 +114,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
       case IMAGE_PRECISION_WORD:
         fullOpacity.u = 0x10000;
         fullOpacity.f = float(0x10000);
-        // TODO: 16-bit rasterizer.
+        // TODO: 16-bit image processing.
         // boxRasterizer16.init();
         // pathRasterizer16.init();
         // scanline16.init();
@@ -137,7 +137,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
 
     case IMAGE_PRECISION_WORD:
       pcBpl *= 8;
-      // TODO: 16-bit rasterizer.
+      // TODO: 16-bit image processing.
       // FOG_RETURN_ON_ERROR(scanline16->prepare(layer.size.w));
       // FOG_RETURN_ON_ERROR(scanlineExt16->prepare(layer.size.w));
       break;

@@ -39,6 +39,23 @@ struct FOG_NO_EXPORT FeMorphology : public FeBorder
     fog_api.femorphology_ctorCopy(this, &other);
   }
 
+  FOG_INLINE FeMorphology(uint32_t morphologyType, float radius)
+  {
+    fog_api.femorphology_ctor(this);
+
+    _morphologyType = morphologyType;
+    _hRadius = radius;
+    _vRadius = radius;
+  }
+
+  FOG_INLINE FeMorphology(uint32_t morphologyType, float hRadius, float vRadius)
+  {
+    fog_api.femorphology_ctor(this);
+
+    _morphologyType = morphologyType;
+    _hRadius = hRadius;
+    _vRadius = vRadius;
+  }
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------

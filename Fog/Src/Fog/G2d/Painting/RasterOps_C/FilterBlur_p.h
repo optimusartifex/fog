@@ -35,30 +35,30 @@ namespace RasterOps_C {
 // indices of pixels which are outside of the raster, and are mapped to the
 // indices inside.
 //
-// So in general the blur effector contains five different loops, processed in
+// So in general the blur effector contains six different loops, processed in
 // the current order:
 //
 //   1. 'aBorderLeadSize' - Process the leading border pixels, used only by 
 //      FE_EXTEND_COLOR or FE_EXTEND_PAD).
-//      - No data is write at this step.
+//      - No data is written at this step.
 //
 //   2. 'aTableSize' - Process the pixels which offset is stored in aTableData.
-//      - No data is write at this step, ATable is used for indices to pixels.
+//      - No data is written at this step, ATable is used for indices to pixels.
 //
 //   3. 'aBorderTailSize' - Process the tailing border pixels, used only by
 //      FE_EXTEND_COLOR or FE_EXTEND_PAD as a special case where it's needed
-//      to process pixels from the second border.
-//      - No data is write at this step.
+//      to process pixels from the second border (right or bottom).
+//      - No data is written at this step.
 //
 //   4. 'runSize - Standard run-loop, which should do the most of the work.
-//      - One pixel is read and stored per loop iteration.
+//      - One pixel is read and one written per loop iteration.
 //      - No checking for borders, generally the fastest loop.
 //
 //   5. 'bTableSize' - Process the pixels which offset is stored in bTableData,
-//      - One pixel is read and stored per loop iteration.
+//      - One pixel is read and one written per loop iteration.
 //
 //   6. 'bBorderTailSize' - Process the tailing border pixels.
-//      - No data is read at this step, one pixel is stored per iteration.
+//      - No data is read at this step, one pixel is written per loop iteration.
 //
 // The naming convention is strict. For initial processing the prefix 'a' is
 // used (aBorderSize, aTableSize, ...). For final processing the prefix 'b' is
@@ -160,6 +160,14 @@ struct FOG_NO_EXPORT FBlurRun_PRGB32
     g -= run.g * scale;
     b -= run.b * scale;
   }
+  
+  FOG_INLINE void shl(int by)
+  {
+    a <<= by;
+    r <<= by;
+    g <<= by;
+    b <<= by;
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -237,6 +245,13 @@ struct FOG_NO_EXPORT FBlurRun_XRGB32
     r -= run.r * scale;
     g -= run.g * scale;
     b -= run.b * scale;
+  }
+
+  FOG_INLINE void shl(int by)
+  {
+    r <<= by;
+    g <<= by;
+    b <<= by;
   }
 
   // --------------------------------------------------------------------------
@@ -317,6 +332,13 @@ struct FOG_NO_EXPORT FBlurRun_RGB24
     b -= run.b * scale;
   }
 
+  FOG_INLINE void shl(int by)
+  {
+    r <<= by;
+    g <<= by;
+    b <<= by;
+  }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -381,6 +403,11 @@ struct FOG_NO_EXPORT FBlurRun_A8
     a -= run.a * scale;
   }
 
+  FOG_INLINE void shl(int by)
+  {
+    a <<= by;
+  }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -401,14 +428,14 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_PRGB32 : public FBaseAccessor_PRGB32
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchRunM(const Run& run, const uint8_t* src)
+  static FOG_INLINE void fetchRunM(Run& run, const uint8_t* src)
   {
     uint32_t pix;
     Face::p32Load4a(pix, src);
     run.set(pix);
   }
 
-  static FOG_INLINE void fetchRunT(const Run& run, const uint8_t* src)
+  static FOG_INLINE void fetchRunT(Run& run, const uint8_t* src)
   {
     fetchRunM(run, src);
   }
@@ -442,14 +469,14 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_XRGB32 : public FBaseAccessor_XRGB32
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchRunM(const Run& run, const uint8_t* src)
+  static FOG_INLINE void fetchRunM(Run& run, const uint8_t* src)
   {
     uint32_t pix;
     Face::p32Load4a(pix, src);
     run.set(pix);
   }
 
-  static FOG_INLINE void fetchRunT(const Run& run, const uint8_t* src)
+  static FOG_INLINE void fetchRunT(Run& run, const uint8_t* src)
   {
     fetchRunM(run, src);
   }
@@ -483,14 +510,14 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_RGB24 : public FBaseAccessor_RGB24
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchRunM(const Run& run, const uint8_t* src)
+  static FOG_INLINE void fetchRunM(Run& run, const uint8_t* src)
   {
     run.r = static_cast<IntT>(src[PIXEL_RGB24_POS_R]);
     run.g = static_cast<IntT>(src[PIXEL_RGB24_POS_G]);
     run.b = static_cast<IntT>(src[PIXEL_RGB24_POS_B]);
   }
 
-  static FOG_INLINE void fetchRunT(const Run& run, const uint8_t* src)
+  static FOG_INLINE void fetchRunT(Run& run, const uint8_t* src)
   {
     uint32_t pix;
     Face::p32Load4a(pix, src);
@@ -527,12 +554,12 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_A8 : public FBaseAccessor_A8
   // [Methods]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void fetchRunM(const Run& run, uint8_t* src)
+  static FOG_INLINE void fetchRunM(Run& run, uint8_t* src)
   {
-    run.r = static_cast<IntT>(src[0]);
+    run.a = static_cast<IntT>(src[0]);
   }
 
-  static FOG_INLINE void fetchRunT(const Run& run, uint8_t* src)
+  static FOG_INLINE void fetchRunT(Run& run, uint8_t* src)
   {
     fethRunM(run, src);
   }
@@ -851,7 +878,7 @@ struct FOG_NO_EXPORT FBlur
   }
 
   // ==========================================================================
-  // [Blur - DoSimpleRect]
+  // [Blur - DoRect]
   // ==========================================================================
 
   static err_t FOG_FASTCALL doRect(
@@ -882,7 +909,7 @@ struct FOG_NO_EXPORT FBlur
     ssize_t intermediateStride = 0;
     uint8_t* intermediateData = NULL;
 
-    // Always use 4 bytes of stack storage per pixel when working with 24-bit.
+    // Always use 4 bytes of stack storage per pixel when working with 24-bpp.
     int stackBpp = srcDesc.getBytesPerPixel();
     if (stackBpp == 3)
       stackBpp = 4;
@@ -893,6 +920,9 @@ struct FOG_NO_EXPORT FBlur
     if (ctx->memBuffer)
       memBuffer = ctx->memBuffer;
 
+    int tLeft, tRight;
+    int tBegin, tEnd;
+
     // ------------------------------------------------------------------------
     // [Base]
     // ------------------------------------------------------------------------
@@ -902,7 +932,8 @@ struct FOG_NO_EXPORT FBlur
     extendTop = Math::min(vRadiusInt, srcRect->y);
     extendBottom = Math::min(vRadiusInt, src->size.h - srcRect->y - srcRect->h);
 
-    if ((extendTop | extendBottom) != 0)
+    // Always create intermediate buffer in case that dst->data is NULL.
+    if (dst->data == NULL || (extendTop | extendBottom) != 0)
     {
       intermediateHeight = srcRect->h + extendTop + extendBottom;
       intermediateStride = srcRect->w * dstDesc.getBytesPerPixel();
@@ -937,9 +968,16 @@ struct FOG_NO_EXPORT FBlur
 
     blurCtx.srcData = src->data + (srcRect->y - extendTop) * src->stride;
     blurCtx.srcStride = src->stride;
-
-    i = Math::max(src->size.w - srcRect->x, 0);
     blurCtx.rowSize = srcRect->h + extendTop + extendBottom;
+
+    blurCtx.kernelRadius = kernelRadius;
+    blurCtx.kernelSize   = kernelSize;
+
+    tLeft = srcRect->x;
+    tRight = tLeft;
+
+    tBegin = 0;
+    tEnd = src->size.w;
 
     if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
     {
@@ -947,25 +985,34 @@ struct FOG_NO_EXPORT FBlur
       FOG_ASSERT(ctx->blur.blurType == FE_BLUR_TYPE_BOX ||
                  ctx->blur.blurType == FE_BLUR_TYPE_STACK);
 
+      i = Math::max(src->size.w - srcRect->x, 0);
+
       blurCtx.runSize      = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->w) : 1;
       blurCtx.runOffset    = (srcRect->x + kernelRadius + 1) * (int)srcDesc.getBytesPerPixel();
 
       blurCtx.aTableSize   = kernelSize;
       blurCtx.bTableSize   = Math::min<int>(srcRect->w - blurCtx.runSize, kernelRadius);
 
-      blurCtx.kernelRadius = kernelRadius;
-      blurCtx.kernelSize   = kernelSize;
+      tRight += int(blurCtx.runSize);
+      initRunBox(&blurCtx, tLeft, tBegin, tEnd);
+
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize + blurCtx.aBorderTailSize == kernelSize);
+      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->w);
     }
     else
     {
-      blurCtx.runSize      = i;
-      blurCtx.runOffset    = 0;
+      blurCtx.runSize      = srcRect->w;
+      blurCtx.runOffset    = srcRect->x * (int)srcDesc.getBytesPerPixel();
 
       blurCtx.aTableSize   = kernelRadius;
       blurCtx.bTableSize   = kernelRadius;
 
-      blurCtx.kernelRadius = kernelRadius;
-      blurCtx.kernelSize   = kernelSize;
+      tRight += int(blurCtx.runSize);
+      initRunExp(&blurCtx, tLeft, tBegin, tEnd);
+
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize == kernelRadius);
+      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize == kernelRadius);
+      FOG_ASSERT(blurCtx.runSize == srcRect->w);
     }
   
     blurCtx.srcFirstOffset = 0;
@@ -980,23 +1027,7 @@ struct FOG_NO_EXPORT FBlur
     blurCtx.aTableData = reinterpret_cast<ssize_t*>(memBuffer->getMem());
     blurCtx.bTableData = blurCtx.aTableData + blurCtx.aTableSize;
     blurCtx.stack = reinterpret_cast<uint8_t*>(blurCtx.bTableData + blurCtx.bTableSize);
-
-    if (FOG_IS_NULL(blurCtx.aTableData))
-      return ERR_RT_OUT_OF_MEMORY;
-
-    fillSimpleBorderTables(&blurCtx, srcRect->x - kernelRadius, 0, src->size.w - 1, srcDesc.getBytesPerPixel());
   
-    if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
-    {
-      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize + blurCtx.aBorderTailSize == kernelSize);
-      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->w);
-    }
-    else
-    {
-      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize +
-                 blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->w + kernelRadius * 2);
-    }
-
     // Logger::debug("Fog::RasterOps_C::FBlur", "doRect", "RectH | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
     //   dstPos->x,
     //   dstPos->y,
@@ -1011,6 +1042,7 @@ struct FOG_NO_EXPORT FBlur
     //   blurCtx.bTableSize,
     //   blurCtx.bBorderTailSize);
 
+    initRunTables(&blurCtx, tLeft, tRight, tBegin, tEnd, srcDesc.getBytesPerPixel());
     ctx->blur.hConvolve(&blurCtx);
 
     // ------------------------------------------------------------------------
@@ -1020,9 +1052,21 @@ struct FOG_NO_EXPORT FBlur
     kernelRadius = Math::iround(ctx->blur.vRadius);
     kernelSize = kernelRadius * 2 + 1;
 
-    blurCtx.dstData = dst->data + dstPos->y * dst->stride +
-                                  dstPos->x * (int)dstDesc.getBytesPerPixel();
-    blurCtx.dstStride = dst->stride;
+    if (dst->data == NULL)
+    {
+      blurCtx.dstData = intermediateData + extendTop * intermediateStride;
+      blurCtx.dstStride = intermediateStride;
+
+      // And initialize the destination buffer so the called can use the data.
+      dst->data = blurCtx.dstData;
+      dst->stride = intermediateStride;
+    }
+    else
+    {
+      blurCtx.dstData = dst->data + dstPos->y * dst->stride +
+                                    dstPos->x * (int)dstDesc.getBytesPerPixel();
+      blurCtx.dstStride = dst->stride;
+    }
 
     if (intermediateData)
     {
@@ -1035,8 +1079,15 @@ struct FOG_NO_EXPORT FBlur
       blurCtx.srcStride = dst->stride;
     }
 
-    i = Math::max(src->size.h - srcRect->y, 0);
     blurCtx.rowSize = srcRect->w;
+    blurCtx.kernelRadius = kernelRadius;
+    blurCtx.kernelSize   = kernelSize;
+
+    tLeft = extendTop;
+    tRight = tLeft;
+
+    tBegin = 0;
+    tEnd = srcRect->h + extendTop + extendBottom;
 
     if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
     {
@@ -1044,25 +1095,34 @@ struct FOG_NO_EXPORT FBlur
       FOG_ASSERT(ctx->blur.blurType == FE_BLUR_TYPE_BOX ||
                  ctx->blur.blurType == FE_BLUR_TYPE_STACK);
 
+      i = Math::max(src->size.h - srcRect->y, 0);
+
       blurCtx.runSize      = (i > kernelRadius) ? Math::min(i - kernelRadius, srcRect->h) : 1;
       blurCtx.runOffset    = (extendTop + kernelRadius + 1) * blurCtx.srcStride;
 
       blurCtx.aTableSize   = kernelSize;
       blurCtx.bTableSize   = Math::min<int>(srcRect->h - blurCtx.runSize, kernelRadius);
 
-      blurCtx.kernelRadius = kernelRadius;
-      blurCtx.kernelSize   = kernelSize;
+      tRight += int(blurCtx.runSize);
+      initRunBox(&blurCtx, tLeft, tBegin, tEnd);
+
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize + blurCtx.aBorderTailSize == kernelSize);
+      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->h);
     }
     else
     {
-      blurCtx.runSize      = i;
-      blurCtx.runOffset    = 0;
+      blurCtx.runSize      = srcRect->h;
+      blurCtx.runOffset    = extendTop * blurCtx.srcStride;
 
       blurCtx.aTableSize   = kernelRadius;
       blurCtx.bTableSize   = kernelRadius;
 
-      blurCtx.kernelRadius = kernelRadius;
-      blurCtx.kernelSize   = kernelSize;
+      tRight += int(blurCtx.runSize);
+      initRunExp(&blurCtx, tLeft, tBegin, tEnd);
+
+      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize == kernelRadius);
+      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize == kernelRadius);
+      FOG_ASSERT(blurCtx.runSize == srcRect->h);
     }
 
     blurCtx.srcFirstOffset = 0;
@@ -1078,19 +1138,6 @@ struct FOG_NO_EXPORT FBlur
     blurCtx.bTableData = blurCtx.aTableData + blurCtx.aTableSize;
     blurCtx.stack = reinterpret_cast<uint8_t*>(blurCtx.bTableData + blurCtx.bTableSize);
 
-    fillSimpleBorderTables(&blurCtx, extendTop - kernelRadius, 0, srcRect->h - 1 + extendTop + extendBottom, blurCtx.srcStride);
-
-    if (ctx->blur.blurType <= FE_BLUR_TYPE_STACK)
-    {
-      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize + blurCtx.aBorderTailSize == kernelSize);
-      FOG_ASSERT(blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->h);
-    }
-    else
-    {
-      FOG_ASSERT(blurCtx.aTableSize + blurCtx.aBorderLeadSize +
-                 blurCtx.bTableSize + blurCtx.bBorderTailSize + blurCtx.runSize == srcRect->h + kernelRadius * 2);
-    }
-
     // Logger::debug("Fog::RasterOps_C::FBlur", "doRect", "RectV | dst=[%d %d] src=[%d %d %d %d] a=[lead=%d table=%d tail=%d] run=%d b=[table=%d tail=%d]",
     //   dstPos->x,
     //   dstPos->y,
@@ -1105,120 +1152,151 @@ struct FOG_NO_EXPORT FBlur
     //   blurCtx.bTableSize,
     //   blurCtx.bBorderTailSize);
 
+    initRunTables(&blurCtx, tLeft, tRight, tBegin, tEnd, blurCtx.srcStride);
     ctx->blur.vConvolve(&blurCtx);
     return ERR_OK;
   }
 
   // ==========================================================================
-  // [Blur - DoSimpleRect - FillBorderTables]
+  // [Blur - InitRun]
   // ==========================================================================
 
-  static void FOG_FASTCALL fillSimpleBorderTables(
-    RasterFilterBlur* blurCtx, int t, int tMin, int tMax, ssize_t tMul)
+  static void FOG_FASTCALL initRunBox(
+    RasterFilterBlur* blurCtx, int& t, int tBegin, int tEnd)
   {
-    uint i;
-    int tRepeat = tMax - tMin + 1;
-
     blurCtx->aBorderLeadSize = 0;
     blurCtx->aBorderTailSize = 0;
     blurCtx->bBorderTailSize = 0;
 
-    switch (blurCtx->extendType)
+    t -= blurCtx->kernelRadius;
+
+    if (blurCtx->extendType > FE_EXTEND_PAD)
+      return;
+    FOG_ASSERT(blurCtx->extendType == FE_EXTEND_COLOR || blurCtx->extendType == FE_EXTEND_PAD);
+
+    // Catch each pixel which is outside of the raster and setup sizes of
+    // lead and tail borders. We need to decrease size of aTableSize every
+    // time we set the border lead/tail size.
+    if (t < tBegin)
     {
-      case FE_EXTEND_COLOR:
-      case FE_EXTEND_PAD:
+      blurCtx->aBorderLeadSize = tBegin - t;
+      blurCtx->aTableSize -= blurCtx->aBorderLeadSize;
+      t = tBegin;
+    }
+
+    if (t + int(blurCtx->aTableSize) > tEnd)
+    {
+      blurCtx->aBorderTailSize = (t + blurCtx->aTableSize) - tEnd;
+      blurCtx->aTableSize -= blurCtx->aBorderTailSize;
+
+      blurCtx->bBorderTailSize = blurCtx->bTableSize;
+      blurCtx->bTableSize = 0;
+    }
+    else 
+    {
+      int m = t + int(blurCtx->kernelSize) + int(blurCtx->runSize) + int(blurCtx->bTableSize) + 1;
+      if (m > tEnd)
       {
-        // Catch each pixel which is outside of the raster and setup sizes of
-        // lead and tail borders. We need to decrease size of aTableSize every
-        // time we set the border lead/tail size.
-        if (t < tMin)
-        {
-          blurCtx->aBorderLeadSize = tMin - t;
-          blurCtx->aTableSize -= blurCtx->aBorderLeadSize;
-          t = tMin;
-        }
-        
-        if (t + int(blurCtx->aTableSize) > tMax + 1)
-        {
-          blurCtx->aBorderTailSize = (t + blurCtx->aTableSize) - (tMax + 1);
-          blurCtx->aTableSize -= blurCtx->aBorderTailSize;
+        blurCtx->bBorderTailSize = Math::min<int>(m - tEnd, int(blurCtx->bTableSize));
+        blurCtx->bTableSize -= blurCtx->bBorderTailSize;
+      }
+    }
+  }
 
-          blurCtx->bBorderTailSize = blurCtx->bTableSize;
-          blurCtx->bTableSize = 0;
-        }
-        else 
-        {
-          int m = t + int(blurCtx->kernelSize) + int(blurCtx->runSize) + int(blurCtx->bTableSize);
-          if (m > tMax)
-          {
-            blurCtx->bBorderTailSize = Math::min<int>(m - tMax, int(blurCtx->bTableSize));
-            blurCtx->bTableSize -= blurCtx->bBorderTailSize;
-          }
-        }
+  static void FOG_FASTCALL initRunExp(
+    RasterFilterBlur* blurCtx, int& t, int tBegin, int tEnd)
+  {
+    blurCtx->aBorderLeadSize = 0;
+    blurCtx->aBorderTailSize = 0;
+    blurCtx->bBorderTailSize = 0;
 
-        // Now it's safe to continue using Repeat mode.
-        goto _Repeat;
+    int tRight = t + int(blurCtx->runSize) + int(blurCtx->bTableSize);
+    t -= blurCtx->kernelRadius;
+
+    if (blurCtx->extendType > FE_EXTEND_PAD)
+      return;
+    FOG_ASSERT(blurCtx->extendType == FE_EXTEND_COLOR || blurCtx->extendType == FE_EXTEND_PAD);
+    
+    if (t < tBegin)
+    {
+      blurCtx->aBorderLeadSize = tBegin - t;
+      blurCtx->aTableSize -= blurCtx->aBorderLeadSize;
+    }
+
+    if (tRight > tEnd)
+    {
+      blurCtx->bBorderTailSize = tRight - tEnd;
+      blurCtx->bTableSize -= blurCtx->bBorderTailSize;
+    }
+  }
+  
+  static void FOG_FASTCALL initRunTables(
+    RasterFilterBlur* blurCtx, int tLeft, int tRight, int tBegin, int tEnd, ssize_t tScale)
+  {
+    int tRepeat = tEnd - tBegin;
+    uint i;
+
+    // It's easier to work in the interval [0...(tEnd - tBegin)].
+    tLeft -= tBegin;
+    tRight -= tBegin;
+
+    if (blurCtx->extendType != FE_EXTEND_REFLECT)
+    {
+      // Repeat 't'.
+      tLeft %= tRepeat;
+      if (tLeft < 0)
+        tLeft += tRepeat;
+
+      if (tRight >= tEnd)
+        tRight -= tRepeat;
+      FOG_ASSERT(tRight < tEnd);
+
+      // Add tBegin back so we don't need to do in loops.
+      tLeft += tBegin;
+      tRight += tBegin;
+
+      for (i = 0; i < blurCtx->aTableSize; i++)
+      {
+        blurCtx->aTableData[i] = tLeft * tScale;
+
+        if (++tLeft >= tEnd)
+          tLeft = tBegin;
       }
 
-      case FE_EXTEND_REPEAT:
+      for (i = 0; i < blurCtx->bTableSize; i++)
       {
-        // Repeat 't'.
-        t -= tMin;
-        t %= tRepeat;
-        if (t < 0)
-          t += tRepeat;
-        t += tMin;
+        blurCtx->bTableData[i] = tRight * tScale;
 
-_Repeat:
-        for (i = 0; i < blurCtx->aTableSize; i++)
-        {
-          blurCtx->aTableData[i] = t * tMul;
+        if (++tRight == tEnd)
+          tRight = tBegin;
+      }
+    }
+    else
+    {
+      // Reflect 't'.
+      int tRepeat2 = tRepeat * 2;
+      
+      tLeft %= tRepeat2;
+      if (tLeft < 0)
+        tLeft += tRepeat2;
 
-          if (++t > tMax)
-            t = tMin;
-        }
+      tRight += blurCtx->runSize;
+      if (tRight >= tRepeat2)
+        tRight -= tRepeat2;
+      FOG_ASSERT(tRight < tRepeat2);
 
-        t += blurCtx->runSize;
-        if (t >= tMax)
-          t -= tRepeat;
-
-        for (i = 0; i < blurCtx->bTableSize; i++)
-        {
-          blurCtx->bTableData[i] = t * tMul;
-
-          if (++t > tMax)
-            t = tMin;
-        }
-        break;
+      for (i = 0; i < blurCtx->aTableSize; i++)
+      {
+        blurCtx->aTableData[i] = ((tLeft < tRepeat ? tLeft : tRepeat2 - tLeft) + tBegin) * tScale;
+        if (++tLeft > tRepeat2)
+          tLeft = 0;
       }
 
-      case FE_EXTEND_REFLECT:
+      for (i = 0; i < blurCtx->bTableSize; i++)
       {
-        // Reflect 't'.
-        int tRepeat2 = tRepeat * 2;
-        
-        t -= tMin;
-        t %= tRepeat2;
-        if (t < 0)
-          t += tRepeat2;
-
-        for (i = 0; i < blurCtx->aTableSize; i++)
-        {
-          blurCtx->aTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
-          if (++t > tRepeat2)
-            t = 0;
-        }
-
-        t += blurCtx->runSize;
-        t %= tRepeat2;
-
-        for (i = 0; i < blurCtx->bTableSize; i++)
-        {
-          blurCtx->bTableData[i] = ((t < tRepeat ? t : tRepeat2 - t) + tMin) * tMul;
-          if (++t > tRepeat2)
-            t = 0;
-        }
-        break;
+        blurCtx->bTableData[i] = ((tRight < tRepeat ? tRight : tRepeat2 - tRight) + tBegin) * tScale;
+        if (++tRight >= tRepeat2)
+          tRight = 0;
       }
     }
   }
@@ -2567,8 +2645,6 @@ _First:
       typename Accessor::Run run;
       typename Accessor::Pixel pix;
 
-      run.reset();
-
       // ----------------------------------------------------------------------
       // [A-Border - Lead]
       // ----------------------------------------------------------------------
@@ -2583,27 +2659,40 @@ _First:
           Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcFirstOffset);
 
         border.set(pix);
-        do {
+        run.set(border);
+        run.shl(BLUR_ZPREC);
+
+        while (--i)
+        {
           Accessor::blurPixel(run, border, aValue);
-        } while (--i);
+        }
+      }
+      else
+      {
+        i++;
+        Accessor::fetchRunM(run, srcPtr + aTableData[0]);
+        run.shl(BLUR_ZPREC);
       }
 
       // ----------------------------------------------------------------------
       // [A-Border - Table]
       // ----------------------------------------------------------------------
 
-      for (i = 0; i < aTableSize; i++)
+      while (i < aTableSize)
       {
 #if defined(FOG_DEBUG)
         FOG_ASSERT(srcPtr + aTableData[i] >= src && srcPtr + aTableData[i] < srcEnd);
 #endif // FOG_DEBUG
 
         Accessor::blurRunM(run, srcPtr + aTableData[i], aValue);
+        i++;
       }
 
       // ----------------------------------------------------------------------
       // [Run-Loop]
       // ----------------------------------------------------------------------
+
+      srcPtr += blurCtx->runOffset;
 
       FOG_ASSERT(runSize != 0);
       i = runSize;
@@ -2708,7 +2797,7 @@ _First:
     ssize_t dstStride = blurCtx->dstStride;
     ssize_t srcStride = blurCtx->srcStride;
 
-    uint runHeight = blurCtx->rowSize;
+    uint runWidth = blurCtx->rowSize;
     uint runSize = blurCtx->runSize;
 
     int aValue = (int)(float(1 << BLUR_APREC) * (1.0f - Math::exp(-2.3f / (blurCtx->filterCtx->blur.vRadius + 1.0f))));
@@ -2724,18 +2813,18 @@ _First:
     uint aTableSize = blurCtx->aTableSize;
     uint bTableSize = blurCtx->bTableSize;
 
-    uint i, r;
-    for (r = 0; r < runHeight; r++)
-    {
+    uint i, r = 0;
+    do {
       uint8_t* dstPtr = dst;
       uint8_t* srcPtr = src;
 
       uint8_t* stackPtr = stackBuf;
 
-      typename Accessor::Run run;
+      typename Accessor::Run run[BLUR_RECT_V_HLINE_COUNT];
       typename Accessor::Pixel pix;
 
-      run.reset();
+      uint xLength = Math::min<uint>(runWidth - r, BLUR_RECT_V_HLINE_COUNT);
+      uint x;
 
       // ----------------------------------------------------------------------
       // [A-Border - Lead]
@@ -2744,37 +2833,90 @@ _First:
       i = aBorderSize;
       if (i != 0)
       {
-        typename Accessor::Run border;
         if (blurCtx->extendType == FE_EXTEND_COLOR)
-          Accessor::fetchPixelS(pix, blurCtx->extendColor);
-        else
-          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcFirstOffset);
+        {
+          typename Accessor::Run border;
 
-        border.set(pix);
-        do {
-          Accessor::blurPixel(run, border, aValue);
-        } while (--i);
+          Accessor::fetchPixelS(pix, blurCtx->extendColor);
+          border.set(pix);
+
+          for (x = 0; x < xLength; x++)
+          {
+            run[x].set(border);
+            run[x].shl(BLUR_ZPREC);
+          }
+
+          while (--i)
+          {
+            for (x = 0; x < xLength; x++)
+            {
+              Accessor::blurPixel(run[x], border, aValue);
+            }
+          }
+        }
+        else
+        {
+          uint8_t* srcBase = srcPtr + blurCtx->srcFirstOffset;
+
+          for (x = 0; x < xLength; x++)
+          {
+            Accessor::fetchRunM(run[x], srcBase + x * Accessor::PIXEL_BPP);
+            run[x].shl(BLUR_ZPREC);
+          }
+
+          while (--i)
+          {
+            for (x = 0; x < xLength; x++)
+            {
+              Accessor::blurRunM(run[x], srcBase + x * Accessor::PIXEL_BPP, aValue);
+            }
+          }
+        }
+      }
+      else
+      {
+        uint8_t* srcBase = srcPtr + aTableData[0];
+
+        for (x = 0; x < xLength; x++)
+        {
+          Accessor::fetchRunM(run[x], srcBase + x * Accessor::PIXEL_BPP);
+          run[x].shl(BLUR_ZPREC);
+        }
+
+        i++;
       }
 
       // ----------------------------------------------------------------------
       // [A-Border - Table]
       // ----------------------------------------------------------------------
 
-      for (i = 0; i < aTableSize; i++)
+      while (i < aTableSize)
       {
-        Accessor::blurRunM(run, srcPtr + aTableData[i], aValue);
+        uint8_t* srcBase = srcPtr + aTableData[i];
+
+        for (x = 0; x < xLength; x++)
+        {
+          Accessor::blurRunM(run[x], srcBase + x * Accessor::PIXEL_BPP, aValue);
+        }
+
+        i++;
       }
 
       // ----------------------------------------------------------------------
       // [Run-Loop]
       // ----------------------------------------------------------------------
 
+      srcPtr += blurCtx->runOffset;
+
       FOG_ASSERT(runSize != 0);
       i = runSize;
 
       do {
-        Accessor::blurRunM(run, srcPtr, aValue);
-        Accessor::storeRunM(dstPtr, run);
+        for (x = 0; x < xLength; x++)
+        {
+          Accessor::blurRunM(run[x], srcPtr + x * Accessor::PIXEL_BPP, aValue);
+          Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x]);
+        }
 
         srcPtr += srcStride;
         dstPtr += dstStride;
@@ -2787,10 +2929,15 @@ _First:
       srcPtr = src;
       for (i = 0; i < bTableSize; i++)
       {
-        Accessor::blurRunM(run, srcPtr + bTableData[i], aValue);
-        Accessor::storeRunT(stackPtr, run);
+        uint8_t* srcBase = srcPtr + bTableData[i];
 
-        stackPtr += Accessor::STACK_BPP;
+        for (x = 0; x < xLength; x++)
+        {
+          Accessor::blurRunM(run[x], srcBase + x * Accessor::PIXEL_BPP, aValue);
+          Accessor::storeRunT(stackPtr, run[x]);
+
+          stackPtr += Accessor::STACK_BPP;
+        }
       }
 
       // ----------------------------------------------------------------------
@@ -2800,19 +2947,36 @@ _First:
       i = bBorderSize;
       if (i != 0)
       {
-        typename Accessor::Run border;
-
         if (blurCtx->extendType == FE_EXTEND_COLOR)
+        {
+          typename Accessor::Run border;
           Accessor::fetchPixelS(pix, blurCtx->extendColor);
-        else
-          Accessor::fetchPixelM(pix, srcPtr + blurCtx->srcLastOffset);
+          border.set(pix);
 
-        border.set(pix);
-        do {
-          Accessor::blurPixel(run, border, aValue);
-          Accessor::storeRunT(stackPtr, run);
-          stackPtr += Accessor::STACK_BPP;
-        } while (--i);
+          do {
+            for (x = 0; x < xLength; x++)
+            {
+              Accessor::blurPixel(run[x], border, aValue);
+              Accessor::storeRunT(stackPtr, run[x]);
+
+              stackPtr += Accessor::STACK_BPP;
+            }
+          } while (--i);
+        }
+        else
+        {
+          uint8_t* srcBase = srcPtr + blurCtx->srcLastOffset;
+
+          do {
+            for (x = 0; x < xLength; x++)
+            {
+              Accessor::blurRunM(run[x], srcBase + x * Accessor::PIXEL_BPP, aValue);
+              Accessor::storeRunT(stackPtr, run[x]);
+
+              stackPtr += Accessor::STACK_BPP;
+            }
+          } while (--i);
+        }
       }
 
       // ----------------------------------------------------------------------
@@ -2821,8 +2985,13 @@ _First:
 
       for (i = bTableSize + bBorderSize; i; i--)
       {
-        stackPtr -= Accessor::STACK_BPP;
-        Accessor::blurRunT(run, stackPtr, aValue);
+        x = xLength;
+        do {
+          x--;
+          stackPtr -= Accessor::STACK_BPP;
+
+          Accessor::blurRunT(run[x], stackPtr, aValue);
+        } while (x);
       }
 
       // ----------------------------------------------------------------------
@@ -2835,13 +3004,18 @@ _First:
       do {
         dstPtr -= dstStride;
 
-        Accessor::blurRunM(run, dstPtr, aValue);
-        Accessor::storeRunM(dstPtr, run);
+        for (x = 0; x < xLength; x++)
+        {
+          Accessor::blurRunM(run[x], dstPtr + x * Accessor::PIXEL_BPP, aValue);
+          Accessor::storeRunM(dstPtr + x * Accessor::PIXEL_BPP, run[x]);
+        }
       } while (--i);
 
-      dst += Accessor::PIXEL_BPP;
-      src += Accessor::PIXEL_BPP;
-    }
+      dst += xLength * Accessor::PIXEL_BPP;
+      src += xLength * Accessor::PIXEL_BPP;
+
+      r += xLength;
+    } while (r < runWidth);
   }
 };
 

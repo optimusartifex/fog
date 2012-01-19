@@ -74,20 +74,33 @@ void AppWindow::onPaint(Painter* _p)
   Font font;
   font.setHeight(30.0f, UNIT_PX);
 
-  StringW msg;
-  msg.format("Size: %d %d", geom.w, geom.h);
+  //StringW msg;
+  //msg.format("Size: %d %d", geom.w, geom.h);
 
-  font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(250.0f, 100.0f), msg);
+  //font.getTextOutline(path, CONTAINER_OP_REPLACE, PointF(250.0f, 100.0f), msg);
 
-  p.setSource(Argb32(0xFFFF0000));
-  p.fillPath(path);
+  //p.setSource(Argb32(0xFF000000));
+  //p.fillPath(path);
 
-  FeBlur feBlur(FE_BLUR_TYPE_EXPONENTIAL, 80.0f);
-  feBlur.setExtendType(FE_EXTEND_COLOR);
+  FeBlur feBlur(FE_BLUR_TYPE_EXPONENTIAL, 50.0f);
+  feBlur.setExtendType(FE_EXTEND_REPEAT);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
 
-  //p.filterRect(feBlur, RectI(60, 60, 200, 200));
-  p.filterAll(feBlur);
+  path.clear();
+  //path.triangle(TriangleF(200.0f, 10.0f, 10.0f, 200.0f, 400.0f, 350.0f));
+  path.round(RoundF(20.0f, 20.0f, float(geom.w) - 40.0f, float(geom.h) - 40.0f, 20.0f, 20.0f));
+  //path.rect(RectF(60.0f, 60.0f, float(geom.w)/2.0f, float(geom.h)/2.0f));
+
+  p.setOpacity(0.5f);
+  p.filterPath(feBlur, path);
+  
+  //p.setSource(Argb32(0xFF0000FF));
+  //p.drawRect(0.5f, 0.5f, float(geom.w) - 1.0f, float(geom.h) - 1.0f);
+  
+  // p.filterAll(feBlur);
+
+  //FeMorphology feMorphology(FE_MORPHOLOGY_TYPE_ERODE, 1.0f);
+  //p.filterAll(feMorphology);
 
   //p.setOpacity(0.15f);
   //p.setSource(Argb32(0xFF0000FF));

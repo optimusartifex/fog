@@ -125,7 +125,7 @@ struct FOG_NO_EXPORT RasterContext
     //! @brief The box analytic rasterizer (8-bit).
     Static<BoxRasterizer8> boxRasterizer8;
 
-    // TODO: 16-bit rasterizer.
+    // TODO: 16-bit image processing.
     // //! @brief The box analytic rasterizer (16-bit).
     // Static<BoxRasterizer16> boxRasterizer16;
   };
@@ -135,7 +135,7 @@ struct FOG_NO_EXPORT RasterContext
     //! @brief The path/polygon analytic rasterizer (8-bit).
     Static<PathRasterizer8> pathRasterizer8;
 
-    // TODO: 16-bit rasterizer.
+    // TODO: 16-bit image processing.
     // //! @brief The analytic rasterizer (16-bit).
     // Static<PathRasterizer16> pathRasterizer16;
   };
@@ -145,7 +145,7 @@ struct FOG_NO_EXPORT RasterContext
     //! @brief The scanline container for solid spans (8-bit).
     Static<RasterScanline8> scanline8;
 
-    // TODO: 16-bit rasterizer.
+    // TODO: 16-bit image processing.
     // //! @brief The scanline container for solid spans (16-bit).
     // Static<RasterScanline16> scanline16;
   };
@@ -155,7 +155,7 @@ struct FOG_NO_EXPORT RasterContext
     //! @brief The scanline container for extended spans (8-bit).
     Static<RasterScanline8> scanlineExt8;
 
-    // TODO: 16-bit rasterizer.
+    // TODO: 16-bit image processing.
     // //! @brief  The scanline container for extended spans (16-bit).
     // Static<RasterScanline16> scanlineExt16;
   };

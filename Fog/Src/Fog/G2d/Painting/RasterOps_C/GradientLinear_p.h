@@ -23,7 +23,7 @@ struct FOG_NO_EXPORT PGradientLinear
   // [Create]
   // ==========================================================================
 
-  // TODO: 16-bit rasterizer.
+  // TODO: 16-bit image processing.
   static err_t FOG_FASTCALL create(
     RasterPattern* ctx, uint32_t dstFormat, const BoxI* clipBox,
     const GradientD* gradient,

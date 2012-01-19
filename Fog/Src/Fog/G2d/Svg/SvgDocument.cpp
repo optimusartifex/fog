@@ -26,7 +26,7 @@ namespace Fog {
 SvgDocument::SvgDocument() :
   _dpi(72.0f)
 {
-  _type |= SVG_ELEMENT_MASK;
+  _ext.setExtension(DOM_EXT_GROUP_SVG, SVG_ELEMENT_NONE);
 }
 
 SvgDocument::~SvgDocument()
@@ -36,12 +36,18 @@ SvgDocument::~SvgDocument()
 XmlElement* SvgDocument::clone() const
 {
   SvgDocument* doc = fog_new SvgDocument();
-  if (!doc) return NULL;
+
+  if (FOG_IS_NULL(doc))
+    return NULL;
 
   for (XmlElement* ch = getFirstChild(); ch; ch = ch->getNextSibling())
   {
     XmlElement* e = ch->clone();
-    if (e && doc->appendChild(e) != ERR_OK) { fog_delete(e); goto _Fail; }
+    if (e && doc->appendChild(e) != ERR_OK)
+    {
+      fog_delete(e);
+      goto _Fail;
+    }
   }
 
   return doc;
@@ -83,7 +89,7 @@ XmlElement* SvgDocument::createElementStatic(const ManagedStringW& tagName)
 
   // If element is not SVG, use the base class to create a default element
   // for the given tagName. But remember, this element won't be processed.
-  return XmlDocument::createElementStatic(tagName);
+  return base::createElementStatic(tagName);
 }
 
 err_t SvgDocument::setDpi(float dpi)
@@ -94,25 +100,21 @@ err_t SvgDocument::setDpi(float dpi)
 SizeF SvgDocument::getDocumentSize() const
 {
   XmlElement* root = getDocumentRoot();
-  SizeF size(0.0f, 0.0f);
 
-  if (root == NULL || !root->isSvg())
-    return size;
-
-  if (reinterpret_cast<SvgElement*>(root)->getSvgType() == SVG_ELEMENT_SVG)
-    size = reinterpret_cast<SvgRootElement*>(root)->getRootSize();
-
-  return size;
+  if (root == NULL || !root->isExtensionGroupAndType(DOM_EXT_GROUP_SVG, SVG_ELEMENT_SVG))
+    return SizeF(0.0f, 0.0f);
+  else
+    static_cast<SvgRootElement*>(root)->getRootSize();
 }
 
 err_t SvgDocument::onProcess(SvgVisitor* visitor) const
 {
   XmlElement* root = getDocumentRoot();
 
-  if (root == NULL || !root->isSvgElement())
+  if (root == NULL || !root->isExtensionGroupAndType(DOM_EXT_GROUP_SVG, SVG_ELEMENT_SVG))
     return ERR_OK;
 
-  return visitor->onVisit(reinterpret_cast<SvgElement*>(root));
+  return visitor->onVisit(static_cast<SvgElement*>(root));
 }
 
 err_t SvgDocument::render(Painter* painter) const

@@ -25,8 +25,8 @@ XmlDocument::XmlDocument() :
   XmlElement(FOG_STR_(XML__document)),
   _documentRoot(NULL)
 {
-  _type = XML_ELEMENT_DOCUMENT;
-  _flags &= ~(XML_ALLOWED_DOM_MANIPULATION | XML_ALLOWED_TAG);
+  _nodeType = DOM_NODE_DOCUMENT;
+  _nodeFlags &= ~(DOM_FLAG_MUTABLE_DOM | DOM_FLAG_MUTABLE_NAME);
 
   // Link to self.
   _document = this;

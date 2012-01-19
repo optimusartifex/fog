@@ -22,11 +22,11 @@ namespace Fog {
 // ============================================================================
 
 XmlElement::XmlElement(const ManagedStringW& tagName) :
-  _type(XML_ELEMENT_BASE),
-  _reserved0(0),
-  _reserved1(0),
-  _dirty(0),
-  _flags(XML_ALLOWED_DOM_MANIPULATION | XML_ALLOWED_TAG | XML_ALLOWED_ATTRIBUTES),
+  _nodeType(DOM_NODE_ELEMENT),
+  _nodeFlags(DOM_FLAG_MUTABLE_DOM | DOM_FLAG_MUTABLE_NAME | DOM_FLAG_MUTABLE_ATTRIBUTES),
+  _nodeReserved(0),
+  _nodeDirty(0),
+  _ext(DOM_EXT_GROUP_XML, DOM_EXT_TYPE_NONE),
   _document(NULL),
   _parent(NULL),
   _firstChild(NULL),
@@ -105,7 +105,7 @@ void XmlElement::normalize()
   {
     XmlElement* next = e->_nextSibling;
 
-    if (e->getType() == XML_ELEMENT_TEXT)
+    if (e->getNodeType() == DOM_NODE_TEXT)
     {
       if (((XmlText *)e)->_data.isEmpty())
       {
@@ -157,12 +157,11 @@ err_t XmlElement::prependChild(XmlElement* ch)
     _firstChild = ch;
   }
 
-  _dirty = true;
+  _nodeDirty = true;
 
-  if ( _document)
-  {
-    if (_document != ch->_document) ch->_manage(_document);
-  }
+  if (_document && _document != ch->_document)
+    ch->_manage(_document);
+
   return ERR_OK;
 }
 
@@ -192,12 +191,11 @@ err_t XmlElement::appendChild(XmlElement* ch)
     _lastChild = ch;
   }
 
-  _dirty = true;
+  _nodeDirty = true;
 
-  if ( _document)
-  {
-    if (_document != ch->_document) ch->_manage(_document);
-  }
+  if (_document && _document != ch->_document)
+    ch->_manage(_document);
+
   return ERR_OK;
 }
 
@@ -213,16 +211,24 @@ err_t XmlElement::replaceChild(XmlElement* newch, XmlElement* oldch)
 {
   if (oldch == NULL) return appendChild(newch);
 
-  if (oldch->_parent != this) return ERR_XML_INVALID_CHILD;
-  if ((oldch->_flags & XML_ALLOWED_DOM_MANIPULATION) == 0) return ERR_XML_MANUPULATION_NOT_ALLOWED;
-  if (newch->contains(this, true)) return ERR_XML_CYCLIC;
+  if (oldch->_parent != this)
+    return ERR_XML_INVALID_CHILD;
+
+  if ((oldch->_nodeFlags & DOM_FLAG_MUTABLE_DOM) == 0)
+    return ERR_XML_MANUPULATION_NOT_ALLOWED;
+
+  if (newch->contains(this, true))
+    return ERR_XML_CYCLIC;
 
   err_t err = ERR_OK;
+
   if (_document == newch->_document)
     err = newch->_unlinkUnmanaged();
   else if (newch->_parent)
     err = newch->unlink();
-  if (FOG_IS_ERROR(err)) return err;
+
+  if (FOG_IS_ERROR(err))
+    return err;
 
   newch->_parent = this;
   newch->_prevSibling = oldch->_prevSibling;
@@ -238,10 +244,9 @@ err_t XmlElement::replaceChild(XmlElement* newch, XmlElement* oldch)
   if (newch->_nextSibling == NULL)
     _lastChild = newch;
 
-  if ( _document)
-  {
-    if (_document != newch->_document) newch->_manage(_document);
-  }
+  if ( _document && _document != newch->_document)
+    newch->_manage(_document);
+
   return ERR_OK;
 }
 
@@ -250,7 +255,9 @@ err_t XmlElement::deleteChild(XmlElement* ch)
   if (ch->_parent == this)
   {
     err_t err = ch->unlink();
-    if (FOG_IS_ERROR(err)) return err;
+
+    if (FOG_IS_ERROR(err))
+      return err;
 
     fog_delete(ch);
     return ERR_OK;
@@ -262,7 +269,8 @@ err_t XmlElement::deleteChild(XmlElement* ch)
 err_t XmlElement::deleteAll()
 {
   XmlElement* e = _firstChild;
-  if (e == NULL) return ERR_OK;
+  if (e == NULL)
+    return ERR_OK;
 
   do {
     XmlElement* next = e->_nextSibling;
@@ -278,7 +286,7 @@ err_t XmlElement::deleteAll()
 
   _firstChild = NULL;
   _lastChild = NULL;
-  _dirty = 0;
+  _nodeDirty = 0;
   _children.reset();
 
   return ERR_OK;
@@ -286,17 +294,25 @@ err_t XmlElement::deleteAll()
 
 err_t XmlElement::unlink()
 {
-  if (_parent == NULL) return ERR_OK;
-  if ((_flags & XML_ALLOWED_DOM_MANIPULATION) == 0) return ERR_XML_MANUPULATION_NOT_ALLOWED;
+  if (_parent == NULL)
+    return ERR_OK;
 
-  if (_document) _unmanage();
+  if ((_nodeFlags & DOM_FLAG_MUTABLE_DOM) == 0)
+    return ERR_XML_MANUPULATION_NOT_ALLOWED;
+
+  if (_document)
+    _unmanage();
+
   return _unlinkUnmanaged();
 }
 
 err_t XmlElement::_unlinkUnmanaged()
 {
-  if (_parent == NULL) return ERR_OK;
-  if ((_flags & XML_ALLOWED_DOM_MANIPULATION) == 0) return ERR_XML_MANUPULATION_NOT_ALLOWED;
+  if (_parent == NULL)
+    return ERR_OK;
+
+  if ((_nodeFlags & DOM_FLAG_MUTABLE_DOM) == 0)
+    return ERR_XML_MANUPULATION_NOT_ALLOWED;
 
   XmlElement* next = _nextSibling;
   XmlElement* prev = _prevSibling;
@@ -311,7 +327,7 @@ err_t XmlElement::_unlinkUnmanaged()
   else
     _parent->_lastChild = prev;
 
-  _parent->_dirty = true;
+  _parent->_nodeDirty = true;
 
   _parent = NULL;
   _prevSibling = NULL;
@@ -334,16 +350,17 @@ bool XmlElement::contains(XmlElement* e, bool deep)
 
 List<XmlElement*> XmlElement::getChildNodes() const
 {
-  if (_dirty)
+  if (_nodeDirty)
   {
     _children.clear();
     XmlElement* e = _firstChild;
-    while (e)
+
+    while (e != NULL)
     {
       _children.append(e);
       e = e->_nextSibling;
     }
-    _dirty = false;
+    _nodeDirty = false;
   }
 
   return _children;
@@ -357,7 +374,7 @@ List<XmlElement*> XmlElement::getChildNodesByTagName(const StringW& tagName) con
   if (tagNameM.isEmpty())
     return elms;
 
-  for (XmlElement* e = getFirstChild(); e; e = e->getNextSibling())
+  for (XmlElement* e = getFirstChild(); e != NULL; e = e->getNextSibling())
   {
     if (e->_tagName == tagNameM) elms.append(e);
   }
@@ -368,19 +385,24 @@ List<XmlElement*> XmlElement::getChildNodesByTagName(const StringW& tagName) con
 XmlElement* XmlElement::_nextChildByTagName(XmlElement* refElement, const StringW& tagName)
 {
   XmlElement* e = refElement;
-  if (e == NULL) return e;
+
+  if (e == NULL)
+    return e;
 
   while ((e = e->getNextSibling()))
   {
     if (e->_tagName == tagName) break;
   }
+
   return e;
 }
 
 XmlElement* XmlElement::_previousChildByTagName(XmlElement* refElement, const StringW& tagName)
 {
   XmlElement* e = refElement;
-  if (e == NULL) return e;
+
+  if (e == NULL)
+    return e;
 
   while ((e = e->getPreviousSibling()))
   {
@@ -416,7 +438,7 @@ bool XmlElement::hasAttribute(const StringW& name) const
 
 err_t XmlElement::setAttribute(const StringW& name, const StringW& value)
 {
-  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0)
+  if ((_nodeFlags & DOM_FLAG_MUTABLE_ATTRIBUTES) == 0)
     return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
   if (name.isEmpty())
@@ -441,7 +463,7 @@ StringW XmlElement::getAttribute(const StringW& name) const
 
 err_t XmlElement::removeAttribute(const StringW& name)
 {
-  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0)
+  if ((_nodeFlags & DOM_FLAG_MUTABLE_ATTRIBUTES) == 0)
     return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
   ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
@@ -454,7 +476,7 @@ err_t XmlElement::removeAttribute(const StringW& name)
 
 err_t XmlElement::removeAttributes()
 {
-  if ((_flags & XML_ALLOWED_ATTRIBUTES) == 0)
+  if ((_nodeFlags & DOM_FLAG_MUTABLE_ATTRIBUTES) == 0)
     return ERR_XML_ATTRIBUTES_NOT_ALLOWED;
 
   size_t i = 0;
@@ -473,7 +495,7 @@ err_t XmlElement::setId(const StringW& id)
 
 err_t XmlElement::setTagName(const StringW& name)
 {
-  if ((_flags & XML_ALLOWED_TAG) == 0)
+  if ((_nodeFlags & DOM_FLAG_MUTABLE_NAME) == 0)
     return ERR_XML_TAG_CHANGE_NOT_ALLOWED;
 
   if (name.isEmpty())
@@ -489,7 +511,7 @@ StringW XmlElement::getTextContent() const
   // behavior for us.
 
   // First try fast-path.
-  if (_firstChild == _lastChild && _firstChild->getType() == XML_ELEMENT_TEXT)
+  if (_firstChild == _lastChild && _firstChild->getNodeType() == DOM_NODE_TEXT)
   {
     return ((XmlText*)_firstChild)->_data;
   }
@@ -504,7 +526,7 @@ StringW XmlElement::getTextContent() const
 err_t XmlElement::setTextContent(const StringW& text)
 {
   // First try fast-path.
-  if (_firstChild == _lastChild && _firstChild->getType() == XML_ELEMENT_TEXT)
+  if (_firstChild == _lastChild && _firstChild->getNodeType() == DOM_NODE_TEXT)
   {
     ((XmlText*)_firstChild)->_data = text;
     return ERR_OK;

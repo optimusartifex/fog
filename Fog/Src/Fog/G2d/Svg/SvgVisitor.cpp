@@ -47,12 +47,14 @@ err_t SvgVisitor::advance(SvgElement* obj)
   {
     XmlElement* parent = obj->getParent();
     elements.append(obj);
-    if (parent == doc || parent == NULL) break;
 
-    if (!parent->isSvgElement())
+    if (parent == doc || parent == NULL)
+      break;
+
+    if (!parent->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
       return ERR_RT_INVALID_STATE;
 
-    obj = reinterpret_cast<SvgElement*>(parent);
+    obj = static_cast<SvgElement*>(parent);
   }
 
   ListReverseIterator<SvgElement*> it(elements);

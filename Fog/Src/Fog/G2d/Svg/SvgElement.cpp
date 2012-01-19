@@ -21,13 +21,14 @@ namespace Fog {
 
 SvgElement::SvgElement(const ManagedStringW& tagName, uint32_t svgType) :
   XmlElement(tagName),
-  _svgType(svgType),
+  _boundingBox(0.0f, 0.0f, 0.0f, 0.0f),
   _boundingBoxDirty(true),
   _visible(true),
-  _unused(0)
+  _unused_0(0),
+  _unused_1(0)
 {
-  _type |= SVG_ELEMENT_MASK;
-  _flags &= ~(XML_ALLOWED_TAG);
+  _nodeFlags &= ~(DOM_FLAG_MUTABLE_NAME);
+  _ext.setExtension(DOM_EXT_GROUP_SVG, svgType);
 }
 
 SvgElement::~SvgElement()
@@ -36,7 +37,7 @@ SvgElement::~SvgElement()
   FOG_ASSERT(_attributes.isEmpty());
 }
 
-SvgElement* SvgElement::clone() const
+XmlElement* SvgElement::clone() const
 {
   SvgElement* e = reinterpret_cast<SvgElement*>(SvgDocument::createElementStatic(_tagName));
   if (e) _copyAttributes(e, const_cast<SvgElement*>(this));
@@ -85,9 +86,9 @@ err_t SvgElement::_visitContainer(SvgVisitor* visitor) const
 
   for (e = getFirstChild(); e; e = e->getNextSibling())
   {
-    if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
+    if (e->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT) && static_cast<SvgElement*>(e)->getVisible())
     {
-      err = visitor->onVisit(reinterpret_cast<SvgElement*>(e));
+      err = visitor->onVisit(static_cast<SvgElement*>(e));
       if (FOG_IS_ERROR(err)) break;
     }
   }

@@ -1105,7 +1105,7 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
           case SVG_SOURCE_URI:
           {
             XmlElement* r = getDocument()->getElementById(parseCssLinkId(a_style._fillUri));
-            if (r && r->isSvg())
+            if (r && r->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
             {
               reinterpret_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_FILL);
             }
@@ -1155,9 +1155,9 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
           case SVG_SOURCE_URI:
           {
             XmlElement* r = getDocument()->getElementById(parseCssLinkId(a_style._strokeUri));
-            if (r && r->isSvg())
+            if (r && r->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
             {
-              reinterpret_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_STROKE);
+              static_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_STROKE);
             }
             break;
           }
@@ -1384,44 +1384,48 @@ err_t SvgAbstractGradientElement::onProcess(SvgVisitor* visitor) const
 void SvgAbstractGradientElement::_walkAndAddColorStops(XmlElement* root, GradientF& gradient)
 {
   bool stopsParsed = false;
-  XmlElement* stop;
+  XmlElement* e;
   int depth = 0;
 
-_Start:
-  for (stop = root->getFirstChild(); stop; stop = stop->getNextSibling())
+  for (;;)
   {
-    if (stop->isSvg() && reinterpret_cast<SvgElement*>(stop)->getSvgType() == SVG_ELEMENT_STOP)
+    for (e = root->getFirstChild(); e != NULL; e = e->getNextSibling())
     {
-      SvgStopElement* _stop = reinterpret_cast<SvgStopElement*>(stop);
-
-      if (_stop->a_offset.isAssigned() && _stop->a_style.hasStyle(SVG_STYLE_STOP_COLOR))
+      if (e->isExtensionGroupAndType(DOM_EXT_GROUP_SVG, SVG_ELEMENT_STOP))
       {
-        float offset = _stop->a_offset.getOffset();
-        Color color(_stop->a_style._stopColor);
+        SvgStopElement* stop = static_cast<SvgStopElement*>(e);
 
-        if (_stop->a_style.hasStyle(SVG_STYLE_STOP_OPACITY))
+        if (stop->a_offset.isAssigned() && stop->a_style.hasStyle(SVG_STYLE_STOP_COLOR))
         {
-          color.setAlpha(_stop->a_style._stopOpacity);
-        }
+          float offset = stop->a_offset.getOffset();
+          Color color(stop->a_style._stopColor);
 
-        gradient.addStop(offset, color);
-        stopsParsed = true;
+          if (stop->a_style.hasStyle(SVG_STYLE_STOP_OPACITY))
+          {
+            color.setAlpha(stop->a_style._stopOpacity);
+          }
+
+          gradient.addStop(offset, color);
+          stopsParsed = true;
+        }
       }
     }
-  }
-
-  if (!stopsParsed)
-  {
-    XmlElement* e;
-    StringW link = root->_getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
-
-    if ((!link.isEmpty() && link.getAt(0) == CharW('#')) &&
-        (e = root->getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1))))
+    
+    if (!stopsParsed)
     {
-      root = e;
-      if (++depth == 32) return;
-      goto _Start;
+      StringW link = root->_getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
+
+      if ((!link.isEmpty() && link.getAt(0) == CharW('#')) &&
+          (e = root->getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1))))
+      {
+        root = e;
+        if (++depth == 32)
+          return;
+        continue;
+      }
     }
+
+    break;
   }
 }
 
@@ -1674,9 +1678,9 @@ err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
   if (!link.isEmpty() && link.getAt(0) == CharW('#'))
   {
     XmlElement* e = getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1));
-    if (e != NULL && e->isSvg() && reinterpret_cast<SvgElement*>(e)->getSvgType() == SVG_ELEMENT_PATTERN)
+    if (e != NULL && e->isExtensionGroupAndType(DOM_EXT_GROUP_SVG, SVG_ELEMENT_PATTERN))
     {
-      SvgPatternElement* pe = reinterpret_cast<SvgPatternElement*>(e);
+      SvgPatternElement* pe = static_cast<SvgPatternElement*>(e);
       FOG_RETURN_ON_ERROR(pe->_createPattern(pattern, obj));
       goto _AssignTransform;
     }
@@ -1880,7 +1884,7 @@ err_t SvgUseElement::onProcess(SvgVisitor* visitor) const
   StringW link = _getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
   XmlElement* ref = getDocument()->getElementById(parseHtmlLinkId(link));
 
-  if (ref && ref->isSvgElement())
+  if (ref && ref->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
     err = visitor->onVisit(reinterpret_cast<SvgElement*>(ref));
 
   return err;
@@ -2458,9 +2462,10 @@ err_t SvgTextElement::onProcess(SvgVisitor* visitor) const
 
   for (e = getFirstChild(); e; e = e->getNextSibling())
   {
-    if (e->isSvgElement() && reinterpret_cast<SvgElement*>(e)->getVisible())
+    if (e->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT) && 
+        static_cast<SvgElement*>(e)->getVisible())
     {
-      err = visitor->onVisit(reinterpret_cast<SvgElement*>(e));
+      err = visitor->onVisit(static_cast<SvgElement*>(e));
       if (FOG_IS_ERROR(err)) break;
     }
 

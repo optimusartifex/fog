@@ -22,8 +22,8 @@ XmlPI::XmlPI(const StringW& data) :
   XmlNoText(FOG_STR_(XML__pi)),
   _data(data)
 {
-  _type = XML_ELEMENT_PI;
-  _flags &= ~(XML_ALLOWED_TAG | XML_ALLOWED_ATTRIBUTES);
+  _nodeType = DOM_NODE_PROCESSING_INSTRUCTION;
+  _nodeFlags &= ~(DOM_FLAG_MUTABLE_NAME | DOM_FLAG_MUTABLE_ATTRIBUTES);
 }
 
 XmlPI::~XmlPI()
@@ -37,13 +37,15 @@ XmlElement* XmlPI::clone() const
 
 const StringW& XmlPI::getData() const
 {
-  FOG_ASSERT(getType() == XML_ELEMENT_PI);
+  FOG_ASSERT(getNodeType() == DOM_NODE_PROCESSING_INSTRUCTION);
+
   return _data;
 }
 
 err_t XmlPI::setData(const StringW& data)
 {
-  FOG_ASSERT(getType() == XML_ELEMENT_PI);
+  FOG_ASSERT(getNodeType() == DOM_NODE_PROCESSING_INSTRUCTION);
+
   return _data.set(data);
 }
 

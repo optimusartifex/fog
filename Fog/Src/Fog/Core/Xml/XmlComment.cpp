@@ -22,8 +22,8 @@ XmlComment::XmlComment(const StringW& data) :
   XmlNoText(FOG_STR_(XML__comment)),
   _data(data)
 {
-  _type = XML_ELEMENT_COMMENT;
-  _flags &= ~(XML_ALLOWED_TAG | XML_ALLOWED_ATTRIBUTES);
+  _nodeType = DOM_NODE_COMMENT;
+  _nodeFlags &= ~(DOM_FLAG_MUTABLE_NAME | DOM_FLAG_MUTABLE_ATTRIBUTES);
 }
 
 XmlComment::~XmlComment()
@@ -37,13 +37,15 @@ XmlElement* XmlComment::clone() const
 
 const StringW& XmlComment::getData() const
 {
-  FOG_ASSERT(getType() == XML_ELEMENT_COMMENT);
+  FOG_ASSERT(getNodeType() == DOM_NODE_COMMENT);
+
   return _data;
 }
 
 err_t XmlComment::setData(const StringW& data)
 {
-  FOG_ASSERT(getType() == XML_ELEMENT_COMMENT);
+  FOG_ASSERT(getNodeType() == DOM_NODE_COMMENT);
+
   return _data.set(data);
 }
 

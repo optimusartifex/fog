@@ -28,6 +28,59 @@ struct XmlSaxReader;
 struct XmlSaxWriter;
 
 // ============================================================================
+// [Fog::DomExtensionType]
+// ============================================================================
+
+union FOG_NO_EXPORT DomExtensionType
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE DomExtensionType(uint32_t group, uint32_t type)
+  {
+    _packed = (group << 16) | type;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getGroup() const { return _data.group; }
+  FOG_INLINE uint32_t getType() const { return _data.type; }
+
+  FOG_INLINE void setGroup(uint32_t group) { _data.group = group; }
+  FOG_INLINE void setType(uint32_t type) { _data.type = type; }
+
+  FOG_INLINE bool isExtension(uint32_t group, uint32_t type) const
+  {
+    return _packed == ((group << 16) | type);
+  }
+
+  FOG_INLINE void setExtension(uint32_t group, uint32_t type)
+  {
+    _packed = ((group << 16) | type);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  struct FOG_NO_EXPORT _Packed
+  {
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+    uint16_t type;
+    uint16_t group;
+#else
+    uint16_t group;
+    uint16_t type;
+#endif // FOG_BYTE_ORDER
+  } _data;
+  
+  uint32_t _packed;
+};
+
+// ============================================================================
 // [Fog::XmlElement]
 // ============================================================================
 
@@ -45,28 +98,50 @@ struct FOG_API XmlElement
   // [Type and Flags]
   // --------------------------------------------------------------------------
 
-  //! @brief Return element type, see @c Type.
-  FOG_INLINE int getType() const { return _type; }
+  //! @brief Get element type, see @ref DOM_NODE.
+  FOG_INLINE uint32_t getNodeType() const { return _nodeType; }
+  //! @brief Get element flags, see @ref DOM_FLAG.
+  FOG_INLINE uint32_t getNodeFlags() const { return _nodeFlags; }
 
-  //! @brief Return true if element is @a TypeElement type.
-  FOG_INLINE bool isElement() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_BASE; }
-  //! @brief Return true if element is @a TypeText type.
-  FOG_INLINE bool isText() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_TEXT; }
-  //! @brief Return true if element is @a TypeCDATA type.
-  FOG_INLINE bool isCDATA() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_CDATA; }
-  //! @brief Return true if element is @a TypePI type.
-  FOG_INLINE bool isPI() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_PI; }
-  //! @brief Return true if element is @a TypeComment type.
-  FOG_INLINE bool isComment() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_COMMENT; }
-  //! @brief Return true if element is @a TypeDocument type.
-  FOG_INLINE bool isDocument() const { return (_type & XML_ELEMENT_MASK) == XML_ELEMENT_DOCUMENT; }
+  //! @brief Get whether the element is @ref DomElement.
+  FOG_INLINE bool isElement() const { return _nodeType == DOM_NODE_ELEMENT; }
+  //! @brief Get whether the element is @ref DomAttribute.
+  FOG_INLINE bool isAttribute() const { return _nodeType == DOM_NODE_ATTRIBUTE; }
+  //! @brief Get whether the element is @ref DomText.
+  FOG_INLINE bool isText() const { return _nodeType == DOM_NODE_TEXT; }
+  //! @brief Get whether the element is @ref DomCDATA.
+  FOG_INLINE bool isCDATA() const { return _nodeType == DOM_NODE_CDATA; }
+  //! @brief Get whether the element is @ref DomEntityReference.
+  FOG_INLINE bool isEntityReference() const { return _nodeType == DOM_NODE_ENTITY_REFERENCE; }
+  //! @brief Get whether the element is @ref DomEntityReference.
+  FOG_INLINE bool isEntity() const { return _nodeType == DOM_NODE_ENTITY; }
+  //! @brief Get whether the element is @ref DomProcessingInstruction.
+  FOG_INLINE bool isProcessingInstruction() const { return _nodeType == DOM_NODE_PROCESSING_INSTRUCTION; }
+  //! @brief Get whether the element is @ref DomComment.
+  FOG_INLINE bool isComment() const { return _nodeType == DOM_NODE_COMMENT; }
+  //! @brief Get whether the element is @ref DomDocument.
+  FOG_INLINE bool isDocument() const { return _nodeType == DOM_NODE_DOCUMENT; }
+  //! @brief Get whether the element is @ref DomDocumentType.
+  FOG_INLINE bool isDocumentType() const { return _nodeType == DOM_NODE_DOCUMENT_TYPE; }
+  //! @brief Get whether the element is @ref DomDocumentFragment.
+  FOG_INLINE bool isDocumentFragment() const { return _nodeType == DOM_NODE_DOCUMENT_FRAGMENT; }
+  //! @brief Get whether the element is @ref DomNotation.
+  FOG_INLINE bool isNotation() const { return _nodeType == DOM_NODE_NOTATION; }
 
-  //! @brief Return true if element is SVG extension.
-  FOG_INLINE bool isSvg() const { return (_type & SVG_ELEMENT_MASK) != 0; }
-  //! @brief Return true if element is @c SvgElement.
-  FOG_INLINE bool isSvgElement() const { return _type == SVG_ELEMENT_BASE; }
-  //! @brief Return true if element is @c SvgDocument.
-  FOG_INLINE bool isSvgDocument() const { return _type == SVG_ELEMENT_DOCUMENT; }
+  //! @brief Get DOM extension group.
+  FOG_INLINE uint32_t getExtensionGroup() const { return _ext.getGroup(); }
+  //! @brief Get DOM extension type.
+  FOG_INLINE uint32_t getExtensionType() const { return _ext.getType(); }
+
+  //! @brief Get whether the DOM node is of extension @a group. 
+  FOG_INLINE bool isExtensionGroup(uint32_t extGroup) const { return _ext.getGroup() == extGroup; }
+  //! @brief Get whether the DOM node is of extension @a group. 
+  FOG_INLINE bool isExtensionType(uint32_t extType) const { return _ext.getType() == extType; }
+
+  //! @brief Get whether the DOM node is of extension @a group and @a type.
+  FOG_INLINE bool isExtensionGroupAndType(uint32_t extGroup, uint32_t extType) const { return _ext.isExtension(extGroup, extType); }
+  //! @brief Get whether the DOM node is of extension @a group and @a type.
+  FOG_INLINE bool isExtensionGroupAndNode(uint32_t extGroup, uint32_t nodeType) const { return (_ext.getGroup() == extGroup) & (getNodeType() == nodeType); }
 
   // --------------------------------------------------------------------------
   // [Manage / Unmanage]
@@ -238,11 +313,17 @@ public:
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint8_t _type;
-  uint8_t _reserved0;
-  uint8_t _reserved1;
-  mutable uint8_t _dirty;
-  uint32_t _flags;
+  //! @brief DOM node type, see @ref DOM_NODE.
+  uint8_t _nodeType;
+  //! @brief DOM node flags, see @ref DOM_FLAG.
+  uint8_t _nodeFlags;
+  //! @brief Reserved for future use.
+  uint8_t _nodeReserved;
+  //! @brief Dirty flag.
+  mutable uint8_t _nodeDirty;
+
+  //! @brief Dom extension group and type.
+  DomExtensionType _ext;
 
   XmlDocument* _document;
   XmlElement* _parent;

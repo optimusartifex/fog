@@ -46,13 +46,7 @@ struct FOG_API SvgElement : public XmlElement
   // [Clone]
   // --------------------------------------------------------------------------
 
-  virtual SvgElement* clone() const;
-
-  // --------------------------------------------------------------------------
-  // [SVG Type]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE int getSvgType() const { return _svgType; }
+  virtual XmlElement* clone() const;
 
   // --------------------------------------------------------------------------
   // [SVG Attributes]
@@ -100,14 +94,12 @@ struct FOG_API SvgElement : public XmlElement
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint8_t _svgType;
-  mutable uint8_t _boundingBoxDirty;
-
-  uint8_t _visible;
-  uint8_t _unused;
-
-protected:
   mutable BoxF _boundingBox;
+
+  mutable uint8_t _boundingBoxDirty;
+  uint8_t _visible;
+  uint8_t _unused_0;
+  uint8_t _unused_1;
 
 private:
   _FOG_NO_COPY(SvgElement)

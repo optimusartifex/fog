@@ -1334,6 +1334,89 @@ enum DF_FORM
 };
 
 // ============================================================================
+// [Fog::DOM_NODE]
+// ============================================================================
+
+//! @brief DOM node type.
+enum DOM_NODE
+{
+  //! @brief Element node (@ref DomElement).
+  DOM_NODE_ELEMENT = 1,
+  //! @brief Attribute node (@ref DomAttribute).
+  DOM_NODE_ATTRIBUTE = 2,
+  //! @brief Text node (@ref DomText).
+  DOM_NODE_TEXT = 3,
+  //! @brief CDATA section (@ref DomCDATA).
+  DOM_NODE_CDATA = 4,
+  //! @brief Entity reference (@ref DomEntityReference).
+  DOM_NODE_ENTITY_REFERENCE = 5,
+  //! @brief Entity (@ref DomEntity).
+  DOM_NODE_ENTITY = 6,
+  //! @brief Processing instruction (@ref DomProcessingInstruction).
+  DOM_NODE_PROCESSING_INSTRUCTION = 7,
+  //! @brief Comment (@ref DomComment).
+  DOM_NODE_COMMENT = 8,
+  //! @brief Document (@ref DomDocument).
+  DOM_NODE_DOCUMENT = 9,
+  //! @brief Document type (@ref DomDocumentType).
+  DOM_NODE_DOCUMENT_TYPE = 10,
+  //! @brief Document fragment (@ref DomDocumentFragment).
+  DOM_NODE_DOCUMENT_FRAGMENT = 11,
+  //! @brief Notation (@ref DomNotation).
+  DOM_NODE_NOTATION = 12
+};
+
+// ============================================================================
+// [Fog::DOM_FLAG]
+// ============================================================================
+
+//! @brief DOM flags.
+enum DOM_FLAG
+{
+  //! @brief Whether the node DOM is mutable (can be manipulated).
+  DOM_FLAG_MUTABLE_DOM = 0x01,
+  //! @brief Whether the node name (or element tagName) is mutable (can be changed).
+  DOM_FLAG_MUTABLE_NAME = 0x02,
+  //! @brief Whether the node is element and supports attributes (and can be changed).
+  DOM_FLAG_MUTABLE_ATTRIBUTES = 0x04,
+
+  //! @brie Whether the node is inlined to the parent node
+  //!
+  //! Inlining means static allocation with parent node. This kind of node
+  //! can't be moved, or added into the another node. It's an optimization
+  //! used to allocate optimum space for all standard attributes of DOM
+  //! extensions and to simplify access to them.
+  DOM_FLAG_INLINED = 0x08
+};
+
+// ============================================================================
+// [Fog::DOM_EXT_GROUP]
+// ============================================================================
+
+//! @brief DOM extension group (implementation dependent).
+enum DOM_EXT_GROUP
+{
+  //! @brief XML-DOM model.
+  DOM_EXT_GROUP_XML = 0,
+  //! @brief SVG-DOM model, see @ref SvgDocument and @ref SvgElement.
+  DOM_EXT_GROUP_SVG = 1,
+
+  //! @brief Third party extension.
+  DOM_EXT_GROUP_EXT = 16
+};
+
+// ============================================================================
+// [Fog::DOM_EXT_TYPE]
+// ============================================================================
+
+//! @brief DOM extension type.
+enum DOM_EXT_TYPE
+{
+  //! @brief Node is not extended.
+  DOM_EXT_TYPE_NONE = 0
+};
+
+// ============================================================================
 // [Fog::FILE_INFO]
 // ============================================================================
 
@@ -2781,42 +2864,6 @@ enum VAR_FLAG_STRING
 {
   VAR_FLAG_STRING_MANAGED = VAR_FLAG_RESERVED_1,
   VAR_FLAG_STRING_CACHED = VAR_FLAG_RESERVED_2
-};
-
-// ============================================================================
-// [Fog::XML_ELEMENT]
-// ============================================================================
-
-//! @brief Xml element type.
-enum XML_ELEMENT
-{
-  XML_ELEMENT_BASE = 0x01,
-  XML_ELEMENT_TEXT = 0x03,
-  XML_ELEMENT_CDATA = 0x04,
-  XML_ELEMENT_PI = 0x07,
-  XML_ELEMENT_COMMENT = 0x08,
-  XML_ELEMENT_DOCUMENT = 0x09,
-
-  XML_ELEMENT_MASK = 0x0F,
-
-  // Svg support.
-  SVG_ELEMENT_MASK = 0x10,
-  SVG_ELEMENT_BASE = XML_ELEMENT_BASE | SVG_ELEMENT_MASK,
-  SVG_ELEMENT_DOCUMENT = XML_ELEMENT_DOCUMENT | SVG_ELEMENT_MASK
-};
-
-// ============================================================================
-// [Fog::XML_FLAGS]
-// ============================================================================
-
-enum XML_FLAGS
-{
-  //! @brief Whether element can be manipulated (DOM).
-  XML_ALLOWED_DOM_MANIPULATION = 0x01,
-  //! @brief Whether element tag name can be changed.
-  XML_ALLOWED_TAG = 0x02,
-  //! @brief Whether element supports attributes.
-  XML_ALLOWED_ATTRIBUTES = 0x04
 };
 
 //! @}

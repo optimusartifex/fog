@@ -26,8 +26,8 @@ union __p64
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint64_t& operator() { return u64; }
-  FOG_INLINE const uint64_t& operator() const { return u64; }
+  FOG_INLINE uint64_t& operator()() { return u64; }
+  FOG_INLINE const uint64_t& operator()() const { return u64; }
 
   // --------------------------------------------------------------------------
   // [Members]

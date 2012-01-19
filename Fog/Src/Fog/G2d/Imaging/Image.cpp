@@ -1039,8 +1039,8 @@ static err_t FOG_CDECL Image_fillRectArgb32(Image* self, const RectI* r, const A
   {
     case IMAGE_PRECISION_BYTE:
     {
-      uint32_t pix0 = c0->p32;
-      Face::p32PRGB32FromARGB32(solid.prgb32.p32, pix0);
+      uint32_t pix0 = c0->u32;
+      Face::p32PRGB32FromARGB32(solid.prgb32.u32, pix0);
 
       uint32_t opacity_8 = Math::uroundToByte256(opacity);
       if (opacity_8 == 0) return ERR_OK;
@@ -1053,7 +1053,7 @@ static err_t FOG_CDECL Image_fillRectArgb32(Image* self, const RectI* r, const A
     case IMAGE_PRECISION_WORD:
     {
       __p64 pix0;
-      Face::p64ARGB64FromARGB32(solid.prgb64.p64, c0->p32);
+      Face::p64ARGB64FromARGB32(solid.prgb64.p64, c0->u32);
       Face::p64PRGB64FromARGB64(solid.prgb64.p64, pix0);
 
       uint32_t opacity_16 = Math::uroundToWord65536(opacity);
@@ -1101,7 +1101,7 @@ static err_t FOG_CDECL Image_fillRectColor(Image* self, const RectI* r, const Co
     case IMAGE_PRECISION_BYTE:
     {
       uint32_t pix0 = c0->getArgb32();
-      Face::p32PRGB32FromARGB32(solid.prgb32.p32, pix0);
+      Face::p32PRGB32FromARGB32(solid.prgb32.u32, pix0);
 
       uint32_t opacity_8 = Math::uroundToByte256(opacity);
       if (opacity_8 == 0) return ERR_OK;

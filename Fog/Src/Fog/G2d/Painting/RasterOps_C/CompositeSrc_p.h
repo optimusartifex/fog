@@ -1374,7 +1374,7 @@ _ARGB32_Glyph_Fill:
   {
     CompositeBase::MemFill32Context ctx;
 
-    ctx.init(src->prgb32.p32);
+    ctx.init(src->prgb32.u32);
     ctx.fill(dst, w);
   }
 
@@ -1388,7 +1388,7 @@ _ARGB32_Glyph_Fill:
     uint32_t sro0p;
     uint32_t sro0p_20, sro0p_31;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     C_BLIT_SPAN8_BEGIN(4)
@@ -2266,7 +2266,7 @@ _ARGB32_Glyph_Skip:
   {
     CompositeBase::MemFill32Context ctx;
 
-    ctx.init(src->prgb32.p32 | 0xFF000000);
+    ctx.init(src->prgb32.u32 | 0xFF000000);
     ctx.fill(dst, w);
   }
 
@@ -2280,7 +2280,7 @@ _ARGB32_Glyph_Skip:
     uint32_t sro0p;
     uint32_t sro0p_20, sro0p_31;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32FillPBB3(sro0p, sro0p);
 
     Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
@@ -2621,7 +2621,7 @@ _ARGB32_Glyph_Skip:
     uint32_t sro0p_packed_1;
     uint32_t sro0p_packed_2;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32RGB24QuadFromXRGB32Solid(sro0p_packed_0, sro0p_packed_1, sro0p_packed_2, sro0p);
 
     BLIT_LOOP_24x4_SMALL_BEGIN(C_Opaque)
@@ -2647,7 +2647,7 @@ _ARGB32_Glyph_Skip:
     uint8_t* dst, const RasterSolid* src, const RasterSpan* span, const RasterClosure* closure)
   {
     uint32_t sro0p;
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32ZeroPBB3(sro0p, sro0p);
 
     uint32_t sro0p_packed_0;

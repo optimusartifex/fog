@@ -820,7 +820,7 @@ struct FOG_NO_EXPORT FBlur
       else
       {
         Argb32 argb32 = feData->_extendColor().getArgb32();
-        Face::p32PRGB32FromARGB32(ctx->blur.extendColor.prgb32.p32, argb32.p32);
+        Face::p32PRGB32FromARGB32(ctx->blur.extendColor.prgb32.u32, argb32.u32);
       }
     }
 

@@ -29,7 +29,7 @@ RasterContext::RasterContext() :
   paintHints.packed = 0;
   rasterHints.packed = 0;
 
-  solid.prgb32.p32 = 0xFF000000;
+  solid.prgb32.u32 = 0xFF000000;
   solid.prgb64.u64 = FOG_UINT64_C(0xFFFF000000000000);
   pc = (RasterPattern*)(size_t)0x1;
 

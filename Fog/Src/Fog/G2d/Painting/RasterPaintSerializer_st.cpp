@@ -240,7 +240,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPa
 
   if (RasterUtil::isSolidContext(engine->ctx.pc))
   {
-    bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.p32);
+    bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
 
     filler._prepare = (RasterFiller::PrepareFunc)RasterPaintFiller_prepare_solid_st;
     filler._process = (RasterFiller::ProcessFunc)RasterPaintFiller_process_solid;
@@ -441,7 +441,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
 
         if (RasterUtil::isSolidContext(engine->ctx.pc))
         {
-          bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.p32);
+          bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
           RasterCBlitLineFunc blitLine = _api_raster.getCBlitLine(format, compositingOperator, isSrcOpaque);
 
           pixels += box->x0 * engine->ctx.layer.primaryBPP;

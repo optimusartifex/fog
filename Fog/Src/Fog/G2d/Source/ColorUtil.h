@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iLoad8(xmm0, &argb64);
     xmm0 = _mm_srli_epi16(xmm0, 8);
     xmm0 = _mm_packus_epi16(xmm0, xmm0);
-    argb32.p32 = _mm_cvtsi128_si32(xmm0);
+    argb32.u32 = _mm_cvtsi128_si32(xmm0);
 #elif FOG_ARCH_BITS >= 64
     // C Implementation (64-bit).
     uint32_t t0 = (uint32_t)(argb64._packed64 >> (56 - 24)) & 0xFF000000U;
@@ -55,7 +55,7 @@ struct FOG_NO_EXPORT ColorUtil
     t0 += t2;
     t1 += t3;
 
-    argb32._packed32 = t0 + t1;
+    argb32.u32 = t0 + t1;
 #else
     // C Implementation (32-bit).
     uint32_t t0 = ((argb64.a << 16) | argb64.g     ) & 0xFF00FF00;
@@ -75,7 +75,7 @@ struct FOG_NO_EXPORT ColorUtil
     Face::m128iCvtPI32FromPS(xmm0, xmmf);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128iPackPU8FromPI32(xmm0, xmm0);
-    Face::m128iStore4(&argb32.p32, xmm0);
+    Face::m128iStore4(&argb32.u32, xmm0);
 #else
     argb32.u32 = (Math::uroundToByte255(argbf[0]) << PIXEL_ARGB32_SHIFT_A) |
                  (Math::uroundToByte255(argbf[1]) << PIXEL_ARGB32_SHIFT_R) |
@@ -104,8 +104,8 @@ struct FOG_NO_EXPORT ColorUtil
     uint64_t t1 = ((uint64_t)(c0 & 0xFF000000U) << 24) | ((uint64_t)(c0 & 0x00FF0000U) << 16);
 
     t0 += t1;
-    t0 *= 0x01010101U;
-    argb64._packed64 = t0;
+    t0 *= FOG_UINT64_C(0x0101);
+    argb64.p64 = t0;
 #else
     // C (32-bit) Implementation.
     uint32_t c0 = argb32.u32;
@@ -147,7 +147,7 @@ struct FOG_NO_EXPORT ColorUtil
     __m128i xmm0;
     __m128f xmmf;
 
-    Face::m128iLoad4(xmm0, &argb32.p32);
+    Face::m128iLoad4(xmm0, &argb32.u32);
     Face::m128iUnpackPI32FromPI8Lo(xmm0, xmm0);
     Face::m128iSwapPI32(xmm0, xmm0);
     Face::m128fCvtPSFromPI32(xmmf, xmm0);

@@ -137,7 +137,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
       savedStateFlags |= RASTER_STATE_SOURCE;
       state->sourceType = RASTER_SOURCE_ARGB32;
-      state->source.color->_argb32.p32 = source.color->_argb32.p32;
+      state->source.color->_argb32.u32 = source.color->_argb32.u32;
       state->solid = ctx.solid;
     }
   }

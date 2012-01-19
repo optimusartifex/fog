@@ -97,7 +97,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Get blue value of ARGB quad.
   FOG_INLINE uint32_t getBlue() const { return b; }
   //! @brief Get grey value (converting RGB components to grey, ignoring alpha).
-  FOG_INLINE uint32_t getGrey() const { return getGrey(p32); }
+  FOG_INLINE uint32_t getGrey() const { return getGrey(u32); }
 
   //! @brief Set alpha value of ARGB quad.
   FOG_INLINE void setAlpha(uint32_t a8) { a = a8; }
@@ -113,7 +113,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Get the packed value.
   FOG_INLINE uint32_t getPacked32() const
   {
-    return p32;
+    return u32;
   }
 
   //! @brief Get the packed value.
@@ -127,7 +127,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Set all values to @a packed32.
   FOG_INLINE void setPacked32(uint32_t packed32)
   {
-    p32 = packed32;
+    u32 = packed32;
   }
 
   //! @brief Set all values to @a packed64.
@@ -143,7 +143,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   // --------------------------------------------------------------------------
 
   //! @brief Convert color to @c Argb32 (convenience).
-  FOG_INLINE Argb32 getArgb32() const { return Argb32(p32); }
+  FOG_INLINE Argb32 getArgb32() const { return Argb32(u32); }
   //! @brief Convert color to @c Argb64.
   FOG_INLINE Argb64 getArgb64() const;
   //! @brief Convert color to @c ArgbF.
@@ -152,19 +152,19 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Set all values to @a argb32.
   FOG_INLINE void setArgb32(const ArgbBase32& argb32)
   {
-    p32 = argb32.p32;
+    u32 = argb32.u32;
   }
 
   //! @brief Set all values to @a a, @a r, @a g, @a b.
   FOG_INLINE void setArgb32(uint32_t a8, uint32_t r8, uint32_t g8, uint32_t b8)
   {
-    p32 = pack(a8, r8, g8, b8);
+    u32 = pack(a8, r8, g8, b8);
   }
 
   //! @brief Set all values to @a argb64.
   FOG_INLINE void setArgb64(const ArgbBase64& argb64)
   {
-    Face::p64ARGB32FromARGB64(p32, argb64.p64);
+    Face::p64ARGB32FromARGB64(u32, argb64.p64);
   }
 
   //! @brief Set all values to @a a, @a r, @a g, @a b.
@@ -173,7 +173,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
     uint32_t t0 = ((a16 << 16) | (g16     )) & 0xFF00FF00;
     uint32_t t1 = ((r16 <<  8) | (b16 >> 8)) & 0x00FF00FF;
 
-    p32 = t0 + t1;
+    u32 = t0 + t1;
   }
 
   //! @brief Set all values to @a argb (converting color entities to 8-bit).
@@ -195,7 +195,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
 
   FOG_INLINE void reset()
   {
-    p32 = 0x00000000U;
+    u32 = 0x00000000U;
   }
 
   // --------------------------------------------------------------------------
@@ -205,7 +205,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Byte-swap the packed color data.
   FOG_INLINE void bswap()
   {
-    p32 = MemOps::bswap32(p32);
+    u32 = MemOps::bswap32(u32);
   }
 
   // --------------------------------------------------------------------------
@@ -215,13 +215,13 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Get whether the alpha is fully-opaque (255 in decimal).
   FOG_INLINE bool isOpaque() const
   {
-    return (p32 >= 0xFF000000);
+    return (u32 >= 0xFF000000);
   }
 
   //! @brief Get whether the alpha is fully-transparent (0 in decimal).
   FOG_INLINE bool isTransparent() const
   {
-    return (p32 <= 0x00FFFFFF);
+    return (u32 <= 0x00FFFFFF);
   }
 
   // --------------------------------------------------------------------------
@@ -229,16 +229,16 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   // --------------------------------------------------------------------------
 
   //! @brief Cast to packed 32-bit integer.
-  FOG_INLINE operator uint32_t() const { return p32; }
+  FOG_INLINE operator uint32_t() const { return u32; }
 
   FOG_INLINE Argb32& operator=(const ArgbBase32& argb32) { setArgb32(argb32); return *this; }
   FOG_INLINE Argb32& operator=(const ArgbBase64& argb64) { setArgb64(argb64); return *this; }
   FOG_INLINE Argb32& operator=(const ArgbBaseF& argbf) { setArgbF(argbf); return *this; }
 
-  FOG_INLINE Argb32& operator=(uint32_t packed32) { p32 = packed32; return *this; }
-  FOG_INLINE Argb32& operator|=(uint32_t packed32) { p32 |= packed32; return *this; }
-  FOG_INLINE Argb32& operator&=(uint32_t packed32) { p32 &= packed32; return *this; }
-  FOG_INLINE Argb32& operator^=(uint32_t packed32) { p32 ^= packed32; return *this; }
+  FOG_INLINE Argb32& operator=(uint32_t packed32) { u32 = packed32; return *this; }
+  FOG_INLINE Argb32& operator|=(uint32_t packed32) { u32 |= packed32; return *this; }
+  FOG_INLINE Argb32& operator&=(uint32_t packed32) { u32 &= packed32; return *this; }
+  FOG_INLINE Argb32& operator^=(uint32_t packed32) { u32 ^= packed32; return *this; }
 
   // --------------------------------------------------------------------------
   // [Statics - Access]
@@ -435,7 +435,7 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
   {
     ArgbBase32 argb32;
     ColorUtil::argb32From64(argb32, *this);
-    return argb32.p32;
+    return argb32.u32;
   }
 
   //! @brief Get the packed 64-bit value.
@@ -448,7 +448,7 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
   FOG_INLINE void setPacked32(uint32_t packed32)
   {
     ArgbBase32 argb32;
-    argb32.p32 = packed32;
+    argb32.u32 = packed32;
     ColorUtil::argb64From32(*this, argb32);
   }
 
@@ -493,11 +493,11 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
     u64 *= FOG_UINT64_C(0x0101);
 #else
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-    p32[0] = (b8 + (g8 << 16)) * 0x0101U;
-    p32[1] = (r8 + (a8 << 16)) * 0x0101U;
+    u32[0] = (b8 + (g8 << 16)) * 0x0101U;
+    u32[1] = (r8 + (a8 << 16)) * 0x0101U;
 #else
-    p32[0] = (r8 + (a8 << 16)) * 0x0101U;
-    p32[1] = (b8 + (g8 << 16)) * 0x0101U;
+    u32[0] = (r8 + (a8 << 16)) * 0x0101U;
+    u32[1] = (b8 + (g8 << 16)) * 0x0101U;
 #endif // FOG_BYTE_ORDER
 #endif // FOG_ARCH_BITS
   }
@@ -548,11 +548,11 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
 #if FOG_ARCH_BITS >= 64
     u64 = MemOps::bswap64(u64);
 #else
-    uint32_t t0 = p32[0];
-    uint32_t t1 = p32[1];
+    uint32_t t0 = u32[0];
+    uint32_t t1 = u32[1];
 
-    p32[0] = MemOps::bswap32(t1);
-    p32[1] = MemOps::bswap32(t0);
+    u32[0] = MemOps::bswap32(t1);
+    u32[1] = MemOps::bswap32(t0);
 #endif
   }
 

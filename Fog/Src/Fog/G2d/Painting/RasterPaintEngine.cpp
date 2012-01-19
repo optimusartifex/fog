@@ -1844,8 +1844,8 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32(Painter* self, uint32_t
         engine->saveSourceArgb32();
       }
 
-      engine->source.color->_argb32.p32 = argb32;
-      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.p32, argb32);
+      engine->source.color->_argb32.u32 = argb32;
+      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, argb32);
       break;
     }
 
@@ -1898,7 +1898,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64(Painter* self, const Ar
   {
     case IMAGE_PRECISION_BYTE:
       engine->source.color.initCustom1(*argb64);
-      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.p32, engine->source.color->_argb32.p32);
+      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, engine->source.color->_argb32.u32);
       break;
 
     case IMAGE_PRECISION_WORD:
@@ -1937,7 +1937,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceColor(Painter* self, const Col
   {
     case IMAGE_PRECISION_BYTE:
       engine->source.color.initCustom1(*color);
-      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.p32, color->_argb32.p32);
+      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, color->_argb32.u32);
       break;
 
     case IMAGE_PRECISION_WORD:
@@ -2264,7 +2264,7 @@ static err_t FOG_CDECL RasterPaintEngine_restore(Painter* self)
         break;
 
       case RASTER_SOURCE_ARGB32:
-        engine->source.color->_argb32.p32 = state->source.color->_argb32.p32;
+        engine->source.color->_argb32.u32 = state->source.color->_argb32.u32;
         engine->ctx.solid = state->solid;
         engine->ctx.pc = (RasterPattern*)(size_t)(0x1);
         break;
@@ -4060,7 +4060,7 @@ void RasterPaintEngine::saveSourceAndDiscard()
         break;
 
       case RASTER_SOURCE_ARGB32:
-        state->source.color->_argb32.p32 = source.color->_argb32.p32;
+        state->source.color->_argb32.u32 = source.color->_argb32.u32;
         state->solid = ctx.solid;
         break;
 

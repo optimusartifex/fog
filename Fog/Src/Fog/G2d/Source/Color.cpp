@@ -422,7 +422,7 @@ static void FOG_CDECL Color_acmykf_from_argb64(float* dst, const ArgbBase64* src
 static void FOG_CDECL Color_argb32_zero(ArgbBase32* dst, const ArgbBase32* src)
 {
   FOG_UNUSED(src);
-  dst->p32 = 0;
+  dst->u32 = 0;
 }
 
 static void FOG_CDECL Color_argb32_from_argbf(ArgbBase32* dst, const ArgbBaseF* src)
@@ -454,7 +454,7 @@ static void FOG_CDECL Color_argb32_from_acmykf(ArgbBase32* dst, const float* src
 
 static void FOG_CDECL Color_argb32_from_argb32(ArgbBase32* dst, const ArgbBase32* src)
 {
-  dst->p32 = src->p32;
+  dst->u32 = src->u32;
 }
 
 static void FOG_CDECL Color_argb32_from_argb64(ArgbBase32* dst, const ArgbBase64* src)

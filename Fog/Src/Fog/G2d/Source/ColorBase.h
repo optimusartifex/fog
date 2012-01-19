@@ -42,7 +42,7 @@ struct FOG_NO_EXPORT ArgbBase32
       uint8_t b;
 #endif // FOG_BYTE_ORDER
     };
-    uint32_t p32;
+    uint32_t u32;
   };
 };
 #include <Fog/Core/C++/PackRestore.h>

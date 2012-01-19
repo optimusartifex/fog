@@ -66,7 +66,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32_byte_SSE2(Painter* self
   Face::m128iMulDiv255PI16(xmmARGB, xmmARGB, xmmAAAA);
   Face::m128iPackPU8FromPU16(xmmARGB, xmmARGB);
 
-  engine->source.color->_argb32.p32 = argb32;
+  engine->source.color->_argb32.u32 = argb32;
   Face::m128iStore4(&engine->ctx.solid.prgb32, xmmARGB);
   return ERR_OK;
 }

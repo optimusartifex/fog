@@ -44,7 +44,7 @@ struct FOG_NO_EXPORT FBaseAccessor_PRGB32
 
   static FOG_INLINE void fetchPixelS(Pixel& dst, const RasterSolid& src)
   {
-    dst = src.prgb32.p32;
+    dst = src.prgb32.u32;
   }
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)
@@ -89,7 +89,7 @@ struct FOG_NO_EXPORT FBaseAccessor_XRGB32
 
   static FOG_INLINE void fetchPixelS(Pixel& dst, const RasterSolid& src)
   {
-    dst = src.prgb32.p32;
+    dst = src.prgb32.u32;
   }
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)
@@ -134,7 +134,7 @@ struct FOG_NO_EXPORT FBaseAccessor_RGB24
 
   static FOG_INLINE void fetchPixelS(Pixel& dst, const RasterSolid& src)
   {
-    dst = src.prgb32.p32;
+    dst = src.prgb32.u32;
   }
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)

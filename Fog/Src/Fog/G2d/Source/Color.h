@@ -81,7 +81,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE bool isOpaqueARGB32() const
   {
-    return Face::p32ARGB32IsAlphaFF(_argb32.p32);
+    return Face::p32ARGB32IsAlphaFF(_argb32.u32);
   }
 
   // --------------------------------------------------------------------------
@@ -324,7 +324,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 FOG_FUZZY_DECLARE_F(Fog::Color,
   a._model == b._model &&
   a._hints == b._hints &&
-  a._argb32.p32 == b._argb32.p32 &&
+  a._argb32.u32 == b._argb32.u32 &&
   Math::feqv(a._data, b._data, 5)
 )
 

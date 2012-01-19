@@ -139,8 +139,8 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_RGB24:
       case IMAGE_FORMAT_A8:
       case IMAGE_FORMAT_I8:
-        solid.prgb32.p32 = color->getArgb32().p32;
-        Face::p32PRGB32FromARGB32(solid.prgb32.p32, solid.prgb32.p32);
+        solid.prgb32.u32 = color->getArgb32().u32;
+        Face::p32PRGB32FromARGB32(solid.prgb32.u32, solid.prgb32.u32);
         break;
 
       case IMAGE_FORMAT_PRGB64:
@@ -168,7 +168,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_XRGB32:
       case IMAGE_FORMAT_RGB24:
       {
-        if (Face::p32PRGB32IsAlphaFF(solid->prgb32.p32))
+        if (Face::p32PRGB32IsAlphaFF(solid->prgb32.u32))
         {
           ctx->_srcFormat = IMAGE_FORMAT_XRGB32;
           ctx->_srcBPP = 4;
@@ -249,7 +249,7 @@ struct FOG_NO_EXPORT Helpers
   static void FOG_FASTCALL p_solid_fetch_helper_prgb32(
     RasterSpan* span, uint8_t* buffer, uint32_t mode, const RasterSolid& solid)
   {
-    uint32_t c0 = solid.prgb32.p32;
+    uint32_t c0 = solid.prgb32.u32;
 
     if (mode == RASTER_FETCH_REFERENCE)
     {

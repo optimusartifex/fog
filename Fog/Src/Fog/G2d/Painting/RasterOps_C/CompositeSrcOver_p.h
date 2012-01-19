@@ -34,7 +34,7 @@ struct FOG_NO_EXPORT CompositeSrcOver
     uint32_t sro0p;
     uint32_t sra0p;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32ExtractPBB3(sra0p, sro0p);
     Face::p32Negate255SBW(sra0p, sra0p);
 
@@ -60,7 +60,7 @@ struct FOG_NO_EXPORT CompositeSrcOver
     uint32_t sro0p, sro0p_20, sro0p_31;
     uint32_t inv0p;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     Face::p32ExtractPBB3(inv0p, sro0p);
@@ -527,7 +527,7 @@ _VARGBGlyphMask:
     uint32_t sro0p;
     uint32_t sra0p;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32ExtractPBB3(sra0p, sro0p);
     Face::p32Negate255SBW(sra0p, sra0p);
     Face::p32FillPBB3(sro0p, sro0p);
@@ -555,7 +555,7 @@ _VARGBGlyphMask:
     uint32_t srf0p;
     uint32_t inv0p;
 
-    Face::p32Copy(sro0p, src->prgb32.p32);
+    Face::p32Copy(sro0p, src->prgb32.u32);
     Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     Face::p32ExtractPBB3(inv0p, sro0p);

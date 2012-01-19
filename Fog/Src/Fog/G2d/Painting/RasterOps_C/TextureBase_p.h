@@ -112,7 +112,7 @@ struct FOG_NO_EXPORT PTextureBase
 _Has8BPC:
         if (tileMode == TEXTURE_TILE_CLAMP)
         {
-          Face::p32PRGB32FromARGB32(ctx->_d.texture.base.clamp.prgb32.p32, clampColor->getArgb32().p32);
+          Face::p32PRGB32FromARGB32(ctx->_d.texture.base.clamp.prgb32.u32, clampColor->getArgb32().u32);
         }
         break;
 
@@ -492,7 +492,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_Base
   enum { DST_BPP = 4 };
 
   FOG_INLINE void fetchNorm(Pixel& dst, const uint8_t* src) { Face::p32Load4a(dst, src); }
-  FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& solid) { dst = solid.prgb32.p32; }
+  FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& solid) { dst = solid.prgb32.u32; }
 
   FOG_INLINE void interpolateNorm_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   {

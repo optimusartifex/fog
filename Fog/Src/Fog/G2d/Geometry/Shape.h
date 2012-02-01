@@ -120,9 +120,9 @@ struct FOG_NO_EXPORT ShapeF
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointF& pt) const
+  FOG_INLINE bool hitTest(const PointF& pt, uint32_t fillRule) const
   {
-    return fog_api.shapef_hitTest(_type, _data, &pt);
+    return fog_api.shapef_hitTest(_type, _data, &pt, fillRule);
   }
 
   // --------------------------------------------------------------------------
@@ -136,9 +136,9 @@ struct FOG_NO_EXPORT ShapeF
   }
 
   static FOG_INLINE bool hitTest(uint32_t shapeType, const void* shapeData,
-    const PointF* pt)
+    const PointF* pt, uint32_t fillRule)
   {
-    return fog_api.shapef_hitTest(shapeType, shapeData, pt);
+    return fog_api.shapef_hitTest(shapeType, shapeData, pt, fillRule);
   }
 
   // --------------------------------------------------------------------------
@@ -235,9 +235,9 @@ struct FOG_NO_EXPORT ShapeD
   // [HitTest]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hitTest(const PointD& pt) const
+  FOG_INLINE bool hitTest(const PointD& pt, uint32_t fillRule) const
   {
-    return fog_api.shaped_hitTest(_type, _data, &pt);
+    return fog_api.shaped_hitTest(_type, _data, &pt, fillRule);
   }
 
   // --------------------------------------------------------------------------
@@ -251,9 +251,9 @@ struct FOG_NO_EXPORT ShapeD
   }
 
   static FOG_INLINE bool hitTest(uint32_t shapeType, const void* shapeData,
-    const PointD* pt)
+    const PointD* pt, uint32_t fillRule)
   {
-    return fog_api.shaped_hitTest(shapeType, shapeData, pt);
+    return fog_api.shaped_hitTest(shapeType, shapeData, pt, fillRule);
   }
 
   // --------------------------------------------------------------------------

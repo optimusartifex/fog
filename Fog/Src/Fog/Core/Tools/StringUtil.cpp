@@ -1291,7 +1291,7 @@ static bool FOG_CDECL StringUtil_isNormalized(const CharW* data, size_t length, 
     if (qc != CHAR_QUICK_CHECK_MAYBE)
       break;
 
-    // TODO:
+    // TODO: StringW::isNormalized() missing implementation.
     break;
   }
 

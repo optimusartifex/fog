@@ -64,33 +64,8 @@ struct ImageBits;
 //! @c end() method.
 //!
 //! It's very important to destroy painter instance or call @c end() method,
-//! because rendering can be asynchronous and destroying or enging will ensure
-//! that all painting operations are visible to the target image.
-//!
-//! @section Meta and user regions, clipping.
-//!
-//! Painter supports two indenpendent region and origin information that can
-//! be used to affect painter origin and clipping. First region and origin
-//! information are stored as meta region and meta origin. These variables
-//! shouldn't be changed during rendering and are used usually by windowing
-//! system to set correct origin and window clipping. If you are using Fog-Gui
-//! library, never change these variables in @c Widget::onPaint() event.
-//!
-//! Also the meta region and origin is generally immutable. When you set it
-//! you are forced to use it in all your painting code. Reseting these regions
-//! will also reset all clipping and painter states. To set meta region and
-//! origin use ... .
-//!
-//! Second region and origin information are stored as user region and user
-//! origin. These variables are designed to be changeable by user during
-//! rendering, so use them if it's useable for you.
-//!
-//! Origin and region clipping is pixel based and it's not affected by affine
-//! transformations (so resetting transformations will not reset user origin).
-//!
-//! @section Transformations.
-//!
-//! TODO
+//! because rendering can be asynchronous and destroying the painter instance
+//! or calling @c end() will ensure that all painting operations are finished.
 struct FOG_NO_EXPORT Painter
 {
   // --------------------------------------------------------------------------

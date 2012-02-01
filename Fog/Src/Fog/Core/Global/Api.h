@@ -1937,8 +1937,8 @@ struct FOG_NO_EXPORT Api
   // [G2d/Geometry - ShapeD]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_METHOD(bool, shapef_hitTest)(uint32_t shapeType, const void* shapeData, const PointF* pt);
-  FOG_CAPI_METHOD(bool, shaped_hitTest)(uint32_t shapeType, const void* shapeData, const PointD* pt);
+  FOG_CAPI_METHOD(bool, shapef_hitTest)(uint32_t shapeType, const void* shapeData, const PointF* pt, uint32_t fillRule);
+  FOG_CAPI_METHOD(bool, shaped_hitTest)(uint32_t shapeType, const void* shapeData, const PointD* pt, uint32_t fillRule);
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - TransformF]

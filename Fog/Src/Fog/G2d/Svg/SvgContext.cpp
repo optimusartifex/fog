@@ -324,7 +324,7 @@ err_t SvgHitTestContext::onShape(SvgElement* obj, const ShapeF& shape)
 
   if (_fillSource.isPaintable())
   {
-    if (shape.hitTest(_invPoint))
+    if (shape.hitTest(_invPoint, _fillRule))
       return _result.append(obj);
   }
 

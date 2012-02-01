@@ -350,7 +350,7 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt)
+static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt, uint32_t fillRule)
 {
   switch (shapeType)
   {
@@ -388,6 +388,7 @@ static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, 
       // TODO:
     }
 
+    // TODO: Fill Rule?
     case SHAPE_TYPE_RECT_ARRAY:
     {
       const NumT_(RectArray)* rects = reinterpret_cast<const NumT_(RectArray)*>(shapeData);
@@ -407,8 +408,7 @@ static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, 
     }
 
     case SHAPE_TYPE_PATH:
-      // TODO: Fill Rule?
-      return reinterpret_cast<const NumT_(Path)*>(shapeData)->hitTest(*pt, FILL_RULE_DEFAULT);
+      return reinterpret_cast<const NumT_(Path)*>(shapeData)->hitTest(*pt, fillRule);
 
     default:
       return false;

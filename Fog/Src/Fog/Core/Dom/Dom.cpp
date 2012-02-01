@@ -2489,6 +2489,7 @@ err_t DomSaxHandler::onCharacterData(const StubW& data)
 
 err_t DomSaxHandler::onIgnorableWhitespace(const StubW& data)
 {
+  // TODO:
   return ERR_OK;
 }
 

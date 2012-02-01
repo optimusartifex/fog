@@ -382,7 +382,7 @@ err_t HANDLEStreamDevice::getSize(int64_t* size)
 
 err_t HANDLEStreamDevice::setSize(int64_t size)
 {
-  // TODO
+  // TODO: HANDLEStreamDevice::setSize() missing implementation.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -570,7 +570,7 @@ err_t FdStreamDevice::getSize(int64_t* size)
 
 err_t FdStreamDevice::setSize(int64_t size)
 {
-  // TODO
+  // TODO: FdStreamDevice::setSize() missing implementation.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 

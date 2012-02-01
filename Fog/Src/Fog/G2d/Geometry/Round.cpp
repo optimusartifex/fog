@@ -28,7 +28,7 @@ static err_t FOG_CDECL RoundT_getBoundingBox(const NumT_(Round)* self,
   NumT_(Box)* dst,
   const NumT_(Transform)* tr)
 {
-  // TODO:
+  // TODO: RoundT<>::getBoundingBox() missing implementation.
   return ERR_OK;
 }
 

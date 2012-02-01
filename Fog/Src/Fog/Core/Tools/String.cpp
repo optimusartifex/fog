@@ -1527,7 +1527,7 @@ static err_t FOG_CDECL StringW_opDouble(StringW* self, uint32_t cntOp, double d)
 
 static err_t FOG_CDECL StringA_opDoubleEx(StringA* self, uint32_t cntOp, double d, const FormatReal* fmt)
 {
-  // TODO:
+  // TODO: StringA::opDoubleEx() missing implementation.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 

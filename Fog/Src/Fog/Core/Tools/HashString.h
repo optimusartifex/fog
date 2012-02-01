@@ -261,6 +261,16 @@ struct Hash<StringA, ItemT> : public HashStringAImpl<ItemT, !TypeInfo<ItemT>::NO
   }
 
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setHash(const Hash<StringA, ItemT>& other)
+  {
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringA, ItemT>::getVTable(), &other);
+    return ERR_OK;
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -349,6 +359,16 @@ struct Hash<StringA, StringA> : public HashUntyped
   FOG_INLINE void reset()
   {
     fog_api.hash_unknown_unknown_reset(this, HashVTable<StringA, StringA>::getVTable());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setHash(const Hash<StringA, StringA>& other)
+  {
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringA, StringA>::getVTable(), &other);
+    return ERR_OK;
   }
 
   // --------------------------------------------------------------------------
@@ -574,6 +594,16 @@ struct Hash<StringA, Var> : public HashUntyped
   FOG_INLINE void reset()
   {
     fog_api.hash_unknown_unknown_reset(this, HashVTable<StringA, Var>::getVTable());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setHash(const Hash<StringA, Var>& other)
+  {
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringA, Var>::getVTable(), &other);
+    return ERR_OK;
   }
 
   // --------------------------------------------------------------------------
@@ -1030,6 +1060,16 @@ struct Hash<StringW, ItemT> : public HashStringWImpl<ItemT, !TypeInfo<ItemT>::NO
   }
 
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setHash(const Hash<StringW, ItemT>& other)
+  {
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringW, ItemT>::getVTable(), &other);
+    return ERR_OK;
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -1118,6 +1158,16 @@ struct Hash<StringW, StringW> : public HashUntyped
   FOG_INLINE void reset()
   {
     fog_api.hash_unknown_unknown_reset(this, HashVTable<StringW, StringW>::getVTable());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setHash(const Hash<StringW, StringW>& other)
+  {
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringW, StringW>::getVTable(), &other);
+    return ERR_OK;
   }
 
   // --------------------------------------------------------------------------
@@ -1402,6 +1452,16 @@ struct Hash<StringW, Var> : public HashUntyped
   FOG_INLINE void reset()
   {
     fog_api.hash_unknown_unknown_reset(this, HashVTable<StringW, Var>::getVTable());
+  }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setHash(const Hash<StringW, Var>& other)
+  {
+    fog_api.hash_unknown_unknown_copy(this, HashVTable<StringW, Var>::getVTable(), &other);
+    return ERR_OK;
   }
 
   // --------------------------------------------------------------------------

@@ -967,35 +967,35 @@ struct FOG_NO_EXPORT Api
   Locale* locale_oUser;
 
   // --------------------------------------------------------------------------
-  // [Core/Tools - ManagedStringW]
+  // [Core/Tools - InternedStringW]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(managedstringw_ctor)(ManagedStringW* self);
-  FOG_CAPI_CTOR(managedstringw_ctorCopy)(ManagedStringW* self, const ManagedStringW* other);
-  FOG_CAPI_CRET(err_t, managedstringw_ctorStubA)(ManagedStringW* self, const StubA* stub, uint32_t options);
-  FOG_CAPI_CRET(err_t, managedstringw_ctorStubW)(ManagedStringW* self, const StubW* stub, uint32_t options);
-  FOG_CAPI_CRET(err_t, managedstringw_ctorStringW)(ManagedStringW* self, const StringW* str, uint32_t options);
-  FOG_CAPI_DTOR(managedstringw_dtor)(ManagedStringW* self);
+  FOG_CAPI_CTOR(internedstringw_ctor)(InternedStringW* self);
+  FOG_CAPI_CTOR(internedstringw_ctorCopy)(InternedStringW* self, const InternedStringW* other);
+  FOG_CAPI_CRET(err_t, internedstringw_ctorStubA)(InternedStringW* self, const StubA* stub, uint32_t options);
+  FOG_CAPI_CRET(err_t, internedstringw_ctorStubW)(InternedStringW* self, const StubW* stub, uint32_t options);
+  FOG_CAPI_CRET(err_t, internedstringw_ctorStringW)(InternedStringW* self, const StringW* str, uint32_t options);
+  FOG_CAPI_DTOR(internedstringw_dtor)(InternedStringW* self);
 
-  FOG_CAPI_METHOD(err_t, managedstringw_setStubA)(ManagedStringW* self, const StubA* stub, uint32_t options);
-  FOG_CAPI_METHOD(err_t, managedstringw_setStubW)(ManagedStringW* self, const StubW* stub, uint32_t options);
-  FOG_CAPI_METHOD(err_t, managedstringw_setStringW)(ManagedStringW* self, const StringW* str, uint32_t options);
-  FOG_CAPI_METHOD(err_t, managedstringw_setManaged)(ManagedStringW* self, const ManagedStringW* str);
+  FOG_CAPI_METHOD(err_t, internedstringw_setStubA)(InternedStringW* self, const StubA* stub, uint32_t options);
+  FOG_CAPI_METHOD(err_t, internedstringw_setStubW)(InternedStringW* self, const StubW* stub, uint32_t options);
+  FOG_CAPI_METHOD(err_t, internedstringw_setStringW)(InternedStringW* self, const StringW* str, uint32_t options);
+  FOG_CAPI_METHOD(err_t, internedstringw_setInterned)(InternedStringW* self, const InternedStringW* str);
 
-  FOG_CAPI_METHOD(void, managedstringw_reset)(ManagedStringW* self);
+  FOG_CAPI_METHOD(void, internedstringw_reset)(InternedStringW* self);
 
-  FOG_CAPI_STATIC(bool, managedstringw_eq)(const ManagedStringW* a, const ManagedStringW* b);
-  FOG_CAPI_STATIC(void, managedstringw_cleanup)(void);
+  FOG_CAPI_STATIC(bool, internedstringw_eq)(const InternedStringW* a, const InternedStringW* b);
+  FOG_CAPI_STATIC(void, internedstringw_cleanup)(void);
 
-  ManagedStringW* managedstringw_oEmpty;
+  InternedStringW* internedstringw_oEmpty;
 
   // --------------------------------------------------------------------------
-  // [Core/Tools - ManagedStringCacheW]
+  // [Core/Tools - InternedStringCacheW]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_STATIC(ManagedStringCacheW*, managedstringcachew_create)(const char* sData, size_t sLength, size_t listLength);
+  FOG_CAPI_STATIC(InternedStringCacheW*, internedstringcachew_create)(const char* sData, size_t sLength, size_t listLength);
 
-  ManagedStringCacheW* managedstringcachew_oInstance;
+  InternedStringCacheW* internedstringcachew_oInstance;
 
   // --------------------------------------------------------------------------
   // [Core/Tools - Random]
@@ -1868,7 +1868,6 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(void, pathstrokerf_setParams)(PathStrokerF* self, const PathStrokerParamsF* params);
   FOG_CAPI_METHOD(void, pathstrokerf_setOther)(PathStrokerF* self, const PathStrokerF* other);
   FOG_CAPI_METHOD(err_t, pathstrokerf_strokeShape)(const PathStrokerF* self, PathF* dst, uint32_t shapeType, const void* shapeData);
-  FOG_CAPI_METHOD(err_t, pathstrokerf_strokePath)(const PathStrokerF* self, PathF* dst, const PathF* src);
   FOG_CAPI_METHOD(void, pathstrokerf_update)(PathStrokerF* self);
 
   // --------------------------------------------------------------------------
@@ -1883,7 +1882,6 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(void, pathstrokerd_setParams)(PathStrokerD* self, const PathStrokerParamsD* params);
   FOG_CAPI_METHOD(void, pathstrokerd_setOther)(PathStrokerD* self, const PathStrokerD* other);
   FOG_CAPI_METHOD(err_t, pathstrokerd_strokeShape)(const PathStrokerD* self, PathD* dst, uint32_t shapeType, const void* shapeData);
-  FOG_CAPI_METHOD(err_t, pathstrokerd_strokePath)(const PathStrokerD* self, PathD* dst, const PathD* src);
   FOG_CAPI_METHOD(void, pathstrokerd_update)(PathStrokerD* self);
 
   // --------------------------------------------------------------------------

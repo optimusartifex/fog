@@ -71,8 +71,9 @@ struct FOG_NO_EXPORT RadialGradientF : public GradientF
   FOG_INLINE void setFocal(const PointF& p) { _pts[1] = p; }
   FOG_INLINE void setFocal(float x, float y) { _pts[1].set(x, y); }
 
-  FOG_INLINE void setRadius(float rad) { _pts[2].set(rad, rad); }
   FOG_INLINE void setRadius(const PointF& rad) { _pts[2] = rad; }
+  FOG_INLINE void setRadius(float r) { _pts[2].set(r, r); }
+  FOG_INLINE void setRadius(float rx, float ry) { _pts[2].set(rx, ry); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
@@ -137,8 +138,9 @@ struct FOG_NO_EXPORT RadialGradientD : public GradientD
   FOG_INLINE void setFocal(const PointD& p) { _pts[1] = p; }
   FOG_INLINE void setFocal(double x, double y) { _pts[1].set(x, y); }
 
-  FOG_INLINE void setRadius(double rad) { _pts[2].set(rad, rad); }
   FOG_INLINE void setRadius(const PointD& rad) { _pts[2] = rad; }
+  FOG_INLINE void setRadius(double r) { _pts[2].set(r, r); }
+  FOG_INLINE void setRadius(double rx, double ry) { _pts[2].set(rx, ry); }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

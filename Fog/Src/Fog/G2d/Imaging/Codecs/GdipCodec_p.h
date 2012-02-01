@@ -121,8 +121,8 @@ struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
-  virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
+  virtual err_t _getProperty(const InternedStringW& name, Var& dst) const;
+  virtual err_t _setProperty(const InternedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -173,8 +173,8 @@ struct FOG_NO_EXPORT GdipEncoder : public ImageEncoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
-  virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
+  virtual err_t _getProperty(const InternedStringW& name, Var& dst) const;
+  virtual err_t _setProperty(const InternedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Members]

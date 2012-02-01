@@ -13,7 +13,7 @@
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemOps.h>
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Imaging/Codecs/PcxCodec_p.h>
@@ -36,7 +36,7 @@ namespace Fog {
 PcxCodecProvider::PcxCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = FOG_STR_(IMAGE_FILE_PCX);
+  _name = FOG_S(PCX);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -46,7 +46,7 @@ PcxCodecProvider::PcxCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(1);
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_pcx));
+  _imageExtensions.append(FOG_S(pcx));
 }
 
 PcxCodecProvider::~PcxCodecProvider()
@@ -64,7 +64,8 @@ uint32_t PcxCodecProvider::checkSignature(const void* mem, size_t length) const
     // [0] == Manufacturer (0x0A).
     // [1] == Version      (0x05).
     // [2] == Encoding     (0x01).
-    if (m[0] == 0x0A && m[1] <= 0x05 && m[2] == 0x01) return 90;
+    if (m[0] == 0x0A && m[1] <= 0x05 && m[2] == 0x01)
+      return 90;
   }
 
   return 0;

@@ -88,7 +88,7 @@
       return _ErrInside; \
   FOG_MACRO_END
 
-#define FOG_IS_ERROR(_Code_) (FOG_UNLIKELY((_Code_) != ERR_OK))
+#define FOG_IS_ERROR(_Code_) (FOG_UNLIKELY((_Code_) != ::Fog::ERR_OK))
 #define FOG_IS_NULL(_Var_) (FOG_UNLIKELY((_Var_) == NULL))
 
 // ============================================================================

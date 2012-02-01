@@ -763,7 +763,7 @@ struct FOG_NO_EXPORT Image
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Image& empty()
+  static FOG_INLINE const Image& getEmptyInstance()
   {
     return *fog_api.image_oEmpty;
   }

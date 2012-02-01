@@ -65,7 +65,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   TextCodec_init();
   Locale_init();
-  ManagedString_init();          // Depends on String and Lock.
+  InternedString_init();          // Depends on String and Lock.
 
   Time_init();                   // Depends on Lock.
   Date_init();
@@ -97,16 +97,16 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   // [Core/Tools]
   Stream_init();
+  XmlEntity_init();
 
   // [Core/Threading]
   EventLoop_init();
   Thread_init();                 // Depends on EventLoop.
   ThreadPool_init();
 
-  // [Core/Xml]
-  XmlEntity_init();
-
   // [Core/Kernel]
+  MemGCAllocator_init();
+
   Object_init();                 // Depends on String.
   EventLoopObserverList_init();  // Depends on List<>.
   Application_init();
@@ -225,7 +225,7 @@ FOG_CAPI_DECLARE void _fog_fini(void)
 
   // [Core/Tools]
   Locale_fini();
-  ManagedString_fini();
+  InternedString_fini();
   TextCodec_fini();
   Logger_fini();
 

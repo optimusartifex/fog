@@ -225,6 +225,16 @@ struct FOG_NO_EXPORT RegExpA
   FOG_INLINE size_t getFixedLength() const { return _d->fixedLength; }
 
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setRegExp(const RegExpA& other)
+  {
+    fog_api.regexpa_copy(this, &other);
+    return ERR_OK;
+  }
+
+  // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
@@ -407,6 +417,16 @@ struct FOG_NO_EXPORT RegExpW
   FOG_INLINE const StringW& getPattern() const { return _d->pattern; }
   FOG_INLINE bool hasFixedLength() const { return _d->fixedLength != INVALID_INDEX; }
   FOG_INLINE size_t getFixedLength() const { return _d->fixedLength; }
+
+  // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setRegExp(const RegExpW& other)
+  {
+    fog_api.regexpw_copy(this, &other);
+    return ERR_OK;
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]

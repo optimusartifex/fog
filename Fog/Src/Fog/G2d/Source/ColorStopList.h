@@ -302,7 +302,7 @@ struct FOG_NO_EXPORT ColorStopList
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const ColorStopList& empty()
+  static FOG_INLINE const ColorStopList& getEmptyInstance()
   {
     return *fog_api.colorstoplist_oEmpty;
   }

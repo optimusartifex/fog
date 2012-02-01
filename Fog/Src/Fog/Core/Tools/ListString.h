@@ -188,12 +188,12 @@ struct List<StringA> : public ListUntyped
   // [SetList]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t setList(List<StringA>& other)
+  FOG_INLINE err_t setList(const List<StringA>& other)
   {
     return fog_api.list_stringa_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
-  FOG_INLINE err_t setList(List<StringA>& other, const Range& range)
+  FOG_INLINE err_t setList(const List<StringA>& other, const Range& range)
   {
     return fog_api.list_stringa_opList(this, CONTAINER_OP_REPLACE, &other, &range);
   }
@@ -645,12 +645,12 @@ struct List<StringW> : public ListUntyped
   // [SetList]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t setList(List<StringW>& other)
+  FOG_INLINE err_t setList(const List<StringW>& other)
   {
     return fog_api.list_stringw_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
-  FOG_INLINE err_t setList(List<StringW>& other, const Range& range)
+  FOG_INLINE err_t setList(const List<StringW>& other, const Range& range)
   {
     return fog_api.list_stringw_opList(this, CONTAINER_OP_REPLACE, &other, &range);
   }

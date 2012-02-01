@@ -99,7 +99,7 @@ struct FOG_NO_EXPORT MemZoneAllocator
   }
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Alloc]
   // --------------------------------------------------------------------------
 
   //! @brief Allocate @c size bytes of memory and return pointer to it.
@@ -124,7 +124,7 @@ struct FOG_NO_EXPORT MemZoneAllocator
   //!   MemZoneAllocator zone(8096);
   //!
   //!   // Create your objects using zone object allocating, for example:
-  //!   Object* obj = new(zone.alloc(sizeof(YourClass))) Object();
+  //!   Object* obj = new(zone.alloc(sizeof(Object))) Object();
   //!
   //!   // ... lifetime of your objects ...
   //!

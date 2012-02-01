@@ -14,7 +14,7 @@
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Memory/MemOps.h>
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Imaging/Codecs/BmpCodec_p.h>
@@ -25,75 +25,6 @@ FOG_IMPLEMENT_OBJECT(Fog::BmpDecoder)
 FOG_IMPLEMENT_OBJECT(Fog::BmpEncoder)
 
 namespace Fog {
-
-// ============================================================================
-// [Fog::BmpCodecProvider]
-// ============================================================================
-
-BmpCodecProvider::BmpCodecProvider()
-{
-  // Name of ImageCodecProvider.
-  _name = FOG_STR_(IMAGE_FILE_BMP);
-
-  // Supported codecs.
-  _codecType = IMAGE_CODEC_BOTH;
-
-  // Supported stream.
-  _streamType = IMAGE_STREAM_BMP;
-
-  // Supported extensions.
-  _imageExtensions.reserve(2);
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_bmp));
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_ras));
-}
-
-BmpCodecProvider::~BmpCodecProvider()
-{
-}
-
-uint32_t BmpCodecProvider::checkSignature(const void* mem, size_t length) const
-{
-  if (!mem || length == 0) return 0;
-
-  const uint8_t* m = (const uint8_t*)mem;
-
-  // Check for 'BM' mime.
-  if (length >= 1 && m[0] != (uint8_t)'B') return 0;
-  if (length >= 2 && m[1] != (uint8_t)'M') return 0;
-
-  // Check for correct header size.
-  if (length >= 18)
-  {
-    uint32_t headerSize = MemOps::bswap32le( *(const uint32_t *)(m + 14) );
-    if (headerSize != 12 || headerSize != 40) return 0;
-
-    return 95;
-  }
-  else
-    return 75;
-}
-
-err_t BmpCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) const
-{
-  ImageCodec* c = NULL;
-
-  switch (codecType)
-  {
-    case IMAGE_CODEC_DECODER:
-      c = fog_new BmpDecoder(const_cast<BmpCodecProvider*>(this));
-      break;
-    case IMAGE_CODEC_ENCODER:
-      c = fog_new BmpEncoder(const_cast<BmpCodecProvider*>(this));
-      break;
-    default:
-      return ERR_RT_INVALID_ARGUMENT;
-  }
-
-  if (FOG_IS_NULL(c)) return ERR_RT_OUT_OF_MEMORY;
-
-  *codec = c;
-  return ERR_OK;
-}
 
 // ============================================================================
 // [Fog::BmpCodecProvider - Helpers]
@@ -179,6 +110,78 @@ static void _BmpSwapDataHeader(BmpDataHeader* h, uint32_t headerSize)
       break;
   }
 #endif
+}
+
+// ============================================================================
+// [Fog::BmpCodecProvider]
+// ============================================================================
+
+BmpCodecProvider::BmpCodecProvider()
+{
+  // Name of ImageCodecProvider.
+  _name = FOG_S(BMP);
+
+  // Supported codecs.
+  _codecType = IMAGE_CODEC_BOTH;
+
+  // Supported stream.
+  _streamType = IMAGE_STREAM_BMP;
+
+  // Supported extensions.
+  _imageExtensions.reserve(2);
+  _imageExtensions.append(FOG_S(bmp));
+  _imageExtensions.append(FOG_S(ras));
+}
+
+BmpCodecProvider::~BmpCodecProvider()
+{
+}
+
+uint32_t BmpCodecProvider::checkSignature(const void* mem, size_t length) const
+{
+  if (!mem || length == 0)
+    return 0;
+
+  const uint8_t* m = (const uint8_t*)mem;
+
+  // Check for 'BM' mime.
+  if (length >= 1 && m[0] != (uint8_t)'B') return 0;
+  if (length >= 2 && m[1] != (uint8_t)'M') return 0;
+
+  // Check for correct header size.
+  if (length >= 18)
+  {
+    uint32_t headerSize = MemOps::bswap32le( *(const uint32_t *)(m + 14) );
+
+    if (!_BmpCheckHeaderSize(headerSize))
+      return 0;
+
+    return 95;
+  }
+  else
+    return 75;
+}
+
+err_t BmpCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) const
+{
+  ImageCodec* c = NULL;
+
+  switch (codecType)
+  {
+    case IMAGE_CODEC_DECODER:
+      c = fog_new BmpDecoder(const_cast<BmpCodecProvider*>(this));
+      break;
+    case IMAGE_CODEC_ENCODER:
+      c = fog_new BmpEncoder(const_cast<BmpCodecProvider*>(this));
+      break;
+    default:
+      return ERR_RT_INVALID_ARGUMENT;
+  }
+
+  if (FOG_IS_NULL(c)) return ERR_RT_OUT_OF_MEMORY;
+
+  *codec = c;
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -280,6 +283,12 @@ err_t BmpDecoder::readHeader()
       break;
   }
 
+  if (_size.h < 0)
+  {
+    _size.h = -_size.h;
+    bmpReversed = true;
+  }
+
   // Check for correct depth.
   if (!_BmpCheckDepth(_depth))
     return (_headerResult = ERR_IMAGEIO_UNSUPPORTED_FORMAT);
@@ -296,7 +305,11 @@ err_t BmpDecoder::readHeader()
   bmpStride = (((_size.w * _depth + 7) >> 3) + 3) & ~3;
 
   // OS2 header doesn't define the image size.
-  if (bmpImageSize == 0) bmpImageSize = bmpStride * _size.h;
+  if (bmpImageSize == 0)
+    bmpImageSize = bmpStride * _size.h;
+
+  // By default, set format to RGB24.
+  _format = IMAGE_FORMAT_RGB24;
 
   switch (_depth)
   {
@@ -385,6 +398,9 @@ err_t BmpDecoder::readHeader()
           bmpDataHeader.winv4.rMask,
           bmpDataHeader.winv4.gMask,
           bmpDataHeader.winv4.bMask);
+          
+        if (bmpDataHeader.winv4.aMask != 0)
+          _format = IMAGE_FORMAT_PRGB32;
       }
       else
       {
@@ -471,11 +487,20 @@ err_t BmpDecoder::readImage(Image& image)
   }
 
   // Create image.
-  if ((err = image.create(_size, _format))) goto _End;
+  err = image.create(_size, _format);
+  if (FOG_IS_ERROR(err))
+    goto _End;
 
   pixelsBegin = image.getFirstX();
   stride = image.getStride();
-  pixelsCur = pixelsBegin + stride * (_size.h - 1);
+
+  if (!bmpReversed)
+  {
+    pixelsBegin += (_size.h - 1) * stride;
+    stride = -stride;
+  }
+
+  pixelsCur = pixelsBegin;
 
   // --------------------------------------------------------------------------
   // [Read - 1 Bit]
@@ -494,7 +519,7 @@ err_t BmpDecoder::readImage(Image& image)
       {
         if (_stream.read(buffer, bmpStride) != bmpStride) goto _Truncated;
         bufferCur = buffer;
-        pixelsCur = pixelsBegin + (_size.h - y - 1) * stride;
+        pixelsCur = pixelsBegin + (ssize_t)y * stride;
 
         for (i = _size.w; i >= 8; i -= 8, pixelsCur += 8, bufferCur++)
         {
@@ -547,7 +572,7 @@ err_t BmpDecoder::readImage(Image& image)
 _Rle4Start:
     if (x >= (uint32_t)_size.w || y >= (uint32_t)_size.h) goto _RleError;
 
-    pixelsCur = pixelsBegin + (_size.h - y - 1) * stride;
+    pixelsCur = pixelsBegin + (ssize_t)y * stride;
     updateProgress(y, _size.h);
 
     for (;;)
@@ -579,20 +604,29 @@ _Rle4Start:
         // b1 = Chunk type.
         switch (b1)
         {
-          case BMP_RLE_NEXT_LINE: x = 0; y++; goto _Rle4Start;
-          case BMP_RLE_END: goto _End;
+          case BMP_RLE_NEXT_LINE:
+            x = 0;
+            y++;
+            goto _Rle4Start;
+
+          case BMP_RLE_END:
+            goto _End;
+
           case BMP_RLE_MOVE:
-            if (rleCur + 2 > rleEnd) goto _Truncated;
+            if (rleCur + 2 > rleEnd)
+              goto _Truncated;
             x += *rleCur++;
             y += *rleCur++;
             goto _Rle4Start;
+
           // FILL BITS (b1 == length).
           default:
           {
             uint8_t* backup = rleCur;
             i = Math::min<uint32_t>(b1, _size.w - x);
 
-            if (rleCur + ((b1 + 1) >> 1) > rleEnd) goto _Truncated;
+            if (rleCur + ((b1 + 1) >> 1) > rleEnd)
+              goto _Truncated;
             x += i;
 
             while (i >= 2)
@@ -611,8 +645,10 @@ _Rle4Start:
             rleCur = backup + ((b1 + 1) >> 1);
 
             // Skip RLE padding.
-            if ((b1 & 3) == 1) rleCur += 2;
-            else if ((b1 & 3) == 2) rleCur++;
+            if ((b1 & 3) == 1)
+              rleCur += 2;
+            else if ((b1 & 3) == 2)
+              rleCur++;
 
             break;
           }
@@ -634,9 +670,11 @@ _Rle4Start:
 
     for (y = 0; y != (uint)_size.h; y++)
     {
-      if (_stream.read(buffer, bmpStride) != bmpStride) goto _Truncated;
+      if (_stream.read(buffer, bmpStride) != bmpStride)
+        goto _Truncated;
+
       bufferCur = buffer;
-      pixelsCur = pixelsBegin + (_size.h - y - 1) * stride;
+      pixelsCur = pixelsBegin + (ssize_t)y * stride;
 
       for (x = 0; x + 2 <= (uint32_t)_size.w; x += 2)
       {
@@ -663,21 +701,27 @@ _Rle4Start:
     uint8_t b0;
     uint8_t b1;
 
-    if ((rleBuffer = (uint8_t *)rleBufferStorage.alloc(bmpImageSize)) == NULL) goto _OutOfMemory;
-    if (_stream.read(rleBuffer, bmpImageSize) != bmpImageSize) goto _Truncated;
+    if ((rleBuffer = (uint8_t *)rleBufferStorage.alloc(bmpImageSize)) == NULL)
+      goto _OutOfMemory;
+
+    if (_stream.read(rleBuffer, bmpImageSize) != bmpImageSize)
+      goto _Truncated;
 
     rleCur = rleBuffer;
     rleEnd = rleBuffer + bmpImageSize;
 
 _Rle8Start:
-    if (x >= (uint32_t)_size.w || y >= (uint32_t)_size.h) goto _RleError;
+    if (x >= (uint32_t)_size.w || y >= (uint32_t)_size.h)
+      goto _RleError;
 
-    pixelsCur = pixelsBegin + (_size.h - y - 1) * stride;
+    pixelsCur = pixelsBegin + (ssize_t)y * stride;
     updateProgress(y, _size.h);
 
     for (;;)
     {
-      if (rleCur + 2 > rleEnd) goto _Truncated;
+      if (rleCur + 2 > rleEnd)
+        goto _Truncated;
+
       b0 = *rleCur++;
       b1 = *rleCur++;
 
@@ -686,33 +730,51 @@ _Rle8Start:
         // b0 = Length.
         // b1 = Color.
         i = Math::min<uint32_t>(b0, (uint32_t)_size.w - x);
-        while (i--) *pixelsCur++ = b1;
+        while (i)
+        {
+          *pixelsCur++ = b1;
+          i--;
+        }
       }
       else
       {
         // b1 = Chunk type.
         switch (b1)
         {
-          case BMP_RLE_NEXT_LINE: x = 0; y++; goto _Rle8Start;
-          case BMP_RLE_END: goto _End;
+          case BMP_RLE_NEXT_LINE:
+            x = 0;
+            y++;
+            goto _Rle8Start;
+
+          case BMP_RLE_END:
+            goto _End;
+
           case BMP_RLE_MOVE:
-            if (rleCur + 2 > rleEnd) goto _Truncated;
+            if (rleCur + 2 > rleEnd)
+              goto _Truncated;
             x += *rleCur++;
             y += *rleCur++;
             goto _Rle8Start;
+
           // FILL BITS (b1 == length).
           default:
           {
             uint8_t* backup = rleCur;
 
             i = Math::min<uint32_t>(b1, _size.w - x);
-            if (rleCur + b1 > rleEnd) goto _Truncated;
+            if (rleCur + b1 > rleEnd)
+              goto _Truncated;
             x += i;
 
-            while (i--) *pixelsCur++ = *rleCur++;
+            while (i)
+            {
+              *pixelsCur++ = *rleCur++;
+              i--;
+            }
 
             rleCur = backup + b1;
-            if (b1 & 1) rleCur++;
+            if (b1 & 1)
+              rleCur++;
             break;
           }
         }
@@ -730,8 +792,12 @@ _Rle8Start:
     for (y = 0; y < (uint32_t)_size.h; y++)
     {
       pixelsCur = pixelsBegin + (_size.h - y - 1) * stride;
-      if (_stream.read(pixelsCur, bmpStride) != bmpStride) goto _Truncated;
-      if ((y & 15) == 0) updateProgress(y, _size.h);
+
+      if (_stream.read(pixelsCur, bmpStride) != bmpStride)
+        goto _Truncated;
+
+      if ((y & 15) == 0)
+        updateProgress(y, _size.h);
     }
   }
 
@@ -742,20 +808,23 @@ _Rle8Start:
   else
   {
     ImageConverter converter;
-    err = converter.create(ImageFormatDescription::getByFormat(_format), bmpFormat);
-    if (FOG_IS_ERROR(err)) goto _End;
 
-    pixelsCur = pixelsBegin + (_size.h - y - 1) * stride;
+    err = converter.create(ImageFormatDescription::getByFormat(_format), bmpFormat);
+    if (FOG_IS_ERROR(err))
+      goto _End;
 
     if (converter.isCopy())
     {
       size_t readBytes = _size.w * (_depth >> 3);
       size_t zeroBytes = bmpStride - readBytes;
 
-      for (y = 0; y < (uint32_t)_size.h; y++, pixelsCur -= stride)
+      for (y = 0; y < (uint32_t)_size.h; y++, pixelsCur += stride)
       {
-        if (_stream.read(pixelsCur, readBytes) != readBytes) goto _Truncated;
-        if (zeroBytes && _stream.read(buffer, zeroBytes) != zeroBytes) goto _Truncated;
+        if (_stream.read(pixelsCur, readBytes) != readBytes)
+          goto _Truncated;
+
+        if (zeroBytes && _stream.read(buffer, zeroBytes) != zeroBytes)
+          goto _Truncated;
 
         if ((y & 15) == 0) updateProgress(y, _size.h);
       }
@@ -763,9 +832,10 @@ _Rle8Start:
     else
     {
       PointI ditherOrigin(0, 0);
-      for (y = 0; y < (uint32_t)_size.h; y++, pixelsCur -= stride, ditherOrigin.y++)
+      for (y = 0; y < (uint32_t)_size.h; y++, pixelsCur += stride, ditherOrigin.y++)
       {
-        if (_stream.read(buffer, bmpStride) != bmpStride) goto _Truncated;
+        if (_stream.read(buffer, bmpStride) != bmpStride)
+          goto _Truncated;
         converter.blitLine(pixelsCur, buffer, _size.w, ditherOrigin);
 
         if ((y & 15) == 0) updateProgress(y, _size.h);
@@ -795,20 +865,20 @@ _End:
   return (_readerResult = err);
 }
 
-err_t BmpDecoder::_getProperty(const ManagedStringW& name, Var& dst) const
+err_t BmpDecoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
-  if (name == FOG_STR_(IMAGE_CODEC_skipFileHeader))
+  if (name == FOG_S(skipFileHeader))
     return dst.setInt(_skipFileHeader);
 
-  return base::_getProperty(name, dst);
+  return Base::_getProperty(name, dst);
 }
 
-err_t BmpDecoder::_setProperty(const ManagedStringW& name, const Var& src)
+err_t BmpDecoder::_setProperty(const InternedStringW& name, const Var& src)
 {
-  if (name == FOG_STR_(IMAGE_CODEC_skipFileHeader))
+  if (name == FOG_S(skipFileHeader))
     return src.getInt(_skipFileHeader, 0, 1);
 
-  return base::_setProperty(name, src);
+  return Base::_setProperty(name, src);
 }
 
 // ============================================================================

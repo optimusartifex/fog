@@ -328,6 +328,9 @@ _FOG_TYPE_DECLARE(double                       , C(SIMPLE) | F(POD) | F(DOUBLE )
 // [Fog::TypeInfo - Fog]
 // ===========================================================================
 
+// [Fog/Core/Dom]
+_FOG_TYPE_DECLARE(Fog::DomAttr                 , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
+
 // [Fog/Core/Kernel]
 _FOG_TYPE_DECLARE(Fog::EventLoopObserverListBase,C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
 _FOG_TYPE_DECLARE(Fog::EventLoopPendingTask    , C(SIMPLE )               | F(NO_CMP ) | F(NO_EQ ))
@@ -373,9 +376,9 @@ _FOG_TYPE_DECLARE(Fog::CharW                   , C(SIMPLE )                     
 _FOG_TYPE_DECLARE(Fog::Date                    , C(SIMPLE )               | F(OWN_CMP) | F(OWN_EQ))
 _FOG_TYPE_DECLARE(Fog::FormatInt               , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::FormatReal              , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::InternedStringW         , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::Locale                  , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::LoggerRecord            , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
-_FOG_TYPE_DECLARE(Fog::ManagedStringW          , C(MOVABLE) | F(IMPLICIT) | F(OWN_CMP) | F(OWN_EQ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::Range                   , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::Random                  , C(SIMPLE )               | F(NO_CMP)  | F(BIN_EQ))
 _FOG_TYPE_DECLARE(Fog::RegExpA                 , C(MOVABLE) | F(IMPLICIT)                         )

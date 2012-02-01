@@ -47,6 +47,8 @@
 //!   various workarounds used to be able to successfully build the 
 //!   Fog-Framework product.
 //!
+//! - @ref Fog_Core_Dom "Fog/Core/Dom" - Document object model.
+//!
 //! - @ref Fog_Core_Global "Fog/Core/Global" - Essential classes, templates,
 //!   and global definitions (constants) used by the rest of the Fog-Framework.
 //!
@@ -73,10 +75,7 @@
 //!   and functions to work with strings (including access to unicode character
 //!   database, text conversion, and localization), collections (lists, hash
 //!   tables, and algorithms related to these types of collections), date&time,
-//!   and variant data type called @ref Var.
-//!
-//! - @ref Fog_Core_Xml "Fog/Core/Xml" - Xml SAX parser/serializer and DOM,
-//!   extensible by custom DOM elements, see @c XmlDocument.
+//!   variant data type called @ref Var, and XML-SAX based parser and serializer.
 
 // ============================================================================
 // [Fog/Core/C++]
@@ -232,16 +231,14 @@
 #include <Fog/Core/C++/Base.h>
 
 // ============================================================================
-// [Fog/Core/Collection]
+// [Fog/Core/Dom]
 // ============================================================================
 
-// TODO: To be removed...
-
-#include <Fog/Core/Collection/StackP.h>
-#include <Fog/Core/Collection/Util.h>
+#include <Fog/Core/Dom/Dom.h>
+#include <Fog/Core/Dom/DomResourceManager.h>
 
 // ============================================================================
-// [Fog::Face]
+// [Fog/Core/Face]
 // ============================================================================
 
 //! @defgroup Fog_Face Fog::Face (Fog Accelerated C++ Extensions)
@@ -269,12 +266,14 @@
 //! @ingroup Fog_Core
 
 #include <Fog/Core/Kernel/Application.h>
+#include <Fog/Core/Kernel/CoreObj.h>
 #include <Fog/Core/Kernel/Delegate.h>
 #include <Fog/Core/Kernel/Event.h>
 #include <Fog/Core/Kernel/EventLoop.h>
 #include <Fog/Core/Kernel/EventLoopObserver.h>
 #include <Fog/Core/Kernel/EventLoopObserverList.h>
 #include <Fog/Core/Kernel/Object.h>
+#include <Fog/Core/Kernel/Property.h>
 #include <Fog/Core/Kernel/Timer.h>
 
 // ============================================================================
@@ -304,6 +303,7 @@
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBlockAllocator.h>
 #include <Fog/Core/Memory/MemBuffer.h>
+#include <Fog/Core/Memory/MemGCAllocator.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Memory/MemPool.h>
@@ -354,12 +354,14 @@
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/CharData.h>
 #include <Fog/Core/Tools/CharUtil.h>
+#include <Fog/Core/Tools/ContainerUtil.h>
 #include <Fog/Core/Tools/Cpu.h>
 #include <Fog/Core/Tools/Date.h>
 #include <Fog/Core/Tools/Hash.h>
 #include <Fog/Core/Tools/HashString.h>
 #include <Fog/Core/Tools/HashUntyped.h>
 #include <Fog/Core/Tools/HashUtil.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ListReal.h>
 #include <Fog/Core/Tools/ListString.h>
@@ -367,7 +369,6 @@
 #include <Fog/Core/Tools/ListVar.h>
 #include <Fog/Core/Tools/Locale.h>
 #include <Fog/Core/Tools/Logger.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Random.h>
 #include <Fog/Core/Tools/Range.h>
 #include <Fog/Core/Tools/RegExp.h>
@@ -381,26 +382,7 @@
 #include <Fog/Core/Tools/Time.h>
 #include <Fog/Core/Tools/Var.h>
 #include <Fog/Core/Tools/VarId.h>
-
-// ============================================================================
-// [Fog/Core/Xml]
-// ============================================================================
-
-//! @defgroup Fog_Core_Xml XML SAX/IO and DOM
-//! @ingroup Fog_Core
-
-#include <Fog/Core/Xml/XmlAttribute.h>
-#include <Fog/Core/Xml/XmlCDATA.h>
-#include <Fog/Core/Xml/XmlComment.h>
-#include <Fog/Core/Xml/XmlDocument.h>
-#include <Fog/Core/Xml/XmlDomReader.h>
-#include <Fog/Core/Xml/XmlDomWriter.h>
-#include <Fog/Core/Xml/XmlElement.h>
-#include <Fog/Core/Xml/XmlIdManager.h>
-#include <Fog/Core/Xml/XmlNoText.h>
-#include <Fog/Core/Xml/XmlSaxReader.h>
-#include <Fog/Core/Xml/XmlSaxWriter.h>
-#include <Fog/Core/Xml/XmlText.h>
+#include <Fog/Core/Tools/XmlIO.h>
 
 // [Guard]
 #endif // _FOG_CORE_H

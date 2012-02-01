@@ -1857,6 +1857,15 @@ struct FOG_NO_EXPORT StringA
   }
 
   // --------------------------------------------------------------------------
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const StringA& getEmptyInstance()
+  {
+    return *fog_api.stringa_oEmpty;
+  }
+
+  // --------------------------------------------------------------------------
   // [Statics - From]
   // --------------------------------------------------------------------------
 
@@ -2159,6 +2168,15 @@ struct FOG_NO_EXPORT StringW
   FOG_INLINE err_t _detach()
   {
     return fog_api.stringw_detach(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Interned]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isInterned() const
+  {
+    return (_d->vType & VAR_FLAG_STRING_INTERNED) != 0;
   }
 
   // --------------------------------------------------------------------------
@@ -4166,6 +4184,15 @@ struct FOG_NO_EXPORT StringW
   FOG_INLINE StringW& operator+=(const StringW& other) { append(other); return *this; }
 
   FOG_INLINE CharW operator[](size_t index) const { return getAt(index); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Instance]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE const StringW& getEmptyInstance()
+  {
+    return *fog_api.stringw_oEmpty;
+  }
 
   // --------------------------------------------------------------------------
   // [Statics - From]

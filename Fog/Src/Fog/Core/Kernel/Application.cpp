@@ -539,14 +539,14 @@ UIEngine* Application::createUIEngine(const StringW& _name)
 StringW Application::detectUIEngine()
 {
 #if defined(FOG_OS_WINDOWS)
-  return FOG_STR_(APPLICATION_UI_Win);
+  return FOG_S(APPLICATION_UI_Win);
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_POSIX)
 # if defined(FOG_OS_MAC)
-  return FOG_STR_(APPLICATION_UI_Mac);
+  return FOG_S(APPLICATION_UI_Mac);
 # else
-  return FOG_STR_(APPLICATION_UI_X11);
+  return FOG_S(APPLICATION_UI_X11);
 # endif
 #endif // FOG_OS_POSIX
 }
@@ -637,16 +637,16 @@ FOG_NO_EXPORT void Application_init(void)
   // [Default]
   // --------------------------------------------------------------------------
 
-  Application::registerEventLoop(FOG_STR_(APPLICATION_Core_Default), Application_DefaultEventLoopConstructor);
+  Application::registerEventLoop(FOG_S(APPLICATION_Core_Default), Application_DefaultEventLoopConstructor);
 
   // --------------------------------------------------------------------------
   // [Windows]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_WINDOWS)
-  Application::registerEventLoop(FOG_STR_(APPLICATION_Core_Win), Application_WinEventLoopConstructor);
+  Application::registerEventLoop(FOG_S(APPLICATION_Core_Win), Application_WinEventLoopConstructor);
 # if defined(FOG_BUILD_UI)
-  Application::registerUIEngine(FOG_STR_(APPLICATION_UI_Win), Application_WinUIEngineConstructor);
+  Application::registerUIEngine(FOG_S(APPLICATION_UI_Win), Application_WinUIEngineConstructor);
 # endif // FOG_BUILD_UI
 #endif // FOG_OS_WINDOWS
 
@@ -655,9 +655,9 @@ FOG_NO_EXPORT void Application_init(void)
   // --------------------------------------------------------------------------
 
 #if defined(FOG_OS_MAC)
-  Application::registerEventLoop(FOG_STR_(APPLICATION_Core_Mac), Application_MacEventLoopConstructor);
+  Application::registerEventLoop(FOG_S(APPLICATION_Core_Mac), Application_MacEventLoopConstructor);
 # if defined(FOG_BUILD_UI)
-  Application::registerUIEngine(FOG_STR_(APPLICATION_UI_Mac), Application_MacUIEngineConstructor);
+  Application::registerUIEngine(FOG_S(APPLICATION_UI_Mac), Application_MacUIEngineConstructor);
 # endif // FOG_BUILD_UI && FOG_OS_MAC
 #endif // FOG_OS_MAC
 
@@ -666,7 +666,7 @@ FOG_NO_EXPORT void Application_init(void)
   // --------------------------------------------------------------------------
 
 #if defined(FOG_BUILD_UI_X11) && !defined(FOG_BUILD_UI_X11_MODULE)
-  Application::registerUIEngine(FOG_STR_(APPLICATION_UI_X11), Application_X11UIEngineConstructor);
+  Application::registerUIEngine(FOG_S(APPLICATION_UI_X11), Application_X11UIEngineConstructor);
 #endif // FOG_BUILD_UI_X11 && !FOG_BUILD_UI_X11_MODULE
 }
 

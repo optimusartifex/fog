@@ -19,8 +19,27 @@ namespace Fog {
 // [TypeDefs - Classes]
 // ============================================================================
 
+// Fog/Core/Dom.
+struct DomAttr;
+struct DomCDATASection;
+struct DomCharacterData;
+struct DomContainer;
+struct DomDocument;
+struct DomDocumentFragment;
+struct DomDocumentType;
+struct DomElement;
+struct DomGCScope;
+struct DomNode;
+struct DomNodeList;
+struct DomObj;
+struct DomProcessingInstruction;
+struct DomResourceItem;
+struct DomResourceManager;
+struct DomText;
+
 // Fog/Core/Kernel.
 struct Application;
+struct CoreObj;
 struct Event;
 struct EventLoop;
 struct EventLoopImpl;
@@ -30,6 +49,7 @@ struct EventLoopPendingTask;
 struct MetaClass;
 struct Object;
 struct ObjectExtra;
+struct PropertyInfo;
 struct Task;
 struct Timer;
 
@@ -97,11 +117,11 @@ struct Date;
 struct DateDelta;
 struct FormatInt;
 struct FormatReal;
+struct InternedStringW;
+struct InternedStringCacheW;
 struct Locale;
 struct LocaleData;
 struct LoggerRecord;
-struct ManagedStringW;
-struct ManagedStringCacheW;
 struct NTOAContext;
 struct Random;
 struct Range;
@@ -125,10 +145,6 @@ struct TimeDelta;
 struct TimeTicks;
 struct Var;
 struct VarData;
-
-// Fog/Core/Xml
-struct XmlDocument;
-struct XmlElement;
 
 // Fog/G2d/Geometry.
 struct ArcF;
@@ -283,9 +299,37 @@ struct RectangularGradientD;
 struct Texture;
 
 // Fog/G2d/Svg.
+struct SvgAElement;
+struct SvgCircleElement;
+struct SvgContext;
+struct SvgContextExtension;
+struct SvgContextGState;
+struct SvgContextSource;
+struct SvgDefsElement;
 struct SvgDocument;
 struct SvgElement;
-struct SvgVisitor;
+struct SvgEllipseElement;
+struct SvgGElement;
+struct SvgGradientElement;
+struct SvgImageElement;
+struct SvgLineElement;
+struct SvgLinearGradientElement;
+struct SvgPathElement;
+struct SvgPatternElement;
+struct SvgPolygonElement;
+struct SvgPolylineElement;
+struct SvgRadialGradientElement;
+struct SvgRectElement;
+struct SvgRootElement;
+struct SvgSolidColorElement;
+struct SvgStopElement;
+struct SvgStylableElement;
+struct SvgSymbolElement;
+struct SvgTextElement;
+struct SvgTextPositioningElement;
+struct SvgTSpanElement;
+struct SvgUseElement;
+struct SvgViewElement;
 
 // Fog/G2d/Text.
 struct Font;
@@ -359,7 +403,7 @@ template<typename ItemT> struct Hash<StringA, ItemT>;
 template<typename ItemT> struct Hash<StringW, ItemT>;
 
 // ============================================================================
-// [TypeDefs - Functions]
+// [TypeDefs - Functions - Fog/Core]
 // ============================================================================
 
 typedef void (FOG_CDECL *MemCleanupFunc)(void* closure, uint32_t reason);
@@ -370,6 +414,16 @@ typedef int (FOG_CDECL *CompareFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareExFunc)(const void* a, const void* b, const void* data);
 
 typedef EventLoopImpl* (*EventLoopConstructor)();
+
+// ============================================================================
+// [TypeDefs - Functions - Fog/G2d]
+// ============================================================================
+
+typedef err_t (FOG_CDECL *CSSStyleHandlerFunc)(void* ctx, const StringW* name, const StringW* value);
+
+// ============================================================================
+// [TypeDefs - Functions - Fog/UI]
+// ============================================================================
 
 #if defined(FOG_BUILD_UI)
 //! @brief Constructor used to create native @ref UIEngine instance.

@@ -1334,86 +1334,150 @@ enum DF_FORM
 };
 
 // ============================================================================
-// [Fog::DOM_NODE]
+// [Fog::DOM_NODE_FLAG]
 // ============================================================================
 
-//! @brief DOM node type.
-enum DOM_NODE
+//! @brief @ref DomNode flags.
+enum DOM_NODE_FLAG
 {
-  //! @brief Element node (@ref DomElement).
-  DOM_NODE_ELEMENT = 1,
-  //! @brief Attribute node (@ref DomAttribute).
-  DOM_NODE_ATTRIBUTE = 2,
-  //! @brief Text node (@ref DomText).
-  DOM_NODE_TEXT = 3,
-  //! @brief CDATA section (@ref DomCDATA).
-  DOM_NODE_CDATA = 4,
-  //! @brief Entity reference (@ref DomEntityReference).
-  DOM_NODE_ENTITY_REFERENCE = 5,
-  //! @brief Entity (@ref DomEntity).
-  DOM_NODE_ENTITY = 6,
-  //! @brief Processing instruction (@ref DomProcessingInstruction).
-  DOM_NODE_PROCESSING_INSTRUCTION = 7,
-  //! @brief Comment (@ref DomComment).
-  DOM_NODE_COMMENT = 8,
-  //! @brief Document (@ref DomDocument).
-  DOM_NODE_DOCUMENT = 9,
-  //! @brief Document type (@ref DomDocumentType).
-  DOM_NODE_DOCUMENT_TYPE = 10,
-  //! @brief Document fragment (@ref DomDocumentFragment).
-  DOM_NODE_DOCUMENT_FRAGMENT = 11,
-  //! @brief Notation (@ref DomNotation).
-  DOM_NODE_NOTATION = 12
-};
+  // --------------------------------------------------------------------------
+  // [DomNode]
+  // --------------------------------------------------------------------------
 
-// ============================================================================
-// [Fog::DOM_FLAG]
-// ============================================================================
+  //! @brief Whether the @ref DomNode and all descendants are read-only.
+  DOM_NODE_FLAG_READ_ONLY = 0x01,
 
-//! @brief DOM flags.
-enum DOM_FLAG
-{
-  //! @brief Whether the node DOM is mutable (can be manipulated).
-  DOM_FLAG_MUTABLE_DOM = 0x01,
-  //! @brief Whether the node name (or element tagName) is mutable (can be changed).
-  DOM_FLAG_MUTABLE_NAME = 0x02,
-  //! @brief Whether the node is element and supports attributes (and can be changed).
-  DOM_FLAG_MUTABLE_ATTRIBUTES = 0x04,
-
-  //! @brie Whether the node is inlined to the parent node
+  //! @brief Whether the node is in GC queue.
   //!
-  //! Inlining means static allocation with parent node. This kind of node
-  //! can't be moved, or added into the another node. It's an optimization
-  //! used to allocate optimum space for all standard attributes of DOM
-  //! extensions and to simplify access to them.
-  DOM_FLAG_INLINED = 0x08
+  //! Each created node is put into the GC queue
+  DOM_NODE_FLAG_IN_GC_QUEUE = 0x02,
+
+  //! @brief Whether the node has attributes.
+  DOM_NODE_FLAG_HAS_ATTRIBUTES = 0x04,
+  //! @brief Whether the node has child nodes.
+  DOM_NODE_FLAG_HAS_CHILD_NODES = 0x08,
+
+  //! @brief Children list in @ref DomNode is dirty and must be updated before
+  //! use.
+  DOM_NODE_FLAG_DIRTY_CHILD_NODE_LIST = 0x10,
+
+  // --------------------------------------------------------------------------
+  // [DomText]
+  // --------------------------------------------------------------------------
+
+  //! @brief @ref DomText contains only whitespace content.
+  DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT = 0x80
 };
 
 // ============================================================================
-// [Fog::DOM_EXT_GROUP]
+// [Fog::DOM_NODE_TYPE]
 // ============================================================================
 
-//! @brief DOM extension group (implementation dependent).
-enum DOM_EXT_GROUP
+//! @brief Type of @ref DomNode.
+enum DOM_NODE_TYPE
 {
-  //! @brief XML-DOM model.
-  DOM_EXT_GROUP_XML = 0,
-  //! @brief SVG-DOM model, see @ref SvgDocument and @ref SvgElement.
-  DOM_EXT_GROUP_SVG = 1,
+  //! @brief Object is not @ref DomNode.
+  DOM_NODE_TYPE_NONE = 0,
 
-  //! @brief Third party extension.
-  DOM_EXT_GROUP_EXT = 16
+  //! @brief Element node (@ref DomElement).
+  //!
+  //! @note Part of DOM Level 1 (ELEMENT_NODE).
+  DOM_NODE_TYPE_ELEMENT = 1,
+
+  //! @brief Text node (@ref DomText).
+  //!
+  //! @note Part of DOM Level 1 (TEXT_NODE).
+  DOM_NODE_TYPE_TEXT = 3,
+
+  //! @brief CDATA section (@ref DomCDATA).
+  //!
+  //! @note Part of DOM Level 1 (CDATA_SECTION_NODE).
+  DOM_NODE_TYPE_CDATA_SECTION = 4,
+
+  //! @brief Processing instruction (@ref DomProcessingInstruction).
+  //!
+  //! @note Part of DOM Level 1 (PROCESSING_INSTRUCTION_NODE).
+  DOM_NODE_TYPE_PROCESSING_INSTRUCTION = 7,
+
+  //! @brief Comment (@ref DomComment).
+  //!
+  //! @note Part of DOM Level 1 (COMMENT_NODE).
+  DOM_NODE_TYPE_COMMENT = 8,
+
+  //! @brief Document (@ref DomDocument).
+  //!
+  //! @note Part of DOM Level 1 (DOCUMENT_NODE).
+  DOM_NODE_TYPE_DOCUMENT = 9,
+
+  //! @brief Document type (@ref DomDocumentType).
+  //!
+  //! @note Part of DOM Level 1 (DOCUMENT_TYPE_NODE).
+  DOM_NODE_TYPE_DOCUMENT_TYPE = 10,
+
+  //! @brief Document fragment (@ref DomDocumentFragment).
+  //!
+  //! @note Part of DOM Level 1 (DOCUMENT_FRAGMENT_NODE).
+  DOM_NODE_TYPE_DOCUMENT_FRAGMENT = 11,
+
+  //! @brief Start of custom @ref DomNode type.
+  //!
+  //! @note W3C says that numeric codes up to 200 are reserved to W3C for
+  //! possible future use, so we start with 201 to match the recommendation.
+  //! Custom node types are not used by Fog-Framework and there is currently
+  //! no internal support for them.
+  DOM_NODE_TYPE_CUSTOM = 201
 };
 
 // ============================================================================
-// [Fog::DOM_EXT_TYPE]
+// [Fog::DOM_OBJECT_MODEL]
 // ============================================================================
 
-//! @brief DOM extension type.
-enum DOM_EXT_TYPE
+//! @brief DOM object model.
+enum DOM_OBJECT_MODEL
 {
-  //! @brief Node is not extended.
-  DOM_EXT_TYPE_NONE = 0
+  //! @brief XML-DOM object (default).
+  DOM_OBJECT_MODEL_XML = 0,
+  //! @brief SVG-DOM object, see built-in @ref SvgDocument and @ref SvgElement.
+  DOM_OBJECT_MODEL_SVG = 1,
+
+  //! @brief User defined object.
+  DOM_OBJECT_MODEL_USER = 100
+};
+
+// ============================================================================
+// [Fog::DOM_OBJECT_TYPE]
+// ============================================================================
+
+//! @brief DOM object class.
+enum DOM_OBJECT_TYPE
+{
+  //! @brief Unknown object class.
+  //!
+  //! Generally shouldn't be returned by @ref DomNode::getObjectClass().
+  DOM_OBJECT_TYPE_UNKNOWN = 0
+};
+
+// ============================================================================
+// [Fog::DOM_POSITION]
+// ============================================================================
+
+enum DOM_POSITION
+{
+  DOM_POSITION_DISCONNECTED = 0x01,
+  DOM_POSITION_PRECEDING = 0x02,
+  DOM_POSITION_FOLLOWING = 0x04,
+  DOM_POSITION_CONTAINS = 0x08,
+  DOM_POSITION_CONTAINED_BY = 0x10
+};
+
+// ============================================================================
+// [Fog::DOM_RESOURCE_FLAG]
+// ============================================================================
+
+enum DOM_RESOURCE_FLAG
+{
+  DOM_RESOURCE_FLAG_LOADED = 0x0001,
+  DOM_RESOURCE_FLAG_ERROR = 0x0002
 };
 
 // ============================================================================
@@ -1519,6 +1583,16 @@ enum FILE_PATH_SUBSTITUTE_FORMAT
 };
 
 // ============================================================================
+// [Fog::INTERNED_STRING_OPTION]
+// ============================================================================
+
+enum INTERNED_STRING_OPTION
+{
+  INTERNED_STRING_OPTION_NONE = 0x00000000,
+  INTERNED_STRING_OPTION_LOOKUP = 0x00000001
+};
+
+// ============================================================================
 // [Fog::LIBRARY_OPEN]
 // ============================================================================
 
@@ -1605,21 +1679,11 @@ enum LOGGER_TYPE
   //! @brief No logging, messages are discarded.
   LOGGER_TYPE_NONE = 0,
 
-  //! @brief Child logger, sends everything to parent @c ref Logger.
+  //! @brief Child logger, sends everything to parent @ref Logger.
   LOGGER_TYPE_CHILD = 1,
   
   //! @brief Logging into @ref Stream.
   LOGGER_TYPE_STREAM = 2
-};
-
-// ============================================================================
-// [Fog::MANAGED_STRING_OPTION]
-// ============================================================================
-
-enum MANAGED_STRING_OPTION
-{
-  MANAGED_STRING_OPTION_NONE = 0x00000000,
-  MANAGED_STRING_OPTION_LOOKUP = 0x00000001
 };
 
 // ============================================================================
@@ -1673,14 +1737,14 @@ enum MATH_POLYNOMIAL_DEGREE
 };
 
 // ============================================================================
-// [Fog::MEMMGR_CLEANUP_REASON]
+// [Fog::MEMORY_CLEANUP_REASON]
 // ============================================================================
 
-enum MEMMGR_CLEANUP_REASON
+enum MEMORY_CLEANUP_REASON
 {
-  MEMMGR_CLEANUP_REASON_PERIODIC = 0,
-  MEMMGR_CLEANUP_REASON_NO_MEMORY = 1,
-  MEMMGR_CLEANUP_REASON_SHUTDOWN = 2
+  MEMORY_CLEANUP_REASON_PERIODIC = 0,
+  MEMORY_CLEANUP_REASON_NO_MEMORY = 1,
+  MEMORY_CLEANUP_REASON_SHUTDOWN = 2
 };
 
 // ============================================================================
@@ -1770,6 +1834,44 @@ enum OBJECT_CREATE
   //! At this time there are no default flags, this enumeration is reserved
   //! for the future in case that something will be changed.
   OBJECT_CREATE_DEFAULT = NO_FLAGS
+};
+
+// ============================================================================
+// [Fog::PROPERTY_FLAG]
+// ============================================================================
+
+enum PROPERTY_FLAG
+{
+  PROPERTY_FLAG_READ_ONLY = 0x00000001,
+  PROPERTY_FLAG_DYNAMIC = 0x00000002
+};
+
+// ============================================================================
+// [Fog::PROPERTY_HANDLER]
+// ============================================================================
+
+//! @internal 
+//!
+//! @brief Internal property action which is used by property implementation.
+enum PROPERTY_HANDLER
+{
+  //! @brief Get attribute index from a given @ref InternedStringW instance.
+  PROPERTY_HANDLER_INDEX_STRINGW = 0,
+  
+  //! @brief Get attribute index from a given @ref StubW instance.
+  PROPERTY_HANDLER_INDEX_STUBW = 1,
+
+  //! @brief Get attribute name from a given index.
+  PROPERTY_HANDLER_GET_INFO = 2,
+
+  //! @brief Get attribute value to @ref StringW.
+  PROPERTY_HANDLER_GET_STRINGW = 3,
+
+  //! @brief Set attribute value from @ref StringW.
+  PROPERTY_HANDLER_SET_STRINGW = 4,
+  
+  //! @brief Reset attribute value to default (or remove property if dynamic).
+  PROPERTY_HANDLER_RESET = 5
 };
 
 // ============================================================================
@@ -1918,16 +2020,176 @@ enum STREAM_SEEK_MODE
 //! @brief Cached strings IDs used in @c fog_strings array.
 enum STR_CODE
 {
-  // --------------------------------------------------------------------------
-  // [Fog/Core - Object / Property System]
-  // --------------------------------------------------------------------------
+  STR_1_0 = 0,
 
-  STR_OBJECT_id = 0,
-  STR_OBJECT_name,
+  STR__cdata_section,
+  STR__comment,
+  STR__document,
+  STR__document_fragment,
+  STR__text,
 
-  // --------------------------------------------------------------------------
-  // [Fog/Core - Application]
-  // --------------------------------------------------------------------------
+  STR_ANI,
+  STR_APNG,
+  STR_BMP,
+  STR_GIF,
+  STR_ICO,
+  STR_JPEG,
+  STR_LBM,
+  STR_MNG,
+  STR_PCX,
+  STR_PNG,
+  STR_PNM,
+  STR_TGA,
+  STR_TIFF,
+  STR_USERPROFILE,
+  STR_UTF_8,
+  STR_XBM,
+  STR_XML,
+  STR_XPM,
+
+  STR_a,
+  STR_actualFrame,
+  STR_angle,
+  STR_ani,
+  STR_apng,
+  STR_bmp,
+  STR_circle,
+  STR_clip,
+  STR_clip_path,
+  STR_clip_rule,
+  STR_clipPath,
+  STR_color,
+  STR_compression,
+  STR_cursor,
+  STR_cx,
+  STR_cy,
+  STR_d,
+  STR_defs,
+  STR_depth,
+  STR_direction,
+  STR_display,
+  STR_dx,
+  STR_dy,
+  STR_ellipse,
+  STR_enable_background,
+  STR_encoding,
+  STR_fill,
+  STR_fill_opacity,
+  STR_fill_rule,
+  STR_filter,
+  STR_flood_color,
+  STR_flood_opacity,
+  STR_font,
+  STR_font_family,
+  STR_font_size,
+  STR_font_size_adjust,
+  STR_font_stretch,
+  STR_font_style,
+  STR_font_variant,
+  STR_font_weight,
+  STR_framesCount,
+  STR_fx,
+  STR_fy,
+  STR_g,
+  STR_gif,
+  STR_gradientTransform,
+  STR_gradientUnits,
+  STR_height,
+  STR_ico,
+  STR_id,
+  STR_image,
+  STR_image_rendering,
+  STR_jfi,
+  STR_jfif,
+  STR_jpeg,
+  STR_jpg,
+  STR_lbm,
+  STR_lengthAdjust,
+  STR_letter_spacing,
+  STR_lighting_color,
+  STR_line,
+  STR_linearGradient,
+  STR_marker,
+  STR_marker_end,
+  STR_marker_mid,
+  STR_marker_start,
+  STR_mask,
+  STR_mng,
+  STR_name,
+  STR_none,
+  STR_offset,
+  STR_opacity,
+  STR_overflow,
+  STR_path,
+  STR_pattern,
+  STR_patternTransform,
+  STR_patternUnits,
+  STR_pcx,
+  STR_planes,
+  STR_png,
+  STR_pnm,
+  STR_points,
+  STR_polygon,
+  STR_polyline,
+  STR_preserveAspectRatio,
+  STR_progress,
+  STR_quality,
+  STR_r,
+  STR_radialGradient,
+  STR_ras,
+  STR_rect,
+  STR_rotate,
+  STR_rx,
+  STR_ry,
+  STR_shape_rendering,
+  STR_skipFileHeader,
+  STR_solidColor,
+  STR_spreadMethod,
+  STR_standalone,
+  STR_stop,
+  STR_stop_color,
+  STR_stop_opacity,
+  STR_stroke,
+  STR_stroke_dasharray,
+  STR_stroke_dashoffset,
+  STR_stroke_linecap,
+  STR_stroke_linejoin,
+  STR_stroke_miterlimit,
+  STR_stroke_opacity,
+  STR_stroke_width,
+  STR_style,
+  STR_svg,
+  STR_symbol,
+  STR_text,
+  STR_text_decoration,
+  STR_text_rendering,
+  STR_textLength,
+  STR_textPath,
+  STR_tga,
+  STR_tif,
+  STR_tiff,
+  STR_transform,
+  STR_tref,
+  STR_tspan,
+  STR_use,
+  STR_version,
+  STR_view,
+  STR_viewBox,
+  STR_visibility,
+  STR_width,
+  STR_word_spacing,
+  STR_x,
+  STR_x1,
+  STR_x2,
+  STR_xbm,
+  STR_xlink_href,
+  STR_xml,
+  STR_xpm,
+  STR_y,
+  STR_y1,
+  STR_y2,
+
+  // TODO: Merge, do something with these constants (or remove them completely?).
 
   // Used for both - EventLoop and UIEngine. Core event loops are only
   // implemented for Windows and Mac, whereas UIEngine has implementation for
@@ -1940,189 +2202,6 @@ enum STR_CODE
   STR_APPLICATION_UI_Win,
   STR_APPLICATION_UI_Mac,
   STR_APPLICATION_UI_X11,
-
-  // --------------------------------------------------------------------------
-  // [Fog/Core - Xml]
-  // --------------------------------------------------------------------------
-
-  STR_XML_unnamed,
-  STR_XML_ATTRIBUTE_id,
-  STR_XML_ATTRIBUTE_style,
-
-  STR_XML__text,
-  STR_XML__cdata,
-  STR_XML__pi,
-  STR_XML__comment,
-  STR_XML__document,
-
-  // --------------------------------------------------------------------------
-  // [Fog/Core/OS]
-  // --------------------------------------------------------------------------
-
-  STR_OSUTIL_USERPROFILE,
-
-  // --------------------------------------------------------------------------
-  // [Fog/G2d/Imaging - Device Properties]
-  // --------------------------------------------------------------------------
-
-  STR_IMAGE_CODEC_width,
-  STR_IMAGE_CODEC_height,
-  STR_IMAGE_CODEC_depth,
-  STR_IMAGE_CODEC_planes,
-  STR_IMAGE_CODEC_actualFrame,
-  STR_IMAGE_CODEC_framesCount,
-  STR_IMAGE_CODEC_progress,
-  STR_IMAGE_CODEC_quality,
-  STR_IMAGE_CODEC_compression,
-  STR_IMAGE_CODEC_skipFileHeader,
-
-  // --------------------------------------------------------------------------
-  // [Fog/G2d/Imaging - Stream Types]
-  // --------------------------------------------------------------------------
-
-  STR_IMAGE_FILE_ANI,
-  STR_IMAGE_FILE_APNG,
-  STR_IMAGE_FILE_BMP,
-  STR_IMAGE_FILE_FLI,
-  STR_IMAGE_FILE_FLC,
-  STR_IMAGE_FILE_GIF,
-  STR_IMAGE_FILE_ICO,
-  STR_IMAGE_FILE_JPEG,
-  STR_IMAGE_FILE_LBM,
-  STR_IMAGE_FILE_MNG,
-  STR_IMAGE_FILE_PCX,
-  STR_IMAGE_FILE_PNG,
-  STR_IMAGE_FILE_PNM,
-  STR_IMAGE_FILE_TGA,
-  STR_IMAGE_FILE_TIFF,
-  STR_IMAGE_FILE_XBM,
-  STR_IMAGE_FILE_XPM,
-
-  // --------------------------------------------------------------------------
-  // [Fog/G2d/Imaging - Stream Extensions]
-  // --------------------------------------------------------------------------
-
-  STR_IMAGE_EXT_ani,
-  STR_IMAGE_EXT_apng,
-  STR_IMAGE_EXT_bmp,
-  STR_IMAGE_EXT_fli,
-  STR_IMAGE_EXT_flc,
-  STR_IMAGE_EXT_gif,
-  STR_IMAGE_EXT_ico,
-  STR_IMAGE_EXT_jfi,
-  STR_IMAGE_EXT_jfif,
-  STR_IMAGE_EXT_jpg,
-  STR_IMAGE_EXT_jpeg,
-  STR_IMAGE_EXT_lbm,
-  STR_IMAGE_EXT_mng,
-  STR_IMAGE_EXT_pcx,
-  STR_IMAGE_EXT_png,
-  STR_IMAGE_EXT_pnm,
-  STR_IMAGE_EXT_ras,
-  STR_IMAGE_EXT_tga,
-  STR_IMAGE_EXT_tif,
-  STR_IMAGE_EXT_tiff,
-  STR_IMAGE_EXT_xbm,
-  STR_IMAGE_EXT_xpm,
-
-  // --------------------------------------------------------------------------
-  // [Fog/Svg - Elements]
-  // --------------------------------------------------------------------------
-
-  STR_SVG_ELEMENT_none,
-  STR_SVG_ELEMENT_a,
-  STR_SVG_ELEMENT_circle,
-  STR_SVG_ELEMENT_clipPath,
-  STR_SVG_ELEMENT_defs,
-  STR_SVG_ELEMENT_ellipse,
-  STR_SVG_ELEMENT_g,
-  STR_SVG_ELEMENT_image,
-  STR_SVG_ELEMENT_line,
-  STR_SVG_ELEMENT_linearGradient,
-  STR_SVG_ELEMENT_marker,
-  STR_SVG_ELEMENT_mask,
-  STR_SVG_ELEMENT_path,
-  STR_SVG_ELEMENT_pattern,
-  STR_SVG_ELEMENT_polygon,
-  STR_SVG_ELEMENT_polyline,
-  STR_SVG_ELEMENT_radialGradient,
-  STR_SVG_ELEMENT_rect,
-  STR_SVG_ELEMENT_solidColor,
-  STR_SVG_ELEMENT_stop,
-  STR_SVG_ELEMENT_svg,
-  STR_SVG_ELEMENT_symbol,
-  STR_SVG_ELEMENT_text,
-  STR_SVG_ELEMENT_textPath,
-  STR_SVG_ELEMENT_tref,
-  STR_SVG_ELEMENT_tspan,
-  STR_SVG_ELEMENT_use,
-  STR_SVG_ELEMENT_view,
-
-  // --------------------------------------------------------------------------
-  // [Fog/Svg - Attributes]
-  // --------------------------------------------------------------------------
-
-  STR_SVG_ATTRIBUTE_angle,
-  STR_SVG_ATTRIBUTE_cx,
-  STR_SVG_ATTRIBUTE_cy,
-  STR_SVG_ATTRIBUTE_d,
-  STR_SVG_ATTRIBUTE_dx,
-  STR_SVG_ATTRIBUTE_dy,
-  STR_SVG_ATTRIBUTE_fx,
-  STR_SVG_ATTRIBUTE_fy,
-  STR_SVG_ATTRIBUTE_gradientTransform,
-  STR_SVG_ATTRIBUTE_gradientUnits,
-  STR_SVG_ATTRIBUTE_height,
-  STR_SVG_ATTRIBUTE_lengthAdjust,
-  STR_SVG_ATTRIBUTE_offset,
-  STR_SVG_ATTRIBUTE_patternTransform,
-  STR_SVG_ATTRIBUTE_patternUnits,
-  STR_SVG_ATTRIBUTE_points,
-  STR_SVG_ATTRIBUTE_preserveAspectRatio,
-  STR_SVG_ATTRIBUTE_r,
-  STR_SVG_ATTRIBUTE_rotate,
-  STR_SVG_ATTRIBUTE_rx,
-  STR_SVG_ATTRIBUTE_ry,
-  STR_SVG_ATTRIBUTE_spreadMethod,
-  STR_SVG_ATTRIBUTE_textLength,
-  STR_SVG_ATTRIBUTE_transform,
-  STR_SVG_ATTRIBUTE_viewBox,
-  STR_SVG_ATTRIBUTE_width,
-  STR_SVG_ATTRIBUTE_x,
-  STR_SVG_ATTRIBUTE_x1,
-  STR_SVG_ATTRIBUTE_x2,
-  STR_SVG_ATTRIBUTE_xlink_href,
-  STR_SVG_ATTRIBUTE_y,
-  STR_SVG_ATTRIBUTE_y1,
-  STR_SVG_ATTRIBUTE_y2,
-
-  // --------------------------------------------------------------------------
-  // [Fog/Svg - Attributes / Styles]
-  // --------------------------------------------------------------------------
-
-  STR_SVG_STYLE_NAMES,
-  STR_SVG_STYLE_clip_path = STR_SVG_STYLE_NAMES,
-  STR_SVG_STYLE_clip_rule,
-  STR_SVG_STYLE_enable_background,
-  STR_SVG_STYLE_fill,
-  STR_SVG_STYLE_fill_opacity,
-  STR_SVG_STYLE_fill_rule,
-  STR_SVG_STYLE_filter,
-  STR_SVG_STYLE_font_family,
-  STR_SVG_STYLE_font_size,
-  STR_SVG_STYLE_letter_spacing,
-  STR_SVG_STYLE_mask,
-  STR_SVG_STYLE_opacity,
-  STR_SVG_STYLE_stop_color,
-  STR_SVG_STYLE_stop_opacity,
-  STR_SVG_STYLE_stroke,
-  STR_SVG_STYLE_stroke_dasharray,
-  STR_SVG_STYLE_stroke_dashoffset,
-  STR_SVG_STYLE_stroke_linecap,
-  STR_SVG_STYLE_stroke_linejoin,
-  STR_SVG_STYLE_stroke_miterlimit,
-  STR_SVG_STYLE_stroke_opacity,
-  STR_SVG_STYLE_stroke_width,
 
   // --------------------------------------------------------------------------
   // [...]
@@ -2771,6 +2850,9 @@ enum VAR_TYPE
 
   VAR_TYPE_FONT = 90,
 
+  VAR_TYPE_DOM_NODE = 1000,
+  VAR_TYPE_DOM_NODE_LIST = 1001,
+
   VAR_TYPE_OBJECT_REF = 0x00FFFFFF,
 
   VAR_TYPE_MASK = 0x00FFFFFF,
@@ -2862,7 +2944,7 @@ enum VAR_FLAG
 //! @brief Var flags used by @ref StringA and @ref StringW.
 enum VAR_FLAG_STRING
 {
-  VAR_FLAG_STRING_MANAGED = VAR_FLAG_RESERVED_1,
+  VAR_FLAG_STRING_INTERNED = VAR_FLAG_RESERVED_1,
   VAR_FLAG_STRING_CACHED = VAR_FLAG_RESERVED_2
 };
 

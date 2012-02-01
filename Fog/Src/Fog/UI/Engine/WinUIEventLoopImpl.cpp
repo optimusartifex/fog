@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/UI/Engine/WinUIEventLoopImpl_p.h>
 
 namespace Fog {
@@ -20,7 +20,7 @@ namespace Fog {
 
 WinUIEventLoopImpl::WinUIEventLoopImpl()
 {
-  _type = FOG_STR_(APPLICATION_UI_Win);
+  _type = FOG_S(APPLICATION_UI_Win);
 }
 
 } // Fog namespace

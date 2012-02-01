@@ -384,7 +384,7 @@ struct FOG_NO_EXPORT PathStrokerF
 
   FOG_INLINE err_t strokePath(PathF& dst, const PathF& src) const
   {
-    return fog_api.pathstrokerf_strokePath(this, &dst, &src);
+    return fog_api.pathstrokerf_strokeShape(this, &dst, SHAPE_TYPE_PATH, &src);
   }
 
   // --------------------------------------------------------------------------
@@ -580,7 +580,7 @@ struct FOG_NO_EXPORT PathStrokerD
 
   FOG_INLINE err_t strokePath(PathD& dst, const PathD& src) const
   {
-    return fog_api.pathstrokerd_strokePath(this, &dst, &src);
+    return fog_api.pathstrokerd_strokeShape(this, &dst, SHAPE_TYPE_PATH, &src);
   }
 
   // --------------------------------------------------------------------------

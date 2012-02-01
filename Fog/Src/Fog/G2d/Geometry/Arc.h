@@ -77,7 +77,8 @@ struct FOG_NO_EXPORT ArcF
 
   FOG_INLINE void setCenter(const PointF& cp) { center = cp; }
   FOG_INLINE void setRadius(const PointF& rp) { radius = rp; }
-  FOG_INLINE void setRadius(float rad) { radius.set(rad, rad); }
+  FOG_INLINE void setRadius(float r) { radius.set(r, r); }
+  FOG_INLINE void setRadius(float rx, float ry) { radius.set(rx, ry); }
 
   FOG_INLINE void setEllipse(const CircleF& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
   FOG_INLINE void setEllipse(const EllipseF& ellipse) { center = ellipse.center; radius = ellipse.radius; }
@@ -260,7 +261,8 @@ struct FOG_NO_EXPORT ArcD
 
   FOG_INLINE void setCenter(const PointD& cp) { center = cp; }
   FOG_INLINE void setRadius(const PointD& rp) { radius = rp; }
-  FOG_INLINE void setRadius(double rad) { radius.set(rad, rad); }
+  FOG_INLINE void setRadius(double r) { radius.set(r, r); }
+  FOG_INLINE void setRadius(double rx, double ry) { radius.set(rx, ry); }
 
   FOG_INLINE void setEllipse(const CircleD& circle) { center = circle.center; radius.set(circle.radius, circle.radius); }
   FOG_INLINE void setEllipse(const EllipseD& ellipse) { center = ellipse.center; radius = ellipse.radius; }

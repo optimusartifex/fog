@@ -105,11 +105,9 @@ public: \
   /* ----------------------------------------------------------------------- */ \
   \
   /*! @brief Self type of class. */ \
-  typedef _SelfType_ _Self; \
+  typedef _SelfType_ Self; \
   /*! @brief Base type of class. */ \
-  typedef _BaseType_ _Base; \
-  /*! @brief Base type of class. */ \
-  typedef _Base base; \
+  typedef _BaseType_ Base; \
   \
   /* ----------------------------------------------------------------------- */ \
   /* [Meta Class]                                                            */ \
@@ -151,7 +149,7 @@ public: \
     if (Fog::AtomicCore<size_t>::cmpXchg(reinterpret_cast<size_t*>(&_privateMetaClass.name), 0, 1)) \
     { \
       /* Called the first time, we must initialize the meta class right now. */ \
-      _privateMetaClass.base = base::getStaticMetaClass(); \
+      _privateMetaClass.base = Base::getStaticMetaClass(); \
       _privateMetaClass.hashCode = Fog::HashUtil::hash(StubA(_privateClassName, FOG_ARRAY_SIZE(_privateClassName) - 1)); \
       _privateMetaClass.name = _privateClassName; \
       \
@@ -207,7 +205,7 @@ public: \
       case _EventCode_: \
       { \
         if (::Fog::OBJECT_EVENT_HANDLER_##_EventBehavior_ == ::Fog::OBJECT_EVENT_HANDLER_REVERSE) \
-          base::onEvent(e); \
+          Base::onEvent(e); \
         \
         _EventHandler_(reinterpret_cast<_EventClass_*>(e)); \
         \
@@ -224,7 +222,7 @@ public: \
         /* into an event handler. */ \
         break; \
     } \
-    base::onEvent(e); \
+    Base::onEvent(e); \
   }
 
 //! @}
@@ -547,9 +545,9 @@ struct FOG_API Object
   err_t setProperty(const StringW& name, const Var& src);
 
   //! @brief Get property @a name to a given @a value.
-  err_t getProperty(const ManagedStringW& name, Var& dst) const;
+  err_t getProperty(const InternedStringW& name, Var& dst) const;
   //! @brief Set property @a name to a given @a value.
-  err_t setProperty(const ManagedStringW& name, const Var& src);
+  err_t setProperty(const InternedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Properties - Virtual]
@@ -558,11 +556,11 @@ struct FOG_API Object
   //! @brief Get property @a name to a given @a value.
   //!
   //! This is virtual version that can be overridden to implement own properties.
-  virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
+  virtual err_t _getProperty(const InternedStringW& name, Var& dst) const;
   //! @brief Set property @a name to a given @a value.
   //!
   //! This is virtual version that can be overridden to implement own properties.
-  virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
+  virtual err_t _setProperty(const InternedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Event Management]

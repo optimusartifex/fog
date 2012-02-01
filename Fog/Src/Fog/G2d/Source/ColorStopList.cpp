@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Global/Init_p.h>
+#include <Fog/Core/Tools/ContainerUtil.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/G2d/Source/ColorStop.h>
 #include <Fog/G2d/Source/ColorStopCache.h>
@@ -287,7 +287,7 @@ static err_t FOG_CDECL ColorStopList_addColorStop(ColorStopList* self, const Col
   // Detach or Resize.
   if (d->reference.get() > 1 || length == d->capacity)
   {
-    ColorStopListData* newd = fog_api.colorstoplist_dCreate(CollectionUtil::getGrowCapacity(
+    ColorStopListData* newd = fog_api.colorstoplist_dCreate(ContainerUtil::getGrowCapacity(
       sizeof(ColorStopListData) - sizeof(ColorStop), sizeof(ColorStop), length, length + 1));
 
     if (FOG_IS_NULL(newd))

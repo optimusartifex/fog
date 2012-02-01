@@ -3895,7 +3895,7 @@ RasterPaintEngine::RasterPaintEngine() :
   strokerPrecision(RASTER_PRECISION_NONE),
   integralTransformType(RASTER_INTEGRAL_TRANSFORM_SIMPLE),
   metaOrigin(0, 0),
-  metaRegion(Region::infinite()),
+  metaRegion(Region::getInfiniteInstance()),
   metaClipBoxI(0, 0, 0, 0),
   metaClipBoxF(0.0f, 0.0f, 0.0f, 0.0f),
   metaClipBoxD(0.0, 0.0, 0.0, 0.0),

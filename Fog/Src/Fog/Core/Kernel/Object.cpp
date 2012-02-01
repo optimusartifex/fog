@@ -18,9 +18,9 @@
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Tools/Hash.h>
 #include <Fog/Core/Tools/HashUtil.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/Logger.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/Var.h>
@@ -394,7 +394,7 @@ static err_t Object_validatePropertyName(const StringW& name)
 // [Fog::Object - Property - Dynamic]
 // ============================================================================
 
-static err_t Object_getDynamicProperty(const Object* self, const ManagedStringW& name, Var& dst)
+static err_t Object_getDynamicProperty(const Object* self, const InternedStringW& name, Var& dst)
 {
   const ObjectExtra* extra = self->_objectExtra;
   if (extra == &Object_extraNull)
@@ -407,7 +407,7 @@ static err_t Object_getDynamicProperty(const Object* self, const ManagedStringW&
     return dst.setVar(*var);
 }
 
-static err_t Object_setDynamicProperty(Object* self, const ManagedStringW& name, const Var& src)
+static err_t Object_setDynamicProperty(Object* self, const InternedStringW& name, const Var& src)
 {
   ObjectExtra* extra = self->getMutableExtra();
   if (FOG_IS_NULL(extra))
@@ -438,7 +438,7 @@ static err_t Object_setDynamicProperty(Object* self, const ManagedStringW& name,
 
 err_t Object::getProperty(const StringW& name, Var& dst) const
 {
-  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
+  InternedStringW m_name(name, INTERNED_STRING_OPTION_LOOKUP);
 
   if (m_name.isEmpty())
   {
@@ -460,22 +460,22 @@ err_t Object::getProperty(const StringW& name, Var& dst) const
 
 err_t Object::setProperty(const StringW& name, const Var& src)
 {
-  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
+  InternedStringW m_name(name, INTERNED_STRING_OPTION_LOOKUP);
 
   if (m_name.isEmpty())
   {
     // Return error if the property name isn't valid. We are going to create
-    // new ManagedStringW so we must be sure that the internal hash table used
-    // to store managed strings won't be polluted by strings we actually don't
+    // new InternedStringW so we must be sure that the internal hash table used
+    // to store interned strings won't be polluted by strings we actually don't
     // need.
     FOG_RETURN_ON_ERROR(Object_validatePropertyName(name));
 
-    // Create a new ManagedStringW.
+    // Create a new InternedStringW.
     FOG_RETURN_ON_ERROR(m_name.set(name));
   }
   else
   {
-    // We know that there is a ManagedStringW, so try Object::_setProperty().
+    // We know that there is a InternedStringW, so try Object::_setProperty().
     err_t err = _setProperty(m_name, src);
 
     // If something bad happened (for example wrong argument type) then we
@@ -492,7 +492,7 @@ err_t Object::setProperty(const StringW& name, const Var& src)
   return Object_setDynamicProperty(this, m_name, src);
 }
 
-err_t Object::getProperty(const ManagedStringW& name, Var& dst) const
+err_t Object::getProperty(const InternedStringW& name, Var& dst) const
 {
   err_t err = _getProperty(name, dst);
   if (err != ERR_PROPERTY_NOT_FOUND)
@@ -506,7 +506,7 @@ err_t Object::getProperty(const ManagedStringW& name, Var& dst) const
   return ERR_PROPERTY_NOT_FOUND;
 }
 
-err_t Object::setProperty(const ManagedStringW& name, const Var& src)
+err_t Object::setProperty(const InternedStringW& name, const Var& src)
 {
   err_t err = _setProperty(name, src);
   if (err != ERR_PROPERTY_NOT_FOUND)
@@ -521,23 +521,23 @@ err_t Object::setProperty(const ManagedStringW& name, const Var& src)
 // [Fog::Object - Property - Virtual]
 // ============================================================================
 
-err_t Object::_getProperty(const ManagedStringW& name, Var& dst) const
+err_t Object::_getProperty(const InternedStringW& name, Var& dst) const
 {
   FOG_UNUSED(name);
   FOG_UNUSED(dst);
 
-  if (name == FOG_STR_(OBJECT_id))
+  if (name == FOG_S(id))
     return dst.setString(_objectExtra->_id);
 
   return ERR_PROPERTY_NOT_FOUND;
 }
 
-err_t Object::_setProperty(const ManagedStringW& name, const Var& src)
+err_t Object::_setProperty(const InternedStringW& name, const Var& src)
 {
   FOG_UNUSED(name);
   FOG_UNUSED(src);
 
-  if (name == FOG_STR_(OBJECT_id))
+  if (name == FOG_S(id))
   {
     StringW src_string;
     FOG_RETURN_ON_ERROR(src.getString(src_string));

@@ -2774,32 +2774,89 @@ enum SVG_PAINT
 
 enum SVG_STYLE
 {
-  // When adding value here, it's important to add value also to the
-  // Fog/Core/Global/EnumCore.h and Fog/Core/Tools/ManagedString.cpp.
-  SVG_STYLE_CLIP_PATH = 0,
-  SVG_STYLE_CLIP_RULE,
-  SVG_STYLE_ENABLE_BACKGROUND,
-  SVG_STYLE_FILL,
-  SVG_STYLE_FILL_OPACITY,
-  SVG_STYLE_FILL_RULE,
-  SVG_STYLE_FILTER,
+  //! @note Part of SVG and CSS2 - Font properties.
+  SVG_STYLE_FONT = 0,
+  //! @note Part of SVG and CSS2 - Font properties.
   SVG_STYLE_FONT_FAMILY,
+  //! @note Part of SVG and CSS2 - Font properties.
   SVG_STYLE_FONT_SIZE,
-  SVG_STYLE_LETTER_SPACING,
-  SVG_STYLE_MASK,
-  SVG_STYLE_OPACITY,
-  SVG_STYLE_STOP_COLOR,
-  SVG_STYLE_STOP_OPACITY,
-  SVG_STYLE_STROKE,
-  SVG_STYLE_STROKE_DASH_ARRAY,
-  SVG_STYLE_STROKE_DASH_OFFSET,
-  SVG_STYLE_STROKE_LINE_CAP,
-  SVG_STYLE_STROKE_LINE_JOIN,
-  SVG_STYLE_STROKE_MITER_LIMIT,
-  SVG_STYLE_STROKE_OPACITY,
-  SVG_STYLE_STROKE_WIDTH,
 
-  SVG_STYLE_INVALID
+  //! @note Part of SVG and CSS2 - Text properties.
+  SVG_STYLE_DIRECTION,
+  //! @note Part of SVG and CSS2 - Text properties.
+  SVG_STYLE_LETTER_SPACING,
+  //! @note Part of SVG and CSS2 - Text properties.
+  SVG_STYLE_TEXT_DECORATION,
+  //! @note Part of SVG and CSS2 - Text properties.
+  SVG_STYLE_WORD_SPACING,
+
+  //! @note Part of SVG and CSS2 - Other properties for visual media.
+  SVG_STYLE_COLOR,
+
+  //! @note Part of SVG - Clipping, Masking, and Compositing properties.
+  SVG_STYLE_CLIP_PATH,
+  //! @note Part of SVG - Clipping, Masking, and Compositing properties.
+  SVG_STYLE_CLIP_RULE,
+  //! @note Part of SVG - Clipping, Masking, and Compositing properties.
+  SVG_STYLE_MASK,
+  //! @note Part of SVG - Clipping, Masking, and Compositing properties.
+  SVG_STYLE_OPACITY,
+
+  //! @note Part of SVG - Filter Effects properties.
+  SVG_STYLE_ENABLE_BACKGROUND,
+  //! @note Part of SVG - Filter Effects properties.
+  SVG_STYLE_FILTER,
+  //! @note Part of SVG - Filter Effects properties.
+  SVG_STYLE_FLOOD_COLOR,
+  //! @note Part of SVG - Filter Effects properties.
+  SVG_STYLE_FLOOD_OPACITY,
+  //! @note Part of SVG - Filter Effects properties.
+  SVG_STYLE_LIGHTING_COLOR,
+
+  //! @note Part of SVG - Gradient properties.
+  SVG_STYLE_STOP_COLOR,
+  //! @note Part of SVG - Gradient properties.
+  SVG_STYLE_STOP_OPACITY,
+
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_FILL,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_FILL_OPACITY,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_FILL_RULE,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_IMAGE_RENDERING,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_MARKER,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_MARKER_END,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_MARKER_MID,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_MARKER_START,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_SHAPE_RENDERING,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_DASH_ARRAY,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_DASH_OFFSET,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_LINE_CAP,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_LINE_JOIN,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_MITER_LIMIT,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_OPACITY,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_STROKE_WIDTH,
+  //! @note Part of SVG - Color and Painting properties.
+  SVG_STYLE_TEXT_RENDERING,
+
+  //! @brief Count of style properties.
+  SVG_STYLE_COUNT
 };
 
 // ============================================================================
@@ -2822,7 +2879,9 @@ enum SVG_SOURCE
 enum SVG_PATTERN_UNITS
 {
   SVG_OBJECT_BOUNDING_BOX = 0,
-  SVG_USER_SPACE_ON_USE = 1
+  SVG_USER_SPACE_ON_USE = 1,
+
+  SVG_PATTERN_UNITS_COUNT = 2
 };
 
 // ============================================================================
@@ -2836,14 +2895,21 @@ enum SVG_LENGTH_ADJUST
 };
 
 // ============================================================================
-// [Fog::SVG_VISITOR]
+// [Fog::SVG_CONTEXT]
 // ============================================================================
 
-//! @brief Type of SvgVisitor.
-enum SVG_VISITOR
+//! @brief Type of SVG context.
+enum SVG_CONTEXT
 {
-  SVG_VISITOR_MEASURE = 0,
-  SVG_VISITOR_RENDER = 1
+  //! @brief None, private use only.
+  SVG_CONTEXT_NONE = 0,
+
+  //! @brief SVG context is @ref SvgRenderContext.
+  SVG_CONTEXT_RENDER = 1,
+  //! @brief SVG context is @ref SvgMeasureContext.
+  SVG_CONTEXT_MEASURE = 2,
+  //! @brief SVG context is @ref SvgHitTestContext.
+  SVG_CONTEXT_HIT_TEST = 3
 };
 
 // ============================================================================

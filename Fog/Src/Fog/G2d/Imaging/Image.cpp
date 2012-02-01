@@ -21,8 +21,8 @@
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/OS/OSUtil.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Logger.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
 #include <Fog/G2d/Face/Face_Raster_C.h>

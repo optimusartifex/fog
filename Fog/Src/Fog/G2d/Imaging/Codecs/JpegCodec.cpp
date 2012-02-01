@@ -16,8 +16,8 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/OS/Library.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Logger.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Var.h>
@@ -120,7 +120,7 @@ void JpegLibrary::close()
 JpegCodecProvider::JpegCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = FOG_STR_(IMAGE_FILE_JPEG);
+  _name = FOG_S(JPEG);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_BOTH;
@@ -130,10 +130,10 @@ JpegCodecProvider::JpegCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(4);
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpg));
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpeg));
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfi));
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfif));
+  _imageExtensions.append(FOG_S(jpg));
+  _imageExtensions.append(FOG_S(jpeg));
+  _imageExtensions.append(FOG_S(jfi));
+  _imageExtensions.append(FOG_S(jfif));
 }
 
 JpegCodecProvider::~JpegCodecProvider()
@@ -786,20 +786,20 @@ _End:
 // [Fog::JpegEncoder - Properties]
 // ===========================================================================
 
-err_t JpegEncoder::_getProperty(const ManagedStringW& name, Var& dst) const
+err_t JpegEncoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
-  if (name == FOG_STR_(IMAGE_CODEC_quality))
+  if (name == FOG_S(quality))
     return dst.setInt(_quality);
 
-  return base::_getProperty(name, dst);
+  return Base::_getProperty(name, dst);
 }
 
-err_t JpegEncoder::_setProperty(const ManagedStringW& name, const Var& src)
+err_t JpegEncoder::_setProperty(const InternedStringW& name, const Var& src)
 {
-  if (name == FOG_STR_(IMAGE_CODEC_quality))
+  if (name == FOG_S(quality))
     return src.getInt(_quality, 0, 100);
 
-  return base::_setProperty(name, src);
+  return Base::_setProperty(name, src);
 }
 
 // ============================================================================

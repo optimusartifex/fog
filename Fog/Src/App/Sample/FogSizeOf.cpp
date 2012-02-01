@@ -6,6 +6,8 @@
 // [FogTestSizeOf]
 // ============================================================================
 
+using namespace Fog;
+
 #define PRINT_PART(_Part_) \
   FOG_MACRO_BEGIN \
     printf("[%s]\n", _Part_); \
@@ -18,11 +20,27 @@
 
 int main(int argc, char* argv[])
 {
+  // [Fog/Core/Dom]
+  PRINT_PART("Fog/Core/Dom");
+  PRINT_TYPE(Fog::DomCDATASection);
+  PRINT_TYPE(Fog::DomCharacterData);
+  PRINT_TYPE(Fog::DomContainer);
+  PRINT_TYPE(Fog::DomDocument);
+  PRINT_TYPE(Fog::DomDocumentFragment);
+  PRINT_TYPE(Fog::DomDocumentType);
+  PRINT_TYPE(Fog::DomElement);
+  PRINT_TYPE(Fog::DomNode);
+  PRINT_TYPE(Fog::DomObj);
+  PRINT_TYPE(Fog::DomProcessingInstruction);
+  PRINT_TYPE(Fog::DomText);
+
   // [Fog/Core/Kernel]
   PRINT_PART("Fog/Core/Kernel");
   PRINT_TYPE(Fog::Application);
+  PRINT_TYPE(Fog::CoreObj);
   PRINT_TYPE(Fog::Event);
   PRINT_TYPE(Fog::Object);
+  PRINT_TYPE(Fog::PropertyInfo);
   PRINT_TYPE(Fog::Task);
   PRINT_TYPE(Fog::Timer);
 
@@ -35,8 +53,14 @@ int main(int argc, char* argv[])
 
   // [Fog/Core/Memory]
   PRINT_PART("Fog/Core/Memory");
+  PRINT_TYPE(Fog::MemBlockAllocator);
   PRINT_TYPE(Fog::MemBuffer);
+  PRINT_TYPE(Fog::MemGCAllocator);
+  PRINT_TYPE(Fog::MemGCChunk);
+  PRINT_TYPE(Fog::MemGCQueue);
+  PRINT_TYPE(Fog::MemGCScope);
   PRINT_TYPE(Fog::MemPool);
+  PRINT_TYPE(Fog::MemZoneAllocator);
 
   // [Fog/Core/Threading]
   PRINT_PART("Fog/Core/Threading");
@@ -61,7 +85,7 @@ int main(int argc, char* argv[])
   PRINT_TYPE(Fog::ListUntypedData);
   PRINT_TYPE(Fog::Locale);
   PRINT_TYPE(Fog::LocaleData);
-  PRINT_TYPE(Fog::ManagedStringW);
+  PRINT_TYPE(Fog::InternedStringW);
   PRINT_TYPE(Fog::Range);
   PRINT_TYPE(Fog::RegExpA);
   PRINT_TYPE(Fog::RegExpW);
@@ -188,6 +212,36 @@ int main(int argc, char* argv[])
   PRINT_TYPE(Fog::RectangularGradientF);
   PRINT_TYPE(Fog::RectangularGradientD);
   PRINT_TYPE(Fog::Texture);
+
+  // [Fog/G2d/Svg]
+  PRINT_PART("Fog/G2d/Svg");
+  PRINT_TYPE(Fog::SvgAElement);
+  PRINT_TYPE(Fog::SvgCircleElement);
+  PRINT_TYPE(Fog::SvgDefsElement);
+  PRINT_TYPE(Fog::SvgDocument);
+  PRINT_TYPE(Fog::SvgElement);
+  PRINT_TYPE(Fog::SvgEllipseElement);
+  PRINT_TYPE(Fog::SvgGElement);
+  PRINT_TYPE(Fog::SvgGradientElement);
+  PRINT_TYPE(Fog::SvgImageElement);
+  PRINT_TYPE(Fog::SvgLineElement);
+  PRINT_TYPE(Fog::SvgLinearGradientElement);
+  PRINT_TYPE(Fog::SvgPathElement);
+  PRINT_TYPE(Fog::SvgPatternElement);
+  PRINT_TYPE(Fog::SvgPolygonElement);
+  PRINT_TYPE(Fog::SvgPolylineElement);
+  PRINT_TYPE(Fog::SvgRadialGradientElement);
+  PRINT_TYPE(Fog::SvgRectElement);
+  PRINT_TYPE(Fog::SvgRootElement);
+  PRINT_TYPE(Fog::SvgSolidColorElement);
+  PRINT_TYPE(Fog::SvgStopElement);
+  PRINT_TYPE(Fog::SvgStyle);
+  PRINT_TYPE(Fog::SvgStylableElement);
+  PRINT_TYPE(Fog::SvgSymbolElement);
+  PRINT_TYPE(Fog::SvgTSpanElement);
+  PRINT_TYPE(Fog::SvgTextElement);
+  PRINT_TYPE(Fog::SvgUseElement);
+  PRINT_TYPE(Fog::SvgViewElement);
 
   // [Fog/G2d/Text]
   PRINT_PART("Fog/G2d/Text");

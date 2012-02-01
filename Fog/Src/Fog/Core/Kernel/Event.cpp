@@ -129,7 +129,7 @@ Event* ChildEvent::clone() const
 // [Fog::PropertyEvent]
 // ============================================================================
 
-PropertyEvent::PropertyEvent(const ManagedStringW& name) :
+PropertyEvent::PropertyEvent(const InternedStringW& name) :
   Event(EVENT_PROPERTY),
   _name(name)
 {

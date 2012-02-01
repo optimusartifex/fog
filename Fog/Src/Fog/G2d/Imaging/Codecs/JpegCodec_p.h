@@ -154,8 +154,8 @@ struct FOG_NO_EXPORT JpegEncoder : public ImageEncoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
-  virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
+  virtual err_t _getProperty(const InternedStringW& name, Var& dst) const;
+  virtual err_t _setProperty(const InternedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Members]

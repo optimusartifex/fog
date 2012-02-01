@@ -16,7 +16,7 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemOps.h>
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -2625,7 +2625,7 @@ struct GifCodecProvider : public ImageCodecProvider
 GifCodecProvider::GifCodecProvider()
 {
   // Name of ImageCodecProvider.
-  _name = FOG_STR_(IMAGE_FILE_GIF);
+  _name = FOG_S(GIF);
 
   // Supported codecs.
   _codecType = IMAGE_CODEC_DECODER;
@@ -2635,7 +2635,7 @@ GifCodecProvider::GifCodecProvider()
 
   // Supported extensions.
   _imageExtensions.reserve(1);
-  _imageExtensions.append(FOG_STR_(IMAGE_EXT_gif));
+  _imageExtensions.append(FOG_S(gif));
 }
 
 GifCodecProvider::~GifCodecProvider()

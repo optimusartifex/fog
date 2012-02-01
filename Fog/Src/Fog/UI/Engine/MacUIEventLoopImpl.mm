@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/UI/Engine/MacUIEventLoopImpl_p.h>
 
 // [Dependencies - Mac]
@@ -31,7 +31,7 @@ namespace Fog {
 MacUIEventLoopImpl::MacUIEventLoopImpl()
 {
   // Retype event loop to "UI.Mac".
-  _type = FOG_STR_(APPLICATION_UI_Mac);
+  _type = FOG_S(APPLICATION_UI_Mac);
 }
 
 // ============================================================================

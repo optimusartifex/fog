@@ -12,8 +12,8 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/List.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
@@ -204,7 +204,9 @@ ImageCodecProvider* ImageCodecProvider::getProviderBySignature(uint32_t codecTyp
   while (it.isValid())
   {
     ImageCodecProvider* provider = it.getItem();
-    if ((provider->getCodecType() & codecType) != codecType) continue;
+
+    if ((provider->getCodecType() & codecType) != codecType)
+      continue;
 
     uint32_t score = provider->checkSignature(mem, len);
     if (score > bestScore)
@@ -301,7 +303,8 @@ _End:
 
 err_t ImageCodecProvider::createDecoderForStream(Stream& stream, const StringW& extension, ImageDecoder** codec)
 {
-  if (codec == NULL) return ERR_RT_INVALID_ARGUMENT;
+  if (codec == NULL)
+    return ERR_RT_INVALID_ARGUMENT;
 
   err_t err = ERR_OK;
 
@@ -314,26 +317,44 @@ err_t ImageCodecProvider::createDecoderForStream(Stream& stream, const StringW& 
   uint8_t mime[128];
   size_t readn;
 
-  if (!stream.isSeekable()) { err = ERR_IO_CANT_SEEK; goto _End; }
+  if (!stream.isSeekable())
+  {
+    err = ERR_IO_CANT_SEEK;
+    goto _End;
+  }
 
   pos = stream.tell();
   readn = stream.read(mime, 128);
 
-  if (stream.seek(pos, STREAM_SEEK_SET) == -1) { err =  ERR_IO_CANT_SEEK; goto _End; }
+  if (stream.seek(pos, STREAM_SEEK_SET) == -1)
+  {
+    err =  ERR_IO_CANT_SEEK;
+    goto _End;
+  }
 
   // First try to use extension.
-  if (!extension.isEmpty()) provider = getProviderByExtension(IMAGE_CODEC_DECODER, extension);
+  if (!extension.isEmpty())
+    provider = getProviderByExtension(IMAGE_CODEC_DECODER, extension);
+  
   // Fallback to signature checking if extension match failed.
-  if (!provider) provider = getProviderBySignature(IMAGE_CODEC_DECODER, mime, readn);
+  if (provider == NULL)
+    provider = getProviderBySignature(IMAGE_CODEC_DECODER, mime, readn);
+  
   // Bail if signature checking failed too.
-  if (!provider) { err = ERR_IMAGE_NO_DECODER; goto _End; }
+  if (provider == NULL)
+  {
+    err = ERR_IMAGE_NO_DECODER;
+    goto _End;
+  }
 
   err = provider->createCodec(IMAGE_CODEC_DECODER, reinterpret_cast<ImageCodec**>(&decoder));
-  if (err == ERR_OK) decoder->attachStream(stream);
+  if (err == ERR_OK)
+    decoder->attachStream(stream);
 
 _End:
   // Seek to begin if failed.
-  if (FOG_IS_ERROR(err)) stream.seek(pos, STREAM_SEEK_SET);
+  if (FOG_IS_ERROR(err))
+    stream.seek(pos, STREAM_SEEK_SET);
 
   *codec = decoder;
   return err;

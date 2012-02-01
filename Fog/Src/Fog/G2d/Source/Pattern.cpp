@@ -516,7 +516,12 @@ static err_t FOG_CDECL Pattern_createArgb32(Pattern* self, const ArgbBase32* arg
 {
   PatternColorData* d = reinterpret_cast<PatternColorData*>(self->_d);
 
-  if (d->patternType != PATTERN_TYPE_COLOR || d->reference.get() != 1)
+  if (d->patternType == PATTERN_TYPE_COLOR && d->reference.get() == 1)
+  {
+    d->color.initCustom1(*argb32);
+    return ERR_OK;
+  }
+  else
   {
     d = reinterpret_cast<PatternColorData*>(
       fog_api.pattern_dCreate(sizeof(PatternColorData)));
@@ -526,20 +531,24 @@ static err_t FOG_CDECL Pattern_createArgb32(Pattern* self, const ArgbBase32* arg
 
     d->vType = VAR_TYPE_COLOR;
     d->patternType = PATTERN_TYPE_COLOR;
+    d->color.initCustom1(*argb32);
 
     self->_d->release();
     self->_d = d;
+    return ERR_OK;
   }
-
-  d->color.initCustom1(*argb32);
-  return ERR_OK;
 }
 
 static err_t FOG_CDECL Pattern_createColor(Pattern* self, const Color* color)
 {
   PatternColorData* d = reinterpret_cast<PatternColorData*>(self->_d);
 
-  if (d->patternType != PATTERN_TYPE_COLOR || d->reference.get() != 1)
+  if (d->patternType == PATTERN_TYPE_COLOR && d->reference.get() == 1)
+  {
+    d->color.initCustom1(*color);
+    return ERR_OK;
+  }
+  else
   {
     d = reinterpret_cast<PatternColorData*>(
       fog_api.pattern_dCreate(sizeof(PatternColorData)));
@@ -549,20 +558,26 @@ static err_t FOG_CDECL Pattern_createColor(Pattern* self, const Color* color)
 
     d->vType = VAR_TYPE_COLOR;
     d->patternType = PATTERN_TYPE_COLOR;
+    d->color.initCustom1(*color);
 
     self->_d->release();
     self->_d = d;
+    return ERR_OK;
   }
-
-  d->color.initCustom1(*color);
-  return ERR_OK;
 }
 
 static err_t FOG_CDECL Pattern_createTextureF(Pattern* self, const Texture* texture, const TransformF* tr)
 {
   PatternTextureDataF* d = reinterpret_cast<PatternTextureDataF*>(self->_d);
+  uint32_t vType = d->vType & VAR_TYPE_MASK;
 
-  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  if (vType == VAR_TYPE_TEXTUREF && d->reference.get() == 1)
+  {
+    d->texture() = *texture;
+    d->transform() = tr != NULL ? *tr : TransformF::identity();
+    return ERR_OK;
+  }
+  else
   {
     d = reinterpret_cast<PatternTextureDataF*>(
       fog_api.pattern_dCreate(sizeof(PatternTextureDataF)));
@@ -579,19 +594,20 @@ static err_t FOG_CDECL Pattern_createTextureF(Pattern* self, const Texture* text
     self->_d = d;
     return ERR_OK;
   }
-  else
-  {
-    d->texture() = *texture;
-    d->transform() = tr != NULL ? *tr : TransformF::identity();
-    return ERR_OK;
-  }
 }
 
 static err_t FOG_CDECL Pattern_createTextureD(Pattern* self, const Texture* texture, const TransformD* tr)
 {
   PatternTextureDataD* d = reinterpret_cast<PatternTextureDataD*>(self->_d);
+  uint32_t vType = d->vType & VAR_TYPE_MASK;
 
-  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  if (vType == VAR_TYPE_TEXTURED && d->reference.get() == 1)
+  {
+    d->texture() = *texture;
+    d->transform() = tr != NULL ? *tr : TransformD::identity();
+    return ERR_OK;
+  }
+  else
   {
     d = reinterpret_cast<PatternTextureDataD*>(
       fog_api.pattern_dCreate(sizeof(PatternTextureDataD)));
@@ -599,7 +615,7 @@ static err_t FOG_CDECL Pattern_createTextureD(Pattern* self, const Texture* text
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
-    d->vType = VAR_TYPE_TEXTUREF;
+    d->vType = VAR_TYPE_TEXTURED;
     d->patternType = PATTERN_TYPE_TEXTURE;
     d->texture.initCustom1(*texture);
     d->transform.initCustom1(tr != NULL ? *tr : TransformD::identity());
@@ -608,26 +624,31 @@ static err_t FOG_CDECL Pattern_createTextureD(Pattern* self, const Texture* text
     self->_d = d;
     return ERR_OK;
   }
-  else
-  {
-    d->texture() = *texture;
-    d->transform() = tr != NULL ? *tr : TransformD::identity();
-    return ERR_OK;
-  }
 }
 
 static err_t FOG_CDECL Pattern_createGradientF(Pattern* self, const GradientF* gradient, const TransformF* tr)
 {
-  // Pattern disallows to use invalid (uninitialized) gradient.
-  if (gradient->getGradientType() >= GRADIENT_TYPE_COUNT)
+  // Pattern doesn't allow to use invalid (uninitialized) gradient.
+  uint32_t gradientType = gradient->getGradientType();
+  if (gradientType >= GRADIENT_TYPE_COUNT)
   {
     fog_api.pattern_reset(self);
     return ERR_OK;
   }
 
   PatternGradientDataF* d = reinterpret_cast<PatternGradientDataF*>(self->_d);
+  uint32_t vType = d->vType & VAR_TYPE_MASK;
 
-  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  if ((vType == VAR_TYPE_LINEAR_GRADIENTF  || vType == VAR_TYPE_RADIAL_GRADIENTF       ||
+       vType == VAR_TYPE_CONICAL_GRADIENTF || vType == VAR_TYPE_RECTANGULAR_GRADIENTF) &&
+      d->reference.get() == 1)
+  {
+    d->vType = Pattern_vTypeFromGradientTableF[gradientType] | (d->vType & ~VAR_TYPE_MASK);
+    d->gradient().setGradient(*gradient);
+    d->transform() = tr != NULL ? *tr : TransformF::identity();
+    return ERR_OK;
+  }
+  else
   {
     d = reinterpret_cast<PatternGradientDataF*>(
       fog_api.pattern_dCreate(sizeof(PatternGradientDataF)));
@@ -635,8 +656,8 @@ static err_t FOG_CDECL Pattern_createGradientF(Pattern* self, const GradientF* g
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
-    d->vType = VAR_TYPE_TEXTUREF;
-    d->patternType = PATTERN_TYPE_TEXTURE;
+    d->vType = Pattern_vTypeFromGradientTableF[gradientType];
+    d->patternType = PATTERN_TYPE_GRADIENT;
     d->gradient.initCustom1(*gradient);
     d->transform.initCustom1(tr != NULL ? *tr : TransformF::identity());
 
@@ -644,26 +665,31 @@ static err_t FOG_CDECL Pattern_createGradientF(Pattern* self, const GradientF* g
     self->_d = d;
     return ERR_OK;
   }
-  else
-  {
-    d->gradient().setGradient(*gradient);
-    d->transform() = tr != NULL ? *tr : TransformF::identity();
-    return ERR_OK;
-  }
 }
 
 static err_t FOG_CDECL Pattern_createGradientD(Pattern* self, const GradientD* gradient, const TransformD* tr)
 {
-  // Pattern disallows to use invalid (uninitialized) gradient.
-  if (gradient->getGradientType() >= GRADIENT_TYPE_COUNT)
+  // Pattern doesn't allow to use invalid (uninitialized) gradient.
+  uint32_t gradientType = gradient->getGradientType();
+  if (gradientType >= GRADIENT_TYPE_COUNT)
   {
     fog_api.pattern_reset(self);
     return ERR_OK;
   }
 
   PatternGradientDataD* d = reinterpret_cast<PatternGradientDataD*>(self->_d);
+  uint32_t vType = d->vType & VAR_TYPE_MASK;
 
-  if ((d->vType & VAR_TYPE_MASK) != VAR_TYPE_TEXTUREF || d->reference.get() != 1)
+  if ((vType == VAR_TYPE_LINEAR_GRADIENTD  || vType == VAR_TYPE_RADIAL_GRADIENTD       ||
+       vType == VAR_TYPE_CONICAL_GRADIENTD || vType == VAR_TYPE_RECTANGULAR_GRADIENTD) &&
+      d->reference.get() == 1)
+  {
+    d->vType = Pattern_vTypeFromGradientTableD[gradientType] | (d->vType & ~VAR_TYPE_MASK);
+    d->gradient().setGradient(*gradient);
+    d->transform() = tr != NULL ? *tr : TransformD::identity();
+    return ERR_OK;
+  }
+  else
   {
     d = reinterpret_cast<PatternGradientDataD*>(
       fog_api.pattern_dCreate(sizeof(PatternGradientDataD)));
@@ -671,19 +697,13 @@ static err_t FOG_CDECL Pattern_createGradientD(Pattern* self, const GradientD* g
     if (FOG_IS_NULL(d))
       return ERR_RT_OUT_OF_MEMORY;
 
-    d->vType = VAR_TYPE_TEXTUREF;
-    d->patternType = PATTERN_TYPE_TEXTURE;
+    d->vType = Pattern_vTypeFromGradientTableD[gradientType];
+    d->patternType = PATTERN_TYPE_GRADIENT;
     d->gradient.initCustom1(*gradient);
     d->transform.initCustom1(tr != NULL ? *tr : TransformD::identity());
 
     self->_d->release();
     self->_d = d;
-    return ERR_OK;
-  }
-  else
-  {
-    d->gradient().setGradient(*gradient);
-    d->transform() = tr != NULL ? *tr : TransformD::identity();
     return ERR_OK;
   }
 }

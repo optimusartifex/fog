@@ -15,7 +15,7 @@
 #include <Fog/Core/OS/FilePath.h>
 #include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/OS/UserUtil.h>
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/Core/Tools/TextCodec.h>
@@ -96,7 +96,7 @@ _Fail:
 
 static err_t FOG_CDECL UserUtil_getHomeDirectory(StringW* dst)
 {
-  return Environment::getValue(FOG_STR_(OSUTIL_USERPROFILE), *dst);
+  return Environment::getValue(FOG_S(USERPROFILE), *dst);
 }
 
 // ============================================================================

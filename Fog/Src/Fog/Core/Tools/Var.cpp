@@ -85,6 +85,17 @@ static Static<Var> Var_oNull;
 #define VAR_OBJECT_C(_D_, _Type_) \
   ((_Type_*)_D_)
 
+static FOG_INLINE size_t Var_dImplicitGetRef(VarData* d)
+{
+  return AtomicCore<size_t>::get(&d->unknown.reference);
+}
+
+static FOG_INLINE VarData* Var_dImplicitAddRef(VarData* d)
+{
+  AtomicCore<size_t>::inc(&d->unknown.reference);
+  return d;
+}
+
 // ============================================================================
 // [Fog::Var - DataSize]
 // ============================================================================
@@ -253,7 +264,8 @@ _CreateNull:
     case VAR_TYPE_REGEXPA:
     case VAR_TYPE_REGEXPW:
     case VAR_TYPE_LOCALE:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
+_CreateImplicit:
+      self->_d = static_cast<const Var*>(vData)->_d->addRef();
       return;
 
     case VAR_TYPE_DATE:
@@ -299,8 +311,7 @@ _CreateNull:
     case VAR_TYPE_PATHF:
     case VAR_TYPE_PATHD:
     case VAR_TYPE_REGION:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
-      return;
+      goto _CreateImplicit;
 
     case VAR_TYPE_TRANSFORMF:
     case VAR_TYPE_TRANSFORMD:
@@ -308,8 +319,7 @@ _CreateNull:
 
     case VAR_TYPE_MATRIXF:
     case VAR_TYPE_MATRIXD:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
-      return;
+      goto _CreateImplicit;
 
     case VAR_TYPE_COLOR:
       fog_api.pattern_ctorColor(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Color*>(vData));
@@ -345,8 +355,7 @@ _CreateNull:
     case VAR_TYPE_IMAGE_PALETTE:
     case VAR_TYPE_IMAGE_FILTER:
     case VAR_TYPE_FONT:
-      self->_d = reinterpret_cast<const VarData*>(vData)->addRef();
-      return;
+      goto _CreateImplicit;
 
     default:
       goto _CreateNull;
@@ -1219,6 +1228,138 @@ static err_t FOG_CDECL Var_getDoubleBound(const Var* self, double* dst, double m
 
 static err_t FOG_CDECL Var_getType(const Var* self, uint32_t vType, void* vData)
 {
+  VarData* d = self->_d;
+  uint32_t dType = d->vType & VAR_TYPE_MASK;
+
+  if (dType == vType)
+  {
+    switch (vType)
+    {
+      case VAR_TYPE_BOOL:
+      case VAR_TYPE_CHAR:
+      case VAR_TYPE_INT32:
+      case VAR_TYPE_UINT32:
+      case VAR_TYPE_INT64:
+      case VAR_TYPE_UINT64:
+      case VAR_TYPE_FLOAT:
+      case VAR_TYPE_DOUBLE:
+_SetSimple:
+        MemOps::copy(vData, d->getData(), Var_getDataSize(vType));
+        return ERR_OK;
+
+      case VAR_TYPE_STRINGA:
+      case VAR_TYPE_STRINGW:
+      case VAR_TYPE_LIST_STRINGA:
+      case VAR_TYPE_LIST_STRINGW:
+      case VAR_TYPE_LIST_VAR:
+      case VAR_TYPE_HASH_STRINGA_STRINGA:
+      case VAR_TYPE_HASH_STRINGA_VAR:
+      case VAR_TYPE_HASH_STRINGW_STRINGW:
+      case VAR_TYPE_HASH_STRINGW_VAR:
+      case VAR_TYPE_REGEXPA:
+      case VAR_TYPE_REGEXPW:
+      case VAR_TYPE_LOCALE:
+_SetImplicit:
+        atomicPtrXchg(&static_cast<Var*>(vData)->_d, Var_dImplicitAddRef(d))->release();
+        return ERR_OK;
+
+      case VAR_TYPE_DATE:
+      case VAR_TYPE_TIME:
+        // ... Fall through ...
+
+      case VAR_TYPE_POINTI:
+      case VAR_TYPE_POINTF:
+      case VAR_TYPE_POINTD:
+      case VAR_TYPE_SIZEI:
+      case VAR_TYPE_SIZEF:
+      case VAR_TYPE_SIZED:
+      case VAR_TYPE_BOXI:
+      case VAR_TYPE_BOXF:
+      case VAR_TYPE_BOXD:
+      case VAR_TYPE_RECTI:
+      case VAR_TYPE_RECTF:
+      case VAR_TYPE_RECTD:
+      // Reserved for VAR_TYPE_LINEI.
+      case VAR_TYPE_LINEF:
+      case VAR_TYPE_LINED:
+      case VAR_TYPE_QBEZIERF:
+      case VAR_TYPE_QBEZIERD:
+      case VAR_TYPE_CBEZIERF:
+      case VAR_TYPE_CBEZIERD:
+      case VAR_TYPE_TRIANGLEF:
+      case VAR_TYPE_TRIANGLED:
+      case VAR_TYPE_ROUNDF:
+      case VAR_TYPE_ROUNDD:
+      case VAR_TYPE_CIRCLEF:
+      case VAR_TYPE_CIRCLED:
+      case VAR_TYPE_ELLIPSEF:
+      case VAR_TYPE_ELLIPSED:
+      case VAR_TYPE_ARCF:
+      case VAR_TYPE_ARCD:
+      case VAR_TYPE_CHORDF:
+      case VAR_TYPE_CHORDD:
+      case VAR_TYPE_PIEF:
+      case VAR_TYPE_PIED:
+        goto _SetSimple;
+
+      case VAR_TYPE_PATHF:
+      case VAR_TYPE_PATHD:
+      case VAR_TYPE_REGION:
+        goto _SetImplicit;
+
+      case VAR_TYPE_TRANSFORMF:
+      case VAR_TYPE_TRANSFORMD:
+        goto _SetSimple;
+
+      case VAR_TYPE_MATRIXF:
+      case VAR_TYPE_MATRIXD:
+        goto _SetImplicit;
+
+      case VAR_TYPE_COLOR:
+        *static_cast<Color*>(vData) = reinterpret_cast<PatternColorData*>(d)->color();
+        return ERR_OK;
+
+      case VAR_TYPE_TEXTUREF:
+        *static_cast<Texture*>(vData) = reinterpret_cast<PatternTextureDataF*>(d)->texture();
+        return ERR_OK;
+
+      case VAR_TYPE_TEXTURED:
+        *static_cast<Texture*>(vData) = reinterpret_cast<PatternTextureDataD*>(d)->texture();
+        return ERR_OK;
+
+      case VAR_TYPE_LINEAR_GRADIENTF:
+      case VAR_TYPE_RADIAL_GRADIENTF:
+      case VAR_TYPE_CONICAL_GRADIENTF:
+      case VAR_TYPE_RECTANGULAR_GRADIENTF:
+        *static_cast<GradientF*>(vData) = reinterpret_cast<PatternGradientDataF*>(d)->gradient();
+        return ERR_OK;
+
+      case VAR_TYPE_LINEAR_GRADIENTD:
+      case VAR_TYPE_RADIAL_GRADIENTD:
+      case VAR_TYPE_CONICAL_GRADIENTD:
+      case VAR_TYPE_RECTANGULAR_GRADIENTD:
+        *static_cast<GradientD*>(vData) = reinterpret_cast<PatternGradientDataD*>(d)->gradient();
+        return ERR_OK;
+
+      case VAR_TYPE_COLOR_STOP:
+        goto _SetSimple;
+      case VAR_TYPE_COLOR_STOP_LIST:
+        goto _SetImplicit;
+
+      case VAR_TYPE_IMAGE:
+      case VAR_TYPE_IMAGE_PALETTE:
+      case VAR_TYPE_IMAGE_FILTER:
+        goto _SetImplicit;
+
+      case VAR_TYPE_FONT:
+        goto _SetImplicit;
+        
+      // TODO:
+      default:
+        break;
+    }
+  }
+
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
 }
@@ -1229,8 +1370,135 @@ static err_t FOG_CDECL Var_getType(const Var* self, uint32_t vType, void* vData)
 
 static err_t FOG_CDECL Var_setType(Var* self, uint32_t vType, const void* vData)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  VarData* d = self->_d;
+
+  switch (vType)
+  {
+    case VAR_TYPE_BOOL:
+    case VAR_TYPE_CHAR:
+    case VAR_TYPE_INT32:
+    case VAR_TYPE_UINT32:
+    case VAR_TYPE_INT64:
+    case VAR_TYPE_UINT64:
+    case VAR_TYPE_FLOAT:
+    case VAR_TYPE_DOUBLE:
+_SetSimple:
+    {
+      size_t dataSize = Var_getDataSize(vType);
+      if ((d->vType & VAR_TYPE_MASK) != vType || Var_dImplicitGetRef(d) != 1)
+      {
+        d = fog_api.var_dCreate(dataSize);
+        if (FOG_IS_NULL(d))
+          return ERR_RT_OUT_OF_MEMORY;
+
+        d->vType = vType;
+        atomicPtrXchg(&self->_d, d)->release();
+      }
+      MemOps::copy(d->getData(), vData, dataSize);
+      return ERR_OK;
+    }
+
+    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_LIST_STRINGA:
+    case VAR_TYPE_LIST_STRINGW:
+    case VAR_TYPE_LIST_VAR:
+    case VAR_TYPE_HASH_STRINGA_STRINGA:
+    case VAR_TYPE_HASH_STRINGA_VAR:
+    case VAR_TYPE_HASH_STRINGW_STRINGW:
+    case VAR_TYPE_HASH_STRINGW_VAR:
+    case VAR_TYPE_REGEXPA:
+    case VAR_TYPE_REGEXPW:
+    case VAR_TYPE_LOCALE:
+_SetImplicit:
+      atomicPtrXchg(&self->_d, Var_dImplicitAddRef(static_cast<const Var*>(vData)->_d))->release();
+      return ERR_OK;
+
+    case VAR_TYPE_DATE:
+    case VAR_TYPE_TIME:
+      // ... Fall through ...
+
+    case VAR_TYPE_POINTI:
+    case VAR_TYPE_POINTF:
+    case VAR_TYPE_POINTD:
+    case VAR_TYPE_SIZEI:
+    case VAR_TYPE_SIZEF:
+    case VAR_TYPE_SIZED:
+    case VAR_TYPE_BOXI:
+    case VAR_TYPE_BOXF:
+    case VAR_TYPE_BOXD:
+    case VAR_TYPE_RECTI:
+    case VAR_TYPE_RECTF:
+    case VAR_TYPE_RECTD:
+    // Reserved for VAR_TYPE_LINEI.
+    case VAR_TYPE_LINEF:
+    case VAR_TYPE_LINED:
+    case VAR_TYPE_QBEZIERF:
+    case VAR_TYPE_QBEZIERD:
+    case VAR_TYPE_CBEZIERF:
+    case VAR_TYPE_CBEZIERD:
+    case VAR_TYPE_TRIANGLEF:
+    case VAR_TYPE_TRIANGLED:
+    case VAR_TYPE_ROUNDF:
+    case VAR_TYPE_ROUNDD:
+    case VAR_TYPE_CIRCLEF:
+    case VAR_TYPE_CIRCLED:
+    case VAR_TYPE_ELLIPSEF:
+    case VAR_TYPE_ELLIPSED:
+    case VAR_TYPE_ARCF:
+    case VAR_TYPE_ARCD:
+    case VAR_TYPE_CHORDF:
+    case VAR_TYPE_CHORDD:
+    case VAR_TYPE_PIEF:
+    case VAR_TYPE_PIED:
+      goto _SetSimple;
+
+    case VAR_TYPE_PATHF:
+    case VAR_TYPE_PATHD:
+    case VAR_TYPE_REGION:
+      goto _SetImplicit;
+
+    case VAR_TYPE_TRANSFORMF:
+    case VAR_TYPE_TRANSFORMD:
+      goto _SetSimple;
+
+    case VAR_TYPE_MATRIXF:
+    case VAR_TYPE_MATRIXD:
+      goto _SetImplicit;
+
+    // TODO:
+    case VAR_TYPE_COLOR:
+      break;
+
+    // TODO:
+    case VAR_TYPE_TEXTUREF:
+    case VAR_TYPE_TEXTURED:
+      break;
+    
+    // TODO:
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+      break;
+
+    case VAR_TYPE_COLOR_STOP:
+      goto _SetSimple;
+
+    case VAR_TYPE_COLOR_STOP_LIST:
+    case VAR_TYPE_IMAGE:
+    case VAR_TYPE_FONT:
+      goto _SetImplicit;
+      
+    // TODO:
+
+    default:
+      return ERR_RT_INVALID_STATE;
+  }
 }
 
 // ============================================================================

@@ -432,7 +432,7 @@ void WinUIEngine::setMouseWheelLines(uint32_t lines)
   if (lines == 0)
     lines = WinUIEngine_getMouseWheelLines(this);
 
-  base::setMouseWheelLines(lines);
+  Base::setMouseWheelLines(lines);
 }
 
 uint32_t WinUIEngine::getFogKeyFromWinKey(WPARAM vk, UINT scancode) const

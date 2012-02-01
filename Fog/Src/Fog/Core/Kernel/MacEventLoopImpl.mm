@@ -15,8 +15,8 @@
 #include <Fog/Core/Kernel/Task.h>
 #include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Lock.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/List.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/Core/Tools/Time.h>
@@ -57,7 +57,7 @@ static void MacEventLoopImpl_onIdleWorkSource(void* info)
 // ============================================================================
 
 MacEventLoopImpl::MacEventLoopImpl() :
-  EventLoopImpl(FOG_STR_(APPLICATION_Core_Mac))
+  EventLoopImpl(FOG_S(APPLICATION_Core_Mac))
 {
   _runLoop = CFRunLoopGetCurrent();
   CFRetain(_runLoop);

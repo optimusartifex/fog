@@ -171,12 +171,12 @@ struct List<Var> : public ListUntyped
   // [SetList]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t setList(List<Var>& other)
+  FOG_INLINE err_t setList(const List<Var>& other)
   {
     return fog_api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, NULL);
   }
 
-  FOG_INLINE err_t setList(List<Var>& other, const Range& range)
+  FOG_INLINE err_t setList(const List<Var>& other, const Range& range)
   {
     return fog_api.list_var_opList(this, CONTAINER_OP_REPLACE, &other, &range);
   }

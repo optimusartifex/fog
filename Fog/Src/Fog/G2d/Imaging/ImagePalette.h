@@ -246,7 +246,7 @@ struct FOG_NO_EXPORT ImagePalette
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const ImagePalette& empty()
+  static FOG_INLINE const ImagePalette& getEmptyInstance()
   {
     return *fog_api.imagepalette_oEmpty;
   }

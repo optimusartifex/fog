@@ -270,8 +270,8 @@ struct FOG_NO_EXPORT BmpDecoder : public ImageDecoder
   // [Properties]
   // --------------------------------------------------------------------------
 
-  virtual err_t _getProperty(const ManagedStringW& name, Var& dst) const;
-  virtual err_t _setProperty(const ManagedStringW& name, const Var& src);
+  virtual err_t _getProperty(const InternedStringW& name, Var& dst) const;
+  virtual err_t _setProperty(const InternedStringW& name, const Var& src);
 
   // --------------------------------------------------------------------------
   // [Helpers]
@@ -300,6 +300,7 @@ struct FOG_NO_EXPORT BmpDecoder : public ImageDecoder
   uint32_t bmpStride;
   // How many bytes to skip to get the bitmap data.
   uint32_t bmpSkipBytes;
+  uint32_t bmpReversed;
 
   //! @brief Used by the IcoDecoder to skip uninteresing part
   int _skipFileHeader;

@@ -20,9 +20,9 @@
 #include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/Logger.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/Core/Tools/Time.h>

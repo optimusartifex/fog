@@ -1292,7 +1292,7 @@ struct FOG_NO_EXPORT PathF
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const PathF& empty()
+  static FOG_INLINE const PathF& getEmptyInstance()
   {
     return *fog_api.pathf_oEmpty;
   }
@@ -2377,7 +2377,7 @@ struct FOG_NO_EXPORT PathD
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const PathD& empty()
+  static FOG_INLINE const PathD& getEmptyInstance()
   {
     return *fog_api.pathd_oEmpty;
   }

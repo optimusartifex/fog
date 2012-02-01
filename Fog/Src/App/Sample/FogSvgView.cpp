@@ -135,7 +135,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/My/svg/linear3.svg");
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
     //fileName = Ascii8("C:/my/svg/lorem_ipsum_compound.svg");
-    fileName = Ascii8("C:/my/svg/tiger.svg");
+    //fileName = Ascii8("C:/my/svg/tiger.svg");
     //fileName = Ascii8("C:/my/svg/lion.svg");
     //fileName = Ascii8("C:/my/svg/Minimap_fixed.svg");
     //fileName = Ascii8("C:/my/svg/path-lines-BE-01.svg");
@@ -147,16 +147,40 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/my/svg/jean_victor_balin_check.svg");
     //fileName = Ascii8("C:/my/svg/PatternTest.svg");
     //fileName = Ascii8("C:/my/svg/Denis - map_v.0.2.svg");
-    
-    //fileName = Ascii8("/Users/petr/Workspace/SVG/tiger.svg");
-    //fileName = Ascii8("/Users/petr/Workspace/SVG/EiffelTower.svg");
+
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/filters.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/map-imeretinka.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/PatternTest.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tiger.svg");
+    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/gradient.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/pservers-grad-13-b.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/paths-data-06-t.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/EiffelTower.svg");
   }
+
+/*
+  {
+    TimeTicks start = TimeTicks::now();
+    SvgDocument svg[1000];
+    fprintf(stderr, "CREATE\n");
+    for (size_t i = 0; i < 1000; i++)
+      svg[i].readFromFile(fileName);
+    
+    fprintf(stderr, "DONE: Time %g\n", (TimeTicks::now() - start).getMillisecondsF());
+    fprintf(stderr, "Mem: allocated=%d used=%d\n", (int)svg[0]._gc.getAllocatedMemory(), (int)svg[0]._gc.getUsedMemory());
+    fprintf(stderr, "DESTROY\n");
+  }
+  fprintf(stderr, "DESTROYED\n");
+*/
 
   err_t err = wnd.svgDocument.readFromFile(fileName);
   SizeF size = wnd.svgDocument.getDocumentSize();
 
-  if (size.w < 800) size.w = 800;
-  if (size.h < 500) size.h = 500;
+  if (size.w < 400) size.w = 400;
+  if (size.h < 400) size.h = 400;
+
+  if (size.w > 1200) size.w = 1200;
+  if (size.h >  750) size.h =  750;
 
   wnd.setWindowSize(SizeI((int)size.w, (int)size.h));
   wnd.show();

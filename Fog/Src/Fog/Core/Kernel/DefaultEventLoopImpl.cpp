@@ -14,7 +14,7 @@
 
 // [Dependencies]
 #include <Fog/Core/Kernel/DefaultEventLoopImpl_p.h>
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 
 namespace Fog {
 
@@ -23,7 +23,7 @@ namespace Fog {
 // ============================================================================
 
 DefaultEventLoopImpl::DefaultEventLoopImpl() :
-  EventLoopImpl(FOG_STR_(APPLICATION_Core_Default)),
+  EventLoopImpl(FOG_S(APPLICATION_Core_Default)),
   _wakeUpEvent(false, false)
 {
 }

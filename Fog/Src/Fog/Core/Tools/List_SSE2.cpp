@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Face/FaceSSE2.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
@@ -17,6 +16,7 @@
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Algorithm.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/ContainerUtil.h>
 #include <Fog/Core/Tools/Cpu.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>

@@ -489,7 +489,35 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE err_t setString(const StringA& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGA, &src); }
   FOG_INLINE err_t setString(const StringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
-  FOG_INLINE err_t setString(const ManagedStringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
+  FOG_INLINE err_t setString(const InternedStringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Image]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getImage(Image& dst) const { return fog_api.var_getType(this, VAR_TYPE_IMAGE, &dst); }
+  FOG_INLINE err_t setImage(const Image& dst) { return fog_api.var_setType(this, VAR_TYPE_IMAGE, &dst); }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - ImagePalette]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getImagePalette(ImagePalette& dst) const { return fog_api.var_getType(this, VAR_TYPE_IMAGE_PALETTE, &dst); }
+  FOG_INLINE err_t setImagePalette(const ImagePalette& dst) { return fog_api.var_setType(this, VAR_TYPE_IMAGE_PALETTE, &dst); }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - ImageFilter]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getImageFilter(ImageFilter& dst) const { return fog_api.var_getType(this, VAR_TYPE_IMAGE_FILTER, &dst); }
+  FOG_INLINE err_t setImageFilter(const ImageFilter& dst) { return fog_api.var_setType(this, VAR_TYPE_IMAGE_FILTER, &dst); }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - Font]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getFont(Font& dst) const { return fog_api.var_getType(this, VAR_TYPE_FONT, &dst); }
+  FOG_INLINE err_t setFont(const Font& dst) { return fog_api.var_setType(this, VAR_TYPE_FONT, &dst); }
 
   // --------------------------------------------------------------------------
   // [Accessors - Var]
@@ -564,6 +592,11 @@ struct FOG_NO_EXPORT Var
 
   static FOG_INLINE Var fromStringA(const StringA& val) { return Var(VAR_TYPE_STRINGA, &val); }
   static FOG_INLINE Var fromStringW(const StringW& val) { return Var(VAR_TYPE_STRINGW, &val); }
+
+  static FOG_INLINE Var fromImage(const Image& val) { return Var(VAR_TYPE_IMAGE, &val); }
+  static FOG_INLINE Var fromImagePalette(const ImagePalette& val) { return Var(VAR_TYPE_IMAGE_PALETTE, &val); }
+  static FOG_INLINE Var fromImageFilter(const ImageFilter& val) { return Var(VAR_TYPE_IMAGE_FILTER, &val); }
+  static FOG_INLINE Var fromFont(const Font& val) { return Var(VAR_TYPE_FONT, &val); }
 
   // --------------------------------------------------------------------------
   // [Equality]

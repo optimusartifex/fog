@@ -457,9 +457,9 @@ struct FOG_NO_EXPORT Region
   // --------------------------------------------------------------------------
 
   //! @brief Get empty region instance.
-  static FOG_INLINE const Region& empty() { return *fog_api.region_oEmpty; }
+  static FOG_INLINE const Region& getEmptyInstance() { return *fog_api.region_oEmpty; }
   //! @brief Get infinite region instance.
-  static FOG_INLINE const Region& infinite() { return *fog_api.region_oInfinite; }
+  static FOG_INLINE const Region& getInfiniteInstance() { return *fog_api.region_oInfinite; }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]

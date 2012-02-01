@@ -26,7 +26,7 @@ namespace Fog {
 //! @brief X11 @ref UIEngineWindow implementation.
 struct FOG_API X11UIEngineWindowImpl : public UIEngineWindowImpl
 {
-  typedef UIEngineWindowImpl base;
+  typedef UIEngineWindowImpl Base;
   
   // --------------------------------------------------------------------------
   // [Construction / Destruction]

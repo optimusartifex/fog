@@ -48,7 +48,7 @@ static void* FOG_CDECL Memory_alloc(size_t size)
 
   if (FOG_IS_NULL(p) && size > 0)
   {
-    MemMgr::cleanup(MEMMGR_CLEANUP_REASON_NO_MEMORY);
+    MemMgr::cleanup(MEMORY_CLEANUP_REASON_NO_MEMORY);
     p = ::malloc(size);
   }
 
@@ -61,7 +61,7 @@ static void* FOG_CDECL Memory_calloc(size_t size)
 
   if (FOG_IS_NULL(p) && size > 0)
   {
-    MemMgr::cleanup(MEMMGR_CLEANUP_REASON_NO_MEMORY);
+    MemMgr::cleanup(MEMORY_CLEANUP_REASON_NO_MEMORY);
     p = ::calloc(size, 1);
   }
 
@@ -86,7 +86,7 @@ static void* FOG_CDECL Memory_realloc(void* p, size_t size)
   newp = ::realloc(p, size);
   if (FOG_IS_NULL(newp))
   {
-    MemMgr::cleanup(MEMMGR_CLEANUP_REASON_NO_MEMORY);
+    MemMgr::cleanup(MEMORY_CLEANUP_REASON_NO_MEMORY);
     newp = ::realloc(p, size);
   }
 

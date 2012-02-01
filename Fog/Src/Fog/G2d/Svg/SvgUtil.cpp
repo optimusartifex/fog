@@ -17,79 +17,85 @@ namespace SvgUtil {
 // [Fog::SvgUtil - Parse - Color]
 // ============================================================================
 
-FOG_API uint32_t parseColor(Color& dst, const StringW& str)
+FOG_API uint32_t parseColor(Color& dst, const StringW& src)
 {
-  const CharW* strCur = str.getData();
-  const CharW* strEnd = strCur + str.getLength();
+  const CharW* srcCur = src.getData();
+  const CharW* srcEnd = srcCur + src.getLength();
 
   // Skip spaces.
   for (;;)
   {
-    if (strCur == strEnd) return SVG_SOURCE_INVALID;
+    if (srcCur == srcEnd)
+      return SVG_SOURCE_INVALID;
 
-    if (!strCur[0].isSpace()) break;
-    strCur++;
+    if (!srcCur[0].isSpace()) break;
+    srcCur++;
   }
 
-  if (strCur + 3 <= strEnd && strCur[0] == CharW('u') &&
-                              strCur[1] == CharW('r') &&
-                              strCur[2] == CharW('l'))
+  if (srcCur + 3 <= srcEnd && srcCur[0] == CharW('u') &&
+                              srcCur[1] == CharW('r') &&
+                              srcCur[2] == CharW('l'))
   {
     dst.reset();
     return SVG_SOURCE_URI;
   }
-  if (strCur + 4 <= strEnd && strCur[0] == CharW('n') &&
-                              strCur[1] == CharW('o') &&
-                              strCur[2] == CharW('n') &&
-                              strCur[3] == CharW('e'))
+
+  if (srcCur + 4 <= srcEnd && srcCur[0] == CharW('n') &&
+                              srcCur[1] == CharW('o') &&
+                              srcCur[2] == CharW('n') &&
+                              srcCur[3] == CharW('e'))
   {
     dst.reset();
     return SVG_SOURCE_NONE;
   }
 
-  err_t err = dst.parse(StubW(strCur, (size_t)(strEnd - strCur)), COLOR_NAME_CSS);
-  if (err == ERR_OK) return SVG_SOURCE_COLOR;
+  err_t err = dst.parse(StubW(srcCur, (size_t)(srcEnd - srcCur)), COLOR_NAME_CSS);
+  if (err == ERR_OK)
+    return SVG_SOURCE_COLOR;
 
   return SVG_SOURCE_INVALID;
 }
 
+FOG_API uint32_t parseColor(Argb32& dst, const StringW& src)
+{
+  Color color(UNINITIALIZED);
+  uint32_t result = parseColor(color, src);
+
+  dst = color.getArgb32();
+  return result;
+}
+
 // ============================================================================
-// [Fog::SvgUtil - Parse - Opacity]
+// [Fog::SvgUtil - Parse - Offset]
 // ============================================================================
 
-err_t parseOpacity(float& dst, const StringW& str)
+err_t parseOffset(float& dst, const StringW& src)
 {
   size_t end;
   float d = 0.0;
-  err_t err = str.parseReal(&d, CharW('.'), &end, NULL);
+  err_t err = src.parseReal(&d, CharW('.'), &end, NULL);
 
   if (err == ERR_OK)
   {
     // Parse '%'.
-    if (end < str.getLength())
+    if (end < src.getLength())
     {
-      const CharW* strCur = str.getData();
-      const CharW* strEnd = strCur + str.getLength();
+      const CharW* srcCur = src.getData();
+      const CharW* srcEnd = srcCur + src.getLength();
 
-      strCur += end;
+      srcCur += end;
 
       do {
-        CharW c = *strCur;
-        if (c.isSpace()) continue;
-
+        CharW c = srcCur[0];
+        if (c.isSpace())
+          continue;
         if (c == CharW('%'))
-        {
           d *= 0.01f;
-          return ERR_OK;
-        }
-        else
-        {
-          return ERR_OK;
-        }
-      } while (++strCur != strEnd);
+        break;
+      } while (++srcCur != srcEnd);
     }
 
-    // Clamp value to 0.0 -> 1.0 inclusive.
+    // Clamp value to 0.0 -> 1.0, inclusive.
     dst = Math::bound<float>(d, 0.0f, 1.0f);
   }
 
@@ -97,15 +103,24 @@ err_t parseOpacity(float& dst, const StringW& str)
 }
 
 // ============================================================================
+// [Fog::SvgUtil - Parse - Opacity]
+// ============================================================================
+
+err_t parseOpacity(float& dst, const StringW& src)
+{
+  return parseOffset(dst, src);
+}
+
+// ============================================================================
 // [Fog::SvgUtil - Parse - Transform]
 // ============================================================================
 
-err_t parseTransform(TransformF& dst, const StringW& str)
+err_t parseTransform(TransformF& dst, const StringW& src)
 {
   err_t err = ERR_OK;
 
-  const CharW* strCur = str.getData();
-  const CharW* strEnd = strCur + str.getLength();
+  const CharW* srcCur = src.getData();
+  const CharW* srcEnd = srcCur + src.getLength();
   const CharW* functionName;
   size_t functionLen;
 
@@ -118,63 +133,63 @@ _Start:
   // Skip spaces.
   for (;;)
   {
-    if (strCur == strEnd) goto _End;
-    else if (strCur->isSpace()) strCur++;
+    if (srcCur == srcEnd) goto _End;
+    else if (srcCur->isSpace()) srcCur++;
     else break;
   }
 
   // Parse function name.
-  functionName = strCur;
+  functionName = srcCur;
   for (;;)
   {
-    if (strCur == strEnd) goto _End;
-    else if (strCur->isAsciiLetter()) strCur++;
+    if (srcCur == srcEnd) goto _End;
+    else if (srcCur->isAsciiLetter()) srcCur++;
     else break;
   }
-  functionLen = (size_t)(strCur - functionName);
+  functionLen = (size_t)(srcCur - functionName);
 
   // Parse '('.
-  if (strCur[0] != CharW('(')) goto _End;
-  strCur++;
+  if (srcCur[0] != CharW('(')) goto _End;
+  srcCur++;
 
   // Parse arguments.
   d_count = 0;
   for (;;)
   {
-    if (strCur == strEnd) goto _End;
+    if (srcCur == srcEnd) goto _End;
 
     // Parse number.
     size_t end;
-    if (StringUtil::parseReal(&d[d_count++], strCur, (size_t)(strEnd - strCur), CharW('.'), &end) != ERR_OK)
+    if (StringUtil::parseReal(&d[d_count++], srcCur, (size_t)(srcEnd - srcCur), CharW('.'), &end) != ERR_OK)
     {
       goto _End;
     }
 
-    strCur += end;
+    srcCur += end;
 
     // Skip ',' and move to position of the next digit.
     bool commaParsed = false;
     for (;;)
     {
-      if (strCur == strEnd) goto _End;
+      if (srcCur == srcEnd) goto _End;
 
-      if (strCur->isSpace())
+      if (srcCur->isSpace())
       {
-        strCur++;
+        srcCur++;
       }
-      else if (strCur[0] == CharW(','))
+      else if (srcCur[0] == CharW(','))
       {
-        strCur++;
+        srcCur++;
         if (commaParsed) goto _End;
         commaParsed = true;
       }
-      else if (strCur[0] == CharW(')'))
+      else if (srcCur[0] == CharW(')'))
       {
-        strCur++;
+        srcCur++;
         if (commaParsed) goto _End;
         goto _Done;
       }
-      else if (strCur[0].isAsciiDigit() || strCur[0] == CharW('-') || strCur[0] == CharW('+'))
+      else if (srcCur[0].isAsciiDigit() || srcCur[0] == CharW('-') || srcCur[0] == CharW('+'))
       {
         break;
       }
@@ -191,14 +206,17 @@ _Done:
   // matrix() function.
   if (functionLen == 6 && StringUtil::eq(functionName, "matrix", 6))
   {
-    if (d_count != 6) goto _End;
+    if (d_count != 6)
+      goto _End;
 
     dst.transform(TransformF(d[0], d[1], d[2], d[3], d[4], d[5]), MATRIX_ORDER_PREPEND);
   }
   // translate() function.
   else if (functionLen == 9 && StringUtil::eq(functionName, "translate", 9))
   {
-    if (d_count != 1 && d_count != 2) goto _End;
+    if (d_count != 1 && d_count != 2) 
+      goto _End;
+
     // If ty is not provided, it's assumed to be zero.
     if (d_count == 1) d[1] = 0.0f;
     dst.translate(PointF(d[0], d[1]), MATRIX_ORDER_PREPEND);
@@ -206,7 +224,9 @@ _Done:
   // scale() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "scale", 5))
   {
-    if (d_count != 1 && d_count != 2) goto _End;
+    if (d_count != 1 && d_count != 2)
+      goto _End;
+
     // If sy is not provided, it's assumed to be equal to sx.
     if (d_count == 1) d[1] = d[0];
     dst.scale(PointF(d[0], d[1]), MATRIX_ORDER_PREPEND);
@@ -214,21 +234,31 @@ _Done:
   // rotate() function.
   else if (functionLen == 6 && StringUtil::eq(functionName, "rotate", 6))
   {
-    if (d_count != 1 && d_count != 3) goto _End;
-    if (d_count == 3) dst.translate(PointF(d[1], d[2]), MATRIX_ORDER_PREPEND);
+    if (d_count != 1 && d_count != 3)
+      goto _End;
+
+    if (d_count == 3)
+      dst.translate(PointF(d[1], d[2]), MATRIX_ORDER_PREPEND);
+
     dst.rotate(Math::deg2rad(d[0]), MATRIX_ORDER_PREPEND);
-    if (d_count == 3) dst.translate(PointF(-d[1], -d[2]), MATRIX_ORDER_PREPEND);
+
+    if (d_count == 3)
+      dst.translate(PointF(-d[1], -d[2]), MATRIX_ORDER_PREPEND);
   }
   // skewX() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "skewX", 5))
   {
-    if (d_count != 1) goto _End;
+    if (d_count != 1)
+      goto _End;
+
     dst.skew(PointF(Math::deg2rad(d[0]), 0.0f), MATRIX_ORDER_PREPEND);
   }
   // skewY() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "skewY", 5))
   {
-    if (d_count != 1) goto _End;
+    if (d_count != 1)
+      goto _End;
+
     dst.skew(PointF(0.0f, Math::deg2rad(d[0])), MATRIX_ORDER_PREPEND);
   }
   else
@@ -239,10 +269,10 @@ _Done:
   // Skip spaces.
   for (;;)
   {
-    if (strCur == strEnd) break;
+    if (srcCur == srcEnd) break;
 
-    if (strCur->isSpace())
-      strCur++;
+    if (srcCur->isSpace())
+      srcCur++;
     else
       goto _Start;
   }
@@ -269,24 +299,25 @@ static const char svgUnitNames[] =
   "ex";
 // ${UNIT:END}
 
-err_t parseCoord(CoordF& coord, const StringW& str)
+err_t parseCoord(CoordF& coord, const StringW& src)
 {
   float d = 0.0f;
   uint32_t unit = UNIT_PX;
 
   size_t end;
-  err_t err = str.parseReal(&d, CharW('.'), &end, NULL);
+  err_t err = src.parseReal(&d, CharW('.'), &end, NULL);
 
   if (err == ERR_OK)
   {
-    if (end < str.getLength())
+    if (end < src.getLength())
     {
-      size_t end2 = str.indexOf(Range(end, DETECT_LENGTH), CharW(' '), CASE_SENSITIVE);
-      StubW spec(str.getData() + end, (end2 == INVALID_INDEX ? str.getLength() : end2) - end);
+      size_t end2 = src.indexOf(Range(end, DETECT_LENGTH), CharW(' '), CASE_SENSITIVE);
+      StubW spec(src.getData() + end, (end2 == INVALID_INDEX ? src.getLength() : end2) - end);
 
       if (spec.getLength() == 1)
       {
-        if (spec[0] == CharW('%')) unit = UNIT_PERCENTAGE;
+        if (spec[0] == CharW('%'))
+          unit = UNIT_PERCENTAGE;
       }
       else if (spec.getLength() == 2)
       {
@@ -303,7 +334,8 @@ err_t parseCoord(CoordF& coord, const StringW& str)
     }
   }
 
-  if (unit == UNIT_PERCENTAGE) d *= 0.01f;
+  if (unit == UNIT_PERCENTAGE)
+    d *= 0.01f;
 
   coord.value = (float)d;
   coord.unit = unit;
@@ -315,40 +347,40 @@ err_t parseCoord(CoordF& coord, const StringW& str)
 // [Fog::SvgUtil - Parse - ViewBox]
 // ============================================================================
 
-err_t parseViewBox(BoxF& box, const StringW& str)
+err_t parseViewBox(BoxF& box, const StringW& src)
 {
   err_t err = ERR_OK;
 
-  const CharW* strCur = str.getData();
-  const CharW* strEnd = strCur + str.getLength();
+  const CharW* srcCur = src.getData();
+  const CharW* srcEnd = srcCur + src.getLength();
 
   float coords[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
   uint32_t position = 0;
   size_t numEnd;
 
   // Finished?
-  if (strCur == strEnd) goto _Bail;
+  if (srcCur == srcEnd) goto _Bail;
 
   // Parse coordinates.
   for (position = 0; position < 4; position++)
   {
     // Skip spaces.
-    while (strCur->isSpace())
+    while (srcCur->isSpace())
     {
-      if (++strCur == strEnd) goto _Bail;
+      if (++srcCur == srcEnd) goto _Bail;
     }
 
     // Parse number.
-    err = StringUtil::parseReal(&coords[position], strCur, (size_t)(strEnd - strCur), CharW('.'), &numEnd);
+    err = StringUtil::parseReal(&coords[position], srcCur, (size_t)(srcEnd - srcCur), CharW('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
-    strCur += numEnd;
-    if (strCur == strEnd) break;
+    srcCur += numEnd;
+    if (srcCur == srcEnd) break;
 
     // Parse optional comma.
-    if (*strCur == CharW(','))
+    if (*srcCur == CharW(','))
     {
-      if (++strCur == strEnd) break;
+      if (++srcCur == srcEnd) break;
     }
   }
 
@@ -363,13 +395,13 @@ _Bail:
 // [Fog::SvgUtil - Parse - Points]
 // ============================================================================
 
-err_t parsePoints(PathF& dst, const StringW& str, bool closePath)
+err_t parsePoints(PathF& dst, const StringW& src, bool closePath)
 {
   err_t err = ERR_OK;
   bool first = true;
 
-  const CharW* strCur = str.getData();
-  const CharW* strEnd = strCur + str.getLength();
+  const CharW* srcCur = src.getData();
+  const CharW* srcEnd = srcCur + src.getLength();
 
   float coords[2];
   uint32_t position = 0;
@@ -378,20 +410,20 @@ err_t parsePoints(PathF& dst, const StringW& str, bool closePath)
   dst.clear();
 
   // Finished?
-  if (strCur == strEnd) goto _Bail;
+  if (srcCur == srcEnd) goto _Bail;
 
   // Parse coordinates.
   for (;;)
   {
     // Skip spaces.
-    while (strCur->isSpace())
+    while (srcCur->isSpace())
     {
-      if (++strCur == strEnd) goto _Bail;
+      if (++srcCur == srcEnd) goto _Bail;
     }
 
     // Parse number.
     size_t numEnd;
-    err = StringUtil::parseReal(&coords[position], strCur, (size_t)(strEnd - strCur), CharW('.'), &numEnd);
+    err = StringUtil::parseReal(&coords[position], srcCur, (size_t)(srcEnd - srcCur), CharW('.'), &numEnd);
     if (FOG_IS_ERROR(err)) goto _Bail;
 
     if (++position == 2)
@@ -410,12 +442,12 @@ err_t parsePoints(PathF& dst, const StringW& str, bool closePath)
       position = 0;
     }
 
-    strCur += numEnd;
-    if (strCur == strEnd) break;
+    srcCur += numEnd;
+    if (srcCur == srcEnd) break;
 
-    if (*strCur == CharW(','))
+    if (*srcCur == CharW(','))
     {
-      if (++strCur == strEnd) break;
+      if (++srcCur == srcEnd) break;
     }
   }
 
@@ -431,12 +463,12 @@ _Bail:
 // [Fog::SvgUtil - Parse - Path]
 // ============================================================================
 
-err_t parsePath(PathF& dst, const StringW& str)
+err_t parsePath(PathF& dst, const StringW& src)
 {
   err_t err = ERR_OK;
 
-  const CharW* strCur = str.getData();
-  const CharW* strEnd = strCur + str.getLength();
+  const CharW* srcCur = src.getData();
+  const CharW* srcEnd = srcCur + src.getLength();
 
   uint32_t command = 0;
   uint32_t position;
@@ -453,23 +485,23 @@ err_t parsePath(PathF& dst, const StringW& str)
   for (;;)
   {
     // Finished?
-    if (strCur == strEnd) goto _Bail;
+    if (srcCur == srcEnd) goto _Bail;
 
     // Skip spaces.
-    while (strCur->isSpace())
+    while (srcCur->isSpace())
     {
-      if (++strCur == strEnd) goto _Bail;
+      if (++srcCur == srcEnd) goto _Bail;
     }
 
     // Parse command.
-    if (!strCur->isAsciiLetter())
+    if (!srcCur->isAsciiLetter())
     {
       if (command == 0) goto _Bail;
     }
     else
     {
-      command = strCur->getValue();
-      if (++strCur == strEnd)
+      command = srcCur->getValue();
+      if (++srcCur == srcEnd)
       {
         if (command == 'Z' || command == 'z') goto _Close;
         goto _Bail;
@@ -497,23 +529,23 @@ err_t parsePath(PathF& dst, const StringW& str)
     for (position = 0; position < count; position++)
     {
       // Skip spaces.
-      while (strCur->isSpace())
+      while (srcCur->isSpace())
       {
-        if (++strCur == strEnd) goto _Bail;
+        if (++srcCur == srcEnd) goto _Bail;
       }
 
       // Parse number.
       size_t numEnd;
 
-      err = StringUtil::parseReal(&coords[position], strCur, (size_t)(strEnd - strCur), CharW('.'), &numEnd);
+      err = StringUtil::parseReal(&coords[position], srcCur, (size_t)(srcEnd - srcCur), CharW('.'), &numEnd);
       if (FOG_IS_ERROR(err)) goto _Bail;
 
-      strCur += numEnd;
-      if (strCur == strEnd) break;
+      srcCur += numEnd;
+      if (srcCur == srcEnd) break;
 
-      if (*strCur == CharW(','))
+      if (*srcCur == CharW(','))
       {
-        if (++strCur == strEnd) break;
+        if (++srcCur == srcEnd) break;
       }
     }
 
@@ -524,7 +556,6 @@ err_t parsePath(PathF& dst, const StringW& str)
       // ----------------------------------------------------------------------
 
       case 'a':
-        coords[0] += last.x; coords[1] += last.y;
         coords[5] += last.x; coords[6] += last.y;
         // ... Fall through ...
 
@@ -700,6 +731,105 @@ _Bail:
 }
 
 // ============================================================================
+// [Fog::SvgUtil - Parse - CSSStyle]
+// ============================================================================
+
+err_t parseCSSStyle(const StringW& src, CSSStyleHandlerFunc func, void* ctx)
+{
+  // Parse all "name: value;" pairs.
+  const CharW* strCur = src.getData();
+  const CharW* strEnd = strCur + src.getLength();
+
+  err_t err = ERR_OK;
+  
+  StringW styleName;
+  StringW styleValue;
+
+  for (;;)
+  {
+    if (strCur == strEnd)
+      break;
+
+    const CharW* styleNameBegin;
+    const CharW* styleNameEnd;
+    const CharW* styleValueBegin;
+    const CharW* styleValueEnd;
+
+    // Skip spaces.
+    while (strCur->isSpace())
+    {
+      if (++strCur == strEnd)
+        goto _Bail;
+    }
+
+    // Parse style name.
+    styleNameBegin = strCur;
+    while (*strCur != CharW(':') && !strCur->isSpace())
+    {
+      if (++strCur == strEnd)
+        goto _Bail;
+    }
+    styleNameEnd = strCur;
+
+    if (strCur->isSpace())
+    {
+      while (*strCur != CharW(':'))
+      {
+        if (++strCur == strEnd)
+          goto _Bail;
+      }
+    }
+
+    // Skip ':'.
+    if (++strCur == strEnd)
+      goto _Bail;
+
+    // Skip spaces.
+    while (strCur->isSpace())
+    {
+      if (++strCur == strEnd)
+        goto _Bail;
+    }
+
+    // Parse style value.
+    styleValueBegin = strCur;
+    while (*strCur != CharW(';'))
+    {
+      if (++strCur == strEnd)
+        break;
+    }
+    styleValueEnd = strCur;
+
+    // Remove trailing spaces.
+    //
+    // We can't cause buffer underflow, because we already parsed ':' that's
+    // not space.
+    while (styleValueEnd[-1].isSpace())
+      styleValueEnd--;
+
+    // Skip ';'.
+    if (strCur != strEnd)
+      strCur++;
+
+    // TODO: What about errors?
+    err = styleName.set(StubW(styleNameBegin, size_t(styleNameEnd - styleNameBegin)));
+    if (FOG_IS_ERROR(err))
+      continue;
+
+    err = styleValue.set(StubW(styleValueBegin, size_t(styleValueEnd - styleValueBegin)));
+    if (FOG_IS_ERROR(err))
+      continue;
+
+    err = func(ctx, &styleName, &styleValue);
+    if (FOG_IS_ERROR(err))
+      continue;
+  }
+
+_Bail:
+  return err;
+}
+
+// ============================================================================
 // [Fog::SvgUtil - Serialize - Color]
 // ============================================================================
 
@@ -761,23 +891,180 @@ err_t serializeColor(StringW& dst, const Color& color)
   }
 }
 
+err_t serializeColor(StringW& dst, const Argb32& argb32)
+{
+  return dst.appendInt(argb32.getPacked32() & 0x00FFFFFF, FormatInt(16, NO_FLAGS, 6));
+}
+
+// ============================================================================
+// [Fog::SvgUtil - Serialize - Offset]
+// ============================================================================
+
+err_t serializeOffset(StringW& dst, float src)
+{
+  FOG_RETURN_ON_ERROR(dst.appendFormat("%g", src));
+  
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgUtil - Serialize - Opacity]
+// ============================================================================
+
+err_t serializeOpacity(StringW& dst, float src)
+{
+  return serializeOffset(dst, src);
+}
+
 // ============================================================================
 // [Fog::SvgUtil - Serialize - Coord]
 // ============================================================================
 
-err_t serializeCoord(StringW& dst, const CoordF& coord)
+err_t serializeCoord(StringW& dst, const CoordF& src)
 {
-  float val = coord.value;
+  float val = src.value;
 
-  if (coord.unit == UNIT_PERCENTAGE) val *= 100.0f;
-  FOG_RETURN_ON_ERROR(dst.appendReal(coord.value));
+  if (src.unit == UNIT_PERCENTAGE) val *= 100.0f;
+  FOG_RETURN_ON_ERROR(dst.appendReal(src.value));
 
-  if (coord.unit < UNIT_COUNT && svgUnitNames[coord.unit * 2] != '\0')
-    FOG_RETURN_ON_ERROR(dst.append(Ascii8(&svgUnitNames[coord.unit * 2], 2)));
-  else if (coord.unit == UNIT_PERCENTAGE)
+  if (src.unit < UNIT_COUNT && svgUnitNames[src.unit * 2] != '\0')
+    FOG_RETURN_ON_ERROR(dst.append(Ascii8(&svgUnitNames[src.unit * 2], 2)));
+  else if (src.unit == UNIT_PERCENTAGE)
     FOG_RETURN_ON_ERROR(dst.append(CharW('%')));
 
   return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgUtil - Serialize - ViewBox]
+// ============================================================================
+
+err_t serializeViewBox(StringW& dst, const BoxF& src)
+{
+  if (src.isValid())
+  {
+    FOG_RETURN_ON_ERROR(dst.appendFormat("%g %g %g %g", src.x0, src.y0, src.x1, src.y1));
+  }
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgUtil - Serialize - Path]
+// ============================================================================
+
+err_t serializePath(StringW& dst, const PathF& src)
+{
+  size_t pathLength = src.getLength();
+  size_t i = 0;
+  
+  const uint8_t* cmd = src.getCommands();
+  const PointF* pts = src.getVertices();
+
+  bool isFirst = true;
+
+  while (i < pathLength)
+  {
+    if (!isFirst)
+      dst.append(CharW(' '));
+    else
+      isFirst = false;
+      
+    switch (cmd[0])
+    {
+      case PATH_CMD_MOVE_TO:
+        FOG_RETURN_ON_ERROR(dst.appendFormat("M%g,%g", 
+          pts[0].x, pts[0].y));
+
+        i++;
+        cmd++;
+        pts++;
+        break;
+      
+      case PATH_CMD_LINE_TO:
+        FOG_RETURN_ON_ERROR(dst.appendFormat("L%g,%g",
+          pts[0].x, pts[0].y));
+
+        i++;
+        cmd++;
+        pts++;
+        break;
+      
+      case PATH_CMD_QUAD_TO:
+        if (i + 2 > pathLength)
+          return ERR_RT_INVALID_STATE;
+
+        FOG_RETURN_ON_ERROR(dst.appendFormat("Q%g,%g %g,%g",
+          pts[0].x, pts[0].y,
+          pts[1].x, pts[1].y));
+
+        i += 2;
+        cmd += 2;
+        pts += 2;
+        break;
+      
+      case PATH_CMD_CUBIC_TO:
+        if (i + 3 > pathLength)
+          return ERR_RT_INVALID_STATE;
+
+        FOG_RETURN_ON_ERROR(dst.appendFormat("C%g,%g %g,%g %g,%g",
+          pts[0].x, pts[0].y,
+          pts[1].x, pts[1].y,
+          pts[2].x, pts[2].y));
+
+        i += 3;
+        cmd += 3;
+        pts += 3;
+        break;
+
+      case PATH_CMD_CLOSE:
+        FOG_RETURN_ON_ERROR(dst.append(CharW('Z')));
+        i++;
+        cmd++;
+        pts++;
+        break;
+
+      default:
+        return ERR_RT_INVALID_STATE;
+    }
+  }
+  
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgUtil - Serialize - Transform]
+// ============================================================================
+
+err_t serializeTransform(StringW& dst, const TransformF& src)
+{
+  switch (src.getType())
+  {
+    case TRANSFORM_TYPE_IDENTITY:
+      return ERR_OK;
+
+    case TRANSFORM_TYPE_TRANSLATION:
+      if (Math::isFuzzyZero(src._21))
+        return dst.appendFormat("translate(%g)", src._20);
+      else
+        return dst.appendFormat("translate(%g %g)", src._20, src._21);
+
+    case TRANSFORM_TYPE_SCALING:
+      if (Math::isFuzzyZero(src._20) && Math::isFuzzyZero(src._21))
+      {
+        if (Math::isFuzzyEq(src._00, src._11))
+          return dst.appendFormat("scale(%g)", src._00);
+        else
+          return dst.appendFormat("scale(%g %g)", src._00, src._11);
+      }
+      // ... Fall through ...
+
+    default:
+      return dst.appendFormat("matrix(%g %g %g %g %g %g)",
+        src._00, src._01,
+        src._10, src._11,
+        src._20, src._21);
+  }
 }
 
 } // SvgUtil namespace

@@ -17,7 +17,7 @@
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/OS/Library.h>
 #include <Fog/Core/OS/WinCom.h>
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Imaging/Codecs/GdipCodec_p.h>
@@ -99,7 +99,7 @@ static void _GdipCodec_clearCommonParams(GdipCommonParams* params, uint32_t stre
   }
 }
 
-static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t streamType, const ManagedStringW& name, Var& dst)
+static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t streamType, const InternedStringW& name, Var& dst)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -107,7 +107,7 @@ static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t 
   switch (streamType)
   {
     case IMAGE_STREAM_JPEG:
-      if (name == FOG_STR_(IMAGE_CODEC_quality))
+      if (name == FOG_S(quality))
       {
         return dst.setInt(params->jpeg.quality);
       }
@@ -121,7 +121,7 @@ static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t 
   return err;
 }
 
-static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t streamType, const ManagedStringW& name, const Var& src)
+static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t streamType, const InternedStringW& name, const Var& src)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -129,7 +129,7 @@ static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t stream
   switch (streamType)
   {
     case IMAGE_STREAM_JPEG:
-      if (name == FOG_STR_(IMAGE_CODEC_quality))
+      if (name == FOG_S(quality))
         return src.getInt(params->jpeg.quality, 0, 100);
       break;
     case IMAGE_STREAM_PNG:
@@ -208,15 +208,15 @@ GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
   switch (_streamType)
   {
     case IMAGE_STREAM_JPEG:
-      _name = FOG_STR_(IMAGE_FILE_JPEG);
+      _name = FOG_S(JPEG);
       _gdipMime = L"image/jpeg";
       break;
     case IMAGE_STREAM_PNG:
-      _name = FOG_STR_(IMAGE_FILE_PNG);
+      _name = FOG_S(PNG);
       _gdipMime = L"image/png";
       break;
     case IMAGE_STREAM_TIFF:
-      _name = FOG_STR_(IMAGE_FILE_TIFF);
+      _name = FOG_S(TIFF);
       _gdipMime = L"image/tiff";
       break;
   }
@@ -229,19 +229,19 @@ GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
   {
     case IMAGE_STREAM_JPEG:
       _imageExtensions.reserve(4);
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpg));
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jpeg));
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfi));
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_jfif));
+      _imageExtensions.append(FOG_S(jpg));
+      _imageExtensions.append(FOG_S(jpeg));
+      _imageExtensions.append(FOG_S(jfi));
+      _imageExtensions.append(FOG_S(jfif));
       break;
     case IMAGE_STREAM_PNG:
       _imageExtensions.reserve(1);
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_png));
+      _imageExtensions.append(FOG_S(png));
       break;
     case IMAGE_STREAM_TIFF:
       _imageExtensions.reserve(2);
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_tif));
-      _imageExtensions.append(FOG_STR_(IMAGE_EXT_tiff));
+      _imageExtensions.append(FOG_S(tif));
+      _imageExtensions.append(FOG_S(tiff));
       break;
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -349,7 +349,7 @@ GdipDecoder::~GdipDecoder()
 void GdipDecoder::attachStream(Stream& stream)
 {
   WinCOM::makeIStream(&_istream, stream);
-  base::attachStream(stream);
+  Base::attachStream(stream);
 }
 
 void GdipDecoder::detachStream()
@@ -366,7 +366,7 @@ void GdipDecoder::detachStream()
     _istream = NULL;
   }
 
-  base::detachStream();
+  Base::detachStream();
 }
 
 // ===========================================================================
@@ -469,20 +469,20 @@ _End:
 // [Fog::GdipDecoder - Properties]
 // ===========================================================================
 
-err_t GdipDecoder::_getProperty(const ManagedStringW& name, Var& dst) const
+err_t GdipDecoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
   err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::_getProperty(name, dst);
+  return Base::_getProperty(name, dst);
 }
 
-err_t GdipDecoder::_setProperty(const ManagedStringW& name, const Var& src)
+err_t GdipDecoder::_setProperty(const InternedStringW& name, const Var& src)
 {
   err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::_setProperty(name, src);
+  return Base::_setProperty(name, src);
 }
 
 // ===========================================================================
@@ -508,7 +508,7 @@ GdipEncoder::~GdipEncoder()
 void GdipEncoder::attachStream(Stream& stream)
 {
   WinCOM::makeIStream(&_istream, stream);
-  base::attachStream(stream);
+  Base::attachStream(stream);
 }
 
 void GdipEncoder::detachStream()
@@ -519,7 +519,7 @@ void GdipEncoder::detachStream()
     _istream = NULL;
   }
 
-  base::detachStream();
+  Base::detachStream();
 }
 
 // ===========================================================================
@@ -623,20 +623,20 @@ _End:
 // [Fog::GdipEncoder - Properties]
 // ===========================================================================
 
-err_t GdipEncoder::_getProperty(const ManagedStringW& name, Var& dst) const
+err_t GdipEncoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
   err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::_getProperty(name, dst);
+  return Base::_getProperty(name, dst);
 }
 
-err_t GdipEncoder::_setProperty(const ManagedStringW& name, const Var& src)
+err_t GdipEncoder::_setProperty(const InternedStringW& name, const Var& src)
 {
   err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
   if (err != (err_t)0xFFFFFFFF) return err;
 
-  return base::_setProperty(name, src);
+  return Base::_setProperty(name, src);
 }
 
 // ===========================================================================

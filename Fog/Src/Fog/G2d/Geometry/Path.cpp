@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Constants.h>
@@ -19,6 +18,7 @@
 #include <Fog/Core/Math/Solve.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
+#include <Fog/Core/Tools/ContainerUtil.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/Core/Tools/VarId.h>
 #include <Fog/G2d/Geometry/Box.h>
@@ -329,7 +329,7 @@ static size_t FOG_CDECL PathT_prepare(NumT_(Path)* self, uint32_t cntOp, size_t 
   else
   {
     size_t optimalCapacity =
-      CollectionUtil::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), start, start + count);
+      ContainerUtil::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), start, start + count);
 
     NumT_(PathData)* newd = PathT_dCreate<NumT>(optimalCapacity);
     if (FOG_IS_NULL(newd)) return INVALID_INDEX;
@@ -370,7 +370,7 @@ static size_t FOG_CDECL PathT_add(NumT_(Path)* self, size_t count)
   else
   {
     size_t optimalCapacity =
-      CollectionUtil::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), length, length + count);
+      ContainerUtil::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), length, length + count);
 
     NumT_(PathData)* newd = PathT_dCreate<NumT>(optimalCapacity);
     if (FOG_IS_NULL(newd)) return INVALID_INDEX;
@@ -727,7 +727,7 @@ static err_t FOG_CDECL PathT_smoothQuadTo(
     commands[0] = PATH_CMD_QUAD_TO;
     commands[1] = PATH_CMD_DATA;
 
-    if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
+    if (_length >= 2 && PathCmd::isQuadTo(commands[-2]))
     {
       pt1 += pt1;
       pt1 -= vertices[-2];
@@ -751,7 +751,7 @@ static err_t FOG_CDECL PathT_smoothQuadToRel(
     commands[1] = PATH_CMD_DATA;
     vertices[1] = pt2[0] + pt1;
 
-    if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
+    if (_length >= 2 && PathCmd::isQuadTo(commands[-2]))
     {
       pt1 += pt1;
       pt1 -= vertices[-2];
@@ -819,7 +819,7 @@ static err_t FOG_CDECL PathT_smoothCubicTo(
     commands[1] = PATH_CMD_DATA;
     commands[2] = PATH_CMD_DATA;
 
-    if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
+    if (_length >= 3 && PathCmd::isCubicTo(commands[-3]))
     {
       pt1 += pt1;
       pt1 -= vertices[-2];
@@ -847,7 +847,7 @@ static err_t FOG_CDECL PathT_smoothCubicToRel(
     vertices[1] = pt2[0] + pt1;
     vertices[2] = pt3[0] + pt1;
 
-    if (_length >= 2 && PathCmd::isQuadOrCubicTo(commands[-2]))
+    if (_length >= 3 && PathCmd::isCubicTo(commands[-3]))
     {
       pt1 += pt1;
       pt1 -= vertices[-2];

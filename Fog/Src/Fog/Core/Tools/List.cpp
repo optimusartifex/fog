@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/MathVec.h>
@@ -17,6 +16,7 @@
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Algorithm.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/ContainerUtil.h>
 #include <Fog/Core/Tools/Cpu.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/ListReal.h>
@@ -624,7 +624,7 @@ static err_t FOG_CDECL List_Simple_growLeft(ListUntyped* self, size_t szItemT, s
     return ERR_RT_OUT_OF_MEMORY;
 
   size_t after = before + length;
-  size_t optimal = CollectionUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, before, after);
+  size_t optimal = ContainerUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, before, after);
 
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
@@ -662,7 +662,7 @@ static err_t FOG_CDECL List_Simple_growRight(ListUntyped* self, size_t szItemT, 
     return ERR_RT_OUT_OF_MEMORY;
 
   size_t after = before + length;
-  size_t optimal = CollectionUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, before, after);
+  size_t optimal = ContainerUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, before, after);
 
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
@@ -886,7 +886,7 @@ static err_t FOG_CDECL List_Simple_insertItem(ListUntyped* self, size_t szItemT,
 _CreateNew:
   {
     size_t after = length + 1;
-    size_t grow = CollectionUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, length, after);
+    size_t grow = ContainerUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, length, after);
 
     if (grow == 0)
       return ERR_RT_OUT_OF_MEMORY;
@@ -1543,7 +1543,7 @@ static void* FOG_CDECL List_Unknown_prepareInsertItem(ListUntyped* self, const L
 _CreateNew:
   {
     size_t after = length + 1;
-    size_t grow = CollectionUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, length, after);
+    size_t grow = ContainerUtil::getGrowCapacity(sizeof(ListUntypedData), szItemT, length, after);
 
     if (grow == 0)
       return NULL;
@@ -1598,7 +1598,7 @@ static err_t FOG_CDECL List_Unknown_growLeft(ListUntyped* self, const ListUntype
     return ERR_RT_OUT_OF_MEMORY;
 
   size_t after = before + length;
-  size_t optimal = CollectionUtil::getGrowCapacity(sizeof(ListUntypedData), v->szItemT, before, after);
+  size_t optimal = ContainerUtil::getGrowCapacity(sizeof(ListUntypedData), v->szItemT, before, after);
 
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;
@@ -1646,7 +1646,7 @@ static err_t FOG_CDECL List_Unknown_growRight(ListUntyped* self, const ListUntyp
     return ERR_RT_OUT_OF_MEMORY;
 
   size_t after = before + length;
-  size_t optimal = CollectionUtil::getGrowCapacity(sizeof(ListUntypedData), v->szItemT, before, after);
+  size_t optimal = ContainerUtil::getGrowCapacity(sizeof(ListUntypedData), v->szItemT, before, after);
 
   if (optimal == 0)
     return ERR_RT_OUT_OF_MEMORY;

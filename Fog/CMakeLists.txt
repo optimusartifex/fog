@@ -591,14 +591,15 @@ Set(FOG_CORE_CPP_HEADERS
   Src/Fog/Core/C++/StdOS.h
 )
 
-# [Fog/Core/Collection]
-Set(FOG_CORE_COLLECTION_SOURCES
-  Src/Fog/Core/Collection/Util.cpp
+# [Fog/Core/Dom]
+Set(FOG_CORE_DOM_SOURCES
+  Src/Fog/Core/Dom/Dom.cpp
+  Src/Fog/Core/Dom/DomResourceManager.cpp
 )
 
-Set(FOG_CORE_COLLECTION_HEADERS
-  Src/Fog/Core/Collection/StackP.h
-  Src/Fog/Core/Collection/Util.h
+Set(FOG_CORE_DOM_HEADERS
+  Src/Fog/Core/Dom/Dom.h
+  Src/Fog/Core/Dom/DomResourceManager.h
 )
 
 # [Fog/Core/Face]
@@ -654,6 +655,7 @@ Set(FOG_CORE_GLOBAL_HEADERS
 # [Fog/Core/Kernel]
 Set(FOG_CORE_KERNEL_SOURCES
   Src/Fog/Core/Kernel/Application.cpp
+  Src/Fog/Core/Kernel/CoreObj.cpp
   Src/Fog/Core/Kernel/DefaultEventLoopImpl.cpp
   Src/Fog/Core/Kernel/Event.cpp
   Src/Fog/Core/Kernel/EventLoop.cpp
@@ -667,6 +669,7 @@ Set(FOG_CORE_KERNEL_SOURCES
 
 Set(FOG_CORE_KERNEL_HEADERS
   Src/Fog/Core/Kernel/Application.h
+  Src/Fog/Core/Kernel/CoreObj.h
   Src/Fog/Core/Kernel/DefaultEventLoopImpl_p.h
   Src/Fog/Core/Kernel/Delegate.h
   Src/Fog/Core/Kernel/Event.h
@@ -675,6 +678,7 @@ Set(FOG_CORE_KERNEL_HEADERS
   Src/Fog/Core/Kernel/EventLoopObserver.h
   Src/Fog/Core/Kernel/EventLoopObserverList.h
   Src/Fog/Core/Kernel/Object.h
+  Src/Fog/Core/Kernel/Property.h
   Src/Fog/Core/Kernel/Task.h
   Src/Fog/Core/Kernel/Timer.h
 )
@@ -727,6 +731,7 @@ Set(FOG_CORE_MATH_HEADERS
 Set(FOG_CORE_MEMORY_SOURCES
   Src/Fog/Core/Memory/MemDebug.cpp
   Src/Fog/Core/Memory/MemBlockAllocator.cpp
+  Src/Fog/Core/Memory/MemGCAllocator.cpp
   Src/Fog/Core/Memory/MemMgr.cpp
   Src/Fog/Core/Memory/MemOps.cpp
   Src/Fog/Core/Memory/MemPool.cpp
@@ -739,6 +744,7 @@ Set(FOG_CORE_MEMORY_HEADERS
   Src/Fog/Core/Memory/MemBuffer.h
   Src/Fog/Core/Memory/MemBufferTmp_p.h
   Src/Fog/Core/Memory/MemDebug_p.h
+  Src/Fog/Core/Memory/MemGCAllocator.h
   Src/Fog/Core/Memory/MemMgr.h
   Src/Fog/Core/Memory/MemOps.h
   Src/Fog/Core/Memory/MemPool.h
@@ -826,14 +832,15 @@ Set(FOG_CORE_TOOLS_SOURCES
   Src/Fog/Core/Tools/Char.cpp
   Src/Fog/Core/Tools/CharData.cpp
   Src/Fog/Core/Tools/CharUtil.cpp
+  Src/Fog/Core/Tools/ContainerUtil.cpp
   Src/Fog/Core/Tools/Cpu.cpp
   Src/Fog/Core/Tools/Date.cpp
   Src/Fog/Core/Tools/Hash.cpp
   Src/Fog/Core/Tools/HashUtil.cpp
+  Src/Fog/Core/Tools/InternedString.cpp
   Src/Fog/Core/Tools/List.cpp
   Src/Fog/Core/Tools/Locale.cpp
   Src/Fog/Core/Tools/Logger.cpp
-  Src/Fog/Core/Tools/ManagedString.cpp
   Src/Fog/Core/Tools/Random.cpp
   Src/Fog/Core/Tools/RegExp.cpp
   Src/Fog/Core/Tools/Stream.cpp
@@ -846,6 +853,8 @@ Set(FOG_CORE_TOOLS_SOURCES
   Src/Fog/Core/Tools/TextIterator.cpp
   Src/Fog/Core/Tools/Time.cpp
   Src/Fog/Core/Tools/Var.cpp
+  Src/Fog/Core/Tools/XmlEntity.cpp
+  Src/Fog/Core/Tools/XmlIO.cpp
 )
 
 Set(FOG_CORE_TOOLS_HEADERS
@@ -854,6 +863,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Src/Fog/Core/Tools/CharData.h
   Src/Fog/Core/Tools/CharUtil.h
   Src/Fog/Core/Tools/CharUtilPrivate_p.h
+  Src/Fog/Core/Tools/ContainerUtil.h
   Src/Fog/Core/Tools/Cpu.h
   Src/Fog/Core/Tools/Date.h
   Src/Fog/Core/Tools/Hash.h
@@ -861,6 +871,7 @@ Set(FOG_CORE_TOOLS_HEADERS
   Src/Fog/Core/Tools/HashUInt.h
   Src/Fog/Core/Tools/HashUntyped.h
   Src/Fog/Core/Tools/HashUtil.h
+  Src/Fog/Core/Tools/InternedString.h
   Src/Fog/Core/Tools/List.h
   Src/Fog/Core/Tools/ListReal.h
   Src/Fog/Core/Tools/ListString.h
@@ -868,7 +879,6 @@ Set(FOG_CORE_TOOLS_HEADERS
   Src/Fog/Core/Tools/ListVar.h
   Src/Fog/Core/Tools/Locale.h
   Src/Fog/Core/Tools/Logger.h
-  Src/Fog/Core/Tools/ManagedString.h
   Src/Fog/Core/Tools/Random.h
   Src/Fog/Core/Tools/Range.h
   Src/Fog/Core/Tools/RegExp.h
@@ -886,53 +896,18 @@ Set(FOG_CORE_TOOLS_HEADERS
   Src/Fog/Core/Tools/Time.h
   Src/Fog/Core/Tools/Var.h
   Src/Fog/Core/Tools/VarId.h
+  Src/Fog/Core/Tools/XmlEntity_p.h
+  Src/Fog/Core/Tools/XmlIO.h
 )
 
 FogAddOptimizedSources(FOG_CORE_TOOLS_SOURCES SSE2
   Src/Fog/Core/Tools/List_SSE2.cpp
 )
 
-# [Fog/Core/Xml]
-Set(FOG_CORE_XML_SOURCES
-  Src/Fog/Core/Xml/XmlAttribute.cpp
-  Src/Fog/Core/Xml/XmlCDATA.cpp
-  Src/Fog/Core/Xml/XmlComment.cpp
-  Src/Fog/Core/Xml/XmlDocument.cpp
-  Src/Fog/Core/Xml/XmlDomReader.cpp
-  Src/Fog/Core/Xml/XmlDomWriter.cpp
-  Src/Fog/Core/Xml/XmlElement.cpp
-  Src/Fog/Core/Xml/XmlEntity.cpp
-  Src/Fog/Core/Xml/XmlIdAttribute.cpp
-  Src/Fog/Core/Xml/XmlIdManager.cpp
-  Src/Fog/Core/Xml/XmlNoText.cpp
-  Src/Fog/Core/Xml/XmlPI.cpp
-  Src/Fog/Core/Xml/XmlSaxReader.cpp
-  Src/Fog/Core/Xml/XmlSaxWriter.cpp
-  Src/Fog/Core/Xml/XmlText.cpp
-)
-
-Set(FOG_CORE_XML_HEADERS
-  Src/Fog/Core/Xml/XmlAttribute.h
-  Src/Fog/Core/Xml/XmlCDATA.h
-  Src/Fog/Core/Xml/XmlComment.h
-  Src/Fog/Core/Xml/XmlDocument.h
-  Src/Fog/Core/Xml/XmlDomReader.h
-  Src/Fog/Core/Xml/XmlDomWriter.h
-  Src/Fog/Core/Xml/XmlElement.h
-  Src/Fog/Core/Xml/XmlEntity_p.h
-  Src/Fog/Core/Xml/XmlIdAttribute_p.h
-  Src/Fog/Core/Xml/XmlIdManager.h
-  Src/Fog/Core/Xml/XmlNoText.h
-  Src/Fog/Core/Xml/XmlPI.h
-  Src/Fog/Core/Xml/XmlSaxReader.h
-  Src/Fog/Core/Xml/XmlSaxWriter.h
-  Src/Fog/Core/Xml/XmlText.h
-)
-
 # Source groups.
 FogAddSourceGroup("Fog/Core"                 ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
 FogAddSourceGroup("Fog/Core/C++"             ${FOG_CORE_CPP_SOURCES}             ${FOG_CORE_CPP_HEADERS}            )
-FogAddSourceGroup("Fog/Core/Collection"      ${FOG_CORE_COLLECTION_SOURCES}      ${FOG_CORE_COLLECTION_HEADERS}     )
+FogAddSourceGroup("Fog/Core/Dom"             ${FOG_CORE_DOM_SOURCES}             ${FOG_CORE_DOM_HEADERS}            )
 FogAddSourceGroup("Fog/Core/Face"            ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
 FogAddSourceGroup("Fog/Core/Global"          ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
 FogAddSourceGroup("Fog/Core/Kernel"          ${FOG_CORE_KERNEL_SOURCES}          ${FOG_CORE_KERNEL_HEADERS}         )
@@ -941,7 +916,6 @@ FogAddSourceGroup("Fog/Core/Memory"          ${FOG_CORE_MEMORY_SOURCES}         
 FogAddSourceGroup("Fog/Core/OS"              ${FOG_CORE_OS_SOURCES}              ${FOG_CORE_OS_HEADERS}             )
 FogAddSourceGroup("Fog/Core/Threading"       ${FOG_CORE_THREADING_SOURCES}       ${FOG_CORE_THREADING_HEADERS}      )
 FogAddSourceGroup("Fog/Core/Tools"           ${FOG_CORE_TOOLS_SOURCES}           ${FOG_CORE_TOOLS_HEADERS}          )
-FogAddSourceGroup("Fog/Core/Xml"             ${FOG_CORE_XML_SOURCES}             ${FOG_CORE_XML_HEADERS}            )
 
 # =============================================================================
 # [Fog/G2d]
@@ -1309,25 +1283,15 @@ Set(FOG_G2D_SOURCE_HEADERS
 
 # [Fog/G2d/Svg]
 Set(FOG_G2D_SVG_SOURCES
-  Src/Fog/G2d/Svg/SvgDocument.cpp
+  Src/Fog/G2d/Svg/SvgContext.cpp
   Src/Fog/G2d/Svg/SvgDom.cpp
-  Src/Fog/G2d/Svg/SvgElement.cpp
-  Src/Fog/G2d/Svg/SvgHitTest.cpp
-  Src/Fog/G2d/Svg/SvgMeasure.cpp
-  Src/Fog/G2d/Svg/SvgRender.cpp
   Src/Fog/G2d/Svg/SvgUtil.cpp
-  Src/Fog/G2d/Svg/SvgVisitor.cpp
 )
 
 Set(FOG_G2D_SVG_HEADERS
-  Src/Fog/G2d/Svg/SvgDocument.h
-  Src/Fog/G2d/Svg/SvgDom_p.h
-  Src/Fog/G2d/Svg/SvgElement.h
-  Src/Fog/G2d/Svg/SvgHitTest.h
-  Src/Fog/G2d/Svg/SvgMeasure.h
-  Src/Fog/G2d/Svg/SvgRender.h
+  Src/Fog/G2d/Svg/SvgContext.h
+  Src/Fog/G2d/Svg/SvgDom.h
   Src/Fog/G2d/Svg/SvgUtil.h
-  Src/Fog/G2d/Svg/SvgVisitor.h
 )
 
 # [Fog/G2d/Text]
@@ -1582,7 +1546,7 @@ Set(FOG_ALL_SOURCES
   # Fog/Core.
   ${FOG_CORE_LIB_SOURCES}
   ${FOG_CORE_CPP_SOURCES}
-  ${FOG_CORE_COLLECTION_SOURCES}
+  ${FOG_CORE_DOM_SOURCES}
   ${FOG_CORE_FACE_SOURCES}
   ${FOG_CORE_GLOBAL_SOURCES}
   ${FOG_CORE_KERNEL_SOURCES}
@@ -1591,7 +1555,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_OS_SOURCES}
   ${FOG_CORE_THREADING_SOURCES}
   ${FOG_CORE_TOOLS_SOURCES}
-  ${FOG_CORE_XML_SOURCES}
   # Fog/G2d.
   ${FOG_G2D_LIB_SOURCES}
   ${FOG_G2D_FACE_SOURCES}
@@ -1612,7 +1575,7 @@ Set(FOG_ALL_HEADERS
   # Fog/Core.
   ${FOG_CORE_LIB_HEADERS}
   ${FOG_CORE_CPP_HEADERS}
-  ${FOG_CORE_COLLECTION_HEADERS}
+  ${FOG_CORE_DOM_HEADERS}
   ${FOG_CORE_FACE_HEADERS}
   ${FOG_CORE_GLOBAL_HEADERS}
   ${FOG_CORE_KERNEL_HEADERS}
@@ -1621,7 +1584,6 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_OS_HEADERS}
   ${FOG_CORE_THREADING_HEADERS}
   ${FOG_CORE_TOOLS_HEADERS}
-  ${FOG_CORE_XML_HEADERS}
   # Fog/G2d.
   ${FOG_G2D_LIB_HEADERS}
   ${FOG_G2D_FACE_HEADERS}

@@ -10,8 +10,8 @@
 // [Dependencies]
 #include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Kernel/Task.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/Core/Tools/ManagedString.h>
 
 namespace Fog {
 
@@ -192,7 +192,7 @@ struct FOG_API PropertyEvent : public Event
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  PropertyEvent(const ManagedStringW& name);
+  PropertyEvent(const InternedStringW& name);
   virtual ~PropertyEvent();
   virtual Event* clone() const;
 
@@ -200,13 +200,13 @@ struct FOG_API PropertyEvent : public Event
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const ManagedStringW& getName() const { return _name; }
+  FOG_INLINE const InternedStringW& getName() const { return _name; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  ManagedStringW _name;
+  InternedStringW _name;
 };
 
 // ============================================================================

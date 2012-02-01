@@ -20,8 +20,8 @@
 #include <Fog/Core/OS/OSUtil.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/Threading/ThreadEvent.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/List.h>
-#include <Fog/Core/Tools/ManagedString.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/Core/Tools/Time.h>
@@ -63,7 +63,7 @@ static const int EVENT_LOOP_MAX_WAIT_OBJECTS = MAXIMUM_WAIT_OBJECTS;
 // ============================================================================
 
 WinEventLoopImpl::WinEventLoopImpl() :
-  EventLoopImpl(FOG_STR_(APPLICATION_Core_Win)),
+  EventLoopImpl(FOG_S(APPLICATION_Core_Win)),
   _haveWork(0)
 {
   initMessageWnd();

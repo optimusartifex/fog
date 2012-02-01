@@ -233,6 +233,16 @@ struct FOG_NO_EXPORT MatrixF
   }
 
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setMatrix(const MatrixF& other)
+  {
+    fog_api.matrixf_copy(this, &other);
+    return ERR_OK;
+  }
+
+  // --------------------------------------------------------------------------
   // [Methods]
   // --------------------------------------------------------------------------
 
@@ -283,7 +293,7 @@ struct FOG_NO_EXPORT MatrixF
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const MatrixF& empty()
+  static FOG_INLINE const MatrixF& getEmptyInstance()
   {
     return *fog_api.matrixf_oEmpty;
   }
@@ -418,6 +428,16 @@ struct FOG_NO_EXPORT MatrixD
   }
 
   // --------------------------------------------------------------------------
+  // [Set]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setMatrix(const MatrixD& other)
+  {
+    fog_api.matrixd_copy(this, &other);
+    return ERR_OK;
+  }
+
+  // --------------------------------------------------------------------------
   // [Methods]
   // --------------------------------------------------------------------------
 
@@ -468,7 +488,7 @@ struct FOG_NO_EXPORT MatrixD
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const MatrixD& empty()
+  static FOG_INLINE const MatrixD& getEmptyInstance()
   {
     return *fog_api.matrixd_oEmpty;
   }

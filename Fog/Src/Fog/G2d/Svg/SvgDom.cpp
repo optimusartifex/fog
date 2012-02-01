@@ -9,19 +9,13 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Tools/ManagedString.h>
+#include <Fog/Core/Kernel/Property.h>
+#include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Stream.h>
-#include <Fog/G2d/Svg/SvgDocument.h>
-#include <Fog/G2d/Svg/SvgDom_p.h>
-#include <Fog/G2d/Svg/SvgElement.h>
-#include <Fog/G2d/Svg/SvgRender.h>
+#include <Fog/Core/Tools/Var.h>
+#include <Fog/G2d/Svg/SvgContext.h>
+#include <Fog/G2d/Svg/SvgDom.h>
 #include <Fog/G2d/Svg/SvgUtil.h>
-#include <Fog/G2d/Svg/SvgVisitor.h>
-
-// Disable the MSC specific warning.
-#if defined(FOG_CC_MSC)
-# pragma warning(disable:4355) // 'this' used in base member initializer list.
-#endif // FOG_CC_MSC
 
 namespace Fog {
 
@@ -35,32 +29,24 @@ namespace Fog {
 //   - <tref>
 
 // ============================================================================
-// [Fog::SvgHelpers]
+// [Fog::SvgDom - Helpers]
 // ============================================================================
 
-// TODO: Rename to svgGetStyleId
-static int svgStyleToId(const ManagedStringW& name)
+static FOG_INLINE float svgGetCoord(const SvgDocument* ownerDocument, float value, uint32_t unit)
 {
-  int i;
-
-  for (i = 0; i < SVG_STYLE_INVALID; i++)
-  {
-    if (name == ManagedStringCacheW::get()->getString(i + STR_SVG_STYLE_NAMES))
-      break;
-  }
-
-  return i;
+  return ownerDocument->_dpi.toDeviceSpace(value, unit);
 }
 
-static int svgGetEnumId(const StringW& value, const SvgEnumItem* items)
+static int svgGetEnum(const StringW& value, const PropertyEnum* pairs)
 {
-  while (items->name[0] != '\0')
+  while (pairs->name[0] != '\0')
   {
-    if (value == Ascii8(items->name)) break;
-    items++;
+    if (value == Ascii8(pairs->name))
+      break;
+    pairs++;
   }
 
-  return items->value;
+  return pairs->value;
 }
 
 static StubW parseHtmlLinkId(const StringW& url)
@@ -70,23 +56,27 @@ static StubW parseHtmlLinkId(const StringW& url)
   const CharW* idMark;
   CharW c;
 
-  if (url.getLength() < 2) goto bail;
+  if (url.getLength() < 2)
+    goto bail;
 
   idStr = url.getData();
   idEnd = idStr + url.getLength();
 
-  if (*idStr != CharW('#')) goto bail;
+  if (*idStr != CharW('#'))
+    goto bail;
   idStr++;
 
   while (idStr->isSpace())
   {
-    if (++idStr == idEnd) goto bail;
+    if (++idStr == idEnd)
+      goto bail;
   }
 
   idMark = idStr;
   while ((c = *idStr).isAsciiNumlet() || c == CharW('-') || c == CharW('_'))
   {
-    if (++idStr == idEnd) break;
+    if (++idStr == idEnd)
+      break;
   }
   return StubW(idMark, (size_t)(idStr - idMark));
 
@@ -146,554 +136,423 @@ _Bail:
 }
 
 // ============================================================================
-// [Fog::SvgEnumItem - Data]
+// [Fog::SvgDom - Enumerations]
 // ============================================================================
 
-static const SvgEnumItem svgEnum_fillRule[] =
+static const PropertyEnum svgEnum_fillRule[] =
 {
   { "nonzero", FILL_RULE_NON_ZERO },
   { "evenodd", FILL_RULE_EVEN_ODD },
-  { "", -1 }
+  { "", 0 }
 };
 
-static const SvgEnumItem svgEnum_gradientUnits[3] =
+static const PropertyEnum svgEnum_gradientUnits[3] =
 {
   { "userSpaceOnUse", SVG_USER_SPACE_ON_USE },
   { "objectBoundingBox", SVG_OBJECT_BOUNDING_BOX },
-  { "", -1 }
+  { "", 0 }
 };
 
-static const SvgEnumItem svgEnum_lengthAdjust[3] =
+static const PropertyEnum svgEnum_lengthAdjust[3] =
 {
   { "spacing", SVG_LENGTH_ADJUST_SPACING },
   { "spacingAndGlyphs", SVG_LENGTH_ADJUST_SPACING_AND_GLYPHS },
-  { "", -1 }
+  { "", 0 }
 };
 
-static const SvgEnumItem svgEnum_spreadMethod[4] =
+static const PropertyEnum svgEnum_spreadMethod[4] =
 {
   { "pad", GRADIENT_SPREAD_PAD },
   { "reflect", GRADIENT_SPREAD_REFLECT },
   { "repeat", GRADIENT_SPREAD_REPEAT },
-  { "", -1 }
+  { "", 0 }
 };
 
-static const SvgEnumItem svgEnum_strokeLineCap[] =
+static const PropertyEnum svgEnum_strokeLineCap[] =
 {
   { "butt", LINE_CAP_BUTT },
   { "round", LINE_CAP_ROUND },
   { "square", LINE_CAP_SQUARE },
-  { "", -1 }
+  { "", 0 }
 };
 
-static const SvgEnumItem svgEnum_strokeLineJoin[] =
+static const PropertyEnum svgEnum_strokeLineJoin[] =
 {
   { "miter", LINE_JOIN_MITER },
   { "round", LINE_JOIN_ROUND },
   { "bevel", LINE_JOIN_BEVEL },
-  { "", -1 }
+  { "", 0 }
 };
 
 // ============================================================================
-// [Fog::SvgEnumAttribute]
+// [Fog::SvgDom - PropertyIO]
 // ============================================================================
 
-SvgEnumAttribute::SvgEnumAttribute(XmlElement* element, const ManagedStringW& name, int offset, const SvgEnumItem* items) :
-  XmlAttribute(element, name, offset),
-  _enumItems(items),
-  _enumValue(-1)
+struct FOG_NO_EXPORT SvgDomIO_OffsetF
+{
+  FOG_INLINE err_t parse(float& dst, const StringW& src) { return SvgUtil::parseOffset(dst, src); }
+  FOG_INLINE err_t serialize(StringW& dst, const float& src) { return SvgUtil::serializeOffset(dst, src); }
+};
+
+struct FOG_NO_EXPORT SvgDomIO_OpacityF
+{
+  FOG_INLINE err_t parse(float& dst, const StringW& src) { return SvgUtil::parseOpacity(dst, src); }
+  FOG_INLINE err_t serialize(StringW& dst, const float& src) { return SvgUtil::serializeOpacity(dst, src); }
+};
+
+struct FOG_NO_EXPORT SvgDomIO_CoordF
+{
+  FOG_INLINE err_t parse(CoordF& dst, const StringW& src) { return SvgUtil::parseCoord(dst, src); }
+  FOG_INLINE err_t serialize(StringW& dst, const CoordF& src) { return SvgUtil::serializeCoord(dst, src); }
+};
+
+struct FOG_NO_EXPORT SvgDomIO_ViewBoxF
+{
+  FOG_INLINE err_t parse(BoxF& dst, const StringW& src) { return SvgUtil::parseViewBox(dst, src); }
+  FOG_INLINE err_t serialize(StringW& dst, const BoxF& src) { return SvgUtil::serializeViewBox(dst, src); }
+};
+
+struct FOG_NO_EXPORT SvgDomIO_TransformF
+{
+  FOG_INLINE err_t parse(TransformF& dst, const StringW& src) { return SvgUtil::parseTransform(dst, src); }
+  FOG_INLINE err_t serialize(StringW& dst, const TransformF& src) { return SvgUtil::serializeTransform(dst, src); }
+};
+
+struct FOG_NO_EXPORT SvgDomIO_PathF
+{
+  FOG_INLINE err_t parse(PathF& dst, const StringW& src) { return SvgUtil::parsePath(dst, src); }
+  FOG_INLINE err_t serialize(StringW& dst, const PathF& src) { return SvgUtil::serializePath(dst, src); }
+};
+
+struct FOG_NO_EXPORT SvgDomIO_Enum
+{
+  FOG_INLINE SvgDomIO_Enum(const PropertyEnum* pairs) : _pairs(pairs) {}
+
+  FOG_INLINE err_t parse(uint32_t& dst, const StringW& src) { dst = svgGetEnum(src, _pairs); return ERR_OK; }
+  FOG_INLINE err_t serialize(StringW& dst, const uint32_t& src) { return dst.append(Ascii8(_pairs[src].name)); }
+
+  const PropertyEnum* _pairs;
+};
+
+// ============================================================================
+// [Fog::SvgElement - Construction / Destruction]
+// ============================================================================
+
+SvgElement::SvgElement(
+  DomDocument* ownerDocument,
+  const InternedStringW& tagName,
+  uint32_t svgType)
+  :
+  DomElement(ownerDocument, tagName),
+  _computedBoundingBox(0.0f, 0.0f, 0.0f, 0.0f),
+  _boundingBoxDirty(true),
+  _visible(true),
+  _unused_0(0),
+  _unused_1(0)
+{
+  _objectModel = DOM_OBJECT_MODEL_SVG;
+  _objectType = svgType;
+}
+
+SvgElement::~SvgElement()
 {
 }
 
-SvgEnumAttribute::~SvgEnumAttribute()
-{
-}
+// ============================================================================
+// [Fog::SvgElement - SVG Interface]
+// ============================================================================
 
-err_t SvgEnumAttribute::setValue(const StringW& value)
+err_t SvgElement::onPrepare(SvgContext* context, SvgContextGState* state) const
 {
-  err_t err = _value.set(value);
-  if (FOG_IS_ERROR(err)) return err;
-
-  _enumValue = svgGetEnumId(value, _enumItems);
+  // Should be reimplemented.
   return ERR_OK;
 }
 
-// ============================================================================
-// [Fog::SvgCoordAttribute]
-// ============================================================================
-
-SvgCoordAttribute::SvgCoordAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-  XmlAttribute(element, name, offset)
+err_t SvgElement::onProcess(SvgContext* context) const
 {
-  _coord.value = 0.0;
-  _coord.unit = UNIT_PX;
-}
-
-SvgCoordAttribute::~SvgCoordAttribute()
-{
-}
-
-err_t SvgCoordAttribute::setValue(const StringW& value)
-{
-  err_t err = _value.set(value);
-  if (FOG_IS_ERROR(err)) return err;
-
-  SvgUtil::parseCoord(_coord, value);
-
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
+  // Should be reimplemented.
   return ERR_OK;
 }
 
-// ============================================================================
-// [Fog::SvgImageLinkAttribute]
-// ============================================================================
-
-SvgImageLinkAttribute::SvgImageLinkAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-  XmlAttribute(element, name, offset),
-  _embedded(false)
+err_t SvgElement::onPattern(SvgContext* context, SvgElement* obj, Pattern* dst) const
 {
+  // Should be reimplemented if SvgElement is SvgPattern, SvgLinearGradient or
+  // SvgRadialGradient.
+  return ERR_RT_INVALID_STATE;
 }
 
-SvgImageLinkAttribute::~SvgImageLinkAttribute()
+err_t SvgElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
+  return ERR_RT_INVALID_STATE;
 }
 
-StringW SvgImageLinkAttribute::getValue() const
+err_t SvgElement::onStrokeBoundingBox(BoxF& box, const PathStrokerParamsF& stroke, const TransformF* tr) const
 {
-  if (_embedded)
-  {
-    err_t err = ERR_OK;
-
-    StringW dst;
-    Stream memio;
-
-    err |= dst.append(Ascii8("data:image/png;base64,"));
-    err |= memio.openBuffer();
-
-    _image.writeToStream(memio, StringW::fromAscii8("png"));
-    err |= StringW::base64Encode(dst, CONTAINER_OP_APPEND, memio.getBuffer());
-
-    if (FOG_IS_ERROR(err)) dst.reset();
-    return dst;
-  }
-  else
-  {
-    return _value;
-  }
+  // TODO:
+  return ERR_RT_INVALID_STATE;
 }
 
-err_t SvgImageLinkAttribute::setValue(const StringW& value)
+err_t SvgElement::_visitContainer(SvgContext* context) const
 {
   err_t err = ERR_OK;
+  DomNode* node;
 
-  if (value.startsWith(Ascii8("data:")))
+  for (node = getFirstChild(); node != NULL; node = node->getNextSibling())
   {
-    size_t semicolon = value.indexOf(CharW(';'));
-    size_t separator = value.indexOf(CharW(','));
-
-    if (semicolon != INVALID_INDEX && separator != INVALID_INDEX)
+    if (node->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT) &&
+        static_cast<SvgElement*>(node)->getVisible())
     {
-      StringW type = value.substring(Range(5, semicolon));
-      StringW extension;
-      StringW encoding = value.substring(Range(semicolon + 1, separator));
-
-      StringA memio;
-      Stream stream;
-
-      if (type == Ascii8("image/png"))
-      {
-        extension = FOG_STR_(IMAGE_EXT_png);
-      }
-      else if (type == Ascii8("image/jpeg"))
-      {
-        extension = FOG_STR_(IMAGE_EXT_jpeg);
-      }
-      else
-      {
-        // Standard talks only about PNG and JPEG, but we can use any attached
-        // image that can be decoded by Fog-Imaging API.
-      }
-
-      if (encoding == Ascii8("base64"))
-      {
-        err |= StringA::base64Decode(memio, CONTAINER_OP_REPLACE, value.getData() + separator + 1, value.getLength() - separator - 1);
-      }
-      else
-      {
-        // Maybe in future something else will be supported by the SVG standard.
-        return ERR_SVG_INVALID_DATA_ENCODING;
-      }
-
-      err |= stream.openBuffer(memio);
-      err |= _image.readFromStream(stream, extension);
-
+      err = context->onVisit(static_cast<SvgElement*>(node));
       if (FOG_IS_ERROR(err))
-      {
-        // Something evil happened. I don't know what to do now, because image
-        // seems to be corrupted or unsupported.
-        _value.set(value);
-        _image.reset();
-        _embedded = false;
-      }
-      else
-      {
-        _value.reset();
-        _embedded = true;
-      }
+        break;
     }
   }
 
-  err = _value.set(value);
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
   return err;
 }
 
-// ============================================================================
-// [Fog::SvgOffsetAttribute]
-// ============================================================================
-
-SvgOffsetAttribute::SvgOffsetAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-  XmlAttribute(element, name, offset)
+err_t SvgElement::getBoundingBox(BoxF& box) const
 {
-  _offset = 0.0;
-}
-
-SvgOffsetAttribute::~SvgOffsetAttribute()
-{
-}
-
-err_t SvgOffsetAttribute::setValue(const StringW& value)
-{
-  err_t err = _value.set(value);
-  if (FOG_IS_ERROR(err)) return err;
-
-  size_t end;
-  if (value.parseReal(&_offset, CharW('.'), &end, NULL) == ERR_OK)
+  if (_boundingBoxDirty)
   {
-    if (end < value.getLength() && value.getAt(end) == CharW('%')) _offset *= 0.01f;
-    _offset = Math::bound<float>(_offset, 0.0f, 1.0f);
-  }
-  else
-  {
-    _offset = 0.0f;
+    // TODO:
+    FOG_RETURN_ON_ERROR(onGeometryBoundingBox(_computedBoundingBox, NULL));
+    _boundingBoxDirty = false;
   }
 
+  box = _computedBoundingBox;
   return ERR_OK;
 }
 
-// ============================================================================
-// [Fog::SvgPathAttribute]
-// ============================================================================
-
-SvgPathAttribute::SvgPathAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-  XmlAttribute(element, name, offset)
+err_t SvgElement::getBoundingBox(BoxF& box, const TransformF* tr) const
 {
-}
+  if (tr == NULL) return getBoundingBox(box);
 
-SvgPathAttribute::~SvgPathAttribute()
-{
-}
-
-err_t SvgPathAttribute::setValue(const StringW& value)
-{
-  FOG_RETURN_ON_ERROR(_value.set(value));
-  FOG_RETURN_ON_ERROR(SvgUtil::parsePath(_path, value));
-
-  // Build path-info to optimize path operations.
-  _path.buildPathInfo();
-
-  if (_element != NULL)
-    reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
-
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::SvgPointsAttribute]
-// ============================================================================
-
-SvgPointsAttribute::SvgPointsAttribute(XmlElement* element, const ManagedStringW& name, bool closePath, int offset) :
-  XmlAttribute(element, name, offset),
-  _closePath(closePath)
-{
-}
-
-SvgPointsAttribute::~SvgPointsAttribute()
-{
-}
-
-err_t SvgPointsAttribute::setValue(const StringW& value)
-{
-  FOG_RETURN_ON_ERROR(_value.set(value));
-  FOG_RETURN_ON_ERROR(SvgUtil::parsePoints(_path, value, _closePath));
-
-  // Close path if used by closed object (SvgPolygon).
-  if (!_path.isEmpty() && _closePath)
-    _path.close();
-
-  // Build path-info to optimize path operations.
-  _path.buildPathInfo();
-
-  if (_element != NULL)
-    reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
-
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::SvgTransformAttribute]
-// ============================================================================
-
-SvgTransformAttribute::SvgTransformAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-    XmlAttribute(element, name, offset)
-{
-}
-
-SvgTransformAttribute::~SvgTransformAttribute()
-{
-}
-
-err_t SvgTransformAttribute::setValue(const StringW& value)
-{
-  err_t err = _value.set(value);
-  if (FOG_IS_ERROR(err)) return err;
-
-  _isValid = (SvgUtil::parseTransform(_transform, value) == ERR_OK);
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::SvgViewBoxAttribute]
-// ============================================================================
-
-SvgViewBoxAttribute::SvgViewBoxAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-  XmlAttribute(element, name, offset)
-{
-  _box.reset();
-}
-
-SvgViewBoxAttribute::~SvgViewBoxAttribute()
-{
-}
-
-err_t SvgViewBoxAttribute::setValue(const StringW& value)
-{
-  err_t err = _value.set(value);
-  if (FOG_IS_ERROR(err)) return err;
-
-  SvgUtil::parseViewBox(_box, value);
-  _isValid = _box.isValid();
-
-  if (_element) reinterpret_cast<SvgElement*>(_element)->_boundingBoxDirty = true;
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::SvgStyleAttribute]
-// ============================================================================
-
-SvgStyleAttribute::SvgStyleAttribute(XmlElement* element, const ManagedStringW& name, int offset) :
-  XmlAttribute(element, name, offset),
-
-  _mask(0),
-
-  _clipRule(FILL_RULE_DEFAULT),
-  _fillSource(SVG_SOURCE_NONE),
-  _fillRule(FILL_RULE_DEFAULT),
-  _strokeSource(SVG_SOURCE_NONE),
-
-  _strokeLineCap(LINE_CAP_DEFAULT),
-  _strokeLineJoin(LINE_JOIN_DEFAULT),
-  _strokeDashOffsetUnit(UNIT_PX),
-  _strokeMiterLimitUnit(UNIT_PX),
-
-  _strokeWidthUnit(UNIT_PX),
-  _fontSizeUnit(UNIT_PX),
-  _letterSpacingUnit(UNIT_PX),
-  _reserved_0(0),
-
-  _fillColor(),
-  _strokeColor(),
-  _stopColor(),
-
-  _opacity(0.0f),
-  _fillOpacity(0.0f),
-  _strokeOpacity(0.0f),
-  _stopOpacity(0.0f),
-
-  _strokeDashOffsetValue(0.0f),
-  _strokeMiterLimitValue(0.0f),
-  _strokeWidthValue(0.0f),
-  _fontSizeValue(0.0f),
-  _letterSpacingValue(0.0f)
-{
-}
-
-SvgStyleAttribute::~SvgStyleAttribute()
-{
-}
-
-StringW SvgStyleAttribute::getValue() const
-{
-  StringW result;
-  result.reserve(128);
-
-  int i;
-  for (i = 0; i < SVG_STYLE_INVALID; i++)
+  switch (tr->getType())
   {
-    if (_mask & (1 << i))
-    {
-      result.append(ManagedStringCacheW::get()->getString(i + STR_SVG_STYLE_NAMES));
-      result.append(CharW(':'));
-      result.append(getStyle(i));
-      result.append(CharW(';'));
-    }
+    case TRANSFORM_TYPE_IDENTITY:
+      return getBoundingBox(box);
+
+    case TRANSFORM_TYPE_TRANSLATION:
+    case TRANSFORM_TYPE_SCALING:
+    case TRANSFORM_TYPE_SWAP:
+      FOG_RETURN_ON_ERROR(getBoundingBox(box));
+      tr->mapBox(box, box);
+      return ERR_OK;
+
+    default:
+      return onGeometryBoundingBox(box, tr);
+  }
+}
+
+// ============================================================================
+// [Fog::SvgStyleData - Construction / Destruction]
+// ============================================================================
+
+SvgStyleData::SvgStyleData() :
+  clipRule(FILL_RULE_NON_ZERO),
+  fillRule(FILL_RULE_NON_ZERO),
+  fillSource(SVG_SOURCE_NONE),
+  strokeSource(SVG_SOURCE_NONE),
+  strokeLineCap(LINE_CAP_DEFAULT),
+  strokeLineJoin(LINE_JOIN_DEFAULT),
+  strokeDashOffsetUnit(UNIT_NONE),
+  strokeMiterLimitUnit(UNIT_NONE),
+  strokeWidthUnit(UNIT_NONE),
+  fontSizeUnit(UNIT_NONE),
+  letterSpacingUnit(UNIT_NONE),
+  unused(0),
+  fillColor(0x00000000),
+  strokeColor(0x00000000),
+  stopColor(0x00000000),
+  opacity(1.0f),
+  fillOpacity(1.0f),
+  strokeOpacity(1.0f),
+  stopOpacity(1.0f),
+  strokeDashOffsetValue(0.0f),
+  strokeMiterLimitValue(4.0f),
+  strokeWidthValue(1.0f),
+  fontSizeValue(12.0f),
+  letterSpacingValue(0.0f),
+  clipPath(),
+  strokeDashArray(),
+  fontFamily(),
+  fillUri(),
+  strokeUri()
+{
+}
+
+SvgStyleData::~SvgStyleData()
+{
+}
+
+// ============================================================================
+// [Fog::SvgStyle - Construction / Destruction]
+// ============================================================================
+
+SvgStyle::SvgStyle(SvgElement* ownerElement) :
+  _styleMask(FOG_UINT64_C(0)),
+  _ownerElement(ownerElement)
+{
+}
+
+SvgStyle::~SvgStyle()
+{
+}
+
+// ============================================================================
+// [Fog::SvgStyle - AddRef / Release]
+// ============================================================================
+
+DomObj* SvgStyle::_addRef()
+{
+  _ownerElement->addRef();
+  return this;
+}
+
+void SvgStyle::_release()
+{
+  _ownerElement->release();
+}
+
+// ============================================================================
+// [Fog::SvgStyle - GC]
+// ============================================================================
+
+bool SvgStyle::_canCollect() const
+{
+  return false;
+}
+
+// ============================================================================
+// [Fog::SvgStyle - Properties]
+// ============================================================================
+
+static const uint32_t SvgStyle_nameToIdData[] =
+{
+  STR_font,
+  STR_font_family,
+  STR_font_size,
+  STR_direction,
+  STR_letter_spacing,
+  STR_text_decoration,
+  STR_word_spacing,
+  STR_color,
+  STR_clip_path,
+  STR_clip_rule,
+  STR_mask,
+  STR_opacity,
+  STR_enable_background,
+  STR_filter,
+  STR_flood_color,
+  STR_flood_opacity,
+  STR_lighting_color,
+  STR_stop_color,
+  STR_stop_opacity,
+  STR_fill,
+  STR_fill_opacity,
+  STR_fill_rule,
+  STR_image_rendering,
+  STR_marker,
+  STR_marker_end,
+  STR_marker_mid,
+  STR_marker_start,
+  STR_shape_rendering,
+  STR_stroke,
+  STR_stroke_dasharray,
+  STR_stroke_dashoffset,
+  STR_stroke_linecap,
+  STR_stroke_linejoin,
+  STR_stroke_miterlimit,
+  STR_stroke_opacity,
+  STR_stroke_width,
+  STR_text_rendering
+};
+
+size_t SvgStyle::_getPropertyIndex(const InternedStringW& name) const
+{
+  for (size_t i = 0; i < FOG_ARRAY_SIZE(SvgStyle_nameToIdData); i++)
+  {
+    if (InternedStringCacheW::get()->getString(SvgStyle_nameToIdData[i]).eq(name))
+      return i;
   }
 
-  return result;
+  return INVALID_INDEX;
 }
 
-err_t SvgStyleAttribute::setValue(const StringW& value)
+size_t SvgStyle::_getPropertyIndex(const CharW* name, size_t length) const
 {
-  // Parse all "name: value;" pairs.
-  const CharW* strCur = value.getData();
-  const CharW* strEnd = strCur + value.getLength();
-
-  ManagedStringW styleName;
-  StringW styleValue;
-
-  for (;;)
+  for (size_t i = 0; i < FOG_ARRAY_SIZE(SvgStyle_nameToIdData); i++)
   {
-    if (strCur == strEnd) break;
-
-    const CharW* styleNameBegin;
-    const CharW* styleNameEnd;
-    const CharW* styleValueBegin;
-    const CharW* styleValueEnd;
-
-    err_t err;
-
-    // Skip spaces.
-    while (strCur->isSpace())
-    {
-      if (++strCur == strEnd) goto _Bail;
-    }
-
-    // Parse style name.
-    styleNameBegin = strCur;
-    while (*strCur != CharW(':') && !strCur->isSpace())
-    {
-      if (++strCur == strEnd) goto _Bail;
-    }
-    styleNameEnd = strCur;
-
-    if (strCur->isSpace())
-    {
-      while (*strCur != CharW(':'))
-      {
-        if (++strCur == strEnd) goto _Bail;
-      }
-    }
-
-    // Skip ':'.
-    if (++strCur == strEnd) goto _Bail;
-
-    // Skip spaces.
-    while (strCur->isSpace())
-    {
-      if (++strCur == strEnd) goto _Bail;
-    }
-
-    // Parse style value.
-    styleValueBegin = strCur;
-    while (*strCur != CharW(';'))
-    {
-      if (++strCur == strEnd) break;
-    }
-    styleValueEnd = strCur;
-
-    // Remove trailing spaces.
-    //
-    // We can't cause buffer underflow, because we already parsed ':' that's
-    // not space.
-    while (styleValueEnd[-1].isSpace()) styleValueEnd--;
-
-    // Skip ';'.
-    if (strCur != strEnd) strCur++;
-
-    err = styleName.set(StubW(styleNameBegin, size_t(styleNameEnd - styleNameBegin)));
-    if (FOG_IS_ERROR(err)) continue;
-
-    err = styleValue.set(StubW(styleValueBegin, size_t(styleValueEnd - styleValueBegin)));
-    if (FOG_IS_ERROR(err)) continue;
-
-    reinterpret_cast<SvgElement*>(getElement())->setStyle(styleName, styleValue);
+    if (InternedStringCacheW::get()->getString(SvgStyle_nameToIdData[i]).eqInline(name, length))
+      return i;
   }
+  
+  return INVALID_INDEX;
+}
 
-_Bail:
+err_t SvgStyle::_getPropertyInfo(size_t index, PropertyInfo& info) const
+{
+  if (index >= FOG_ARRAY_SIZE(SvgStyle_nameToIdData))
+    return ERR_OBJ_PROPERTY_NOT_FOUND;
+
+  info.setName(InternedStringCacheW::get()->getString(SvgStyle_nameToIdData[index]));
+  info.setIndex(index);
+  info.setType(0);
+  info.setFlags(NO_FLAGS);
+
   return ERR_OK;
 }
 
-StringW SvgStyleAttribute::getStyle(int styleId) const
+err_t SvgStyle::_getProperty(size_t index, StringW& value) const
 {
-  StringW result;
+  if (index >= FOG_ARRAY_SIZE(SvgStyle_nameToIdData))
+    return ERR_OBJ_PROPERTY_NOT_FOUND;
 
   // Don't process non-used style values.
-  if ((_mask & (1 << styleId)) == 0) goto _End;
+  if ((_styleMask & ((uint64_t)1 << index)) == 0)
+    goto _End;
 
-  switch (styleId)
+  switch (index)
   {
+    // ------------------------------------------------------------------------
+    // [Font Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_FONT:
+      break;
+
+    case SVG_STYLE_FONT_FAMILY:
+      value.set(_d.fontFamily);
+      break;
+
+    case SVG_STYLE_FONT_SIZE:
+      SvgUtil::serializeCoord(value, getFontSize());
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Text Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_LETTER_SPACING:
+      SvgUtil::serializeCoord(value, getLetterSpacing());
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Other Properties for Visual Media]
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    // [Clipping, Masking, and Compositing Properties]
+    // ------------------------------------------------------------------------
+
     case SVG_STYLE_CLIP_PATH:
       // SVG TODO:
       break;
 
     case SVG_STYLE_CLIP_RULE:
-      FOG_ASSERT(_clipRule < FILL_RULE_COUNT);
-      result.set(Ascii8(svgEnum_fillRule[_clipRule].name));
-      break;
-
-    case SVG_STYLE_ENABLE_BACKGROUND:
-      // SVG TODO:
-      break;
-
-    case SVG_STYLE_FILL:
-      switch (_fillSource)
-      {
-        case SVG_SOURCE_NONE:
-          result.append(Ascii8("none"));
-          break;
-        case SVG_SOURCE_COLOR:
-          SvgUtil::serializeColor(result, _fillColor);
-          break;
-        case SVG_SOURCE_URI:
-          result = _fillUri;
-          break;
-      }
-      break;
-
-    case SVG_STYLE_FILL_OPACITY:
-      result.setReal(_fillOpacity);
-      break;
-
-    case SVG_STYLE_FILL_RULE:
-      FOG_ASSERT(_fillRule < FILL_RULE_COUNT);
-      result.set(Ascii8(svgEnum_fillRule[_fillRule].name));
-      break;
-
-    case SVG_STYLE_FILTER:
-      // SVG TODO:
-      break;
-
-    case SVG_STYLE_FONT_FAMILY:
-      result.set(_fontFamily);
-      break;
-
-    case SVG_STYLE_FONT_SIZE:
-      SvgUtil::serializeCoord(result, getFontSize());
-      break;
-
-    case SVG_STYLE_LETTER_SPACING:
-      SvgUtil::serializeCoord(result, getLetterSpacing());
+      FOG_ASSERT(_d.clipRule < FILL_RULE_COUNT);
+      value.set(Ascii8(svgEnum_fillRule[_d.clipRule].name));
       break;
 
     case SVG_STYLE_MASK:
@@ -701,28 +560,72 @@ StringW SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_OPACITY:
-      result.setReal(_opacity);
+      value.setReal(_d.opacity);
       break;
 
+    // ------------------------------------------------------------------------
+    // [Filter Effects Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_ENABLE_BACKGROUND:
+      // SVG TODO:
+      break;
+
+    case SVG_STYLE_FILTER:
+      // SVG TODO:
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Gradient Properties]
+    // ------------------------------------------------------------------------
+
     case SVG_STYLE_STOP_COLOR:
-      SvgUtil::serializeColor(result, _stopColor);
+      SvgUtil::serializeColor(value, _d.stopColor);
       break;
 
     case SVG_STYLE_STOP_OPACITY:
-      result.setReal(_stopOpacity);
+      value.setReal(_d.stopOpacity);
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Color and Painting Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_FILL:
+      switch (_d.fillSource)
+      {
+        case SVG_SOURCE_NONE:
+          value.append(Ascii8("none"));
+          break;
+        case SVG_SOURCE_COLOR:
+          SvgUtil::serializeColor(value, _d.fillColor);
+          break;
+        case SVG_SOURCE_URI:
+          value = _d.fillUri;
+          break;
+      }
+      break;
+
+    case SVG_STYLE_FILL_OPACITY:
+      value.setReal(_d.fillOpacity);
+      break;
+
+    case SVG_STYLE_FILL_RULE:
+      FOG_ASSERT(_d.fillRule < FILL_RULE_COUNT);
+      value.set(Ascii8(svgEnum_fillRule[_d.fillRule].name));
       break;
 
     case SVG_STYLE_STROKE:
-      switch (_strokeSource)
+      switch (_d.strokeSource)
       {
         case SVG_SOURCE_NONE:
-          result.append(Ascii8("none"));
+          value.append(Ascii8("none"));
           break;
         case SVG_SOURCE_COLOR:
-          SvgUtil::serializeColor(result, _strokeColor);
+          SvgUtil::serializeColor(value, _d.strokeColor);
           break;
         case SVG_SOURCE_URI:
-          result = _strokeUri;
+          value = _d.strokeUri;
           break;
       }
       break;
@@ -732,119 +635,59 @@ StringW SvgStyleAttribute::getStyle(int styleId) const
       break;
 
     case SVG_STYLE_STROKE_DASH_OFFSET:
-      SvgUtil::serializeCoord(result, getStrokeDashOffset());
+      SvgUtil::serializeCoord(value, getStrokeDashOffset());
       break;
 
     case SVG_STYLE_STROKE_LINE_CAP:
-      FOG_ASSERT(_strokeLineCap < LINE_CAP_COUNT);
-      result.set(Ascii8(svgEnum_strokeLineCap[_strokeLineCap].name));
+      FOG_ASSERT(_d.strokeLineCap < LINE_CAP_COUNT);
+      value.set(Ascii8(svgEnum_strokeLineCap[_d.strokeLineCap].name));
       break;
 
     case SVG_STYLE_STROKE_LINE_JOIN:
-      FOG_ASSERT(_strokeLineJoin < LINE_JOIN_COUNT);
-      result.set(Ascii8(svgEnum_strokeLineJoin[_strokeLineJoin].name));
+      FOG_ASSERT(_d.strokeLineJoin < LINE_JOIN_COUNT);
+      value.set(Ascii8(svgEnum_strokeLineJoin[_d.strokeLineJoin].name));
       break;
 
     case SVG_STYLE_STROKE_MITER_LIMIT:
-      SvgUtil::serializeCoord(result, getStrokeMiterLimit());
+      SvgUtil::serializeCoord(value, getStrokeMiterLimit());
       break;
 
     case SVG_STYLE_STROKE_OPACITY:
-      result.setReal(_strokeOpacity);
+      value.setReal(_d.strokeOpacity);
       break;
 
     case SVG_STYLE_STROKE_WIDTH:
-      SvgUtil::serializeCoord(result, getStrokeWidth());
+      SvgUtil::serializeCoord(value, getStrokeWidth());
       break;
 
     default:
-      break;
+      return ERR_RT_NOT_IMPLEMENTED;
   }
+
 _End:
-  return result;
+  return ERR_OK;
 }
 
-err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
+err_t SvgStyle::_setProperty(size_t index, const StringW& value)
 {
+  if (index >= FOG_ARRAY_SIZE(SvgStyle_nameToIdData))
+    return ERR_OBJ_PROPERTY_NOT_FOUND;
+
   err_t err = ERR_OK;
   int i;
 
   if (value.isEmpty())
+    return _resetProperty(index);
+
+  switch (index)
   {
-    _mask &= ~(1 << styleId);
-    return ERR_OK;
-  }
-
-  switch (styleId)
-  {
-    case SVG_STYLE_CLIP_PATH:
-    {
-      // SVG TODO:
-      err = ERR_RT_NOT_IMPLEMENTED;
-      break;
-    }
-
-    case SVG_STYLE_CLIP_RULE:
-    {
-      i = svgGetEnumId(value, svgEnum_fillRule);
-      if (i == -1)
-        err = ERR_SVG_INVALID_STYLE_VALUE;
-      else
-        _clipRule = (uint8_t)(uint)i;
-      break;
-    }
-
-    case SVG_STYLE_ENABLE_BACKGROUND:
-    {
-      // SVG TODO:
-      err = ERR_RT_NOT_IMPLEMENTED;
-      break;
-    }
-
-    case SVG_STYLE_FILL:
-    {
-      _fillSource = (uint8_t)SvgUtil::parseColor(_fillColor, value);
-      switch (_fillSource)
-      {
-        case SVG_SOURCE_NONE:
-        case SVG_SOURCE_COLOR:
-          break;
-        case SVG_SOURCE_URI:
-          _fillUri = value;
-          break;
-        case SVG_SOURCE_INVALID:
-          err = ERR_SVG_INVALID_STYLE_VALUE;
-          break;
-      }
-      break;
-    }
-
-    case SVG_STYLE_FILL_OPACITY:
-    {
-      err = SvgUtil::parseOpacity(_fillOpacity, value);
-      break;
-    }
-
-    case SVG_STYLE_FILL_RULE:
-    {
-      i = svgGetEnumId(value, svgEnum_fillRule);
-      if (i == -1)
-        err = ERR_SVG_INVALID_STYLE_VALUE;
-      else
-        _fillRule = (uint8_t)(uint)i;
-      break;
-    }
-
-    case SVG_STYLE_FILTER:
-    {
-      // SVG TODO:
-      err = ERR_RT_NOT_IMPLEMENTED;
-      break;
-    }
+    // ------------------------------------------------------------------------
+    // [Font Properties]
+    // ------------------------------------------------------------------------
 
     case SVG_STYLE_FONT_FAMILY:
     {
-      err = _value.set(value);
+      err = _d.fontFamily.set(value);
       break;
     }
 
@@ -853,9 +696,14 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
       CoordF coord(UNINITIALIZED);
       if (SvgUtil::parseCoord(coord, value) != ERR_OK)
         err = ERR_SVG_INVALID_STYLE_VALUE;
+
       setFontSize(coord);
       break;
     }
+
+    // ------------------------------------------------------------------------
+    // [Text Properties]
+    // ------------------------------------------------------------------------
 
     case SVG_STYLE_LETTER_SPACING:
     {
@@ -866,6 +714,31 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
       break;
     }
 
+    // ------------------------------------------------------------------------
+    // [Other Properties for Visual Media]
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    // [Clipping, Masking, and Compositing Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_CLIP_PATH:
+    {
+      // SVG TODO:
+      err = ERR_RT_NOT_IMPLEMENTED;
+      break;
+    }
+
+    case SVG_STYLE_CLIP_RULE:
+    {
+      i = svgGetEnum(value, svgEnum_fillRule);
+      if (i == -1)
+        err = ERR_SVG_INVALID_STYLE_VALUE;
+      else
+        _d.clipRule = (uint8_t)(uint)i;
+      break;
+    }
+
     case SVG_STYLE_MASK:
     {
       err = ERR_RT_NOT_IMPLEMENTED;
@@ -874,13 +747,35 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
 
     case SVG_STYLE_OPACITY:
     {
-      err = SvgUtil::parseOpacity(_opacity, value);
+      err = SvgUtil::parseOpacity(_d.opacity, value);
       break;
     }
 
+    // ------------------------------------------------------------------------
+    // [Filter Effects Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_ENABLE_BACKGROUND:
+    {
+      // SVG TODO:
+      err = ERR_RT_NOT_IMPLEMENTED;
+      break;
+    }
+
+    case SVG_STYLE_FILTER:
+    {
+      // SVG TODO:
+      err = ERR_RT_NOT_IMPLEMENTED;
+      break;
+    }
+
+    // ------------------------------------------------------------------------
+    // [Gradient Properties]
+    // ------------------------------------------------------------------------
+
     case SVG_STYLE_STOP_COLOR:
     {
-      if (SvgUtil::parseColor(_stopColor, value) != SVG_SOURCE_COLOR)
+      if (SvgUtil::parseColor(_d.stopColor, value) != SVG_SOURCE_COLOR)
       {
         err = ERR_SVG_INVALID_STYLE_VALUE;
       }
@@ -889,20 +784,58 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
 
     case SVG_STYLE_STOP_OPACITY:
     {
-      err = SvgUtil::parseOpacity(_stopOpacity, value);
+      err = SvgUtil::parseOpacity(_d.stopOpacity, value);
       break;
     }
 
-    case SVG_STYLE_STROKE:
+    // ------------------------------------------------------------------------
+    // [Color and Painting Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_FILL:
     {
-      _strokeSource = (uint8_t)SvgUtil::parseColor(_strokeColor, value);
-      switch (_strokeSource)
+      _d.fillSource = (uint8_t)SvgUtil::parseColor(_d.fillColor, value);
+      switch (_d.fillSource)
       {
         case SVG_SOURCE_NONE:
         case SVG_SOURCE_COLOR:
           break;
         case SVG_SOURCE_URI:
-          _strokeUri = value;
+          _d.fillUri = value;
+          break;
+        case SVG_SOURCE_INVALID:
+          err = ERR_SVG_INVALID_STYLE_VALUE;
+          break;
+      }
+      break;
+    }
+
+    case SVG_STYLE_FILL_OPACITY:
+    {
+      err = SvgUtil::parseOpacity(_d.fillOpacity, value);
+      break;
+    }
+
+    case SVG_STYLE_FILL_RULE:
+    {
+      i = svgGetEnum(value, svgEnum_fillRule);
+      if (i == -1)
+        err = ERR_SVG_INVALID_STYLE_VALUE;
+      else
+        _d.fillRule = (uint8_t)(uint)i;
+      break;
+    }
+
+    case SVG_STYLE_STROKE:
+    {
+      _d.strokeSource = (uint8_t)SvgUtil::parseColor(_d.strokeColor, value);
+      switch (_d.strokeSource)
+      {
+        case SVG_SOURCE_NONE:
+        case SVG_SOURCE_COLOR:
+          break;
+        case SVG_SOURCE_URI:
+          _d.strokeUri = value;
           break;
         case SVG_SOURCE_INVALID:
           err = ERR_SVG_INVALID_STYLE_VALUE;
@@ -928,21 +861,21 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
 
     case SVG_STYLE_STROKE_LINE_CAP:
     {
-      i = svgGetEnumId(value, svgEnum_strokeLineCap);
+      i = svgGetEnum(value, svgEnum_strokeLineCap);
       if (i == -1)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       else
-        _strokeLineCap = (uint8_t)(uint)i;
+        _d.strokeLineCap = (uint8_t)(uint)i;
       break;
     }
 
     case SVG_STYLE_STROKE_LINE_JOIN:
     {
-      i = svgGetEnumId(value, svgEnum_strokeLineJoin);
+      i = svgGetEnum(value, svgEnum_strokeLineJoin);
       if (i == -1)
         err = ERR_SVG_INVALID_STYLE_VALUE;
       else
-        _strokeLineJoin = (uint8_t)(uint)i;
+        _d.strokeLineJoin = (uint8_t)(uint)i;
       break;
     }
 
@@ -957,7 +890,7 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
 
     case SVG_STYLE_STROKE_OPACITY:
     {
-      err = SvgUtil::parseOpacity(_strokeOpacity, value);
+      err = SvgUtil::parseOpacity(_d.strokeOpacity, value);
       break;
     }
 
@@ -971,144 +904,210 @@ err_t SvgStyleAttribute::setStyle(int styleId, const StringW& value)
     }
 
     default:
-      return ERR_RT_INVALID_ARGUMENT;
+      // return ERR_RT_NOT_IMPLEMENTED;
+      break;
   }
 
   if (err == ERR_OK)
-    _mask |= (1 << styleId);
+    _styleMask |= ((uint64_t)1 << index);
   else
-    _mask &= ~(1 << styleId);
+    _styleMask &= ~((uint64_t)1 << index);
 
   return err;
 }
 
+err_t SvgStyle::_resetProperty(size_t index)
+{
+  if (index >= FOG_ARRAY_SIZE(SvgStyle_nameToIdData))
+    return ERR_OBJ_PROPERTY_NOT_FOUND;
+
+  _styleMask &= ~(1 << index);
+  return ERR_OK;
+}
+
 // ============================================================================
-// [Fog::SvgStyledElement]
+// [Fog::SvgStyle - Style]
 // ============================================================================
 
-SvgStyledElement::SvgStyledElement(const ManagedStringW& tagName, uint32_t svgType) :
-  SvgElement(tagName, svgType),
-  a_style    (this, FOG_STR_(XML_ATTRIBUTE_style), FOG_OFFSET_OF(SvgStyledElement, a_style)),
-  a_transform(NULL, FOG_STR_(SVG_ATTRIBUTE_transform), FOG_OFFSET_OF(SvgStyledElement, a_transform))
+static err_t FOG_CDECL SvgStyle_parserFunc(void* ctx, const StringW* styleName, const StringW* styleValue)
 {
-  // Style attribute is always added as default and can't be removed.
-  _attributes.append(&a_style);
+  return static_cast<SvgStyle*>(ctx)->setProperty(*styleName, *styleValue);
 }
 
-SvgStyledElement::~SvgStyledElement()
+err_t SvgStyle::getStyle(StringW& value) const
 {
-  // Class that inherits us must destroy all attributes (a_style must be
-  // removed from _attributes too).
-  FOG_ASSERT(_attributes.isEmpty());
-}
+  // TODO: Posibility for overlap - "font", "font-size", ...
+  StringW data;
 
-XmlAttribute* SvgStyledElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(XML_ATTRIBUTE_style)) return (XmlAttribute*)&a_style;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_transform)) return (XmlAttribute*)&a_transform;
-
-  return base::_createAttribute(name);
-}
-
-err_t SvgStyledElement::_setAttribute(const ManagedStringW& name, const StringW& value)
-{
-  // Add css-style instead of attribute.
-  int id = svgStyleToId(name);
-  if ((uint)id < SVG_STYLE_INVALID)
+  for (size_t i = 0; i < FOG_ARRAY_SIZE(SvgStyle_nameToIdData); i++)
   {
-    // Do not return an error value here, because if Xml/Svg parser see error
-    // then parsing is over. This means that there is probability we can't
-    // render correctly some image, but we want to render what we can.
-    a_style.setStyle(id, value);
-    return ERR_OK;
+    if (_styleMask & ((uint64_t)1 << i))
+    {
+      data.clear();
+      getProperty(i, data);
+
+      value.append(InternedStringCacheW::get()->getString(SvgStyle_nameToIdData[i]));
+      value.append(CharW(':'));
+      value.append(data);
+      value.append(CharW(';'));
+    }
   }
 
-  return base::_setAttribute(name, value);
+  return ERR_OK;
 }
 
-err_t SvgStyledElement::_removeAttribute(const ManagedStringW& name)
+err_t SvgStyle::setStyle(const StringW& value)
 {
-  if (name == FOG_STR_(XML_ATTRIBUTE_style)) return ERR_XML_ATTRIBUTE_CANT_BE_REMOVED;
-
-  return base::_removeAttribute(name);
+  resetStyle();
+  return SvgUtil::parseCSSStyle(value, SvgStyle_parserFunc, this);
 }
 
-err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
+err_t SvgStyle::resetStyle()
+{
+  _styleMask = 0;
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgStylableElement - Construction / Destruction]
+// ============================================================================
+
+SvgStylableElement::SvgStylableElement(DomDocument* ownerDocument, const InternedStringW& tagName, uint32_t svgType) :
+  SvgElement(ownerDocument, tagName, svgType),
+  _style(this)
+{
+}
+
+SvgStylableElement::~SvgStylableElement()
+{
+}
+
+// ============================================================================
+// [Fog::SvgStylableElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgStylableElement)
+  // "style" property.
+  FOG_CORE_OBJ_PROPERTY_ACCESS(Style, FOG_S(style), _style.getStyle, _style.setStyle, _style.resetStyle)
+
+  // "style" redirect.
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Font            , FOG_S(font             ), &_style, SVG_STYLE_FONT              )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(FontFamily      , FOG_S(font_family      ), &_style, SVG_STYLE_FONT_FAMILY       )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(FontSize        , FOG_S(font_size        ), &_style, SVG_STYLE_FONT_SIZE         )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Direction       , FOG_S(direction        ), &_style, SVG_STYLE_DIRECTION         )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(LetterSpacing   , FOG_S(letter_spacing   ), &_style, SVG_STYLE_LETTER_SPACING    )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(TextDecoration  , FOG_S(text_decoration  ), &_style, SVG_STYLE_TEXT_DECORATION   )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(WordSpacing     , FOG_S(word_spacing     ), &_style, SVG_STYLE_WORD_SPACING      )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Color           , FOG_S(color            ), &_style, SVG_STYLE_COLOR             )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(ClipPath        , FOG_S(clip_path        ), &_style, SVG_STYLE_CLIP_PATH         )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(ClipRule        , FOG_S(clip_rule        ), &_style, SVG_STYLE_CLIP_RULE         )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Mask            , FOG_S(mask             ), &_style, SVG_STYLE_MASK              )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Opacity         , FOG_S(opacity          ), &_style, SVG_STYLE_OPACITY           )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(EnableBackground, FOG_S(enable_background), &_style, SVG_STYLE_ENABLE_BACKGROUND )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Filter          , FOG_S(filter           ), &_style, SVG_STYLE_FILTER            )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(FloodColor      , FOG_S(flood_color      ), &_style, SVG_STYLE_FLOOD_COLOR       )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(FloodOpacity    , FOG_S(flood_opacity    ), &_style, SVG_STYLE_FLOOD_OPACITY     )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(LightingColor   , FOG_S(lighting_color   ), &_style, SVG_STYLE_LIGHTING_COLOR    )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StopColor       , FOG_S(stop_color       ), &_style, SVG_STYLE_STOP_COLOR        )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StopOpacity     , FOG_S(stop_opacity     ), &_style, SVG_STYLE_STOP_OPACITY      )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Fill            , FOG_S(fill             ), &_style, SVG_STYLE_FILL              )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(FillOpacity     , FOG_S(fill_opacity     ), &_style, SVG_STYLE_FILL_OPACITY      )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(FillRule        , FOG_S(fill_rule        ), &_style, SVG_STYLE_FILL_RULE         )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(ImageRendering  , FOG_S(image_rendering  ), &_style, SVG_STYLE_IMAGE_RENDERING   )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Marker          , FOG_S(marker           ), &_style, SVG_STYLE_MARKER            )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(MarkerEnd       , FOG_S(marker_end       ), &_style, SVG_STYLE_MARKER_END        )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(MarkerMid       , FOG_S(marker_mid       ), &_style, SVG_STYLE_MARKER_MID        )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(MarkerStart     , FOG_S(marker_start     ), &_style, SVG_STYLE_MARKER_START      )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(ShapeRendering  , FOG_S(shape_rendering  ), &_style, SVG_STYLE_SHAPE_RENDERING   )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(Stroke          , FOG_S(stroke           ), &_style, SVG_STYLE_STROKE            )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeDashArray , FOG_S(stroke_dasharray ), &_style, SVG_STYLE_STROKE_DASH_ARRAY )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeDashOffset, FOG_S(stroke_dashoffset), &_style, SVG_STYLE_STROKE_DASH_OFFSET)
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeLineCap   , FOG_S(stroke_linecap   ), &_style, SVG_STYLE_STROKE_LINE_CAP   )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeLineJoin  , FOG_S(stroke_linejoin  ), &_style, SVG_STYLE_STROKE_LINE_JOIN  )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeMiterLimit, FOG_S(stroke_miterlimit), &_style, SVG_STYLE_STROKE_MITER_LIMIT)
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeOpacity   , FOG_S(stroke_opacity   ), &_style, SVG_STYLE_STROKE_OPACITY    )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(StrokeWidth     , FOG_S(stroke_width     ), &_style, SVG_STYLE_STROKE_WIDTH      )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(TextRendering   , FOG_S(text_rendering   ), &_style, SVG_STYLE_TEXT_RENDERING    )
+FOG_CORE_OBJ_END()
+
+// ============================================================================
+// [Fog::SvgStylableElement - SVG Interface]
+// ============================================================================
+
+err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state) const
 {
   // Apply transformations and setup styles defined by this element.
-  uint32_t styleMask = a_style.getMask();
-  bool isTransformed = a_transform.isAssigned() & a_transform.isValid();
+  uint64_t styleMask = _style.getStyleMask();
 
-  if (styleMask != 0 || isTransformed)
+  if (styleMask != 0)
   {
-    SvgDocument* doc = reinterpret_cast<SvgDocument*>(getDocument());
-
-    if (isTransformed)
-    {
-      if (state && !state->hasState(SvgGState::SAVED_TRANSFORM))
-        state->saveTransform();
-      visitor->transform(a_transform.getTransform());
-    }
+    SvgDocument* doc = reinterpret_cast<SvgDocument*>(getOwnerDocument());
 
     // Setup global parameters.
-    if (styleMask & ((1 << SVG_STYLE_OPACITY)))
+    if (styleMask & (((uint64_t)1 << SVG_STYLE_OPACITY)))
     {
-      if (state) state->saveGlobal();
-      visitor->setOpacity(a_style._opacity);
+      if (state)
+        state->saveGlobal();
+      context->setOpacity(_style._d.opacity);
     }
 
     // Setup font parameters.
-    if (styleMask & ((1 << SVG_STYLE_FONT_FAMILY) |
-                     (1 << SVG_STYLE_FONT_SIZE  )))
+    if (styleMask & (((uint64_t)1 << SVG_STYLE_FONT_FAMILY) |
+                     ((uint64_t)1 << SVG_STYLE_FONT_SIZE  )))
     {
-      if (state) state->saveFont();
+      if (state)
+        state->saveFont();
 
-      StringW family = visitor->_font.getFamily();
-      float size = visitor->_font.getHeight();
+      StringW family = context->_font.getFamily();
+      float size = context->_font.getHeight();
 
       if (styleMask & (1 << SVG_STYLE_FONT_FAMILY))
       {
-        family = a_style._fontFamily;
+        family = _style._d.fontFamily;
       }
 
       if (styleMask & (1 << SVG_STYLE_FONT_SIZE))
       {
         size = doc->_dpi.toDeviceSpace(
-          a_style._fontSizeValue, a_style._fontSizeUnit);
+          _style._d.fontSizeValue, _style._d.fontSizeUnit);
       }
 
-      visitor->_font.create(family, size, UNIT_NONE);
+      context->_font.create(family, size, UNIT_NONE);
     }
 
     // Setup fill parameters.
-    if (styleMask & ((1 << SVG_STYLE_FILL               ) |
-                     (1 << SVG_STYLE_FILL_OPACITY       ) |
-                     (1 << SVG_STYLE_FILL_RULE          )))
+    if (styleMask & (((uint64_t)1 << SVG_STYLE_FILL               ) |
+                     ((uint64_t)1 << SVG_STYLE_FILL_OPACITY       ) |
+                     ((uint64_t)1 << SVG_STYLE_FILL_RULE          )))
     {
-      if (state) state->saveFill();
+      if (state)
+        state->saveFill();
 
       if (styleMask & (1 << SVG_STYLE_FILL))
       {
-        switch (a_style._fillSource)
+        switch (_style._d.fillSource)
         {
           case SVG_SOURCE_NONE:
           case SVG_SOURCE_INVALID:
           {
-            visitor->setFillNone();
+            context->setFillNone();
             break;
           }
           case SVG_SOURCE_COLOR:
           {
-            visitor->setFillColor(a_style._fillColor);
+            context->setFillColor(_style._d.fillColor);
             break;
           }
           case SVG_SOURCE_URI:
           {
-            XmlElement* r = getDocument()->getElementById(parseCssLinkId(a_style._fillUri));
-            if (r && r->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
-            {
-              reinterpret_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_FILL);
-            }
+            DomElement* uriRef = getOwnerDocument()->getElementById(
+              parseCssLinkId(_style._d.fillUri));
+
+            if (uriRef != NULL && uriRef->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+              context->setFillPattern(static_cast<SvgElement*>(uriRef));
+            else
+              context->setFillNone();
             break;
           }
         }
@@ -1116,81 +1115,84 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
 
       if (styleMask & (1 << SVG_STYLE_FILL_OPACITY))
       {
-        visitor->setFillOpacity(a_style._fillOpacity);
+        context->setFillOpacity(_style._d.fillOpacity);
       }
 
       if (styleMask & (1 << SVG_STYLE_FILL_RULE))
       {
-        visitor->setFillRule(a_style._fillRule);
+        context->setFillRule(_style._d.fillRule);
       }
     }
 
     // Setup stroke parameters.
-    if (styleMask & ((1 << SVG_STYLE_STROKE             ) |
-                     (1 << SVG_STYLE_STROKE_DASH_ARRAY  ) |
-                     (1 << SVG_STYLE_STROKE_DASH_OFFSET ) |
-                     (1 << SVG_STYLE_STROKE_LINE_CAP    ) |
-                     (1 << SVG_STYLE_STROKE_LINE_JOIN   ) |
-                     (1 << SVG_STYLE_STROKE_MITER_LIMIT ) |
-                     (1 << SVG_STYLE_STROKE_OPACITY     ) |
-                     (1 << SVG_STYLE_STROKE_WIDTH       )))
+    if (styleMask & (((uint64_t)1 << SVG_STYLE_STROKE             ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_DASH_ARRAY  ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_DASH_OFFSET ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_LINE_CAP    ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_LINE_JOIN   ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_MITER_LIMIT ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_OPACITY     ) |
+                     ((uint64_t)1 << SVG_STYLE_STROKE_WIDTH       )))
     {
-      if (state) state->saveStroke();
+      if (state)
+        state->saveStroke();
 
       if (styleMask & (1 << SVG_STYLE_STROKE))
       {
-        switch (a_style._strokeSource)
+        switch (_style._d.strokeSource)
         {
           case SVG_SOURCE_NONE:
           case SVG_SOURCE_INVALID:
           {
-            visitor->setStrokeNone();
+            context->setStrokeNone();
             break;
           }
           case SVG_SOURCE_COLOR:
           {
-            visitor->setStrokeColor(a_style._strokeColor);
+            context->setStrokeColor(_style._d.strokeColor);
             break;
           }
           case SVG_SOURCE_URI:
           {
-            XmlElement* r = getDocument()->getElementById(parseCssLinkId(a_style._strokeUri));
-            if (r && r->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
-            {
-              static_cast<SvgElement*>(r)->onPattern(visitor, const_cast<SvgStyledElement*>(this), SVG_PAINT_STROKE);
-            }
+            DomElement* uriRef = getOwnerDocument()->getElementById(
+              parseCssLinkId(_style._d.strokeUri));
+
+            if (uriRef != NULL && uriRef->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+              context->setStrokePattern(static_cast<SvgElement*>(uriRef));
+            else
+              context->setStrokeNone();
             break;
           }
         }
       }
 
-      if (styleMask & (1 << SVG_STYLE_STROKE_LINE_CAP))
+      if (styleMask & ((uint64_t)1 << SVG_STYLE_STROKE_LINE_CAP))
       {
-        visitor->setLineCaps(a_style._strokeLineCap);
+        context->setLineCaps(_style._d.strokeLineCap);
       }
 
-      if (styleMask & (1 << SVG_STYLE_STROKE_LINE_JOIN))
+      if (styleMask & ((uint64_t)1 << SVG_STYLE_STROKE_LINE_JOIN))
       {
-        visitor->setLineJoin(a_style._strokeLineJoin);
+        context->setLineJoin(_style._d.strokeLineJoin);
       }
 
-      if (styleMask & (1 << SVG_STYLE_STROKE_MITER_LIMIT))
+      if (styleMask & ((uint64_t)1 << SVG_STYLE_STROKE_MITER_LIMIT))
       {
         float miterLimit = doc->_dpi.toDeviceSpace(
-          a_style._strokeMiterLimitValue, a_style._strokeMiterLimitUnit);
-        visitor->setMiterLimit(miterLimit);
+          _style._d.strokeMiterLimitValue, _style._d.strokeMiterLimitUnit);
+        context->setMiterLimit(miterLimit);
       }
 
-      if (styleMask & (1 << SVG_STYLE_STROKE_OPACITY))
+      if (styleMask & ((uint64_t)1 << SVG_STYLE_STROKE_OPACITY))
       {
-        visitor->setStrokeOpacity(a_style._strokeOpacity);
+        context->setStrokeOpacity(_style._d.strokeOpacity);
       }
 
-      if (styleMask & (1 << SVG_STYLE_STROKE_WIDTH))
+      if (styleMask & ((uint64_t)1 << SVG_STYLE_STROKE_WIDTH))
       {
         float lineWidth = doc->_dpi.toDeviceSpace(
-          a_style._strokeWidthValue, a_style._strokeWidthUnit);
-        visitor->setLineWidth(lineWidth);
+          _style._d.strokeWidthValue, _style._d.strokeWidthUnit);
+        context->setLineWidth(lineWidth);
       }
     }
   }
@@ -1198,88 +1200,215 @@ err_t SvgStyledElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
   return ERR_OK;
 }
 
-StringW SvgStyledElement::getStyle(const StringW& name) const
+
+
+// ============================================================================
+// [Fog::SvgTransformableElement]
+// ============================================================================
+
+SvgTransformableElement::SvgTransformableElement(DomDocument* ownerDocument,
+  const InternedStringW& tagName, uint32_t svgType)
+  :
+  SvgStylableElement(ownerDocument, tagName, svgType)
 {
-  StringW result;
-  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
-
-  if (m_name.isEmpty())
-    return result;
-
-  int id = svgStyleToId(m_name);
-  if ((uint)id >= SVG_STYLE_INVALID)
-    return result;
-
-  return a_style.getStyle(id);
 }
 
-err_t SvgStyledElement::setStyle(const StringW& name, const StringW& value)
+SvgTransformableElement::~SvgTransformableElement()
 {
-  ManagedStringW m_name(name, MANAGED_STRING_OPTION_LOOKUP);
-
-  if (m_name.isEmpty())
-    return ERR_SVG_INVALID_STYLE_NAME;
-
-  int id = svgStyleToId(m_name);
-  if ((uint)id >= SVG_STYLE_INVALID)
-    return ERR_SVG_INVALID_STYLE_NAME;
-
-  return a_style.setStyle(id, value);
 }
 
 // ============================================================================
-// [Fog::SvgRootElement]
+// [Fog::SvgTransformableElement - SVG Properties]
 // ============================================================================
 
-SvgRootElement::SvgRootElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_svg), SVG_ELEMENT_SVG),
-  a_x      (NULL, FOG_STR_(SVG_ATTRIBUTE_x      ), FOG_OFFSET_OF(SvgRootElement, a_x      )),
-  a_y      (NULL, FOG_STR_(SVG_ATTRIBUTE_y      ), FOG_OFFSET_OF(SvgRootElement, a_y      )),
-  a_width  (NULL, FOG_STR_(SVG_ATTRIBUTE_width  ), FOG_OFFSET_OF(SvgRootElement, a_width  )),
-  a_height (NULL, FOG_STR_(SVG_ATTRIBUTE_height ), FOG_OFFSET_OF(SvgRootElement, a_height )),
-  a_viewBox(NULL, FOG_STR_(SVG_ATTRIBUTE_viewBox), FOG_OFFSET_OF(SvgRootElement, a_viewBox))
+FOG_CORE_OBJ_DEF(SvgTransformableElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Transform, FOG_S(transform), SvgDomIO_TransformF())
+FOG_CORE_OBJ_END()
+
+err_t SvgTransformableElement::setTransform(const TransformF& transform)
+{
+  _transform = transform;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTransformableElement::resetTransform()
+{
+  _transform.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgTransformableElement - SVG Interface]
+// ============================================================================
+
+err_t SvgTransformableElement::onPrepare(SvgContext* context, SvgContextGState* state) const
+{
+  if (!_transform.isIdentity())
+  {
+    if (state && !state->hasState(SvgContextGState::SAVED_TRANSFORM))
+      state->saveTransform();
+    context->transform(_transform);
+  }
+
+  return Base::onPrepare(context, state);
+}
+
+// ============================================================================
+// [Fog::SvgRootElement - Construction / Destruction]
+// ============================================================================
+
+SvgRootElement::SvgRootElement(DomDocument* ownerDocument) :
+  SvgStylableElement(ownerDocument, FOG_S(svg), SVG_ELEMENT_SVG),
+  _viewBox(0.0f, 0.0f, 0.0f, 0.0f),
+  _x(0.0f),
+  _y(0.0f),
+  _width(0.0f),
+  _height(0.0f),
+  _xUnit(UNIT_NONE),
+  _yUnit(UNIT_NONE),
+  _widthUnit(UNIT_NONE),
+  _heightUnit(UNIT_NONE)
 {
 }
 
 SvgRootElement::~SvgRootElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgRootElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x      )) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y      )) return (XmlAttribute*)&a_y;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_width  )) return (XmlAttribute*)&a_width;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_height )) return (XmlAttribute*)&a_height;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_viewBox)) return (XmlAttribute*)&a_viewBox;
+// ============================================================================
+// [Fog::SvgRootElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgRootElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Width, FOG_S(width), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Height, FOG_S(height), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(ViewBox, FOG_S(transform), SvgDomIO_ViewBoxF())
+FOG_CORE_OBJ_END()
+
+err_t SvgRootElement::setViewBox(const BoxF& viewBox)
+{
+  _viewBox = viewBox;
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgRootElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
+err_t SvgRootElement::setX(const CoordF& x)
 {
-  if (a_viewBox.isAssigned() && a_viewBox.isValid())
+  _x = x.getValue();
+  _xUnit = x.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::setY(const CoordF& y)
+{
+  _y = y.getValue();
+  _yUnit = y.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::setWidth(const CoordF& width)
+{
+  _width = width.getValue();
+  _widthUnit = width.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::setHeight(const CoordF& height)
+{
+  _height = height.getValue();
+  _heightUnit = height.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::resetViewBox()
+{
+  _viewBox.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::resetX()
+{
+  _x = 0.0f;
+  _xUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::resetY()
+{
+  _y = 0.0f;
+  _yUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::resetWidth()
+{
+  _height = 0.0f;
+  _heightUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRootElement::resetHeight()
+{
+  _height = 0.0f;
+  _heightUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgRootElement - SVG Interface]
+// ============================================================================
+
+err_t SvgRootElement::onPrepare(SvgContext* context, SvgContextGState* state) const
+{
+  if (_viewBox.isValid())
   {
-    if (state) state->saveTransform();
+    if (state)
+      state->saveTransform();
 
     SizeF size = getRootSize();
-    BoxF box = a_viewBox.getBox();
+    const BoxF& box = _viewBox;
 
     TransformF tr(
       size.w / box.getWidth(), 0.0f,
       0.0f, size.h / box.getHeight(),
       -box.x0, -box.y0);
-    visitor->transform(tr);
+    context->transform(tr);
   }
 
-  return base::onPrepare(visitor, state);
+  return Base::onPrepare(context, state);
 }
 
-err_t SvgRootElement::onProcess(SvgVisitor* visitor) const
+err_t SvgRootElement::onProcess(SvgContext* context) const
 {
-  if (!hasChildNodes()) return ERR_OK;
-  return _visitContainer(visitor);
+  if (!hasChildNodes())
+    return ERR_OK;
+
+  return _visitContainer(context);
 }
 
 err_t SvgRootElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -1293,17 +1422,19 @@ SizeF SvgRootElement::getRootSize() const
   SizeF size(0.0f, 0.0f);
 
   // Width/Height of document are assigned.
-  if (a_width.isAssigned() && a_height.isAssigned())
+  if (_width > 0.0f && _height > 0.0f)
   {
-    float w = a_width.getCoordComputed();
-    float h = a_height.getCoordComputed();
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    if (a_width.getCoordUnit() == UNIT_PERCENTAGE || a_height.getCoordUnit() == UNIT_PERCENTAGE)
+    float w = svgGetCoord(doc, _width, _widthUnit);
+    float h = svgGetCoord(doc, _height, _heightUnit);
+ 
+    if (_widthUnit == UNIT_PERCENTAGE || _heightUnit == UNIT_PERCENTAGE)
     {
-      if (a_viewBox.isAssigned() && a_viewBox.isValid())
+      if (_viewBox.isValid())
       {
-        w = a_viewBox.getBox().getWidth();
-        h = a_viewBox.getBox().getHeight();
+        w = _viewBox.getWidth();
+        h = _viewBox.getHeight();
       }
       else
       {
@@ -1330,82 +1461,135 @@ SizeF SvgRootElement::getRootSize() const
 // [Fog::SvgSolidColorElement]
 // ============================================================================
 
-SvgSolidColorElement::SvgSolidColorElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_solidColor), SVG_ELEMENT_SOLID_COLOR)
+SvgSolidColorElement::SvgSolidColorElement(DomDocument* ownerDocument) :
+  SvgStylableElement(ownerDocument, FOG_S(solidColor), SVG_ELEMENT_SOLID_COLOR)
 {
 }
 
 SvgSolidColorElement::~SvgSolidColorElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgSolidColorElement::_createAttribute(const ManagedStringW& name) const
-{
-  return base::_createAttribute(name);
-}
-
-err_t SvgSolidColorElement::onProcess(SvgVisitor* visitor) const
+err_t SvgSolidColorElement::onProcess(SvgContext* context) const
 {
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::SvgAbstractGradientElement]
+// [Fog::SvgGradientElement - Construction / Destruction]
 // ============================================================================
 
-SvgAbstractGradientElement::SvgAbstractGradientElement(const ManagedStringW& tagName, uint32_t svgType) :
-  SvgStyledElement(tagName, svgType),
-  a_spreadMethod     (NULL, FOG_STR_(SVG_ATTRIBUTE_spreadMethod     ), FOG_OFFSET_OF(SvgAbstractGradientElement, a_spreadMethod     ), svgEnum_spreadMethod),
-  a_gradientUnits    (NULL, FOG_STR_(SVG_ATTRIBUTE_gradientUnits    ), FOG_OFFSET_OF(SvgAbstractGradientElement, a_gradientUnits    ), svgEnum_gradientUnits),
-  a_gradientTransform(NULL, FOG_STR_(SVG_ATTRIBUTE_gradientTransform), FOG_OFFSET_OF(SvgAbstractGradientElement, a_gradientTransform))
+SvgGradientElement::SvgGradientElement(DomDocument* ownerDocument, const InternedStringW& tagName, uint32_t svgType) :
+  SvgStylableElement(ownerDocument, tagName, svgType),
+  _gradientTransform(),
+  _spreadMethod(GRADIENT_SPREAD_PAD),
+  _gradientUnits(SVG_OBJECT_BOUNDING_BOX)
 {
 }
 
-SvgAbstractGradientElement::~SvgAbstractGradientElement()
+SvgGradientElement::~SvgGradientElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgAbstractGradientElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_spreadMethod     )) return (XmlAttribute*)&a_spreadMethod;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_gradientUnits    )) return (XmlAttribute*)&a_gradientUnits;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_gradientTransform)) return (XmlAttribute*)&a_gradientTransform;
+// ============================================================================
+// [Fog::SvgGradientElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgGradientElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(SpreadMethod, FOG_S(spreadMethod), SvgDomIO_Enum(svgEnum_spreadMethod))
+  FOG_CORE_OBJ_PROPERTY_BASE(GradientUnits, FOG_S(gradientUnits), SvgDomIO_Enum(svgEnum_gradientUnits))
+  FOG_CORE_OBJ_PROPERTY_BASE(GradientTransform, FOG_S(gradientTransform), SvgDomIO_TransformF())
+FOG_CORE_OBJ_END()
+
+err_t SvgGradientElement::setSpreadMethod(uint32_t spreadMethod)
+{
+  if (spreadMethod >= GRADIENT_SPREAD_COUNT)
+    return ERR_OBJ_INVALID_VALUE;
+
+  _spreadMethod = spreadMethod;
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgAbstractGradientElement::onProcess(SvgVisitor* visitor) const
+err_t SvgGradientElement::resetSpreadMethod()
+{
+  _spreadMethod = GRADIENT_SPREAD_PAD;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgGradientElement::setGradientUnits(uint32_t gradientUnits)
+{
+  if (gradientUnits >= SVG_PATTERN_UNITS_COUNT)
+    return ERR_OBJ_INVALID_VALUE;
+
+  _gradientUnits = gradientUnits;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgGradientElement::resetGradientUnits()
+{
+  _gradientUnits = SVG_OBJECT_BOUNDING_BOX;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgGradientElement::setGradientTransform(const TransformF& gradientTransform)
+{
+  _gradientTransform = gradientTransform;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgGradientElement::resetGradientTransform()
+{
+  _gradientTransform.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgGradientElement - SVG Interface]
+// ============================================================================
+
+err_t SvgGradientElement::onProcess(SvgContext* context) const
 {
   return ERR_OK;
 }
 
-void SvgAbstractGradientElement::_walkAndAddColorStops(XmlElement* root, GradientF& gradient)
+void SvgGradientElement::_walkAndAddColorStops(DomElement* root, GradientF& gradient)
 {
   bool stopsParsed = false;
-  XmlElement* e;
-  int depth = 0;
+  uint depth = 0;
 
+  DomNode* node;
   for (;;)
   {
-    for (e = root->getFirstChild(); e != NULL; e = e->getNextSibling())
+    for (node = root->getFirstChild(); node != NULL; node = node->getNextSibling())
     {
-      if (e->isExtensionGroupAndType(DOM_EXT_GROUP_SVG, SVG_ELEMENT_STOP))
+      if (node->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_STOP))
       {
-        SvgStopElement* stop = static_cast<SvgStopElement*>(e);
+        SvgStopElement* stop = static_cast<SvgStopElement*>(node);
 
-        if (stop->a_offset.isAssigned() && stop->a_style.hasStyle(SVG_STYLE_STOP_COLOR))
+        if (stop->_offsetAssigned)
         {
-          float offset = stop->a_offset.getOffset();
-          Color color(stop->a_style._stopColor);
+          float offset = stop->_offset;
+          Argb32 argb(0xFF000000);
+          
+          if (stop->_style.hasStyle(SVG_STYLE_STOP_COLOR))
+            argb = stop->_style.getStopColor();
 
-          if (stop->a_style.hasStyle(SVG_STYLE_STOP_OPACITY))
-          {
-            color.setAlpha(stop->a_style._stopOpacity);
-          }
+          if (stop->_style.hasStyle(SVG_STYLE_STOP_OPACITY))
+            argb.setAlpha(Math::iround(stop->_style.getStopOpacity() * 255.0f));
 
-          gradient.addStop(offset, color);
+          gradient.addStop(offset, argb);
           stopsParsed = true;
         }
       }
@@ -1413,15 +1597,19 @@ void SvgAbstractGradientElement::_walkAndAddColorStops(XmlElement* root, Gradien
     
     if (!stopsParsed)
     {
-      StringW link = root->_getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
-
-      if ((!link.isEmpty() && link.getAt(0) == CharW('#')) &&
-          (e = root->getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1))))
+      StringW link = root->getAttribute(FOG_S(xlink_href));
+      if (link.startsWith(CharW('#')))
       {
-        root = e;
-        if (++depth == 32)
-          return;
-        continue;
+        DomDocument* document = root->getOwnerDocument();
+        node = document->getElementById(StubW(link.getData() + 1, link.getLength() - 1));
+
+        if (node != NULL)
+        {
+          root = static_cast<DomElement*>(node);
+          if (++depth == 32)
+            return;
+          continue;
+        }
       }
     }
 
@@ -1430,52 +1618,120 @@ void SvgAbstractGradientElement::_walkAndAddColorStops(XmlElement* root, Gradien
 }
 
 // ============================================================================
-// [Fog::SvgLinearGradientElement]
+// [Fog::SvgLinearGradientElement - Construction / Destruction]
 // ============================================================================
 
-SvgLinearGradientElement::SvgLinearGradientElement() :
-  SvgAbstractGradientElement(FOG_STR_(SVG_ELEMENT_linearGradient), SVG_ELEMENT_LINEAR_GRADIENT),
-  a_x1(NULL, FOG_STR_(SVG_ATTRIBUTE_x1), FOG_OFFSET_OF(SvgLinearGradientElement, a_x1)),
-  a_y1(NULL, FOG_STR_(SVG_ATTRIBUTE_y1), FOG_OFFSET_OF(SvgLinearGradientElement, a_y1)),
-  a_x2(NULL, FOG_STR_(SVG_ATTRIBUTE_x2), FOG_OFFSET_OF(SvgLinearGradientElement, a_x2)),
-  a_y2(NULL, FOG_STR_(SVG_ATTRIBUTE_y2), FOG_OFFSET_OF(SvgLinearGradientElement, a_y2))
+SvgLinearGradientElement::SvgLinearGradientElement(DomDocument* ownerDocument) :
+  SvgGradientElement(ownerDocument, FOG_S(linearGradient), SVG_ELEMENT_LINEAR_GRADIENT),
+  _x1(0.0f),
+  _y1(0.0f),
+  _x2(1.0f),
+  _y2(0.0f),
+  _x1Unit(UNIT_NONE),
+  _y1Unit(UNIT_NONE),
+  _x2Unit(UNIT_NONE),
+  _y2Unit(UNIT_NONE)
 {
 }
 
 SvgLinearGradientElement::~SvgLinearGradientElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgLinearGradientElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x1)) return (XmlAttribute*)&a_x1;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y1)) return (XmlAttribute*)&a_y1;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x2)) return (XmlAttribute*)&a_x2;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y2)) return (XmlAttribute*)&a_y2;
+// ============================================================================
+// [Fog::SvgLinearGradientElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgLinearGradientElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X1, FOG_S(x1), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y1, FOG_S(y1), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(X2, FOG_S(x2), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y2, FOG_S(y2), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgLinearGradientElement::setX1(const CoordF& x1)
+{
+  _x1 = x1.getValue();
+  _x1Unit = x1.getUnit();
+
+  return ERR_OK;
 }
 
-err_t SvgLinearGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
+err_t SvgLinearGradientElement::resetX1()
 {
+  _x1 = 0.0f;
+  _x1Unit = UNIT_NONE;
+
+  return ERR_OK;
+}
+
+err_t SvgLinearGradientElement::setY1(const CoordF& y1)
+{
+  _y1 = y1.getValue();
+  _y1Unit = y1.getUnit();
+
+  return ERR_OK;
+}
+
+err_t SvgLinearGradientElement::resetY1()
+{
+  _y1 = 0.0f;
+  _y1Unit = UNIT_NONE;
+
+  return ERR_OK;
+}
+
+err_t SvgLinearGradientElement::setX2(const CoordF& x2)
+{
+  _x2 = x2.getValue();
+  _x2Unit = x2.getUnit();
+
+  return ERR_OK;
+}
+
+err_t SvgLinearGradientElement::resetX2()
+{
+  _x2 = 1.0f;
+  _x2Unit = UNIT_NONE;
+
+  return ERR_OK;
+}
+
+err_t SvgLinearGradientElement::setY2(const CoordF& y2)
+{
+  _y2 = y2.getValue();
+  _y2Unit = y2.getUnit();
+
+  return ERR_OK;
+}
+
+err_t SvgLinearGradientElement::resetY2()
+{
+  _y2 = 0.0f;
+  _y2Unit = UNIT_NONE;
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgLinearGradientElement - SVG Interface]
+// ============================================================================
+
+err_t SvgLinearGradientElement::onPattern(SvgContext* context, SvgElement* obj, Pattern* dst) const
+{
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+
   LinearGradientF gradient;
+  gradient.setGradientSpread(_spreadMethod);
+
   TransformF tr;
 
-  // Set spread method.
-  if (a_spreadMethod.isAssigned()) gradient.setGradientSpread(a_spreadMethod.getEnumValue());
-
   // Setup start and end points.
-  if (!a_gradientUnits.isAssigned() || a_gradientUnits.getEnumValue() == SVG_OBJECT_BOUNDING_BOX)
+  if (_gradientUnits == SVG_OBJECT_BOUNDING_BOX)
   {
     // "objectBoundingBox".
     BoxF bbox;
     obj->getBoundingBox(bbox);
-
-    float x1 = a_x1.isAssigned() ? a_x1.getCoordValue() : 0.0f;
-    float y1 = a_y1.isAssigned() ? a_y1.getCoordValue() : 0.0f;
-    float x2 = a_x2.isAssigned() ? a_x2.getCoordValue() : 1.0f;
-    float y2 = a_y2.isAssigned() ? a_y2.getCoordValue() : 0.0f;
 
     tr._type = TRANSFORM_TYPE_SCALING;
     tr._00 = bbox.getWidth();
@@ -1483,85 +1739,179 @@ err_t SvgLinearGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
     tr._20 = bbox.getX();
     tr._21 = bbox.getY();
 
-    gradient.setStart(PointF(x1, y1));
-    gradient.setEnd(PointF(x2, y2));
+    gradient.setStart(_x1, _y1);
+    gradient.setEnd(_x2, _y2);
   }
   else
   {
     // "userSpaceOnUse".
-    float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
-    float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
-    float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 1.0f;
-    float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
+    float x1 = svgGetCoord(doc, _x1, _x1Unit);
+    float y1 = svgGetCoord(doc, _y1, _y1Unit);
+    float x2 = svgGetCoord(doc, _x2, _x2Unit);
+    float y2 = svgGetCoord(doc, _y2, _y2Unit);
 
     // TODO: Percentages to the current view-port.
-    // if (!a_x1.isAssigned() || a_x1.getCoordUnit() == COORD_UNIT_PERCENT)
-    // if (!a_y1.isAssigned() || a_y1.getCoordUnit() == COORD_UNIT_PERCENT)
-    // if (!a_x2.isAssigned() || a_x2.getCoordUnit() == COORD_UNIT_PERCENT)
-    // if (!a_y2.isAssigned() || a_y2.getCoordUnit() == COORD_UNIT_PERCENT)
+    // if (!_x1.isAssigned() || _x1.getUnit() == UNIT_PERCENT)
+    // if (!_y1.isAssigned() || _y1.getUnit() == UNIT_PERCENT)
+    // if (!_x2.isAssigned() || _x2.getUnit() == UNIT_PERCENT)
+    // if (!_y2.isAssigned() || _y2.getUnit() == UNIT_PERCENT)
 
-    gradient.setStart(PointF(x1, y1));
-    gradient.setEnd(PointF(x2, y2));
+    gradient.setStart(x1, y1);
+    gradient.setEnd(x2, y2);
   }
 
   // Add color stops.
   _walkAndAddColorStops(const_cast<SvgLinearGradientElement*>(this), gradient);
 
-  if (a_gradientTransform.isAssigned())
-    tr.transform(a_gradientTransform.getTransform(), MATRIX_ORDER_APPEND);
-
   // Create Pattern instance.
-  Pattern pattern(gradient, tr);
-
-  if (paintType == SVG_PAINT_FILL)
-    visitor->setFillPattern(pattern);
-  else
-    visitor->setStrokePattern(pattern);
-
-  return ERR_OK;
+  tr.transform(_gradientTransform, MATRIX_ORDER_APPEND);
+  return dst->createGradient(gradient, tr);
 }
 
 // ============================================================================
-// [Fog::SvgRadialGradientElement]
+// [Fog::SvgRadialGradientElement - Construction / Destruction]
 // ============================================================================
 
-SvgRadialGradientElement::SvgRadialGradientElement() :
-  SvgAbstractGradientElement(FOG_STR_(SVG_ELEMENT_radialGradient), SVG_ELEMENT_RADIAL_GRADIENT),
-  a_cx(NULL, FOG_STR_(SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgRadialGradientElement, a_cx)),
-  a_cy(NULL, FOG_STR_(SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgRadialGradientElement, a_cy)),
-  a_fx(NULL, FOG_STR_(SVG_ATTRIBUTE_fx), FOG_OFFSET_OF(SvgRadialGradientElement, a_fx)),
-  a_fy(NULL, FOG_STR_(SVG_ATTRIBUTE_fy), FOG_OFFSET_OF(SvgRadialGradientElement, a_fx)),
-  a_r (NULL, FOG_STR_(SVG_ATTRIBUTE_r ), FOG_OFFSET_OF(SvgRadialGradientElement, a_r ))
+SvgRadialGradientElement::SvgRadialGradientElement(DomDocument* ownerDocument) :
+  SvgGradientElement(ownerDocument, FOG_S(radialGradient), SVG_ELEMENT_RADIAL_GRADIENT),
+  _cx(0.5f),
+  _cy(0.5f),
+  _fx(0.0f),
+  _fy(0.0f),
+  _r(0.5f),
+  _cxUnit(UNIT_NONE),
+  _cyUnit(UNIT_NONE),
+  _fxUnit(UNIT_NONE),
+  _fyUnit(UNIT_NONE),
+  _rUnit(UNIT_NONE),
+  _fxAssigned(false),
+  _fyAssigned(false)
 {
 }
 
 SvgRadialGradientElement::~SvgRadialGradientElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgRadialGradientElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_fx)) return (XmlAttribute*)&a_fx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_fy)) return (XmlAttribute*)&a_fy;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_r )) return (XmlAttribute*)&a_r;
+// ============================================================================
+// [Fog::SvgRadialGradientElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgRadialGradientElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Cx, FOG_S(cx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Cy, FOG_S(cy), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Fx, FOG_S(fx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Fy, FOG_S(fy), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(R, FOG_S(r), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgRadialGradientElement::setCx(const CoordF& cx)
+{
+  _cx = cx.getValue();
+  _cxUnit = cx.getUnit();
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgRadialGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
+err_t SvgRadialGradientElement::resetCx()
 {
+  _cx = 0.5f;
+  _cxUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::setCy(const CoordF& cy)
+{
+  _cy = cy.getValue();
+  _cyUnit = cy.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::resetCy()
+{
+  _cy = 0.5f;
+  _cyUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::setFx(const CoordF& fx)
+{
+  _fx = fx.getValue();
+  _fxUnit = fx.getUnit();
+  _fxAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::resetFx()
+{
+  _fx = 0.0f;
+  _fxUnit = UNIT_NONE;
+  _fxAssigned = false;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::setFy(const CoordF& fy)
+{
+  _fy = fy.getValue();
+  _fyUnit = fy.getUnit();
+  _fyAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::resetFy()
+{
+  _fy = 0.0f;
+  _fyUnit = UNIT_NONE;
+  _fyAssigned = false;
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::setR(const CoordF& r)
+{
+  _r = r.getValue();
+  _rUnit = r.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRadialGradientElement::resetR()
+{
+  _r = 0.5f;
+  _rUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgRadialGradientElement - SVG Interface]
+// ============================================================================
+
+err_t SvgRadialGradientElement::onPattern(SvgContext* context, SvgElement* obj, Pattern* dst) const
+{
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+
   // SVG TODO: Radial Gradient.
-
   RadialGradientF gradient;
-
-  // Set spread method.
-  if (a_spreadMethod.isAssigned()) gradient.setGradientSpread(a_spreadMethod.getEnumValue());
+  gradient.setGradientSpread(_spreadMethod);
 
   // Setup start and end points.
-  if (!a_gradientUnits.isAssigned() || a_gradientUnits.getEnumValue() == SVG_OBJECT_BOUNDING_BOX)
+  if (_gradientUnits == SVG_OBJECT_BOUNDING_BOX)
   {
     BoxF bbox;
     obj->getBoundingBox(bbox);
@@ -1569,11 +1919,13 @@ err_t SvgRadialGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
     float bw = bbox.getWidth();
     float bh = bbox.getHeight();
 
-    float cx = a_cx.isAssigned() ? a_cx.getCoordValue() : 0.5f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordValue() : 0.5f;
-    float fx = a_fx.isAssigned() ? a_fx.getCoordValue() : cx;
-    float fy = a_fy.isAssigned() ? a_fy.getCoordValue() : cy;
-    float rx = a_r.isAssigned() ? a_r.getCoordValue() : 0.5f;
+    float cx = _cx;
+    float cy = _cy;
+
+    float fx = _fxAssigned ? _fx : cx;
+    float fy = _fyAssigned ? _fy : cy;
+
+    float rx = _r;
     float ry = rx;
 
     cx = bbox.x0 + bw * cx;
@@ -1583,104 +1935,222 @@ err_t SvgRadialGradientElement::onPattern(SvgVisitor* visitor, SvgElement* obj, 
     rx = bw * rx;
     ry = bh * ry;
 
-    gradient.setCenter(PointF(cx, cy));
-    gradient.setFocal(PointF(fx, fy));
-    gradient.setRadius(PointF(rx, ry));
+    gradient.setCenter(cx, cy);
+    gradient.setFocal(fx, fy);
+    gradient.setRadius(rx, ry);
   }
   else
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.5f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.5f;
-    float fx = a_fx.isAssigned() ? a_fx.getCoordComputed() : cx;
-    float fy = a_fy.isAssigned() ? a_fy.getCoordComputed() : cy;
-    float rx = a_r.isAssigned() ? a_r.getCoordComputed() : 0.5f;
+    float cx = svgGetCoord(doc, _cx, _cxUnit);
+    float cy = svgGetCoord(doc, _cy, _cyUnit);
+
+    float fx = _fxAssigned ? svgGetCoord(doc, _fx, _fxUnit) : cx;
+    float fy = _fyAssigned ? svgGetCoord(doc, _fy, _fyUnit) : cy;
+
+    float rx = svgGetCoord(doc, _r, _rUnit);
     float ry = rx;
 
     // TODO: Percentages to the current view-port.
-
-    gradient.setCenter(PointF(cx, cy));
-    gradient.setFocal(PointF(fx, fy));
-    gradient.setRadius(PointF(rx, ry));
+    gradient.setCenter(cx, cy);
+    gradient.setFocal(fx, fy);
+    gradient.setRadius(rx, ry);
   }
 
   // Add color stops.
   _walkAndAddColorStops(const_cast<SvgRadialGradientElement*>(this), gradient);
 
   // Create Pattern instance.
-  Pattern pattern(gradient, a_gradientTransform.isAssigned()
-    ? a_gradientTransform.getTransform()
-    : TransformF::identity()
-  );
-
-  if (paintType == SVG_PAINT_FILL)
-    visitor->setFillPattern(pattern);
-  else
-    visitor->setStrokePattern(pattern);
-
-  return ERR_OK;
+  return dst->createGradient(gradient, _gradientTransform);
 }
 
 // ============================================================================
-// [Fog::SvgPatternElement]
+// [Fog::SvgPatternElement - Construction / Destruction]
 // ============================================================================
 
-SvgPatternElement::SvgPatternElement() :
-  SvgElement(FOG_STR_(SVG_ELEMENT_pattern), SVG_ELEMENT_PATTERN),
-  a_x               (NULL, FOG_STR_(SVG_ATTRIBUTE_x               ), FOG_OFFSET_OF(SvgPatternElement, a_x               )),
-  a_y               (NULL, FOG_STR_(SVG_ATTRIBUTE_y               ), FOG_OFFSET_OF(SvgPatternElement, a_y               )),
-  a_width           (NULL, FOG_STR_(SVG_ATTRIBUTE_width           ), FOG_OFFSET_OF(SvgPatternElement, a_width           )),
-  a_height          (NULL, FOG_STR_(SVG_ATTRIBUTE_height          ), FOG_OFFSET_OF(SvgPatternElement, a_height          )),
-  a_patternUnits    (NULL, FOG_STR_(SVG_ATTRIBUTE_patternUnits    ), FOG_OFFSET_OF(SvgPatternElement, a_patternUnits    ), svgEnum_gradientUnits),
-  a_patternTransform(NULL, FOG_STR_(SVG_ATTRIBUTE_patternTransform), FOG_OFFSET_OF(SvgPatternElement, a_patternTransform)),
-  a_viewBox         (NULL, FOG_STR_(SVG_ATTRIBUTE_viewBox         ), FOG_OFFSET_OF(SvgPatternElement, a_viewBox         ))
+SvgPatternElement::SvgPatternElement(DomDocument* ownerDocument) :
+  SvgElement(ownerDocument, FOG_S(pattern), SVG_ELEMENT_PATTERN),
+  _patternTransform(),
+  _viewBox(0.0f, 0.0f, 0.0f, 0.0f),
+  _x(0.0f),
+  _y(0.0f),
+  _width(0.0f),
+  _height(0.0f),
+  _xUnit(UNIT_NONE),
+  _yUnit(UNIT_NONE),
+  _widthUnit(UNIT_NONE),
+  _heightUnit(UNIT_NONE),
+  _patternUnits(SVG_OBJECT_BOUNDING_BOX)
 {
 }
 
 SvgPatternElement::~SvgPatternElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgPatternElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgPatternElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgPatternElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Width, FOG_S(width), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Height, FOG_S(height), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(PatternTransform, FOG_S(patternTransform), SvgDomIO_TransformF())
+  FOG_CORE_OBJ_PROPERTY_BASE(PatternUnits, FOG_S(patternUnits), SvgDomIO_Enum(svgEnum_gradientUnits))
+  FOG_CORE_OBJ_PROPERTY_BASE(ViewBox, FOG_S(viewBox), SvgDomIO_ViewBoxF())
+FOG_CORE_OBJ_END()
+
+err_t SvgPatternElement::setX(const CoordF& x)
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x               )) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y               )) return (XmlAttribute*)&a_y;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_width           )) return (XmlAttribute*)&a_width;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_height          )) return (XmlAttribute*)&a_height;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_patternUnits    )) return (XmlAttribute*)&a_patternUnits;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_patternTransform)) return (XmlAttribute*)&a_patternTransform;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_viewBox         )) return (XmlAttribute*)&a_viewBox;
+  _x = x.getValue();
+  _xUnit = x.getUnit();
+  _setDirty();
 
-  return base::_createAttribute(name);
+  return ERR_OK;
 }
 
-err_t SvgPatternElement::onProcess(SvgVisitor* visitor) const
+err_t SvgPatternElement::resetX()
+{
+  _x = 0.0f;
+  _xUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::setY(const CoordF& y)
+{
+  _y = y.getValue();
+  _yUnit = y.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::resetY()
+{
+  _y = 0.0f;
+  _yUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::setWidth(const CoordF& width)
+{
+  _width = width.getValue();
+  _widthUnit = width.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::resetWidth()
+{
+  _width = 0.0f;
+  _widthUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::setHeight(const CoordF& height)
+{
+  _height = height.getValue();
+  _heightUnit = height.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::resetHeight()
+{
+  _height = 0.0f;
+  _heightUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::setPatternTransform(const TransformF& patternTransform)
+{
+  _patternTransform = patternTransform;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::resetPatternTransform()
+{
+  _patternTransform.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::setPatternUnits(uint32_t patternUnits)
+{
+  if (patternUnits >= SVG_PATTERN_UNITS_COUNT)
+    return ERR_OBJ_INVALID_VALUE;
+
+  _patternUnits = patternUnits;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::resetPatternUnits()
+{
+  _patternUnits = SVG_OBJECT_BOUNDING_BOX;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::setViewBox(const BoxF& viewBox)
+{
+  _viewBox = viewBox;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgPatternElement::resetViewBox()
+{
+  _viewBox.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgPatternElement - SVG Interface]
+// ============================================================================
+
+err_t SvgPatternElement::onProcess(SvgContext* context) const
 {
   return ERR_OK;
 }
 
-err_t SvgPatternElement::onPattern(SvgVisitor* visitor, SvgElement* obj, uint32_t paintType) const
+err_t SvgPatternElement::onPattern(SvgContext* context, SvgElement* obj, Pattern* dst) const
 {
-  Pattern pattern;
-  FOG_RETURN_ON_ERROR(_createPattern(pattern, obj));
-
-  if (paintType == SVG_PAINT_FILL)
-    visitor->setFillPattern(pattern);
-  else
-    visitor->setStrokePattern(pattern);
-  return ERR_OK;
+  return _createPattern(*dst, obj);
 }
 
 err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
 {
-  StringW link = _getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+  StringW link = getAttribute(FOG_S(xlink_href));
 
   if (!link.isEmpty() && link.getAt(0) == CharW('#'))
   {
-    XmlElement* e = getDocument()->getElementById(StubW(link.getData() + 1, link.getLength() - 1));
-    if (e != NULL && e->isExtensionGroupAndType(DOM_EXT_GROUP_SVG, SVG_ELEMENT_PATTERN))
+    DomElement* element = doc->getElementById(StubW(link.getData() + 1, link.getLength() - 1));
+
+    if (element != NULL &&
+        element->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_PATTERN))
     {
-      SvgPatternElement* pe = static_cast<SvgPatternElement*>(e);
+      SvgPatternElement* pe = static_cast<SvgPatternElement*>(element);
       FOG_RETURN_ON_ERROR(pe->_createPattern(pattern, obj));
       goto _AssignTransform;
     }
@@ -1688,9 +2158,11 @@ err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
 
   // TODO: Object bounding box support.
   {
-    int w = a_width.isAssigned()  ? (int)a_width.getCoordValue()  : 0;
-    int h = a_height.isAssigned() ? (int)a_height.getCoordValue() : 0;
-    if (w == 0 || h == 0) return ERR_IMAGE_INVALID_SIZE;
+    int w = Math::iround(svgGetCoord(doc, _width, _widthUnit));
+    int h = Math::iround(svgGetCoord(doc, _height, _heightUnit));
+
+    if (w == 0 || h == 0)
+      return ERR_IMAGE_INVALID_SIZE;
 
     Image image;
     FOG_RETURN_ON_ERROR(image.create(SizeI(w, h), IMAGE_FORMAT_PRGB32));
@@ -1700,9 +2172,9 @@ err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
     painter.setCompositingOperator(COMPOSITE_SRC);
     painter.fillAll();
 
-    if (a_viewBox.isAssigned() && a_viewBox.isValid())
+    if (_viewBox.isValid())
     {
-      const BoxF& box = a_viewBox.getBox();
+      const BoxF& box = _viewBox;
       float bbw = box.getWidth();
       float bbh = box.getHeight();
 
@@ -1716,89 +2188,125 @@ err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
       }
     }
 
-    SvgRender render(&painter);
-    _visitContainer(&render);
+    SvgRenderContext ctx(doc->_createContextExtension(NULL));
+
+    ctx.setPainter(&painter);
+    ctx.initPainter();
+    _visitContainer(&ctx);
+    ctx.resetPainter();
     painter.end();
 
-    float tx = a_x.isAssigned() ? a_x.getCoordValue() : 0.0f;
-    float ty = a_y.isAssigned() ? a_y.getCoordValue() : 0.0f;
+    float tx = svgGetCoord(doc, _x, _xUnit);
+    float ty = svgGetCoord(doc, _y, _yUnit);
 
     pattern.createTexture(Texture(image, TEXTURE_TILE_REPEAT));
     pattern.translate(PointF(tx, ty));
   }
 
 _AssignTransform:
-  if (a_patternTransform.isAssigned() && a_patternTransform.isValid())
-    pattern.transform(a_patternTransform.getTransform());
+  if (!_patternTransform.isIdentity())
+    pattern.transform(_patternTransform);
 
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::SvgStopElement]
+// [Fog::SvgStopElement - Construction / Destruction]
 // ============================================================================
 
-SvgStopElement::SvgStopElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_stop), SVG_ELEMENT_STOP),
-  a_offset(NULL, FOG_STR_(SVG_ATTRIBUTE_offset), FOG_OFFSET_OF(SvgStopElement, a_offset))
+SvgStopElement::SvgStopElement(DomDocument* ownerDocument) :
+  SvgStylableElement(ownerDocument, FOG_S(stop), SVG_ELEMENT_STOP),
+  _offset(0.0f),
+  _offsetAssigned(false)
 {
 }
 
 SvgStopElement::~SvgStopElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgStopElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgStopElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgStopElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Offset, FOG_S(offset), SvgDomIO_OffsetF())
+FOG_CORE_OBJ_END()
+
+err_t SvgStopElement::setOffset(float offset)
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_offset)) return (XmlAttribute*)&a_offset;
+  if (!Math::isFinite(offset))
+    return ERR_OBJ_INVALID_VALUE;
 
-  return base::_createAttribute(name);
+  _offset = Math::bound<float>(offset, 0.0f, 1.0f);
+  _offsetAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgStopElement::onProcess(SvgVisitor* visitor) const
+err_t SvgStopElement::resetOffset()
+{
+  _offset = 0.0f;
+  _offsetAssigned = false;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgStopElement - SVG Interface]
+// ============================================================================
+
+err_t SvgStopElement::onProcess(SvgContext* context) const
 {
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::SvgDefsElement]
+// [Fog::SvgDefsElement - Construction / Destruction]
 // ============================================================================
 
-SvgDefsElement::SvgDefsElement() :
-  SvgElement(FOG_STR_(SVG_ELEMENT_defs), SVG_ELEMENT_DEFS)
+SvgDefsElement::SvgDefsElement(DomDocument* ownerDocument) :
+  SvgElement(ownerDocument, FOG_S(defs), SVG_ELEMENT_DEFS)
 {
 }
 
 SvgDefsElement::~SvgDefsElement()
 {
-  _removeAttributes();
 }
 
-err_t SvgDefsElement::onProcess(SvgVisitor* visitor) const
+// ============================================================================
+// [Fog::SvgDefsElement - SVG Interface]
+// ============================================================================
+
+err_t SvgDefsElement::onProcess(SvgContext* context) const
 {
   // <defs> section is used only to define shared resources. Don't go inside.
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::SvgGElement]
+// [Fog::SvgGElement - Construction / Destruction]
 // ============================================================================
 
-SvgGElement::SvgGElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_g), SVG_ELEMENT_G)
+SvgGElement::SvgGElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(g), SVG_ELEMENT_G)
 {
 }
 
 SvgGElement::~SvgGElement()
 {
-  _removeAttributes();
 }
 
-err_t SvgGElement::onProcess(SvgVisitor* visitor) const
+// ============================================================================
+// [Fog::SvgGElement - SVG Interface]
+// ============================================================================
+
+err_t SvgGElement::onProcess(SvgContext* context) const
 {
   if (!hasChildNodes()) return ERR_OK;
-  return _visitContainer(visitor);
+  return _visitContainer(context);
 }
 
 err_t SvgGElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -1817,76 +2325,121 @@ err_t SvgGElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 }
 
 // ============================================================================
-// [Fog::SvgSymbolElement]
+// [Fog::SvgSymbolElement - Construction / Destruction]
 // ============================================================================
 
-SvgSymbolElement::SvgSymbolElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_symbol), SVG_ELEMENT_SYMBOL)
+SvgSymbolElement::SvgSymbolElement(DomDocument* ownerDocument) :
+  SvgStylableElement(ownerDocument, FOG_S(symbol), SVG_ELEMENT_SYMBOL)
 {
 }
 
 SvgSymbolElement::~SvgSymbolElement()
 {
-  _removeAttributes();
 }
 
-err_t SvgSymbolElement::onProcess(SvgVisitor* visitor) const
+// ============================================================================
+// [Fog::SvgSymbolElement - SVG Interface]
+// ============================================================================
+
+err_t SvgSymbolElement::onProcess(SvgContext* context) const
 {
   if (!hasChildNodes()) return ERR_OK;
-  return _visitContainer(visitor);
+  return _visitContainer(context);
 }
 
 // ============================================================================
-// [Fog::SvgUseElement]
+// [Fog::SvgUseElement - Construction / Destruction]
 // ============================================================================
 
-SvgUseElement::SvgUseElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_use), SVG_ELEMENT_USE),
-  a_x(NULL, FOG_STR_(SVG_ATTRIBUTE_x), FOG_OFFSET_OF(SvgUseElement, a_x)),
-  a_y(NULL, FOG_STR_(SVG_ATTRIBUTE_y), FOG_OFFSET_OF(SvgUseElement, a_y))
+SvgUseElement::SvgUseElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(use), SVG_ELEMENT_USE),
+  _x(0.0f),
+  _y(0.0f),
+  _xUnit(UNIT_NONE),
+  _yUnit(UNIT_NONE)
 {
 }
 
 SvgUseElement::~SvgUseElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgUseElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgUseElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgUseElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgUseElement::setX(const CoordF& x)
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x)) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y)) return (XmlAttribute*)&a_y;
-
-  return base::_createAttribute(name);
-}
-
-err_t SvgUseElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
-{
-  float tx = 0.0f;
-  float ty = 0.0f;
-
-  if (a_x.isAssigned()) tx = a_x.getCoordComputed();
-  if (a_y.isAssigned()) ty = a_y.getCoordComputed();
-
-  if (tx != 0.0f || ty != 0.0f)
-  {
-    if (state && !state->hasState(SvgGState::SAVED_TRANSFORM)) state->saveTransform();
-    visitor->translate(PointF(tx, ty));
-  }
+  _x = x.getValue();
+  _xUnit = x.getUnit();
+  _setDirty();
 
   return ERR_OK;
 }
 
-err_t SvgUseElement::onProcess(SvgVisitor* visitor) const
+err_t SvgUseElement::resetX()
 {
+  _x = 0.0f;
+  _xUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgUseElement::setY(const CoordF& y)
+{
+  _y = y.getValue();
+  _yUnit = y.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgUseElement::resetY()
+{
+  _y = 0.0f;
+  _yUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgUseElement - SVG Interface]
+// ============================================================================
+
+err_t SvgUseElement::onPrepare(SvgContext* context, SvgContextGState* state) const
+{
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+
+  float tx = svgGetCoord(doc, _x, _xUnit);
+  float ty = svgGetCoord(doc, _y, _yUnit);
+
+  if (tx != 0.0f || ty != 0.0f)
+  {
+    if (state && !state->hasState(SvgContextGState::SAVED_TRANSFORM))
+      state->saveTransform();
+    context->translate(PointF(tx, ty));
+  }
+
+  return Base::onPrepare(context, state);
+}
+
+err_t SvgUseElement::onProcess(SvgContext* context) const
+{
+  StringW link = getAttribute(FOG_S(xlink_href));
+
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+  DomElement* ref = doc->getElementById(parseHtmlLinkId(link));
+
   err_t err = ERR_OK;
-
-  StringW link = _getAttribute(FOG_STR_(SVG_ATTRIBUTE_xlink_href));
-  XmlElement* ref = getDocument()->getElementById(parseHtmlLinkId(link));
-
-  if (ref && ref->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT))
-    err = visitor->onVisit(reinterpret_cast<SvgElement*>(ref));
-
+  if (ref && ref->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+    err = context->onVisit(reinterpret_cast<SvgElement*>(ref));
   return err;
 }
 
@@ -1897,31 +2450,51 @@ err_t SvgUseElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) cons
 }
 
 // ============================================================================
-// [Fog::SvgViewElement]
+// [Fog::SvgViewElement - Construction / Destruction]
 // ============================================================================
 
-SvgViewElement::SvgViewElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_svg), SVG_ELEMENT_VIEW),
-  a_viewBox(NULL, FOG_STR_(SVG_ATTRIBUTE_viewBox), FOG_OFFSET_OF(SvgViewElement, a_viewBox))
+SvgViewElement::SvgViewElement(DomDocument* ownerDocument) :
+  SvgElement(ownerDocument, FOG_S(svg), SVG_ELEMENT_VIEW),
+  _viewBox(0.0f, 0.0f, 0.0f, 0.0f)
 {
 }
 
 SvgViewElement::~SvgViewElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgViewElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgViewElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgViewElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(ViewBox, FOG_S(viewBox), SvgDomIO_ViewBoxF())
+FOG_CORE_OBJ_END()
+
+err_t SvgViewElement::setViewBox(const BoxF& viewBox)
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_viewBox)) return (XmlAttribute*)&a_viewBox;
+  _viewBox = viewBox;
+  _setDirty();
 
-  return base::_createAttribute(name);
+  return ERR_OK;
 }
 
-err_t SvgViewElement::onProcess(SvgVisitor* visitor) const
+err_t SvgViewElement::resetViewBox()
+{
+  _viewBox.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgViewElement - SVG Interface]
+// ============================================================================
+
+err_t SvgViewElement::onProcess(SvgContext* context) const
 {
   if (!hasChildNodes()) return ERR_OK;
-  return _visitContainer(visitor);
+  return _visitContainer(context);
 }
 
 err_t SvgViewElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
@@ -1931,67 +2504,107 @@ err_t SvgViewElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) con
 }
 
 // ============================================================================
-// [Fog::SvgAElement]
+// [Fog::SvgCircleElement - Construction / Destruction]
 // ============================================================================
 
-SvgAElement::SvgAElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_a), SVG_ELEMENT_A)
-{
-}
-
-SvgAElement::~SvgAElement()
-{
-  _removeAttributes();
-}
-
-XmlAttribute* SvgAElement::_createAttribute(const ManagedStringW& name) const
-{
-  return base::_createAttribute(name);
-}
-
-err_t SvgAElement::onProcess(SvgVisitor* visitor) const
-{
-  return _visitContainer(visitor);
-}
-
-// ============================================================================
-// [Fog::SvgCircleElement]
-// ============================================================================
-
-SvgCircleElement::SvgCircleElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_circle), SVG_ELEMENT_CIRCLE),
-  a_cx(NULL, FOG_STR_(SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgCircleElement, a_cx)),
-  a_cy(NULL, FOG_STR_(SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgCircleElement, a_cy)),
-  a_r (NULL, FOG_STR_(SVG_ATTRIBUTE_r ), FOG_OFFSET_OF(SvgCircleElement, a_r ))
+SvgCircleElement::SvgCircleElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(circle), SVG_ELEMENT_CIRCLE),
+  _cx(0.0f),
+  _cy(0.0f),
+  _r(0.0f),
+  _cxUnit(UNIT_NONE),
+  _cyUnit(UNIT_NONE),
+  _rUnit(UNIT_NONE)
 {
 }
 
 SvgCircleElement::~SvgCircleElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgCircleElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_r )) return (XmlAttribute*)&a_r;
+// ============================================================================
+// [Fog::SvgCircleElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgCircleElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Cx, FOG_S(cx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Cy, FOG_S(cy), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(R, FOG_S(r), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgCircleElement::setCx(const CoordF& cx)
+{
+  _cx = cx.getValue();
+  _cxUnit = cx.getUnit();
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgCircleElement::onProcess(SvgVisitor* visitor) const
+err_t SvgCircleElement::resetCx()
 {
-  if (a_r.isAssigned())
+  _cx = 0.0f;
+  _cxUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgCircleElement::setCy(const CoordF& cy)
+{
+  _cy = cy.getValue();
+  _cyUnit = cy.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgCircleElement::resetCy()
+{
+  _cy = 0.0f;
+  _cyUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgCircleElement::setR(const CoordF& r)
+{
+  _r = r.getValue();
+  _rUnit = r.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgCircleElement::resetR()
+{
+  _r = 0.0f;
+  _rUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgCircleElement - SVG Interface]
+// ============================================================================
+
+err_t SvgCircleElement::onProcess(SvgContext* context) const
+{
+  if (_r > 0.0f)
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
-    float r = Math::abs(a_r.getCoordComputed());
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    if (r <= 0.0f) return ERR_OK;
+    float cx = svgGetCoord(doc, _cx, _cxUnit);
+    float cy = svgGetCoord(doc, _cy, _cyUnit);
+    float r = Math::abs(svgGetCoord(doc, _r, _rUnit));
+
+    if (r <= 0.0f)
+      return ERR_OK;
 
     CircleF circle(cx, cy, r);
-    return visitor->onShape((SvgElement*)this, ShapeF(&circle));
+    return context->onShape((SvgElement*)this, ShapeF(&circle));
   }
 
   return ERR_OK;
@@ -1999,13 +2612,17 @@ err_t SvgCircleElement::onProcess(SvgVisitor* visitor) const
 
 err_t SvgCircleElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (a_r.isAssigned())
+  if (_r > 0.0f)
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
-    float r = Math::abs(a_r.getCoordComputed());
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    if (r <= 0.0f) goto _Fail;
+    float cx = svgGetCoord(doc, _cx, _cxUnit);
+    float cy = svgGetCoord(doc, _cy, _cyUnit);
+    float r = Math::abs(svgGetCoord(doc, _r, _rUnit));
+
+    if (r <= 0.0f)
+      goto _Fail;
+
     return CircleF(PointF(cx, cy), r)._getBoundingBox(box, tr);
   }
 
@@ -2018,44 +2635,127 @@ _Fail:
 // [Fog::SvgEllipseElement]
 // ============================================================================
 
-SvgEllipseElement::SvgEllipseElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_ellipse), SVG_ELEMENT_ELLIPSE),
-  a_cx(NULL, FOG_STR_(SVG_ATTRIBUTE_cx), FOG_OFFSET_OF(SvgEllipseElement, a_cx)),
-  a_cy(NULL, FOG_STR_(SVG_ATTRIBUTE_cy), FOG_OFFSET_OF(SvgEllipseElement, a_cy)),
-  a_rx(NULL, FOG_STR_(SVG_ATTRIBUTE_rx), FOG_OFFSET_OF(SvgEllipseElement, a_rx)),
-  a_ry(NULL, FOG_STR_(SVG_ATTRIBUTE_ry), FOG_OFFSET_OF(SvgEllipseElement, a_ry))
+SvgEllipseElement::SvgEllipseElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(ellipse), SVG_ELEMENT_ELLIPSE),
+  _cx(0.0f),
+  _cy(0.0f),
+  _rx(0.0f),
+  _ry(0.0f),
+  _cxUnit(UNIT_NONE),
+  _cyUnit(UNIT_NONE),
+  _rxUnit(UNIT_NONE),
+  _ryUnit(UNIT_NONE)
 {
 }
 
 SvgEllipseElement::~SvgEllipseElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgEllipseElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_cx)) return (XmlAttribute*)&a_cx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_cy)) return (XmlAttribute*)&a_cy;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_rx)) return (XmlAttribute*)&a_rx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_ry)) return (XmlAttribute*)&a_ry;
+// ============================================================================
+// [Fog::SvgEllipseElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgEllipseElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Cx, FOG_S(cx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Cy, FOG_S(cy), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Rx, FOG_S(rx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Ry, FOG_S(ry), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgEllipseElement::setCx(const CoordF& cx)
+{
+  _cx = cx.getValue();
+  _cxUnit = cx.getUnit();
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgEllipseElement::onProcess(SvgVisitor* visitor) const
+err_t SvgEllipseElement::resetCx()
 {
-  if (a_rx.isAssigned() && a_ry.isAssigned())
+  _cx = 0.0f;
+  _cxUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgEllipseElement::setCy(const CoordF& cy)
+{
+  _cy = cy.getValue();
+  _cyUnit = cy.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgEllipseElement::resetCy()
+{
+  _cy = 0.0f;
+  _cyUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgEllipseElement::setRx(const CoordF& rx)
+{
+  _rx = rx.getValue();
+  _rxUnit = rx.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgEllipseElement::resetRx()
+{
+  _rx = 0.0f;
+  _rxUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgEllipseElement::setRy(const CoordF& ry)
+{
+  _ry = ry.getValue();
+  _ryUnit = ry.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgEllipseElement::resetRy()
+{
+  _ry = 0.0f;
+  _ryUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgEllipseElement - SVG Interface]
+// ============================================================================
+
+err_t SvgEllipseElement::onProcess(SvgContext* context) const
+{
+  if (_rx > 0.0f && _ry > 0.0f)
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    float rx = Math::abs(a_rx.getCoordComputed());
-    float ry = Math::abs(a_ry.getCoordComputed());
+    float cx = svgGetCoord(doc, _cx, _cxUnit);
+    float cy = svgGetCoord(doc, _cy, _cyUnit);
 
-    if (rx <= 0.0f || ry <= 0.0f) return ERR_OK;
+    float rx = Math::abs(svgGetCoord(doc, _rx, _rxUnit));
+    float ry = Math::abs(svgGetCoord(doc, _ry, _ryUnit));
+
+    if (rx <= 0.0f || ry <= 0.0f)
+      return ERR_OK;
 
     EllipseF ellipse(cx, cy, rx, ry);
-    return visitor->onShape((SvgElement*)this, ShapeF(&ellipse));
+    return context->onShape((SvgElement*)this, ShapeF(&ellipse));
   }
 
   return ERR_OK;
@@ -2063,15 +2763,19 @@ err_t SvgEllipseElement::onProcess(SvgVisitor* visitor) const
 
 err_t SvgEllipseElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (a_rx.isAssigned() && a_ry.isAssigned())
+  if (_rx > 0.0f && _ry > 0.0f)
   {
-    float cx = a_cx.isAssigned() ? a_cx.getCoordComputed() : 0.0f;
-    float cy = a_cy.isAssigned() ? a_cy.getCoordComputed() : 0.0f;
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    float rx = a_rx.getCoordComputed();
-    float ry = a_ry.getCoordComputed();
+    float cx = svgGetCoord(doc, _cx, _cxUnit);
+    float cy = svgGetCoord(doc, _cy, _cyUnit);
 
-    if (rx <= 0.0f || ry <= 0.0f) goto _Fail;
+    float rx = Math::abs(svgGetCoord(doc, _rx, _rxUnit));
+    float ry = Math::abs(svgGetCoord(doc, _ry, _ryUnit));
+
+    if (rx <= 0.0f || ry <= 0.0f)
+      goto _Fail;
+
     return EllipseF(PointF(cx, cy), PointF(rx, ry))._getBoundingBox(box, tr);
   }
 
@@ -2081,153 +2785,195 @@ _Fail:
 }
 
 // ============================================================================
-// [Fog::SvgImageElement]
+// [Fog::SvgLineElement - Construction / Destruction]
 // ============================================================================
 
-SvgImageElement::SvgImageElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_image), SVG_ELEMENT_IMAGE),
-  a_x      (NULL, FOG_STR_(SVG_ATTRIBUTE_x         ), FOG_OFFSET_OF(SvgImageElement, a_x     )),
-  a_y      (NULL, FOG_STR_(SVG_ATTRIBUTE_y         ), FOG_OFFSET_OF(SvgImageElement, a_y     )),
-  a_width  (NULL, FOG_STR_(SVG_ATTRIBUTE_width     ), FOG_OFFSET_OF(SvgImageElement, a_width )),
-  a_height (NULL, FOG_STR_(SVG_ATTRIBUTE_height    ), FOG_OFFSET_OF(SvgImageElement, a_height)),
-  a_href   (NULL, FOG_STR_(SVG_ATTRIBUTE_xlink_href), FOG_OFFSET_OF(SvgImageElement, a_href  ))
-{
-}
-
-SvgImageElement::~SvgImageElement()
-{
-  _removeAttributes();
-}
-
-XmlAttribute* SvgImageElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x         )) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y         )) return (XmlAttribute*)&a_y;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_width     )) return (XmlAttribute*)&a_width;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_height    )) return (XmlAttribute*)&a_height;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_xlink_href)) return (XmlAttribute*)&a_href;
-
-  return base::_createAttribute(name);
-}
-
-err_t SvgImageElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
-{
-  // There is only transformation attribute which can be applied to the image.
-  if (a_transform.isAssigned() && a_transform.isValid())
-  {
-    if (state && !state->hasState(SvgGState::SAVED_TRANSFORM))
-      state->saveTransform();
-    visitor->transform(a_transform.getTransform());
-  }
-
-  return ERR_OK;
-}
-
-err_t SvgImageElement::onProcess(SvgVisitor* visitor) const
-{
-  if (!a_href._embedded || a_href._image.isEmpty()) return ERR_OK;
-
-  float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
-  float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
-
-  return visitor->onImage((SvgElement*)this, PointF(x, y), a_href._image);
-}
-
-// ============================================================================
-// [Fog::SvgLineElement]
-// ============================================================================
-
-SvgLineElement::SvgLineElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_line), SVG_ELEMENT_LINE),
-  a_x1(NULL, FOG_STR_(SVG_ATTRIBUTE_x1), FOG_OFFSET_OF(SvgLineElement, a_x1)),
-  a_y1(NULL, FOG_STR_(SVG_ATTRIBUTE_y1), FOG_OFFSET_OF(SvgLineElement, a_y1)),
-  a_x2(NULL, FOG_STR_(SVG_ATTRIBUTE_x2), FOG_OFFSET_OF(SvgLineElement, a_x2)),
-  a_y2(NULL, FOG_STR_(SVG_ATTRIBUTE_y2), FOG_OFFSET_OF(SvgLineElement, a_y2))
+SvgLineElement::SvgLineElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(line), SVG_ELEMENT_LINE),
+  _x1(0.0f),
+  _y1(0.0f),
+  _x2(0.0f),
+  _y2(0.0f),
+  _x1Unit(UNIT_NONE),
+  _y1Unit(UNIT_NONE),
+  _x2Unit(UNIT_NONE),
+  _y2Unit(UNIT_NONE)
 {
 }
 
 SvgLineElement::~SvgLineElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgLineElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x1)) return (XmlAttribute*)&a_x1;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y1)) return (XmlAttribute*)&a_y1;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x2)) return (XmlAttribute*)&a_x2;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y2)) return (XmlAttribute*)&a_y2;
+// ============================================================================
+// [Fog::SvgLineElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgLineElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X1, FOG_S(x1), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y1, FOG_S(y1), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(X2, FOG_S(x2), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y2, FOG_S(y2), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgLineElement::setX1(const CoordF& x1)
+{
+  _x1 = x1.getValue();
+  _x1Unit = x1.getUnit();
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgLineElement::onProcess(SvgVisitor* visitor) const
+err_t SvgLineElement::resetX1()
 {
-  float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
-  float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
-  float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
-  float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
+  _x1 = 0.0f;
+  _x1Unit = UNIT_NONE;
+  _setDirty();
 
-  LineF line(x1, y1, x2, y2);
-  return visitor->onShape((SvgElement*)this, ShapeF(&line));
+  return ERR_OK;
 }
 
-err_t SvgLineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
+err_t SvgLineElement::setY1(const CoordF& y1)
 {
-  float x1 = a_x1.isAssigned() ? a_x1.getCoordComputed() : 0.0f;
-  float y1 = a_y1.isAssigned() ? a_y1.getCoordComputed() : 0.0f;
-  float x2 = a_x2.isAssigned() ? a_x2.getCoordComputed() : 0.0f;
-  float y2 = a_y2.isAssigned() ? a_y2.getCoordComputed() : 0.0f;
+  _y1 = y1.getValue();
+  _y1Unit = y1.getUnit();
+  _setDirty();
 
-  box.setBox(x1, y1, x2, y2);
-  if (tr) tr->mapPoints(reinterpret_cast<PointF*>(&box), reinterpret_cast<PointF*>(&box), 2);
+  return ERR_OK;
+}
 
-  if (box.x0 > box.x1) swap(box.x0, box.x1);
-  if (box.y0 > box.y1) swap(box.y0, box.y1);
+err_t SvgLineElement::resetY1()
+{
+  _y1 = 0.0f;
+  _y1Unit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgLineElement::setX2(const CoordF& x2)
+{
+  _x2 = x2.getValue();
+  _x2Unit = x2.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgLineElement::resetX2()
+{
+  _x2 = 0.0f;
+  _x2Unit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgLineElement::setY2(const CoordF& y2)
+{
+  _y2 = y2.getValue();
+  _y2Unit = y2.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgLineElement::resetY2()
+{
+  _y2 = 0.0f;
+  _y2Unit = UNIT_NONE;
+  _setDirty();
+
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::SvgPathElement]
+// [Fog::SvgLineElement - SVG Interface]
 // ============================================================================
 
-SvgPathElement::SvgPathElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_path), SVG_ELEMENT_PATH),
-  a_d(NULL, FOG_STR_(SVG_ATTRIBUTE_d), FOG_OFFSET_OF(SvgPathElement, a_d))
+err_t SvgLineElement::onProcess(SvgContext* context) const
+{
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+
+  float x1 = svgGetCoord(doc, _x1, _x1Unit);
+  float y1 = svgGetCoord(doc, _y1, _y1Unit);
+  float x2 = svgGetCoord(doc, _x2, _x2Unit);
+  float y2 = svgGetCoord(doc, _y2, _y2Unit);
+
+  LineF line(x1, y1, x2, y2);
+  return context->onShape((SvgElement*)this, ShapeF(&line));
+}
+
+err_t SvgLineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
+{
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+
+  float x1 = svgGetCoord(doc, _x1, _x1Unit);
+  float y1 = svgGetCoord(doc, _y1, _y1Unit);
+  float x2 = svgGetCoord(doc, _x2, _x2Unit);
+  float y2 = svgGetCoord(doc, _y2, _y2Unit);
+
+  box.setBox(x1, y1, x2, y2);
+  if (tr != NULL)
+    tr->mapBox(box, box);
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgPathElement - Construction / Destruction]
+// ============================================================================
+
+SvgPathElement::SvgPathElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(path), SVG_ELEMENT_PATH)
 {
 }
 
 SvgPathElement::~SvgPathElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgPathElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_d)) return (XmlAttribute*)&a_d;
+// ============================================================================
+// [Fog::SvgPathElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgPathElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(D, FOG_S(d), SvgDomIO_PathF())
+FOG_CORE_OBJ_END()
+
+err_t SvgPathElement::setD(const PathF& d)
+{
+  _d = d;
+  _setDirty();
+  
+  return ERR_OK;
 }
 
-err_t SvgPathElement::onProcess(SvgVisitor* visitor) const
+err_t SvgPathElement::resetD()
 {
-  /*if (_unused)
-  {
-    printf("A");
-  }*/
+  _d.reset();
+  _setDirty();
 
-  if (!a_d.isAssigned()) return ERR_OK;
+  return ERR_OK;
+}
 
-  const PathF& path = a_d.getPath();
-  return visitor->onShape((SvgElement*)this, ShapeF(&path));
+// ============================================================================
+// [Fog::SvgPathElement - SVG Interface]
+// ============================================================================
+
+err_t SvgPathElement::onProcess(SvgContext* context) const
+{
+  if (!_d.isEmpty())
+    return context->onShape((SvgElement*)this, ShapeF(&_d));
+  else
+    return ERR_OK;
 }
 
 err_t SvgPathElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (a_d.isAssigned())
+  if (!_d.isEmpty())
   {
-    const PathF& path = a_d.getPath();
-    return path._getBoundingBox(box, tr);
+    return _d._getBoundingBox(box, tr);
   }
   else
   {
@@ -2237,41 +2983,41 @@ err_t SvgPathElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) con
 }
 
 // ============================================================================
-// [Fog::SvgPolygonElement]
+// [Fog::SvgPolygonElement - Construction / Destruction]
 // ============================================================================
 
-SvgPolygonElement::SvgPolygonElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_polygon), SVG_ELEMENT_POLYGON),
-  a_points(NULL, FOG_STR_(SVG_ATTRIBUTE_points), true, FOG_OFFSET_OF(SvgPolygonElement, a_points))
+SvgPolygonElement::SvgPolygonElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(polygon), SVG_ELEMENT_POLYGON),
+  _points()
 {
 }
 
 SvgPolygonElement::~SvgPolygonElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgPolygonElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgPolygonElement - SVG Propreties]
+// ============================================================================
+
+
+// ============================================================================
+// [Fog::SvgPolygonElement - SVG Interface]
+// ============================================================================
+
+err_t SvgPolygonElement::onProcess(SvgContext* context) const
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_points)) return (XmlAttribute*)&a_points;
-
-  return base::_createAttribute(name);
-}
-
-err_t SvgPolygonElement::onProcess(SvgVisitor* visitor) const
-{
-  if (!a_points.isAssigned()) return ERR_OK;
-
-  const PathF& path = a_points.getPath();
-  return visitor->onShape((SvgElement*)this, ShapeF(&path));
+  if (!_points.isEmpty())
+    return context->onShape((SvgElement*)this, ShapeF(&_points));
+  else
+    return ERR_OK;
 }
 
 err_t SvgPolygonElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (a_points.isAssigned())
+  if (!_points.isEmpty())
   {
-    const PathF& path = a_points.getPath();
-    return path._getBoundingBox(box, tr);
+    return _points._getBoundingBox(box, tr);
   }
   else
   {
@@ -2281,41 +3027,41 @@ err_t SvgPolygonElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) 
 }
 
 // ============================================================================
-// [Fog::SvgPolylineElement]
+// [Fog::SvgPolylineElement - Construction / Destruction]
 // ============================================================================
 
-SvgPolylineElement::SvgPolylineElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_polyline), SVG_ELEMENT_POLYLINE),
-  a_points(NULL, FOG_STR_(SVG_ATTRIBUTE_points), false, FOG_OFFSET_OF(SvgPolylineElement, a_points))
+SvgPolylineElement::SvgPolylineElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(polyline), SVG_ELEMENT_POLYLINE),
+  _points()
 {
 }
 
 SvgPolylineElement::~SvgPolylineElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgPolylineElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgPolylineElement - SVG Properties]
+// ============================================================================
+
+
+// ============================================================================
+// [Fog::SvgPolylineElement - SVG Interface]
+// ============================================================================
+
+err_t SvgPolylineElement::onProcess(SvgContext* context) const
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_points)) return (XmlAttribute*)&a_points;
-
-  return base::_createAttribute(name);
-}
-
-err_t SvgPolylineElement::onProcess(SvgVisitor* visitor) const
-{
-  if (!a_points.isAssigned()) return ERR_OK;
-
-  const PathF& path = a_points.getPath();
-  return visitor->onShape((SvgElement*)this, ShapeF(&path));
+  if (!_points.isEmpty())
+    return context->onShape((SvgElement*)this, ShapeF(&_points));
+  else
+    return ERR_OK;
 }
 
 err_t SvgPolylineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (a_points.isAssigned())
+  if (!_points.isEmpty())
   {
-    const PathF& path = a_points.getPath();
-    return path._getBoundingBox(box, tr);
+    return _points._getBoundingBox(box, tr);
   }
   else
   {
@@ -2325,63 +3071,191 @@ err_t SvgPolylineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr)
 }
 
 // ============================================================================
-// [Fog::SvgRectElement]
+// [Fog::SvgRectElement - Construction / Destruction]
 // ============================================================================
 
-SvgRectElement::SvgRectElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_rect), SVG_ELEMENT_RECT),
-  a_x     (NULL, FOG_STR_(SVG_ATTRIBUTE_x     ), FOG_OFFSET_OF(SvgRectElement, a_x     )),
-  a_y     (NULL, FOG_STR_(SVG_ATTRIBUTE_y     ), FOG_OFFSET_OF(SvgRectElement, a_y     )),
-  a_width (NULL, FOG_STR_(SVG_ATTRIBUTE_width ), FOG_OFFSET_OF(SvgRectElement, a_width )),
-  a_height(NULL, FOG_STR_(SVG_ATTRIBUTE_height), FOG_OFFSET_OF(SvgRectElement, a_height)),
-  a_rx    (NULL, FOG_STR_(SVG_ATTRIBUTE_rx    ), FOG_OFFSET_OF(SvgRectElement, a_rx    )),
-  a_ry    (NULL, FOG_STR_(SVG_ATTRIBUTE_ry    ), FOG_OFFSET_OF(SvgRectElement, a_ry    ))
+SvgRectElement::SvgRectElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(rect), SVG_ELEMENT_RECT),
+  _x(0.0f),
+  _y(0.0f),
+  _width(0.0f),
+  _height(0.0f),
+  _rx(0.0f),
+  _ry(0.0f),
+  _xUnit(UNIT_NONE),
+  _yUnit(UNIT_NONE),
+  _widthUnit(UNIT_NONE),
+  _heightUnit(UNIT_NONE),
+  _rxUnit(UNIT_NONE),
+  _ryUnit(UNIT_NONE),
+  _rxAssigned(false),
+  _ryAssigned(false)
 {
 }
 
 SvgRectElement::~SvgRectElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgRectElement::_createAttribute(const ManagedStringW& name) const
-{
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x     )) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y     )) return (XmlAttribute*)&a_y;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_width )) return (XmlAttribute*)&a_width;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_height)) return (XmlAttribute*)&a_height;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_rx    )) return (XmlAttribute*)&a_rx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_ry    )) return (XmlAttribute*)&a_ry;
+// ============================================================================
+// [Fog::SvgRectElement - SVG Properties]
+// ============================================================================
 
-  return base::_createAttribute(name);
+FOG_CORE_OBJ_DEF(SvgRectElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Width, FOG_S(width), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Height, FOG_S(height), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Rx, FOG_S(rx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Ry, FOG_S(ry), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgRectElement::setX(const CoordF& x)
+{
+  _x = x.getValue();
+  _xUnit = x.getUnit();
+  _setDirty();
+
+  return ERR_OK;
 }
 
-err_t SvgRectElement::onProcess(SvgVisitor* visitor) const
+err_t SvgRectElement::resetX()
 {
-  if (a_width.isAssigned() && a_height.isAssigned())
+  _x = 0.0f;
+  _xUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::setY(const CoordF& y)
+{
+  _y = y.getValue();
+  _yUnit = y.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::resetY()
+{
+  _y = 0.0f;
+  _yUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::setWidth(const CoordF& width)
+{
+  _width = width.getValue();
+  _widthUnit = width.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::resetWidth()
+{
+  _width = 0.0f;
+  _widthUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::setHeight(const CoordF& height)
+{
+  _height = height.getValue();
+  _heightUnit = height.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::resetHeight()
+{
+  _height = 0.0f;
+  _heightUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::setRx(const CoordF& rx)
+{
+  _rx = rx.getValue();
+  _rxUnit = rx.getUnit();
+  _rxAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::resetRx()
+{
+  _rx = 0.0f;
+  _rxUnit = UNIT_NONE;
+  _rxAssigned = false;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::setRy(const CoordF& ry)
+{
+  _ry = ry.getValue();
+  _ryUnit = ry.getUnit();
+  _ryAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgRectElement::resetRy()
+{
+  _ry = 0.0f;
+  _ryUnit = UNIT_NONE;
+  _ryAssigned = false;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgRectElement - SVG Interface]
+// ============================================================================
+
+err_t SvgRectElement::onProcess(SvgContext* context) const
+{
+  if (_width > 0.0f && _height > 0.0f)
   {
-    float rw = a_width.getCoordComputed();
-    float rh = a_height.getCoordComputed();
-    if (rw <= 0.0f || rh <= 0.0f) return ERR_GEOMETRY_INVALID;
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    float rx = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
-    float ry = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
+    float w = svgGetCoord(doc, _width, _widthUnit);
+    float h = svgGetCoord(doc, _height, _heightUnit);
 
-    float radx = a_rx.isAssigned() ? a_rx.getCoordComputed() : 0.0f;
-    float rady = a_ry.isAssigned() ? a_ry.getCoordComputed() : 0.0f;
+    if (w <= 0.0f || h <= 0.0f)
+      return ERR_GEOMETRY_INVALID;
 
-    if (!a_rx.isAssigned() && a_ry.isAssigned()) radx = rady;
-    if (!a_ry.isAssigned() && a_rx.isAssigned()) rady = radx;
+    float x = svgGetCoord(doc, _x, _xUnit);
+    float y = svgGetCoord(doc, _y, _yUnit);
 
-    if (radx <= float(0.0) || rady <= float(0.0))
+    float rx = svgGetCoord(doc, _rx, _rxUnit);
+    float ry = svgGetCoord(doc, _ry, _ryUnit);
+
+    if (!_rxAssigned && _ryAssigned) rx = ry;
+    if (!_ryAssigned && _rxAssigned) ry = rx;
+
+    if (rx <= 0.0f || ry <= 0.0f)
     {
-      RectF rect(rx, ry, rw, rh);
-      return visitor->onShape((SvgElement*)this, ShapeF(&rect));
+      RectF rect(x, y, w, h);
+      return context->onShape((SvgElement*)this, ShapeF(&rect));
     }
     else
     {
-      RoundF round(rx, ry, rw, rh, radx, rady);
-      return visitor->onShape((SvgElement*)this, ShapeF(&round));
+      RoundF round(x, y, w, h, rx, ry);
+      return context->onShape((SvgElement*)this, ShapeF(&round));
     }
   }
 
@@ -2390,16 +3264,20 @@ err_t SvgRectElement::onProcess(SvgVisitor* visitor) const
 
 err_t SvgRectElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  if (a_width.isAssigned() && a_height.isAssigned())
+  if (_width > 0.0f && _height > 0.0f)
   {
-    float rw = a_width.getCoordComputed();
-    float rh = a_height.getCoordComputed();
-    if (rw < 0.0f || rh < 0.0f) goto _Fail;
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-    float rx = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
-    float ry = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
+    float w = svgGetCoord(doc, _width, _widthUnit);
+    float h = svgGetCoord(doc, _height, _heightUnit);
 
-    box.setRect(rx, ry, rw, rh);
+    if (w <= 0.0f || h <= 0.0f)
+      goto _Fail;
+
+    float x = svgGetCoord(doc, _x, _xUnit);
+    float y = svgGetCoord(doc, _y, _yUnit);
+
+    box.setRect(x, y, w, h);
     if (tr) tr->mapBox(box, box);
 
     return ERR_OK;
@@ -2411,75 +3289,399 @@ _Fail:
 }
 
 // ============================================================================
-// [Fog::SvgTextElement]
+// [Fog::SvgImageElement - Construction / Destruction]
 // ============================================================================
 
-SvgTextElement::SvgTextElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_text), SVG_ELEMENT_TEXT),
-  a_x           (NULL, FOG_STR_(SVG_ATTRIBUTE_x         ), FOG_OFFSET_OF(SvgTextElement, a_x           )),
-  a_y           (NULL, FOG_STR_(SVG_ATTRIBUTE_y         ), FOG_OFFSET_OF(SvgTextElement, a_y           )),
-  a_dx          (NULL, FOG_STR_(SVG_ATTRIBUTE_dx        ), FOG_OFFSET_OF(SvgTextElement, a_dx          )),
-  a_dy          (NULL, FOG_STR_(SVG_ATTRIBUTE_dy        ), FOG_OFFSET_OF(SvgTextElement, a_dy          )),
-  a_textLength  (NULL, FOG_STR_(SVG_ATTRIBUTE_textLength), FOG_OFFSET_OF(SvgTextElement, a_textLength  ))
+SvgImageElement::SvgImageElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(image), SVG_ELEMENT_IMAGE),
+  _href(),
+  _resource(NULL),
+  _x(0.0f),
+  _y(0.0f),
+  _width(0.0f),
+  _height(0.0f),
+  _xUnit(UNIT_NONE),
+  _yUnit(UNIT_NONE),
+  _widthUnit(UNIT_NONE),
+  _heightUnit(UNIT_NONE)
+{
+}
+
+SvgImageElement::~SvgImageElement()
+{
+  if (_resource != NULL)
+    _resource->release();
+}
+
+// ============================================================================
+// [Fog::SvgImageElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgImageElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Width, FOG_S(width), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Height, FOG_S(height), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_DEFAULT(Href, FOG_S(xlink_href))
+FOG_CORE_OBJ_END()
+
+err_t SvgImageElement::setX(const CoordF& x)
+{
+  _x = x.getValue();
+  _xUnit = x.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::resetX()
+{
+  _x = 0.0f;
+  _xUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::setY(const CoordF& y)
+{
+  _y = y.getValue();
+  _yUnit = y.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::resetY()
+{
+  _y = 0.0f;
+  _yUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::setWidth(const CoordF& width)
+{
+  _width = width.getValue();
+  _widthUnit = width.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::resetWidth()
+{
+  _width = 0.0f;
+  _widthUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::setHeight(const CoordF& height)
+{
+  _height = height.getValue();
+  _heightUnit = height.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::resetHeight()
+{
+  _height = 0.0f;
+  _heightUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::setHref(const StringW& href)
+{
+  if (_href == href)
+    return ERR_OK;
+
+  FOG_RETURN_ON_ERROR(_href.set(href));
+  _setDirty();
+
+  if (_resource != NULL)
+  {
+    _resource->release();
+    _resource = NULL;
+  }
+
+  err_t err = ERR_OK;
+  if (_href.isEmpty())
+    return err;
+
+  DomResourceManager* mgr = getOwnerDocument()->getResourceManager();
+  if (_href.startsWith(Ascii8("data:")))
+  {
+    size_t semicolon = href.indexOf(CharW(';'));
+    size_t separator = href.indexOf(CharW(','));
+
+    if (semicolon != INVALID_INDEX && separator != INVALID_INDEX)
+    {
+      StringW type = href.substring(Range(5, semicolon));
+      StringW extension;
+      StringW encoding = href.substring(Range(semicolon + 1, separator));
+
+      StringA memio;
+      Stream stream;
+
+      // Standard mentions only PNG and JPEG, but we can use generally
+      // any attached image which can be decoded by Fog-Framework API.
+      if (type == Ascii8("image/png"))
+        extension = FOG_S(png);
+      else if (type == Ascii8("image/jpeg"))
+        extension = FOG_S(jpeg);
+
+      if (encoding == Ascii8("base64"))
+      {
+        err = StringA::base64Decode(memio, CONTAINER_OP_REPLACE,
+          href.getData() + separator + 1, href.getLength() - separator - 1);
+      }
+      else
+      {
+        // Maybe in future something else will be supported by the SVG standard.
+        err = ERR_SVG_INVALID_DATA_ENCODING;
+      }
+
+      if (FOG_IS_ERROR(err))
+        return err;
+
+      err = stream.openBuffer(memio);
+      if (FOG_IS_ERROR(err))
+        return err;
+
+      Image image;
+      err = image.readFromStream(stream, extension);
+      if (FOG_IS_ERROR(err))
+        return err;
+
+      _resource = mgr->createInternalResource(Var::fromImage(image));
+    }
+  }
+  else
+  {
+    _resource = mgr->createExternalResource(_href);
+  }
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::resetHref()
+{
+  _href.reset();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgImageElement - SVG Interface]
+// ============================================================================
+
+err_t SvgImageElement::onPrepare(SvgContext* context, SvgContextGState* state) const
+{
+  // There is only transformation attribute which can be applied to the image.
+  if (!_transform.isIdentity())
+  {
+    if (state && !state->hasState(SvgContextGState::SAVED_TRANSFORM))
+      state->saveTransform();
+    context->transform(_transform);
+  }
+
+  return ERR_OK;
+}
+
+err_t SvgImageElement::onProcess(SvgContext* context) const
+{
+  if (_resource != NULL && _resource->isLoaded())
+  {
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+    Image image;
+
+    err_t err = _resource->getData().getImage(image);
+    if (FOG_IS_ERROR(err))
+      return err;
+
+    float x = svgGetCoord(doc, _x, _xUnit);
+    float y = svgGetCoord(doc, _y, _yUnit);
+    return context->onImage((SvgElement*)this, PointF(x, y), image);
+  }
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgTextPositioningElement - Construction / Destruction]
+// ============================================================================
+
+SvgTextPositioningElement::SvgTextPositioningElement(DomDocument* ownerDocument,
+  const InternedStringW& tagName, uint32_t svgType)
+  :
+  SvgTransformableElement(ownerDocument, tagName, svgType),
+  _x(0.0f),
+  _y(0.0f),
+  _dx(0.0f),
+  _dy(0.0f),
+  _xUnit(UNIT_NONE),
+  _yUnit(UNIT_NONE),
+  _dxUnit(UNIT_NONE),
+  _dyUnit(UNIT_NONE)
+{
+}
+
+SvgTextPositioningElement::~SvgTextPositioningElement()
+{
+}
+
+// ============================================================================
+// [Fog::SvgTextPositioningElement - SVG Properties]
+// ============================================================================
+
+FOG_CORE_OBJ_DEF(SvgTextPositioningElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Dx, FOG_S(dx), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Dy, FOG_S(dy), SvgDomIO_CoordF())
+FOG_CORE_OBJ_END()
+
+err_t SvgTextPositioningElement::setX(const CoordF& x)
+{
+  _x = x.getValue();
+  _xUnit = x.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::resetX()
+{
+  _x = 0.0f;
+  _xUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::setY(const CoordF& y)
+{
+  _y = y.getValue();
+  _yUnit = y.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::resetY()
+{
+  _y = 0.0f;
+  _yUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::setDx(const CoordF& dx)
+{
+  _dx = dx.getValue();
+  _dxUnit = dx.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::resetDx()
+{
+  _dx = 0.0f;
+  _dxUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::setDy(const CoordF& dy)
+{
+  _dy = dy.getValue();
+  _dyUnit = dy.getUnit();
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgTextPositioningElement::resetDy()
+{
+  _dy = 0.0f;
+  _dyUnit = UNIT_NONE;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgTextElement - Construction / Destruction]
+// ============================================================================
+
+SvgTextElement::SvgTextElement(DomDocument* ownerDocument) :
+  SvgTextPositioningElement(ownerDocument, FOG_S(text), SVG_ELEMENT_TEXT)
 {
 }
 
 SvgTextElement::~SvgTextElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgTextElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgTextElement - SVG Interface]
+// ============================================================================
+
+err_t SvgTextElement::onPrepare(SvgContext* context, SvgContextGState* state) const
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x           )) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y           )) return (XmlAttribute*)&a_y;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_dx          )) return (XmlAttribute*)&a_dx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_dy          )) return (XmlAttribute*)&a_dy;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_textLength  )) return (XmlAttribute*)&a_textLength;
+  Base::onPrepare(context, state);
+  if (state && !state->hasState(SvgContextGState::SAVED_GLOBAL))
+    state->saveGlobal();
 
-  return base::_createAttribute(name);
-}
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-err_t SvgTextElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
-{
-  base::onPrepare(visitor, state);
-  if (state && !state->hasState(SvgGState::SAVED_GLOBAL)) state->saveGlobal();
-
-  float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
-  float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
-  visitor->_textCursor.set(x, y);
+  float x = svgGetCoord(doc, _x, _xUnit);
+  float y = svgGetCoord(doc, _y, _yUnit);
+  context->_textCursor.set(x, y);
 
   return ERR_OK;
 }
 
-err_t SvgTextElement::onProcess(SvgVisitor* visitor) const
+err_t SvgTextElement::onProcess(SvgContext* context) const
 {
   err_t err = ERR_OK;
-  XmlElement* e;
 
-  float x = visitor->_textCursor.x;
-  float y = visitor->_textCursor.y;
+  float x = context->_textCursor.x;
+  float y = context->_textCursor.y;
 
-  for (e = getFirstChild(); e; e = e->getNextSibling())
+  DomNode* node;
+  for (node = getFirstChild(); node != NULL; node = node->getNextSibling())
   {
-    if (e->isExtensionGroupAndNode(DOM_EXT_GROUP_SVG, DOM_NODE_ELEMENT) && 
-        static_cast<SvgElement*>(e)->getVisible())
+    if (node->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT) && 
+        static_cast<SvgElement*>(node)->getVisible())
     {
-      err = visitor->onVisit(static_cast<SvgElement*>(e));
-      if (FOG_IS_ERROR(err)) break;
+      err = context->onVisit(static_cast<SvgElement*>(node));
+      if (FOG_IS_ERROR(err))
+        break;
     }
 
-    if (e->isText())
+    if (node->isText())
     {
-      StringW text = e->getTextContent();
+      StringW text = node->getTextContent();
       text.simplify();
 
       // TODO: Not optimal, just initial support for text rendering.
       PathF path;
-      visitor->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
+      context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
 
-      err = visitor->onShape((SvgElement*)this, ShapeF(&path));
-      if (FOG_IS_ERROR(err)) break;
+      err = context->onShape((SvgElement*)this, ShapeF(&path));
+      if (FOG_IS_ERROR(err))
+        break;
     }
   }
 
@@ -2493,58 +3695,44 @@ err_t SvgTextElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) con
 }
 
 // ============================================================================
-// [Fog::SvgTSpanElement]
+// [Fog::SvgTSpanElement - Construction / Destruction]
 // ============================================================================
 
-SvgTSpanElement::SvgTSpanElement() :
-  SvgStyledElement(FOG_STR_(SVG_ELEMENT_text), SVG_ELEMENT_TSPAN),
-  a_x           (NULL, FOG_STR_(SVG_ATTRIBUTE_x           ), FOG_OFFSET_OF(SvgTSpanElement, a_x           )),
-  a_y           (NULL, FOG_STR_(SVG_ATTRIBUTE_y           ), FOG_OFFSET_OF(SvgTSpanElement, a_y           )),
-  a_dx          (NULL, FOG_STR_(SVG_ATTRIBUTE_dx          ), FOG_OFFSET_OF(SvgTSpanElement, a_dx          )),
-  a_dy          (NULL, FOG_STR_(SVG_ATTRIBUTE_dy          ), FOG_OFFSET_OF(SvgTSpanElement, a_dy          )),
-  a_textLength  (NULL, FOG_STR_(SVG_ATTRIBUTE_textLength  ), FOG_OFFSET_OF(SvgTSpanElement, a_textLength  )),
-  a_lengthAdjust(NULL, FOG_STR_(SVG_ATTRIBUTE_lengthAdjust), FOG_OFFSET_OF(SvgTSpanElement, a_lengthAdjust), svgEnum_lengthAdjust)
+SvgTSpanElement::SvgTSpanElement(DomDocument* ownerDocument) :
+  SvgTextPositioningElement(ownerDocument, FOG_S(tspan), SVG_ELEMENT_TSPAN)
 {
 }
 
 SvgTSpanElement::~SvgTSpanElement()
 {
-  _removeAttributes();
 }
 
-XmlAttribute* SvgTSpanElement::_createAttribute(const ManagedStringW& name) const
+// ============================================================================
+// [Fog::SvgTSpanElement - SVG Interface]
+// ============================================================================
+
+err_t SvgTSpanElement::onPrepare(SvgContext* context, SvgContextGState* state) const
 {
-  if (name == FOG_STR_(SVG_ATTRIBUTE_x         )) return (XmlAttribute*)&a_x;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_y         )) return (XmlAttribute*)&a_y;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_dx        )) return (XmlAttribute*)&a_dx;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_dy        )) return (XmlAttribute*)&a_dy;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_textLength)) return (XmlAttribute*)&a_textLength;
-  if (name == FOG_STR_(SVG_ATTRIBUTE_lengthAdjust)) return (XmlAttribute*)&a_lengthAdjust;
+  Base::onPrepare(context, state);
 
-  return base::_createAttribute(name);
-}
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+  if (state && !state->hasState(SvgContextGState::SAVED_GLOBAL))
+    state->saveGlobal();
 
-err_t SvgTSpanElement::onPrepare(SvgVisitor* visitor, SvgGState* state) const
-{
-  base::onPrepare(visitor, state);
-  if (state && !state->hasState(SvgGState::SAVED_GLOBAL)) state->saveGlobal();
-
-  float x = a_x.isAssigned() ? a_x.getCoordComputed() : 0.0f;
-  float y = a_y.isAssigned() ? a_y.getCoordComputed() : 0.0f;
-  visitor->_textCursor.set(x, y);
+  float x = svgGetCoord(doc, _x, _xUnit);
+  float y = svgGetCoord(doc, _y, _yUnit);
+  context->_textCursor.set(x, y);
 
   return ERR_OK;
 }
 
-err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
+err_t SvgTSpanElement::onProcess(SvgContext* context) const
 {
+  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
   err_t err = ERR_OK;
 
-  float x = visitor->_textCursor.x;
-  float y = visitor->_textCursor.y;
-
-  if (a_dx.isAssigned()) x += a_dx.getCoordComputed();
-  if (a_dy.isAssigned()) y += a_dy.getCoordComputed();
+  float x = context->_textCursor.x + svgGetCoord(doc, _dx, _dxUnit);
+  float y = context->_textCursor.y + svgGetCoord(doc, _dy, _dyUnit);
 
   StringW text = getTextContent();
   text.simplify();
@@ -2552,12 +3740,155 @@ err_t SvgTSpanElement::onProcess(SvgVisitor* visitor) const
   // TODO: Not optimal, just initial support for text rendering.
   PathF path;
 
-  err = visitor->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
+  err = context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
   if (FOG_IS_ERROR(err)) return err;
 
-  err = visitor->onShape((SvgElement*)this, ShapeF(&path));
-  visitor->_textCursor.set(x, y);
+  err = context->onShape((SvgElement*)this, ShapeF(&path));
+  context->_textCursor.set(x, y);
   return err;
+}
+
+// ============================================================================
+// [Fog::SvgAElement - Construction / Destruction]
+// ============================================================================
+
+SvgAElement::SvgAElement(DomDocument* ownerDocument) :
+  SvgTransformableElement(ownerDocument, FOG_S(a), SVG_ELEMENT_A)
+{
+}
+
+SvgAElement::~SvgAElement()
+{
+}
+
+// ============================================================================
+// [Fog::SvgAElement - SVG Interface]
+// ============================================================================
+
+err_t SvgAElement::onProcess(SvgContext* context) const
+{
+  return _visitContainer(context);
+}
+
+// ============================================================================
+// [Fog::SvgDocument - Construction / Destruction]
+// ============================================================================
+
+SvgDocument::SvgDocument() :
+  _dpi(96.0f)
+{
+  _objectModel = DOM_OBJECT_MODEL_SVG;
+  _objectType = SVG_ELEMENT_NONE;
+}
+
+SvgDocument::~SvgDocument()
+{
+}
+
+// ============================================================================
+// [Fog::SvgDocument - DOM Interface]
+// ============================================================================
+
+DomDocument* SvgDocument::_createDocument()
+{
+  return fog_new SvgDocument();
+}
+
+DomElement* SvgDocument::_createElement(const InternedStringW& tagName)
+{
+  if (tagName == FOG_S(a             )) return _newElementT<SvgAElement>();
+  if (tagName == FOG_S(circle        )) return _newElementT<SvgCircleElement>();
+  if (tagName == FOG_S(defs          )) return _newElementT<SvgDefsElement>();
+  if (tagName == FOG_S(ellipse       )) return _newElementT<SvgEllipseElement>();
+  if (tagName == FOG_S(g             )) return _newElementT<SvgGElement>();
+  if (tagName == FOG_S(image         )) return _newElementT<SvgImageElement>();
+  if (tagName == FOG_S(line          )) return _newElementT<SvgLineElement>();
+  if (tagName == FOG_S(linearGradient)) return _newElementT<SvgLinearGradientElement>();
+  if (tagName == FOG_S(path          )) return _newElementT<SvgPathElement>();
+  if (tagName == FOG_S(pattern       )) return _newElementT<SvgPatternElement>();
+  if (tagName == FOG_S(polygon       )) return _newElementT<SvgPolygonElement>();
+  if (tagName == FOG_S(polyline      )) return _newElementT<SvgPolylineElement>();
+  if (tagName == FOG_S(radialGradient)) return _newElementT<SvgRadialGradientElement>();
+  if (tagName == FOG_S(rect          )) return _newElementT<SvgRectElement>();
+  if (tagName == FOG_S(solidColor    )) return _newElementT<SvgSolidColorElement>();
+  if (tagName == FOG_S(stop          )) return _newElementT<SvgStopElement>();
+  if (tagName == FOG_S(svg           )) return _newElementT<SvgRootElement>();
+  if (tagName == FOG_S(symbol        )) return _newElementT<SvgSymbolElement>();
+  if (tagName == FOG_S(text          )) return _newElementT<SvgTextElement>();
+  if (tagName == FOG_S(tspan         )) return _newElementT<SvgTSpanElement>();
+  if (tagName == FOG_S(use           )) return _newElementT<SvgUseElement>();
+  if (tagName == FOG_S(view          )) return _newElementT<SvgViewElement>();
+
+  // If element is not SVG, use the base class to create a default element
+  // for the given tagName. But remember, this element won't be processed.
+  return Base::_createElement(tagName);
+}
+
+// ============================================================================
+// [Fog::SvgDocument - SVG Interface]
+// ============================================================================
+
+SvgContextExtension* SvgDocument::_createContextExtension(const SvgContextExtension* ex)
+{
+  return NULL;
+}
+
+// ============================================================================
+// [Fog::SvgDocument - DPI / Size]
+// ============================================================================
+
+
+err_t SvgDocument::setDpi(float dpi)
+{
+  return _dpi.setDpi(dpi);
+}
+
+SizeF SvgDocument::getDocumentSize() const
+{
+  DomElement* root = getDocumentElement();
+
+  if (root == NULL || !root->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_SVG))
+    return SizeF(0.0f, 0.0f);
+  else
+    return static_cast<SvgRootElement*>(root)->getRootSize();
+}
+
+// ============================================================================
+// [Fog::SvgDocument - Context]
+// ============================================================================
+
+err_t SvgDocument::onProcess(SvgContext* context)
+{
+  DomElement* root = getDocumentElement();
+
+  if (root == NULL || !root->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_SVG))
+    return ERR_OK;
+
+  return context->onVisit(static_cast<SvgElement*>(root));
+}
+
+err_t SvgDocument::render(Painter* painter)
+{
+  SvgRenderContext ctx(_createContextExtension(NULL));
+
+  ctx.setPainter(painter);
+  ctx.initPainter();
+  err_t err = onProcess(&ctx);
+  ctx.resetPainter();
+
+  return err;
+}
+
+List<SvgElement*> SvgDocument::hitTest(const PointF& pt, const TransformF* tr)
+{
+  SvgHitTestContext ctx(_createContextExtension(NULL));
+  ctx.setPoint(pt);
+
+  if (tr != NULL)
+    ctx.setTransform(*tr);
+
+  onProcess(&ctx);
+  return ctx._result;
 }
 
 } // Fog namespace

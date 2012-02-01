@@ -24,6 +24,7 @@ FOG_NO_EXPORT void MemMgr_init(void);
 FOG_NO_EXPORT void MemMgr_fini(void);
 
 FOG_NO_EXPORT void MemBlockAllocator_init(void);
+FOG_NO_EXPORT void MemGCAllocator_init(void);
 FOG_NO_EXPORT void MemOps_init(void);
 FOG_NO_EXPORT void MemPool_init(void);
 FOG_NO_EXPORT void MemZoneAllocator_init(void);
@@ -93,8 +94,8 @@ FOG_NO_EXPORT void Locale_fini(void);
 FOG_NO_EXPORT void Logger_init(void);
 FOG_NO_EXPORT void Logger_fini(void);
 
-FOG_NO_EXPORT void ManagedString_init(void);
-FOG_NO_EXPORT void ManagedString_fini(void);
+FOG_NO_EXPORT void InternedString_init(void);
+FOG_NO_EXPORT void InternedString_fini(void);
 
 FOG_NO_EXPORT void Stream_init(void);
 FOG_NO_EXPORT void Stream_fini(void);
@@ -114,8 +115,6 @@ FOG_NO_EXPORT void Date_init(void);
 FOG_NO_EXPORT void Time_init(void);
 
 FOG_NO_EXPORT void Var_init(void);
-
-// [Fog/Core/Xml]
 FOG_NO_EXPORT void XmlEntity_init(void);
 
 // [Fog/G2d/Geometry]

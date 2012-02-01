@@ -117,6 +117,14 @@ enum ERR_CODE
   // [Core/Kernel]
   // --------------------------------------------------------------------------
 
+  ERR_OBJ_PROPERTY_NOT_FOUND,
+  ERR_OBJ_PROPERTY_READ_ONLY,
+  ERR_OBJ_INVALID_VALUE,
+
+  // --------------------------------------------------------------------------
+  // [Core/Kernel]
+  // --------------------------------------------------------------------------
+
   //! @brief Object is not part of a hierarchy.
   //!
   //! Tried to remove object from a bad ascendant.
@@ -138,6 +146,94 @@ enum ERR_CODE
   ERR_PROPERTY_NOT_FOUND,
   //! @brief Property is read-only.
   ERR_PROPERTY_READ_ONLY,
+
+  // --------------------------------------------------------------------------
+  // [Core/Dom]
+  // --------------------------------------------------------------------------
+
+  //! @brief Index or size is negative, or greater than the allowed value.
+  //!
+  //! @note Index value in fog is alwats unsigned, so this error happens only
+  //! in case that the index is greater than the allowed value.
+  //!
+  //! @note Part of DOM Level 1 (INDEX_SIZE_ERR).
+  ERR_DOM_INDEX_SIZE,
+
+  //! @brief If any @ref DomNode is inserted somewhere it doesn't belong.
+  //!
+  //! @note Part of DOM Level 1 (HIERARCHY_REQUEST_ERR).
+  ERR_DOM_HIERARCHY_REQUEST,
+
+  //! @brief If a @ref DomNode is used in a different document than the one
+  //! that created it.
+  //!
+  //! @note Part of DOM Level 1 (WRONG_DOCUMENT_ERR).
+  ERR_DOM_WRONG_DOCUMENT,
+
+  //! @brief If an invalid or illegal character is specified, such as in an
+  //! XML name.
+  //!
+  //! @note Part of DOM Level 1 (INVALID_CHARACTER_ERR).
+  ERR_DOM_INVALID_CHARACTER,
+
+  //! @brief If an attempt is made to modify an object where modifications
+  //! are not allowed.
+  //!
+  //! @note Part of DOM Level 1 (NO_MODIFICATION_ALLOWED_ERR).
+  ERR_DOM_NO_MODIFICATION_ALLOWED,
+
+  //! @brief If an attempt is made to reference a @ref DomNode in a context
+  //! where it does not exist.
+  //!
+  //! @note Part of DOM Level 1 (NOT_FOUND_ERR).
+  ERR_DOM_NOT_FOUND,
+
+  //! @brief If the implementation does not support the requested type of
+  //! object or operation.
+  //!
+  //! @note Part of DOM Level 1 (NOT_SUPPORTED_ERR).
+  ERR_DOM_NOT_SUPPORTED,
+
+  //! @brief If an attempt is made to use an object that is not, or is no
+  //! longer, usable.
+  //!
+  //! @note Part of DOM Level 2 (INVALID_STATE_ERR).
+  ERR_DOM_INVALID_STATE,
+
+  //! @brief If an invalid or illegal string is specified.
+  //!
+  //! @note Part of DOM Level 2 (SYNTAX_ERR).
+  ERR_DOM_SYNTAX,
+
+  //! @brief If an attempt is made to modify the type of the underlying 
+  //! object.
+  //!
+  //! @note Part of DOM Level 2 (INVALID_MODIFICATION_ERR).
+  ERR_DOM_INVALID_MODIFICATION,
+
+  //! @brief If an attempt is made to create or change an object in a way
+  //! which is incorrect with regard to namespaces.
+  //!
+  //! @note Part of DOM Level 2 (NAMESPACE_ERR).
+  ERR_DOM_NAMESPACE,
+
+  //! @brief If a parameter or an operation is not supported by the 
+  //! underlying object.
+  //!
+  //! @note Part of DOM Level 2 (INVALID_ACCESS_ERR).
+  ERR_DOM_INVALID_ACCESS,
+
+  //! @brief If the type of an object is incompatible with the expected
+  //! type of the parameter associated to the object.
+  //!
+  //! @note Part of DOM Level 3 (TYPE_MISMATCH_ERR).
+  ERR_DOM_TYPE_MISMATCH,
+
+  //! @brief The value assigned to the attribute is invalid.
+  //!
+  //! Returned when DomAttr::setValue() is called with bad value (string).
+  //! after calling the attribute is marked as invalid.
+  ERR_DOM_INVALID_VALUE,
 
   // --------------------------------------------------------------------------
   // [Core/OS - Environment]
@@ -224,6 +320,15 @@ enum ERR_CODE
   ERR_USER_NO_DIRECTORY,
 
   // --------------------------------------------------------------------------
+  // [Core/Threading - ThreadLocal]
+  // --------------------------------------------------------------------------
+
+  //! @brien Invalid TLS index catched by @c ThreadLocal.
+  ERR_THREAD_TLS_INVALID,
+  //! @brief TLS indices exhausted.
+  ERR_THREAD_TLS_EXHAUSTED,
+
+  // --------------------------------------------------------------------------
   // [Core/Tools - Date]
   // --------------------------------------------------------------------------
 
@@ -269,47 +374,21 @@ enum ERR_CODE
   ERR_STRING_LOST,
 
   // --------------------------------------------------------------------------
-  // [Core/Threading - ThreadLocal]
+  // [Core/Tools / Xml]
   // --------------------------------------------------------------------------
 
-  //! @brien Invalid TLS index catched by @c ThreadLocal.
-  ERR_THREAD_TLS_INVALID,
-  //! @brief TLS indices exhausted.
-  ERR_THREAD_TLS_EXHAUSTED,
-
-  // --------------------------------------------------------------------------
-  // [Core/Xml]
-  // --------------------------------------------------------------------------
-
-  ERR_XML_INTERNAL,
-
-  // XmlDom Errors.
-  ERR_XML_DOCUMENT_INVALID_CHILD,
-  ERR_XML_MANUPULATION_NOT_ALLOWED,
-  ERR_XML_TAG_CHANGE_NOT_ALLOWED,
-  ERR_XML_ATTRIBUTES_NOT_ALLOWED,
-  ERR_XML_NOT_A_TEXT_NODE,
-  ERR_XML_ATTRIBUTE_NOT_EXISTS,
-  ERR_XML_ATTRIBUTE_CANT_BE_REMOVED,
-  ERR_XML_INVALID_ATTRIBUTE,
-  ERR_XML_CYCLIC,
-  ERR_XML_INVALID_CHILD,
-  ERR_XML_INVALID_TAG_NAME,
-  ERR_XML_DOCUMENT_HAS_ALREADY_ROOT,
-
-  // XmlSaxReader Errors.
-  ERR_XML_NO_DOCUMENT,
-  ERR_XML_MISSING_ROOT_TAG,
-  ERR_XML_MISSING_TAG,
-  ERR_XML_MISSING_ATTRIBUTE,
-  ERR_XML_UNMATCHED_CLOSING_TAG,
-  ERR_XML_UNCLOSED_CDATA,
-  ERR_XML_UNCLOSED_PI,
-  ERR_XML_UNCLOSED_COMMENT,
-  ERR_XML_UNCLOSED_DOCTYPE,
-  ERR_XML_SYNTAX_ERROR,
-
-  ERR_XML_INVALID_CLOSING_TAG,
+  ERR_XML_SAX_INTERNAL,
+  ERR_XML_SAX_NO_DOCUMENT,
+  ERR_XML_SAX_MISSING_ROOT_TAG,
+  ERR_XML_SAX_MISSING_TAG,
+  ERR_XML_SAX_MISSING_ATTRIBUTE,
+  ERR_XML_SAX_UNMATCHED_CLOSING_TAG,
+  ERR_XML_SAX_UNCLOSED_CDATA,
+  ERR_XML_SAX_UNCLOSED_PI,
+  ERR_XML_SAX_UNCLOSED_COMMENT,
+  ERR_XML_SAX_UNCLOSED_DOCTYPE,
+  ERR_XML_SAX_SYNTAX,
+  ERR_XML_SAX_INVALID_CLOSING_TAG,
 
   // --------------------------------------------------------------------------
   // [G2d/Imaging]

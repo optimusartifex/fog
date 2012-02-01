@@ -113,7 +113,7 @@ void MacUIEngine::setMouseWheelLines(uint32_t lines)
   if (lines == 0)
     lines = MacUIEngine_getMouseWheelLines();
 
-  base::setMouseWheelLines(lines);
+  Base::setMouseWheelLines(lines);
 }
 
 // ============================================================================

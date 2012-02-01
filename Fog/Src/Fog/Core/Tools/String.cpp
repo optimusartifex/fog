@@ -9,7 +9,6 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Collection/Util.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Memory/MemMgr.h>
@@ -19,6 +18,7 @@
 #include <Fog/Core/Tools/CharData.h>
 #include <Fog/Core/Tools/CharUtil.h>
 #include <Fog/Core/Tools/CharUtilPrivate_p.h>
+#include <Fog/Core/Tools/ContainerUtil.h>
 #include <Fog/Core/Tools/HashUtil.h>
 #include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/Locale.h>
@@ -634,7 +634,7 @@ static CharT* FOG_CDECL StringT_prepare(CharT_(String)* self, uint32_t cntOp, si
 
     if (d->reference.get() > 1)
     {
-      size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
+      size_t optimal = ContainerUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
       d = CharI_(String)::_dCreate(optimal, CharT_(Stub)(d->data, before));
       if (FOG_IS_NULL(d))
@@ -643,7 +643,7 @@ static CharT* FOG_CDECL StringT_prepare(CharT_(String)* self, uint32_t cntOp, si
     }
     else if (d->capacity < after)
     {
-      size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
+      size_t optimal = ContainerUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
       d = CharI_(String)::_dRealloc(d, optimal);
       if (FOG_IS_NULL(d))
@@ -672,7 +672,7 @@ static CharT* FOG_CDECL StringT_add(CharT_(String)* self, size_t length)
 
   if (d->reference.get() > 1)
   {
-    size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
+    size_t optimal = ContainerUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
     d = CharI_(String)::_dCreate(optimal, CharT_(Stub)(d->data, before));
     if (FOG_IS_NULL(d))
@@ -681,7 +681,7 @@ static CharT* FOG_CDECL StringT_add(CharT_(String)* self, size_t length)
   }
   else if (d->capacity < after)
   {
-    size_t optimal = CollectionUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
+    size_t optimal = ContainerUtil::getGrowCapacity(sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
     d = CharI_(String)::_dRealloc(d, optimal);
     if (FOG_IS_NULL(d))
@@ -2483,7 +2483,7 @@ static CharT* StringT_prepareInsert(CharT_(String)* self, size_t index, size_t l
 
   if (d->reference.get() > 1 || d->capacity < after)
   {
-    size_t optimalCapacity = CollectionUtil::getGrowCapacity(
+    size_t optimalCapacity = ContainerUtil::getGrowCapacity(
       sizeof(CharT_(StringData)), sizeof(CharT), before, after);
 
     d = CharI_(String)::_dCreate(optimalCapacity, CharT_(Stub)(d->data, index));
@@ -4483,7 +4483,7 @@ static bool FOG_CDECL StringT_eqString(const CharT_(String)* a, const SrcT_(Stri
   if (aLength != bLength)
     return false;
 
-  if (sizeof(CharT) == sizeof(SrcT) && ((a_d->vType & b_d->vType) & VAR_FLAG_STRING_MANAGED) == VAR_FLAG_STRING_MANAGED)
+  if (sizeof(CharT) == sizeof(SrcT) && ((a_d->vType & b_d->vType) & VAR_FLAG_STRING_INTERNED) == VAR_FLAG_STRING_INTERNED)
     return false;
 
   return StringUtil::eq(a_d->data, b_d->data, aLength, CASE_SENSITIVE);
@@ -6006,10 +6006,10 @@ FOG_NO_EXPORT void String_init(void)
   StringDataW* dw = &StringW_dEmpty;
 
   da->reference.init(1);
-  da->vType = VAR_TYPE_STRINGA | VAR_FLAG_STRING_MANAGED;
+  da->vType = VAR_TYPE_STRINGA | VAR_FLAG_STRING_INTERNED;
 
   dw->reference.init(1);
-  dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_MANAGED;
+  dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_INTERNED;
 
   fog_api.stringa_oEmpty = StringA_oEmpty.initCustom1(da);
   fog_api.stringw_oEmpty = StringW_oEmpty.initCustom1(dw);

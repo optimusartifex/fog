@@ -146,13 +146,9 @@
 // [Fog/G2d/Svg]
 // ============================================================================
 
-#include <Fog/G2d/Svg/SvgDocument.h>
-#include <Fog/G2d/Svg/SvgElement.h>
-#include <Fog/G2d/Svg/SvgHitTest.h>
-#include <Fog/G2d/Svg/SvgMeasure.h>
-#include <Fog/G2d/Svg/SvgRender.h>
+#include <Fog/G2d/Svg/SvgContext.h>
+#include <Fog/G2d/Svg/SvgDom.h>
 #include <Fog/G2d/Svg/SvgUtil.h>
-#include <Fog/G2d/Svg/SvgVisitor.h>
 
 // ============================================================================
 // [Fog/G2d/Text]

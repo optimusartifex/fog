@@ -2219,6 +2219,10 @@ DomElement* DomDocument::getElementById(const StringW& id) const
 {
   DomElement* element = static_cast<DomDocumentIdMap*>(_domIdHash)->get(id);
 
+  // Not found.
+  if (element == NULL)
+    return NULL;
+
   // Only return elements inside the document.
   if (element->_parentNode != NULL)
     return element;

@@ -720,13 +720,17 @@ static int cmp(BInt* a, BInt* b)
   j = b->wds;
 
   FOG_ASSERT_X(i <= 1 || a->x[i - 1] != 0, "Fog::StringUtil::dtoa() - cmp called with a->x[a->wds-1] == 0");
-  FOG_ASSERT_X(j <= 1 || a->x[j - 1] != 0, "Fog::StringUtil::dtoa() - cmp called with b->x[b->wds-1] == 0");
+  FOG_ASSERT_X(j <= 1 || b->x[j - 1] != 0, "Fog::StringUtil::dtoa() - cmp called with b->x[b->wds-1] == 0");
 
-  if (i -= j) return i;
+  i -= j;
+  if (i != 0)
+    return i;
+
   xa0 = a->x;
   xa = xa0 + j;
   xb0 = b->x;
   xb = xb0 + j;
+
   for (;;)
   {
     if (*--xa != *--xb)
@@ -734,6 +738,7 @@ static int cmp(BInt* a, BInt* b)
     if (xa <= xa0)
       break;
   }
+
   return 0;
 }
 

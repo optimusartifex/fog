@@ -3767,13 +3767,8 @@ FOG_NO_EXPORT void Transform_init(void)
   // [Data]
   // --------------------------------------------------------------------------
 
-  TransformF_identity->setData(1.0f, 0.0f, 0.0f,
-                               0.0f, 1.0f, 0.0f,
-                               0.0f, 0.0f, 1.0f);
-
-  TransformD_identity->setData(1.0f, 0.0f, 0.0f,
-                               0.0f, 1.0f, 0.0f,
-                               0.0f, 0.0f, 1.0f);
+  TransformF_identity->setData(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+  TransformD_identity->setData(1.0 , 0.0 , 0.0 , 0.0 , 1.0 , 0.0 , 0.0 , 0.0 , 1.0 );
 
   fog_api.transformf_oIdentity = &TransformF_identity;
   fog_api.transformd_oIdentity = &TransformD_identity;
@@ -3782,9 +3777,9 @@ FOG_NO_EXPORT void Transform_init(void)
   // [CPU Based Optimizations]
   // --------------------------------------------------------------------------
 
-  FOG_CPU_USE_INITIALIZER_3DNOW( Transform_init_3dNow() )
-  FOG_CPU_USE_INITIALIZER_SSE( Transform_init_SSE() )
-  FOG_CPU_USE_INITIALIZER_SSE2( Transform_init_SSE2() )
+  FOG_CPU_USE_INITIALIZER_3DNOW(Transform_init_3dNow())
+  FOG_CPU_USE_INITIALIZER_SSE(Transform_init_SSE())
+  FOG_CPU_USE_INITIALIZER_SSE2(Transform_init_SSE2())
 }
 
 } // Fog namespace

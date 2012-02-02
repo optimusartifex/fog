@@ -286,7 +286,7 @@ static FeComponentFunctionData* FOG_CDECL FeComponentFunction_dCreate(uint32_t f
     return NULL;
 
   d->reference.init(1);
-  d->vType = 0; // TODO: Var
+  d->vType = 0; // TODO: Var support
   d->functionType = functionType;
 
   switch (functionType)
@@ -359,7 +359,7 @@ FOG_NO_EXPORT void FeComponentFunction_init(void)
   FeComponentFunctionData* d = &FeComponentFunction_dIdentity;
 
   d->reference.init(1);
-  d->vType = 0; // TODO: Var
+  d->vType = 0; // TODO: Var support
   d->functionType = FE_COMPONENT_FUNCTION_IDENTITY;
 
   fog_api.fecomponentfunction_oIdentity = FeComponentFunction_oIdentity.initCustom1(d);

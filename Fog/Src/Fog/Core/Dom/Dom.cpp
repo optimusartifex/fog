@@ -187,7 +187,7 @@ static const uint32_t DomUtil_hierarchyMap[] =
 // [Fog::Dom - Util]
 // ============================================================================
 
-static bool DomUtil_isWhitespaceOnly(const CharW* sData, size_t sLength)
+static FOG_INLINE bool DomUtil_isWhitespaceOnly(const CharW* sData, size_t sLength)
 {
   for (size_t i = 0; i < sLength; i++)
   {
@@ -560,22 +560,37 @@ size_t DomContainer_ChildNodeList::getLength() const
 // [Fog::DomNode - Helpers]
 // ============================================================================
 
-static FOG_INLINE bool DomNode_isDocumentCompatible(DomNode* base, DomNode* node)
+static FOG_INLINE bool DomNode_isContainer(const DomNode* node)
 {
-  DomDocument* nodeDocument = node->getOwnerDocument();
+  return node->isElement() ||
+         node->isDocument() ||
+         node->isDocumentFragment();
+}
+
+static FOG_INLINE bool DomNode_isCharacterData(const DomNode* node)
+{
+  return node->isText() ||
+         node->isCDATASection() ||
+         node->isComment() ||
+         node->isProcessingInstruction();
+}
+
+static FOG_INLINE bool DomNode_isDocumentCompatible(const DomNode* base, const DomNode* node)
+{
+  DomDocument* nodeDocument = node->_ownerDocument;
 
   if (base->isDocument())
     return base == nodeDocument;
   else
-    return base->getOwnerDocument() == nodeDocument;
+    return base->_ownerDocument == nodeDocument;
 }
 
-static FOG_INLINE bool DomNode_isAncestorOrItself(DomNode* base, DomNode* node)
+static FOG_INLINE bool DomNode_isAncestorOrItself(const DomNode* base, const DomNode* node)
 {
   do {
     if (base == node)
       return true;
-    node = node->getParentNode();
+    node = node->_parentNode;
   } while (node != NULL);
   
   return false;
@@ -592,22 +607,22 @@ static FOG_INLINE bool DomNode_isChildNodeCompatible(uint32_t baseNodeType, uint
   return (DomUtil_hierarchyMap[baseNodeType] & (1 << childNodeType)) != 0;
 }
 
-static FOG_NO_INLINE bool DomNode_isDocumentFragmentCompatible(DomNode* base, DomNode* node)
+static FOG_NO_INLINE bool DomNode_isDocumentFragmentCompatible(const DomNode* base, const DomNode* node)
 {
   uint32_t baseNodeType = base->_nodeType;
 
   FOG_ASSERT(baseNodeType < FOG_ARRAY_SIZE(DomUtil_hierarchyMap));
   FOG_ASSERT(node->_nodeType == DOM_NODE_TYPE_DOCUMENT_FRAGMENT);
 
-  node = static_cast<DomDocumentFragment*>(node)->_firstChild;
+  node = static_cast<const DomDocumentFragment*>(node)->_firstChild;
 
   // Special handling for DomDocument. The DomDocumentType and DomElement can be
   // added only once there. So we just count these and fail if the counter exceeds
   // one.
   if (baseNodeType == DOM_NODE_TYPE_DOCUMENT)
   {
-    bool hasDocumentType = static_cast<DomDocument*>(base)->_documentType;
-    bool hasDocumentElement = static_cast<DomDocument*>(base)->_documentElement;
+    bool hasDocumentType = static_cast<const DomDocument*>(base)->_documentType;
+    bool hasDocumentElement = static_cast<const DomDocument*>(base)->_documentElement;
 
     while (node != NULL)
     {
@@ -697,7 +712,6 @@ static err_t DomNode_insertFragment(DomContainer* self, DomNode* after, DomDocum
   if (after == NULL)
   {
     DomNode* selfFirstChild = self->_firstChild;
-    DomNode* selfLastChild = self->_lastChild;
 
     // Prepend.
     self->_firstChild = fragmentFirstChild;
@@ -819,7 +833,7 @@ static err_t DomNode_insertAfterSafe(DomContainer* self, DomNode* newChild, DomN
   FOG_ASSERT(newChild != refChild);
 
   FOG_ASSERT(refChild != NULL);
-  FOG_ASSERT(refChild->getParentNode() == self);
+  FOG_ASSERT(refChild->_parentNode == self);
 
   uint32_t thisNodeType = self->_nodeType;
   uint32_t childNodeType = newChild->_nodeType;
@@ -833,7 +847,7 @@ static err_t DomNode_insertAfterSafe(DomContainer* self, DomNode* newChild, DomN
     if (static_cast<DomDocumentFragment*>(newChild)->_firstChild == NULL)
       return ERR_OK;
 
-    FOG_ASSERT(newChild->getParentNode() == NULL);
+    FOG_ASSERT(newChild->_parentNode == NULL);
     if (!DomNode_isDocumentFragmentCompatible(self, newChild))
       return ERR_DOM_HIERARCHY_REQUEST;
 
@@ -1030,7 +1044,7 @@ err_t DomNode::setNodeValue(const StringW& value)
 }
 
 // ============================================================================
-// [Fog::DomNode - DOM Interface]
+// [Fog::DomNode - Hierarchy]
 // ============================================================================
 
 DomNode* DomNode::getFirstChild() const
@@ -1068,7 +1082,7 @@ bool DomNode::contains(DomNode* refChild, bool deep) const
   if (!hasChildNodes())
     return false;
 
-  DomNode* node = refChild->getParentNode();
+  DomNode* node = refChild->_parentNode;
   if (!deep)
     return node == this;
 
@@ -1076,7 +1090,7 @@ bool DomNode::contains(DomNode* refChild, bool deep) const
   {
     if (node == this)
       return true;
-    node = node->getParentNode();
+    node = node->_parentNode;
   } while (node);
   return false;      
 }
@@ -1104,7 +1118,9 @@ err_t DomNode::prependChild(DomNode* newChild)
     if (static_cast<DomDocumentFragment*>(newChild)->_firstChild == NULL)
       return ERR_OK;
 
-    FOG_ASSERT(newChild->getParentNode() == NULL);
+    // DocumentFragment has never parentNode.
+    FOG_ASSERT(newChild->_parentNode == NULL);
+
     if (!DomNode_isDocumentFragmentCompatible(this, newChild))
       return ERR_DOM_HIERARCHY_REQUEST;
 
@@ -1172,7 +1188,9 @@ err_t DomNode::appendChild(DomNode* newChild)
     if (static_cast<DomDocumentFragment*>(newChild)->_firstChild == NULL)
       return ERR_OK;
 
-    FOG_ASSERT(newChild->getParentNode() == NULL);
+    // DocumentFragment has never parentNode.
+    FOG_ASSERT(newChild->_parentNode == NULL);
+
     if (!DomNode_isDocumentFragmentCompatible(this, newChild))
       return ERR_DOM_HIERARCHY_REQUEST;
 
@@ -1225,10 +1243,21 @@ err_t DomNode::removeChild(DomNode* oldChild)
   if (isReadOnly())
     return ERR_DOM_NO_MODIFICATION_ALLOWED;
 
-  if (oldChild->getParentNode() != this)
-    return ERR_DOM_HIERARCHY_REQUEST;
+  if (oldChild->_parentNode != this)
+    return ERR_DOM_NOT_FOUND;
 
   return oldChild->unlink();
+}
+
+err_t DomNode::removeChildNodes()
+{
+  if (isReadOnly())
+    return ERR_DOM_NO_MODIFICATION_ALLOWED;
+
+  if ((_nodeFlags & DOM_NODE_FLAG_HAS_CHILD_NODES) != 0)
+    return DomContainer_removeChildNodes(static_cast<DomContainer*>(this));
+
+  return ERR_OK;
 }
 
 err_t DomNode::insertBefore(DomNode* newChild, DomNode* refChild)
@@ -1245,8 +1274,8 @@ err_t DomNode::insertBefore(DomNode* newChild, DomNode* refChild)
   if (!DomNode_isDocumentCompatible(this, newChild))
     return ERR_DOM_WRONG_DOCUMENT;
 
-  if (refChild->getParentNode() != this)
-    return ERR_DOM_HIERARCHY_REQUEST;
+  if (refChild->_parentNode != this)
+    return ERR_DOM_NOT_FOUND;
 
   if (newChild == refChild)
     return ERR_OK;
@@ -1271,8 +1300,8 @@ err_t DomNode::insertAfter(DomNode* newChild, DomNode* refChild)
   if (!DomNode_isDocumentCompatible(this, newChild))
     return ERR_DOM_WRONG_DOCUMENT;
 
-  if (refChild->getParentNode() != this)
-    return ERR_DOM_HIERARCHY_REQUEST;
+  if (refChild->_parentNode != this)
+    return ERR_DOM_NOT_FOUND;
 
   if (newChild == refChild)
     return ERR_OK;
@@ -1285,24 +1314,149 @@ err_t DomNode::insertAfter(DomNode* newChild, DomNode* refChild)
 
 err_t DomNode::replaceChild(DomNode* newChild, DomNode* refChild)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
-}
+  if (newChild == NULL)
+    return ERR_RT_INVALID_ARGUMENT;
 
-err_t DomNode::removeChildNodes()
-{
+  if (refChild == NULL)
+    return ERR_RT_INVALID_ARGUMENT;
+  
   if (isReadOnly())
     return ERR_DOM_NO_MODIFICATION_ALLOWED;
 
-  if ((_nodeFlags & DOM_NODE_FLAG_HAS_CHILD_NODES) != 0)
-    return DomContainer_removeChildNodes(static_cast<DomContainer*>(this));
+  DomContainer* newChildParent = newChild->_parentNode;
+  if (newChildParent != NULL && newChildParent->isReadOnly())
+    return ERR_DOM_NO_MODIFICATION_ALLOWED;
 
-  return ERR_OK;
+  if (refChild->_parentNode != this)
+    return ERR_DOM_NOT_FOUND;
+
+  if (this->isDocument())
+  {
+    // DomDocument can contain only one DomElement and one DomDocumentType
+    // node. We need to check if this assumption will is valid before we
+    // try to manipulate DOM.
+    DomDocument* doc = static_cast<DomDocument*>(this);
+
+    size_t domElementCount = doc->_documentElement != NULL;
+    size_t domDocumentTypeCount = doc->_documentType != NULL;
+
+    domElementCount -= refChild == doc->_documentElement;
+    domDocumentTypeCount -= refChild == doc->_documentType;
+    
+    if (newChild->isDocumentFragment())
+    {
+      DomNode* node = static_cast<DomDocumentFragment*>(newChild)->_firstChild;
+      while (node != NULL)
+      {
+        domElementCount += node->isElement();
+        domDocumentTypeCount += node->isDocumentType();
+        node = node->_nextSibling;
+      }
+    }
+    else
+    {
+      domElementCount += newChild->isElement();
+      domDocumentTypeCount += newChild->isDocumentType();
+    }
+
+    if (domElementCount > 1 || domDocumentTypeCount > 1)
+      return ERR_DOM_HIERARCHY_REQUEST;
+  }
+
+  if (this == newChildParent)
+  {
+    // Unlikely, but possible.
+    if (newChild == refChild)
+      return ERR_OK;
+
+    // We don't need to check for document compatibility and child
+    // compatibility, because all the two children are in document,
+    // so they must be compatible to the DOM. So basically we need
+    // to remove the refChild, and move newChild into the location
+    // where refChild was.
+    DomNode* prev = refChild->_previousSibling;
+
+    FOG_RETURN_ON_ERROR(DomNode_unlinkSafe(newChild));
+    DomNode_unlinkSafe(refChild);
+
+    if (prev == NULL)
+      return prependChild(newChild);
+    else
+      return DomNode_insertAfterSafe(static_cast<DomContainer*>(this), newChild, prev);
+  }
+
+  if (!DomNode_isDocumentCompatible(this, newChild))
+    return ERR_DOM_WRONG_DOCUMENT;
+
+  uint32_t thisNodeType = _nodeType;
+  uint32_t newNodeType = newChild->_nodeType;
+
+  if (!DomNode_isChildNodeCompatible(thisNodeType, newNodeType))
+    return ERR_DOM_HIERARCHY_REQUEST;
+
+  if (newNodeType == DOM_NODE_TYPE_DOCUMENT_FRAGMENT)
+  {
+    if (static_cast<DomDocumentFragment*>(newChild)->_firstChild == NULL)
+      return refChild->unlink();
+    
+    // DocumentFragment has never parentNode.
+    FOG_ASSERT(newChild->_parentNode == NULL);
+
+    if (!DomNode_isDocumentFragmentCompatible(this, newChild))
+      return ERR_DOM_HIERARCHY_REQUEST;
+
+    DomNode* prev = refChild->_previousSibling;
+    DomNode_unlinkSafe(refChild);
+
+    return DomNode_insertFragment(
+      static_cast<DomContainer*>(this), prev, static_cast<DomDocumentFragment*>(newChild));
+  }
+  else
+  {
+    // Generate error if newChild is 'this' or ancestor.
+    if (DomNode_isAncestorOrItself(this, newChild))
+      return ERR_DOM_HIERARCHY_REQUEST;
+
+    // We can simply replace refChild with newChild.
+    FOG_RETURN_ON_ERROR(DomNode_unlinkSafe(newChild));
+
+    _onChildRemove(refChild, refChild);
+
+    DomNode* prev = refChild->_previousSibling;
+    DomNode* next = refChild->_nextSibling;
+
+    // Link newChild.
+    newChild->_parentNode = refChild->_parentNode;
+    newChild->_previousSibling = prev;
+    newChild->_nextSibling = next;
+
+    if (prev == NULL)
+      static_cast<DomContainer*>(this)->_firstChild = newChild;
+    else
+      prev->_nextSibling = newChild;
+
+    if (next == NULL)
+      static_cast<DomContainer*>(this)->_lastChild = newChild;
+    else
+      next->_previousSibling = newChild;
+
+    // Unlink refChild.
+    refChild->_parentNode = NULL;
+    refChild->_nextSibling = NULL;
+    refChild->_previousSibling = NULL;
+
+    _nodeFlags |= DOM_NODE_FLAG_DIRTY_CHILD_NODE_LIST;
+    if (this->isDocument())
+      DomDocument_onChildAdd(static_cast<DomDocument*>(this), newChild);
+
+    _onChildAdd(newChild, newChild);
+    return ERR_OK;
+  }
 }
 
 err_t DomNode::unlink()
 {
-  if (getParentNode() == NULL)
+  if (_parentNode == NULL)
     return ERR_OK;
 
   FOG_RETURN_ON_ERROR(DomNode_unlinkSafe(this));
@@ -1325,10 +1479,52 @@ DomNode* DomNode::cloneNode(bool deep) const
 // [Fog::DomNode - Normalize]
 // ============================================================================
 
-err_t DomNode::normalize()
+err_t DomNode::normalize(bool deep)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  if (!DomNode_isContainer(this))
+    return ERR_OK;
+
+  DomNode* node = reinterpret_cast<DomContainer*>(this)->_firstChild;
+  DomText* text;
+
+  while (node != NULL)
+  {
+    DomNode* next = node->_nextSibling;
+
+    if (node->isText())
+    {
+      if (static_cast<DomText*>(node)->getData().isEmpty())
+      {
+        if (node->isReadOnly())
+          return ERR_DOM_NO_MODIFICATION_ALLOWED;
+        FOG_RETURN_ON_ERROR(text->unlink());
+      }
+      else if (text != NULL)
+      {
+        if (node->isReadOnly() || text->isReadOnly())
+          return ERR_DOM_NO_MODIFICATION_ALLOWED;
+
+        StringW data = StringW(text->_data, static_cast<DomText*>(node)->_data);
+
+        FOG_RETURN_ON_ERROR(node->unlink());
+        FOG_RETURN_ON_ERROR(text->setData(data));
+      }
+      else
+      {
+        text = static_cast<DomText*>(node);
+      }
+    }
+    else
+    {
+      if (deep)
+        FOG_RETURN_ON_ERROR(node->normalize(deep));
+      text = NULL;
+    }
+
+    node = next;
+  }
+
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -1337,8 +1533,50 @@ err_t DomNode::normalize()
 
 uint32_t DomNode::compareDocumentPosition(DomNode* other) const
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  // 1. Let reference be the context object (this).
+  //
+  // There is not mentioned which value to return in case that other is NULL,
+  // we return NO_FLAGS.
+  if (other == NULL)
+    return NO_FLAGS;
+
+  // 2. If other and reference are the same object, return zero and terminate
+  //    these steps.
+  if (this == other)
+    return NO_FLAGS;
+
+  // 3. If other and reference are not in the same tree, return 
+  //    DOCUMENT_POSITION_DISCONNECTED and terminate these steps.
+  if (_ownerDocument != other->_ownerDocument)
+    return DOM_POSITION_DISCONNECTED;
+
+  // 4. If other is an ancestor of reference, return the result of adding
+  //    DOCUMENT_POSITION_CONTAINS to DOCUMENT_POSITION_PRECEDING and terminate
+  //    these steps.
+  if (DomNode_isAncestorOrItself(this, other->_parentNode))
+    return DOM_POSITION_CONTAINS | DOM_POSITION_PRECEDING;
+
+  // 5. If other is a descendant of reference, return the result of adding
+  //    DOCUMENT_POSITION_CONTAINED_BY to DOCUMENT_POSITION_FOLLOWING and
+  //    terminate these steps.
+  if (DomNode_isAncestorOrItself(this->_parentNode, other))
+    return DOM_POSITION_CONTAINED_BY | DOM_POSITION_FOLLOWING;
+
+  // 6. If other is preceding reference return DOCUMENT_POSITION_PRECEDING and 
+  //    terminate these steps.
+  DomNode* node = other;
+
+  for (;;)
+  {
+    node = node->_previousSibling;
+    if (node == NULL)
+      break;
+    if (node == this)
+      return DOM_POSITION_PRECEDING;
+  }
+
+  // 7. Return DOCUMENT_POSITION_FOLLOWING.
+  return DOM_POSITION_FOLLOWING;
 }
 
 // ============================================================================
@@ -1347,14 +1585,130 @@ uint32_t DomNode::compareDocumentPosition(DomNode* other) const
 
 StringW DomNode::getTextContent() const
 {
-  // TODO:
-  return StringW();
+  switch (_nodeType)
+  {
+    case DOM_NODE_TYPE_ELEMENT:
+    case DOM_NODE_TYPE_DOCUMENT_FRAGMENT:
+    {
+      DomNode* node = static_cast<const DomContainer*>(this)->_firstChild;
+      DomNode* t;
+
+      if (node == NULL)
+        goto _None;
+
+      StringW textContent;
+
+      // Traverse the whole node-tree and create content from all character-data
+      // nodes.
+      for (;;)
+      {
+        if (DomNode_isContainer(node))
+        {
+          t = static_cast<DomContainer*>(node)->_firstChild;
+          if (t != NULL)
+          {
+            node = t;
+            continue;
+          }
+        }
+        else if (DomNode_isCharacterData(node))
+        {
+          textContent.append(static_cast<DomCharacterData*>(node)->_data);
+        }
+
+        for (;;)
+        {
+          t = node->_nextSibling;
+          if (t != NULL)
+            break;
+
+          node = node->_parentNode;
+          if (node == this)
+            return textContent;
+        }
+      }
+    }
+    
+    case DOM_NODE_TYPE_TEXT:
+    case DOM_NODE_TYPE_PROCESSING_INSTRUCTION:
+    case DOM_NODE_TYPE_CDATA_SECTION:
+    case DOM_NODE_TYPE_COMMENT:
+      return static_cast<const DomCharacterData*>(this)->_data;
+      
+    default:
+_None:
+      return StringW();
+  }
 }
 
 err_t DomNode::setTextContent(const StringW& textContent)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  switch (_nodeType)
+  {
+    case DOM_NODE_TYPE_ELEMENT:
+    case DOM_NODE_TYPE_DOCUMENT_FRAGMENT:
+    {
+      // We try to cache our
+      DomNode* node = static_cast<DomContainer*>(this)->_firstChild;
+
+      // If the first node is text-content, and it's not used (reference is zero)
+      // then instead of creating new node, we reuse this one.
+      if (node != NULL)
+      {
+        if (node->_reference.get() == 0 && node->isText() && !textContent.isEmpty())
+          node->addRef();
+        else
+          node = NULL;
+      }
+
+      err_t err = removeChildNodes();
+
+      // Handle the possible error case.
+      if (FOG_IS_ERROR(err))
+      {
+        if (node != NULL)
+          node->release();
+        return err;
+      }
+
+      if (node != NULL)
+      {
+        err = static_cast<DomText*>(node)->setData(textContent);
+        if (FOG_IS_ERROR(err))
+        {
+          node->release();
+          return err;
+        }
+        
+        err = appendChild(node);
+        if (FOG_IS_ERROR(err))
+          node->release();
+      }
+      else
+      {
+        node = _ownerDocument->_createTextNode(textContent);
+        if (FOG_IS_NULL(node))
+          return ERR_RT_OUT_OF_MEMORY;
+
+        err = appendChild(node);
+        if (FOG_IS_ERROR(err))
+          _ownerDocument->_gc.mark(node);
+      }
+
+      return err;
+    }
+
+    case DOM_NODE_TYPE_TEXT:
+    case DOM_NODE_TYPE_CDATA_SECTION:
+    case DOM_NODE_TYPE_COMMENT:
+    case DOM_NODE_TYPE_PROCESSING_INSTRUCTION:
+    {
+      return static_cast<DomCharacterData*>(this)->setData(textContent);
+    }
+
+    default:
+      return ERR_DOM_TYPE_MISMATCH;
+  }
 }
 
 // ============================================================================
@@ -2440,7 +2794,7 @@ err_t DomSaxHandler::onEndElement(const StubW& tagName)
   if (FOG_IS_NULL(_currentContainer) || _currentContainer == _document)
     return ERR_RT_INVALID_STATE;
 
-  _currentContainer = _currentContainer->getParentNode();
+  _currentContainer = _currentContainer->_parentNode;
   return ERR_OK;
 }
 

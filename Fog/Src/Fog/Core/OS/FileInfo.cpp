@@ -383,7 +383,7 @@ static FileInfoData* FOG_CDECL FileInfo_dCreate(const StringW* fileName)
 
   d->reference.init(1);
 
-  // TODO:
+  // TODO: Var support
   // d->vType = VAR_TYPE_FILE_INFO;
 
   d->fileFlags = NO_FLAGS;

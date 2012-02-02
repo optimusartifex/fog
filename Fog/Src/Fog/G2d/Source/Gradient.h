@@ -159,8 +159,8 @@ struct FOG_NO_EXPORT GradientF
   FOG_INLINE GradientF& operator=(const GradientF& other) { setGradient(other); return *this; }
   FOG_INLINE GradientF& operator=(const GradientD& other) { setGradient(other); return *this; }
 
-  FOG_INLINE bool operator==(const GradientF& other) { return  eq(other); }
-  FOG_INLINE bool operator!=(const GradientF& other) { return !eq(other); }
+  FOG_INLINE bool operator==(const GradientF& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const GradientF& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]
@@ -348,8 +348,8 @@ struct FOG_NO_EXPORT GradientD
   FOG_INLINE GradientD& operator=(const GradientF& other) { setGradient(other); return *this; }
   FOG_INLINE GradientD& operator=(const GradientD& other) { setGradient(other); return *this; }
 
-  FOG_INLINE bool operator==(const GradientD& other) { return  eq(other); }
-  FOG_INLINE bool operator!=(const GradientD& other) { return !eq(other); }
+  FOG_INLINE bool operator==(const GradientD& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const GradientD& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]

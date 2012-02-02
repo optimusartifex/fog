@@ -949,11 +949,70 @@ static bool FOG_CDECL Pattern_eq(const Pattern* a, const Pattern* b)
   if (a_d == b_d)
     return true;
 
-  uint32_t patternType = a_d->patternType;
-  if (patternType != b_d->patternType)
+  uint32_t vType = a_d->vType;
+  if (vType != b_d->vType)
     return false;
 
-  // TODO: Pattern comparison.
+  switch (vType)
+  {
+    // Redundant check, because in such case a_d has to be equal with b_d.
+    case VAR_TYPE_NULL:
+      return true;
+
+    case VAR_TYPE_COLOR:
+    {
+      const PatternColorData* a_data = static_cast<const PatternColorData*>(a_d);
+      const PatternColorData* b_data = static_cast<const PatternColorData*>(b_d);
+
+      return a_data->color() == b_data->color();
+    }
+
+    case VAR_TYPE_TEXTUREF:
+    {
+      const PatternTextureDataF* a_data = static_cast<const PatternTextureDataF*>(a_d);
+      const PatternTextureDataF* b_data = static_cast<const PatternTextureDataF*>(b_d);
+
+      return a_data->texture() == b_data->texture() &&
+             a_data->transform() == b_data->transform();
+    }
+
+    case VAR_TYPE_TEXTURED:
+    {
+      const PatternTextureDataD* a_data = static_cast<const PatternTextureDataD*>(a_d);
+      const PatternTextureDataD* b_data = static_cast<const PatternTextureDataD*>(b_d);
+
+      return a_data->texture() == b_data->texture() &&
+             a_data->transform() == b_data->transform();
+    }
+
+    case VAR_TYPE_LINEAR_GRADIENTF:
+    case VAR_TYPE_RADIAL_GRADIENTF:
+    case VAR_TYPE_CONICAL_GRADIENTF:
+    case VAR_TYPE_RECTANGULAR_GRADIENTF:
+    {
+      const PatternGradientDataF* a_data = static_cast<const PatternGradientDataF*>(a_d);
+      const PatternGradientDataF* b_data = static_cast<const PatternGradientDataF*>(b_d);
+
+      return a_data->gradient() == b_data->gradient() &&
+             a_data->transform() == b_data->transform();
+    }
+
+    case VAR_TYPE_LINEAR_GRADIENTD:
+    case VAR_TYPE_RADIAL_GRADIENTD:
+    case VAR_TYPE_CONICAL_GRADIENTD:
+    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+    {
+      const PatternGradientDataD* a_data = static_cast<const PatternGradientDataD*>(a_d);
+      const PatternGradientDataD* b_data = static_cast<const PatternGradientDataD*>(b_d);
+
+      return a_data->gradient() == b_data->gradient() &&
+             a_data->transform() == b_data->transform();
+    }
+    
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
   return false;
 }
 

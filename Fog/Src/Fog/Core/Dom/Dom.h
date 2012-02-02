@@ -301,13 +301,13 @@ struct FOG_API DomNode : public DomObj
 
   err_t prependChild(DomNode* newChild);
   err_t appendChild(DomNode* newChild);
+
   err_t removeChild(DomNode* oldChild);
+  err_t removeChildNodes();
 
   err_t insertBefore(DomNode* newChild, DomNode* refChild);
   err_t insertAfter(DomNode* newChild, DomNode* refChild);
   err_t replaceChild(DomNode* newChild, DomNode* refChild);
-
-  err_t removeChildNodes();
   err_t unlink();
 
   // --------------------------------------------------------------------------
@@ -320,7 +320,7 @@ struct FOG_API DomNode : public DomObj
   // [Normalize]
   // --------------------------------------------------------------------------
 
-  err_t normalize();
+  err_t normalize(bool deep);
 
   // --------------------------------------------------------------------------
   // [CompareDocumentPosition]

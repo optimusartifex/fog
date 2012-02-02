@@ -719,7 +719,7 @@ static err_t DomNode_insertFragment(DomContainer* self, DomNode* after, DomDocum
     // If container is empty then it's just reparent from fragment to self.
     if (selfFirstChild == NULL)
     {
-      FOG_ASSERT(selfLastChild == NULL);
+      FOG_ASSERT(self->_lastChild == NULL);
       self->_lastChild = fragmentLastChild;
     }
     else

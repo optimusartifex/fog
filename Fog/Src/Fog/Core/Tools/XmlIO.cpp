@@ -106,20 +106,22 @@ static FOG_INLINE uint8_t XmlUtil_lo8(uint8_t c)
 }
 
 // NameStartChar ::= 
-//   ":" | [A-Z] | 
-//   "_" | [a-z] | 
+//   ":"                 |
+//   "_"                 |
+//   [A-Z]               |
+//   [a-z]               |
 //   [U+0000C0-U+0000D6] |
 //   [U+0000D8-U+0000F6] |
 //   [U+0000F8-U+0002FF] |
 //   [U+000370-U+00037D] |
-//   [U+00037F-U+001FFF] | 
-//   [U+00200C-U+00200D] | 
-//   [U+002070-U+00218F] | 
-//   [U+002C00-U+002FEF] | 
-//   [U+003001-U+00D7FF] | 
-//   [U+00F900-U+00FDCF] | 
+//   [U+00037F-U+001FFF] |
+//   [U+00200C-U+00200D] |
+//   [U+002070-U+00218F] |
+//   [U+002C00-U+002FEF] |
+//   [U+003001-U+00D7FF] |
+//   [U+00F900-U+00FDCF] |
 //   [U+00FDF0-U+00FFFD] |
-//   [U+010000-U+0EFFFF]
+//   [U+010000-U+0EFFFF] ;
 static FOG_INLINE bool XmlUtil_isNameStartChar(const CharW& c)
 {
   return c.isLetter() ||
@@ -128,13 +130,13 @@ static FOG_INLINE bool XmlUtil_isNameStartChar(const CharW& c)
 }
 
 // NameChar ::=
-//   NameStartChar | 
-//   "-" | 
-//   "." | 
-//   [0-9]           | 
-//   [U+00B7]        | 
-//   [U+0300-U+036F] | 
-//   [U+203F-U+2040]
+//   NameStartChar       |
+//   "-"                 | 
+//   "."                 |
+//   [U+000000-U+000009] |
+//   [U+0000B7]          |
+//   [U+000300-U+00036F] |
+//   [U+00203F-U+002040] ;
 static FOG_INLINE bool XmlUtil_isNameChar(const CharW& c)
 {
   return c.isNumlet() ||

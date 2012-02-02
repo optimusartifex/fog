@@ -2102,7 +2102,7 @@ static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, siz
   if (s == sEnd)
     goto _Ret0;
 
-  // skip all spaces
+  // Skip all spaces.
   if (CharT_Func::isSpace(*s))
   {
     flags |= STRING_PARSED_SPACES;
@@ -2133,8 +2133,10 @@ static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, siz
     nz0 = 1;
     for (;;)
     {
-      if (++s == sEnd) goto _Ret;
-      if (*s != CharT('0')) break;
+      if (++s == sEnd)
+        goto _Ret;
+      if (*s != CharT('0'))
+        break;
     }
   }
 
@@ -2143,16 +2145,17 @@ static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, siz
   nd = nf = 0;
   nd0 = 0;
 
-  for(; (c = *s) >= '0' && c <= '9'; nd++)
+  for (; (c = *s) >= '0' && c <= '9'; nd++)
   {
     if (nd < 9)
-      y = 10*y + (int)c - '0';
+      y = 10 * y + (int)c - '0';
     else if (nd < 16)
-      z = 10*z + (int)c - '0';
+      z = 10 * z + (int)c - '0';
 
     if (++s == sEnd)
     {
-      c = 0; nd++;
+      c = 0;
+      nd++;
       goto _DigitDone;
     }
   }
@@ -2176,7 +2179,8 @@ static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, siz
         if (c == '0')
         {
           nz++;
-          if (++s == sEnd) goto _DigitDone;
+          if (++s == sEnd)
+            goto _DigitDone;
           c = *s;
           continue;
         }
@@ -2193,16 +2197,16 @@ static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, siz
       }
     }
 
-    for(; c >= '0' && c <= '9'; )
+    for (; c >= '0' && c <= '9'; )
     {
- _HaveDigit:
+_HaveDigit:
       nz++;
       c -= '0';
 
       if (c)
       {
         nf += nz;
-        for(i = 1; i < nz; i++)
+        for (i = 1; i < nz; i++)
         {
           if (nd++ < 9)
             y *= 10;
@@ -2211,9 +2215,9 @@ static err_t FOG_CDECL StringUtil_parseDouble(double* dst, const CharT* str, siz
         }
 
         if (nd++ < 9)
-          y = 10*y + c;
+          y = 10 * y + c;
         else if (nd <= DBL_DIG + 1)
-          z = 10*z + c;
+          z = 10 * z + c;
 
         nz = 0;
       }
@@ -3087,6 +3091,7 @@ _Ret:
     *dst = -rv.d;
   else
     *dst = rv.d;
+
   return err;
 }
 

@@ -133,23 +133,30 @@ _Start:
   // Skip spaces.
   for (;;)
   {
-    if (srcCur == srcEnd) goto _End;
-    else if (srcCur->isSpace()) srcCur++;
-    else break;
+    if (srcCur == srcEnd)
+      goto _End;
+    else if (srcCur->isSpace())
+      srcCur++;
+    else
+      break;
   }
 
   // Parse function name.
   functionName = srcCur;
   for (;;)
   {
-    if (srcCur == srcEnd) goto _End;
-    else if (srcCur->isAsciiLetter()) srcCur++;
-    else break;
+    if (srcCur == srcEnd)
+      goto _End;
+    else if (srcCur->isAsciiLetter())
+      srcCur++;
+    else
+      break;
   }
   functionLen = (size_t)(srcCur - functionName);
 
   // Parse '('.
-  if (srcCur[0] != CharW('(')) goto _End;
+  if (srcCur[0] != CharW('('))
+    goto _End;
   srcCur++;
 
   // Parse arguments.

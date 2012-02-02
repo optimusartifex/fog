@@ -465,16 +465,23 @@ struct FOG_NO_EXPORT FeColorMatrix : public FeBase
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  //! @brief Get global identity matrix.
-  static FOG_INLINE const FeColorMatrix& identity() { return *fog_api.fecolormatrix_oIdentity; }
-  //! @brief Get global zero matrix.
-  static FOG_INLINE const FeColorMatrix& zero() { return *fog_api.fecolormatrix_oZero; }
-  //! @brief Get global grayscale matrix.
-  static FOG_INLINE const FeColorMatrix& greyscale() { return *fog_api.fecolormatrix_oGreyscale; }
-  //! @brief Get global pre-hue matrix (used by rotate-hue).
-  static FOG_INLINE const FeColorMatrix& preHue() { return *fog_api.fecolormatrix_oPreHue; }
-  //! @brief Get global post-hue matrix (used by rotate-hue).
-  static FOG_INLINE const FeColorMatrix& postHue() { return *fog_api.fecolormatrix_oPostHue; }
+  //! @brief Get global instance of identity matrix.
+  static FOG_INLINE const FeColorMatrix& getIdentityInstance()
+  {
+    return *fog_api.fecolormatrix_oIdentity;
+  }
+
+  //! @brief Get global instance of zero matrix.
+  static FOG_INLINE const FeColorMatrix& getZeroInstance()
+  {
+    return *fog_api.fecolormatrix_oZero;
+  }
+
+  //! @brief Get global instance of grayscale matrix.
+  static FOG_INLINE const FeColorMatrix& getGreyscaleInstance()
+  {
+    return *fog_api.fecolormatrix_oGreyscale;
+  }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]

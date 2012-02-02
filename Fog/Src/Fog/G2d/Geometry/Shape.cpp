@@ -243,7 +243,7 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
       return ERR_GEOMETRY_NONE;
 
     case SHAPE_TYPE_LINE:
-      *dst = reinterpret_cast<const NumT_(Line)*>(shapeData)->getBoundingBox();
+      *dst = static_cast<const NumT_(Line)*>(shapeData)->getBoundingBox();
       if (transform) transform->mapBox(*dst, *dst);
       return ERR_OK;
 
@@ -261,15 +261,15 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
           };
 
           NumT_T1(PathTmp, 16) path;
-          transform->mapPathData(path, cmd, reinterpret_cast<const NumT_(Point)*>(shapeData), 3);
+          transform->mapPathData(path, cmd, static_cast<const NumT_(Point)*>(shapeData), 3);
           return path.getBoundingBox(*dst);
         }
 
-        transform->_mapPoints(tmp, reinterpret_cast<const NumT_(Point)*>(shapeData), 3);
+        transform->_mapPoints(tmp, static_cast<const NumT_(Point)*>(shapeData), 3);
         shapeData = &tmp;
       }
 
-      FOG_RETURN_ON_ERROR(reinterpret_cast<const NumT_(QBezier)*>(shapeData)->getBoundingBox(*dst));
+      FOG_RETURN_ON_ERROR(static_cast<const NumT_(QBezier)*>(shapeData)->getBoundingBox(*dst));
       return ERR_OK;
 
     case SHAPE_TYPE_CBEZIER:
@@ -286,58 +286,58 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
           };
 
           NumT_T1(PathTmp, 16) path;
-          transform->mapPathData(path, cmd, reinterpret_cast<const NumT_(Point)*>(shapeData), 4);
+          transform->mapPathData(path, cmd, static_cast<const NumT_(Point)*>(shapeData), 4);
           return path.getBoundingBox(*dst);
         }
 
-        transform->_mapPoints(tmp, reinterpret_cast<const NumT_(Point)*>(shapeData), 4);
+        transform->_mapPoints(tmp, static_cast<const NumT_(Point)*>(shapeData), 4);
         shapeData = &tmp;
       }
 
-      FOG_RETURN_ON_ERROR(reinterpret_cast<const NumT_(CBezier)*>(shapeData)->getBoundingBox(*dst));
+      FOG_RETURN_ON_ERROR(static_cast<const NumT_(CBezier)*>(shapeData)->getBoundingBox(*dst));
       return ERR_OK;
 
     case SHAPE_TYPE_ARC:
-      return reinterpret_cast<const NumT_(Arc)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Arc)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_RECT:
-      *dst = *reinterpret_cast<const NumT_(Rect)*>(shapeData);
+      *dst = *static_cast<const NumT_(Rect)*>(shapeData);
       if (transform) transform->mapBox(*dst, *dst);
       return ERR_OK;
 
     case SHAPE_TYPE_ROUND:
-      return reinterpret_cast<const NumT_(Round)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Round)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_CIRCLE:
-      reinterpret_cast<const NumT_(Circle)*>(shapeData)->_getBoundingBox(*dst, transform);
+      static_cast<const NumT_(Circle)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_ELLIPSE:
-      return reinterpret_cast<const NumT_(Ellipse)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Ellipse)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_CHORD:
-      return reinterpret_cast<const NumT_(Chord)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Chord)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_PIE:
-      return reinterpret_cast<const NumT_(Pie)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Pie)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_TRIANGLE:
-      return reinterpret_cast<const NumT_(Triangle)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Triangle)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     case SHAPE_TYPE_POLYLINE:
     case SHAPE_TYPE_POLYGON:
     {
-      const NumT_(PointArray)* pa = reinterpret_cast<const NumT_(PointArray)*>(shapeData);
+      const NumT_(PointArray)* pa = static_cast<const NumT_(PointArray)*>(shapeData);
       return ShapeT_getBoundingBoxOfPoints<NumT>(dst, pa->getData(), pa->getLength(), transformType, transform);
     }
 
     case SHAPE_TYPE_RECT_ARRAY:
     {
-      const NumT_(RectArray)* pa = reinterpret_cast<const NumT_(RectArray)*>(shapeData);
+      const NumT_(RectArray)* pa = static_cast<const NumT_(RectArray)*>(shapeData);
       return ShapeT_getBoundingBoxOfRects<NumT>(dst, pa->getData(), pa->getLength(), transformType, transform);
     }
 
     case SHAPE_TYPE_PATH:
-      return reinterpret_cast<const NumT_(Path)*>(shapeData)->_getBoundingBox(*dst, transform);
+      return static_cast<const NumT_(Path)*>(shapeData)->_getBoundingBox(*dst, transform);
 
     default:
       dst->reset();
@@ -350,7 +350,62 @@ static err_t FOG_CDECL ShapeT_getBoundingBox(uint32_t shapeType, const void* sha
 // ============================================================================
 
 template<typename NumT>
-static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* pt, uint32_t fillRule)
+static FOG_INLINE bool ShapeT_hitTestPolygon(const NumT_(Point)* pts, size_t length, const NumT_(Point)* hitPt, uint32_t fillRule)
+{
+  const NumT_(Point)* ptsEnd = pts + length;
+
+  if (length < 3)
+    return false;
+
+  NumT x0, y0;
+  NumT x1, y1;
+
+  NumT px, py;
+  NumT dx, dy;
+
+  x0 = pts[0].x;
+  y0 = pts[0].y;
+  pts++;
+  
+  int windingNumber = 0;
+  px = hitPt->x;
+  py = hitPt->y;
+
+  do {
+    x1 = pts[0].x;
+    y1 = pts[0].y;
+
+    dx = x1 - x0;
+    dy = y1 - y0;
+
+    if (dy > NumT(0.0))
+    {
+      if (py >= y0 && py < y1)
+      {
+        NumT ix = x0 + (py - y0) * dx / dy;
+        windingNumber += (px >= ix);
+      }
+    }
+    else if (dy < NumT(0.0))
+    {
+      if (py >= y1 && py < y0)
+      {
+        NumT ix = x0 + (py - y0) * dx / dy;
+        windingNumber -= (px >= ix);
+      }
+    }
+
+    x0 = x1;
+    y0 = y1;
+  } while (++pts != ptsEnd);
+
+  if (fillRule == FILL_RULE_EVEN_ODD)
+    windingNumber &= 1;
+  return windingNumber != 0;
+}
+
+template<typename NumT>
+static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* hitPt, uint32_t fillRule)
 {
   switch (shapeType)
   {
@@ -362,36 +417,39 @@ static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, 
       return false;
 
     case SHAPE_TYPE_RECT:
-      return reinterpret_cast<const NumT_(Rect)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Rect)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_ROUND:
-      return reinterpret_cast<const NumT_(Round)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Round)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_CIRCLE:
-      return reinterpret_cast<const NumT_(Circle)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Circle)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_ELLIPSE:
-      return reinterpret_cast<const NumT_(Ellipse)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Ellipse)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_CHORD:
-      return reinterpret_cast<const NumT_(Chord)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Chord)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_PIE:
-      return reinterpret_cast<const NumT_(Pie)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Pie)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_TRIANGLE:
-      return reinterpret_cast<const NumT_(Triangle)*>(shapeData)->hitTest(*pt);
+      return static_cast<const NumT_(Triangle)*>(shapeData)->hitTest(*hitPt);
 
     case SHAPE_TYPE_POLYLINE:
+      return false;
+
     case SHAPE_TYPE_POLYGON:
     {
-      // TODO:
+      const NumT_(PointArray)* pts = static_cast<const NumT_(PointArray)*>(shapeData);
+      return ShapeT_hitTestPolygon<NumT>(pts->getData(), pts->getLength(), hitPt, fillRule);
     }
 
     // TODO: Fill Rule?
     case SHAPE_TYPE_RECT_ARRAY:
     {
-      const NumT_(RectArray)* rects = reinterpret_cast<const NumT_(RectArray)*>(shapeData);
+      const NumT_(RectArray)* rects = static_cast<const NumT_(RectArray)*>(shapeData);
 
       size_t count = rects->getLength();
       const NumT_(Rect)* rect = rects->getData();
@@ -401,14 +459,14 @@ static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, 
 
       for (size_t i = 0; i < count; i++)
       {
-        if (rect[i].hitTest(*pt))
+        if (rect[i].hitTest(*hitPt))
           return true;
       }
       return false;
     }
 
     case SHAPE_TYPE_PATH:
-      return reinterpret_cast<const NumT_(Path)*>(shapeData)->hitTest(*pt, fillRule);
+      return static_cast<const NumT_(Path)*>(shapeData)->hitTest(*hitPt, fillRule);
 
     default:
       return false;

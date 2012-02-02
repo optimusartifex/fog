@@ -71,22 +71,6 @@ _FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oGreyscale,
   0.0f, 0.0f, 0.0f, 0.0f, 1.0f
 );
 
-_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oPreHue,
-  0.8164966106f, 0.0f         , 0.5345109105f, 0.0f, 0.0f,
- -0.4082482755f, 0.7071067691f, 1.0555117130f, 0.0f, 0.0f,
- -0.4082482755f,-0.7071067691f, 0.1420281678f, 0.0f, 0.0f,
-  0.0f         , 0.0f         , 0.0f         , 1.0f, 0.0f,
-  0.0f         , 0.0f         , 0.0f         , 0.0f, 1.0f
-);
-
-_FOG_FE_COLOR_MATRIX_STATIC(FeColorMatrix_oPostHue,
-  0.8467885852f,-0.3779562712f,-0.3779562712f, 0.0f, 0.0f,
- -0.3729280829f, 0.3341786563f,-1.0800348520f, 0.0f, 0.0f,
-  0.5773502588f, 0.5773502588f, 0.5773502588f, 0.0f, 0.0f,
-  0.0f         , 0.0f         , 0.0f         , 1.0f, 0.0f,
-  0.0f         , 0.0f         , 0.0f         , 0.0f, 1.0f
-);
-
 // ============================================================================
 // [Fog::FeColorMatrix - Helpers]
 // ============================================================================
@@ -713,15 +697,64 @@ static err_t FOG_CDECL FeColorMatrix_saturate(FeColorMatrix* self, float s, uint
 
 static err_t FOG_CDECL FeColorMatrix_rotateHue(FeColorMatrix* self, float phi)
 {
-  // Rotate the gray vector to the blue axis and rotate around the blue axis.
-  fog_api.fecolormatrix_simplifiedPremultiply(self,
-    reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue));
+  // The equation is based on the SVGFeColorMatrix, which can be found at:
+  //
+  //   - http://www.w3.org/TR/SVG/filters.html
+  //
+  // The matrix to rotate hue is defined as:
+  //
+  // |a00 a01 a02 0 0|
+  // |a10 a11 a12 0 0|
+  // |a20 a21 a22 0 0|
+  // |0   0   0   1 0|
+  // |0   0   0   0 1|
+  //
+  // Where the terms a00, a01, etc. are calculated as follows:
+  //
+  // |a00 a01 a02|   |0.213 0.715 0.072|              | 0.787 -0.715 -0.072|
+  // |a10 a11 a12| = |0.213 0.715 0.072| + cos(phi) * |-0.213  0.285 -0.072|
+  // |a20 a21 a22|   |0.213 0.715 0.072|              |-0.213 -0.715  0.928|
+  //
+  //                                                  |-0.213 -0.715  0.928|
+  //                                     + sin(phi) * | 0.143  0.140 -0.283|
+  //                                                  |-0.787  0.715  0.072|
+  FeColorMatrix hue(UNINITIALIZED);
 
-  self->rotateBlue(phi);
+  float phiSin;
+  float phiCos;
+  Math::sincos(phi, &phiSin, &phiCos);
 
-  fog_api.fecolormatrix_simplifiedPremultiply(self,
-    reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue));
+  hue.m[ 0] = 0.213f + phiCos * 0.787f - phiSin * 0.213f; // a00
+  hue.m[ 1] = 0.715f - phiCos * 0.715f - phiSin * 0.715f; // a01
+  hue.m[ 2] = 0.072f - phiCos * 0.072f + phiSin * 0.928f; // a02
+  hue.m[ 3] = 0.0f;
+  hue.m[ 4] = 0.0f;
 
+  hue.m[ 5] = 0.213f - phiCos * 0.213f + phiSin * 0.143f; // a10
+  hue.m[ 6] = 0.715f + phiCos * 0.285f + phiSin * 0.140f; // a11
+  hue.m[ 7] = 0.072f - phiCos * 0.072f - phiSin * 0.283f; // a12
+  hue.m[ 8] = 0.0f;
+  hue.m[ 9] = 0.0f;
+
+  hue.m[10] = 0.213f - phiCos * 0.213f - phiSin * 0.787f; // a20
+  hue.m[11] = 0.715f - phiCos * 0.715f + phiSin * 0.715f; // a21
+  hue.m[12] = 0.072f + phiCos * 0.928f + phiSin * 0.072f; // a22
+  hue.m[13] = 0.0f;
+  hue.m[14] = 0.0f;
+
+  hue.m[15] = 0.0f;
+  hue.m[16] = 0.0f;
+  hue.m[17] = 0.0f;
+  hue.m[18] = 1.0f;
+  hue.m[19] = 0.0f;
+
+  hue.m[20] = 0.0f;
+  hue.m[21] = 0.0f;
+  hue.m[22] = 0.0f;
+  hue.m[23] = 0.0f;
+  hue.m[24] = 1.0f;
+
+  fog_api.fecolormatrix_simplifiedPremultiply(self, &hue);
   return ERR_OK;
 }
 
@@ -841,71 +874,6 @@ static bool FOG_CDECL FeColorMatrix_eq(const FeColorMatrix* a, const FeColorMatr
 }
 
 // ============================================================================
-// [Fog::FeColorMatrix - Dump]
-// ============================================================================
-
-// TODO: Rerun, update hue rotation to use the snippet defined by SVG 1.1 instead.
-#if 0
-// Dump code to generate PreHue and PostHue matrices. The original code to
-// generate these matrices comes probably from QFeColorMatrix class by Sjaak
-// Priester (sjaak@sjaakpriester.nl). I used some comments from the original
-// code which should describe how pre-hue and post-hue matrices are generated.
-
-// Dump FeColorMatrix as C code to stdout.
-static void FeColorMatrix_dump(const FeColorMatrix& m, const char* name)
-{
-  printf("static const float %s[25] =\n");
-  printf("{\n");
-
-  for (int i = 0; i < 5; i++)
-  {
-    printf("%.10gf, %.10gf, %.10gf, %.10gf, %.10gf",
-      m[i][0], m[i][1], m[i][2], m[i][3], m[i][4]);
-    printf(i != 4 ? ",\n" : "\n");
-  }
-
-  printf("};\n");
-}
-
-// Dump pre-hue and post-hue matrices.
-static void FeColorMatrix_dumpHelpers()
-{
-  FeColorMatrix preHue;
-  FeColorMatrix postHue;
-
-  // NOTE: Theoretically, greenRotation should have the value of 39.182655
-  // degrees, being the angle for which the sine is 1/(sqrt(3)), and the
-  // cosine is sqrt(2/3). However, I found that using a slightly smaller angle
-  // works better. In particular, the greys in the image are not visibly
-  // affected with the smaller angle, while they deviate a little bit with the
-  // theoretical value. An explanation escapes me for now. If you rather stick
-  // with the theory, change the comments in the previous lines.
-  float greenRotation = Math::deg2rad(35.0f);
-
-  // Rotate the gray vector in the red plane:
-  preHue.rotateRed(Math::deg2rad(45.0f));
-
-  // Rotate again in the green plane so it coinsides with the blue axis.
-  preHue.rotateGreen(-greenRotation, MATRIX_ORDER_APPEND);
-
-  // Shear the blue plane, in order to keep the color luminance constant.
-  ArgbF lum(1.0f, LumR, LumG, LumB);
-  preHue.mapArgb(lum);
-  float red = lum.r / lum.b;
-  float green = lum.g / lum.b;
-  preHue.shearBlue(red, green);
-
-  // Prepare the PostHue matrix, which is actually the inverse of the PreHue.
-  postHue.shearBlue(-red, -green);
-  postHue.rotateGreen(greenRotation);
-  postHue.rotateRed(Math::deg2rad(-45.0f));
-
-  FeColorMatrix_dump(preHue, "FeColorMatrix_oPreHue");
-  FeColorMatrix_dump(postHue, "FeColorMatrix_oPostHue");
-}
-#endif
-
-// ============================================================================
 // [Init / Fini]
 // ============================================================================
 
@@ -951,8 +919,6 @@ FOG_NO_EXPORT void FeColorMatrix_init(void)
   fog_api.fecolormatrix_oIdentity = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oIdentity);
   fog_api.fecolormatrix_oZero = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oZero);
   fog_api.fecolormatrix_oGreyscale = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oGreyscale);
-  fog_api.fecolormatrix_oPreHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPreHue);
-  fog_api.fecolormatrix_oPostHue = reinterpret_cast<const FeColorMatrix*>(&FeColorMatrix_oPostHue);
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

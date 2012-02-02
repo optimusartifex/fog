@@ -2984,7 +2984,8 @@ static bool FOG_CDECL PathT_hitTest(
 
       case PATH_CMD_LINE_TO:
       {
-        if (FOG_UNLIKELY(!hasMoveTo)) goto _Invalid;
+        if (FOG_UNLIKELY(!hasMoveTo))
+          goto _Invalid;
 
         x0 = pts[-1].x;
         y0 = pts[-1].y;
@@ -3030,7 +3031,9 @@ _DoLine:
         FOG_ASSERT(i >= 2);
 
         const NumT_(Point)* p = pts - 1;
-        if (FOG_UNLIKELY(!hasMoveTo)) goto _Invalid;
+
+        if (FOG_UNLIKELY(!hasMoveTo))
+          goto _Invalid;
 
         NumT minY = Math::min(p[0].y, p[1].y, p[2].y);
         NumT maxY = Math::max(p[0].y, p[1].y, p[2].y);
@@ -3075,7 +3078,8 @@ _DoLine:
           for (tIndex = 0; tIndex < tLength; tIndex++)
           {
             NumT tVal = tExtrema[tIndex];
-            if (tVal == tCut) continue;
+            if (tVal == tCut)
+              continue;
 
             if (tVal == NumT(1.0))
             {
@@ -3137,7 +3141,9 @@ _DoLine:
         FOG_ASSERT(i >= 3);
 
         const NumT_(Point)* p = pts - 1;
-        if (FOG_UNLIKELY(!hasMoveTo)) goto _Invalid;
+
+        if (FOG_UNLIKELY(!hasMoveTo))
+          goto _Invalid;
 
         NumT minY = Math::min(p[0].y, p[1].y, p[2].y, p[3].y);
         NumT maxY = Math::max(p[0].y, p[1].y, p[2].y, p[3].y);
@@ -3285,7 +3291,8 @@ _DoLine:
     goto _DoLine;
   }
 
-  if (fillRule == FILL_RULE_EVEN_ODD) windingNumber &= 1;
+  if (fillRule == FILL_RULE_EVEN_ODD)
+    windingNumber &= 1;
   return windingNumber != 0;
 
 _Invalid:

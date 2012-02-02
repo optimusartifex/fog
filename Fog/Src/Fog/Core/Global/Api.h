@@ -2259,8 +2259,6 @@ struct FOG_NO_EXPORT Api
   const FeColorMatrix* fecolormatrix_oIdentity;
   const FeColorMatrix* fecolormatrix_oZero;
   const FeColorMatrix* fecolormatrix_oGreyscale;
-  const FeColorMatrix* fecolormatrix_oPreHue;
-  const FeColorMatrix* fecolormatrix_oPostHue;
 
   // --------------------------------------------------------------------------
   // [G2d/Imaging/Filters - FeComponentFunction]

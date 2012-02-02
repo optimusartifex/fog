@@ -138,7 +138,8 @@ struct FOG_NO_EXPORT RasterScanline
   FOG_INLINE void newSpan(int x0, uint type)
   {
     RasterSpan* span = _spanCurrent->getNext();
-    if (FOG_UNLIKELY(span == NULL)) span = _growSpans();
+    if (FOG_UNLIKELY(span == NULL))
+      span = _growSpans();
 
     _spanCurrent = span;
     _spanCurrent->_x0 = x0;
@@ -176,10 +177,11 @@ struct FOG_NO_EXPORT RasterScanline
   //! Last span is set-up by @c endScanline() method.
   RasterSpan* _spanLast;
 
-  //! @brief Saved span that will be normally after the @c _spanLast. Purpose
-  //! of this variable is to keep saved chain that was break by @c endScanline()
-  //! method. Calling @c _begin() will join this broken chain so span
-  //! builder has all spans together for building the new chain.
+  //! @brief Saved span that will be normally after the @c _spanLast.
+  //!
+  //! Purpose of this variable is to keep saved chain that was break by 
+  //! @c endScanline() method. Calling @c _begin() will join this broken chain
+  //! so span builder has all spans together for building the new chain.
   RasterSpan* _spanSaved;
 
   //! @brief Current span, used by span-builder.
@@ -634,7 +636,7 @@ private:
 // [Fog::RasterScanline16]
 // ============================================================================
 
-// TODO:
+// TODO: 16-bit image processing.
 
 //! @}
 

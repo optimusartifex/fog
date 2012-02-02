@@ -2693,7 +2693,8 @@ _Update_Repeat:
         case PATH_CMD_CLOSE:
           cmd++;
           pts++;
-          if (--i) goto _Update_Repeat;
+          if (--i)
+            goto _Update_Repeat;
           break;
 
         default:
@@ -2701,7 +2702,8 @@ _Update_Repeat:
       }
     }
 
-    if (isFirst) goto _Empty;
+    if (isFirst)
+      goto _Empty;
 
     self->_d->vType |= PATH_FLAG_HAS_BBOX;
     self->_d->boundingBox = box;
@@ -2720,8 +2722,10 @@ _Update_Repeat:
         box.y1 *= transform->_11;
 
 _Update_Scaling:
-        if (box.x0 > box.x1) swap(box.x0, box.x1);
-        if (box.y0 > box.y1) swap(box.y0, box.y1);
+        if (box.x0 > box.x1)
+          swap(box.x0, box.x1);
+        if (box.y0 > box.y1)
+          swap(box.y0, box.y1);
         // ... Fall through ...
 
       case TRANSFORM_TYPE_TRANSLATION:

@@ -176,16 +176,6 @@ FOG_UI_MAIN()
   err_t err = wnd.svgDocument.readFromFile(fileName);
   SizeF size = wnd.svgDocument.getDocumentSize();
 
-  TimeTicks start = TimeTicks::now();
-  size_t a = 0;
-  DomElement* e = wnd.svgDocument.getElementById(StringW::fromAscii8("rect1183"));
-  for (size_t i = 0; i < 100000000; i++)
-  {
-    //a += e->getPropertyIndex(FOG_S(id).getData(), FOG_S(id).getLength());
-    a += e->getPropertyIndex(FOG_S(id));
-  }
-  fprintf(stderr, "Time %g\n", (TimeTicks::now() - start).getMillisecondsF());
-
   if (size.w < 400) size.w = 400;
   if (size.h < 400) size.h = 400;
 

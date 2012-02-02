@@ -1865,7 +1865,8 @@ static err_t FOG_CDECL Image_glyphFromPath(Image* dst, PointI* dstOffset, const 
       }
 
       err = dst->create(SizeI(w, h), IMAGE_FORMAT_A8);
-      if (FOG_IS_ERROR(err)) goto _Fail;
+      if (FOG_IS_ERROR(err))
+        goto _Fail;
 
       uint8_t* pixels = dst->getFirstX();
       ssize_t stride = dst->getStride();

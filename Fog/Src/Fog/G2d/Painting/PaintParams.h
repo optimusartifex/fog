@@ -66,7 +66,6 @@ union FOG_NO_EXPORT PaintHints
 // [Fog::PaintParamsF]
 // ============================================================================
 
-// TODO: What to do?
 struct FOG_NO_EXPORT PaintParamsF
 {
   // --------------------------------------------------------------------------
@@ -80,8 +79,8 @@ struct FOG_NO_EXPORT PaintParamsF
   }
 
   FOG_INLINE PaintParamsF(const PaintParamsF& other) :
-    _opacity(other._opacity),
-    _strokeParams(other._strokeParams)
+    _strokeParams(other._strokeParams),
+    _opacity(other._opacity)
   {
     _hints.packed = other._hints.packed;
   }
@@ -89,6 +88,12 @@ struct FOG_NO_EXPORT PaintParamsF
   // --------------------------------------------------------------------------
   // [Accessors - Global]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE const PathStrokerParamsF& getStrokeParams() const { return _strokeParams; }
+  FOG_INLINE void setStrokeParams(const PathStrokerParamsF& params) { _strokeParams = params; }
+
+  FOG_INLINE float getOpacity() const { return _opacity; }
+  FOG_INLINE void setOpacity(float opacity) { _opacity = opacity; }
 
   FOG_INLINE uint32_t getCompositingOperator() const { return _hints.compositingOperator; }
   FOG_INLINE void setCompositingOperator(uint32_t op) { _hints.compositingOperator = op; }
@@ -110,12 +115,6 @@ struct FOG_NO_EXPORT PaintParamsF
 
   FOG_INLINE uint32_t getFillRule() const { return _hints.fillRule; }
   FOG_INLINE void setFillRule(uint32_t fillRule) { _hints.fillRule = fillRule; }
-
-  FOG_INLINE float getOpacity() const { return _opacity; }
-  FOG_INLINE void setOpacity(float opacity) { _opacity = opacity; }
-
-  FOG_INLINE const PathStrokerParamsF& getStrokeParams() const { return _strokeParams; }
-  FOG_INLINE void setStrokeParams(const PathStrokerParamsF& params) { _strokeParams = params; }
 
   // --------------------------------------------------------------------------
   // [Accessors - StrokeParams]
@@ -147,9 +146,9 @@ struct FOG_NO_EXPORT PaintParamsF
 
   FOG_INLINE void reset()
   {
-    _hints.reset();
-    _opacity = 1.0f;
     _strokeParams.reset();
+    _opacity = 1.0f;
+    _hints.reset();
   }
 
   // --------------------------------------------------------------------------
@@ -158,9 +157,9 @@ struct FOG_NO_EXPORT PaintParamsF
 
   PaintParamsF& operator=(const PaintParamsF& other)
   {
-    _hints.packed = other._hints.packed;
-    _opacity = other._opacity;
     _strokeParams = other._strokeParams;
+    _opacity = other._opacity;
+    _hints.packed = other._hints.packed;
 
     return *this;
   }
@@ -169,9 +168,9 @@ struct FOG_NO_EXPORT PaintParamsF
   // [Members]
   // --------------------------------------------------------------------------
 
-  PaintHints _hints;
-  float _opacity;
   PathStrokerParamsF _strokeParams;
+  float _opacity;
+  PaintHints _hints;
 };
 
 // ============================================================================
@@ -191,8 +190,8 @@ struct FOG_NO_EXPORT PaintParamsD
   }
 
   FOG_INLINE PaintParamsD(const PaintParamsD& other) :
-    _opacity(other._opacity),
-    _strokeParams(other._strokeParams)
+    _strokeParams(other._strokeParams),
+    _opacity(other._opacity)
   {
     _hints.packed = other._hints.packed;
   }
@@ -200,6 +199,12 @@ struct FOG_NO_EXPORT PaintParamsD
   // --------------------------------------------------------------------------
   // [Accessors - Global]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE const PathStrokerParamsD& getStrokeParams() const { return _strokeParams; }
+  FOG_INLINE void setStrokeParams(const PathStrokerParamsD& params) { _strokeParams = params; }
+
+  FOG_INLINE double getOpacity() const { return _opacity; }
+  FOG_INLINE void setOpacity(double opacity) { _opacity = opacity; }
 
   FOG_INLINE uint32_t getCompositingOperator() const { return _hints.compositingOperator; }
   FOG_INLINE void setCompositingOperator(uint32_t op) { _hints.compositingOperator = op; }
@@ -221,12 +226,6 @@ struct FOG_NO_EXPORT PaintParamsD
 
   FOG_INLINE uint32_t getFillRule() const { return _hints.fillRule; }
   FOG_INLINE void setFillRule(uint32_t fillRule) { _hints.fillRule = fillRule; }
-
-  FOG_INLINE double getOpacity() const { return _opacity; }
-  FOG_INLINE void setOpacity(double opacity) { _opacity = opacity; }
-
-  FOG_INLINE const PathStrokerParamsD& getStrokeParams() const { return _strokeParams; }
-  FOG_INLINE void setStrokeParams(const PathStrokerParamsD& params) { _strokeParams = params; }
 
   // --------------------------------------------------------------------------
   // [Accessors - StrokeParams]
@@ -258,9 +257,9 @@ struct FOG_NO_EXPORT PaintParamsD
 
   FOG_INLINE void reset()
   {
-    _hints.reset();
-    _opacity = 1.0;
     _strokeParams.reset();
+    _opacity = 1.0;
+    _hints.reset();
   }
 
   // --------------------------------------------------------------------------
@@ -269,9 +268,9 @@ struct FOG_NO_EXPORT PaintParamsD
 
   PaintParamsD& operator=(const PaintParamsD& other)
   {
-    _hints.packed = other._hints.packed;
-    _opacity = other._opacity;
     _strokeParams = other._strokeParams;
+    _opacity = other._opacity;
+    _hints.packed = other._hints.packed;
 
     return *this;
   }
@@ -280,9 +279,9 @@ struct FOG_NO_EXPORT PaintParamsD
   // [Members]
   // --------------------------------------------------------------------------
 
-  PaintHints _hints;
-  double _opacity;
   PathStrokerParamsD _strokeParams;
+  double _opacity;
+  PaintHints _hints;
 };
 
 //! @}

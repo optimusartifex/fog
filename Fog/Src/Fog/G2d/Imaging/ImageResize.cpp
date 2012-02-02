@@ -1706,17 +1706,15 @@ FOG_NO_EXPORT void ImageResize_init(void)
   ImageResize_api.doHorizontal[IMAGE_FORMAT_XRGB32] = ImageResizeContext_doHorizontal_XRGB32;
   ImageResize_api.doHorizontal[IMAGE_FORMAT_RGB24 ] = ImageResizeContext_doHorizontal_RGB24;
   ImageResize_api.doHorizontal[IMAGE_FORMAT_A8    ] = ImageResizeContext_doHorizontal_A8;
-
-  // TODO:
-  // ImageResize_api.doHorizontal[IMAGE_FORMAT_I8    ] = ImageResizeContext_doHorizontal_I8;
+//ImageResize_api.doHorizontal[IMAGE_FORMAT_I8    ] = NONE;
+  // TODO: 16-bit image processing.
 
   ImageResize_api.doVertical[IMAGE_FORMAT_PRGB32] = ImageResizeContext_doVertical_PRGB32;
   ImageResize_api.doVertical[IMAGE_FORMAT_XRGB32] = ImageResizeContext_doVertical_XRGB32;
   ImageResize_api.doVertical[IMAGE_FORMAT_RGB24 ] = ImageResizeContext_doVertical_RGB24;
   ImageResize_api.doVertical[IMAGE_FORMAT_A8    ] = ImageResizeContext_doVertical_A8;
-
-  // TODO:
-  // ImageResize_api.doVertical[IMAGE_FORMAT_I8    ] = ImageResizeContext_doVertical_I8;
+//ImageResize_api.doVertical[IMAGE_FORMAT_I8    ] = NONE;
+  // TODO: 16-bit image processing.
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

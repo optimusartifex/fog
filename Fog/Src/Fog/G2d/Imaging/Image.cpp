@@ -1879,7 +1879,7 @@ static err_t FOG_CDECL Image_glyphFromPath(Image* dst, PointI* dstOffset, const 
 
     case IMAGE_PRECISION_WORD:
     {
-      // TODO: Rasterizer precision.
+      // TODO: 16-bit image processing.
       break;
     }
 

@@ -405,6 +405,29 @@ static FOG_INLINE bool ShapeT_hitTestPolygon(const NumT_(Point)* pts, size_t len
 }
 
 template<typename NumT>
+static bool FOG_INLINE ShapeT_hitTestRects(const NumT_(Rect)* rects, size_t length, const NumT_(Point)* hitPt, uint32_t fillRule)
+{
+  if (fillRule == FILL_RULE_NON_ZERO)
+  {
+    for (size_t i = 0; i < length; i++)
+    {
+      if (rects[i].hitTest(*hitPt))
+        return true;
+    }
+    return false;
+  }
+  else
+  {
+    int windingNumber = 0;
+    for (size_t i = 0; i < length; i++)
+    {
+      windingNumber += rects[i].hitTest(*hitPt);
+    }
+    return windingNumber != 0;
+  }
+}
+
+template<typename NumT>
 static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, const NumT_(Point)* hitPt, uint32_t fillRule)
 {
   switch (shapeType)
@@ -446,23 +469,10 @@ static bool FOG_CDECL ShapeT_hitTest(uint32_t shapeType, const void* shapeData, 
       return ShapeT_hitTestPolygon<NumT>(pts->getData(), pts->getLength(), hitPt, fillRule);
     }
 
-    // TODO: Fill Rule?
     case SHAPE_TYPE_RECT_ARRAY:
     {
       const NumT_(RectArray)* rects = static_cast<const NumT_(RectArray)*>(shapeData);
-
-      size_t count = rects->getLength();
-      const NumT_(Rect)* rect = rects->getData();
-
-      if (count == 0)
-        return false;
-
-      for (size_t i = 0; i < count; i++)
-      {
-        if (rect[i].hitTest(*hitPt))
-          return true;
-      }
-      return false;
+      return ShapeT_hitTestRects<NumT>(rects->getData(), rects->getLength(), hitPt, fillRule);
     }
 
     case SHAPE_TYPE_PATH:

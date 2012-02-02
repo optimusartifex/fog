@@ -2781,7 +2781,8 @@ static bool FOG_CDECL TransformT_invert(NumT_(Transform)* self,
 
     case TRANSFORM_TYPE_SCALING:
     {
-      if (Math::isFuzzyZero(a->_00 * a->_11)) goto _NonInvertible;
+      if (Math::isFuzzyZero(a->_00 * a->_11))
+        goto _NonInvertible;
 
       double inv00 = 1.0 / double(a->_00);
       double inv11 = 1.0 / double(a->_11);
@@ -2804,20 +2805,22 @@ static bool FOG_CDECL TransformT_invert(NumT_(Transform)* self,
 
     case TRANSFORM_TYPE_SWAP:
     {
-      double d = -double(a->_01) * double(a->_10);
-      if (Math::isFuzzyZero(d)) goto _NonInvertible;
+      double d = double(a->_01) * double(a->_10);
+      if (Math::isFuzzyZero(d))
+        goto _NonInvertible;
 
       d = 1.0 / d;
 
-      double t01 = -double(a->_01) * d;
-      double t10 = -double(a->_10) * d;
-      double t20 = -double(a->_21) * t10;
-      double t21 = -double(a->_20) * t01;
+      double t01 = double(a->_01) * d;
+      double t10 = double(a->_10) * d;
+      double t20 =-double(a->_21) * t10;
+      double t21 =-double(a->_20) * t01;
 
-      self->_01 = NumT(t01);
-      self->_10 = NumT(t10);
-      self->_20 = NumT(t20);
-      self->_21 = NumT(t21);
+      self->_setData(a->_type,
+        NumT(0.0), NumT(t01), NumT(0.0),
+        NumT(t10), NumT(0.0), NumT(0.0),
+        NumT(t20), NumT(t21), NumT(1.0)
+      );
       return true;
     }
 
@@ -2827,16 +2830,17 @@ static bool FOG_CDECL TransformT_invert(NumT_(Transform)* self,
       // Inverted matrix should be as accurate as possible so the 'double'
       // type is used instead of 'float' here.
       double d = (double(a->_00) * double(a->_11) - double(a->_01) * double(a->_10));
-      if (Math::isFuzzyZero(d)) goto _NonInvertible;
+      if (Math::isFuzzyZero(d))
+        goto _NonInvertible;
 
       d = 1.0 / d;
 
-      double t00 =  double(a->_11) * d;
-      double t01 = -double(a->_01) * d;
-      double t10 = -double(a->_10) * d;
-      double t11 =  double(a->_00) * d;
-      double t20 = -double(a->_20) * t00 - double(a->_21) * t10;
-      double t21 = -double(a->_20) * t01 - double(a->_21) * t11;
+      double t00 = double(a->_11) * d;
+      double t01 =-double(a->_01) * d;
+      double t10 =-double(a->_10) * d;
+      double t11 = double(a->_00) * d;
+      double t20 =-double(a->_20) * t00 - double(a->_21) * t10;
+      double t21 =-double(a->_20) * t01 - double(a->_21) * t11;
 
       self->_setData(a->_type,
         NumT(t00), NumT(t01), NumT(0.0),
@@ -2857,7 +2861,8 @@ static bool FOG_CDECL TransformT_invert(NumT_(Transform)* self,
       double d  = double(a->_00) * d0 +
                   double(a->_10) * d1 +
                   double(a->_20) * d2;
-      if (Math::isFuzzyZero(d)) goto _NonInvertible;
+      if (Math::isFuzzyZero(d))
+        goto _NonInvertible;
 
       d = 1.0 / d;
       self->_setData(a->_type,

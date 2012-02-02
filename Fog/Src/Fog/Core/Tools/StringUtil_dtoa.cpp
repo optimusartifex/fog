@@ -2239,9 +2239,8 @@ _DigitDone:
     flags |= STRING_PARSED_EXPONENT;
 
     if (!nd && !nz && !nz0)
-    {
       goto _Ret0;
-    }
+
     str = s;
     esign = 0;
 
@@ -2262,7 +2261,8 @@ _DigitDone:
     {
       while (c == '0')
       {
-        if (++s == sEnd) goto _ExponentDone;
+        if (++s == sEnd)
+          goto _ExponentDone;
         c = *s;
       }
 
@@ -2271,14 +2271,14 @@ _DigitDone:
         L = c - '0';
         s1 = s;
 
-
         for (;;)
         {
-          if (++s == sEnd) break;
+          if (++s == sEnd)
+            break;
           c = *s;
           if (c >= '0' && c <= '9')
           {
-            L = 10*L + c - '0';
+            L = 10 * L + c - '0';
             continue;
           }
           else
@@ -2290,7 +2290,8 @@ _DigitDone:
           e = 19999; // safe for 16 bit ints.
         else
           e = (int)L;
-        if (esign) e = -e;
+        if (esign)
+          e = -e;
       }
       else
         e = 0;
@@ -3084,8 +3085,10 @@ _RetFree:
 _Ret:
   BContext_destroy(&context);
 
-  if (pEnd) *pEnd = (size_t)(s - sBegin);
-  if (pFlags) *pFlags = flags;
+  if (pEnd)
+    *pEnd = (size_t)(s - sBegin);
+  if (pFlags)
+    *pFlags = flags;
 
   if (sign)
     *dst = -rv.d;

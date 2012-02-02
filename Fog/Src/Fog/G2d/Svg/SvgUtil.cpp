@@ -178,7 +178,8 @@ _Start:
     bool commaParsed = false;
     for (;;)
     {
-      if (srcCur == srcEnd) goto _End;
+      if (srcCur == srcEnd)
+        goto _End;
 
       if (srcCur->isSpace())
       {
@@ -187,13 +188,15 @@ _Start:
       else if (srcCur[0] == CharW(','))
       {
         srcCur++;
-        if (commaParsed) goto _End;
+        if (commaParsed)
+          goto _End;
         commaParsed = true;
       }
       else if (srcCur[0] == CharW(')'))
       {
         srcCur++;
-        if (commaParsed) goto _End;
+        if (commaParsed)
+          goto _End;
         goto _Done;
       }
       else if (srcCur[0].isAsciiDigit() || srcCur[0] == CharW('-') || srcCur[0] == CharW('+'))
@@ -206,7 +209,8 @@ _Start:
       }
     }
 
-    if (d_count == 6) goto _End;
+    if (d_count == 6)
+      goto _End;
   }
 _Done:
 
@@ -276,7 +280,8 @@ _Done:
   // Skip spaces.
   for (;;)
   {
-    if (srcCur == srcEnd) break;
+    if (srcCur == srcEnd)
+      break;
 
     if (srcCur->isSpace())
       srcCur++;

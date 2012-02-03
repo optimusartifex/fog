@@ -218,7 +218,7 @@ err_t X11UIEngineWindowImpl::destroy()
 
 void X11UIEngineWindowImpl::destroyed()
 {
-  base::destroyed();
+  Base::destroyed();
 
   _xic = 0;
   _gc = 0;

@@ -869,7 +869,7 @@ void X11UIEngine::setMouseWheelLines(uint32_t lines)
   if (lines == 0)
     lines = X11UIEngine_getMouseWheelLines(this);
 
-  base::setMouseWheelLines(lines);
+  Base::setMouseWheelLines(lines);
 }
 
 uint32_t X11UIEngine::getFogKeyFromXKeySym(KeySym xKeySym) const
@@ -955,7 +955,7 @@ uint32_t X11UIEngine::getFogButtonFromXButton(uint xButton) const
 
 void X11UIEngine::doPaintWindow(UIEngineWindow* window, Painter* painter, const RectI& paintRect)
 {
-  base::doPaintWindow(window, painter, paintRect);
+  Base::doPaintWindow(window, painter, paintRect);
 }
 
 // ============================================================================

@@ -519,6 +519,7 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
     // [Font Properties]
     // ------------------------------------------------------------------------
 
+    // TODO: Svg font.
     case SVG_STYLE_FONT:
       break;
 

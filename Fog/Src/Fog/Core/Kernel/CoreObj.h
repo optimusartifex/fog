@@ -282,37 +282,37 @@ public: \
 #define FOG_CORE_OBJ_DEF(_Self_) \
   size_t _Self_::_getPropertyIndex(const ::Fog::InternedStringW& name) const \
   { \
-    return const_cast<_Self_*>(this)->_handleProperty<::Fog::PROPERTY_HANDLER_INDEX_STRINGW>(\
+    return const_cast< _Self_* >(this)->_handleProperty< ::Fog::PROPERTY_HANDLER_INDEX_STRINGW >(\
       ::Fog::INVALID_INDEX, &name, NULL); \
   } \
   \
   size_t _Self_::_getPropertyIndex(const ::Fog::CharW* name, size_t length) const \
   { \
-    return const_cast<_Self_*>(this)->_handleProperty<::Fog::PROPERTY_HANDLER_INDEX_STUBW>(\
+    return const_cast< _Self_* >(this)->_handleProperty< ::Fog::PROPERTY_HANDLER_INDEX_STUBW >(\
       length, name, NULL); \
   } \
   \
   err_t _Self_::_getPropertyInfo(size_t index, ::Fog::PropertyInfo& info) const \
   { \
-    return static_cast<err_t>(const_cast<_Self_*>(this)->_handleProperty<::Fog::PROPERTY_HANDLER_GET_INFO>(\
+    return static_cast<err_t>(const_cast< _Self_* >(this)->_handleProperty< ::Fog::PROPERTY_HANDLER_GET_INFO >(\
       index, NULL, &info)); \
   } \
   \
   err_t _Self_::_getProperty(size_t index, ::Fog::StringW& value) const \
   { \
-    return static_cast<err_t>(const_cast<_Self_*>(this)->_handleProperty<::Fog::PROPERTY_HANDLER_GET_STRINGW>(\
+    return static_cast<err_t>(const_cast< _Self_* >(this)->_handleProperty< ::Fog::PROPERTY_HANDLER_GET_STRINGW >(\
       index, NULL, &value)); \
   } \
   \
   err_t _Self_::_setProperty(size_t index, const ::Fog::StringW& value) \
   { \
-    return static_cast<err_t>(_handleProperty<::Fog::PROPERTY_HANDLER_SET_STRINGW>(\
-      index, NULL, const_cast<::Fog::StringW*>(&value))); \
+    return static_cast<err_t>(_handleProperty< ::Fog::PROPERTY_HANDLER_SET_STRINGW >(\
+      index, NULL, const_cast< ::Fog::StringW* >(&value))); \
   } \
   \
   err_t _Self_::_resetProperty(size_t index) \
   { \
-    return static_cast<err_t>(_handleProperty<::Fog::PROPERTY_HANDLER_RESET>(\
+    return static_cast<err_t>(_handleProperty< ::Fog::PROPERTY_HANDLER_RESET >(\
       index, NULL, NULL)); \
   } \
   \
@@ -346,13 +346,13 @@ public: \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STRINGW) \
       { \
-        if (internedName.eq(*static_cast<const ::Fog::InternedStringW*>(name))) \
+        if (internedName.eq(*static_cast< const ::Fog::InternedStringW* >(name))) \
           return PropertyDef::ID; \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STUBW) \
       { \
-        if (internedName.eqInline(static_cast<const ::Fog::CharW*>(name), arg)) \
+        if (internedName.eqInline(static_cast< const ::Fog::CharW* >(name), arg)) \
           return PropertyDef::ID; \
       }
 
@@ -368,7 +368,7 @@ public: \
       { \
         if (arg == PropertyDef::ID) \
         { \
-          ::Fog::PropertyInfo* info = static_cast<::Fog::PropertyInfo*>(value); \
+          ::Fog::PropertyInfo* info = static_cast< ::Fog::PropertyInfo* >(value); \
           \
           info->setName(_InternedName_); \
           info->setIndex(arg); \
@@ -388,7 +388,7 @@ public: \
         if (arg == PropertyDef::ID) \
         { \
           return _Serializer_.serialize( \
-            *static_cast<::Fog::StringW*>(value), this->get##_PropertyName_()); \
+            *static_cast< ::Fog::StringW* >(value), this->get##_PropertyName_()); \
         } \
       } \
       \
@@ -408,7 +408,7 @@ public: \
           { \
             PropertyDef::Type t; \
             err_t err = _Serializer_.parse( \
-              t, *static_cast<const ::Fog::StringW*>(value)); \
+              t, *static_cast< const ::Fog::StringW* >(value)); \
             \
             if (FOG_IS_ERROR(err)) \
               return err; \
@@ -450,7 +450,7 @@ public: \
       { \
         if (arg == PropertyDef::ID) \
         { \
-          ::Fog::PropertyInfo* info = static_cast<::Fog::PropertyInfo*>(value); \
+          ::Fog::PropertyInfo* info = static_cast< ::Fog::PropertyInfo* >(value); \
           (_ToObject_)->_getPropertyInfo(_ToId_, *info); \
           \
           /* Redirected property has different id, we need to patch the info. */ \
@@ -467,7 +467,7 @@ public: \
       { \
         if (arg == PropertyDef::ID) \
         { \
-          return (_ToObject_)->_getProperty(_ToId_, *static_cast<::Fog::StringW*>(value)); \
+          return (_ToObject_)->_getProperty(_ToId_, *static_cast< ::Fog::StringW* >(value)); \
         } \
       } \
       \
@@ -485,7 +485,7 @@ public: \
           } \
           else \
           { \
-            return (_ToObject_)->_setProperty(_ToId_, *static_cast<const ::Fog::StringW*>(value)); \
+            return (_ToObject_)->_setProperty(_ToId_, *static_cast< const ::Fog::StringW* >(value)); \
           } \
         } \
       } \
@@ -519,7 +519,7 @@ public: \
       { \
         if (arg == PropertyDef::ID) \
         { \
-          ::Fog::PropertyInfo* info = static_cast<::Fog::PropertyInfo*>(value); \
+          ::Fog::PropertyInfo* info = static_cast< ::Fog::PropertyInfo* >(value); \
           \
           info->setName(_InternedName_); \
           info->setIndex(arg); \
@@ -538,7 +538,7 @@ public: \
       { \
         if (arg == PropertyDef::ID) \
         { \
-          return _Get_(*static_cast<::Fog::StringW*>(value)); \
+          return _Get_(*static_cast< ::Fog::StringW* >(value)); \
         } \
       } \
       \
@@ -553,7 +553,7 @@ public: \
           if ((PropertyDef::FLAGS & ::Fog::PROPERTY_FLAG_READ_ONLY) != 0) \
             return ::Fog::ERR_PROPERTY_READ_ONLY; \
           else \
-            return _Set_(*static_cast<const ::Fog::StringW*>(value)); \
+            return _Set_(*static_cast< const ::Fog::StringW* >(value)); \
         } \
       } \
       \
@@ -583,31 +583,31 @@ public: \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STRINGW) \
       { \
         return _Handler_::getPropertyIndex(this, \
-          *static_cast<const ::Fog::InternedStringW*>(name)); \
+          *static_cast< const ::Fog::InternedStringW* >(name)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STUBW) \
       { \
         return _Handler_::getPropertyIndex(this, \
-          static_cast<const ::Fog::CharW*>(name), arg); \
+          static_cast< const ::Fog::CharW* >(name), arg); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_GET_INFO) \
       { \
         return _Handler_::getPropertyInfo(this, \
-          arg, *static_cast<::Fog::PropertyInfo*>(value)); \
+          arg, *static_cast< ::Fog::PropertyInfo* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_GET_STRINGW) \
       { \
         return _Handler_::getProperty(this, \
-          arg, *static_cast<::Fog::StringW*>(value)); \
+          arg, *static_cast< ::Fog::StringW* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_SET_STRINGW) \
       { \
         return _Handler_::setProperty(this, \
-          arg, *static_cast<const ::Fog::StringW*>(value)); \
+          arg, *static_cast< const ::Fog::StringW* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_RESET) \
@@ -626,31 +626,31 @@ public: \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STRINGW) \
       { \
         return _Fog_PropertyBaseCall<Base>::getPropertyIndex(this, \
-          *static_cast<const ::Fog::InternedStringW*>(name)); \
+          *static_cast< const ::Fog::InternedStringW* >(name)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STUBW) \
       { \
         return _Fog_PropertyBaseCall<Base>::getPropertyIndex(this, \
-          static_cast<const ::Fog::CharW*>(name), arg); \
+          static_cast< const ::Fog::CharW* >(name), arg); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_GET_INFO) \
       { \
         return _Fog_PropertyBaseCall<Base>::getPropertyInfo(this, \
-          arg, *static_cast<::Fog::PropertyInfo*>(value)); \
+          arg, *static_cast< ::Fog::PropertyInfo* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_GET_STRINGW) \
       { \
         return _Fog_PropertyBaseCall<Base>::getProperty(this, \
-          arg, *static_cast<::Fog::StringW*>(value)); \
+          arg, *static_cast< ::Fog::StringW* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_SET_STRINGW) \
       { \
         return _Fog_PropertyBaseCall<Base>::setProperty(this, \
-          arg, *static_cast<const ::Fog::StringW*>(value)); \
+          arg, *static_cast< const ::Fog::StringW* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_RESET) \

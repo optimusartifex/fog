@@ -1027,6 +1027,8 @@ struct FOG_API SvgUseElement : public SvgTransformableElement
   FOG_PROPERTY_DEF()
     FOG_PROPERTY_RW(X, CoordF)
     FOG_PROPERTY_RW(Y, CoordF)
+    FOG_PROPERTY_RW(Width, CoordF)
+    FOG_PROPERTY_RW(Height, CoordF)
   FOG_PROPERTY_END()
 
   FOG_INLINE CoordF getX() const { return CoordF(_x, _xUnit); }
@@ -1036,6 +1038,20 @@ struct FOG_API SvgUseElement : public SvgTransformableElement
   FOG_INLINE CoordF getY() const { return CoordF(_y, _yUnit); }
   err_t setY(const CoordF& y);
   err_t resetY();
+
+  FOG_INLINE CoordF getWidth() const { return CoordF(_width, _widthUnit); }
+  err_t setWidth(const CoordF& width);
+  err_t resetWidth();
+
+  FOG_INLINE CoordF getHeight() const { return CoordF(_height, _heightUnit); }
+  err_t setHeight(const CoordF& y);
+  err_t resetHeight();
+
+  // --------------------------------------------------------------------------
+  // [SVG Methods]
+  // --------------------------------------------------------------------------
+
+  SvgElement* getLinkedElement() const;
 
   // --------------------------------------------------------------------------
   // [SVG Interface]
@@ -1051,9 +1067,16 @@ struct FOG_API SvgUseElement : public SvgTransformableElement
 
   float _x;
   float _y;
+  float _width;
+  float _height;
 
   uint32_t _xUnit : 4;
   uint32_t _yUnit : 4;
+  uint32_t _widthUnit : 4;
+  uint32_t _heightUnit : 4;
+
+  uint32_t _widthAssigned : 1;
+  uint32_t _heightAssigned : 1;
 };
 
 // ============================================================================

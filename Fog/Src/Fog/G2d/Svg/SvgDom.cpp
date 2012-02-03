@@ -1288,7 +1288,7 @@ FOG_CORE_OBJ_DEF(SvgRootElement)
   FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
   FOG_CORE_OBJ_PROPERTY_BASE(Width, FOG_S(width), SvgDomIO_CoordF())
   FOG_CORE_OBJ_PROPERTY_BASE(Height, FOG_S(height), SvgDomIO_CoordF())
-  FOG_CORE_OBJ_PROPERTY_BASE(ViewBox, FOG_S(transform), SvgDomIO_ViewBoxF())
+  FOG_CORE_OBJ_PROPERTY_BASE(ViewBox, FOG_S(viewBox), SvgDomIO_ViewBoxF())
 FOG_CORE_OBJ_END()
 
 err_t SvgRootElement::setViewBox(const BoxF& viewBox)
@@ -2282,7 +2282,7 @@ SvgDefsElement::~SvgDefsElement()
 
 err_t SvgDefsElement::onProcess(SvgContext* context) const
 {
-  // <defs> section is used only to define shared resources. Don't go inside.
+  // <defs> section is used only to define shared resources. Never go inside.
   return ERR_OK;
 }
 
@@ -2355,8 +2355,14 @@ SvgUseElement::SvgUseElement(DomDocument* ownerDocument) :
   SvgTransformableElement(ownerDocument, FOG_S(use), SVG_ELEMENT_USE),
   _x(0.0f),
   _y(0.0f),
+  _width(0.0f),
+  _height(0.0f),
   _xUnit(UNIT_NONE),
-  _yUnit(UNIT_NONE)
+  _yUnit(UNIT_NONE),
+  _widthUnit(UNIT_NONE),
+  _heightUnit(UNIT_NONE),
+  _widthAssigned(false),
+  _heightAssigned(false)
 {
 }
 
@@ -2371,6 +2377,8 @@ SvgUseElement::~SvgUseElement()
 FOG_CORE_OBJ_DEF(SvgUseElement)
   FOG_CORE_OBJ_PROPERTY_BASE(X, FOG_S(x), SvgDomIO_CoordF())
   FOG_CORE_OBJ_PROPERTY_BASE(Y, FOG_S(y), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Width, FOG_S(width), SvgDomIO_CoordF())
+  FOG_CORE_OBJ_PROPERTY_BASE(Height, FOG_S(height), SvgDomIO_CoordF())
 FOG_CORE_OBJ_END()
 
 err_t SvgUseElement::setX(const CoordF& x)
@@ -2409,38 +2417,115 @@ err_t SvgUseElement::resetY()
   return ERR_OK;
 }
 
+err_t SvgUseElement::setWidth(const CoordF& width)
+{
+  _width = width.getValue();
+  _widthUnit = width.getUnit();
+  _widthAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgUseElement::resetWidth()
+{
+  _width = 0.0f;
+  _widthUnit = UNIT_NONE;
+  _widthAssigned = false;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgUseElement::setHeight(const CoordF& height)
+{
+  _height = height.getValue();
+  _heightUnit = height.getUnit();
+  _heightAssigned = true;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+err_t SvgUseElement::resetHeight()
+{
+  _height = 0.0f;
+  _heightUnit = UNIT_NONE;
+  _heightAssigned = false;
+  _setDirty();
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::SvgUseElement - SVG Methods]
+// ============================================================================
+
+SvgElement* SvgUseElement::getLinkedElement() const
+{
+  StringW link;
+
+  if (getProperty(FOG_S(xlink_href), link) != ERR_OK)
+    return NULL;
+
+  if (link.isEmpty())
+    return NULL;
+
+  DomElement* ref = _ownerDocument->getElementById(parseHtmlLinkId(link));
+  if (ref == NULL)
+    return NULL;
+
+  if (ref->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+    return static_cast<SvgElement*>(ref);
+
+  return NULL;
+}
+
 // ============================================================================
 // [Fog::SvgUseElement - SVG Interface]
 // ============================================================================
 
 err_t SvgUseElement::onPrepare(SvgContext* context, SvgContextGState* state) const
 {
-  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+  err_t err =  Base::onPrepare(context, state);
 
-  float tx = svgGetCoord(doc, _x, _xUnit);
-  float ty = svgGetCoord(doc, _y, _yUnit);
-
-  if (tx != 0.0f || ty != 0.0f)
+  if (err == ERR_OK)
   {
-    if (state && !state->hasState(SvgContextGState::SAVED_TRANSFORM))
-      state->saveTransform();
-    context->translate(PointF(tx, ty));
+    SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
+
+    float tx = svgGetCoord(doc, _x, _xUnit);
+    float ty = svgGetCoord(doc, _y, _yUnit);
+
+    if (_widthAssigned || _heightAssigned)
+    {
+      SvgElement* ref = getLinkedElement();
+      if (ref != NULL)
+      {
+        BoxF bbox(UNINITIALIZED);
+        ref->getBoundingBox(bbox);
+
+        
+        // TODO: SVG<use> width/height support.
+      }
+    }
+
+    if (tx != 0.0f || ty != 0.0f)
+    {
+      if (state && !state->hasState(SvgContextGState::SAVED_TRANSFORM))
+        state->saveTransform();
+      context->translate(PointF(tx, ty));
+    }
   }
 
-  return Base::onPrepare(context, state);
+  return err;
 }
 
 err_t SvgUseElement::onProcess(SvgContext* context) const
 {
-  StringW link = getAttribute(FOG_S(xlink_href));
-
-  SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
-  DomElement* ref = doc->getElementById(parseHtmlLinkId(link));
-
-  err_t err = ERR_OK;
-  if (ref && ref->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
-    err = context->onVisit(reinterpret_cast<SvgElement*>(ref));
-  return err;
+  SvgElement* ref = getLinkedElement();
+  if (ref == NULL)
+    return ERR_OK;
+  return context->onVisit(ref);
 }
 
 err_t SvgUseElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const

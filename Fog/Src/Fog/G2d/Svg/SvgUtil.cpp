@@ -248,13 +248,21 @@ _Done:
     if (d_count != 1 && d_count != 3)
       goto _End;
 
-    if (d_count == 3)
-      dst.translate(PointF(d[1], d[2]), MATRIX_ORDER_PREPEND);
+    float rotateDeg = Math::deg2rad(d[0]);
 
-    dst.rotate(Math::deg2rad(d[0]), MATRIX_ORDER_PREPEND);
-
-    if (d_count == 3)
-      dst.translate(PointF(-d[1], -d[2]), MATRIX_ORDER_PREPEND);
+    if (d_count == 1)
+    {
+      dst.rotate(rotateDeg);
+    }
+    else
+    {
+      TransformF t;
+      t.translate(PointF(d[1], d[2]));
+      t.rotate(rotateDeg);
+      t.translate(PointF(-d[1], -d[2]));
+      dst.transform(t);
+      //dst.rotate(rotateDeg, d[1], d[2]);
+    }
   }
   // skewX() function.
   else if (functionLen == 5 && StringUtil::eq(functionName, "skewX", 5))

@@ -985,7 +985,7 @@ void X11UIEngine::doBlitWindow(UIEngineWindow* window)
 {
   X11UIEngineWindowImpl* d = reinterpret_cast<X11UIEngineWindowImpl*>(window->_d);
 
-  if (!d->_bufferData.size.isValid())
+  if (!d->_bufferData._size.isValid())
     return;
 
   if (d->_blitRegion.isEmpty())

@@ -970,6 +970,36 @@ err_t serializeViewBox(StringW& dst, const BoxF& src)
 }
 
 // ============================================================================
+// [Fog::SvgUtil - Serialize - Points]
+// ============================================================================
+
+err_t serializePoints(StringW& dst, const PathF& src)
+{
+  size_t pathLength = src.getLength();
+  size_t i = 0;
+  
+  const uint8_t* cmd = src.getCommands();
+  const PointF* pts = src.getVertices();
+
+  bool isFirst = true;
+
+  while (i < pathLength)
+  {
+    if (cmd[0] != PATH_CMD_CLOSE)
+    {
+      if (!isFirst)
+        FOG_RETURN_ON_ERROR(dst.append(CharW(' ')));
+      else
+        isFirst = false;
+
+      FOG_RETURN_ON_ERROR(dst.appendFormat("%g,%g", pts[0].x, pts[0].y));
+    }
+  }
+  
+  return ERR_OK;
+}
+
+// ============================================================================
 // [Fog::SvgUtil - Serialize - Path]
 // ============================================================================
 

@@ -1363,6 +1363,18 @@ struct FOG_API SvgPolygonElement : public SvgTransformableElement
   virtual ~SvgPolygonElement();
 
   // --------------------------------------------------------------------------
+  // [SVG Properties]
+  // --------------------------------------------------------------------------
+
+  FOG_PROPERTY_DEF()
+    FOG_PROPERTY_RW(Points, PathF)
+  FOG_PROPERTY_END()
+
+  FOG_INLINE const PathF& getPoints() const { return _points; }
+  err_t setPoints(const PathF& points);
+  err_t resetPoints();
+
+  // --------------------------------------------------------------------------
   // [SVG Interface]
   // --------------------------------------------------------------------------
 
@@ -1390,6 +1402,18 @@ struct FOG_API SvgPolylineElement : public SvgTransformableElement
 
   SvgPolylineElement(DomDocument* ownerDocument);
   virtual ~SvgPolylineElement();
+
+  // --------------------------------------------------------------------------
+  // [SVG Properties]
+  // --------------------------------------------------------------------------
+
+  FOG_PROPERTY_DEF()
+    FOG_PROPERTY_RW(Points, PathF)
+  FOG_PROPERTY_END()
+
+  FOG_INLINE const PathF& getPoints() const { return _points; }
+  err_t setPoints(const PathF& points);
+  err_t resetPoints();
 
   // --------------------------------------------------------------------------
   // [SVG Interface]

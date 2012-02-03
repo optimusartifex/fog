@@ -75,6 +75,10 @@ FOG_API err_t serializeCoord(StringW& dst, const CoordF& src);
 //! @brief Serialize SVG view-box to string.
 FOG_API err_t serializeViewBox(StringW& dst, const BoxF& src);
 
+//! @brief Serialize SVG points in path to string (used by SVG <polygon> and 
+//! <polyline> elements.
+FOG_API err_t serializePoints(StringW& dst, const PathF& src);
+
 //! @brief Serialize SVG path to string.
 FOG_API err_t serializePath(StringW& dst, const PathF& src);
 

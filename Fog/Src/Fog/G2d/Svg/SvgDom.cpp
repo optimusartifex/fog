@@ -224,6 +224,16 @@ struct FOG_NO_EXPORT SvgDomIO_PathF
   FOG_INLINE err_t serialize(StringW& dst, const PathF& src) { return SvgUtil::serializePath(dst, src); }
 };
 
+struct FOG_NO_EXPORT SvgDomIO_PointsF
+{
+  FOG_INLINE SvgDomIO_PointsF(bool closePath) : _closePath(closePath) {}
+
+  FOG_INLINE err_t parse(PathF& dst, const StringW& src) { return SvgUtil::parsePoints(dst, src, _closePath); }
+  FOG_INLINE err_t serialize(StringW& dst, const PathF& src) { return SvgUtil::serializePoints(dst, src); }
+
+  bool _closePath;
+};
+
 struct FOG_NO_EXPORT SvgDomIO_Enum
 {
   FOG_INLINE SvgDomIO_Enum(const PropertyEnum* pairs) : _pairs(pairs) {}
@@ -3086,6 +3096,25 @@ SvgPolygonElement::~SvgPolygonElement()
 // [Fog::SvgPolygonElement - SVG Propreties]
 // ============================================================================
 
+FOG_CORE_OBJ_DEF(SvgPolygonElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Points, FOG_S(points), SvgDomIO_PointsF(true))
+FOG_CORE_OBJ_END()
+
+err_t SvgPolygonElement::setPoints(const PathF& points)
+{
+  _points = points;
+  _setDirty();
+  
+  return ERR_OK;
+}
+
+err_t SvgPolygonElement::resetPoints()
+{
+  _points.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
 
 // ============================================================================
 // [Fog::SvgPolygonElement - SVG Interface]
@@ -3130,6 +3159,25 @@ SvgPolylineElement::~SvgPolylineElement()
 // [Fog::SvgPolylineElement - SVG Properties]
 // ============================================================================
 
+FOG_CORE_OBJ_DEF(SvgPolylineElement)
+  FOG_CORE_OBJ_PROPERTY_BASE(Points, FOG_S(points), SvgDomIO_PointsF(false))
+FOG_CORE_OBJ_END()
+
+err_t SvgPolylineElement::setPoints(const PathF& points)
+{
+  _points = points;
+  _setDirty();
+  
+  return ERR_OK;
+}
+
+err_t SvgPolylineElement::resetPoints()
+{
+  _points.reset();
+  _setDirty();
+
+  return ERR_OK;
+}
 
 // ============================================================================
 // [Fog::SvgPolylineElement - SVG Interface]

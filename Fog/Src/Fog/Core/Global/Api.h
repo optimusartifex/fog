@@ -173,7 +173,7 @@ struct FOG_NO_EXPORT Api
   // [Core/Memory - MemZoneAllocator]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(memzoneallocator_ctor)(MemZoneAllocator* self, size_t nodeSize);
+  FOG_CAPI_CTOR(memzoneallocator_ctor)(MemZoneAllocator* self, uint32_t nodeSize);
   FOG_CAPI_DTOR(memzoneallocator_dtor)(MemZoneAllocator* self);
 
   FOG_CAPI_METHOD(void*, memzoneallocator_alloc)(MemZoneAllocator* self, size_t size);

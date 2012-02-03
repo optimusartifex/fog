@@ -18,18 +18,19 @@ namespace Fog {
 // [Fog::MemZoneAllocator - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL MemZoneAllocator_ctor(MemZoneAllocator* self, size_t nodeSize)
+static void FOG_CDECL MemZoneAllocator_ctor(MemZoneAllocator* self, uint32_t nodeSize)
 {
+  self->_pos = self->_first.data;
+  self->_end = self->_first.data;
+
+  self->_current = &self->_first;
   self->_nodeSize = nodeSize;
+  self->_firstSize = 0;
 
   // We need at least one node. The first node is here just to prevent checking
   // for null pointers in inlined methods.
   self->_first.prev = NULL;
   self->_first.next = NULL;
-  self->_first.pos = self->_first.data;
-  self->_first.end = self->_first.data;
-
-  self->_current = &self->_first;
 }
 
 // ============================================================================
@@ -42,26 +43,28 @@ static void* FOG_CDECL MemZoneAllocator_alloc(MemZoneAllocator* self, size_t siz
   MemZoneNode* node = self->_current->next;
 
   // alloc() increased the position, we must decrease it.
-  self->_current->pos -= size;
+  self->_pos -= size;
 
   if (node == NULL)
   {
     node = self->_allocChunk();
+
     if (node == NULL)
     {
-      // Fix pos to never overflow if called zillion times.
-      self->_current->pos = self->_current->data + self->_nodeSize;
+      // Fix pos to never overflow if failed multiple times.
+      self->_pos = self->_current->data + self->_nodeSize;
       return NULL;
     }
+
     node->prev = self->_current;
     self->_current->next = node;
 
     node->next = NULL;
-    node->end = node->data + self->_nodeSize;
   }
 
   self->_current = node;
-  node->pos = reinterpret_cast<uint8_t*>(node->data) + size;
+  self->_pos = reinterpret_cast<uint8_t*>(node->data) + size;
+  self->_end = node->data + self->_nodeSize;
   return node->data;
 }
 
@@ -72,6 +75,9 @@ static void* FOG_CDECL MemZoneAllocator_alloc(MemZoneAllocator* self, size_t siz
 static void FOG_CDECL MemZoneAllocator_clear(MemZoneAllocator* self)
 {
   self->_current = &self->_first;
+
+  self->_pos = self->_first.data;
+  self->_end = self->_first.data + self->_firstSize;
 }
 
 static void FOG_CDECL MemZoneAllocator_reset(MemZoneAllocator* self)
@@ -87,6 +93,9 @@ static void FOG_CDECL MemZoneAllocator_reset(MemZoneAllocator* self)
 
   self->_first.next = NULL;
   self->_current = &self->_first;
+
+  self->_pos = self->_first.data;
+  self->_end = self->_first.data + self->_firstSize;
 }
 
 // ============================================================================
@@ -95,11 +104,11 @@ static void FOG_CDECL MemZoneAllocator_reset(MemZoneAllocator* self)
 
 static MemZoneRecord* FOG_CDECL MemZoneAllocator_record(MemZoneAllocator* self)
 {
-  MemZoneRecord* record = reinterpret_cast<MemZoneRecord*>(
+  MemZoneRecord* record = static_cast<MemZoneRecord*>(
     self->alloc(sizeof(MemZoneRecord)));
 
-  record->current = self->_current;
-  record->pos = self->_current->pos;
+  if (record != NULL)
+    record->current = self->_current;
 
   return record;
 }
@@ -107,7 +116,7 @@ static MemZoneRecord* FOG_CDECL MemZoneAllocator_record(MemZoneAllocator* self)
 static void FOG_CDECL MemZoneAllocator_revert(MemZoneAllocator* self, MemZoneRecord* record, bool keepRecord)
 {
   self->_current = record->current;
-  self->_current->pos = record->pos;
+  self->_pos = reinterpret_cast<uint8_t*>(record);
 
   if (keepRecord)
     self->alloc(sizeof(MemZoneRecord));

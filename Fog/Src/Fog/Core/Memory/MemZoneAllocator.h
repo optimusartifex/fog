@@ -35,11 +35,6 @@ struct FOG_NO_EXPORT MemZoneNode
   //! @brief Link to next node (optional, used by clip-span allocator).
   MemZoneNode* next;
 
-  //! @brief Current position in this node (data + offset).
-  uint8_t* pos;
-  //! @brief End position (first invalid byte position) of this node.
-  uint8_t* end;
-
   //! @brief Data.
   uint8_t data[sizeof(void*)];
 };
@@ -59,17 +54,12 @@ struct FOG_NO_EXPORT MemZoneRecord
 
   //! @brief Current node.
   MemZoneNode* current;
-
-  //! @brief Current node position pointer (saved).
-  uint8_t* pos;
 };
 
 // ============================================================================
 // [Fog::MemZoneAllocator]
 // ============================================================================
 
-//! @internal
-//!
 //! @brief Incremental memory allocator designed to allocate memory for objects
 //! or data with short lifetime.
 //!
@@ -87,7 +77,7 @@ struct FOG_NO_EXPORT MemZoneAllocator
 
   //! @brief Create a new instance of zone allocator.
   //! @param nodeSize Default size for one zone node.
-  FOG_INLINE MemZoneAllocator(size_t nodeSize)
+  FOG_INLINE MemZoneAllocator(uint32_t nodeSize)
   {
     fog_api.memzoneallocator_ctor(this, nodeSize);
   }
@@ -144,10 +134,10 @@ struct FOG_NO_EXPORT MemZoneAllocator
     // than the node size), so never do it!
     FOG_ASSERT(size < _nodeSize);
 
-    uint8_t* p = _current->pos;
-    _current->pos += size;
+    uint8_t* p = _pos;
+    _pos += size;
 
-    if (FOG_UNLIKELY(_current->pos > _current->end))
+    if (FOG_UNLIKELY(_pos > _end))
       return fog_api.memzoneallocator_alloc(this, size);
 
     return (void*)p;
@@ -203,11 +193,17 @@ struct FOG_NO_EXPORT MemZoneAllocator
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Current position in @c _current node (data + offset).
+  uint8_t* _pos;
+  //! @brief End position (first invalid byte position) in @c _current node.
+  uint8_t* _end;
+
   //! @brief Current allocated node of memory.
   MemZoneNode* _current;
-
   //! @brief One node size.
-  size_t _nodeSize;
+  uint32_t _nodeSize;
+  //! @brief First node size.
+  uint32_t _firstSize;
 
   //! @brief First allocated node of memory.
   //!
@@ -227,9 +223,11 @@ struct FOG_NO_EXPORT MemZoneAllocatorTmp : public MemZoneAllocator
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE MemZoneAllocatorTmp(size_t nodeSize) : MemZoneAllocator(nodeSize)
+  FOG_INLINE MemZoneAllocatorTmp(uint32_t nodeSize) :
+    MemZoneAllocator(nodeSize)
   {
-    _first.end = _first.data + N;
+    _firstSize = static_cast<uint32_t>(N);
+    _end += N;
   }
 
   // --------------------------------------------------------------------------

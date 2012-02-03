@@ -152,10 +152,12 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/map-imeretinka.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/PatternTest.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tiger.svg");
-    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/gradient.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/gradient.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/pservers-grad-13-b.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/paths-data-06-t.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/EiffelTower.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/svg-cards.svg");
+    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
   }
 
 /*
@@ -176,11 +178,11 @@ FOG_UI_MAIN()
   err_t err = wnd.svgDocument.readFromFile(fileName);
   SizeF size = wnd.svgDocument.getDocumentSize();
 
-  if (size.w < 400) size.w = 400;
-  if (size.h < 400) size.h = 400;
+  if (size.w < 200) size.w = 200;
+  if (size.h < 200) size.h = 200;
 
-  if (size.w > 1200) size.w = 1200;
-  if (size.h >  750) size.h =  750;
+  if (size.w > 900) size.w = 900;
+  if (size.h > 720) size.h = 720;
 
   wnd.setWindowSize(SizeI((int)size.w, (int)size.h));
   wnd.show();

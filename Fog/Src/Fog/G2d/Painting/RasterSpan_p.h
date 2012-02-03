@@ -78,6 +78,14 @@ struct FOG_NO_EXPORT RasterSpan
     _x0 = (uint32_t)(uint)x0;
   }
 
+  //! @brief Set span start position and type.
+  FOG_INLINE void setX0AndType(int x0, uint type)
+  {
+    FOG_ASSERT(x0 >= 0);
+    _x0 = (uint32_t)(uint)x0;
+    _type = type;
+  }
+
   //! @brief Set span end position.
   FOG_INLINE void setX1(int x1)
   {

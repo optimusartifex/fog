@@ -82,7 +82,6 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         boxRasterizer8.destroy();
         pathRasterizer8.destroy();
         scanline8.destroy();
-        scanlineExt8.destroy();
         break;
 
       case IMAGE_PRECISION_WORD:
@@ -90,7 +89,6 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         // boxRasterizer16.destroy();
         // pathRasterizer16.destroy();
         // scanline16.destroy();
-        // scanlineExt16.destroy();
         break;
 
       default:
@@ -108,7 +106,6 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         boxRasterizer8.init();
         pathRasterizer8.init();
         scanline8.init();
-        scanlineExt8.initCustom1((uint32_t)sizeof(RasterSpanExt8));
         break;
 
       case IMAGE_PRECISION_WORD:
@@ -118,7 +115,6 @@ err_t RasterContext::_initPrecision(uint32_t precision)
         // boxRasterizer16.init();
         // pathRasterizer16.init();
         // scanline16.init();
-        // scanlineExt16.init((uint32_t)sizeof(RasterSpanExt16));
         break;
 
       default:
@@ -131,15 +127,11 @@ err_t RasterContext::_initPrecision(uint32_t precision)
   {
     case IMAGE_PRECISION_BYTE:
       pcBpl *= 4;
-      FOG_RETURN_ON_ERROR(scanline8->prepare(layer.size.w));
-      FOG_RETURN_ON_ERROR(scanlineExt8->prepare(layer.size.w));
       break;
 
     case IMAGE_PRECISION_WORD:
       pcBpl *= 8;
       // TODO: 16-bit image processing.
-      // FOG_RETURN_ON_ERROR(scanline16->prepare(layer.size.w));
-      // FOG_RETURN_ON_ERROR(scanlineExt16->prepare(layer.size.w));
       break;
 
     default:

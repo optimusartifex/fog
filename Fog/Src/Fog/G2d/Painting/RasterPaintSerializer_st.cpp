@@ -198,7 +198,7 @@ static void FOG_FASTCALL RasterPaintFiller_process_filter(RasterPaintFiller* sel
   RasterUtil::validateSpans<RasterSpan8>(spans, self->ctx->clipBoxI.x0, self->ctx->clipBoxI.x1);
 #endif // FOG_DEBUG
 
-  RasterSpanExt8* s = static_cast<RasterSpanExt8*>(spans);
+  RasterSpan8* s = spans;
   FOG_ASSERT(s != NULL);
 
   uint8_t* src = self->f.srcPixels;
@@ -266,7 +266,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPa
     filler.v.pc = engine->ctx.pc;
     filler.v.pb = &engine->ctx.buffer;
 
-    rasterizer->render(&filler, &engine->ctx.scanlineExt8);
+    rasterizer->render(&filler, &engine->ctx.scanline8);
   }
 
   return ERR_OK;
@@ -459,7 +459,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
 
           uint32_t srcFormat = pc->getSrcFormat();
 
-          RasterSpanExt8 span[1];
+          RasterSpan8 span[1];
           span[0].setPositionAndType(box->x0, box->x1, RASTER_SPAN_C);
           span[0].setConstMask(0x100);
           span[0].setNext(NULL);
@@ -811,7 +811,7 @@ _BlitImageA8_Opaque:
         {
           RasterVBlitSpanFunc blitSpan;
 
-          RasterSpanExt8 span[1];
+          RasterSpan8 span[1];
           span[0].setPositionAndType(x0, x0 + srcWidth, RASTER_SPAN_C);
           span[0].setConstMask(opacity);
           span[0].setNext(NULL);
@@ -1097,7 +1097,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterRasterizedShape8_st(Raster
   filler.f.srcBpp = bpp;
   filler.f.srcBaseY = bBox->y0;
 
-  rasterizer->render(&filler, &engine->ctx.scanlineExt8);
+  rasterizer->render(&filler, &engine->ctx.scanline8);
 
   ctx.destroy(&ctx);
   return ERR_OK;
@@ -1176,7 +1176,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_st(
       {
         case IMAGE_PRECISION_BYTE:
         {
-          RasterSpanExt8 span[1];
+          RasterSpan8 span[1];
           span[0].setPositionAndType(box->x0, box->x1, RASTER_SPAN_C);
           span[0].setConstMask(opacity);
           span[0].setNext(NULL);

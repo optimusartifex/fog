@@ -150,16 +150,6 @@ struct FOG_NO_EXPORT RasterContext
     // Static<RasterScanline16> scanline16;
   };
 
-  union
-  {
-    //! @brief The scanline container for extended spans (8-bit).
-    Static<RasterScanline8> scanlineExt8;
-
-    // TODO: 16-bit image processing.
-    // //! @brief  The scanline container for extended spans (16-bit).
-    // Static<RasterScanline16> scanlineExt16;
-  };
-
   // --------------------------------------------------------------------------
   // [Members - Clip]
   // --------------------------------------------------------------------------

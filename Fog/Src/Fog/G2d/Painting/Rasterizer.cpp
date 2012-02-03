@@ -312,7 +312,7 @@ static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_box(
   filler->prepare(y0);
   RasterFiller::ProcessFunc process = filler->_process;
 
-  RasterSpanExt8 span[1];
+  RasterSpan8 span[1];
   span[0].setPositionAndType(box.x0, box.x1, RASTER_SPAN_C);
   span[0].setConstMask(self->_opacity);
   span[0].setNext(NULL);
@@ -433,7 +433,7 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_box(
   filler->prepare(y0);
   RasterFiller::ProcessFunc process = filler->_process;
 
-  RasterSpanExt8 span[3];
+  RasterSpan8 span[3];
   uint16_t mask[10];
 
   // Process.
@@ -2307,7 +2307,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
   PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
   FOG_ASSERT(self->_isFinalized);
 
-  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
+  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth() * 2)))
     return;
 
   int y0 = self->_boundingBox.y0;

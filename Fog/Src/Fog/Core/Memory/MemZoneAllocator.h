@@ -127,7 +127,7 @@ struct FOG_NO_EXPORT MemZoneAllocator
   //! @endcode
   FOG_INLINE void* alloc(size_t size)
   {
-    // Chunks must be valid pointer if we are here.
+    // Current node must be valid pointer if we are here.
     FOG_ASSERT(_current != NULL);
 
     // This allocator wasn't designed to alloc huge amount of memory (larger
@@ -147,14 +147,16 @@ struct FOG_NO_EXPORT MemZoneAllocator
   // [Reuse / Reset]
   // --------------------------------------------------------------------------
 
-  //! @brief Invalidate all allocated memory, but do not free allocated memory
-  //! nodes.
+  //! @brief Invalidate all allocated memory, but do not free allocated nodes.
   //!
   //! This method should be used when one task which needed zone memory ended,
-  //! but another needs to be run.
+  //! but another needs to be run. It has advantage that heap memory is already
+  //! allocated so it doesn't need to be allocated again.
   FOG_INLINE void clear()
   {
-    return fog_api.memzoneallocator_clear(this);
+    _current = _firstUsable;
+    _pos = _current->data;
+    _end = _pos + _firstSize;
   }
 
   //! @brief Free allocated memory.
@@ -200,9 +202,27 @@ struct FOG_NO_EXPORT MemZoneAllocator
 
   //! @brief Current allocated node of memory.
   MemZoneNode* _current;
+  //! @brief First usable node.
+  //!
+  //! @note If the @c MemZoneAllocatorTmp<N> is used, then @c _firstUsable is
+  //! linked with @c _first node, but if only pure @c MemZoneallocator is used,
+  //! then @c _firstUsable is linked to the first node which contains memory.
+  //! This is optimization to make @c clear() method as fastest (and smallest)
+  //! as possible.
+  MemZoneNode* _firstUsable;
+
   //! @brief One node size.
   uint32_t _nodeSize;
+
   //! @brief First node size.
+  //!
+  //! @note If the @c MemZoneAllocatorTmp<N> is used, then @c _firstSize is
+  //! always the same as N (template parameter). It's never cleared or changed.
+  //! If the pure @c MemZoneAllocator is used, then first size is first set to
+  //! zero, and when the first node is dynamically allocated, _firstSize is set
+  //! to @c _nodeSize. It's also set to zero when @c reset() is called to
+  //! prevent memory corruption, because @c reset() frees all dynamically
+  //! allocated nodes.
   uint32_t _firstSize;
 
   //! @brief First allocated node of memory.

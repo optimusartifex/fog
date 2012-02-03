@@ -1148,7 +1148,7 @@ static err_t Image_blitImagePrivate(
   uint32_t sFormat = src_d->format;
 
   bool isOpaque;
-  RasterSpanExt8 span;
+  RasterSpan8 span;
 
   if (opacity <= 0.0f)
     return ERR_OK;
@@ -3054,7 +3054,7 @@ Image Image::scaled(const SizeI& to, uint32_t interpolationType) const
   uint8_t* dstData = (uint8_t*)dst.getData();
   ssize_t dstStride = dst.getStride();
 
-  RasterSpanExt8 span;
+  RasterSpan8 span;
   span.setPositionAndType(0, to.w, RASTER_SPAN_C);
   span.setCMask(0xFF);
   span.setNext(NULL);

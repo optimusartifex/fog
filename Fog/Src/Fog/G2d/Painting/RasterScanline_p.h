@@ -47,7 +47,7 @@ struct FOG_NO_EXPORT RasterScanline
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  RasterScanline(uint32_t spanSize, uint32_t maskUnit);
+  RasterScanline();
   ~RasterScanline();
 
   // --------------------------------------------------------------------------
@@ -60,10 +60,12 @@ struct FOG_NO_EXPORT RasterScanline
   //! (this means probably all operations in raster paint engine). After the
   //! the @c prepare() method was caleed then the @c begin() method can
   //! be used instead of the slower @c begin(int x0, int x1).
-  FOG_INLINE err_t prepare(int w)
+  FOG_INLINE err_t prepare(size_t maxSize)
   {
-    if (FOG_LIKELY((uint)w <= _maskCapacity)) return ERR_OK;
-    return _prepare(w);
+    if (FOG_UNLIKELY((uint)maxSize > _maskCapacity))
+      return _prepare(maxSize);
+    else
+      return ERR_OK;
   }
 
   // --------------------------------------------------------------------------
@@ -72,9 +74,11 @@ struct FOG_NO_EXPORT RasterScanline
 
   FOG_INLINE void begin()
   {
-    _maskCurrent = _maskData;
+    _maskCurrent = _maskStorage;
     _spanCurrent = &_spanFirst;
-    if (_spanLast) _spanLast->setNext(_spanSaved);
+
+    if (_spanLast)
+      _spanLast->setNext(_spanSaved);
     _spanLast = NULL;
   }
 
@@ -87,7 +91,7 @@ struct FOG_NO_EXPORT RasterScanline
     if (FOG_UNLIKELY((uint)x1 - x0 > _maskCapacity)) return _begin(x0, x1);
 
     // Duplicated, the same code is also in _begin().
-    _maskCurrent = _maskData;
+    _maskCurrent = _maskStorage;
     _spanCurrent = &_spanFirst;
     if (_spanLast) _spanLast->setNext(_spanSaved);
     _spanLast = NULL;
@@ -123,7 +127,7 @@ struct FOG_NO_EXPORT RasterScanline
   // --------------------------------------------------------------------------
 
   //! @brief Private method that can be called by @c prepare().
-  err_t _prepare(int w);
+  err_t _prepare(size_t maxSize);
 
   //! @brief Private method that can be called by @c begin().
   err_t _begin(int x0, int x1);
@@ -150,15 +154,12 @@ struct FOG_NO_EXPORT RasterScanline
   // [Members - Mask]
   // --------------------------------------------------------------------------
 
-  //! @brief The mask data.
-  uint8_t* _maskData;
   //! @brief The mask position.
   uint8_t* _maskCurrent;
-
-  //! @brief The capacity of the _maskData.
-  uint32_t _maskCapacity;
-  //! @brief The maximum size of one pixel in the _maskData array.
-  uint32_t _maskUnit;
+  //! @brief The mask storage.
+  uint8_t* _maskStorage;
+  //! @brief The capacity of the _maskStorage.
+  size_t _maskCapacity;
 
   // --------------------------------------------------------------------------
   // [Members - Span]
@@ -187,9 +188,6 @@ struct FOG_NO_EXPORT RasterScanline
   //! @brief Current span, used by span-builder.
   RasterSpan* _spanCurrent;
 
-  //! @brief The size of one span, sizeof(RasterSpan8) for example.
-  uint32_t _spanSize;
-
 private:
   _FOG_NO_COPY(RasterScanline)
 };
@@ -211,8 +209,8 @@ struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RasterScanline8(uint32_t spanSize = sizeof(RasterSpan8)) :
-    RasterScanline(spanSize, 4)
+  FOG_INLINE RasterScanline8() :
+    RasterScanline()
   {
   }
 
@@ -369,7 +367,7 @@ _Link:
     FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_A8_GLYPH ||
                getCurrent()->getType() == RASTER_SPAN_AX_GLYPH);
     // Detect buffer overflow.
-    FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
+    FOG_ASSERT(_maskCurrent < _maskStorage + _maskCapacity);
     // Detect an invalid mask.
     FOG_ASSERT(m < 0x100);
 
@@ -469,7 +467,7 @@ _Link:
     // Detect an invalid span.
     FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_AX_EXTRA);
     // Detect buffer overflow.
-    FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
+    FOG_ASSERT(_maskCurrent < _maskStorage + _maskCapacity);
     // Detect an invalid mask.
     FOG_ASSERT(m <= 0x100);
 
@@ -566,7 +564,7 @@ _Link:
     FOG_ASSERT(getCurrent()->getType() == RASTER_SPAN_ARGB32_GLYPH ||
                getCurrent()->getType() == RASTER_SPAN_ARGBXX_GLYPH);
     // Detect buffer overflow.
-    FOG_ASSERT(_maskCurrent < _maskData + _maskCapacity);
+    FOG_ASSERT(_maskCurrent < _maskStorage + _maskCapacity);
 
     ((uint32_t*)_maskCurrent)[0] = m;
     _maskCurrent += 4;

@@ -159,6 +159,22 @@ struct FOG_NO_EXPORT RasterSpan
   }
 
   // --------------------------------------------------------------------------
+  // [Data]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get span data.
+  FOG_INLINE uint8_t* getData() const
+  {
+    return _data;
+  }
+
+  //! @brief Set span data.
+  FOG_INLINE void setData(uint8_t* data)
+  {
+    _data = data;
+  }
+
+  // --------------------------------------------------------------------------
   // [Next]
   // --------------------------------------------------------------------------
 
@@ -186,6 +202,9 @@ struct FOG_NO_EXPORT RasterSpan
     void* _mask;
     size_t _mask_uint;
   };
+
+  //! @brief Span data (used by patterns).
+  uint8_t* _data;
 
   //! @brief Pointer to the next span (or @c NULL).
   RasterSpan* _next;
@@ -340,51 +359,6 @@ struct FOG_NO_EXPORT RasterSpan8 : public RasterSpan
   {
     return (uint8_t*)(void*)(uintptr_t)mask;
   }
-};
-#include <Fog/Core/C++/PackRestore.h>
-
-// ============================================================================
-// [Fog::RasterSpanExt8]
-// ============================================================================
-
-#include <Fog/Core/C++/PackByte.h>
-//! @internal
-//!
-//! @brief @c RasterSpan8 extended by a @c data pointer.
-struct FOG_NO_EXPORT RasterSpanExt8 : public RasterSpan8
-{
-  // --------------------------------------------------------------------------
-  // [Data]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get the @c RasterSpanExt8 data.
-  FOG_INLINE uint8_t* getData() const
-  {
-    return _data;
-  }
-
-  //! @brief Set the @c RasterSpanExt8 data.
-  FOG_INLINE void setData(uint8_t* data)
-  {
-    _data = data;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Next]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get the next span.
-  FOG_INLINE RasterSpanExt8* getNext() const
-  {
-    return reinterpret_cast<RasterSpanExt8*>(_next);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! @brief Data pointer, used by patterns to store pointer to a fetched pixels.
-  uint8_t* _data;
 };
 #include <Fog/Core/C++/PackRestore.h>
 
@@ -547,51 +521,6 @@ struct FOG_NO_EXPORT RasterSpan16 : public RasterSpan
 
     return width * advanceData[type];
   }
-};
-#include <Fog/Core/C++/PackRestore.h>
-
-// ============================================================================
-// [Fog::RasterSpanExt16]
-// ============================================================================
-
-#include <Fog/Core/C++/PackByte.h>
-//! @internal
-//!
-//! @brief @c RasterSpan16 extended by a @c data pointer.
-struct FOG_NO_EXPORT RasterSpanExt16 : public RasterSpan16
-{
-  // --------------------------------------------------------------------------
-  // [Data]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get the @c RasterSpanExt16 data.
-  FOG_INLINE uint8_t* getData() const
-  {
-    return _data;
-  }
-
-  //! @brief Set the @c RasterSpanExt16 data.
-  FOG_INLINE void setData(uint8_t* data)
-  {
-    _data = data;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Next]
-  // --------------------------------------------------------------------------
-
-  //! @brief Get the next span.
-  FOG_INLINE RasterSpanExt16* getNext() const
-  {
-    return reinterpret_cast<RasterSpanExt16*>(_next);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! @brief Data pointer, used by patterns to store pointer to a fetched pixels.
-  uint8_t* _data;
 };
 #include <Fog/Core/C++/PackRestore.h>
 

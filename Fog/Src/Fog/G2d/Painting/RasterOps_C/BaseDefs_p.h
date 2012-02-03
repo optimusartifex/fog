@@ -223,7 +223,7 @@
     \
     dst = dstBase + x * BPP; \
     const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getGenericMask(); \
-    const uint8_t* src = (const uint8_t*)reinterpret_cast<const RasterSpanExt8*>(span)->getData(); \
+    const uint8_t* src = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getData(); \
     \
     switch (span->getType()) \
     {
@@ -1349,17 +1349,17 @@ _##_Group_##_End: \
   {
 
 #define P_FETCH_SPAN8_SET_CURRENT() \
-    reinterpret_cast<RasterSpanExt8*>(span)->setData(dst);
+    reinterpret_cast<RasterSpan8*>(span)->setData(dst);
 
 #define P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(_BPP_) \
-    reinterpret_cast<RasterSpanExt8*>(span)->setData(dst); \
+    reinterpret_cast<RasterSpan8*>(span)->setData(dst); \
     \
     { \
       RasterSpan* next = span->getNext(); \
       if (next && next->getX0() == span->getX1()) \
       { \
         do { \
-          reinterpret_cast<RasterSpanExt8*>(next)->setData(dst + (uint)w * _BPP_); \
+          reinterpret_cast<RasterSpan8*>(next)->setData(dst + (uint)w * _BPP_); \
           span = next; \
           w = (int)((uint)next->getX1() - (uint)x); \
           next = span->getNext(); \
@@ -1368,7 +1368,7 @@ _##_Group_##_End: \
     }
 
 #define P_FETCH_SPAN8_SET_CUSTOM(_Dst_) \
-    reinterpret_cast<RasterSpanExt8*>(span)->setData((uint8_t*)(_Dst_));
+    reinterpret_cast<RasterSpan8*>(span)->setData((uint8_t*)(_Dst_));
 
 #define P_FETCH_SPAN8_NEXT() \
     if ((span = span->getNext()) == NULL) break; \

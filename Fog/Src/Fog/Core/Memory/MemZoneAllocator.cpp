@@ -24,6 +24,7 @@ static void FOG_CDECL MemZoneAllocator_ctor(MemZoneAllocator* self, uint32_t nod
   self->_end = self->_first.data;
 
   self->_current = &self->_first;
+  self->_firstUsable = &self->_first;
   self->_nodeSize = nodeSize;
   self->_firstSize = 0;
 
@@ -56,6 +57,13 @@ static void* FOG_CDECL MemZoneAllocator_alloc(MemZoneAllocator* self, size_t siz
       return NULL;
     }
 
+    // Setup the _firstUsable and _firstSize if this is the first allocated node.
+    if (self->_firstSize == 0)
+    {
+      self->_firstUsable = node;
+      self->_firstSize = self->_nodeSize;
+    }
+
     node->prev = self->_current;
     self->_current->next = node;
 
@@ -72,14 +80,6 @@ static void* FOG_CDECL MemZoneAllocator_alloc(MemZoneAllocator* self, size_t siz
 // [Fog::MemZoneAllocator - Clear / Reset]
 // ============================================================================
 
-static void FOG_CDECL MemZoneAllocator_clear(MemZoneAllocator* self)
-{
-  self->_current = &self->_first;
-
-  self->_pos = self->_first.data;
-  self->_end = self->_first.data + self->_firstSize;
-}
-
 static void FOG_CDECL MemZoneAllocator_reset(MemZoneAllocator* self)
 {
   MemZoneNode* cur = self->_first.next;
@@ -91,11 +91,17 @@ static void FOG_CDECL MemZoneAllocator_reset(MemZoneAllocator* self)
     cur = next;
   }
 
-  self->_first.next = NULL;
+  // Clear _firstSize if we freed the first usable node.
+  if (self->_firstUsable != &self->_first)
+    self->_firstSize = 0;
+
   self->_current = &self->_first;
+  self->_firstUsable = &self->_first;
 
   self->_pos = self->_first.data;
   self->_end = self->_first.data + self->_firstSize;
+
+  self->_first.next = NULL;
 }
 
 // ============================================================================
@@ -131,7 +137,6 @@ FOG_NO_EXPORT void MemZoneAllocator_init(void)
   fog_api.memzoneallocator_ctor = MemZoneAllocator_ctor;
   fog_api.memzoneallocator_dtor = MemZoneAllocator_reset;
   fog_api.memzoneallocator_alloc = MemZoneAllocator_alloc;
-  fog_api.memzoneallocator_clear = MemZoneAllocator_clear;
   fog_api.memzoneallocator_reset = MemZoneAllocator_reset;
   fog_api.memzoneallocator_record = MemZoneAllocator_record;
   fog_api.memzoneallocator_revert = MemZoneAllocator_revert;

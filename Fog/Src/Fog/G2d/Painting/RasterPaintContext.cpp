@@ -20,7 +20,7 @@ namespace Fog {
 RasterContext::RasterContext() :
   engine(NULL),
   precision(0xFFFFFFFF),
-  clipType(RASTER_CLIP_NULL),
+  clipType(RASTER_CLIP_BOXI),
   clipBoxI(0, 0, 0, 0)
 {
   scope.reset();

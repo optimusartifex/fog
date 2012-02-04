@@ -3487,11 +3487,13 @@ FOG_NO_EXPORT void Rasterizer_init(void)
   Rasterizer_api.box8.init32x0 = BoxRasterizer8_init32x0;
   Rasterizer_api.box8.init24x8 = BoxRasterizer8_init24x8;
 
-  Rasterizer_api.box8.render_32x0[RASTER_CLIP_BOX   ] = BoxRasterizer8_render_32x0_st_clip_box;
+  Rasterizer_api.box8.render_32x0[RASTER_CLIP_BOXI  ] = BoxRasterizer8_render_32x0_st_clip_box;
+  Rasterizer_api.box8.render_32x0[RASTER_CLIP_BOXF  ] = BoxRasterizer8_render_32x0_st_clip_box;
   Rasterizer_api.box8.render_32x0[RASTER_CLIP_REGION] = BoxRasterizer8_render_32x0_st_clip_region;
   Rasterizer_api.box8.render_32x0[RASTER_CLIP_MASK  ] = BoxRasterizer8_render_32x0_st_clip_mask;
 
-  Rasterizer_api.box8.render_24x8[RASTER_CLIP_BOX   ] = BoxRasterizer8_render_24x8_st_clip_box;
+  Rasterizer_api.box8.render_24x8[RASTER_CLIP_BOXI  ] = BoxRasterizer8_render_24x8_st_clip_box;
+  Rasterizer_api.box8.render_24x8[RASTER_CLIP_BOXF  ] = BoxRasterizer8_render_24x8_st_clip_box;
   Rasterizer_api.box8.render_24x8[RASTER_CLIP_REGION] = BoxRasterizer8_render_24x8_st_clip_region;
   Rasterizer_api.box8.render_24x8[RASTER_CLIP_MASK  ] = BoxRasterizer8_render_24x8_st_clip_mask;
 
@@ -3499,19 +3501,23 @@ FOG_NO_EXPORT void Rasterizer_init(void)
   // [Fog::PathRasterizer8]
   // --------------------------------------------------------------------------
 
-  Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 0>;
+  Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 0>;
+  Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_BOXF  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 0>;
   Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_NON_ZERO, 0>;
   Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_NON_ZERO, 0>;
 
-  Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 1>;
+  Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 1>;
+  Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_BOXF  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 1>;
   Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_NON_ZERO, 1>;
   Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_NON_ZERO, 1>;
 
-  Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 0>;
+  Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 0>;
+  Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_BOXF  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 0>;
   Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_EVEN_ODD, 0>;
   Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_EVEN_ODD, 0>;
 
-  Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 1>;
+  Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 1>;
+  Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_BOXF  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 1>;
   Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_EVEN_ODD, 1>;
   Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_EVEN_ODD, 1>;
 }

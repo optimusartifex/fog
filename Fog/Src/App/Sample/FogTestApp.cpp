@@ -81,7 +81,7 @@ void AppWindow::onPaint(Painter* _p)
 
   //p.setSource(Argb32(0xFF000000));
   //p.fillPath(path);
-
+/*
   FeBlur feBlur(FE_BLUR_TYPE_EXPONENTIAL, 50.0f);
   feBlur.setExtendType(FE_EXTEND_COLOR);
   feBlur.setExtendColor(Argb32(0xFF00FF00));
@@ -93,7 +93,18 @@ void AppWindow::onPaint(Painter* _p)
 
   p.setOpacity(0.5f);
   p.filterPath(feBlur, path);
-  
+*/
+
+  p.save();
+  p.setSource(Argb32(0xFFFF0000));
+  p.clipRect(CLIP_OP_INTERSECT, RectI(200, 200, 200, 200));
+  p.fillRect(RectI(100, 100, 400, 400));
+  p.restore();
+
+  p.setSource(Argb32(0xFFFF00FF));
+  p.fillRect(RectI(200, 200, 200, 200));
+
+
   //p.setSource(Argb32(0xFF0000FF));
   //p.drawRect(0.5f, 0.5f, float(geom.w) - 1.0f, float(geom.h) - 1.0f);
   

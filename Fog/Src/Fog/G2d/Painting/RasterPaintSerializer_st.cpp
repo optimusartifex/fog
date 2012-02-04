@@ -425,7 +425,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
     case IMAGE_PRECISION_BYTE:
     {
       // Fast-path (clip-box and full-opacity).
-      if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.clipType == RASTER_CLIP_BOX)
+      if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.clipType == RASTER_CLIP_BOXI)
       {
         uint8_t* pixels = engine->ctx.layer.pixels;
         ssize_t stride = engine->ctx.layer.stride;
@@ -731,7 +731,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_st(
     case IMAGE_PRECISION_BYTE:
     {
       // Fast-path (clip-box and full-opacity).
-      if (engine->ctx.clipType == RASTER_CLIP_BOX)
+      if (engine->ctx.clipType == RASTER_CLIP_BOXI)
       {
         uint8_t* pixels = engine->ctx.layer.pixels;
         ssize_t stride = engine->ctx.layer.stride;
@@ -1382,6 +1382,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_st(
 static err_t FOG_FASTCALL RasterPaintSerializer_clipAll_st(
   RasterPaintEngine* engine)
 {
+  if ((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0)
+    engine->saveClipping();
+
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
@@ -1514,7 +1517,8 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_st(
   FOG_ASSERT((clipOp & CLIP_OP_STROKE) == 0);
   FOG_ASSERT(box->isValid());
 
-  
+  if ((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0)
+    engine->saveClipping();
 
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;

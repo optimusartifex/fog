@@ -81,6 +81,17 @@ struct FOG_NO_EXPORT RasterState
   //! @brief The integralTransform type, see @c RASTER_INTEGRAL_TRANSFORM.
   uint8_t integralTransformType;
 
+  // ------------------------------------------------------------------------
+  // [Clipping]
+  // ------------------------------------------------------------------------
+
+  uint8_t clipType;  
+  uint8_t reserved[3];
+
+  // ------------------------------------------------------------------------
+  // [Integral Transform - Data]
+  // ------------------------------------------------------------------------
+
   struct _IntegralTransform
   {
     int _sx, _sy;
@@ -122,12 +133,17 @@ struct FOG_NO_EXPORT RasterState
   // [RASTER_STATE_CLIPPING]
   // ------------------------------------------------------------------------
 
-  // TODO: Clipping
+  //! @brief The clip-box (int).
+  BoxI clipBoxI;
+
+  //! @brief The clip-box (float).
+  BoxF clipBoxF;
+
+  //! @brief The clip-box (double).
+  BoxD clipBoxD;
 
   //! @brief The clip-region.
-  //Region ctxClipRegion;
-  //! @brief The clip-box.
-  //BoxI ctxClipBox;
+  Static<Region> clipRegion;
 
   // ------------------------------------------------------------------------
   // [RASTER_STATE_FILTER]

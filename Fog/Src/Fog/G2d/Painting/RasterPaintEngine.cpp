@@ -2375,7 +2375,47 @@ _RestoreSourceContinue:
 
   if (restoreFlags & RASTER_STATE_CLIPPING)
   {
-    // TODO: Clipping.
+    switch (state->clipType)
+    {
+      case RASTER_CLIP_BOXI:
+      case RASTER_CLIP_BOXF:
+        if (engine->ctx.clipType == RASTER_CLIP_MASK)
+        {
+          // TODO: RasterPaintEngine - clip-mask.
+        }
+
+        engine->ctx.clipType = state->clipType;
+        engine->ctx.clipBoxI = state->clipBoxI;
+        engine->stroker.f().setClipBox(state->clipBoxF);
+        engine->stroker.d().setClipBox(state->clipBoxD);
+
+        // TODO:
+        engine->ctx.clipRegion.clear();
+        break;
+
+      case RASTER_CLIP_REGION:
+        if (engine->ctx.clipType == RASTER_CLIP_MASK)
+        {
+          // TODO: RasterPaintEngine - clip-mask.
+        }
+
+        engine->ctx.clipType = state->clipType;
+        engine->ctx.clipBoxI = state->clipBoxI;
+        engine->stroker.f().setClipBox(state->clipBoxF);
+        engine->stroker.d().setClipBox(state->clipBoxD);
+
+        // TODO:
+        engine->ctx.clipRegion = state->clipRegion();
+        state->clipRegion.destroy();
+        break;
+
+      case RASTER_CLIP_MASK:
+        // TODO: RasterPaintEngine - clip-mask.
+        break;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
   }
 
   // ------------------------------------------------------------------------
@@ -4137,7 +4177,28 @@ void RasterPaintEngine::saveClipping()
 
   savedStateFlags |= RASTER_STATE_CLIPPING;
 
-  // TODO: Clipping.
+  state->clipType = static_cast<uint8_t>(ctx.clipType);
+  state->clipBoxI = ctx.clipBoxI;
+  state->clipBoxF = stroker.f().getClipBox();
+  state->clipBoxD = stroker.d().getClipBox();
+
+  switch (ctx.clipType)
+  {
+    case RASTER_CLIP_BOXI:
+    case RASTER_CLIP_BOXF:
+      break;
+
+    case RASTER_CLIP_REGION:
+      state->clipRegion.init(ctx.clipRegion);
+      break;
+
+    case RASTER_CLIP_MASK:
+      // TODO: RasterPaintEngine - clip-mask.
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
 }
 
 void RasterPaintEngine::saveFilter()
@@ -4201,7 +4262,27 @@ _DiscardSourceContinue:
 
     if (restoreFlags & RASTER_STATE_CLIPPING)
     {
-      // TODO: Clipping.
+      switch (state->clipType)
+      {
+        case RASTER_CLIP_BOXI:
+          // Nothing here.
+          break;
+
+        case RASTER_CLIP_BOXF:
+          // Nothing here.
+          break;
+
+        case RASTER_CLIP_REGION:
+          state->clipRegion.destroy();
+          break;
+
+        case RASTER_CLIP_MASK:
+          // TODO: RasterPaintEngine - clip-mask.
+          break;
+          
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
     }
 
     last = state;
@@ -4310,7 +4391,7 @@ void RasterPaintEngine::setupDefaultClip()
   metaRegion = bounds;
 
   // TODO:?
-  ctx.clipType = RASTER_CLIP_BOX;
+  ctx.clipType = RASTER_CLIP_BOXI;
   ctx.clipRegion = metaRegion;
   ctx.clipBoxI = bounds;
 

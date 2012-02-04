@@ -151,13 +151,13 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/filters.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/map-imeretinka.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/PatternTest.svg");
-    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tiger.svg");
+    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tiger.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/gradient.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/pservers-grad-13-b.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/paths-data-06-t.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/EiffelTower.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/svg-cards.svg");
-    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
   }
 
 /*

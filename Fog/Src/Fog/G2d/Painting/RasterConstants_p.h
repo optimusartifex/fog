@@ -633,37 +633,22 @@ enum RASTER_STATE
 //! @internal
 //!
 //! @brief Raster clip mode.
-//!
-//! Possible combinations are:
-//! - @c RASTER_CLIP_NULL - This can happen, painting is disabled (there is
-//!   no area where to paint. Together with this flag the painter state
-//!   should also have also set related RASTER_ENGINE_NO_PAINT_... flags.
-//! - @c RASTER_CLIP_BOX - Simple clip region (rectangle).
-//! - @c RASTER_CLIP_REGION - Complex clip region (set of rectangles).
-//! - @c RASTER_CLIP_MASK - Mask clip.
 enum RASTER_CLIP
 {
-  //! @brief Null clip (no paint).
-  RASTER_CLIP_NULL = 0,
+  //! @brief The clip is a rectangle (@ref BoxI) or painting is completely
+  //! disabled.
+  RASTER_CLIP_BOXI = 0,
 
-  //! @brief The clip is a rectangle.
-  //!
-  //! This flag is never set together with @c RASTER_CLIP_REGION, only one flag
-  //! can be set at the time.
-  RASTER_CLIP_BOX = 1,
+  //! @brief The clip is an unaligned rectangle (@ref BoxF and @ref BoxD).
+  RASTER_CLIP_BOXF = 1,
 
-  //! @brief The clip is a region.
-  //!
-  //! This flag is never set together with @c RASTER_CLIP_BOX, only one flag
-  //! can be set at the time.
+  //! @brief The clip is a region (YX sorted array of @ref BoxI instances).
   RASTER_CLIP_REGION = 2,
 
-  //! @brief The clip is a mask.
-  //!
-  //! This is addition to @c RASTER_CLIP_BOX and @c RASTER_CLIP_REGION flags.
+  //! @brief The clip is a mask (internally created by @c RasterSpan instances).
   RASTER_CLIP_MASK = 3,
 
-  //! @brief Count of raster clip modes.
+  //! @brief Count of clip modes.
   RASTER_CLIP_COUNT = 4
 };
 

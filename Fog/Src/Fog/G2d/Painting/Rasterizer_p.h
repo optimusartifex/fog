@@ -82,7 +82,7 @@ struct FOG_NO_EXPORT Rasterizer8
     _render = NULL;
 
     _opacity = 0x100;
-    _clipType = RASTER_CLIP_BOX;
+    _clipType = RASTER_CLIP_BOXI;
     _initialized = false;
   }
 
@@ -148,7 +148,7 @@ struct FOG_NO_EXPORT Rasterizer8
 
   FOG_INLINE void resetClip()
   {
-    _clipType = RASTER_CLIP_BOX;
+    _clipType = RASTER_CLIP_BOXI;
   }
 
   // --------------------------------------------------------------------------

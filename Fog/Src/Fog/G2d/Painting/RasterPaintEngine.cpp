@@ -2364,7 +2364,6 @@ _RestoreSourceContinue:
     switch (state->clipType)
     {
       case RASTER_CLIP_BOXI:
-      case RASTER_CLIP_BOXF:
         if (engine->ctx.clipType == RASTER_CLIP_MASK)
         {
           // TODO: RasterPaintEngine - clip-mask.
@@ -4173,7 +4172,6 @@ void RasterPaintEngine::saveClipping()
   switch (ctx.clipType)
   {
     case RASTER_CLIP_BOXI:
-    case RASTER_CLIP_BOXF:
       break;
 
     case RASTER_CLIP_REGION:
@@ -4253,10 +4251,6 @@ _DiscardSourceContinue:
       switch (state->clipType)
       {
         case RASTER_CLIP_BOXI:
-          // Nothing here.
-          break;
-
-        case RASTER_CLIP_BOXF:
           // Nothing here.
           break;
 

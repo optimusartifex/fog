@@ -639,17 +639,14 @@ enum RASTER_CLIP
   //! disabled.
   RASTER_CLIP_BOXI = 0,
 
-  //! @brief The clip is an unaligned rectangle (@ref BoxF and @ref BoxD).
-  RASTER_CLIP_BOXF = 1,
-
   //! @brief The clip is a region (YX sorted array of @ref BoxI instances).
-  RASTER_CLIP_REGION = 2,
+  RASTER_CLIP_REGION = 1,
 
   //! @brief The clip is a mask (internally created by @c RasterSpan instances).
-  RASTER_CLIP_MASK = 3,
+  RASTER_CLIP_MASK = 2,
 
   //! @brief Count of clip modes.
-  RASTER_CLIP_COUNT = 4
+  RASTER_CLIP_COUNT = 3
 };
 
 // ============================================================================

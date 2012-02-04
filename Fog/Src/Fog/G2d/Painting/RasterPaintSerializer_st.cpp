@@ -1537,8 +1537,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_st(
       switch (engine->ctx.clipType)
       {
         case RASTER_CLIP_BOXI:
-        case RASTER_CLIP_BOXF:
-_ReplaceClip:
+_ReplaceClipBox:
         {
           engine->masterFlags &= ~RASTER_NO_PAINT_USER_CLIP;
 
@@ -1552,14 +1551,16 @@ _ReplaceClip:
 
         case RASTER_CLIP_REGION:
         {
+          // Not used anymore.
           engine->ctx.clipRegion.clear();
-          goto _ReplaceClip;
+
+          goto _ReplaceClipBox;
         }
 
         case RASTER_CLIP_MASK:
         {
           // TODO: RasterPaintEngine - clip-mask.
-          goto _ReplaceClip;
+          break;
         }
 
         default:
@@ -1570,21 +1571,56 @@ _ReplaceClip:
     case CLIP_OP_INTERSECT:
       switch (engine->ctx.clipType)
       {
-        // TODO:
         case RASTER_CLIP_BOXI:
-          break;
+        {
+          // ClipNormalizedBox is always called with already clipped box to
+          // the current clip-box or meta clip-box. This means that we don't
+          // need to clip it again.
+          FOG_ASSERT(engine->ctx.clipBoxI.subsumes(*box));
+          goto _ReplaceClipBox;
+        }
 
-        // TODO:
-        case RASTER_CLIP_BOXF:
-          break;
-
-        // TODO:
         case RASTER_CLIP_REGION:
-          break;
+        {
+          // Just assure that there is something in current clipRegion, 
+          // because clipping is set to RASTER_CLIP_REGION.
+          FOG_ASSERT(engine->ctx.clipRegion.getLength() > 1);
+
+          Region& newRegion = engine->getTemporaryRegion();
+          FOG_RETURN_ON_ERROR(Region::intersect(newRegion, engine->ctx.clipRegion, *box));
+          
+          size_t newLength = newRegion.getLength();
+
+          // If the result is empty region, then everything is clipped (and
+          // painting is temporary disabled).
+          if (newLength == 0)
+            return engine->serializer->clipAll(engine);
+
+          // If the result is single rectangle, then we switch to different
+          // clip-type (RASTER_CLIP_BOXI), which is simpler and much faster.
+          if (newLength == 1)
+            goto _ReplaceClipBox;
+
+          // ClipType is already set to RASTER_CLIP_REGION, we don't need
+          // to touch it. However, the newRegion is not yet active, so it's
+          // needed to set it to the context. We use swap(), because the
+          // old region can be allocated on the heap and we would like to
+          // prevent deallocation (it can be reused later).
+          swap(engine->ctx.clipRegion, newRegion);
+
+          // And now we have to update all clip-boxes.
+          engine->ctx.clipBoxI = engine->ctx.clipRegion.getBoundingBox();
+          engine->stroker.f->_clipBox.setBox(engine->ctx.clipBoxI);
+          engine->stroker.d->_clipBox.setBox(engine->ctx.clipBoxI);
+
+          return ERR_OK;
+        }
 
         case RASTER_CLIP_MASK:
+        {
           // TODO: RasterPaintEngine - clip-mask.
           break;
+        }
       }
       break;
     
@@ -1612,6 +1648,11 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_st(
       {
         BoxI boxI(box24x8.x0 >> 8, box24x8.y0 >> 8, box24x8.x1 >> 8, box24x8.y1 >> 8);
         return engine->serializer->clipNormalizedBoxI(engine, clipOp, &boxI);
+      }
+
+      if (engine->ctx.clipType == RASTER_CLIP_BOXI)
+      {
+        // TODO:
       }
 
       BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;

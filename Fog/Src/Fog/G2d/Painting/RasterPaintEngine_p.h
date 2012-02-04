@@ -181,6 +181,21 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   FOG_INLINE void destroyPatternContext(RasterPattern* pc);
 
   // --------------------------------------------------------------------------
+  // [Helpers - Region]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Region& getTemporaryRegion()
+  {
+    size_t i;
+    for (i = 0; i < FOG_ARRAY_SIZE(tmpRegion) - 1; i++)
+    {
+      if (tmpRegion[i].isDetached())
+        break;
+    }
+    return tmpRegion[i];
+  }
+
+  // --------------------------------------------------------------------------
   // [Changed]
   // --------------------------------------------------------------------------
 
@@ -365,7 +380,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   // Temporary regions.
-  Region tmpRegion[2];
+  Region tmpRegion[4];
 };
 
 // ============================================================================

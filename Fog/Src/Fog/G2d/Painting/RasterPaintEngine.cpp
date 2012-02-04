@@ -3625,10 +3625,14 @@ _Default:
 
 static err_t FOG_CDECL RasterPaintEngine_filterStrokedShapeF(Painter* self, const FeBase* feBase, uint32_t shapeType, const void* shapeData)
 {
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 static err_t FOG_CDECL RasterPaintEngine_filterStrokedShapeD(Painter* self, const FeBase* feBase, uint32_t shapeType, const void* shapeData)
 {
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================

@@ -129,6 +129,8 @@ struct FOG_NO_EXPORT Rasterizer8
 
   FOG_INLINE void setClipRegion(const BoxI* data, size_t length)
   {
+    FOG_ASSERT(length > 0);
+
     _clipType = RASTER_CLIP_REGION;
     _clip.region.y0 = data[0].y0;
     _clip.region.y1 = data[length - 1].y1;
@@ -259,12 +261,24 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
   //! @brief Box to fill in 24.8 fixed point.
   BoxI _box24x8;
 
-  //! @brief Coverate-top.
-  uint16_t _ct[4];
-  //! @brief Coverage-inner.
-  uint16_t _ci[4];
-  //! @brief Coverage-bottom.
-  uint16_t _cb[4];
+  union
+  {
+    struct
+    {
+      //! @brief Coverate - top.
+      uint16_t _ct[4];
+      //! @brief Coverage - inner.
+      uint16_t _ci[4];
+      //! @brief Coverage - bottom.
+      uint16_t _cb[4];
+    };
+
+    struct
+    {
+      //! @brief Coverage - all-in-one.
+      uint16_t _coverage[12];
+    };
+  };
 };
 
 // ============================================================================

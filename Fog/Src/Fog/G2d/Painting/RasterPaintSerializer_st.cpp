@@ -1514,6 +1514,8 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_st(
   FOG_ASSERT((clipOp & CLIP_OP_STROKE) == 0);
   FOG_ASSERT(box->isValid());
 
+  
+
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }

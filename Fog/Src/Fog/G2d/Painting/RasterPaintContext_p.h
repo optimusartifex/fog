@@ -142,11 +142,11 @@ struct FOG_NO_EXPORT RasterContext
 
   union
   {
-    //! @brief The scanline container for solid spans (8-bit).
+    //! @brief The scanline container (8-bit).
     Static<RasterScanline8> scanline8;
 
     // TODO: 16-bit image processing.
-    // //! @brief The scanline container for solid spans (16-bit).
+    // //! @brief The scanline container (16-bit).
     // Static<RasterScanline16> scanline16;
   };
 

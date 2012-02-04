@@ -124,21 +124,19 @@ struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RasterSpan8* getFakeSpan() const
+  FOG_INLINE uint8_t* getMask() const
   {
-    return (RasterSpan8*)&_fakeSpan;
+    return _mask;
   }
 
   // --------------------------------------------------------------------------
   // [Begin / End]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint8_t* begin()
+  FOG_INLINE RasterSpan8* begin()
   {
-    FOG_ASSERT(_mask != NULL);
-
     _spanAllocator.clear();
-    return _mask;
+    return static_cast<RasterSpan8*>(&_fakeSpan);
   }
 
   FOG_INLINE RasterSpan8* end(RasterSpan8* currentSpan)

@@ -3653,7 +3653,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipRectF(Painter* self, uint32_t clipO
       engine->getFinalTransformF().mapBox(normBox, normBox);
     }
 
-    if (!BoxF::intersect(normBox, normBox, engine->getClipBoxF()))
+    if (!BoxF::intersect(normBox, normBox, clipBox))
       return ERR_OK;
 
     return engine->serializer->clipNormalizedBoxF(engine, clipOp, &normBox);
@@ -3689,7 +3689,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipRectD(Painter* self, uint32_t clipO
 
     engine->getFinalTransformD().mapBox(normBox, normBox);
 
-    if (!BoxD::intersect(normBox, normBox, engine->getClipBoxD()))
+    if (!BoxD::intersect(normBox, normBox, clipBox))
       return ERR_OK;
 
     return engine->serializer->clipNormalizedBoxD(engine, clipOp, &normBox);

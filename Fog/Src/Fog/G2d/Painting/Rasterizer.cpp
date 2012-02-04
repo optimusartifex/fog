@@ -186,6 +186,17 @@ enum CELL_OP
 static FOG_INLINE int upscale24x8(float  v) { return Math::ifloor(v * (float )256 + 0.5f); }
 static FOG_INLINE int upscale24x8(double v) { return Math::ifloor(v * (double)256 + 0.5 ); }
 
+#define ALLOC_SPAN(_Span_, _OnFail_) \
+  FOG_MACRO_BEGIN \
+    RasterSpan8* _newSpan = scanline->allocSpan(); \
+    if (FOG_IS_NULL(_newSpan)) \
+    { \
+      _OnFail_; \
+    } \
+    _Span_->_next = _newSpan; \
+    _Span_ = _newSpan; \
+  FOG_MACRO_END
+
 // ============================================================================
 // [Fog::RasterizerApi]
 // ============================================================================
@@ -296,9 +307,9 @@ static void FOG_CDECL BoxRasterizer8_init24x8(BoxRasterizer8* self, const BoxI* 
 static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_box(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* _scanline)
 {
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
   FOG_UNUSED(_scanline);
 
+  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
   const BoxI& box = self->_boxBounds;
 
   int y0 = box.y0;
@@ -329,87 +340,110 @@ static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_region(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
   BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
+  const BoxI& box = self->_boxBounds;
 
-  // TODO: Rasterizer.
-#if 0
-  y -= self->_boundingBox.y0;
+  int x0 = box.x0;
+  int x1 = box.x1;
 
-  FOG_ASSERT(self->_isFinalized);
-  FOG_ASSERT((uint)y < (uint)self->_boundingBox.y1);
+  int y0 = box.y0;
+  int y1 = box.y1;
 
-  RasterScanline8* scanline = self->_outputScanline;
+  const BoxI* cPtr = self->_clip.region.data;
+  const BoxI* cEnd = cPtr + self->_clip.region.length;
 
-  int x0 = self->xLeft;
-  int x1 = self->xRight;
+  // --------------------------------------------------------------------------
+  // [Prepare]
+  // --------------------------------------------------------------------------
 
-  // Clipping.
-  const BoxI* clipCur = clipBoxes;
-  const BoxI* clipEnd = clipBoxes + count;
-  if (FOG_UNLIKELY(clipCur == clipEnd)) return NULL;
-
-  // Current clip box start / end point (not part of clip span).
-  int clipX0;
-  int clipX1 = clipCur->x1;
-
-  // Advance clip (discard clip-boxes that can't intersect).
-  while (clipX1 <= x0)
+  // Skip boxes which do not intersect in vertical direction.
+  while (cPtr->y1 <= y0)
   {
-    if (++clipCur == clipEnd) return NULL;
-    clipX1 = clipCur->x1;
+    if (++cPtr == cEnd)
+      return;
   }
 
-  clipX0 = Math::max<int>(clipCur->x0, x0);
-  if (clipX0 > x1) return NULL;
+  if (cPtr->y0 >= y1)
+    return;
 
-  if (scanline->begin(self->_boundingBox.x0, self->_boundingBox.x1) != ERR_OK)
-    return NULL;
+  if (y0 < cPtr->y0)
+    y0 = cPtr->y0;
 
-  const uint32_t* covers = self->_ci;
-  if (FOG_UNLIKELY(y == 0))
-    covers = self->_ct;
-  else if (FOG_UNLIKELY(y == (shape->bounds.y1 - shape->bounds.y0)))
-    covers = self->_cb;
+  int yEnd = y1;
+  int yPos = y0;
 
-  if (clipX0 == x0)
-  {
-    clipX0++;
-    scanline->newA8Extra_buf(x0, clipX0)[0] = (uint16_t)covers[0];
-  }
+  uint32_t opacity = self->_opacity;
 
-  uint16_t midcover = covers[1];
-  for (;;)
-  {
-    if (clipX0 < x1)
+  filler->prepare(yPos);
+  RasterFiller::ProcessFunc process = filler->_process;
+
+  // --------------------------------------------------------------------------
+  // [Process]
+  // --------------------------------------------------------------------------
+
+  do {
+    // Skip clip boxes which do not intersect with the shape-box.
+    while (cPtr->x1 <= x0)
     {
-      scanline->lnkConstSpanOrMerge(clipX0, Math::min<int>(clipX1, x1), midcover);
-    }
-    if (clipX1 > x1)
-    {
-      scanline->lnkConstSpanOrMerge(x1, x1 + 1, covers[2]);
-      break;
+      if (++cPtr == cEnd)
+        return;
     }
 
-    if (++clipBoxes == clipEnd) break;
-    clipX0 = clipBoxes->x0;
-    if (clipX0 > x1) break;
-    clipX1 = clipBoxes->x1;
-  }
+    y0 = cPtr->y0;
+    y1 = cPtr->y1;
 
-  if (scanline->close() != ERR_OK) return NULL;
-#if defined(FOG_DEBUG_RASTERIZER)
-  Rasterizer_dumpSpans(y0, scanline->getSpans());
-#endif // FOG_DEBUG_RASTERIZER
-  return scanline->getSpans();
+    if (y0 >= yEnd)
+      return;
 
-#endif
+    // Build a scanline.
+    RasterSpan8* span = scanline->begin();
+
+    // We need to care about x0 in the first span. Another spans have to be
+    // inside of the painting box, so we need only to handle x1, which can be
+    // outside (also applies to x0 in case that one clip box completely subsumes
+    // the painting one).
+    ALLOC_SPAN(span, return);
+    span->setPositionAndType(Math::max<int>(x0, cPtr->x0), Math::min<int>(x1, cPtr->x1), RASTER_SPAN_C);
+    span->setConstMask(opacity);
+
+    for (;;)
+    {
+      if (++cPtr == cEnd)
+        break;
+
+      if (cPtr->y1 != y1)
+        break;
+
+      if (cPtr->x0 < x1)
+      {
+        ALLOC_SPAN(span, return);
+        span->setPositionAndType(cPtr->x0, Math::min<int>(x1, cPtr->x1), RASTER_SPAN_C);
+        span->setConstMask(opacity);
+      }
+    }
+
+    if (y1 > yEnd)
+      y1 = yEnd;
+
+    span = scanline->end(span);
+    if (span != NULL)
+    {
+      if (yPos != y0)
+        filler->_skip(filler, y0 - yPos);
+
+      do {
+        process(filler, span);
+      } while (++y0 != y1);
+    }
+
+    yPos = y1;
+  } while (cPtr != cEnd);
 }
 
 static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_mask(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
+  // TODO: BoxRasterizer32x0::ClipMask.
   BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
-
-  // TODO: Rasterizer.
 }
 
 // ============================================================================
@@ -429,14 +463,20 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_box(
   uint w = box.getWidth();
   uint i;
 
-  // Prepare.
+  // --------------------------------------------------------------------------
+  // [Prepare]
+  // --------------------------------------------------------------------------
+
   filler->prepare(y0);
   RasterFiller::ProcessFunc process = filler->_process;
 
   RasterSpan8 span[3];
   uint16_t mask[10];
 
-  // Process.
+  // --------------------------------------------------------------------------
+  // [Process]
+  // --------------------------------------------------------------------------
+
   if (w < 10)
   {
 #define SETUP_MASK(_Coverage_) \
@@ -2349,8 +2389,8 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
     // [Fetch]
     // ------------------------------------------------------------------------
 
-    mask = scanline->begin();
-    span = scanline->getFakeSpan();
+    span = scanline->begin();
+    mask = scanline->getMask();
 
     PathRasterizer8::Chunk* chunk = first;
     PathRasterizer8::Cell* cell = chunk->cells;
@@ -2384,8 +2424,6 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
         span->setX0AndType(x, RASTER_SPAN_AX_EXTRA);
         span->setVariantMask(mask);
       }
-
-      // scanline->lnkA8Extra(x);
 
 _Continue:
       x += i;

@@ -1361,6 +1361,18 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterShapeF(this, filter.getFeData(), SHAPE_TYPE_PATH, &p); }
   FOG_INLINE err_t filterPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterShapeD(this, filter.getFeData(), SHAPE_TYPE_PATH, &p); }
 
+  FOG_INLINE err_t filterStrokedShape(const FeBase& feBase, const ShapeF& shape) { return _vtable->filterStrokedShapeF(this, &feBase, shape.getType(), shape.getData()); }
+  FOG_INLINE err_t filterStrokedShape(const FeBase& feBase, const ShapeD& shape) { return _vtable->filterStrokedShapeD(this, &feBase, shape.getType(), shape.getData()); }
+
+  FOG_INLINE err_t filterStrokedShape(const ImageFilter& filter, const ShapeF& shape) { return _vtable->filterStrokedShapeF(this, filter.getFeData(), shape.getType(), shape.getData()); }
+  FOG_INLINE err_t filterStrokedShape(const ImageFilter& filter, const ShapeD& shape) { return _vtable->filterStrokedShapeD(this, filter.getFeData(), shape.getType(), shape.getData()); }
+
+  FOG_INLINE err_t filterStrokedPath(const FeBase& feBase, const PathF& p) { return _vtable->filterStrokedShapeF(this, &feBase, SHAPE_TYPE_PATH, &p); }
+  FOG_INLINE err_t filterStrokedPath(const FeBase& feBase, const PathD& p) { return _vtable->filterStrokedShapeD(this, &feBase, SHAPE_TYPE_PATH, &p); }
+
+  FOG_INLINE err_t filterStrokedPath(const ImageFilter& filter, const PathF& p) { return _vtable->filterStrokedShapeF(this, filter.getFeData(), SHAPE_TYPE_PATH, &p); }
+  FOG_INLINE err_t filterStrokedPath(const ImageFilter& filter, const PathD& p) { return _vtable->filterStrokedShapeD(this, filter.getFeData(), SHAPE_TYPE_PATH, &p); }
+
   // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
@@ -1411,6 +1423,12 @@ struct FOG_NO_EXPORT Painter
 
   FOG_INLINE err_t clipPath(uint32_t clipOp, const PathF& path) { return _vtable->clipShapeF(this, clipOp, SHAPE_TYPE_PATH, &path); }
   FOG_INLINE err_t clipPath(uint32_t clipOp, const PathD& path) { return _vtable->clipShapeD(this, clipOp, SHAPE_TYPE_PATH, &path); }
+
+  FOG_INLINE err_t clipStrokedShape(uint32_t clipOp, const ShapeF& shape) { return _vtable->clipStrokedShapeF(this, clipOp, shape.getType(), shape.getData()); }
+  FOG_INLINE err_t clipStrokedShape(uint32_t clipOp, const ShapeD& shape) { return _vtable->clipStrokedShapeD(this, clipOp, shape.getType(), shape.getData()); }
+
+  FOG_INLINE err_t clipStrokedPath(uint32_t clipOp, const PathF& path) { return _vtable->clipStrokedShapeF(this, clipOp, SHAPE_TYPE_PATH, &path); }
+  FOG_INLINE err_t clipStrokedPath(uint32_t clipOp, const PathD& path) { return _vtable->clipStrokedShapeD(this, clipOp, SHAPE_TYPE_PATH, &path); }
 
   FOG_INLINE err_t clipText(uint32_t clipOp, const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->clipTextAtI(this, clipOp, &p, &text, &font, clip); }
   FOG_INLINE err_t clipText(uint32_t clipOp, const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->clipTextAtF(this, clipOp, &p, &text, &font, clip); }

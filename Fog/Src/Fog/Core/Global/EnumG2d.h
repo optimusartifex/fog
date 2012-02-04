@@ -54,19 +54,16 @@ enum AXIS
 // [Fog::CLIP_OP]
 // ============================================================================
 
-//! @brief Clip operation used by @c Painter::clip() and PaintEngine::clip()
-//! methods.
+//! @brief Clip operation.
 enum CLIP_OP
 {
-  //! @brief Replace the current clipping area by the filled shape.
-  CLIP_OP_REPLACE = 0x0,
-  //! @brief Intersect the current clipping area by the filled shape.
-  CLIP_OP_INTERSECT = 0x1,
-  //! @brief Stroke instead of fill (invalid when clipping to masks).
-  CLIP_OP_STROKE = 0x2,
+  //! @brief Replace the current clipping area.
+  CLIP_OP_REPLACE = 0,
+  //! @brief Intersect the current clipping area.
+  CLIP_OP_INTERSECT = 1,
 
   //! @brief Count of clip operators.
-  CLIP_OP_COUNT = 4
+  CLIP_OP_COUNT = 2
 };
 
 // ============================================================================

@@ -35,9 +35,8 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   typedef err_t (FOG_FASTCALL *FillAll)(RasterPaintEngine* engine);
   typedef err_t (FOG_FASTCALL *FillPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *FillPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *StrokeAndFillPathF)(RasterPaintEngine* engine, const PathF* path);
-  typedef err_t (FOG_FASTCALL *StrokeAndFillPathD)(RasterPaintEngine* engine, const PathD* path);
-
+  typedef err_t (FOG_FASTCALL *FillStrokedPathF)(RasterPaintEngine* engine, const PathF* path);
+  typedef err_t (FOG_FASTCALL *FillStrokedPathD)(RasterPaintEngine* engine, const PathD* path);
   typedef err_t (FOG_FASTCALL *FillNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
   typedef err_t (FOG_FASTCALL *FillNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
   typedef err_t (FOG_FASTCALL *FillNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
@@ -49,14 +48,17 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // --------------------------------------------------------------------------
 
   FillAll fillAll;
+
   FillPathF fillPathF;
   FillPathD fillPathD;
-  StrokeAndFillPathF strokeAndFillPathF;
-  StrokeAndFillPathD strokeAndFillPathD;
+
+  FillStrokedPathF fillStrokedPathF;
+  FillStrokedPathD fillStrokedPathD;
 
   FillNormalizedBoxI fillNormalizedBoxI;
   FillNormalizedBoxF fillNormalizedBoxF;
   FillNormalizedBoxD fillNormalizedBoxD;
+
   FillNormalizedPathF fillNormalizedPathF;
   FillNormalizedPathD fillNormalizedPathD;
 
@@ -74,6 +76,7 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // --------------------------------------------------------------------------
 
   BlitImageD blitImageD;
+
   BlitNormalizedImageA blitNormalizedImageA;
   BlitNormalizedImageI blitNormalizedImageI;
   BlitNormalizedImageD blitNormalizedImageD;
@@ -82,13 +85,14 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // [Types - Filter]
   // --------------------------------------------------------------------------
 
+  typedef err_t (FOG_FASTCALL *FilterAll)(RasterPaintEngine* engine, const FeBase* feBase);
   typedef err_t (FOG_FASTCALL *FilterPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *FilterPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
-
+  typedef err_t (FOG_FASTCALL *FilterStrokedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path);
+  typedef err_t (FOG_FASTCALL *FilterStrokedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path);
   typedef err_t (FOG_FASTCALL *FilterNormalizedBoxI)(RasterPaintEngine* engine, const FeBase* feBase, const BoxI* box);
   typedef err_t (FOG_FASTCALL *FilterNormalizedBoxF)(RasterPaintEngine* engine, const FeBase* feBase, const BoxF* box);
   typedef err_t (FOG_FASTCALL *FilterNormalizedBoxD)(RasterPaintEngine* engine, const FeBase* feBase, const BoxD* box);
-
   typedef err_t (FOG_FASTCALL *FilterNormalizedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *FilterNormalizedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
 
@@ -96,8 +100,13 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // [Funcs - Filter]
   // --------------------------------------------------------------------------
 
+  FilterAll filterAll;
+
   FilterPathF filterPathF;
   FilterPathD filterPathD;
+
+  FilterStrokedPathF filterStrokedPathF;
+  FilterStrokedPathD filterStrokedPathD;
 
   FilterNormalizedBoxI filterNormalizedBoxI;
   FilterNormalizedBoxF filterNormalizedBoxF;
@@ -113,9 +122,8 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   typedef err_t (FOG_FASTCALL *ClipAll)(RasterPaintEngine* engine);
   typedef err_t (FOG_FASTCALL *ClipPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *ClipPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *StrokeAndClipPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path);
-  typedef err_t (FOG_FASTCALL *StrokeAndClipPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path);
-
+  typedef err_t (FOG_FASTCALL *ClipStrokedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path);
+  typedef err_t (FOG_FASTCALL *ClipStrokedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path);
   typedef err_t (FOG_FASTCALL *ClipNormalizedBoxI)(RasterPaintEngine* engine, uint32_t clipOp, const BoxI* box);
   typedef err_t (FOG_FASTCALL *ClipNormalizedBoxF)(RasterPaintEngine* engine, uint32_t clipOp, const BoxF* box);
   typedef err_t (FOG_FASTCALL *ClipNormalizedBoxD)(RasterPaintEngine* engine, uint32_t clipOp, const BoxD* box);
@@ -127,10 +135,12 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // --------------------------------------------------------------------------
 
   ClipAll clipAll;
+
   ClipPathF clipPathF;
   ClipPathD clipPathD;
-  StrokeAndClipPathF strokeAndClipPathF;
-  StrokeAndClipPathD strokeAndClipPathD;
+
+  ClipStrokedPathF clipStrokedPathF;
+  ClipStrokedPathD clipStrokedPathD;
 
   ClipNormalizedBoxI clipNormalizedBoxI;
   ClipNormalizedBoxF clipNormalizedBoxF;

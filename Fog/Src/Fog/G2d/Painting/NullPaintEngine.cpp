@@ -501,6 +501,18 @@ static err_t FOG_CDECL MyPaintEngine_filterShapeD(Painter* self, const FeBase* f
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
+static err_t FOG_CDECL MyPaintEngine_filterStrokedShapeF(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_filterStrokedShapeD(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
 // ============================================================================
 // [Fog::MyPaintEngine - Clip]
 // ============================================================================
@@ -542,6 +554,18 @@ static err_t FOG_CDECL MyPaintEngine_clipShapeF(Painter* self, uint32_t clipOp, 
 }
 
 static err_t FOG_CDECL MyPaintEngine_clipShapeD(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_clipStrokedShapeF(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
+{
+  MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_clipStrokedShapeD(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData)
 {
   MyPaintEngine* engine = reinterpret_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -720,7 +744,6 @@ static void MyPaintEngine_init()
   v->setTransformD = MyPaintEngine_setTransformD;
 
   v->applyTransform = MyPaintEngine_applyTransform;
-
   v->resetTransform = MyPaintEngine_resetTransform;
 
   // --------------------------------------------------------------------------
@@ -810,12 +833,16 @@ static void MyPaintEngine_init()
   // --------------------------------------------------------------------------
 
   v->filterAll = MyPaintEngine_filterAll;
+
   v->filterRectI = MyPaintEngine_filterRectI;
   v->filterRectF = MyPaintEngine_filterRectF;
   v->filterRectD = MyPaintEngine_filterRectD;
 
   v->filterShapeF = MyPaintEngine_filterShapeF;
   v->filterShapeD = MyPaintEngine_filterShapeD;
+
+  v->filterStrokedShapeF = MyPaintEngine_filterStrokedShapeF;
+  v->filterStrokedShapeD = MyPaintEngine_filterStrokedShapeD;
 
   // --------------------------------------------------------------------------
   // [Clip]
@@ -830,6 +857,9 @@ static void MyPaintEngine_init()
 
   v->clipShapeF = MyPaintEngine_clipShapeF;
   v->clipShapeD = MyPaintEngine_clipShapeD;
+
+  v->clipStrokedShapeF = MyPaintEngine_clipStrokedShapeF;
+  v->clipStrokedShapeD = MyPaintEngine_clipStrokedShapeD;
 
   v->clipTextAtI = MyPaintEngine_clipTextAtI;
   v->clipTextAtF = MyPaintEngine_clipTextAtF;
@@ -1381,6 +1411,9 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v->filterShapeF = (PaintEngineVTable::FilterShapeF)NullPaintEngine_filterShape;
   v->filterShapeD = (PaintEngineVTable::FilterShapeD)NullPaintEngine_filterShape;
 
+  v->filterStrokedShapeF = (PaintEngineVTable::FilterStrokedShapeF)NullPaintEngine_filterShape;
+  v->filterStrokedShapeD = (PaintEngineVTable::FilterStrokedShapeD)NullPaintEngine_filterShape;
+
   // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
@@ -1394,6 +1427,9 @@ FOG_NO_EXPORT void NullPaintEngine_init()
 
   v->clipShapeF = (PaintEngineVTable::ClipShapeF)NullPaintEngine_clipShape;
   v->clipShapeD = (PaintEngineVTable::ClipShapeD)NullPaintEngine_clipShape;
+
+  v->clipStrokedShapeF = (PaintEngineVTable::ClipStrokedShapeF)NullPaintEngine_clipShape;
+  v->clipStrokedShapeD = (PaintEngineVTable::ClipStrokedShapeD)NullPaintEngine_clipShape;
 
   v->clipTextAtI = (PaintEngineVTable::ClipTextAtI)NullPaintEngine_clipText;
   v->clipTextAtF = (PaintEngineVTable::ClipTextAtF)NullPaintEngine_clipText;

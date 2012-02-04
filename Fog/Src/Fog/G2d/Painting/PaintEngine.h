@@ -289,6 +289,9 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *FilterShapeF)(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *FilterShapeD)(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData);
 
+  typedef err_t (FOG_CDECL *FilterStrokedShapeF)(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData);
+  typedef err_t (FOG_CDECL *FilterStrokedShapeD)(Painter* self, const FeBase* fe, uint32_t shapeType, const void* shapeData);
+
   // --------------------------------------------------------------------------
   // [Funcs - Filter]
   // --------------------------------------------------------------------------
@@ -301,6 +304,9 @@ struct FOG_NO_EXPORT PaintEngineVTable
 
   FilterShapeF filterShapeF;
   FilterShapeD filterShapeD;
+
+  FilterShapeF filterStrokedShapeF;
+  FilterShapeD filterStrokedShapeD;
 
   // --------------------------------------------------------------------------
   // [Types - Clip]
@@ -315,6 +321,9 @@ struct FOG_NO_EXPORT PaintEngineVTable
 
   typedef err_t (FOG_CDECL *ClipShapeF)(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *ClipShapeD)(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
+
+  typedef err_t (FOG_CDECL *ClipStrokedShapeF)(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
+  typedef err_t (FOG_CDECL *ClipStrokedShapeD)(Painter* self, uint32_t clipOp, uint32_t shapeType, const void* shapeData);
 
   typedef err_t (FOG_CDECL *ClipTextAtI)(Painter* self, uint32_t clipOp, const PointI* p, const StringW* text, const Font* font, const RectI* clip);
   typedef err_t (FOG_CDECL *ClipTextAtF)(Painter* self, uint32_t clipOp, const PointF* p, const StringW* text, const Font* font, const RectF* clip);
@@ -349,6 +358,9 @@ struct FOG_NO_EXPORT PaintEngineVTable
 
   ClipShapeF clipShapeF;
   ClipShapeD clipShapeD;
+
+  ClipShapeF clipStrokedShapeF;
+  ClipShapeD clipStrokedShapeD;
 
   ClipTextAtI clipTextAtI;
   ClipTextAtF clipTextAtF;

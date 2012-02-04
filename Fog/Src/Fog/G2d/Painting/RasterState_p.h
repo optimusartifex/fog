@@ -135,10 +135,8 @@ struct FOG_NO_EXPORT RasterState
 
   //! @brief The clip-box (int).
   BoxI clipBoxI;
-
   //! @brief The clip-box (float).
   BoxF clipBoxF;
-
   //! @brief The clip-box (double).
   BoxD clipBoxD;
 

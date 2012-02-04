@@ -1036,6 +1036,20 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterPathD_st(
   }
 }
 
+static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathF_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const PathF* path)
+{
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathD_st(
+  RasterPaintEngine* engine, const FeBase* feBase, const PathD* path)
+{
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
 // ============================================================================
 // [Fog::RasterPaintSerializer - FilterRasterizerShape]
 // ============================================================================
@@ -1385,8 +1399,14 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipAll_st(
   if ((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0)
     engine->saveClipping();
 
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  engine->masterFlags |= RASTER_NO_PAINT_USER_CLIP;
+
+  engine->ctx.clipBoxI.reset();
+  engine->ctx.clipRegion.clear();
+  engine->stroker.f->_clipBox.reset();
+  engine->stroker.d->_clipBox.reset();
+
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -1511,8 +1531,68 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_st(
   if ((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0)
     engine->saveClipping();
 
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  switch (clipOp)
+  {
+    case CLIP_OP_REPLACE:
+      switch (engine->ctx.clipType)
+      {
+        case RASTER_CLIP_BOXI:
+        case RASTER_CLIP_BOXF:
+_ReplaceClip:
+        {
+          engine->masterFlags &= ~RASTER_NO_PAINT_USER_CLIP;
+
+          engine->ctx.clipType = RASTER_CLIP_BOXI;
+          engine->ctx.clipBoxI = *box;
+          engine->stroker.f->_clipBox.setBox(*box);
+          engine->stroker.d->_clipBox.setBox(*box);
+
+          return ERR_OK;
+        }
+
+        case RASTER_CLIP_REGION:
+        {
+          engine->ctx.clipRegion.clear();
+          goto _ReplaceClip;
+        }
+
+        case RASTER_CLIP_MASK:
+        {
+          // TODO: RasterPaintEngine - clip-mask.
+          goto _ReplaceClip;
+        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
+      }
+      break;
+
+    case CLIP_OP_INTERSECT:
+      switch (engine->ctx.clipType)
+      {
+        // TODO:
+        case RASTER_CLIP_BOXI:
+          break;
+
+        // TODO:
+        case RASTER_CLIP_BOXF:
+          break;
+
+        // TODO:
+        case RASTER_CLIP_REGION:
+          break;
+
+        case RASTER_CLIP_MASK:
+          // TODO: RasterPaintEngine - clip-mask.
+          break;
+      }
+      break;
+    
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  return ERR_RT_INVALID_STATE;
 }
 
 static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_st(
@@ -1657,6 +1737,9 @@ void FOG_NO_EXPORT RasterPaintSerializer_init_st(void)
   s->filterPathF = RasterPaintSerializer_filterPathF_st;
   s->filterPathD = RasterPaintSerializer_filterPathD_st;
 
+  s->filterStrokedPathF = RasterPaintSerializer_filterStrokedPathF_st;
+  s->filterStrokedPathD = RasterPaintSerializer_filterStrokedPathD_st;
+
   s->filterNormalizedBoxI = RasterPaintSerializer_filterNormalizedBoxI_st;
   s->filterNormalizedBoxF = RasterPaintSerializer_filterNormalizedBoxF_st;
   s->filterNormalizedBoxD = RasterPaintSerializer_filterNormalizedBoxD_st;
@@ -1668,8 +1751,10 @@ void FOG_NO_EXPORT RasterPaintSerializer_init_st(void)
   // --------------------------------------------------------------------------
 
   s->clipAll = RasterPaintSerializer_clipAll_st;
+
   s->clipPathF = RasterPaintSerializer_clipPathF;
   s->clipPathD = RasterPaintSerializer_clipPathD;
+
   s->clipStrokedPathF = RasterPaintSerializer_clipStrokedPathF;
   s->clipStrokedPathD = RasterPaintSerializer_clipStrokedPathD;
 

@@ -60,9 +60,9 @@ static const uint32_t RasterPaintEngine_clipAllFlags[CLIP_OP_COUNT] =
   // 1 - CLIP_OP_INTERSECT
   RASTER_NO_PAINT_META_REGION    |
   RASTER_NO_PAINT_META_TRANSFORM |
-  RASTER_NO_PAINT_USER_REGION    |
-  RASTER_NO_PAINT_USER_TRANSFORM |
-  RASTER_NO_PAINT_USER_MASK      
+  RASTER_NO_PAINT_USER_CLIP      |
+  RASTER_NO_PAINT_USER_MASK      |
+  RASTER_NO_PAINT_USER_TRANSFORM
 };
 // ${CLIP_OP:END}
 
@@ -3643,7 +3643,9 @@ static err_t FOG_CDECL RasterPaintEngine_clipRectI(Painter* self, uint32_t clipO
 
   if (engine->isIntegralTransform())
   {
-    const BoxI& clipBox = (clipOp == CLIP_OP_REPLACE) ? engine->metaClipBoxI : engine->ctx.clipBoxI;
+    const BoxI& clipBox = (clipOp == CLIP_OP_REPLACE) 
+      ? engine->metaClipBoxI
+      : engine->ctx.clipBoxI;
     BoxI normBox(UNINITIALIZED);
 
     if (engine->doIntegralTransformAndClip(normBox, *r, clipBox))
@@ -4372,20 +4374,18 @@ void RasterPaintEngine::setupDefaultClip()
   //integralTransform._tx -= finalOrigin.x;
   //integralTransform._ty -= finalOrigin.y;
 
+  ctx.clipType = RASTER_CLIP_BOXI;
+  ctx.clipRegion.clear();
+  ctx.clipBoxI = bounds;
+  stroker.f->_clipBox.setBox(bounds);
+  stroker.d->_clipBox.setBox(bounds);
+
   // Clear the regions and origins and set work and final region to the bounds.
   metaOrigin.reset();
   metaRegion = bounds;
-
-  // TODO:?
-  ctx.clipType = RASTER_CLIP_BOXI;
-  ctx.clipRegion = metaRegion;
-  ctx.clipBoxI = bounds;
-
-  stroker.f->_clipBox = bounds;
-  stroker.d->_clipBox = bounds;
-
-  // TODO:
-  //ctx.state |= RASTER_STATE_PENDING_CLIP_REGION;
+  metaClipBoxI = bounds;
+  metaClipBoxF = bounds;
+  metaClipBoxD = bounds;
 }
 
 // ============================================================================

@@ -637,15 +637,16 @@ PathRasterizer8::PathRasterizer8() :
 
   // Clear rows.
   _rowsCapacity = 0;
-  _rows = NULL;
+  _rowsStorage = NULL;
+  _rowsAdjusted = NULL;
 
   reset();
 }
 
 PathRasterizer8::~PathRasterizer8()
 {
-  if (_rows != NULL)
-    MemMgr::free(_rows);
+  if (_rowsStorage != NULL)
+    MemMgr::free(_rowsStorage);
 }
 
 // ============================================================================
@@ -690,31 +691,31 @@ err_t PathRasterizer8::init()
   _isValid = false;
   _isFinalized = false;
 
-  _size.set(_sceneBox.getWidth(), _sceneBox.getHeight());
-  _size24x8.set(_size.w << A8_SHIFT, _size.h << A8_SHIFT);
+  _sceneBox24x8.setBox(_sceneBox.x0 << 8, _sceneBox.y0 << 8, _sceneBox.x1 << 8, _sceneBox.y1 << 8);
 
-  _offsetF.set(0, -_sceneBox.y0);
-  _offsetD.set(0, -_sceneBox.y0);
+  _offsetF.reset();
+  _offsetD.reset();
   uint i = (uint)_sceneBox.getHeight() + 1;
 
   if (_rowsCapacity < i)
   {
-    if (_rows != NULL)
-      MemMgr::free(_rows);
+    if (_rowsStorage != NULL)
+      MemMgr::free(_rowsStorage);
 
     // Align...
     _rowsCapacity = (i + 255U) & ~255U;
-    _rows = reinterpret_cast<Row*>(MemMgr::alloc(_rowsCapacity * sizeof(Row)));
+    _rowsStorage = reinterpret_cast<Row*>(MemMgr::alloc(_rowsCapacity * sizeof(Row)));
+    _rowsAdjusted = NULL;
 
-    if (_rows == NULL)
+    if (_rowsStorage == NULL)
     {
       _rowsCapacity = 0;
       setError(ERR_RT_OUT_OF_MEMORY);
-      goto _End;
+      return _error;
     }
   }
 
-_End:
+  _rowsAdjusted = _rowsStorage - _sceneBox.y0;
   return _error;
 }
 
@@ -763,8 +764,8 @@ _Start:
     if (PathCmd::isMoveTo(c))
     {
 _MoveTo:
-      x0 = startX0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].x + offset.x), 0, self->_size24x8.w);
-      y0 = startY0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].y + offset.y), 0, self->_size24x8.h);
+      x0 = startX0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].x + offset.x), self->_sceneBox24x8.x0, self->_sceneBox24x8.x1);
+      y0 = startY0 = Math::bound<Fixed24x8>(upscale24x8(srcPts[-1].y + offset.y), self->_sceneBox24x8.y0, self->_sceneBox24x8.y1);
       break;
     }
   }
@@ -781,8 +782,8 @@ _MoveTo:
 
     if (PathCmd::isLineTo(c))
     {
-      Fixed24x8 x1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].x + offset.x), 0, self->_size24x8.w);
-      Fixed24x8 y1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].y + offset.y), 0, self->_size24x8.h);
+      Fixed24x8 x1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].x + offset.x), self->_sceneBox24x8.x0, self->_sceneBox24x8.x1);
+      Fixed24x8 y1 = Math::bound<Fixed24x8>(upscale24x8(srcPts[0].y + offset.y), self->_sceneBox24x8.y0, self->_sceneBox24x8.y1);
 
       if ((x0 != x1) | (y0 != y1) && !PathRasterizer8_renderLine<int>(self, x0, y0, x1, y1))
         return;
@@ -852,8 +853,8 @@ _MoveTo:
         }
 
         // LineTo.
-        Fixed24x8 x1 = Math::bound<Fixed24x8>(curve[0].x, 0, self->_size24x8.w);
-        Fixed24x8 y1 = Math::bound<Fixed24x8>(curve[0].y, 0, self->_size24x8.h);
+        Fixed24x8 x1 = Math::bound<Fixed24x8>(curve[0].x, self->_sceneBox24x8.x0, self->_sceneBox24x8.x1);
+        Fixed24x8 y1 = Math::bound<Fixed24x8>(curve[0].y, self->_sceneBox24x8.y0, self->_sceneBox24x8.y1);
 
         if (!PathRasterizer8_renderLine<int>(self, x0, y0, x1, y1))
           return;
@@ -966,8 +967,8 @@ _MoveTo:
         }
 
         {
-          Fixed24x8 x1 = Math::bound<Fixed24x8>(curve[0].x, 0, self->_size24x8.w);
-          Fixed24x8 y1 = Math::bound<Fixed24x8>(curve[0].y, 0, self->_size24x8.h);
+          Fixed24x8 x1 = Math::bound<Fixed24x8>(curve[0].x, self->_sceneBox24x8.x0, self->_sceneBox24x8.x1);
+          Fixed24x8 y1 = Math::bound<Fixed24x8>(curve[0].y, self->_sceneBox24x8.y0, self->_sceneBox24x8.y1);
 
           if (!PathRasterizer8_renderLine<int>(self, x0, y0, x1, y1))
             return;
@@ -1212,7 +1213,7 @@ void PathRasterizer8::addBox(const BoxD& box)
           if (_X_ >= _chunk->x0) \
           { \
 _Name_##_Add_One_Merge: \
-            LOG_CELL("Add_One", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+            LOG_CELL("Add_One", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
             _chunk->cells[_X_ - _chunk->x0].add(_Cover_, _Area_); \
             goto _Name_##_Add_One_End; \
           } \
@@ -1242,7 +1243,7 @@ _Name_##_Add_One_Merge: \
     _chunk->prev = _cNew; \
     \
 _Name_##_Add_One_Set: \
-    LOG_CELL("Add_One", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+    LOG_CELL("Add_One", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
     _cNew->cells[0].set(_Cover_, _Area_); \
     \
 _Name_##_Add_One_End: \
@@ -1273,12 +1274,12 @@ _Name_##_Add_One_End: \
       \
       _Row_->first = _chunk; \
       \
-      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
       _chunk->cells[0].set(_Cover_, _Area_); \
       \
       _Advance_ \
       \
-      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
       _chunk->cells[1].set(_Cover_, _Area_); \
       \
       goto _Name_##_Add_Two_End; \
@@ -1336,7 +1337,7 @@ _Name_##_Add_One_End: \
           if (_X_ >= _chunk->x0) \
           { \
 _Name_##_Add_Two_Merge: \
-            LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+            LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
             _chunk->cells[_X_ - _chunk->x0].add(_Cover_, _Area_); \
             \
             _Advance_ \
@@ -1344,7 +1345,7 @@ _Name_##_Add_Two_Merge: \
             if (_X_ < _chunk->x1) \
             { \
 _Name_##_Add_Two_Merge_Second: \
-              LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+              LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
               _chunk->cells[_X_ - _chunk->x0].add(_Cover_, _Area_); \
               goto _Name_##_Add_Two_End; \
             } \
@@ -1362,7 +1363,7 @@ _Name_##_Add_Two_Merge_Second: \
             _cLast->next = _cNew; \
             _chunk->prev = _cNew; \
             \
-            LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+            LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
             _cNew->cells[0].set(_Cover_, _Area_); \
             goto _Name_##_Add_Two_End; \
           } \
@@ -1395,7 +1396,7 @@ _Name_##_Add_Two_Merge_Second: \
     _chunk->prev = _cNew; \
     \
 _Name_##_Add_Two_Set: \
-    LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+    LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
     _cNew->cells[0].set(_Cover_, _Area_); \
     \
     _Advance_ \
@@ -1404,7 +1405,7 @@ _Name_##_Add_Two_Set: \
     { \
       FOG_ASSERT(_cNew->x1 - _cNew->x0 == 2); \
       \
-      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
       _cNew->cells[1].set(_Cover_, _Area_); \
     } \
     else \
@@ -1412,7 +1413,7 @@ _Name_##_Add_Two_Set: \
       FOG_ASSERT(_cNew->next == _chunk); \
       FOG_ASSERT(_cNew->x1 <= _chunk->x0); \
       \
-      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+      LOG_CELL("Add_Two", _X_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
       _chunk->cells[0].add(_Cover_, _Area_); \
     } \
     \
@@ -1623,7 +1624,7 @@ _Name_##_Add_N_Fill: \
           { \
             for (;;) \
             { \
-              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
               _cell->set(_Cover_, _Area_); \
               _cell++; \
               \
@@ -1639,7 +1640,7 @@ _Name_##_Add_N_Fill: \
           \
           _Last_ \
           \
-          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
           _cell->set(_Cover_, _Area_); \
           break; \
         \
@@ -1648,7 +1649,7 @@ _Name_##_Add_N_Fill: \
           { \
             for (;;) \
             { \
-              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), -(_Cover_), -(_Area_)); \
+              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), -(_Cover_), -(_Area_)); \
               _cell->set(-(_Cover_), -(_Area_)); \
               _cell++; \
               \
@@ -1664,7 +1665,7 @@ _Name_##_Add_N_Fill: \
           \
           _Last_ \
           \
-          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), -(_Cover_), -(_Area_)); \
+          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), -(_Cover_), -(_Area_)); \
           _cell->set(-(_Cover_), -(_Area_)); \
           break; \
         \
@@ -1675,7 +1676,7 @@ _Name_##_Add_N_Fill: \
           { \
             for (;;) \
             { \
-              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
               _cell->add(_Cover_, _Area_); \
               _cell++; \
               \
@@ -1691,7 +1692,7 @@ _Name_##_Add_N_Fill: \
           \
           _Last_ \
           \
-          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
           _cell->add(_Cover_, _Area_); \
           break; \
         \
@@ -1702,7 +1703,7 @@ _Name_##_Add_N_Fill: \
           { \
             for (;;) \
             { \
-              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+              LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
               _cell->sub(_Cover_, _Area_); \
               _cell++; \
               \
@@ -1718,7 +1719,7 @@ _Name_##_Add_N_Fill: \
           \
           _Last_ \
           \
-          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rows), _Cover_, _Area_); \
+          LOG_CELL("Add_N", _X0_, (int)(_Row_ - self->_rowsAdjusted), _Cover_, _Area_); \
           _cell->sub(_Cover_, _Area_); \
           break; \
         \
@@ -1811,8 +1812,8 @@ static bool PathRasterizer8_renderLine(PathRasterizer8* self, FixedT x0, FixedT 
   //  - 'j' - Used for next loop.
 
   // Prepare the current and end row pointers.
-  PathRasterizer8::Row* rPtr = self->_rows;
-  PathRasterizer8::Row* rEnd = self->_rows;
+  PathRasterizer8::Row* rPtr = self->_rowsAdjusted;
+  PathRasterizer8::Row* rEnd = self->_rowsAdjusted;
 
   // --------------------------------------------------------------------------
   // [Bounding-Box]
@@ -2353,7 +2354,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
   int y0 = self->_boundingBox.y0;
   int y1 = self->_boundingBox.y1;
 
-  PathRasterizer8::Row* rows = self->_rows - self->_sceneBox.y0 + y0;
+  PathRasterizer8::Row* rows = self->_rowsAdjusted + y0;
   int xEnd = self->_sceneBox.x1;
 
   filler->prepare(y0);
@@ -2625,7 +2626,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_region(
   int y0 = self->_boundingBox.y0;
   int y1 = self->_boundingBox.y1;
 
-  void** rows = self->_rows - self->_sceneBox.y0;
+  void** rows = self->_rowsAdjusted;
   const BoxI* rectCur = self->_clip.region.data;
   const BoxI* rectEnd = rectCur + self->_clip.region.length;
 
@@ -2873,7 +2874,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_mask(
   if (y0 >= y1)
     return;
 
-  void** rows = self->_rows - self->_sceneBox.y0;
+  void** rows = self->_rowsAdjusted - self->_sceneBox.y0;
   const RasterSpan8** mrows = self->_clip.mask.spans - self->_clip.mask.y0;
 
   filler->prepare(y0);
@@ -3439,11 +3440,10 @@ err_t PathRasterizer8::finalize()
   if (_error != ERR_OK || _isFinalized)
     return _error;
 
+  // If no shape has been added, then the output is not valid.
   if (_boundingBox.y0 == -1)
     goto _NotValid;
 
-  // Translate bounding box to match _sceneBox.
-  _boundingBox.translate(0, _sceneBox.y0);
   // Normalize bounding box to our standard, x1/y1 coordinates are outside.
   _boundingBox.x1++;
   _boundingBox.y1++;

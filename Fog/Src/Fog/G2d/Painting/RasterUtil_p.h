@@ -94,7 +94,7 @@ static FOG_INLINE uint32_t getCompositeCompatVBlitId(uint32_t dstFormat, uint32_
 #if defined(FOG_DEBUG)
 // Check whether all spans are inside screen.
 template<typename SpanT>
-static FOG_INLINE void validateSpans(const SpanT* span, int screenX0, int screenX1)
+static void validateSpans(const SpanT* span, int screenX0, int screenX1)
 {
   while (span != NULL)
   {

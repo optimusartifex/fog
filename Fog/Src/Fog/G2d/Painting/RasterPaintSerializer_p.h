@@ -100,8 +100,6 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // [Funcs - Filter]
   // --------------------------------------------------------------------------
 
-  FilterAll filterAll;
-
   FilterPathF filterPathF;
   FilterPathD filterPathD;
 

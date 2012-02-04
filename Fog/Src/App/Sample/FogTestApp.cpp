@@ -68,7 +68,7 @@ void AppWindow::onPaint(Painter* _p)
 
   p.setSource(Argb32(0xFF000000));
   //p.fillRect(100, 100, 100, 100);
-  p.fillCircle(CircleF(320.0f, 240.0f, 85.0f));
+  //p.fillCircle(CircleF(320.0f, 240.0f, 85.0f));
 
   PathF path;
   Font font;
@@ -95,15 +95,16 @@ void AppWindow::onPaint(Painter* _p)
   p.filterPath(feBlur, path);
 */
 
+  p.setCompositingOperator(COMPOSITE_SRC_OVER);
+
   p.save();
+  p.clipRect(CLIP_OP_REPLACE, RectI(200, 200, 200, 200));
   p.setSource(Argb32(0xFFFF0000));
-  p.clipRect(CLIP_OP_INTERSECT, RectI(200, 200, 200, 200));
-  p.fillRect(RectI(100, 100, 400, 400));
+  p.fillCircle(CircleF(300.0f, 300.0f, 110.0f));
+  //p.fillRect(RectI(100, 100, 400, 400));
+  //p.setSource(Argb32(0xFFFF00FF));
+  //p.fillRect(RectI(300, 300, 200, 200));
   p.restore();
-
-  p.setSource(Argb32(0xFFFF00FF));
-  p.fillRect(RectI(200, 200, 200, 200));
-
 
   //p.setSource(Argb32(0xFF0000FF));
   //p.drawRect(0.5f, 0.5f, float(geom.w) - 1.0f, float(geom.h) - 1.0f);

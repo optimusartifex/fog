@@ -684,20 +684,20 @@ enum RASTER_MASTER_FLAGS
   //! @brief Mask including all no-paint states and fatal-error.
   RASTER_NO_PAINT_ALL_FLAGS = 0x8000FFFF,
 
-  //! @brief The meta clip-region contains no painting area.
+  //! @brief The meta clip-region doens't contain painting area.
   RASTER_NO_PAINT_META_REGION = 0x00000001,
 
   //! @brief The meta transform is invalid.
   RASTER_NO_PAINT_META_TRANSFORM = 0x00000002,
 
-  //! @brief The user clip-region contains no painting area.
-  RASTER_NO_PAINT_USER_REGION = 0x00000004,
+  //! @brief The user clip rect/region doesn't contain painting area.
+  RASTER_NO_PAINT_USER_CLIP = 0x00000004,
+
+  //! @brief The user clip mask doesn't contain painting area.
+  RASTER_NO_PAINT_USER_MASK = 0x00000010,
 
   //! @brief The user transform is invalid.
   RASTER_NO_PAINT_USER_TRANSFORM = 0x00000008,
-
-  //! @brief The user clip-mask contains no painting area.
-  RASTER_NO_PAINT_USER_MASK = 0x00000010,
 
   //! @brief The compositing operator produces no painting onto the current layer.
   RASTER_NO_PAINT_COMPOSITING_OPERATOR = 0x00000020,
@@ -714,9 +714,9 @@ enum RASTER_MASTER_FLAGS
 
   RASTER_NO_PAINT_BASE_FLAGS   = RASTER_NO_PAINT_META_REGION          |
                                  RASTER_NO_PAINT_META_TRANSFORM       |
-                                 RASTER_NO_PAINT_USER_REGION          |
-                                 RASTER_NO_PAINT_USER_TRANSFORM       |
+                                 RASTER_NO_PAINT_USER_CLIP            |
                                  RASTER_NO_PAINT_USER_MASK            |
+                                 RASTER_NO_PAINT_USER_TRANSFORM       |
                                  RASTER_NO_PAINT_COMPOSITING_OPERATOR |
                                  RASTER_NO_PAINT_OPACITY              ,
 
@@ -728,6 +728,7 @@ enum RASTER_MASTER_FLAGS
   //! is destroyed or reused.
   RASTER_NO_PAINT_FATAL = 0x80000000,
 
+#if 0
   // --------------------------------------------------------------------------
   // [Pending Flags - TOP-TO-BOTTOM Order]
   //
@@ -756,7 +757,6 @@ enum RASTER_MASTER_FLAGS
   //RASTER_PENDING_MASK_SAVE = 0,
   //RASTER_PENDING_MASK_RESTORE = 0,
 
-#if 0
   // TODO: Remove...
 
   //! @brief Clipping was changed so the first paint call (that is likely to

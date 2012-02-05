@@ -38,7 +38,7 @@ FOG_NO_EXPORT void ImageCodecProvider_initPCX(void);
 FOG_NO_EXPORT void ImageCodecProvider_initPNG(void);
 
 #if defined(FOG_OS_WINDOWS)
-FOG_NO_EXPORT void ImageCodecProvider_initGdip(void);
+FOG_NO_EXPORT void ImageCodecProvider_initWinGdip(void);
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_MAC)
@@ -388,7 +388,7 @@ FOG_NO_EXPORT void ImageCodecProvider_init(void)
 #endif // FOG_HAVE_LIBPNG
 
 #if defined(FOG_OS_WINDOWS)
-  ImageCodecProvider_initGdip();
+  ImageCodecProvider_initWinGdip();
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_MAC)

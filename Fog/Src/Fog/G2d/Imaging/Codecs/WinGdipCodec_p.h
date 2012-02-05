@@ -4,13 +4,13 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_IMAGING_CODECS_GDIPCODEC_P_H
-#define _FOG_G2D_IMAGING_CODECS_GDIPCODEC_P_H
+#ifndef _FOG_G2D_IMAGING_CODECS_WINGDIPCODEC_P_H
+#define _FOG_G2D_IMAGING_CODECS_WINGDIPCODEC_P_H
 
 #include <Fog/Core/C++/Base.h>
 
 #if !defined(FOG_OS_WINDOWS)
-#error "Fog::GdipCodec can be included / compiled only under Windows"
+#error "Fog::WinGdipCodec can be included / compiled only under Windows"
 #endif // FOG_OS_WINDOWS
 
 // [Dependencies]
@@ -28,56 +28,56 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::GdipJpegParams]
+// [Fog::WinGdipJpegParams]
 // ============================================================================
 
 //! @internal
-struct GdipJpegParams
+struct WinGdipJpegParams
 {
   int quality;
 };
 
 // ============================================================================
-// [Fog::GdipPngParams]
+// [Fog::WinGdipPngParams]
 // ============================================================================
 
 //! @internal
-struct GdipPngParams
+struct WinGdipPngParams
 {
   int dummy;
 };
 
 // ============================================================================
-// [Fog::GdipTiffParams]
+// [Fog::WinGdipTiffParams]
 // ============================================================================
 
 //! @internal
-struct GdipTiffParams
+struct WinGdipTiffParams
 {
   int dummy;
 };
 
 // ============================================================================
-// [Fog::GdipCommonParams]
+// [Fog::WinGdipCommonParams]
 // ============================================================================
 
 //! @internal
-union GdipCommonParams
+union WinGdipCommonParams
 {
-  GdipJpegParams jpeg;
-  GdipPngParams png;
-  GdipTiffParams tiff;
+  WinGdipJpegParams jpeg;
+  WinGdipPngParams png;
+  WinGdipTiffParams tiff;
 };
 
 // ============================================================================
-// [Fog::GdipCodecProvider]
+// [Fog::WinGdipCodecProvider]
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT GdipCodecProvider : public ImageCodecProvider
+struct FOG_NO_EXPORT WinGdipCodecProvider : public ImageCodecProvider
 {
-  GdipCodecProvider(uint32_t streamType);
-  virtual ~GdipCodecProvider();
+  WinGdipCodecProvider(uint32_t streamType);
+  virtual ~WinGdipCodecProvider();
 
   virtual uint32_t checkSignature(const void* mem, size_t length) const;
   virtual err_t createCodec(uint32_t codecType, ImageCodec** codec) const;
@@ -90,16 +90,16 @@ struct FOG_NO_EXPORT GdipCodecProvider : public ImageCodecProvider
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
+struct FOG_NO_EXPORT WinGdipDecoder : public ImageDecoder
 {
-  FOG_DECLARE_OBJECT(GdipDecoder, ImageDecoder)
+  FOG_DECLARE_OBJECT(WinGdipDecoder, ImageDecoder)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  GdipDecoder(ImageCodecProvider* provider);
-  virtual ~GdipDecoder();
+  WinGdipDecoder(ImageCodecProvider* provider);
+  virtual ~WinGdipDecoder();
 
   // --------------------------------------------------------------------------
   // [Stream]
@@ -133,7 +133,7 @@ struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
   //! @brief Gdi+ library.
   WinGdiPlus* _gdip;
   //! @brief JPEG, PNG or TIFF parameters.
-  GdipCommonParams _params;
+  WinGdipCommonParams _params;
 
   //! @brief Gdi+ shadow image instance.
   GpImage* _gpImage;
@@ -144,16 +144,16 @@ struct FOG_NO_EXPORT GdipDecoder : public ImageDecoder
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT GdipEncoder : public ImageEncoder
+struct FOG_NO_EXPORT WinGdipEncoder : public ImageEncoder
 {
-  FOG_DECLARE_OBJECT(GdipEncoder, ImageEncoder)
+  FOG_DECLARE_OBJECT(WinGdipEncoder, ImageEncoder)
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  GdipEncoder(ImageCodecProvider* provider);
-  virtual ~GdipEncoder();
+  WinGdipEncoder(ImageCodecProvider* provider);
+  virtual ~WinGdipEncoder();
 
   // --------------------------------------------------------------------------
   // [Stream]
@@ -185,10 +185,10 @@ struct FOG_NO_EXPORT GdipEncoder : public ImageEncoder
   //! @brief Gdi+ library.
   WinGdiPlus* _gdip;
   //! @brief JPEG, PNG or TIFF parameters.
-  GdipCommonParams _params;
+  WinGdipCommonParams _params;
 };
 
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_IMAGING_CODECS_GDIPCODEC_P_H
+#endif // _FOG_G2D_IMAGING_CODECS_WINGDIPCODEC_P_H

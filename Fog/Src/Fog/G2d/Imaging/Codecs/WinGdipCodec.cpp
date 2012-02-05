@@ -20,14 +20,14 @@
 #include <Fog/Core/Tools/InternedString.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Imaging/Codecs/GdipCodec_p.h>
+#include <Fog/G2d/Imaging/Codecs/WinGdipCodec_p.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageConverter.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
 #include <Fog/G2d/OS/WinGdiPlus.h>
 
-FOG_IMPLEMENT_OBJECT(Fog::GdipDecoder)
-FOG_IMPLEMENT_OBJECT(Fog::GdipEncoder)
+FOG_IMPLEMENT_OBJECT(Fog::WinGdipDecoder)
+FOG_IMPLEMENT_OBJECT(Fog::WinGdipEncoder)
 
 namespace Fog {
 
@@ -35,7 +35,7 @@ namespace Fog {
 // [Fog::GdiPlusImage - Format - Helpers]
 // ===========================================================================
 
-static uint32_t _GdipCodec_cvtFogFormatFromGpFormat(GpPixelFormat fmt)
+static uint32_t _WinGdipCodec_cvtFogFormatFromGpFormat(GpPixelFormat fmt)
 {
   switch (fmt)
   {
@@ -57,7 +57,7 @@ static uint32_t _GdipCodec_cvtFogFormatFromGpFormat(GpPixelFormat fmt)
   }
 }
 
-static GpPixelFormat _GdipCodec_cvtGpFormatFromFogFormat(uint32_t fmt)
+static GpPixelFormat _WinGdipCodec_cvtGpFormatFromFogFormat(uint32_t fmt)
 {
   switch (fmt)
   {
@@ -83,9 +83,9 @@ FOG_COM_DEFINE_GUID(GpEncoderQuality, 0x1d5be4b5, 0xfa4a, 0x452d, 0x9c, 0xdd, 0x
 // [Fog::GdiPlusImage - Params - Helpers]
 // ===========================================================================
 
-static void _GdipCodec_clearCommonParams(GdipCommonParams* params, uint32_t streamType)
+static void _WinGdipCodec_clearCommonParams(WinGdipCommonParams* params, uint32_t streamType)
 {
-  memset(params, 0, sizeof(GdipCommonParams));
+  memset(params, 0, sizeof(WinGdipCommonParams));
 
   switch (streamType)
   {
@@ -99,7 +99,7 @@ static void _GdipCodec_clearCommonParams(GdipCommonParams* params, uint32_t stre
   }
 }
 
-static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t streamType, const InternedStringW& name, Var& dst)
+static err_t _WinGdipCodec_getCommonParam(const WinGdipCommonParams* params, uint32_t streamType, const InternedStringW& name, Var& dst)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -121,7 +121,7 @@ static err_t _GdipCodec_getCommonParam(const GdipCommonParams* params, uint32_t 
   return err;
 }
 
-static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t streamType, const InternedStringW& name, const Var& src)
+static err_t _WinGdipCodec_setCommonParam(WinGdipCommonParams* params, uint32_t streamType, const InternedStringW& name, const Var& src)
 {
   // This means to continue property processing calling superclass.
   err_t err = (err_t)0xFFFFFFFF;
@@ -142,10 +142,10 @@ static err_t _GdipCodec_setCommonParam(GdipCommonParams* params, uint32_t stream
 }
 
 // ===========================================================================
-// [Fog::GdipCodecProvider]
+// [Fog::WinGdipCodecProvider]
 // ===========================================================================
 
-static err_t getGdipEncoderClsid(WinGdiPlus* _gdip, const WCHAR* mime, CLSID* clsid)
+static err_t getWinGdipEncoderClsid(WinGdiPlus* _gdip, const WCHAR* mime, CLSID* clsid)
 {
   GpStatus status;
   GpImageCodecInfo* codecs = NULL;
@@ -194,7 +194,7 @@ _End:
   return err;
 }
 
-GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
+WinGdipCodecProvider::WinGdipCodecProvider(uint32_t streamType)
 {
   const WCHAR* gdipMime = NULL;
 
@@ -250,11 +250,11 @@ GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
   }
 }
 
-GdipCodecProvider::~GdipCodecProvider()
+WinGdipCodecProvider::~WinGdipCodecProvider()
 {
 }
 
-uint32_t GdipCodecProvider::checkSignature(const void* mem, size_t length) const
+uint32_t WinGdipCodecProvider::checkSignature(const void* mem, size_t length) const
 {
   // Note: GdiPlus proxy provider uses 14 as a base score. This is by one less
   // than all other providers based on external libraries (libpng, libjpeg,
@@ -300,7 +300,7 @@ uint32_t GdipCodecProvider::checkSignature(const void* mem, size_t length) const
   return score;
 }
 
-err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) const
+err_t WinGdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) const
 {
   FOG_ASSERT(codec != NULL);
 
@@ -312,10 +312,10 @@ err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) con
   switch (codecType)
   {
     case IMAGE_CODEC_DECODER:
-      c = fog_new GdipDecoder(const_cast<GdipCodecProvider*>(this));
+      c = fog_new WinGdipDecoder(const_cast<WinGdipCodecProvider*>(this));
       break;
     case IMAGE_CODEC_ENCODER:
-      c = fog_new GdipEncoder(const_cast<GdipCodecProvider*>(this));
+      c = fog_new WinGdipEncoder(const_cast<WinGdipCodecProvider*>(this));
       break;
     default:
       return ERR_RT_INVALID_ARGUMENT;
@@ -329,33 +329,33 @@ err_t GdipCodecProvider::createCodec(uint32_t codecType, ImageCodec** codec) con
 }
 
 // ===========================================================================
-// [Fog::GdipDecoder - Construction / Destruction]
+// [Fog::WinGdipDecoder - Construction / Destruction]
 // ===========================================================================
 
-GdipDecoder::GdipDecoder(ImageCodecProvider* provider) :
+WinGdipDecoder::WinGdipDecoder(ImageCodecProvider* provider) :
   ImageDecoder(provider),
   _istream(NULL),
   _gdip(WinGdiPlus::get()),
   _gpImage(NULL)
 {
-  _GdipCodec_clearCommonParams(&_params, _streamType);
+  _WinGdipCodec_clearCommonParams(&_params, _streamType);
 }
 
-GdipDecoder::~GdipDecoder()
+WinGdipDecoder::~WinGdipDecoder()
 {
 }
 
 // ===========================================================================
-// [Fog::GdipDecoder - AttachStream / DetachStream]
+// [Fog::WinGdipDecoder - AttachStream / DetachStream]
 // ===========================================================================
 
-void GdipDecoder::attachStream(Stream& stream)
+void WinGdipDecoder::attachStream(Stream& stream)
 {
   WinCOM::makeIStream(&_istream, stream);
   Base::attachStream(stream);
 }
 
-void GdipDecoder::detachStream()
+void WinGdipDecoder::detachStream()
 {
   if (_gpImage != NULL)
   {
@@ -373,20 +373,20 @@ void GdipDecoder::detachStream()
 }
 
 // ===========================================================================
-// [Fog::GdipDecoder - Reset]
+// [Fog::WinGdipDecoder - Reset]
 // ===========================================================================
 
-void GdipDecoder::reset()
+void WinGdipDecoder::reset()
 {
-  _GdipCodec_clearCommonParams(&_params, _streamType);
+  _WinGdipCodec_clearCommonParams(&_params, _streamType);
   Base::reset();
 }
 
 // ===========================================================================
-// [Fog::GdipDecoder - ReadHeader]
+// [Fog::WinGdipDecoder - ReadHeader]
 // ===========================================================================
 
-err_t GdipDecoder::readHeader()
+err_t WinGdipDecoder::readHeader()
 {
   // Do not read header more than once.
   if (_headerResult)
@@ -407,17 +407,17 @@ err_t GdipDecoder::readHeader()
   GpPixelFormat pf;
   _gdip->_GdipGetImagePixelFormat(_gpImage, &pf);
 
-  _format = _GdipCodec_cvtFogFormatFromGpFormat(pf);
+  _format = _WinGdipCodec_cvtFogFormatFromGpFormat(pf);
   _depth = ImageFormatDescription::getByFormat(_format).getDepth();
 
   return ERR_OK;
 }
 
 // ===========================================================================
-// [Fog::GdipDecoder - ReadImage]
+// [Fog::WinGdipDecoder - ReadImage]
 // ===========================================================================
 
-err_t GdipDecoder::readImage(Image& image)
+err_t WinGdipDecoder::readImage(Image& image)
 {
   err_t err = ERR_OK;
 
@@ -445,7 +445,7 @@ err_t GdipDecoder::readImage(Image& image)
     (INT)image.getWidth(),
     (INT)image.getHeight(),
     (INT)image.getStride(),
-    _GdipCodec_cvtGpFormatFromFogFormat(image.getFormat()),
+    _WinGdipCodec_cvtGpFormatFromFogFormat(image.getFormat()),
     (BYTE*)image.getDataX(),
     &bm);
 
@@ -501,52 +501,52 @@ _End:
 }
 
 // ===========================================================================
-// [Fog::GdipDecoder - Properties]
+// [Fog::WinGdipDecoder - Properties]
 // ===========================================================================
 
-err_t GdipDecoder::_getProperty(const InternedStringW& name, Var& dst) const
+err_t WinGdipDecoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
-  err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
+  err_t err = _WinGdipCodec_getCommonParam(&_params, _streamType, name, dst);
   if (err != (err_t)0xFFFFFFFF)
     return err;
   return Base::_getProperty(name, dst);
 }
 
-err_t GdipDecoder::_setProperty(const InternedStringW& name, const Var& src)
+err_t WinGdipDecoder::_setProperty(const InternedStringW& name, const Var& src)
 {
-  err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
+  err_t err = _WinGdipCodec_setCommonParam(&_params, _streamType, name, src);
   if (err != (err_t)0xFFFFFFFF)
     return err;
   return Base::_setProperty(name, src);
 }
 
 // ===========================================================================
-// [Fog::GdipEncoder - Construction / Destruction]
+// [Fog::WinGdipEncoder - Construction / Destruction]
 // ===========================================================================
 
-GdipEncoder::GdipEncoder(ImageCodecProvider* provider) :
+WinGdipEncoder::WinGdipEncoder(ImageCodecProvider* provider) :
   ImageEncoder(provider),
   _istream(NULL),
   _gdip(WinGdiPlus::get())
 {
-  _GdipCodec_clearCommonParams(&_params, _streamType);
+  _WinGdipCodec_clearCommonParams(&_params, _streamType);
 }
 
-GdipEncoder::~GdipEncoder()
+WinGdipEncoder::~WinGdipEncoder()
 {
 }
 
 // ===========================================================================
-// [Fog::GdipEncoder - AttachStream / DetachStream]
+// [Fog::WinGdipEncoder - AttachStream / DetachStream]
 // ===========================================================================
 
-void GdipEncoder::attachStream(Stream& stream)
+void WinGdipEncoder::attachStream(Stream& stream)
 {
   WinCOM::makeIStream(&_istream, stream);
   Base::attachStream(stream);
 }
 
-void GdipEncoder::detachStream()
+void WinGdipEncoder::detachStream()
 {
   if (_istream != NULL)
   {
@@ -558,20 +558,20 @@ void GdipEncoder::detachStream()
 }
 
 // ===========================================================================
-// [Fog::GdipEncoder - Reset]
+// [Fog::WinGdipEncoder - Reset]
 // ===========================================================================
 
-void GdipEncoder::reset()
+void WinGdipEncoder::reset()
 {
-  _GdipCodec_clearCommonParams(&_params, _streamType);
+  _WinGdipCodec_clearCommonParams(&_params, _streamType);
   Base::reset();
 }
 
 // ===========================================================================
-// [Fog::GdipEncoder - WriteImage]
+// [Fog::WinGdipEncoder - WriteImage]
 // ===========================================================================
 
-err_t GdipEncoder::writeImage(const Image& image)
+err_t WinGdipEncoder::writeImage(const Image& image)
 {
   Image tmp;
   if (image.isEmpty())
@@ -588,17 +588,17 @@ err_t GdipEncoder::writeImage(const Image& image)
   CLSID encoderClsid;
 
   uint32_t fogFormat = image.getFormat();
-  GpPixelFormat gpFormat = _GdipCodec_cvtGpFormatFromFogFormat(fogFormat);
+  GpPixelFormat gpFormat = _WinGdipCodec_cvtGpFormatFromFogFormat(fogFormat);
 
   // Get GDI+ encoder CLSID.
-  err = getGdipEncoderClsid(_gdip, reinterpret_cast<GdipCodecProvider*>(getProvider())->_gdipMime, &encoderClsid);
+  err = getWinGdipEncoderClsid(_gdip, reinterpret_cast<WinGdipCodecProvider*>(getProvider())->_gdipMime, &encoderClsid);
   if (FOG_IS_ERROR(err)) goto _End;
 
-  if (_GdipCodec_cvtFogFormatFromGpFormat(gpFormat) != fogFormat)
+  if (_WinGdipCodec_cvtFogFormatFromGpFormat(gpFormat) != fogFormat)
   {
     // Create GpBitmap that will share raster data with the temporary image.
     tmp = image;
-    err = tmp.convert(_GdipCodec_cvtFogFormatFromGpFormat(gpFormat));
+    err = tmp.convert(_WinGdipCodec_cvtFogFormatFromGpFormat(gpFormat));
     if (FOG_IS_ERROR(err)) goto _End;
 
     status = _gdip->_GdipCreateBitmapFromScan0(
@@ -659,20 +659,20 @@ _End:
 }
 
 // ===========================================================================
-// [Fog::GdipEncoder - Properties]
+// [Fog::WinGdipEncoder - Properties]
 // ===========================================================================
 
-err_t GdipEncoder::_getProperty(const InternedStringW& name, Var& dst) const
+err_t WinGdipEncoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
-  err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
+  err_t err = _WinGdipCodec_getCommonParam(&_params, _streamType, name, dst);
   if (err != (err_t)0xFFFFFFFF)
     return err;
   return Base::_getProperty(name, dst);
 }
 
-err_t GdipEncoder::_setProperty(const InternedStringW& name, const Var& src)
+err_t WinGdipEncoder::_setProperty(const InternedStringW& name, const Var& src)
 {
-  err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
+  err_t err = _WinGdipCodec_setCommonParam(&_params, _streamType, name, src);
   if (err != (err_t)0xFFFFFFFF)
     return err;
   return Base::_setProperty(name, src);
@@ -682,19 +682,19 @@ err_t GdipEncoder::_setProperty(const InternedStringW& name, const Var& src)
 // [Init / Fini]
 // ===========================================================================
 
-FOG_NO_EXPORT void ImageCodecProvider_initGdip(void)
+FOG_NO_EXPORT void ImageCodecProvider_initWinGdip(void)
 {
   ImageCodecProvider* provider;
 
-  provider = fog_new GdipCodecProvider(IMAGE_STREAM_PNG);
+  provider = fog_new WinGdipCodecProvider(IMAGE_STREAM_PNG);
   ImageCodecProvider::addProvider(provider);
   provider->deref();
 
-  provider = fog_new GdipCodecProvider(IMAGE_STREAM_JPEG);
+  provider = fog_new WinGdipCodecProvider(IMAGE_STREAM_JPEG);
   ImageCodecProvider::addProvider(provider);
   provider->deref();
 
-  provider = fog_new GdipCodecProvider(IMAGE_STREAM_TIFF);
+  provider = fog_new WinGdipCodecProvider(IMAGE_STREAM_TIFF);
   ImageCodecProvider::addProvider(provider);
   provider->deref();
 }

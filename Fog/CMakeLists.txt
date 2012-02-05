@@ -1068,6 +1068,7 @@ Set(FOG_G2D_IMAGING_CODECS_SOURCES
   Src/Fog/G2d/Imaging/Codecs/GifCodec.cpp
   Src/Fog/G2d/Imaging/Codecs/IcoCodec.cpp
   Src/Fog/G2d/Imaging/Codecs/JpegCodec.cpp
+  Src/Fog/G2d/Imaging/Codecs/MacCGCodec.cpp
   Src/Fog/G2d/Imaging/Codecs/PcxCodec.cpp
   Src/Fog/G2d/Imaging/Codecs/PngCodec.cpp
 )
@@ -1077,6 +1078,7 @@ Set(FOG_G2D_IMAGING_CODECS_HEADERS
   Src/Fog/G2d/Imaging/Codecs/GdipCodec_p.h
   Src/Fog/G2d/Imaging/Codecs/IcoCodec_p.h
   Src/Fog/G2d/Imaging/Codecs/JpegCodec_p.h
+  Src/Fog/G2d/Imaging/Codecs/MacCGCodec_p.h
   Src/Fog/G2d/Imaging/Codecs/PcxCodec_p.h
   Src/Fog/G2d/Imaging/Codecs/PngCodec_p.h
 )

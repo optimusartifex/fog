@@ -77,7 +77,7 @@ err_t MacFontProviderData::getFontFace(FontFace** dst, const StringW& fontFamily
   if (FOG_IS_NULL(face))
     return ERR_RT_OUT_OF_MEMORY;
 
-  FOG_RETURN_ON_ERROR(reinterpret_cast<MacFontFace*>(face)->_init(fontNameW, ctFont));
+  FOG_RETURN_ON_ERROR(static_cast<MacFontFace*>(face)->_init(fontNameW, ctFont));
 
   err = fontFaceCache.put(face->family, face);
   if (FOG_IS_ERROR(err))

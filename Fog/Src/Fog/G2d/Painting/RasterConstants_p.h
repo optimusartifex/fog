@@ -637,7 +637,7 @@ enum RASTER_CLIP
 {
   //! @brief The clip is a rectangle (@ref BoxI) or painting is completely
   //! disabled.
-  RASTER_CLIP_BOXI = 0,
+  RASTER_CLIP_BOX = 0,
 
   //! @brief The clip is a region (YX sorted array of @ref BoxI instances).
   RASTER_CLIP_REGION = 1,

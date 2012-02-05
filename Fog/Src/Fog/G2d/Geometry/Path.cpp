@@ -137,7 +137,7 @@ static NumT_(PathData)* FOG_CDECL PathT_dCreate(size_t capacity)
 {
   size_t dsize = PathT_getDataSize<NumT>(capacity);
 
-  NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(MemMgr::alloc(dsize));
+  NumT_(PathData)* newd = static_cast<NumT_(PathData)*>(MemMgr::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
 
   newd->reference.init(1);
@@ -157,7 +157,7 @@ static NumT_(PathData)* FOG_CDECL PathT_dCreate(size_t capacity)
 template<typename NumT>
 static NumT_(PathData)* FOG_CDECL PathT_dAdopt(void* address, size_t capacity)
 {
-  NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(address);
+  NumT_(PathData)* newd = static_cast<NumT_(PathData)*>(address);
 
   newd->reference.init(1);
   newd->vType = VarId<NumT_(Path)>::ID | VAR_FLAG_STATIC;
@@ -179,7 +179,7 @@ static NumT_(PathData)* FOG_CDECL PathT_dRealloc(NumT_(PathData)* d, size_t capa
   FOG_ASSERT(d->length <= capacity);
   size_t dsize = PathT_getDataSize<NumT>(capacity);
 
-  NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(MemMgr::alloc(dsize));
+  NumT_(PathData)* newd = static_cast<NumT_(PathData)*>(MemMgr::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
 
   size_t length = d->length;
@@ -210,7 +210,7 @@ static NumT_(PathData)* FOG_CDECL PathT_dCopy(const NumT_(PathData)* d)
 
   size_t dsize = PathT_getDataSize<NumT>(length);
 
-  NumT_(PathData)* newd = reinterpret_cast<NumT_(PathData)*>(MemMgr::alloc(dsize));
+  NumT_(PathData)* newd = static_cast<NumT_(PathData)*>(MemMgr::alloc(dsize));
   if (FOG_IS_NULL(newd)) return NULL;
 
   newd->reference.init(1);
@@ -1544,25 +1544,25 @@ static err_t FOG_CDECL PathT_shape(
       
       case SHAPE_TYPE_POLYLINE:
       {
-        const NumT_(PointArray)* poly = reinterpret_cast<const NumT_(PointArray)*>(shapeData);
+        const NumT_(PointArray)* poly = static_cast<const NumT_(PointArray)*>(shapeData);
         return self->polyline(poly->getData(), poly->getLength(), direction);
       }
 
       case SHAPE_TYPE_POLYGON:
       {
-        const NumT_(PointArray)* poly = reinterpret_cast<const NumT_(PointArray)*>(shapeData);
+        const NumT_(PointArray)* poly = static_cast<const NumT_(PointArray)*>(shapeData);
         return self->polygon(poly->getData(), poly->getLength(), direction);
       }
 
       case SHAPE_TYPE_RECT_ARRAY:
       {
-        const NumT_(RectArray)* rects = reinterpret_cast<const NumT_(RectArray)*>(shapeData);
+        const NumT_(RectArray)* rects = static_cast<const NumT_(RectArray)*>(shapeData);
         return self->rects(rects->getData(), rects->getLength(), direction);
       }
 
       case SHAPE_TYPE_PATH:
       {
-        const NumT_(Path)* path = reinterpret_cast<const NumT_(Path)*>(shapeData);
+        const NumT_(Path)* path = static_cast<const NumT_(Path)*>(shapeData);
 
         // TODO: Direction!
         return self->append(*path);
@@ -1593,7 +1593,7 @@ static err_t FOG_CDECL PathT_shape(
 
     case SHAPE_TYPE_LINE:
     {
-      const NumT_(Line)* shape = reinterpret_cast<const NumT_(Line)*>(shapeData);
+      const NumT_(Line)* shape = static_cast<const NumT_(Line)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_LINE_TO;
@@ -1624,7 +1624,7 @@ static err_t FOG_CDECL PathT_shape(
 
     case SHAPE_TYPE_QBEZIER:
     {
-      const NumT_(QBezier)* shape = reinterpret_cast<const NumT_(QBezier)*>(shapeData);
+      const NumT_(QBezier)* shape = static_cast<const NumT_(QBezier)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_QUAD_TO;
@@ -1650,7 +1650,7 @@ static err_t FOG_CDECL PathT_shape(
 
     case SHAPE_TYPE_CBEZIER:
     {
-      const NumT_(CBezier)* shape = reinterpret_cast<const NumT_(CBezier)*>(shapeData);
+      const NumT_(CBezier)* shape = static_cast<const NumT_(CBezier)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_CUBIC_TO;
@@ -1680,7 +1680,7 @@ static err_t FOG_CDECL PathT_shape(
 
     case SHAPE_TYPE_ARC:
     {
-      const NumT_(Arc)* shape = reinterpret_cast<const NumT_(Arc)*>(shapeData);
+      const NumT_(Arc)* shape = static_cast<const NumT_(Arc)*>(shapeData);
 
       NumT_(Arc) arc(UNINITIALIZED);
       if (direction != PATH_DIRECTION_CW)
@@ -1709,7 +1709,7 @@ static err_t FOG_CDECL PathT_shape(
     case SHAPE_TYPE_RECT:
 _ShapeRect:
     {
-      const NumT_(Rect)* shape = reinterpret_cast<const NumT_(Rect)*>(shapeData);
+      const NumT_(Rect)* shape = static_cast<const NumT_(Rect)*>(shapeData);
       if (FOG_UNLIKELY(!shape->isValid()))
       {
         err = ERR_GEOMETRY_INVALID;
@@ -1754,7 +1754,7 @@ _ShapeRect:
 
     case SHAPE_TYPE_ROUND:
     {
-      const NumT_(Round)* shape = reinterpret_cast<const NumT_(Round)*>(shapeData);
+      const NumT_(Round)* shape = static_cast<const NumT_(Round)*>(shapeData);
       const NumT_(Rect)& r = shape->rect;
 
       if (FOG_UNLIKELY(!r.isValid()))
@@ -1905,14 +1905,14 @@ _ShapeRect:
 
       if (shapeType == SHAPE_TYPE_CIRCLE)
       {
-        const NumT_(Circle)* shape = reinterpret_cast<const NumT_(Circle)*>(shapeData);
+        const NumT_(Circle)* shape = static_cast<const NumT_(Circle)*>(shapeData);
         c = shape->center;
         rx = shape->radius;
         ry = Math::abs(rx);
       }
       else
       {
-        const NumT_(Ellipse)* shape = reinterpret_cast<const NumT_(Ellipse)*>(shapeData);
+        const NumT_(Ellipse)* shape = static_cast<const NumT_(Ellipse)*>(shapeData);
         c = shape->center;
         rx = shape->radius.x;
         ry = shape->radius.y;
@@ -1971,7 +1971,7 @@ _ShapeRect:
     case SHAPE_TYPE_CHORD:
     case SHAPE_TYPE_PIE:
     {
-      const NumT_(Arc)* shape = reinterpret_cast<const NumT_(Arc)*>(shapeData);
+      const NumT_(Arc)* shape = static_cast<const NumT_(Arc)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_LINE_TO;
@@ -2016,7 +2016,7 @@ _ShapeRect:
 
     case SHAPE_TYPE_TRIANGLE:
     {
-      const NumT_(Triangle)* shape = reinterpret_cast<const NumT_(Triangle)*>(shapeData);
+      const NumT_(Triangle)* shape = static_cast<const NumT_(Triangle)*>(shapeData);
 
       dstCmd[0] = PATH_CMD_MOVE_TO;
       dstCmd[1] = PATH_CMD_LINE_TO;

@@ -98,7 +98,7 @@ static err_t FOG_CDECL Image_MacCG_create(ImageData** pd, const SizeI* size, uin
   }
 
   size_t dSize = sizeof(MacCGImageData) + 16 + (size_t)stride * (uint)size->h;
-  MacCGImageData* d = reinterpret_cast<MacCGImageData*>(MemMgr::alloc(dSize));
+  MacCGImageData* d = static_cast<MacCGImageData*>(MemMgr::alloc(dSize));
 
   if (FOG_IS_NULL(d))
     return ERR_RT_OUT_OF_MEMORY;
@@ -174,7 +174,7 @@ static err_t FOG_CDECL Image_MacCG_create(ImageData** pd, const SizeI* size, uin
 // and use it after the original Fog::Image instance was released.
 static void FOG_CDECL Image_MacCG_destroy(ImageData* _d)
 {
-  MacCGImageData* d = reinterpret_cast<MacCGImageData*>(_d);
+  MacCGImageData* d = static_cast<MacCGImageData*>(_d);
   CGImageRef cgImage = d->cgImage;
 
   if (cgImage == NULL)
@@ -194,7 +194,7 @@ static void FOG_CDECL Image_MacCG_destroy(ImageData* _d)
 
 static void* FOG_CDECL Image_MacCG_getHandle(const ImageData* _d)
 {
-  const MacCGImageData* d = reinterpret_cast<const MacCGImageData*>(_d);
+  const MacCGImageData* d = static_cast<const MacCGImageData*>(_d);
   return (void*)d->cgImage;
 }
 
@@ -207,13 +207,13 @@ static err_t FOG_CDECL Image_MacCG_updatePalette(ImageData* _d, const Range* ran
 
 static const void *Image_MacCG_getBytePointerCallback(void *info)
 {
-  MacCGImageData* d = reinterpret_cast<MacCGImageData*>(info);
+  MacCGImageData* d = static_cast<MacCGImageData*>(info);
   return d->data;
 }
 
 static void Image_MacCG_releaseInfoCallback(void *info)
 {
-  MacCGImageData* d = reinterpret_cast<MacCGImageData*>(info);
+  MacCGImageData* d = static_cast<MacCGImageData*>(info);
   d->release();
 }
 

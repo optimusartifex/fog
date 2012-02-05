@@ -197,6 +197,17 @@ static FOG_INLINE int upscale24x8(double v) { return Math::ifloor(v * (double)25
     _Span_ = _newSpan; \
   FOG_MACRO_END
 
+#define ALLOC_SPANS(_Span_, _Count_, _OnFail_) \
+  FOG_MACRO_BEGIN \
+    RasterSpan8* _newSpan = scanline->allocSpans(_Count_); \
+    if (FOG_IS_NULL(_newSpan)) \
+    { \
+      _OnFail_; \
+    } \
+    _Span_->_next = _newSpan; \
+    _Span_ = _newSpan; \
+  FOG_MACRO_END
+
 // ============================================================================
 // [Fog::RasterizerApi]
 // ============================================================================
@@ -259,6 +270,9 @@ static void FOG_CDECL BoxRasterizer8_init24x8(BoxRasterizer8* self, const BoxI* 
   self->_boxBounds.x1 += fx1 != 0;
   self->_boxBounds.y1 += fy1 != 0;
 
+  if (fx1 == 0) fx1 = 256;
+  if (fy1 == 0) fy1 = 256;
+
   uint32_t hl = 256 - fx0;
   uint32_t hr = fx1;
   uint32_t vt = 256 - fy0;
@@ -301,7 +315,7 @@ static void FOG_CDECL BoxRasterizer8_init24x8(BoxRasterizer8* self, const BoxI* 
 }
 
 // ============================================================================
-// [Fog::BoxRasterizer8 - Render - 32x0]
+// [Fog::BoxRasterizer8 - Render - 32x0 - Clip-Box]
 // ============================================================================
 
 static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_box(
@@ -309,7 +323,7 @@ static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_box(
 {
   FOG_UNUSED(_scanline);
 
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
+  BoxRasterizer8* self = static_cast<BoxRasterizer8*>(_self);
   const BoxI& box = self->_boxBounds;
 
   int y0 = box.y0;
@@ -336,10 +350,14 @@ static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_box(
     process(filler, span);
 }
 
+// ============================================================================
+// [Fog::BoxRasterizer8 - Render - 32x0 - Clip-Region]
+// ============================================================================
+
 static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_region(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
+  BoxRasterizer8* self = static_cast<BoxRasterizer8*>(_self);
   const BoxI& box = self->_boxBounds;
 
   int x0 = box.x0;
@@ -384,15 +402,27 @@ static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_region(
     // Skip clip boxes which do not intersect with the shape-box.
     while (cPtr->x1 <= x0)
     {
+_Start:
+      if (++cPtr == cEnd)
+        return;
+    }
+
+    while (cPtr->x0 >= x1)
+    {
       if (++cPtr == cEnd)
         return;
     }
 
     y0 = cPtr->y0;
-    y1 = cPtr->y1;
-
     if (y0 >= yEnd)
       return;
+
+    if (cPtr->x1 <= x0)
+      goto _Start;
+
+    if (y0 < box.y0)
+      y0 = box.y0;
+    y1 = cPtr->y1;
 
     // Build a scanline.
     RasterSpan8* span = scanline->begin();
@@ -433,30 +463,34 @@ static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_region(
       do {
         process(filler, span);
       } while (++y0 != y1);
+      yPos = y1;
     }
-
-    yPos = y1;
   } while (cPtr != cEnd);
 }
+
+// ============================================================================
+// [Fog::BoxRasterizer8 - Render - 32x0 - Clip-Mask]
+// ============================================================================
 
 static void FOG_CDECL BoxRasterizer8_render_32x0_st_clip_mask(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  // TODO: BoxRasterizer32x0::ClipMask.
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
+  // TODO: BoxRasterizer8 - render 32x0 - clip-mask.
+  BoxRasterizer8* self = static_cast<BoxRasterizer8*>(_self);
 }
 
 // ============================================================================
-// [Fog::BoxRasterizer8 - Render - 24x8]
+// [Fog::BoxRasterizer8 - Render - 24x8 - Clip-Box]
 // ============================================================================
 
 static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_box(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* _scanline)
 {
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
+  BoxRasterizer8* self = static_cast<BoxRasterizer8*>(_self);
+  const BoxI& box = self->_boxBounds;
+
   FOG_UNUSED(_scanline);
 
-  const BoxI& box = self->_boxBounds;
   int y0 = box.y0;
   int y1 = box.y1 - 1;
 
@@ -493,7 +527,8 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_box(
     // Render top part (or top+bottom part in case that the box is 1 pixel height).
     SETUP_MASK(self->_ct);
     process(filler, span);
-    if (y0 >= y1) return;
+    if (y0 >= y1)
+      return;
 
     // Render inner part.
     SETUP_MASK(self->_ci);
@@ -526,7 +561,8 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_box(
     // Render top part (or top+bottom part in case that the box is 1 pixel height).
     SETUP_MASK(self->_ct);
     process(filler, span);
-    if (y0 >= y1) return;
+    if (y0 >= y1)
+      return;
 
     // Render inner part.
     SETUP_MASK(self->_ci);
@@ -540,89 +576,193 @@ static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_box(
   }
 }
 
+// ============================================================================
+// [Fog::BoxRasterizer8 - Render - 24x8 - Clip-Region]
+// ============================================================================
+
 static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_region(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
+  BoxRasterizer8* self = static_cast<BoxRasterizer8*>(_self);
+  const BoxI& box = self->_boxBounds;
 
-  // TODO: Rasterizer.
-#if 0
-  y -= self->_boundingBox.y0;
+  int x0 = box.x0;
+  int x1 = box.x1;
 
-  FOG_ASSERT(self->_isFinalized);
-  FOG_ASSERT((uint)y < (uint)self->_boundingBox.y1);
+  int y0 = box.y0;
+  int y1 = box.y1;
 
-  int x0 = self->xLeft;
-  int x1 = self->xRight;
+  const BoxI* cPtr = self->_clip.region.data;
+  const BoxI* cEnd = cPtr + self->_clip.region.length;
 
-  // Clipping.
-  const BoxI* clipCur = clipBoxes;
-  const BoxI* clipEnd = clipBoxes + count;
-  if (FOG_UNLIKELY(clipCur == clipEnd)) return NULL;
+  // --------------------------------------------------------------------------
+  // [Prepare]
+  // --------------------------------------------------------------------------
 
-  // Current clip box start / end point (not part of clip span).
-  int clipX0;
-  int clipX1 = clipCur->x1;
-
-  // Advance clip (discard clip-boxes that can't intersect).
-  while (clipX1 <= x0)
+  // Skip boxes which do not intersect in vertical direction.
+  while (cPtr->y1 <= y0)
   {
-    if (++clipCur == clipEnd) return NULL;
-    clipX1 = clipCur->x1;
+    if (++cPtr == cEnd)
+      return;
   }
 
-  clipX0 = Math::max<int>(clipCur->x0, x0);
-  if (clipX0 > x1) return NULL;
+  if (cPtr->y0 >= y1)
+    return;
 
-  if (scanline->begin(self->_boundingBox.x0, self->_boundingBox.x1) != ERR_OK)
-    return NULL;
+  if (y0 < cPtr->y0)
+    y0 = cPtr->y0;
 
-  const uint32_t* covers = self->_ci;
-  if (FOG_UNLIKELY(y == 0))
-    covers = self->_ct;
-  else if (FOG_UNLIKELY(y == (shape->bounds.y1 - shape->bounds.y0)))
-    covers = self->_cb;
+  int yEnd = y1;
+  int yPos = y0;
 
-  if (clipX0 == x0)
-  {
-    clipX0++;
-    scanline->newA8Extra_buf(x0, clipX0)[0] = (uint16_t)covers[0];
-  }
+  int yTop = box.y0;
+  int yBottom = y1 - 1;
 
-  uint16_t midcover = covers[1];
-  for (;;)
-  {
-    if (clipX0 < x1)
+  filler->prepare(yPos);
+  RasterFiller::ProcessFunc process = filler->_process;
+
+  // --------------------------------------------------------------------------
+  // [Process]
+  // --------------------------------------------------------------------------
+
+  do {
+    const BoxI* cMark;
+    const uint16_t* covers;
+
+    RasterSpan8* span;
+    RasterSpan8* rightSpan;
+
+    // Skip clip boxes which do not intersect with the shape-box.
+    while (cPtr->x1 <= x0)
     {
-      scanline->lnkConstSpanOrMerge(clipX0, Math::min<int>(clipX1, x1), midcover);
-    }
-    if (clipX1 > x1)
-    {
-      scanline->lnkConstSpanOrMerge(x1, x1 + 1, covers[2]);
-      break;
+_Start:
+      if (++cPtr == cEnd)
+        return;
     }
 
-    if (++clipBoxes == clipEnd) break;
-    clipX0 = clipBoxes->x0;
-    if (clipX0 > x1) break;
-    clipX1 = clipBoxes->x1;
-  }
+    while (cPtr->x0 >= x1)
+    {
+      if (++cPtr == cEnd)
+        return;
+    }
 
-  if (scanline->close() != ERR_OK) return NULL;
-#if defined(FOG_DEBUG_RASTERIZER)
-  Rasterizer_dumpSpans(y0, scanline->getSpans());
-#endif // FOG_DEBUG_RASTERIZER
-  return scanline->getSpans();
+    y0 = cPtr->y0;
+    if (y0 >= yEnd)
+      return;
 
-#endif
+    if (cPtr->x1 <= x0)
+      goto _Start;
+
+    if (y0 < yTop)
+      y0 = yTop;
+    y1 = cPtr->y1;
+
+    // Build a scanline.
+    cMark = cPtr;
+
+_Repeat:
+    span = scanline->begin();
+    covers = self->_covers + 4 * ((y0 != yTop) + (y0 == yBottom));
+
+    // We need to care about x0 in the first span. Another spans have to be
+    // inside of the painting box, so we need only to handle x1, which can be
+    // outside (also applies to x0 in case that one clip box completely subsumes
+    // the painting one).
+    ALLOC_SPANS(span, 3, return);
+    span->setPositionAndType(Math::max<int>(x0, cPtr->x0), Math::min<int>(x1, cPtr->x1), RASTER_SPAN_C);
+    span->setConstMask(covers[1]);
+
+    // Used only if last pixel is inside the region.
+    rightSpan = &span[2];
+
+    // Handle the left coverage if not clipped out.
+    if (span->getX0() == x0)
+    {
+      span->setConstMask(covers[0]);
+      if (span->getLength() > 1)
+      {
+        span[1].setPositionAndType(x0 + 1, span[0].getX1(), RASTER_SPAN_C);
+        span[1].setConstMask(covers[1]);
+        span[0].setX1(x0 + 1);
+        span[0].setNext(&span[1]);
+        span++;
+      }
+    }
+
+    for (;;)
+    {
+      if (++cPtr == cEnd)
+        break;
+
+      if (cPtr->y1 != y1)
+        break;
+
+      if (cPtr->x0 < x1)
+      {
+        ALLOC_SPAN(span, return);
+        span->setPositionAndType(cPtr->x0, Math::min<int>(x1, cPtr->x1), RASTER_SPAN_C);
+        span->setConstMask(covers[1]);
+      }
+    }
+
+    if (y1 > yEnd)
+      y1 = yEnd;
+    
+    // Handle the right coverage if not clipped out.
+    if (span->getX1() == x1)
+    {
+      if (span->getLength() > 1)
+      {
+        span->_x1--;
+        span->setNext(rightSpan);
+        span = rightSpan;
+        span->setPositionAndType(x1 - 1, x1, RASTER_SPAN_C);
+        span->setConstMask(covers[2]);
+      }
+      else if (span->getX0() != x0)
+      {
+        span->setConstMask(covers[2]);
+      }
+    }
+
+    span = scanline->end(span);
+    if (span != NULL)
+    {
+      if (yPos != y0)
+        filler->_skip(filler, y0 - yPos);
+
+      // Because there are 3 cases, we need to stop filling if we advance from top-inner
+      // or inner-bottom covers. Instead of patching scanlines we simply run the process
+      // again, the correct coverage will be set at the start of loop.
+      yPos = y1;
+
+      if (y0 == yTop)
+        yPos = y0 + 1;
+      else if (y1 == box.y1 && y0 != yBottom)
+        yPos = yBottom;
+
+      do {
+        process(filler, span);
+      } while (++y0 != yPos);
+
+      if (y1 != yPos)
+      {
+        cPtr = cMark;
+        goto _Repeat;
+      }
+    }
+  } while (cPtr != cEnd);
 }
+
+// ============================================================================
+// [Fog::BoxRasterizer8 - Render - 24x8 - Clip-Mask]
+// ============================================================================
 
 static void FOG_CDECL BoxRasterizer8_render_24x8_st_clip_mask(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  BoxRasterizer8* self = reinterpret_cast<BoxRasterizer8*>(_self);
-
-  // TODO: Rasterizer.
+  // TODO: BoxRasterizer8 - render 24x8 - clip-mask.
+  BoxRasterizer8* self = static_cast<BoxRasterizer8*>(_self);
 }
 
 // ============================================================================
@@ -1135,7 +1275,7 @@ void PathRasterizer8::addBox(const BoxD& box)
 
 #define ROW_NEW_CHUNK(_Chunk_, _X_, _Length_) \
   FOG_MACRO_BEGIN \
-    _Chunk_ = reinterpret_cast<PathRasterizer8::Chunk*>(self->_allocator.alloc(PathRasterizer8::Chunk::getSizeOf(_Length_))); \
+    _Chunk_ = static_cast<PathRasterizer8::Chunk*>(self->_allocator.alloc(PathRasterizer8::Chunk::getSizeOf(_Length_))); \
     if (FOG_IS_NULL(_Chunk_)) goto _Bail; \
     \
     _Chunk_->x0 = (_X_); \
@@ -2345,7 +2485,7 @@ template<int _RULE, int _USE_ALPHA>
 static void FOG_CDECL PathRasterizer8_render_st_clip_box(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
+  PathRasterizer8* self = static_cast<PathRasterizer8*>(_self);
   FOG_ASSERT(self->_isFinalized);
 
   if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth() * 2)))
@@ -2415,13 +2555,7 @@ static void FOG_CDECL PathRasterizer8_render_st_clip_box(
       // one for v-mask and one for possible c-mask.
       if (span->getX1() != x || span->getType() != RASTER_SPAN_AX_EXTRA)
       {
-        RasterSpan8* newSpan = scanline->allocSpans(2);
-        if (FOG_IS_NULL(newSpan))
-          return;
-
-        span->setNext(newSpan);
-        span = newSpan;
-
+        ALLOC_SPANS(span, 2, return);
         span->setX0AndType(x, RASTER_SPAN_AX_EXTRA);
         span->setVariantMask(mask);
       }
@@ -2465,8 +2599,19 @@ _Continue:
 
         if (len <= RASTER_SPAN_C_THRESHOLD)
         {
+          // If CPU supports unaligned read/write then we can optimize filling
+          // of small spans by extending the alpha to 32-bit or 64-bit integer
+          // and storing it directly to the current array. Span allocator always
+          // reserves some bytes for these optimizations.
+          //
+          // This optimization increased performance of FogBench for about 1-2%,
+          // depending on raterized shape and size. It's very cheap, and gives
+          // good results.
+          FOG_ASSERT(RASTER_SPAN_C_THRESHOLD <= 4);
+
 #if FOG_ARCH_BITS >= 64 && defined(FOG_ARCH_UNALIGNED_ACCESS_64)
-          Face::p64Store8u(mask, (uint64_t)alpha * FOG_UINT64_C(0x0001000100010001));
+          Face::p64Store8u(mask,
+            (uint64_t)alpha * FOG_UINT64_C(0x0001000100010001));
           mask += len * 2;
 #elif FOG_ARCH_BITS >= 32 && defined(FOG_ARCH_UNALIGNED_ACCESS_32)
           alpha *= 0x00010001;
@@ -2474,6 +2619,7 @@ _Continue:
           Face::p32Store4u(mask + 4, alpha);
           mask += len * 2;
 #else
+          // This is the common case.
           do {
             Face::p32Store2a(mask, alpha);
             mask += 2;
@@ -2515,311 +2661,175 @@ _Continue:
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================================================
 // [Fog::PathRasterizer8 - Render - Clip-Region]
 // ============================================================================
-
-#define RASTER_FETCH_DECLARE() \
-  PathRasterizer8::Chunk* chunk; \
-  PathRasterizer8::Cell* cPtr; \
-  PathRasterizer8::Cell* cEnd; \
-  \
-  int x; \
-  int xNext; \
-  int area; \
-  int cover
-
-#define RASTER_FETCH_BEGIN(_Skip_) \
-  scanline->begin(); \
-  \
-  FOG_ASSERT(chunk != NULL); \
-  cPtr = chunk->cells; \
-  cEnd = cPtr + chunk->getLength(); \
-  \
-  xNext = chunk->x0; \
-  cover = 0;
-
-#define RASTER_FETCH_CELL() \
-  FOG_MACRO_BEGIN \
-    x      = xNext; \
-    area   = cPtr->area; \
-    cover += cPtr->cover << (A8_SHIFT + 1); \
-    \
-    for (;;) \
-    { \
-      if (++cPtr == cEnd) \
-      { \
-        chunk = chunk->next; \
-        if (chunk == NULL) break; \
-        \
-        cPtr = chunk->cells; \
-        cEnd = cPtr + chunk->getLength(); \
-        xNext = chunk->x0; \
-        FOG_ASSERT(x != xNext); \
-      } \
-      else \
-      { \
-        xNext++; \
-      } \
-      break; \
-    } \
-  FOG_MACRO_END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// TODO: This should be really completed early.
 
 template<int _RULE, int _USE_ALPHA>
 static void FOG_CDECL PathRasterizer8_render_st_clip_region(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
-
-#if 0
+  PathRasterizer8* self = static_cast<PathRasterizer8*>(_self);
   FOG_ASSERT(self->_isFinalized);
 
-  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
+  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth() * 2)))
     return;
 
   int y0 = self->_boundingBox.y0;
   int y1 = self->_boundingBox.y1;
 
-  void** rows = self->_rowsAdjusted;
-  const BoxI* rectCur = self->_clip.region.data;
-  const BoxI* rectEnd = rectCur + self->_clip.region.length;
-
-  // Find the rectangle which is closest to the y0.
-  rectCur = RegionUtil::getClosestBox(rectCur, self->_clip.region.length, y0);
-  if (FOG_IS_NULL(rectCur))
-    return;
-
-  if (y0 < rectCur->y0)
-  {
-    y0 = rectCur->y0;
-    if (y0 >= y1) return;
-  }
-
-  const BoxI* bandCur = rectCur;
-  const BoxI* bandEnd = RegionUtil::getEndBand(rectCur, rectEnd);
+  PathRasterizer8::Row* rows = self->_rowsAdjusted + y0;
+  int xEnd = self->_sceneBox.x1;
 
   filler->prepare(y0);
 
+  RasterSpan8* span;
+  uint8_t* mask;
+  
   for (;;)
   {
-    // ------------------------------------------------------------------------
-    // [Declare]
-    // ------------------------------------------------------------------------
-
-    RASTER_FETCH_DECLARE();
-    int bandX0;
-    int bandX1 = bandCur->x1;
-
     // ------------------------------------------------------------------------
     // [Merge / Skip]
     // ------------------------------------------------------------------------
 
-    numCells = PathRasterizer8_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(self, rows[y0], &cellCur, buffer);
-    if (FOG_UNLIKELY(numCells == 0))
+    PathRasterizer8::Chunk* first = rows->first;
+    rows++;
+
+    if (FOG_IS_NULL(first))
     {
       int mark = y0;
       do {
         if (++y0 >= y1) return;
-        numCells = PathRasterizer8_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(self, rows[y0], &cellCur, buffer);
-      } while (numCells == 0);
+
+        first = rows->first;
+        rows++;
+      } while (first == NULL);
+
       filler->skip(y0 - mark);
     }
+
+    VERIFY_CHUNKS_8(first);
 
     // ------------------------------------------------------------------------
     // [Fetch]
     // ------------------------------------------------------------------------
 
-    RASTER_FETCH_BEGIN(_SkipScanline);
+    span = scanline->begin();
+    mask = scanline->getMask();
 
-    // Discard clip-boxes that can't intersect.
-    while (bandX1 <= xNext)
-    {
-_AdvanceClip:
-      if (++bandCur == bandEnd) goto _EndScanline;
-      bandX1 = bandCur->x1;
-    }
+    PathRasterizer8::Chunk* chunk = first;
+    PathRasterizer8::Cell* cell = chunk->cells;
 
-    bandX0 = bandCur->x0;
-    FOG_ASSERT(xNext < bandX1);
+    uint i = static_cast<uint>(chunk->getLength());
+
+    int x;
+    int xNext = chunk->x0;
+    int cover = 0;
+    uint32_t alpha;
 
     for (;;)
     {
-      RASTER_FETCH_CELL();
+      if (xNext == xEnd)
+        break;
 
-      // ----------------------------------------------------------------------
-      // [H-Line]
-      // ----------------------------------------------------------------------
+      x = xNext;
 
-      if (x + 1 == xNext)
+      // Link to the existing span if possible. In such case we don't need to
+      // worry about span allocation, because we have preallocated two spans,
+      // one for v-mask and one for possible c-mask.
+      if (span->getX1() != x || span->getType() != RASTER_SPAN_AX_EXTRA)
       {
-        if (x < bandX0) continue;
+        ALLOC_SPANS(span, 2, return);
+        span->setX0AndType(x, RASTER_SPAN_AX_EXTRA);
+        span->setVariantMask(mask);
+      }
 
-        // Skip this cell if resulting mask is zero.
-        uint32_t alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-        if (alpha == 0) continue;
+_Continue:
+      x += i;
+      if (x > xEnd && --i == 0)
+      {
+        FOG_ASSERT(x - 1 == xEnd);
+        break;
+      }
 
-        // Okay, it seems that we will now generate some masks, embedded to one
-        // span instance.
-        scanline->lnkA8Extra(x);
-        scanline->valA8Extra(alpha);
+      // Terminate span for now.
+      span->setX1(x);
 
-        if (bandX1 <= xNext)
+      do {
+        cover += cell->cover;
+        alpha  = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - (cell->area >> A8_SHIFT_2));
+
+        Face::p32Store2a(mask, alpha);
+        mask += 2;
+
+        cell++;
+      } while (--i);
+
+      chunk = chunk->next;
+      if (chunk == first)
+        break;
+
+      cell = chunk->cells;
+      xNext = chunk->x0;
+      i = (uint)chunk->getLength();
+
+      if (x == xNext)
+        goto _Continue;
+
+      alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover);
+      if (alpha != 0)
+      {
+        uint len = static_cast<uint>(xNext - x);
+
+        if (len <= RASTER_SPAN_C_THRESHOLD)
         {
-          scanline->endA8Extra(xNext);
-          goto _AdvanceClip;
-        }
+          // If CPU supports unaligned read/write then we can optimize filling
+          // of small spans by extending the alpha to 32-bit or 64-bit integer
+          // and storing it directly to the current array. Span allocator always
+          // reserves some bytes for these optimizations.
+          //
+          // This optimization increased performance of FogBench for about 1-2%,
+          // depending on raterized shape and size. It's very cheap, and gives
+          // good results.
+          FOG_ASSERT(RASTER_SPAN_C_THRESHOLD <= 4);
 
-        for (;;)
-        {
-          RASTER_FETCH_CELL();
-          alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-
-          if (++x == xNext)
-          {
-            scanline->valA8Extra(alpha);
-            if (bandX1 <= xNext)
-            {
-              scanline->endA8Extra(x);
-              goto _AdvanceClip;
-            }
-            continue;
-          }
-          break;
-        }
-
-        if (area != 0)
-        {
-          if (alpha != 0x00) scanline->valA8Extra(alpha);
+#if FOG_ARCH_BITS >= 64 && defined(FOG_ARCH_UNALIGNED_ACCESS_64)
+          Face::p64Store8u(mask,
+            (uint64_t)alpha * FOG_UINT64_C(0x0001000100010001));
+          mask += len * 2;
+#elif FOG_ARCH_BITS >= 32 && defined(FOG_ARCH_UNALIGNED_ACCESS_32)
+          alpha *= 0x00010001;
+          Face::p32Store4u(mask + 0, alpha);
+          Face::p32Store4u(mask + 4, alpha);
+          mask += len * 2;
+#else
+          // This is the common case.
+          do {
+            Face::p32Store2a(mask, alpha);
+            mask += 2;
+          } while (--len);
+#endif
+          span->setX1(xNext);
         }
         else
         {
-          x--;
+          span->setNext(span + 1);
+          span++;
+          
+          span->setPositionAndType(x, xNext, RASTER_SPAN_C);
+          span->setConstMask(alpha);
         }
-
-        if (numCells == 0) break;
-      }
-
-      // ----------------------------------------------------------------------
-      // [V-Line]
-      // ----------------------------------------------------------------------
-
-      else
-      {
-        uint32_t alpha;
-        if (area != 0)
-        {
-          if (x >= bandX0 && (alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area)) != 0)
-          {
-            scanline->lnkA8Extra(x);
-            scanline->valA8Extra(alpha);
-            scanline->endA8Extra(x + 1);
-          }
-          x++;
-        }
-        if (numCells == 0) break;
-      }
-
-      // ----------------------------------------------------------------------
-      // [Area]
-      // ----------------------------------------------------------------------
-
-      {
-        if (x >= bandX1)
-        {
-          if (++bandCur == bandEnd) goto _EndScanline;
-          bandX0 = bandCur->x0;
-          bandX1 = bandCur->x1;
-          FOG_ASSERT(x < bandX1);
-        }
-
-        uint32_t alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover);
-        if (alpha && xNext > bandX0)
-        {
-          if (x < bandX0) x = bandX0;
-
-          if (x < bandX1)
-          {
-            FOG_ASSERT(x < bandX1);
-            int toX = Math::min<int>(xNext, bandX1);
-            scanline->lnkConstSpanOrMerge(x, toX, alpha);
-            x = toX;
-          }
-
-          if (xNext > bandX1)
-          {
-            for (;;)
-            {
-              if (++bandCur == bandEnd) goto _EndScanline;
-              bandX0 = bandCur->x0;
-              bandX1 = bandCur->x1;
-              if (xNext > bandX0)
-              {
-                scanline->lnkConstSpan(bandX0, Math::min<int>(xNext, bandX1), alpha);
-                if (xNext >= bandX1) continue;
-              }
-              break;
-            }
-          }
-        }
-
-        if (xNext >= bandX1) goto _AdvanceClip;
       }
     }
+
+    span = scanline->end(span);
 
     // ------------------------------------------------------------------------
     // [Fill / Skip]
     // ------------------------------------------------------------------------
 
-_EndScanline:
-    if (FOG_IS_ERROR(scanline->close()) || scanline->getSpans() == NULL)
+    if (FOG_IS_NULL(span))
     {
-_SkipScanline:
       filler->skip(1);
     }
     else
@@ -2827,29 +2837,12 @@ _SkipScanline:
 #if defined(FOG_DEBUG_RASTERIZER)
       Rasterizer_dumpSpans(y0, scanline->getSpans());
 #endif // FOG_DEBUG_RASTERIZER
-      filler->process(scanline->getSpans());
+      filler->process(span);
     }
 
     if (++y0 >= y1)
       return;
-
-    // Advance clip to the next band if needed.
-    if (rectCur->y1 <= y0)
-    {
-      if (bandEnd == rectEnd)
-        return;
-
-      y0 = bandEnd[0].y0;
-      if (y0 >= y1)
-        return;
-
-      rectCur = bandEnd;
-      bandEnd = RegionUtil::getEndBand(rectCur, rectEnd);
-    }
-
-    bandCur = rectCur;
   }
-#endif
 }
 
 // ============================================================================
@@ -2860,573 +2853,9 @@ template<int _RULE, int _USE_ALPHA>
 static void FOG_CDECL PathRasterizer8_render_st_clip_mask(
   Rasterizer8* _self, RasterFiller* filler, RasterScanline8* scanline)
 {
-  PathRasterizer8* self = reinterpret_cast<PathRasterizer8*>(_self);
-
-#if 0
-  FOG_ASSERT(self->_isFinalized);
-
-  if (FOG_IS_ERROR(scanline->prepare(self->_boundingBox.getWidth())))
-    return;
-
-  int y0 = Math::max<int>(self->_boundingBox.y0, self->_clip.mask.y0);
-  int y1 = Math::min<int>(self->_boundingBox.y1, self->_clip.mask.y1);
-
-  if (y0 >= y1)
-    return;
-
-  void** rows = self->_rowsAdjusted - self->_sceneBox.y0;
-  const RasterSpan8** mrows = self->_clip.mask.spans - self->_clip.mask.y0;
-
-  filler->prepare(y0);
-
-  for (;;)
-  {
-    // ------------------------------------------------------------------------
-    // [Declare]
-    // ------------------------------------------------------------------------
-
-    RASTER_FETCH_DECLARE();
-    const RasterSpan8* mask;                // Mask-span instance.
-    int maskX0;                             // Mask-span x0.
-    int maskX1;                             // Mask-span x1.
-    uint32_t maskType;                      // Mask-span type.
-    const uint8_t* maskData;                // Mask-span data pointer (or const-value).
-
-    // ------------------------------------------------------------------------
-    // [Merge / Skip]
-    // ------------------------------------------------------------------------
-
-    numCells = PathRasterizer8_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(self, rows[y0], &cellCur, buffer);
-    mask = mrows[y0];
-    if (FOG_UNLIKELY(numCells == 0 || mask == NULL))
-    {
-      int mark = y0;
-      do {
-        if (++y0 >= y1) return;
-        numCells = PathRasterizer8_mergeCells<_CHUNK_TYPE, _CELL_TYPE>(self, rows[y0], &cellCur, buffer);
-        mask = mrows[y0];
-      } while (numCells == 0 || mask == NULL);
-      filler->skip(y0 - mark);
-    }
-
-    // ------------------------------------------------------------------------
-    // [Fetch]
-    // ------------------------------------------------------------------------
-
-    RASTER_FETCH_BEGIN(_SkipScanline);
-
-    // ------------------------------------------------------------------------
-    // [Clip]
-    // ------------------------------------------------------------------------
-
-    maskX1 = mask->getX1();
-
-#define MASK_SPAN_CHANGED() \
-    FOG_MACRO_BEGIN \
-      maskX0 = mask->getX0(); \
-      FOG_ASSERT(maskX0 < maskX1); \
-      \
-      maskType = mask->getType(); \
-      maskData = reinterpret_cast<uint8_t*>(mask->getGenericMask()); \
-      maskData -= RasterSpan8::getMaskAdvance(maskType, maskX0); \
-    FOG_MACRO_END
-
-    // ------------------------------------------------------------------------
-    // [Prepare]
-    // ------------------------------------------------------------------------
-
-    // Advance clip (discard clip-boxes that can't intersect).
-    while (maskX1 <= xNext)
-    {
-_AdvanceClip:
-      if ((mask = mask->getNext()) == NULL) goto _EndScanline;
-      maskX1 = mask->getX1();
-    }
-
-    MASK_SPAN_CHANGED();
-    FOG_ASSERT(xNext < maskX1);
-
-    // ------------------------------------------------------------------------
-    // [Main-Loop]
-    // ------------------------------------------------------------------------
-
-_Continue:
-    for (;;)
-    {
-      RASTER_FETCH_CELL();
-      FOG_ASSERT(x < maskX1);
-
-      // ----------------------------------------------------------------------
-      // [H-Line]
-      // ----------------------------------------------------------------------
-
-      if (x + 1 == xNext)
-      {
-        if (x < maskX0) continue;
-
-        // Skip this cell if resulting mask is zero.
-        uint32_t alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-        if (alpha == 0)
-        {
-          if (maskX1 <= xNext) goto _AdvanceClip;
-          continue;
-        }
-
-        switch (maskType)
-        {
-          case RASTER_SPAN_C:
-          {
-            uint32_t m = RasterSpan8::getConstMaskFromPointer(maskData);
-            Face::p32MulDiv256SBW(alpha, alpha, m);
-
-            if (alpha == 0x00)
-            {
-              if (maskX1 <= xNext) goto _AdvanceClip;
-              goto _Continue;
-            }
-
-            scanline->lnkA8Extra(x);
-            scanline->valA8Extra(alpha);
-            if (maskX1 <= xNext) { scanline->endA8Extra(xNext); goto _AdvanceClip; }
-
-            for (;;)
-            {
-              RASTER_FETCH_CELL();
-              FOG_ASSERT(x >= maskX0 && x < maskX1);
-
-              alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-              Face::p32MulDiv256SBW(alpha, alpha, m);
-
-              if (++x != xNext) break;
-
-              scanline->valA8Extra(alpha);
-              if (maskX1 <= xNext)
-              {
-                scanline->endA8Extra(x);
-                goto _AdvanceClip;
-              }
-            }
-
-            if (area != 0)
-            {
-              if (alpha != 0) scanline->valA8Extra(alpha);
-            }
-            else
-            {
-              x--;
-            }
-
-            scanline->endA8Extra();
-            break;
-          }
-
-          case RASTER_SPAN_A8_GLYPH:
-          case RASTER_SPAN_AX_GLYPH:
-          {
-            uint32_t m;
-
-            Face::p32Load1b(m, maskData + x);
-            Face::p32MulDiv256SBW(m, m, alpha);
-
-            if (m == 0x00)
-            {
-              if (maskX1 <= xNext) goto _AdvanceClip;
-              goto _Continue;
-            }
-
-            scanline->lnkA8Glyph(x);
-            scanline->valA8Glyph(m);
-            if (maskX1 <= xNext) { scanline->endA8Glyph(xNext); goto _AdvanceClip; }
-
-            for (;;)
-            {
-              RASTER_FETCH_CELL();
-              FOG_ASSERT(x >= maskX0 && x < maskX1);
-
-              alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-              Face::p32Load1b(m, maskData + x);
-              Face::p32MulDiv256SBW(m, m, alpha);
-
-              if (++x == xNext)
-              {
-                scanline->valA8Glyph(m);
-                if (maskX1 <= xNext) { scanline->endA8Glyph(x); goto _AdvanceClip; }
-              }
-              else
-              {
-                break;
-              }
-            }
-
-            if (area != 0)
-            {
-              if (m != 0x00) scanline->valA8Glyph(m);
-            }
-            else
-            {
-              x--;
-            }
-
-            scanline->endA8Glyph();
-            break;
-          }
-
-          case RASTER_SPAN_AX_EXTRA:
-          {
-            uint32_t m;
-
-            Face::p32Load2a(m, maskData + x * 2);
-            Face::p32MulDiv256SBW(m, m, alpha);
-
-            if (m == 0x00)
-            {
-              if (maskX1 <= xNext) goto _AdvanceClip;
-              goto _Continue;
-            }
-
-            scanline->lnkA8Extra(x);
-            scanline->valA8Extra(m);
-            if (maskX1 <= xNext) { scanline->endA8Extra(xNext); goto _AdvanceClip; }
-
-            for (;;)
-            {
-              RASTER_FETCH_CELL();
-              FOG_ASSERT(x >= maskX0 && x < maskX1);
-
-              alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-              Face::p32Load2a(m, maskData + x * 2);
-              Face::p32MulDiv256SBW(m, m, alpha);
-
-              if (++x == xNext)
-              {
-                scanline->valA8Extra(m);
-                if (maskX1 <= xNext) { scanline->endA8Extra(x); goto _AdvanceClip; }
-              }
-              else
-              {
-                break;
-              }
-            }
-
-            if (area != 0)
-            {
-              if (m != 0x00) scanline->valA8Extra(m);
-            }
-            else
-            {
-              x--;
-            }
-
-            scanline->endA8Extra();
-            break;
-          }
-
-          case RASTER_SPAN_ARGB32_GLYPH:
-          case RASTER_SPAN_ARGBXX_GLYPH:
-          {
-            uint32_t m;
-
-            Face::p32Load4a(m, maskData + x * 4);
-            Face::p32MulDiv256PBB_SBW(m, m, alpha);
-
-            if (m == 0x00000000)
-            {
-              if (maskX1 <= xNext) goto _AdvanceClip;
-              goto _Continue;
-            }
-
-            scanline->lnkARGB32Glyph(x);
-            scanline->valARGB32Glyph(m);
-            if (maskX1 <= xNext) { scanline->endARGB32Glyph(xNext); goto _AdvanceClip; }
-
-            for (;;)
-            {
-              RASTER_FETCH_CELL();
-              FOG_ASSERT(x >= maskX0 && x < maskX1);
-
-              alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area);
-              Face::p32Load4a(m, maskData + x * 4);
-              Face::p32MulDiv256PBB_SBW(m, m, alpha);
-
-              if (++x == xNext)
-              {
-                scanline->valARGB32Glyph(m);
-                if (maskX1 <= xNext) { scanline->endARGB32Glyph(x); goto _AdvanceClip; }
-              }
-              else
-              {
-                break;
-              }
-            }
-
-            if (area != 0)
-            {
-              if (m != 0x00000000) scanline->valARGB32Glyph(m);
-            }
-            else
-            {
-              x--;
-            }
-
-            scanline->endARGB32Glyph();
-            break;
-          }
-
-          default:
-            FOG_ASSERT_NOT_REACHED();
-        }
-      }
-
-      // ----------------------------------------------------------------------
-      // [V-Line]
-      // ----------------------------------------------------------------------
-
-      else
-      {
-        uint32_t alpha;
-
-        if (area != 0)
-        {
-          if (x >= maskX0 && (alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - area)) != 0)
-          {
-            FOG_ASSERT(x >= maskX0 && x < maskX1);
-            uint32_t m;
-
-            switch (maskType)
-            {
-              case RASTER_SPAN_C:
-                m = RasterSpan8::getConstMaskFromPointer(maskData);
-                goto _VLine_AxExtra;
-
-              case RASTER_SPAN_A8_GLYPH:
-              case RASTER_SPAN_AX_GLYPH:
-                Face::p32Load1b(m, maskData + x);
-                Face::p32MulDiv256SBW(m, m, alpha);
-
-                if (m != 0x00)
-                {
-                  scanline->lnkA8Glyph(x);
-                  scanline->valA8Glyph(m);
-                  scanline->endA8Glyph(x + 1);
-                }
-                break;
-
-              case RASTER_SPAN_AX_EXTRA:
-                Face::p32Load4a(m, maskData + x * 2);
-_VLine_AxExtra:
-                Face::p32MulDiv256SBW(m, m, alpha);
-
-                if (m != 0x00)
-                {
-                  scanline->lnkA8Extra(x);
-                  scanline->valA8Extra(m);
-                  scanline->endA8Extra(x + 1);
-                }
-                break;
-
-              case RASTER_SPAN_ARGB32_GLYPH:
-              case RASTER_SPAN_ARGBXX_GLYPH:
-                Face::p32Load4a(m, maskData + x * 4);
-                Face::p32MulDiv256PBB_SBW(m, m, alpha);
-
-                if (m != 0x00000000)
-                {
-                  scanline->lnkARGB32Glyph(x);
-                  scanline->valARGB32Glyph(m);
-                  scanline->endARGB32Glyph(x + 1);
-                }
-                break;
-
-              default:
-                FOG_ASSERT_NOT_REACHED();
-            }
-          }
-          x++;
-        }
-      }
-
-      if (numCells == 0) break;
-
-      // ----------------------------------------------------------------------
-      // [Area]
-      // ----------------------------------------------------------------------
-
-      if (xNext > maskX0)
-      {
-        if (maskX1 <= x)
-        {
-          if ((mask = mask->getNext()) == NULL) goto _EndScanline;
-          maskX1 = mask->getX1();
-          MASK_SPAN_CHANGED();
-          FOG_ASSERT(x < maskX1);
-        }
-
-        uint32_t alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover);
-
-        if (alpha)
-        {
-          if (x < maskX0) x = maskX0;
-
-          if (x < maskX1)
-          {
-            int toX = Math::min<int>(xNext, maskX1);
-
-            FOG_ASSERT(x < maskX1);
-            FOG_ASSERT(x < toX);
-
-            switch (maskType)
-            {
-              case RASTER_SPAN_C:
-              {
-                uint32_t m = RasterSpan8::getConstMaskFromPointer(maskData);
-                Face::p32MulDiv256SBW(m, m, alpha);
-                if (m != 0x00) scanline->lnkConstSpanOrMerge(x, toX, m);
-                break;
-              }
-
-              case RASTER_SPAN_A8_GLYPH:
-              case RASTER_SPAN_AX_GLYPH:
-              {
-                // TODO: Rasterizer.
-                /*
-                _api_raster.mask[MASK_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
-                  scanline->lnkA8Extra_buf(x, toX),  // Destination.
-                  maskData + x,                     // Source A.
-                  alpha,                            // Source B.
-                  toX - x);                         // Length.
-                */
-                break;
-              }
-
-              case RASTER_SPAN_AX_EXTRA:
-              {
-                // TODO: Rasterizer.
-                break;
-              }
-
-              case RASTER_SPAN_ARGB32_GLYPH:
-              case RASTER_SPAN_ARGBXX_GLYPH:
-              {
-                // TODO: Rasterizer.
-                break;
-              }
-
-              default:
-                FOG_ASSERT_NOT_REACHED();
-            }
-
-            x = toX;
-          }
-
-          if (xNext > maskX1)
-          {
-            for (;;)
-            {
-              if ((mask = mask->getNext()) == NULL) goto _EndScanline;
-
-              maskX1 = mask->getX1();
-              MASK_SPAN_CHANGED();
-
-              if (xNext > maskX0)
-              {
-                int toX = Math::min<int>(xNext, maskX1);
-                FOG_ASSERT(maskX0 < toX);
-
-                switch (maskType)
-                {
-                  case RASTER_SPAN_C:
-                  {
-                    uint32_t m = RasterSpan8::getConstMaskFromPointer(maskData);
-                    Face::p32MulDiv256SBW(m, m, alpha);
-                    if (m != 0x00) scanline->lnkConstSpanOrMerge(maskX0, toX, m);
-                    break;
-                  }
-
-                  case RASTER_SPAN_A8_GLYPH:
-                  case RASTER_SPAN_AX_GLYPH:
-                  {
-                    // TODO: Rasterizer.
-                    /*
-                    _api_raster.mask[MASK_OP_INTERSECT][IMAGE_FORMAT_A8].v_op_c(
-                      scanline->lnkA8Extra_buf(maskX0, toX),  // Destination.
-                      maskData + maskX0,                     // Source A.
-                      alpha,                                 // Source B.
-                      toX - maskX0);                         // Length.
-                    */
-                    break;
-                  }
-
-                  case RASTER_SPAN_AX_EXTRA:
-                  {
-                    // TODO: Rasterizer.
-                    break;
-                  }
-
-                  case RASTER_SPAN_ARGB32_GLYPH:
-                  case RASTER_SPAN_ARGBXX_GLYPH:
-                  {
-                    // TODO: Rasterizer.
-                    break;
-                  }
-
-                  default:
-                    FOG_ASSERT_NOT_REACHED();
-                }
-                if (maskX1 <= xNext) continue;
-              }
-              break;
-            }
-          }
-        }
-
-        if (maskX1 <= xNext) goto _AdvanceClip;
-      }
-    }
-
-#undef MASK_SPAN_CHANGED
-
-    // ------------------------------------------------------------------------
-    // [Fill / Skip]
-    // ------------------------------------------------------------------------
-
-_EndScanline:
-    if (FOG_IS_ERROR(scanline->close()) || scanline->getSpans() == NULL)
-    {
-_SkipScanline:
-      filler->skip(1);
-    }
-    else
-    {
-#if defined(FOG_DEBUG_RASTERIZER)
-      Rasterizer_dumpSpans(y0, scanline->getSpans());
-#endif // FOG_DEBUG_RASTERIZER
-      filler->process(scanline->getSpans());
-    }
-
-    if (++y0 >= y1)
-      return;
-  }
-#endif
+  // TODO: Rasterizer - clip-mask
+  PathRasterizer8* self = static_cast<PathRasterizer8*>(_self);
 }
-
-#undef RENDER_VARIABLES
-#undef RASTER_FETCH_ROW
-#undef RASTER_FETCH_CELL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [Fog::PathRasterizer8 - Finalize]
@@ -3487,11 +2916,11 @@ FOG_NO_EXPORT void Rasterizer_init(void)
   Rasterizer_api.box8.init32x0 = BoxRasterizer8_init32x0;
   Rasterizer_api.box8.init24x8 = BoxRasterizer8_init24x8;
 
-  Rasterizer_api.box8.render_32x0[RASTER_CLIP_BOXI  ] = BoxRasterizer8_render_32x0_st_clip_box;
+  Rasterizer_api.box8.render_32x0[RASTER_CLIP_BOX   ] = BoxRasterizer8_render_32x0_st_clip_box;
   Rasterizer_api.box8.render_32x0[RASTER_CLIP_REGION] = BoxRasterizer8_render_32x0_st_clip_region;
   Rasterizer_api.box8.render_32x0[RASTER_CLIP_MASK  ] = BoxRasterizer8_render_32x0_st_clip_mask;
 
-  Rasterizer_api.box8.render_24x8[RASTER_CLIP_BOXI  ] = BoxRasterizer8_render_24x8_st_clip_box;
+  Rasterizer_api.box8.render_24x8[RASTER_CLIP_BOX   ] = BoxRasterizer8_render_24x8_st_clip_box;
   Rasterizer_api.box8.render_24x8[RASTER_CLIP_REGION] = BoxRasterizer8_render_24x8_st_clip_region;
   Rasterizer_api.box8.render_24x8[RASTER_CLIP_MASK  ] = BoxRasterizer8_render_24x8_st_clip_mask;
 
@@ -3499,19 +2928,19 @@ FOG_NO_EXPORT void Rasterizer_init(void)
   // [Fog::PathRasterizer8]
   // --------------------------------------------------------------------------
 
-  Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 0>;
+  Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 0>;
   Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_NON_ZERO, 0>;
   Rasterizer_api.path8.render_nonzero[0][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_NON_ZERO, 0>;
 
-  Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 1>;
+  Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_NON_ZERO, 1>;
   Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_NON_ZERO, 1>;
   Rasterizer_api.path8.render_nonzero[1][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_NON_ZERO, 1>;
 
-  Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 0>;
+  Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 0>;
   Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_EVEN_ODD, 0>;
   Rasterizer_api.path8.render_evenodd[0][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_EVEN_ODD, 0>;
 
-  Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_BOXI  ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 1>;
+  Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_BOX   ] = PathRasterizer8_render_st_clip_box   <FILL_RULE_EVEN_ODD, 1>;
   Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_REGION] = PathRasterizer8_render_st_clip_region<FILL_RULE_EVEN_ODD, 1>;
   Rasterizer_api.path8.render_evenodd[1][RASTER_CLIP_MASK  ] = PathRasterizer8_render_st_clip_mask  <FILL_RULE_EVEN_ODD, 1>;
 }

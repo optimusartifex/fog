@@ -82,7 +82,7 @@ struct FOG_NO_EXPORT Rasterizer8
     _render = NULL;
 
     _opacity = 0x100;
-    _clipType = RASTER_CLIP_BOXI;
+    _clipType = RASTER_CLIP_BOX;
     _initialized = false;
   }
 
@@ -102,34 +102,17 @@ struct FOG_NO_EXPORT Rasterizer8
   FOG_INLINE void setSceneBox(const BoxI& sceneBox)
   {
     _sceneBox = sceneBox;
+    _clipType = RASTER_CLIP_BOX;
+
     _sceneBox24x8.x0 = sceneBox.x0 << 8;
     _sceneBox24x8.y0 = sceneBox.y0 << 8;
     _sceneBox24x8.x1 = sceneBox.x1 << 8;
     _sceneBox24x8.y1 = sceneBox.y1 << 8;
   }
 
-  // --------------------------------------------------------------------------
-  // [Opacity]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE uint32_t getOpacity() const
-  {
-    return _opacity;
-  }
-
-  FOG_INLINE void setOpacity(uint32_t opacity)
-  {
-    FOG_ASSERT(opacity <= 0x100);
-    _opacity = opacity;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Clipping]
-  // --------------------------------------------------------------------------
-
   FOG_INLINE void setClipRegion(const BoxI* data, size_t length)
   {
-    FOG_ASSERT(length > 0);
+    FOG_ASSERT(length > 1);
 
     _clipType = RASTER_CLIP_REGION;
     _clip.region.y0 = data[0].y0;
@@ -146,9 +129,19 @@ struct FOG_NO_EXPORT Rasterizer8
     _clip.mask.spans = spans;
   }
 
-  FOG_INLINE void resetClip()
+  // --------------------------------------------------------------------------
+  // [Opacity]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getOpacity() const
   {
-    _clipType = RASTER_CLIP_BOXI;
+    return _opacity;
+  }
+
+  FOG_INLINE void setOpacity(uint32_t opacity)
+  {
+    FOG_ASSERT(opacity <= 0x100);
+    _opacity = opacity;
   }
 
   // --------------------------------------------------------------------------
@@ -265,18 +258,18 @@ struct FOG_NO_EXPORT BoxRasterizer8 : public Rasterizer8
   {
     struct
     {
-      //! @brief Coverate - top.
+      //! @brief Covers - top.
       uint16_t _ct[4];
-      //! @brief Coverage - inner.
+      //! @brief Covers - inner.
       uint16_t _ci[4];
-      //! @brief Coverage - bottom.
+      //! @brief Covers - bottom.
       uint16_t _cb[4];
     };
 
     struct
     {
-      //! @brief Coverage - all-in-one.
-      uint16_t _coverage[12];
+      //! @brief Covers - all-in-one.
+      uint16_t _covers[12];
     };
   };
 };

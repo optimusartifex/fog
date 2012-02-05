@@ -184,7 +184,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Helpers - Region]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE Region& getTemporaryRegion()
+  FOG_INLINE Region* getTemporaryRegion()
   {
     size_t i;
     for (i = 0; i < FOG_ARRAY_SIZE(tmpRegion) - 1; i++)
@@ -192,7 +192,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
       if (tmpRegion[i].isDetached())
         break;
     }
-    return tmpRegion[i];
+    return &tmpRegion[i];
   }
 
   // --------------------------------------------------------------------------

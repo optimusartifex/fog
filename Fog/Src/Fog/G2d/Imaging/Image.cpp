@@ -81,7 +81,7 @@ static err_t FOG_CDECL Image_Buffer_create(ImageData** pd, const SizeI* size, ui
     return ERR_RT_OUT_OF_MEMORY;
 
   size_t dSize = sizeof(ImageData) + 16 + (size_t)stride * (uint)size->h;
-  ImageData* d = reinterpret_cast<ImageData*>(MemMgr::alloc(dSize));
+  ImageData* d = static_cast<ImageData*>(MemMgr::alloc(dSize));
 
   if (FOG_IS_NULL(d))
     return ERR_RT_OUT_OF_MEMORY;
@@ -309,7 +309,7 @@ static err_t FOG_CDECL Image_adopt(Image* self, const ImageBits* imageBits, uint
   }
   else
   {
-    d = reinterpret_cast<ImageData*>(MemMgr::alloc(sizeof(ImageData)));
+    d = static_cast<ImageData*>(MemMgr::alloc(sizeof(ImageData)));
 
     if (FOG_IS_NULL(d))
     {

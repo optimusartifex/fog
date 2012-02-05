@@ -304,7 +304,7 @@ struct FOG_NO_EXPORT Helpers
   static void FOG_FASTCALL p_solid_fetch_rgb48(
     RasterPatternFetcher* fetcher, RasterSpan* span, uint8_t* buffer)
   {
-    // TODO: PRGB48 support.
+    // TODO: RGB48 support.
   }
 
   static void FOG_FASTCALL p_solid_fetch_a16(

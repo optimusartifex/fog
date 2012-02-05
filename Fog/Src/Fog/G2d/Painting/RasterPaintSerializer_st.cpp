@@ -222,6 +222,33 @@ static void FOG_FASTCALL RasterPaintFiller_skip_filter(RasterPaintFiller* self, 
 }
 
 // ============================================================================
+// [Fog::RasterPaintSerializer - PrepareRasterizer (st)]
+// ============================================================================
+
+static void FOG_INLINE RasterPaintSerializer_prepareRasterizer_st(RasterPaintEngine* engine, Rasterizer8* rasterizer)
+{
+  rasterizer->setSceneBox(engine->ctx.clipBoxI);
+  rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
+
+  switch (engine->ctx.clipType)
+  {
+    case RASTER_CLIP_BOX:
+      break;
+
+    case RASTER_CLIP_REGION:
+      rasterizer->setClipRegion(engine->ctx.clipRegion.getData(), engine->ctx.clipRegion.getLength());
+      break;
+
+    case RASTER_CLIP_MASK:
+      // TODO: RasterPaintEngine - clip-mask.
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+// ============================================================================
 // [Fog::RasterPaintSerializer - FillRasterizedShape (st)]
 // ============================================================================
 
@@ -425,7 +452,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
     case IMAGE_PRECISION_BYTE:
     {
       // Fast-path (clip-box and full-opacity).
-      if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.clipType == RASTER_CLIP_BOXI)
+      if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.clipType == RASTER_CLIP_BOX)
       {
         uint8_t* pixels = engine->ctx.layer.pixels;
         ssize_t stride = engine->ctx.layer.stride;
@@ -495,9 +522,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-
-        rasterizer->setSceneBox(engine->ctx.clipBoxI);
-        rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
+        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
         rasterizer->init32x0(*box);
         return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
@@ -538,8 +563,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_st(
       }
 
       BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-      rasterizer->setSceneBox(engine->ctx.clipBoxI);
-      rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
+      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->init24x8(box24x8);
       return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
@@ -579,9 +603,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_st(
       }
 
       BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-
-      rasterizer->setSceneBox(engine->ctx.clipBoxI);
-      rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
+      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->init24x8(box24x8);
       return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
@@ -613,11 +635,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
+      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
-      rasterizer->setSceneBox(engine->ctx.clipBoxI);
       rasterizer->setFillRule(fillRule);
-      rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
-
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
@@ -652,11 +672,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
+      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
-      rasterizer->setSceneBox(engine->ctx.clipBoxI);
       rasterizer->setFillRule(fillRule);
-      rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
-
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
@@ -731,7 +749,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_st(
     case IMAGE_PRECISION_BYTE:
     {
       // Fast-path (clip-box and full-opacity).
-      if (engine->ctx.clipType == RASTER_CLIP_BOXI)
+      if (engine->ctx.clipType == RASTER_CLIP_BOX)
       {
         uint8_t* pixels = engine->ctx.layer.pixels;
         ssize_t stride = engine->ctx.layer.stride;
@@ -865,13 +883,11 @@ _BlitImageA8_Alpha:
       }
       else
       {
-        BoxRasterizer8& rasterizer = engine->ctx.boxRasterizer8;
+        BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
+        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+
         BoxI box(pt->x, pt->y, pt->x + srcFragment->w, pt->y + srcFragment->h);
-
-        rasterizer.setSceneBox(engine->ctx.clipBoxI);
-        rasterizer.setOpacity(engine->ctx.rasterHints.opacity);
-
-        rasterizer.init32x0(box);
+        rasterizer->init32x0(box);
 
         RasterPattern* old = engine->ctx.pc;
         RasterPattern pc;
@@ -886,7 +902,7 @@ _BlitImageA8_Alpha:
         );
 
         engine->ctx.pc = &pc;
-        err_t err = RasterPaintSerializer_fillRasterizedShape8_st(engine, &rasterizer);
+        err_t err = RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
         engine->ctx.pc = old;
 
         pc.destroy();
@@ -1039,15 +1055,52 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterPathD_st(
 static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathF_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  if (!engine->ctx.rasterHints.finalTransformF)
+  {
+    if (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY)
+    {
+      engine->stroker.f->_transform->setTransform(engine->stroker.d->getTransform());
+      engine->ctx.rasterHints.finalTransformF = 1;
+    }
+    else
+    {
+      engine->stroker.f->_transform->reset();
+    }
+    engine->stroker.f->_isDirty = true;
+  }
+
+  if (engine->strokerPrecision == RASTER_PRECISION_D)
+  {
+    engine->strokerPrecision = RASTER_PRECISION_BOTH;
+    engine->stroker.f->_params() = engine->stroker.d->_params();
+  }
+
+  PathStrokerF& stroker = engine->stroker.f;
+  PathF& tmp = engine->ctx.tmpPathF[0];
+
+  tmp.clear();
+  FOG_RETURN_ON_ERROR(stroker.strokePath(tmp, *path));
+
+  return engine->serializer->filterNormalizedPathF(engine, feBase, &tmp, FILL_RULE_NON_ZERO);
 }
 
 static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathD_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path)
 {
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  if (engine->strokerPrecision == RASTER_PRECISION_F)
+  {
+    engine->strokerPrecision = RASTER_PRECISION_BOTH;
+    engine->stroker.d->_params() = engine->stroker.f->_params();
+    engine->stroker.d->_isDirty = true;
+  }
+
+  PathStrokerD& stroker = engine->stroker.d;
+  PathD& tmp = engine->ctx.tmpPathD[0];
+
+  tmp.clear();
+  FOG_RETURN_ON_ERROR(stroker.strokePath(tmp, *path));
+
+  return engine->serializer->filterNormalizedPathD(engine, feBase, &tmp, FILL_RULE_NON_ZERO);
 }
 
 // ============================================================================
@@ -1242,8 +1295,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxF_st(
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-        rasterizer->setSceneBox(engine->ctx.clipBoxI);
-        rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
+        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
         rasterizer->init24x8(box24x8);
         return RasterPaintSerializer_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boxBounds);
@@ -1285,8 +1337,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxD_st(
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-        rasterizer->setSceneBox(engine->ctx.clipBoxI);
-        rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
+        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
         rasterizer->init24x8(box24x8);
         return RasterPaintSerializer_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boxBounds);
@@ -1319,11 +1370,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathF_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
+      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
-      rasterizer->setSceneBox(engine->ctx.clipBoxI);
       rasterizer->setFillRule(fillRule);
-      rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
-
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
@@ -1358,11 +1407,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
+      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
 
-      rasterizer->setSceneBox(engine->ctx.clipBoxI);
       rasterizer->setFillRule(fillRule);
-      rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
-
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
@@ -1531,37 +1578,50 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_st(
   if ((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0)
     engine->saveClipping();
 
+  Region* newRegion;
+  size_t newLength;
+
   switch (clipOp)
   {
     case CLIP_OP_REPLACE:
       switch (engine->ctx.clipType)
       {
-        case RASTER_CLIP_BOXI:
+        case RASTER_CLIP_BOX:
+          // RasterPaintEngine always clips only to clip-box, if there is a
+          // meta-region then we have to clip manually.
+_ReplaceTryMeta:
+          if (engine->metaRegion.getLength() > 1)
+          {
+            newRegion = engine->getTemporaryRegion();
+            FOG_RETURN_ON_ERROR(Region::intersect(*newRegion, engine->metaRegion, *box));
+
+            newLength = newRegion->getLength();
+            box = &newRegion->_d->boundingBox;
+
+            if (newLength == 0)
+              return engine->serializer->clipAll(engine);
+
+            if (newLength > 1)
+              goto _ReplaceClipRegion;
+          }
+
 _ReplaceClipBox:
-        {
           engine->masterFlags &= ~RASTER_NO_PAINT_USER_CLIP;
 
-          engine->ctx.clipType = RASTER_CLIP_BOXI;
+          engine->ctx.clipType = RASTER_CLIP_BOX;
           engine->ctx.clipBoxI = *box;
           engine->stroker.f->_clipBox.setBox(*box);
           engine->stroker.d->_clipBox.setBox(*box);
-
           return ERR_OK;
-        }
 
         case RASTER_CLIP_REGION:
-        {
           // Not used anymore.
           engine->ctx.clipRegion.clear();
-
-          goto _ReplaceClipBox;
-        }
+          goto _ReplaceTryMeta;
 
         case RASTER_CLIP_MASK:
-        {
           // TODO: RasterPaintEngine - clip-mask.
-          break;
-        }
+          goto _ReplaceTryMeta;
 
         default:
           FOG_ASSERT_NOT_REACHED();
@@ -1571,25 +1631,23 @@ _ReplaceClipBox:
     case CLIP_OP_INTERSECT:
       switch (engine->ctx.clipType)
       {
-        case RASTER_CLIP_BOXI:
-        {
+        case RASTER_CLIP_BOX:
           // ClipNormalizedBox is always called with already clipped box to
           // the current clip-box or meta clip-box. This means that we don't
           // need to clip it again.
           FOG_ASSERT(engine->ctx.clipBoxI.subsumes(*box));
           goto _ReplaceClipBox;
-        }
 
         case RASTER_CLIP_REGION:
-        {
           // Just assure that there is something in current clipRegion, 
           // because clipping is set to RASTER_CLIP_REGION.
           FOG_ASSERT(engine->ctx.clipRegion.getLength() > 1);
 
-          Region& newRegion = engine->getTemporaryRegion();
-          FOG_RETURN_ON_ERROR(Region::intersect(newRegion, engine->ctx.clipRegion, *box));
-          
-          size_t newLength = newRegion.getLength();
+          newRegion = engine->getTemporaryRegion();
+          FOG_RETURN_ON_ERROR(Region::intersect(*newRegion, engine->ctx.clipRegion, *box));
+
+          newLength = newRegion->getLength();
+          box = &newRegion->_d->boundingBox;
 
           // If the result is empty region, then everything is clipped (and
           // painting is temporary disabled).
@@ -1597,33 +1655,31 @@ _ReplaceClipBox:
             return engine->serializer->clipAll(engine);
 
           // If the result is single rectangle, then we switch to different
-          // clip-type (RASTER_CLIP_BOXI), which is simpler and much faster.
+          // clip-type (RASTER_CLIP_BOX), which is simpler and much faster.
           if (newLength == 1)
             goto _ReplaceClipBox;
 
-          // ClipType is already set to RASTER_CLIP_REGION, we don't need
-          // to touch it. However, the newRegion is not yet active, so it's
-          // needed to set it to the context. We use swap(), because the
-          // old region can be allocated on the heap and we would like to
-          // prevent deallocation (it can be reused later).
-          swap(engine->ctx.clipRegion, newRegion);
+_ReplaceClipRegion:
+          // We use swap to prevent old clipRegion to be deallocated. It's
+          // likely that it will be used again.
+          swap(engine->ctx.clipRegion, *newRegion);
 
           // And now we have to update all clip-boxes.
-          engine->ctx.clipBoxI = engine->ctx.clipRegion.getBoundingBox();
+          engine->ctx.clipType = RASTER_CLIP_REGION;
+          engine->ctx.clipBoxI = *box;
           engine->stroker.f->_clipBox.setBox(engine->ctx.clipBoxI);
           engine->stroker.d->_clipBox.setBox(engine->ctx.clipBoxI);
-
           return ERR_OK;
-        }
 
         case RASTER_CLIP_MASK:
-        {
           // TODO: RasterPaintEngine - clip-mask.
           break;
-        }
+
+        default:
+          FOG_ASSERT_NOT_REACHED();
       }
       break;
-    
+
     default:
       FOG_ASSERT_NOT_REACHED();
   }
@@ -1648,11 +1704,6 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_st(
       {
         BoxI boxI(box24x8.x0 >> 8, box24x8.y0 >> 8, box24x8.x1 >> 8, box24x8.y1 >> 8);
         return engine->serializer->clipNormalizedBoxI(engine, clipOp, &boxI);
-      }
-
-      if (engine->ctx.clipType == RASTER_CLIP_BOXI)
-      {
-        // TODO:
       }
 
       BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
@@ -1751,8 +1802,10 @@ void FOG_NO_EXPORT RasterPaintSerializer_init_st(void)
   // --------------------------------------------------------------------------
 
   s->fillAll = RasterPaintSerializer_fillAll_st;
+
   s->fillPathF = RasterPaintSerializer_fillPathF_st;
   s->fillPathD = RasterPaintSerializer_fillPathD_st;
+
   s->fillStrokedPathF = RasterPaintSerializer_fillStrokedPathF_st;
   s->fillStrokedPathD = RasterPaintSerializer_fillStrokedPathD_st;
 
@@ -1767,6 +1820,7 @@ void FOG_NO_EXPORT RasterPaintSerializer_init_st(void)
   // --------------------------------------------------------------------------
 
   s->blitImageD = RasterPaintSerializer_blitImageD_st;
+
   s->blitNormalizedImageA = RasterPaintSerializer_blitNormalizedImageA_st;
   s->blitNormalizedImageI = RasterPaintSerializer_blitNormalizedImageI_st;
   s->blitNormalizedImageD = RasterPaintSerializer_blitNormalizedImageD_st;

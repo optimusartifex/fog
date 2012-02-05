@@ -475,7 +475,7 @@ err_t MacUIEngineWindowImpl::clientToWorld(PointI& pt) const
 err_t MacUIEngineWindowImpl::setWindowOpacity(float opacity)
 {
   if (FOG_IS_NULL(_handle))
-    return ERR_RT_INVALID_HANDLE;
+    return ERR_RT_INVALID_STATE;
 
   Fog_MacNSWindow* window = static_cast<Fog_MacNSWindow*>(_handle);
   int opFixed = Math::iround(opacity * 255.0f);
@@ -501,7 +501,7 @@ err_t MacUIEngineWindowImpl::setWindowOpacity(float opacity)
 err_t MacUIEngineWindowImpl::setWindowTitle(const StringW& title)
 {
   if (FOG_IS_NULL(_handle))
-    return ERR_RT_INVALID_HANDLE;
+    return ERR_RT_INVALID_STATE;
 
   Fog_MacNSWindow* window = static_cast<Fog_MacNSWindow*>(_handle);
   NSString* nsTitle;

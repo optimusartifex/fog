@@ -19,7 +19,7 @@
 
 namespace Fog {
 
-// TODO: List of unimplemented elements:
+// TODO: SVG - List of unimplemented elements:
 //   - <clipPath>
 //   - <desc>
 //   - <marker>
@@ -298,7 +298,7 @@ err_t SvgElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 
 err_t SvgElement::onStrokeBoundingBox(BoxF& box, const PathStrokerParamsF& stroke, const TransformF* tr) const
 {
-  // TODO:
+  // TODO: SVG - onStrokeBoundingBox.
   return ERR_RT_INVALID_STATE;
 }
 
@@ -325,7 +325,7 @@ err_t SvgElement::getBoundingBox(BoxF& box) const
 {
   if (_boundingBoxDirty)
   {
-    // TODO:
+    // TODO: SVG - BoundingBoxDirty.
     FOG_RETURN_ON_ERROR(onGeometryBoundingBox(_computedBoundingBox, NULL));
     _boundingBoxDirty = false;
   }
@@ -529,7 +529,7 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
     // [Font Properties]
     // ------------------------------------------------------------------------
 
-    // TODO: Svg font.
+    // TODO: SVG - Svg font.
     case SVG_STYLE_FONT:
       break;
 
@@ -558,7 +558,7 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
     // ------------------------------------------------------------------------
 
     case SVG_STYLE_CLIP_PATH:
-      // SVG TODO:
+      // TODO: SVG - Clip path. 
       break;
 
     case SVG_STYLE_CLIP_RULE:
@@ -567,7 +567,7 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
       break;
 
     case SVG_STYLE_MASK:
-      // SVG TODO:
+      // TODO: SVG - Mask.
       break;
 
     case SVG_STYLE_OPACITY:
@@ -579,11 +579,11 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
     // ------------------------------------------------------------------------
 
     case SVG_STYLE_ENABLE_BACKGROUND:
-      // SVG TODO:
+      // TODO: SVG - Enable background.
       break;
 
     case SVG_STYLE_FILTER:
-      // SVG TODO:
+      // TODO: SVG - Filter.
       break;
 
     // ------------------------------------------------------------------------
@@ -642,7 +642,7 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
       break;
 
     case SVG_STYLE_STROKE_DASH_ARRAY:
-      // SVG TODO:
+      // TODO: SVG - DashArray.
       break;
 
     case SVG_STYLE_STROKE_DASH_OFFSET:
@@ -735,7 +735,7 @@ err_t SvgStyle::_setProperty(size_t index, const StringW& value)
 
     case SVG_STYLE_CLIP_PATH:
     {
-      // SVG TODO:
+      // TODO: SVG - ClipPath.
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
     }
@@ -768,7 +768,7 @@ err_t SvgStyle::_setProperty(size_t index, const StringW& value)
 
     case SVG_STYLE_ENABLE_BACKGROUND:
     {
-      // SVG TODO:
+      // TODO: SVG - EnableBackground.
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
     }
@@ -947,7 +947,7 @@ static err_t FOG_CDECL SvgStyle_parserFunc(void* ctx, const StringW* styleName, 
 
 err_t SvgStyle::getStyle(StringW& value) const
 {
-  // TODO: Posibility for overlap - "font", "font-size", ...
+  // TODO: SVG - Posibility for overlap - "font", "font-size", ...
   StringW data;
 
   for (size_t i = 0; i < FOG_ARRAY_SIZE(SvgStyle_nameToIdData); i++)
@@ -1761,7 +1761,7 @@ err_t SvgLinearGradientElement::onPattern(SvgContext* context, SvgElement* obj, 
     float x2 = svgGetCoord(doc, _x2, _x2Unit);
     float y2 = svgGetCoord(doc, _y2, _y2Unit);
 
-    // TODO: Percentages to the current view-port.
+    // TODO: SVG - Percentages to the current view-port.
     // if (!_x1.isAssigned() || _x1.getUnit() == UNIT_PERCENT)
     // if (!_y1.isAssigned() || _y1.getUnit() == UNIT_PERCENT)
     // if (!_x2.isAssigned() || _x2.getUnit() == UNIT_PERCENT)
@@ -1961,7 +1961,7 @@ err_t SvgRadialGradientElement::onPattern(SvgContext* context, SvgElement* obj, 
     float rx = svgGetCoord(doc, _r, _rUnit);
     float ry = rx;
 
-    // TODO: Percentages to the current view-port.
+    // TODO: SVG - Percentages to the current view-port.
     gradient.setCenter(cx, cy);
     gradient.setFocal(fx, fy);
     gradient.setRadius(rx, ry);
@@ -2167,7 +2167,7 @@ err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
     }
   }
 
-  // TODO: Object bounding box support.
+  // TODO: SVG - Object bounding box support.
   {
     int w = Math::iround(svgGetCoord(doc, _width, _widthUnit));
     int h = Math::iround(svgGetCoord(doc, _height, _heightUnit));
@@ -2328,7 +2328,7 @@ err_t SvgGElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
     return ERR_GEOMETRY_NONE;
   }
 
-  // TODO: It seems that there is nothing to do, because all render specific
+  // TODO: SVG - It seems that there is nothing to do, because all render specific
   // options are related to a single SVG element, not to a group.
   // return _walkAndMergeBBox(this);
 
@@ -2516,7 +2516,7 @@ err_t SvgUseElement::onPrepare(SvgContext* context, SvgContextGState* state) con
         ref->getBoundingBox(bbox);
 
         
-        // TODO: SVG<use> width/height support.
+        // TODO: SVG - SVG<use> width/height support.
       }
     }
 
@@ -3809,7 +3809,7 @@ err_t SvgTextElement::onProcess(SvgContext* context) const
       StringW text = node->getTextContent();
       text.simplify();
 
-      // TODO: Not optimal, just initial support for text rendering.
+      // TODO: SVG - Not optimal, just initial support for text rendering.
       PathF path;
       context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
 
@@ -3824,7 +3824,7 @@ err_t SvgTextElement::onProcess(SvgContext* context) const
 
 err_t SvgTextElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  // TODO: SVGText bounding box.
+  // TODO: SVG - SVGText bounding box.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -3871,7 +3871,7 @@ err_t SvgTSpanElement::onProcess(SvgContext* context) const
   StringW text = getTextContent();
   text.simplify();
 
-  // TODO: Not optimal, just initial support for text rendering.
+  // TODO: SVG - Not optimal, just initial support for text rendering.
   PathF path;
 
   err = context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);

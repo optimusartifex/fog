@@ -691,7 +691,7 @@ struct FOG_NO_EXPORT Image
   //! @brief Convert image to Windows @c HBITMAP (DIBSECTION).
   //!
   //! @note This function is for Windows-only.
-  FOG_INLINE err_t toHBITMAP(HBITMAP& hBitmap)
+  FOG_INLINE err_t toHBITMAP(HBITMAP& hBitmap) const
   {
     return fog_api.image_toHBITMAP(this, &hBitmap);
   }
@@ -723,7 +723,7 @@ struct FOG_NO_EXPORT Image
   //! @brief Convert image to Windows @c HBITMAP (DIBSECTION).
   //!
   //! @note This function is for Windows-only.
-  FOG_INLINE err_t toCGImage(CGImageRef* cgImage)
+  FOG_INLINE err_t toCGImage(CGImageRef* cgImage) const
   {
     return fog_api.image_toCGImage(this, cgImage);
   }

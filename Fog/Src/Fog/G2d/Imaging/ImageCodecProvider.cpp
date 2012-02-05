@@ -41,6 +41,10 @@ FOG_NO_EXPORT void ImageCodecProvider_initPNG(void);
 FOG_NO_EXPORT void ImageCodecProvider_initGdip(void);
 #endif // FOG_OS_WINDOWS
 
+#if defined(FOG_OS_MAC)
+FOG_NO_EXPORT void ImageCodecProvider_initMacCG(void);
+#endif // FOG_OS_MAC
+
 // ============================================================================
 // [Fog::ImageCodecProvider - Global]
 // ============================================================================
@@ -386,14 +390,18 @@ FOG_NO_EXPORT void ImageCodecProvider_init(void)
 #if defined(FOG_OS_WINDOWS)
   ImageCodecProvider_initGdip();
 #endif // FOG_OS_WINDOWS
+
+#if defined(FOG_OS_MAC)
+  ImageCodecProvider_initMacCG();
+#endif // FOG_OS_MAC
 }
 
 FOG_NO_EXPORT void ImageCodecProvider_fini(void)
 {
   // Remove (and delete) all providers
   //
-  // Do not need to lock, because we are shutting down. All threads should
-  // have been already destroyed.
+  // Do not need to lock, because we are shutting down. All threads have
+  // should be already destroyed.
   ListIterator<ImageCodecProvider*> it(ImageCodecProvider_global->providers);
   while (it.isValid())
   {

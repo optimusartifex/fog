@@ -219,9 +219,11 @@ GdipCodecProvider::GdipCodecProvider(uint32_t streamType)
       _name = FOG_S(TIFF);
       _gdipMime = L"image/tiff";
       break;
+    default:
+      FOG_ASSERT_NOT_REACHED();
   }
 
-  // All GDI+ providers starts with "[GDI+]" prefix.
+  // All GDI+ providers contains "[GDI+]" suffix.
   _name.append(Ascii8("[GDI+]"));
 
   // Supported extensions.
@@ -258,7 +260,8 @@ uint32_t GdipCodecProvider::checkSignature(const void* mem, size_t length) const
   // than all other providers based on external libraries (libpng, libjpeg,
   // libtiff) and reason is that when these external libraries are available
   // then they are used instead.
-  if (!mem || length == 0) return 0;
+  if (!mem || length == 0)
+    return 0;
 
   uint32_t score = 0;
   size_t i;
@@ -376,7 +379,7 @@ void GdipDecoder::detachStream()
 void GdipDecoder::reset()
 {
   _GdipCodec_clearCommonParams(&_params, _streamType);
-  ImageDecoder::reset();
+  Base::reset();
 }
 
 // ===========================================================================
@@ -386,12 +389,15 @@ void GdipDecoder::reset()
 err_t GdipDecoder::readHeader()
 {
   // Do not read header more than once.
-  if (_headerResult) return _headerResult;
+  if (_headerResult)
+    return _headerResult;
 
-  if (_istream == NULL) return ERR_RT_INVALID_HANDLE;
+  if (_istream == NULL)
+    return (_headerResult = ERR_RT_INVALID_STATE);
 
   GpStatus status = _gdip->_GdipLoadImageFromStream(_istream, &_gpImage);
-  if (status != GpOk) return (_headerResult = ERR_IMAGE_GDIPLUS_ERROR);
+  if (status != GpOk)
+    return (_headerResult = ERR_IMAGE_GDIPLUS_ERROR);
 
   FOG_ASSERT(sizeof(UINT) == sizeof(int));
   _gdip->_GdipGetImageWidth(_gpImage, (UINT*)&_size.w);
@@ -415,20 +421,24 @@ err_t GdipDecoder::readImage(Image& image)
 {
   err_t err = ERR_OK;
 
-  if (_istream == NULL) return ERR_RT_INVALID_HANDLE;
+  if (_istream == NULL)
+    return ERR_RT_INVALID_STATE;
 
   GpBitmap* bm = NULL;
   GpGraphics* gr = NULL;
   GpStatus status;
 
   // Read image header.
-  if (readHeader() != ERR_OK) return _headerResult;
+  if (readHeader() != ERR_OK)
+    return _headerResult;
 
   // Don't read image more than once.
-  if (isReaderDone()) return (_readerResult = ERR_IMAGE_NO_FRAMES);
+  if (isReaderDone())
+    return (_readerResult = ERR_IMAGE_NO_FRAMES);
 
   // Create image.
-  if ((err = image.create(_size, _format)) != ERR_OK) return err;
+  if ((err = image.create(_size, _format)) != ERR_OK)
+    return err;
 
   // Create GpBitmap that will share raster data with our image.
   status = _gdip->_GdipCreateBitmapFromScan0(
@@ -438,30 +448,55 @@ err_t GdipDecoder::readImage(Image& image)
     _GdipCodec_cvtGpFormatFromFogFormat(image.getFormat()),
     (BYTE*)image.getDataX(),
     &bm);
-  if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
+
+  if (status != GpOk)
+  {
+    err = ERR_IMAGE_GDIPLUS_ERROR;
+    goto _End;
+  }
 
   // Create GpGraphics context.
   status = _gdip->_GdipGetImageGraphicsContext((GpImage*)bm, &gr);
-  if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
+  if (status != GpOk)
+  {
+    err = ERR_IMAGE_GDIPLUS_ERROR;
+    goto _End;
+  }
 
   // Set compositing to source copy (we want alpha bits).
   status = _gdip->_GdipSetCompositingMode(gr, GpCompositingModeSourceCopy);
-  if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
+  if (status != GpOk)
+  {
+    err = ERR_IMAGE_GDIPLUS_ERROR;
+    goto _End;
+  }
 
   // Draw streamed image to GpGraphics context.
   status = _gdip->_GdipDrawImageI(gr, _gpImage, 0, 0);
-  if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
+  if (status != GpOk)
+  {
+    err = ERR_IMAGE_GDIPLUS_ERROR;
+    goto _End;
+  }
 
   // flush (this step is probably not necessary).
   status = _gdip->_GdipFlush(gr, GpFlushIntentionSync);
-  if (status != GpOk) { err = ERR_IMAGE_GDIPLUS_ERROR; goto _End; }
+  if (status != GpOk)
+  {
+    err = ERR_IMAGE_GDIPLUS_ERROR;
+    goto _End;
+  }
 
 _End:
   // Delete created Gdi+ objects.
-  if (gr) _gdip->_GdipDeleteGraphics(gr);
-  if (bm) _gdip->_GdipDisposeImage((GpImage*)bm);
+  if (gr != NULL)
+    _gdip->_GdipDeleteGraphics(gr);
+  if (bm != NULL)
+    _gdip->_GdipDisposeImage((GpImage*)bm);
 
-  if (err == ERR_OK) updateProgress(1.0f);
+  if (err == ERR_OK)
+    updateProgress(1.0f);
+
   return (_readerResult = err);
 }
 
@@ -472,16 +507,16 @@ _End:
 err_t GdipDecoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
   err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
-  if (err != (err_t)0xFFFFFFFF) return err;
-
+  if (err != (err_t)0xFFFFFFFF)
+    return err;
   return Base::_getProperty(name, dst);
 }
 
 err_t GdipDecoder::_setProperty(const InternedStringW& name, const Var& src)
 {
   err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
-  if (err != (err_t)0xFFFFFFFF) return err;
-
+  if (err != (err_t)0xFFFFFFFF)
+    return err;
   return Base::_setProperty(name, src);
 }
 
@@ -529,7 +564,7 @@ void GdipEncoder::detachStream()
 void GdipEncoder::reset()
 {
   _GdipCodec_clearCommonParams(&_params, _streamType);
-  ImageEncoder::reset();
+  Base::reset();
 }
 
 // ===========================================================================
@@ -539,10 +574,12 @@ void GdipEncoder::reset()
 err_t GdipEncoder::writeImage(const Image& image)
 {
   Image tmp;
-  if (image.isEmpty()) return ERR_IMAGE_INVALID_SIZE;
+  if (image.isEmpty())
+    return ERR_IMAGE_INVALID_SIZE;
 
   err_t err = ERR_OK;
-  if (_istream == NULL) return ERR_RT_INVALID_HANDLE;
+  if (_istream == NULL)
+    return ERR_RT_INVALID_STATE;
 
   GpBitmap* bm = NULL;
   GpGraphics* gr = NULL;
@@ -615,7 +652,9 @@ _End:
   // Delete created Gdi+ objects.
   if (bm) _gdip->_GdipDisposeImage((GpImage*)bm);
 
-  if (err == ERR_OK) updateProgress(1.0f);
+  if (err == ERR_OK)
+    updateProgress(1.0f);
+
   return err;
 }
 
@@ -626,16 +665,16 @@ _End:
 err_t GdipEncoder::_getProperty(const InternedStringW& name, Var& dst) const
 {
   err_t err = _GdipCodec_getCommonParam(&_params, _streamType, name, dst);
-  if (err != (err_t)0xFFFFFFFF) return err;
-
+  if (err != (err_t)0xFFFFFFFF)
+    return err;
   return Base::_getProperty(name, dst);
 }
 
 err_t GdipEncoder::_setProperty(const InternedStringW& name, const Var& src)
 {
   err_t err = _GdipCodec_setCommonParam(&_params, _streamType, name, src);
-  if (err != (err_t)0xFFFFFFFF) return err;
-
+  if (err != (err_t)0xFFFFFFFF)
+    return err;
   return Base::_setProperty(name, src);
 }
 

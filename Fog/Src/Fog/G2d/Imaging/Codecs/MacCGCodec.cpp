@@ -265,6 +265,8 @@ err_t MacCGDecoder::readHeader()
   if (cgDict == NULL)
     return (_headerResult = ERR_IMAGEIO_INTERNAL_ERROR);
 
+  // TODO: How to get width/height/depth and other information from the
+  // cgDict?
   
 
   CFRelease(cgDict);

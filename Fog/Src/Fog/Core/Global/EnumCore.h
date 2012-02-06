@@ -1840,10 +1840,32 @@ enum OBJECT_CREATE
 // [Fog::PROPERTY_FLAG]
 // ============================================================================
 
+//! @brief Property flags used by @ref PropertyInfo.
 enum PROPERTY_FLAG
 {
+  //! @brief Property is read-only (can't be set or reset).
   PROPERTY_FLAG_READ_ONLY = 0x00000001,
-  PROPERTY_FLAG_DYNAMIC = 0x00000002
+
+  //! @brief Property is assigned.
+  //!
+  //! Property is assigned only if it's different to the default value or it
+  //! was assigned explicitly. Reset should always unassign property (clear
+  //! this flag).
+  PROPERTY_FLAG_ASSIGNED = 0x00000002,
+
+  //! @brief Property overlaps with other property.
+  //!
+  //! If this flag is set then it means that this property (or the other one)
+  //! shouldn't be serialized. This flag was designed mainly to work with SVG
+  //! where for example 'font' attribute overlaps with 'font-size', 'font-family',
+  //! etc...
+  PROPERTY_FLAG_OVERLAPS = 0x00000004,
+
+  //! @brief Property was created dynamically.
+  //!
+  //! Index of dynamic properties isn't stable, it depends on order properties
+  //! was created or removed.
+  PROPERTY_FLAG_DYNAMIC = 0x80000000
 };
 
 // ============================================================================

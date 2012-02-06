@@ -40,7 +40,7 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
 
   ApiRaster& api = _api_raster;
 
-  uint i;
+  uint i, j;
 
   // --------------------------------------------------------------------------
   // [RasterOps - Convert - API]
@@ -113,6 +113,24 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   api.compositeCore[IMAGE_FORMAT_PRGB64][COMPOSITE_SRC].vblit_line[IMAGE_FORMAT_PRGB64] = api.convert.copy[RASTER_COPY_64];
   api.compositeCore[IMAGE_FORMAT_RGB48 ][COMPOSITE_SRC].vblit_line[IMAGE_FORMAT_RGB48 ] = api.convert.copy[RASTER_COPY_48];
   api.compositeCore[IMAGE_FORMAT_A16   ][COMPOSITE_SRC].vblit_line[IMAGE_FORMAT_A16   ] = api.convert.copy[RASTER_COPY_16];
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Clear]
+  // --------------------------------------------------------------------------
+
+  for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
+  {
+    RasterCompositeExtFuncs& fClear = api.compositeExt[i][RASTER_COMPOSITE_EXT_CLEAR];
+
+    fClear.cblit_line[RASTER_CBLIT_XRGB] = fClear.cblit_line[RASTER_CBLIT_PRGB];
+    fClear.cblit_span[RASTER_CBLIT_XRGB] = fClear.cblit_span[RASTER_CBLIT_PRGB];
+
+    for (j = 1; j < RASTER_VBLIT_INVALID; j++)
+    {
+      fClear.vblit_line[j] = fClear.vblit_line[0];
+      fClear.vblit_span[j] = fClear.vblit_span[0];
+    }
+  }
 }
 
 } // Fog namespace

@@ -55,6 +55,8 @@ struct AccessPRGB32
   // --------------------------------------------------------------------------
   // [64-Bits Per Pixel]
   // --------------------------------------------------------------------------
+
+  // TODO: 64-bit image processing.
 };
 
 // ============================================================================
@@ -80,6 +82,12 @@ struct AccessXRGB32
     Face::p32Load4a(dst0, srcp);
   }
 
+  static FOG_INLINE void p32LoadZRGB32(uint32_t& dst0, const void* srcp)
+  {
+    Face::p32Load4a(dst0, srcp);
+    Face::p32ZeroPBB3(dst0, dst0);
+  }
+
   static FOG_INLINE void p32StorePRGB32(void* dstp, const uint32_t& src0)
   {
     p32StoreZRGB32(dstp, src0);
@@ -100,6 +108,8 @@ struct AccessXRGB32
   // --------------------------------------------------------------------------
   // [64-Bits Per Pixel]
   // --------------------------------------------------------------------------
+
+  // TODO: 64-bit image processing.
 };
 
 // ============================================================================
@@ -125,6 +135,11 @@ struct AccessRGB24
     Face::p32Load3b(dst0, srcp);
   }
 
+  static FOG_INLINE void p32LoadZRGB32(uint32_t& dst0, const void* srcp)
+  {
+    Face::p32Load3b(dst0, srcp);
+  }
+
   static FOG_INLINE void p32StorePRGB32(void* dstp, const uint32_t& src0)
   {
     Face::p32Store3b(dstp, src0);
@@ -143,6 +158,8 @@ struct AccessRGB24
   // --------------------------------------------------------------------------
   // [64-Bits Per Pixel]
   // --------------------------------------------------------------------------
+
+  // TODO: 64-bit image processing.
 };
 
 // ============================================================================
@@ -169,6 +186,12 @@ struct AccessRGB16_555
     Face::p32ZRGB32FromRGB16_555(dst0, dst0);
   }
 
+  static FOG_INLINE void p32LoadZRGB32(uint32_t& dst0, const void* srcp)
+  {
+    Face::p32Load2a(dst0, srcp);
+    Face::p32ZRGB32FromRGB16_555(dst0, dst0);
+  }
+
   static FOG_INLINE void p32StorePRGB32(void* dstp, const uint32_t& src0)
   {
     p32StoreZRGB32(dstp, src0);
@@ -189,6 +212,8 @@ struct AccessRGB16_555
   // --------------------------------------------------------------------------
   // [64-Bits Per Pixel]
   // --------------------------------------------------------------------------
+
+  // TODO: 64-bit image processing.
 };
 
 // ============================================================================
@@ -215,6 +240,12 @@ struct AccessRGB16_565
     Face::p32ZRGB32FromRGB16_565(dst0, dst0);
   }
 
+  static FOG_INLINE void p32LoadZRGB32(uint32_t& dst0, const void* srcp)
+  {
+    Face::p32Load2a(dst0, srcp);
+    Face::p32ZRGB32FromRGB16_565(dst0, dst0);
+  }
+
   static FOG_INLINE void p32StorePRGB32(void* dstp, const uint32_t& src0)
   {
     p32StoreZRGB32(dstp, src0);
@@ -235,6 +266,8 @@ struct AccessRGB16_565
   // --------------------------------------------------------------------------
   // [64-Bits Per Pixel]
   // --------------------------------------------------------------------------
+
+  // TODO: 64-bit image processing.
 };
 
 // ============================================================================
@@ -248,11 +281,6 @@ struct AccessPRGB64
   // --------------------------------------------------------------------------
   // [32-Bits Per Pixel]
   // --------------------------------------------------------------------------
-
-  static FOG_INLINE void p32LoadARGB32(uint32_t& dst0, const void* srcp)
-  {
-    // TODO:
-  }
 
   static FOG_INLINE void p32LoadPRGB32(uint32_t& dst0, const void* srcp)
   {
@@ -272,17 +300,26 @@ struct AccessPRGB64
 
   static FOG_INLINE void p32StorePRGB32(void* dstp, const uint32_t& src0)
   {
-    // TODO
+    uint32_t src0p_10, src0p_32;
+
+    Face::p32PRGB64FromPRGB32(src0p_10, src0p_32, src0);
+    Face::p32Store8a(dstp, src0p_10, src0p_32);
   }
 
   static FOG_INLINE void p32StoreXRGB32(void* dstp, const uint32_t& src0)
   {
-    p32StoreZRGB32(dstp, src0);
+    uint32_t src0p_10, src0p_32;
+
+    Face::p32FRGB64FromXRGB32(src0p_10, src0p_32, src0);
+    Face::p32Store8a(dstp, src0p_10, src0p_32);
   }
 
   static FOG_INLINE void p32StoreZRGB32(void* dstp, const uint32_t& src0)
   {
-    // TODO
+    uint32_t src0p_10, src0p_32;
+
+    Face::p32FRGB64FromZRGB32(src0p_10, src0p_32, src0);
+    Face::p32Store8a(dstp, src0p_10, src0p_32);
   }
 
   // --------------------------------------------------------------------------
@@ -325,11 +362,6 @@ struct AccessRGB48
   // [32-Bits Per Pixel]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void p32LoadARGB32(uint32_t& dst0, const void* srcp)
-  {
-    Face::p32RGB48LoadToFRGB32(dst0, srcp);
-  }
-
   static FOG_INLINE void p32LoadPRGB32(uint32_t& dst0, const void* srcp)
   {
     Face::p32RGB48LoadToFRGB32(dst0, srcp);
@@ -340,9 +372,9 @@ struct AccessRGB48
     Face::p32RGB48LoadToZRGB32(dst0, srcp);
   }
 
-  static FOG_INLINE void p32StoreARGB32(void* dstp, const uint32_t& src0)
+  static FOG_INLINE void p32LoadZRGB32(uint32_t& dst0, const void* srcp)
   {
-    Face::p32RGB48StoreFromARGB32(dstp, src0);
+    Face::p32RGB48LoadToZRGB32(dst0, srcp);
   }
 
   static FOG_INLINE void p32StorePRGB32(void* dstp, const uint32_t& src0)
@@ -364,15 +396,6 @@ struct AccessRGB48
   // [64-Bits Per Pixel]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void p32LoadARGB64(uint32_t& dst0_10, uint32_t& dst0_32, const void* srcp)
-  {
-    uint32_t src0_r, src0_g, src0_b;
-
-    Face::p32RGB48Load(src0_r, src0_g, src0_b, srcp);
-    dst0_10 = _FOG_FACE_COMBINE_2(src0_b, src0_g << 16);
-    dst0_32 = _FOG_FACE_COMBINE_2(src0_r, 0xFFFF0000);
-  }
-
   static FOG_INLINE void p32LoadPRGB64(uint32_t& dst0_10, uint32_t& dst0_32, const void* srcp)
   {
     uint32_t src0_r, src0_g, src0_b;
@@ -391,19 +414,14 @@ struct AccessRGB48
     dst0_32 = src0_r;
   }
 
-  static FOG_INLINE void p32StoreARGB64(void* dstp, const uint32_t& src0_10, const uint32_t& src0_32)
-  {
-    // TODO
-  }
-
   static FOG_INLINE void p32StorePRGB64(void* dstp, const uint32_t& src0_10, const uint32_t& src0_32)
   {
-    // TODO
+    // TODO: 64-bit image processing.
   }
 
   static FOG_INLINE void p32StoreXRGB64(void* dstp, const uint32_t& src0_10, const uint32_t& src0_32)
   {
-    // TODO
+    // TODO: 64-bit image processing.
   }
 };
 

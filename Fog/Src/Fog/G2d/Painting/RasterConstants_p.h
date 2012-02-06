@@ -45,61 +45,64 @@ enum RASTER_VBLIT
   // [PRGB32]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_PRGB32_VS_PRGB32 = 0,
-  RASTER_VBLIT_PRGB32_VS_XRGB32 = 1,
-  RASTER_VBLIT_PRGB32_VS_RGB24 = 2,
+  RASTER_VBLIT_PRGB32_AND_PRGB32 = 0,
+  RASTER_VBLIT_PRGB32_AND_XRGB32 = 1,
+  RASTER_VBLIT_PRGB32_AND_RGB24 = 2,
+  RASTER_VBLIT_PRGB32_AND_A8 = 3,
 
   // --------------------------------------------------------------------------
   // [XRGB32]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_XRGB32_VS_PRGB32 = 0,
-  RASTER_VBLIT_XRGB32_VS_XRGB32 = 1,
-  RASTER_VBLIT_XRGB32_VS_RGB24 = 2,
+  RASTER_VBLIT_XRGB32_AND_PRGB32 = 0,
+  RASTER_VBLIT_XRGB32_AND_XRGB32 = 1,
+  RASTER_VBLIT_XRGB32_AND_RGB24 = 2,
 
   // --------------------------------------------------------------------------
   // [RGB24]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_RGB24_VS_PRGB32 = 0,
-  RASTER_VBLIT_RGB24_VS_XRGB32 = 1,
-  RASTER_VBLIT_RGB24_VS_RGB24 = 2,
+  RASTER_VBLIT_RGB24_AND_PRGB32 = 0,
+  RASTER_VBLIT_RGB24_AND_XRGB32 = 1,
+  RASTER_VBLIT_RGB24_AND_RGB24 = 2,
 
   // --------------------------------------------------------------------------
   // [A8]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_A8_VS_A8 = 0,
+  RASTER_VBLIT_A8_AND_PRGB32 = 0,
+  RASTER_VBLIT_A8_AND_A8 = 1,
 
   // --------------------------------------------------------------------------
   // [PRGB64]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_PRGB64_VS_PRGB64 = 0,
-  RASTER_VBLIT_PRGB64_VS_RGB48 = 1,
-  RASTER_VBLIT_PRGB64_VS_PRGB32 = 2,
+  RASTER_VBLIT_PRGB64_AND_PRGB64 = 0,
+  RASTER_VBLIT_PRGB64_AND_RGB48 = 1,
+  RASTER_VBLIT_PRGB64_AND_PRGB32 = 2,
 
   // --------------------------------------------------------------------------
   // [RGB48]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_RGB48_VS_PRGB64 = 0,
-  RASTER_VBLIT_RGB48_VS_RGB48 = 1,
-  RASTER_VBLIT_RGB48_VS_PRGB32 = 2,
+  RASTER_VBLIT_RGB48_AND_PRGB64 = 0,
+  RASTER_VBLIT_RGB48_AND_RGB48 = 1,
+  RASTER_VBLIT_RGB48_AND_PRGB32 = 2,
 
   // --------------------------------------------------------------------------
   // [A16]
   // --------------------------------------------------------------------------
 
-  RASTER_VBLIT_A16_VS_A16 = 0,
-  RASTER_VBLIT_A16_VS_A8 = 1,
+  RASTER_VBLIT_A16_AND_PRGB64 = 0,
+  RASTER_VBLIT_A16_AND_A16 = 1,
+  RASTER_VBLIT_A16_AND_A8 = 2,
 
   // --------------------------------------------------------------------------
   // [...]
   // --------------------------------------------------------------------------
 
   //! @brief Count of VBlit formats.
-  RASTER_VBLIT_COUNT = 3,
+  RASTER_VBLIT_COUNT = 4,
 
   //! @brief Invalid VBlit format.
   RASTER_VBLIT_INVALID = RASTER_VBLIT_COUNT
@@ -496,7 +499,7 @@ struct RasterCompatibleFormat
 #include <Fog/Core/C++/PackRestore.h>
 
 //! @internal
-extern FOG_NO_EXPORT const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT];
+extern FOG_NO_EXPORT const RasterCompatibleFormat _raster_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT];
 
 // ============================================================================
 // [Fog::RASTER_CORE]

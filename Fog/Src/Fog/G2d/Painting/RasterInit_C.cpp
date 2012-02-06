@@ -124,7 +124,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   convert.argb64_from_prgb64 = (ImageConverterBlitLineFunc)RasterOps_C::Convert::argb64_from_prgb64;
 
   // --------------------------------------------------------------------------
-  //[RasterOps - Convert - ARGB32]
+  // [RasterOps - Convert - ARGB32]
   // --------------------------------------------------------------------------
 
   convert.argb32_from[RASTER_FORMAT_RGB16_555          ] = RasterOps_C::Convert::argb32_from_rgb16_555;
@@ -221,7 +221,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   convert.argb64_from[RASTER_FORMAT_ARGB64_CUSTOM_BS   ] = RasterOps_C::Convert::argb64_from_argb64_custom_bs;
 //convert.argb64_from[RASTER_FORMAT_I8                 ];
 
-  // TODO:
+  // TODO: Image conversion.
   /*
   convert.from_argb64[RASTER_FORMAT_RGB16_555          ] = RasterOps_C::Convert::rgb16_555_from_argb64;
   convert.from_argb64[RASTER_FORMAT_RGB16_555_BS       ] = RasterOps_C::Convert::rgb16_555_bs_from_argb64;
@@ -351,6 +351,12 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   }
 
   // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Src - A8]
+  // --------------------------------------------------------------------------
+
+  // TODO: Image compositing.
+
+  // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcOver - PRGB32]
   // --------------------------------------------------------------------------
 
@@ -418,14 +424,106 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // [RasterOps - Composite - SrcOver - RGB24]
   // --------------------------------------------------------------------------
 
+  // TODO: Image compositing.
+
   // --------------------------------------------------------------------------
-  // [RasterOps - Composite - Clear]
+  // [RasterOps - Composite - SrcOver - A8]
   // --------------------------------------------------------------------------
+
+  // TODO: Image compositing.
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Clear - PRGB32]
+  // --------------------------------------------------------------------------
+
+  {
+    RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_EXT_CLEAR];
+
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], (RasterCBlitLineFunc)RasterOps_C::CompositeClear::prgb32_xblit_line);
+    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], (RasterCBlitSpanFunc)RasterOps_C::CompositeClear::prgb32_cblit_span);
+    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_PRGB32], (RasterVBlitLineFunc)RasterOps_C::CompositeClear::prgb32_xblit_line);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32]);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_RGB24 ]);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_A8    ]);
+
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_PRGB32], (RasterVBlitSpanFunc)RasterOps_C::CompositeClear::prgb32_vblit_span);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_XRGB32]);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_RGB24 ]);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_A8    ]);
+  }
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Clear - XRGB32]
+  // --------------------------------------------------------------------------
+
+  {
+    RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_EXT_CLEAR];
+
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], (RasterCBlitLineFunc)RasterOps_C::CompositeClear::xrgb32_xblit_line);
+    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], (RasterCBlitSpanFunc)RasterOps_C::CompositeClear::xrgb32_cblit_span);
+    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_XRGB32_AND_PRGB32], (RasterVBlitLineFunc)RasterOps_C::CompositeClear::xrgb32_xblit_line);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_XRGB32_AND_XRGB32]);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_XRGB32_AND_RGB24 ]);
+
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_XRGB32_AND_PRGB32], (RasterVBlitSpanFunc)RasterOps_C::CompositeClear::xrgb32_vblit_span);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_XRGB32_AND_XRGB32]);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_XRGB32_AND_RGB24 ]);
+  }
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Clear - RGB24]
+  // --------------------------------------------------------------------------
+  
+  {
+    RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_RGB24][RASTER_COMPOSITE_EXT_CLEAR];
+
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], (RasterCBlitLineFunc)RasterOps_C::CompositeClear::rgb24_xblit_line);
+    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], (RasterCBlitSpanFunc)RasterOps_C::CompositeClear::rgb24_cblit_span);
+    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_RGB24_AND_PRGB32 ], (RasterVBlitLineFunc)RasterOps_C::CompositeClear::rgb24_xblit_line);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_RGB24_AND_XRGB32 ]);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_RGB24_AND_RGB24  ]);
+
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_RGB24_AND_PRGB32 ], (RasterVBlitSpanFunc)RasterOps_C::CompositeClear::rgb24_vblit_span);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_RGB24_AND_XRGB32 ]);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_RGB24_AND_RGB24  ]);
+  }
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Clear - A8]
+  // --------------------------------------------------------------------------
+
+  {
+    RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_A8][RASTER_COMPOSITE_EXT_CLEAR];
+
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], (RasterCBlitLineFunc)RasterOps_C::CompositeClear::a8_xblit_line);
+    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], (RasterCBlitSpanFunc)RasterOps_C::CompositeClear::a8_cblit_span);
+    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
+
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_A8_AND_PRGB32    ], (RasterVBlitLineFunc)RasterOps_C::CompositeClear::a8_xblit_line);
+    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_A8_AND_A8        ]);
+
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_A8_AND_PRGB32    ], (RasterVBlitSpanFunc)RasterOps_C::CompositeClear::a8_vblit_span);
+    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_A8_AND_A8        ]);
+  }
 
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Solid]
+  // [RasterOps - Pattern - Solid]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_RASTER_INIT_C)
@@ -447,13 +545,13 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Gradient - API]
+  // [RasterOps - Pattern - Gradient - API]
   // --------------------------------------------------------------------------
 
   RasterGradientFuncs& gradient = api.gradient;
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Gradient - Interpolate]
+  // [RasterOps - Pattern - Gradient - Interpolate]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_RASTER_INIT_C)
@@ -462,7 +560,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Gradient - Linear]
+  // [RasterOps - Pattern - Gradient - Linear]
   // --------------------------------------------------------------------------
 
   gradient.create[GRADIENT_TYPE_LINEAR] = RasterOps_C::PGradientLinear::create;
@@ -494,7 +592,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Gradient - Radial]
+  // [RasterOps - Pattern - Gradient - Radial]
   // --------------------------------------------------------------------------
 
   gradient.create[GRADIENT_TYPE_RADIAL] = RasterOps_C::PGradientRadial::create;
@@ -526,7 +624,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Gradient - Conical]
+  // [RasterOps - Pattern - Gradient - Conical]
   // --------------------------------------------------------------------------
 
   gradient.create[GRADIENT_TYPE_CONICAL] = RasterOps_C::PGradientConical::create;
@@ -538,7 +636,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Gradient - Rectangular]
+  // [RasterOps - Pattern - Gradient - Rectangular]
   // --------------------------------------------------------------------------
 
   gradient.create[GRADIENT_TYPE_RECTANGULAR] = RasterOps_C::PGradientRectangular::create;
@@ -570,13 +668,13 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Texture - API]
+  // [RasterOps - Pattern - Texture - API]
   // --------------------------------------------------------------------------
 
   RasterTextureFuncs& texture = api.texture;
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Texture - Simple]
+  // [RasterOps - Pattern - Texture - Simple]
   // --------------------------------------------------------------------------
 
   texture.create = RasterOps_C::PTextureBase::create;
@@ -679,7 +777,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   texture.prgb32.fetch_simple_subxy[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = RasterOps_C::PTextureSimple::fetch_subxy_clamp<RasterOps_C::PTextureAccessor_PRGB32_From_I8    >;
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Texture - Affine]
+  // [RasterOps - Pattern - Texture - Affine]
   // --------------------------------------------------------------------------
 
   texture.prgb32.fetch_affine_nearest [IMAGE_FORMAT_PRGB32][TEXTURE_TILE_PAD    ] = RasterOps_C::PTextureAffine::fetch_affine_nearest_pad<RasterOps_C::PTextureAccessor_PRGB32_From_PRGB32>;
@@ -731,7 +829,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   texture.prgb32.fetch_affine_bilinear[IMAGE_FORMAT_I8    ][TEXTURE_TILE_CLAMP  ] = RasterOps_C::PTextureAffine::fetch_affine_bilinear_clamp<RasterOps_C::PTextureAccessor_PRGB32_From_I8    >;
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Texture - Projection]
+  // [RasterOps - Pattern - Texture - Projection]
   // --------------------------------------------------------------------------
 
   // TODO:

@@ -265,7 +265,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPa
   filler.dstPixels = pixels;
   filler.dstStride = stride;
 
-  if (RasterUtil::isSolidContext(engine->ctx.pc))
+  if (RasterUtil::isSolidContext(engine->ctx.pc) || compositingOperator == COMPOSITE_CLEAR)
   {
     bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
 
@@ -466,7 +466,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
 
         pixels += y0 * stride;
 
-        if (RasterUtil::isSolidContext(engine->ctx.pc))
+        if (RasterUtil::isSolidContext(engine->ctx.pc) || compositingOperator == COMPOSITE_CLEAR)
         {
           bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
           RasterCBlitLineFunc blitLine = _api_raster.getCBlitLine(format, compositingOperator, isSrcOpaque);
@@ -804,8 +804,8 @@ _BlitImageA8_Opaque:
           }
           else
           {
-            uint32_t vBlitSrc = _g2d_render_compatibleFormat[format][srcFormat].srcFormat;
-            uint32_t vBlitId = _g2d_render_compatibleFormat[format][srcFormat].vblitId;
+            uint32_t vBlitSrc = _raster_compatibleFormat[format][srcFormat].srcFormat;
+            uint32_t vBlitId = _raster_compatibleFormat[format][srcFormat].vblitId;
 
             blitLine = _api_raster.getCompositeExt(format, compositingOperator)->vblit_line[vBlitId];
             if (srcFormat == vBlitSrc)
@@ -856,8 +856,8 @@ _BlitImageA8_Alpha:
           }
           else
           {
-            uint32_t vBlitSrc = _g2d_render_compatibleFormat[format][srcFormat].srcFormat;
-            uint32_t vBlitId = _g2d_render_compatibleFormat[format][srcFormat].vblitId;
+            uint32_t vBlitSrc = _raster_compatibleFormat[format][srcFormat].srcFormat;
+            uint32_t vBlitId = _raster_compatibleFormat[format][srcFormat].vblitId;
 
             blitSpan = _api_raster.getCompositeExt(format, compositingOperator)->vblit_span[vBlitId];
             if (srcFormat == vBlitSrc)

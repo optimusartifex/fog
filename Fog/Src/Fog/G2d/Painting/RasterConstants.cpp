@@ -99,21 +99,21 @@ const uint8_t _raster_blur_stack_8_shr[256] =
 // ============================================================================
 
 // ${IMAGE_FORMAT:BEGIN}
-const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT] =
+const RasterCompatibleFormat _raster_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT] =
 {
   // --------------------------------------------------------------------------
   // [PRGB32]
   // --------------------------------------------------------------------------
 
   {
-    /* PRGB32    <- PRGB32    */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* PRGB32    <- XRGB32    */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_VS_XRGB32, 0 },
-    /* PRGB32    <- RGB24     */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_RGB24    , RASTER_VBLIT_PRGB32_VS_RGB24 , 0 },
-    /* PRGB32    <- A8        */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* PRGB32    <- I8        */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* PRGB32    <- PRGB64    */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* PRGB32    <- RGB48     */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_VS_XRGB32, 0 },
-    /* PRGB32    <- A16       */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 }
+    /* PRGB32    <- PRGB32    */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* PRGB32    <- XRGB32    */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_AND_XRGB32, 0 },
+    /* PRGB32    <- RGB24     */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_RGB24    , RASTER_VBLIT_PRGB32_AND_RGB24 , 0 },
+    /* PRGB32    <- A8        */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_A8       , RASTER_VBLIT_PRGB32_AND_A8    , 0 },
+    /* PRGB32    <- I8        */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* PRGB32    <- PRGB64    */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* PRGB32    <- RGB48     */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_AND_XRGB32, 0 },
+    /* PRGB32    <- A16       */ { IMAGE_FORMAT_PRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 }
   },
 
   // --------------------------------------------------------------------------
@@ -121,14 +121,14 @@ const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // --------------------------------------------------------------------------
 
   {
-    /* XRGB32    <- PRGB32    */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* XRGB32    <- XRGB32    */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_VS_XRGB32, 0 },
-    /* XRGB32    <- RGB24     */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_RGB24    , RASTER_VBLIT_PRGB32_VS_RGB24 , 0 },
-    /* XRGB32    <- A8        */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* XRGB32    <- I8        */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* XRGB32    <- PRGB64    */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* XRGB32    <- RGB48     */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_VS_XRGB32, 0 },
-    /* XRGB32    <- A16       */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 }
+    /* XRGB32    <- PRGB32    */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* XRGB32    <- XRGB32    */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_AND_XRGB32, 0 },
+    /* XRGB32    <- RGB24     */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_RGB24    , RASTER_VBLIT_PRGB32_AND_RGB24 , 0 },
+    /* XRGB32    <- A8        */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* XRGB32    <- I8        */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* XRGB32    <- PRGB64    */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* XRGB32    <- RGB48     */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_AND_XRGB32, 0 },
+    /* XRGB32    <- A16       */ { IMAGE_FORMAT_XRGB32   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 }
   },
 
   // --------------------------------------------------------------------------
@@ -136,14 +136,14 @@ const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // --------------------------------------------------------------------------
 
   {
-    /* RGB24     <- PRGB32    */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* RGB24     <- XRGB32    */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_VS_XRGB32, 0 },
-    /* RGB24     <- RGB24     */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_RGB24    , RASTER_VBLIT_PRGB32_VS_RGB24 , 0 },
-    /* RGB24     <- A8        */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* RGB24     <- I8        */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* RGB24     <- PRGB64    */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 },
-    /* RGB24     <- RGB48     */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_VS_XRGB32, 0 },
-    /* RGB24     <- A16       */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_VS_PRGB32, 0 }
+    /* RGB24     <- PRGB32    */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* RGB24     <- XRGB32    */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_AND_XRGB32, 0 },
+    /* RGB24     <- RGB24     */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_RGB24    , RASTER_VBLIT_PRGB32_AND_RGB24 , 0 },
+    /* RGB24     <- A8        */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* RGB24     <- I8        */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* RGB24     <- PRGB64    */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 },
+    /* RGB24     <- RGB48     */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_XRGB32   , RASTER_VBLIT_PRGB32_AND_XRGB32, 0 },
+    /* RGB24     <- A16       */ { IMAGE_FORMAT_RGB24    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB32_AND_PRGB32, 0 }
   },
 
   // --------------------------------------------------------------------------
@@ -151,14 +151,14 @@ const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // --------------------------------------------------------------------------
 
   {
-    /* A8        <- PRGB32    */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- XRGB32    */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- RGB24     */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- A8        */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- I8        */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- PRGB64    */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- RGB48     */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 },
-    /* A8        <- A16       */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_VS_A8        , 0 }
+    /* A8        <- PRGB32    */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_A8_AND_PRGB32    , 0 },
+    /* A8        <- XRGB32    */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 },
+    /* A8        <- RGB24     */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 },
+    /* A8        <- A8        */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 },
+    /* A8        <- I8        */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 },
+    /* A8        <- PRGB64    */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 },
+    /* A8        <- RGB48     */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 },
+    /* A8        <- A16       */ { IMAGE_FORMAT_A8       , IMAGE_FORMAT_A8       , RASTER_VBLIT_A8_AND_A8        , 0 }
   },
 
   // --------------------------------------------------------------------------
@@ -181,14 +181,14 @@ const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // --------------------------------------------------------------------------
 
   {
-    /* PRGB64    <- PRGB32    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_VS_PRGB32, 0 },
-    /* PRGB64    <- XRGB32    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_VS_RGB48 , 0 },
-    /* PRGB64    <- RGB24     */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_VS_RGB48 , 0 },
-    /* PRGB64    <- A8        */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_VS_PRGB32, 0 },
-    /* PRGB64    <- I8        */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_VS_PRGB32, 0 },
-    /* PRGB64    <- PRGB64    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_VS_PRGB64, 0 },
-    /* PRGB64    <- RGB48     */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_VS_RGB48 , 0 },
-    /* PRGB64    <- A16       */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_VS_PRGB64, 0 }
+    /* PRGB64    <- PRGB32    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_AND_PRGB32, 0 },
+    /* PRGB64    <- XRGB32    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_AND_RGB48 , 0 },
+    /* PRGB64    <- RGB24     */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_AND_RGB48 , 0 },
+    /* PRGB64    <- A8        */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_AND_PRGB32, 0 },
+    /* PRGB64    <- I8        */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_AND_PRGB32, 0 },
+    /* PRGB64    <- PRGB64    */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_AND_PRGB64, 0 },
+    /* PRGB64    <- RGB48     */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_AND_RGB48 , 0 },
+    /* PRGB64    <- A16       */ { IMAGE_FORMAT_PRGB64   , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_AND_PRGB64, 0 }
   },
 
   // --------------------------------------------------------------------------
@@ -196,14 +196,14 @@ const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // --------------------------------------------------------------------------
 
   {
-    /* RGB48     <- PRGB32    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_VS_PRGB32 , 0 },
-    /* RGB48     <- XRGB32    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_VS_RGB48  , 0 },
-    /* RGB48     <- RGB24     */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_VS_RGB48  , 0 },
-    /* RGB48     <- A8        */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_VS_PRGB32 , 0 },
-    /* RGB48     <- I8        */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_VS_PRGB32 , 0 },
-    /* RGB48     <- PRGB64    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_VS_PRGB64 , 0 },
-    /* RGB48     <- RGB48     */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_VS_RGB48  , 0 },
-    /* RGB48     <- A16       */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_VS_PRGB64 , 0 }
+    /* RGB48     <- PRGB32    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_AND_PRGB32 , 0 },
+    /* RGB48     <- XRGB32    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_AND_RGB48  , 0 },
+    /* RGB48     <- RGB24     */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_AND_RGB48  , 0 },
+    /* RGB48     <- A8        */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_AND_PRGB32 , 0 },
+    /* RGB48     <- I8        */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB32   , RASTER_VBLIT_PRGB64_AND_PRGB32 , 0 },
+    /* RGB48     <- PRGB64    */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_AND_PRGB64 , 0 },
+    /* RGB48     <- RGB48     */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_RGB48    , RASTER_VBLIT_PRGB64_AND_RGB48  , 0 },
+    /* RGB48     <- A16       */ { IMAGE_FORMAT_RGB48    , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_PRGB64_AND_PRGB64 , 0 }
   },
 
   // --------------------------------------------------------------------------
@@ -211,14 +211,14 @@ const RasterCompatibleFormat _g2d_render_compatibleFormat[IMAGE_FORMAT_COUNT][IM
   // --------------------------------------------------------------------------
 
   {
-    /* A16       <- PRGB32    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_VS_A8        , 0 },
-    /* A16       <- XRGB32    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_VS_A8        , 0 },
-    /* A16       <- RGB24     */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_VS_A8        , 0 },
-    /* A16       <- A8        */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_VS_A8        , 0 },
-    /* A16       <- I8        */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_VS_A8        , 0 },
-    /* A16       <- PRGB64    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A16      , RASTER_VBLIT_A16_VS_A16       , 0 },
-    /* A16       <- RGB48     */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A16      , RASTER_VBLIT_A16_VS_A16       , 0 },
-    /* A16       <- A16       */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A16      , RASTER_VBLIT_A16_VS_A16       , 0 }
+    /* A16       <- PRGB32    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_AND_A8        , 0 },
+    /* A16       <- XRGB32    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_AND_A8        , 0 },
+    /* A16       <- RGB24     */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_AND_A8        , 0 },
+    /* A16       <- A8        */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_AND_A8        , 0 },
+    /* A16       <- I8        */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A8       , RASTER_VBLIT_A16_AND_A8        , 0 },
+    /* A16       <- PRGB64    */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_PRGB64   , RASTER_VBLIT_A16_AND_PRGB64    , 0 },
+    /* A16       <- RGB48     */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A16      , RASTER_VBLIT_A16_AND_A16       , 0 },
+    /* A16       <- A16       */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A16      , RASTER_VBLIT_A16_AND_A16       , 0 }
   }
 };
 // ${IMAGE_FORMAT:END}

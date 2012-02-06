@@ -2838,7 +2838,6 @@ _SkipCells:
 
       if (x0 == x1)
       {
-_AdvanceCell:
         chunk = chunk->next;
         if (chunk == first)
           goto _Fill;

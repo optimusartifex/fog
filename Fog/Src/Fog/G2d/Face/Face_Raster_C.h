@@ -1355,14 +1355,39 @@ static FOG_INLINE void p32FRGB64FromRGB16_565(
 }
 
 // ============================================================================
+// [Fog::Face - XRGB64 - From - ZRGB32]
+// ============================================================================
+
+static FOG_INLINE void p32ZRGB64FromZRGB32(
+  uint32_t& dst0_10, uint32_t& dst0_32, const uint32_t& x0)
+{
+  uint32_t t0 = (x0      ) & 0xFF; // [000B]
+  uint32_t t1 = (x0 >> 16)       ; // [000R]
+  FOG_ASSERT(t1 <= 0xFF);
+
+  dst0_10 = _FOG_FACE_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
+  dst0_32 = t1;
+
+  dst0_10 = dst0_10 * 0x101;
+  dst0_32 = dst0_32 * 0x101;
+}
+
+static FOG_INLINE void p32FRGB64FromZRGB32(
+  uint32_t& dst0_10, uint32_t& dst0_32, const uint32_t& x0)
+{
+  p32ZRGB64FromZRGB32(dst0_10, dst0_32, x0);
+  p32FillPWW1(dst0_32, dst0_32);
+}
+
+// ============================================================================
 // [Fog::Face - XRGB64 - From - XRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB64FromXRGB32(
   uint32_t& dst0_10, uint32_t& dst0_32, const uint32_t& x0)
 {
-  uint32_t t0 = (x0      ) & 0xFF;             // [000B]
-  uint32_t t1 = (x0 >> 16) & 0xFF;             // [000R]
+  uint32_t t0 = (x0      ) & 0xFF; // [000B]
+  uint32_t t1 = (x0 >> 16) & 0xFF; // [000R]
 
   dst0_10 = _FOG_FACE_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
   dst0_32 = t1;
@@ -1642,7 +1667,6 @@ static FOG_INLINE bool p64PRGB64IsAlpha0000(const __p64& c0)
   return c0.u32Hi == 0x00000000U;
 #endif // FOG_ARCH_NATIVE_P64
 }
-
 
 // ============================================================================
 // [Fog::Face - PRGB64 - From - PRGB32]

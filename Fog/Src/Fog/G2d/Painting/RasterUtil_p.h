@@ -75,7 +75,7 @@ static FOG_INLINE uint32_t getCompositeCompatFormat(uint32_t dstFormat, uint32_t
   FOG_ASSERT(dstFormat <= IMAGE_FORMAT_COUNT);
   FOG_ASSERT(srcFormat <= IMAGE_FORMAT_COUNT);
 
-  return _g2d_render_compatibleFormat[dstFormat][srcFormat].srcFormat;
+  return _raster_compatibleFormat[dstFormat][srcFormat].srcFormat;
 }
 
 static FOG_INLINE uint32_t getCompositeCompatVBlitId(uint32_t dstFormat, uint32_t srcFormat)
@@ -83,7 +83,7 @@ static FOG_INLINE uint32_t getCompositeCompatVBlitId(uint32_t dstFormat, uint32_
   FOG_ASSERT(dstFormat <= IMAGE_FORMAT_COUNT);
   FOG_ASSERT(srcFormat <= IMAGE_FORMAT_COUNT);
 
-  return _g2d_render_compatibleFormat[dstFormat][srcFormat].vblitId;
+  return _raster_compatibleFormat[dstFormat][srcFormat].vblitId;
 }
 
 // ============================================================================

@@ -775,7 +775,7 @@ err_t SvgStyle::_setProperty(size_t index, const StringW& value)
 
     case SVG_STYLE_FILTER:
     {
-      // SVG TODO:
+      // TODO: SVG - Filter.
       err = ERR_RT_NOT_IMPLEMENTED;
       break;
     }
@@ -1424,7 +1424,7 @@ err_t SvgRootElement::onProcess(SvgContext* context) const
 
 err_t SvgRootElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  // TODO:
+  // TODO: SVG - onGeometryBoundingBox.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -1917,7 +1917,7 @@ err_t SvgRadialGradientElement::onPattern(SvgContext* context, SvgElement* obj, 
 {
   SvgDocument* doc = static_cast<SvgDocument*>(getOwnerDocument());
 
-  // SVG TODO: Radial Gradient.
+  // TODO: SVG - Radial Gradient.
   RadialGradientF gradient;
   gradient.setGradientSpread(_spreadMethod);
 
@@ -2595,7 +2595,7 @@ err_t SvgViewElement::onProcess(SvgContext* context) const
 
 err_t SvgViewElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 {
-  // TODO:
+  // TODO: SVG - onGeometryBoundingBox.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 

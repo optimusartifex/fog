@@ -3343,7 +3343,7 @@ struct FOG_NO_EXPORT DibC
       {
         uint32_t pix0 = pixels[x1];
 
-        if (!RasterUtil::isAlpha0xFF_ARGB32(pix0))
+        if (!Face::p32ARGB32IsAlphaFF(pix0))
           pixels[x1] = ColorUtil::premultiply(pix0);
         x1++;
       }

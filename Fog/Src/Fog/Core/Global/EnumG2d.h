@@ -725,18 +725,18 @@ enum FE_BLUR_TYPE
   //! The exponential blur is fast compromise between box blur and gaussian
   //! blur, but it looks slightly different than stack blur. The reason why
   //! it's included in Fog-Framework is that it's already used by other
-  //! libraries (KDE) so it's easy to blur an image and to expect the similar
-  //! result.
+  //! libraries (KDE) so it's possible to get the similar result like these
+  //! libs.
   //!
   //! The performance of exponential blur should be better than stack-blur,
   //! so it's generally the preferred blur algorithm for the most purposes.
   FE_BLUR_TYPE_EXPONENTIAL = 2,
 
-  //! @brief Gaussian blur effect.
+  //! @brief True gaussian blur effect.
   //!
-  //! The gaussian-blur effect is high-quality blur, but computation very 
-  //! intensive, because the blur kernel can't be optimized using techniques
-  //! available for box blur and exponential blur.
+  //! @note Gaussian blur is implemented using approximation defined in SVG
+  //! filters - <feGaussianBlur> element. Internally three box-blur passes
+  //! are used, so the radius won't affect the overall performance.
   FE_BLUR_TYPE_GAUSSIAN = 3,
 
   //! @brief The default blur type.

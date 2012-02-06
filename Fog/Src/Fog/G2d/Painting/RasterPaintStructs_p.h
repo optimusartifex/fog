@@ -98,6 +98,9 @@ union FOG_NO_EXPORT RasterHints
     //! Ideal line means one-pixel width and square caps. If fastLineHint is set
     //! to true then different algorithm can be used for line rendering.
     uint32_t idealLine : 1;
+
+    //! @brief Reserved for future use.
+    uint32_t unused : 5;
   };
 
   //! @brief All data packed in single integer.

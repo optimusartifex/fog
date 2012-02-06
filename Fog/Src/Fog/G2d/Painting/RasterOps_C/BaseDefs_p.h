@@ -35,6 +35,7 @@
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
 #include <Fog/G2d/Painting/RasterStructs_p.h>
+#include <Fog/G2d/Painting/RasterUtil_p.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/ColorStop.h>
 #include <Fog/G2d/Source/ColorStopCache.h>

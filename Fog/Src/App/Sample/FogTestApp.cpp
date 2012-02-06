@@ -95,17 +95,80 @@ void AppWindow::onPaint(Painter* _p)
   p.filterPath(feBlur, path);
 */
 
+/*
+  Region region;
+  region.union_(RectI(100, 100, 100, 100));
+  region.union_(RectI(300, 100, 100, 100));
+  region.union_(RectI(100, 300, 100, 100));
+  region.union_(RectI(300, 300, 100, 100));
+  p.setMetaParams(region, PointI(0, 0));
+*/
+
+  p.setSource(Argb32(0xFF000000));
+  p.fillAll();
+
+  p.setCompositingOperator(COMPOSITE_ADD);
+
+  LinearGradientF lg;
+  lg.setStart(100.0f, 100.0f);
+  lg.setEnd(300.0f, 100.0f);
+  lg.clearStops();
+  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(1.0f, Argb32(0xFF0000FF));
+  p.setSource(lg);
+  p.fillRect(RectI(100, 100, 200, 200));
+  
+  lg.setStart(150.0f, 150.0f);
+  lg.setEnd(150.0f, 350.0f);
+  lg.clearStops();
+  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(1.0f, Argb32(0xFFFF0000));
+  p.setSource(lg);
+  p.fillRect(RectI(150, 150, 200, 200));
+
+  lg.setStart(200.0f, 200.0f);
+  lg.setEnd(400.0f, 400.0f);
+  lg.clearStops();
+  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(1.0f, Argb32(0xFF00FF00));
+  p.setSource(lg);
+  p.fillRect(RectI(200, 200, 200, 200));
+
+/*
+  p.setSource(Argb32(0xFFFF0000));
+  p.fillCircle(CircleF(200.0f, 200.0f, 100.0f));
+  
+  p.setSource(Argb32(0xFF00FF00));
+  p.fillCircle(CircleF(250.0f, 250.0f, 100.0f));
+
+  p.setSource(Argb32(0xFF0000FF));
+  p.fillCircle(CircleF(300.0f, 300.0f, 100.0f));
+*/
+/*
+  p.setSource(Argb32(0xFF000000));
+  p.fillRect(RectI(100, 100, 100, 100));
+  p.fillRect(RectI(60, 200, 40, 100));
+  p.fillRect(RectF(100.5f, 200.5f, 99.5f, 99.5f));
+*/
+
+/*
   p.setCompositingOperator(COMPOSITE_SRC_OVER);
 
   p.save();
+
   p.clipRect(CLIP_OP_REPLACE, RectI(200, 200, 200, 200));
-  p.setSource(Argb32(0xFFFF0000));
+  p.setSource(Argb32(0x7FFF0000));
   p.fillCircle(CircleF(300.0f, 300.0f, 110.0f));
+
+  p.clipRect(CLIP_OP_REPLACE, RectI(220, 220, 200, 200));
+  p.setSource(Argb32(0x7F0000FF));
+  p.fillCircle(CircleF(300.0f, 300.0f, 110.0f));
+
   //p.fillRect(RectI(100, 100, 400, 400));
   //p.setSource(Argb32(0xFFFF00FF));
   //p.fillRect(RectI(300, 300, 200, 200));
   p.restore();
-
+*/
   //p.setSource(Argb32(0xFF0000FF));
   //p.drawRect(0.5f, 0.5f, float(geom.w) - 1.0f, float(geom.h) - 1.0f);
   

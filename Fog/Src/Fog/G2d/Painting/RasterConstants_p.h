@@ -128,7 +128,7 @@ enum RASTER_COMPOSITE
   // [CompositeExt]
   // --------------------------------------------------------------------------
 
-  RASTER_COMPOSITE_EXT_START       = 2,
+  RASTER_COMPOSITE_EXT_START       = RASTER_COMPOSITE_CORE_COUNT,
   RASTER_COMPOSITE_EXT_COUNT       = COMPOSITE_COUNT       - RASTER_COMPOSITE_EXT_START,
 
   RASTER_COMPOSITE_EXT_SRC_IN      = COMPOSITE_SRC_IN      - RASTER_COMPOSITE_EXT_START,
@@ -164,6 +164,7 @@ enum RASTER_COMPOSITE
 
 enum
 {
+  //! @brief Internal buffer-size used for multi-pass image conversion.
   RASTER_CONVERT_BUFFER_SIZE = 2048
 };
 
@@ -500,6 +501,12 @@ struct RasterCompatibleFormat
 
 //! @internal
 extern FOG_NO_EXPORT const RasterCompatibleFormat _raster_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT];
+
+// ============================================================================
+// [Fog::Raster - Data - ModifiedOperator]
+// ============================================================================
+
+extern FOG_NO_EXPORT const uint8_t _raster_modifiedOperator[IMAGE_FORMAT_COUNT][COMPOSITE_COUNT][2];
 
 // ============================================================================
 // [Fog::RASTER_CORE]

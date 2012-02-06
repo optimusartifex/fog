@@ -87,6 +87,18 @@ static FOG_INLINE uint32_t getCompositeCompatVBlitId(uint32_t dstFormat, uint32_
 }
 
 // ============================================================================
+// [Fog::RasterUtil - Composite - Modified Operator]
+// ============================================================================
+
+static FOG_INLINE uint32_t getCompositeModifiedOperator(uint32_t dstFormat, uint32_t compositingOperator, uint32_t isOpaque)
+{
+  FOG_ASSERT(dstFormat <= IMAGE_FORMAT_COUNT);
+  FOG_ASSERT(compositingOperator < COMPOSITE_COUNT);
+
+  return _raster_modifiedOperator[dstFormat][compositingOperator][!isOpaque];
+}
+
+// ============================================================================
 // [Fog::RasterUtil - Debug]
 // ============================================================================
 

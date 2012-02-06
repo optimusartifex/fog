@@ -20,7 +20,7 @@ namespace RasterOps_C {
 //! @internal
 struct FOG_NO_EXPORT CompositeSrc
 {
-  enum { CHARACTERISTICS = COMPOSITE_SRC };
+  enum { COMBINE_FLAGS = RASTER_COMBINE_OP_SRC };
 
   // ==========================================================================
   // [COMP8 - VBlit - A8 - Helpers]
@@ -264,7 +264,7 @@ _ARGB32_Glyph_Fill:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _comp8_vblit_a8_c_opaque<DstF>(dst, src, w);
     }
@@ -273,7 +273,7 @@ _ARGB32_Glyph_Fill:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;
@@ -508,7 +508,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _comp8_vblit_i8_c_opaque<DstF>(dst, src, w, closure->palette);
     }
@@ -517,7 +517,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;
@@ -756,7 +756,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _comp8_vblit_prgb64_c_opaque<DstF>(dst, src, w);
     }
@@ -765,7 +765,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;
@@ -1315,7 +1315,7 @@ _ARGB32_Glyph_Fill:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _comp8_vblit_a16_c_opaque<DstF>(dst, src, w);
     }
@@ -1324,7 +1324,7 @@ _ARGB32_Glyph_Fill:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;
@@ -1720,7 +1720,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _frgb32_vblit_xrgb32_c_opaque(dst, src, w);
     }
@@ -1729,7 +1729,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;
@@ -2011,7 +2011,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _frgb32_vblit_rgb24_c_opaque(dst, src, w);
     }
@@ -2020,7 +2020,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       BLIT_LOOP_32x1_INIT()
 
@@ -2207,7 +2207,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _prgb32_vblit_prgb32_c_opaque(dst, src, w);
     }
@@ -2216,7 +2216,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;
@@ -2463,7 +2463,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       BLIT_LOOP_32x1_INIT()
 
@@ -2483,7 +2483,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       BLIT_LOOP_32x1_INIT()
 
@@ -3094,7 +3094,7 @@ _ARGB32_Glyph_Skip:
     // [C-Opaque]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_OPAQUE()
+    V_BLIT_SPAN8_C_OPAQUE()
     {
       _rgb24_vblit_xrgb32_c_opaque(dst, src, w);
     }
@@ -3103,7 +3103,7 @@ _ARGB32_Glyph_Skip:
     // [C-Mask]
     // ------------------------------------------------------------------------
 
-    C_BLIT_SPAN8_C_MASK()
+    V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
       uint32_t inv0p;

@@ -256,24 +256,25 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPa
 {
   RasterPaintFiller filler;
 
-  uint8_t* pixels = engine->ctx.layer.pixels;
-  ssize_t stride = engine->ctx.layer.stride;
-  uint32_t format = engine->ctx.layer.primaryFormat;
+  uint8_t* dstPixels = engine->ctx.layer.pixels;
+  ssize_t dstStride = engine->ctx.layer.stride;
+  uint32_t dstFormat = engine->ctx.layer.primaryFormat;
   uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
 
   filler.ctx = &engine->ctx;
-  filler.dstPixels = pixels;
-  filler.dstStride = stride;
+  filler.dstPixels = dstPixels;
+  filler.dstStride = dstStride;
 
   if (RasterUtil::isSolidContext(engine->ctx.pc) || compositingOperator == COMPOSITE_CLEAR)
   {
+_Solid:
     bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
 
     filler._prepare = (RasterFiller::PrepareFunc)RasterPaintFiller_prepare_solid_st;
     filler._process = (RasterFiller::ProcessFunc)RasterPaintFiller_process_solid;
     filler._skip = (RasterFiller::SkipFunc)RasterPaintFiller_skip_solid;
 
-    filler.c.blit = _api_raster.getCBlitSpan(format, compositingOperator, isSrcOpaque);
+    filler.c.blit = _api_raster.getCBlitSpan(dstFormat, compositingOperator, isSrcOpaque);
     filler.c.closure = &engine->ctx.closure;
     filler.c.solid = &engine->ctx.solid;
 
@@ -283,13 +284,18 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPa
   {
     _FOG_RASTER_ENSURE_PATTERN(engine);
 
+    uint32_t srcFormat = engine->ctx.pc->getSrcFormat();
+    compositingOperator = RasterUtil::getCompositeModifiedOperator(dstFormat, compositingOperator, srcFormat);
+
+    if (compositingOperator == COMPOSITE_CLEAR)
+      goto _Solid;
+
     filler._prepare = (RasterFiller::PrepareFunc)RasterPaintFiller_prepare_pattern_st;
     filler._process = (RasterFiller::ProcessFunc)RasterPaintFiller_process_pattern;
     filler._skip = (RasterFiller::SkipFunc)RasterPaintFiller_skip_pattern;
 
-    filler.v.blit = _api_raster.getVBlitSpan(format, compositingOperator, engine->ctx.pc->getSrcFormat());
+    filler.v.blit = _api_raster.getVBlitSpan(dstFormat, compositingOperator, srcFormat);
     filler.v.closure = &engine->ctx.closure;
-
     filler.v.pc = engine->ctx.pc;
     filler.v.pb = &engine->ctx.buffer;
 
@@ -454,9 +460,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
       // Fast-path (clip-box and full-opacity).
       if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.clipType == RASTER_CLIP_BOX)
       {
-        uint8_t* pixels = engine->ctx.layer.pixels;
-        ssize_t stride = engine->ctx.layer.stride;
-        uint32_t format = engine->ctx.layer.primaryFormat;
+        uint8_t* dstPixels = engine->ctx.layer.pixels;
+        ssize_t dstStride = engine->ctx.layer.stride;
+        uint32_t dstFormat = engine->ctx.layer.primaryFormat;
         uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
 
         int y0 = box->y0;
@@ -464,17 +470,18 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
         int w = box->x1 - box->x0;
         int i = box->y1 - box->y0;
 
-        pixels += y0 * stride;
+        dstPixels += y0 * dstStride;
 
         if (RasterUtil::isSolidContext(engine->ctx.pc) || compositingOperator == COMPOSITE_CLEAR)
         {
+_Solid:
           bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
-          RasterCBlitLineFunc blitLine = _api_raster.getCBlitLine(format, compositingOperator, isSrcOpaque);
+          RasterCBlitLineFunc blitLine = _api_raster.getCBlitLine(dstFormat, compositingOperator, isSrcOpaque);
 
-          pixels += box->x0 * engine->ctx.layer.primaryBPP;
+          dstPixels += box->x0 * engine->ctx.layer.primaryBPP;
           do {
-            blitLine(pixels, &engine->ctx.solid, w, &engine->ctx.closure);
-            pixels += stride;
+            blitLine(dstPixels, &engine->ctx.solid, w, &engine->ctx.closure);
+            dstPixels += dstStride;
           } while (--i);
         }
         else
@@ -485,35 +492,39 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
           RasterPatternFetcher pf;
 
           uint32_t srcFormat = pc->getSrcFormat();
+          compositingOperator = RasterUtil::getCompositeModifiedOperator(dstFormat, compositingOperator, srcFormat);
+
+          if (compositingOperator == COMPOSITE_CLEAR)
+            goto _Solid;
 
           RasterSpan8 span[1];
           span[0].setPositionAndType(box->x0, box->x1, RASTER_SPAN_C);
           span[0].setConstMask(0x100);
           span[0].setNext(NULL);
 
-          if (RasterUtil::isCompositeCopyOp(format, srcFormat, compositingOperator))
+          if (RasterUtil::isCompositeCopyOp(dstFormat, srcFormat, compositingOperator))
           {
             pc->prepare(&pf, y0, 1, RASTER_FETCH_COPY);
 
-            pixels += box->x0 * engine->ctx.layer.primaryBPP;
+            dstPixels += box->x0 * engine->ctx.layer.primaryBPP;
             do {
-              pf.fetch(span, pixels);
-              pixels += stride;
+              pf.fetch(span, dstPixels);
+              dstPixels += dstStride;
             } while (--i);
           }
           else
           {
             pc->prepare(&pf, y0, 1, RASTER_FETCH_REFERENCE);
 
-            RasterVBlitLineFunc blitLine = _api_raster.getVBlitLine(format, compositingOperator, srcFormat);
+            RasterVBlitLineFunc blitLine = _api_raster.getVBlitLine(dstFormat, compositingOperator, srcFormat);
             uint8_t* srcPixels = reinterpret_cast<uint8_t*>(engine->ctx.buffer.getMem());
 
-            pixels += box->x0 * engine->ctx.layer.primaryBPP;
+            dstPixels += box->x0 * engine->ctx.layer.primaryBPP;
 
             do {
               pf.fetch(span, srcPixels);
-              blitLine(pixels, span->getData(), w, &engine->ctx.closure);
-              pixels += stride;
+              blitLine(dstPixels, span->getData(), w, &engine->ctx.closure);
+              dstPixels += dstStride;
             } while (--i);
           }
         }

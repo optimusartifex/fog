@@ -39,7 +39,6 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // pointers are always marked as 'SKIP' in the code.
 
   ApiRaster& api = _api_raster;
-
   uint i, j;
 
   // --------------------------------------------------------------------------
@@ -122,13 +121,31 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   {
     RasterCompositeExtFuncs& fClear = api.compositeExt[i][RASTER_COMPOSITE_EXT_CLEAR];
 
-    fClear.cblit_line[RASTER_CBLIT_XRGB] = fClear.cblit_line[RASTER_CBLIT_PRGB];
-    fClear.cblit_span[RASTER_CBLIT_XRGB] = fClear.cblit_span[RASTER_CBLIT_PRGB];
-
     for (j = 1; j < RASTER_VBLIT_INVALID; j++)
     {
       fClear.vblit_line[j] = fClear.vblit_line[0];
       fClear.vblit_span[j] = fClear.vblit_span[0];
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Other]
+  // --------------------------------------------------------------------------
+
+  // If CBLIT operator doesn't contain implementation for XRGB then we link it
+  // with PRGB operator, because it's guaranteed that alpha component is always
+  // set to fully opaque for CBLITs.
+
+  for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
+  {
+    for (j = 0; j < RASTER_COMPOSITE_EXT_COUNT; j++)
+    {
+      RasterCompositeExtFuncs& fOp = api.compositeExt[i][j];
+
+      if (fOp.cblit_line[RASTER_CBLIT_XRGB] == NULL)
+        fOp.cblit_line[RASTER_CBLIT_XRGB] = fOp.cblit_line[RASTER_CBLIT_PRGB];
+      if (fOp.cblit_span[RASTER_CBLIT_XRGB] == NULL)
+        fOp.cblit_span[RASTER_CBLIT_XRGB] = fOp.cblit_span[RASTER_CBLIT_PRGB];
     }
   }
 }

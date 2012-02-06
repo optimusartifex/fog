@@ -20,7 +20,7 @@ namespace RasterOps_C {
 //! @internal
 struct FOG_NO_EXPORT CompositeClear
 {
-  enum { CHARACTERISTICS = COMPOSITE_CLEAR };
+  enum { COMBINE_FLAGS = RASTER_COMBINE_OP_CLEAR };
 
   // ==========================================================================
   // [PRGB32 - Line]

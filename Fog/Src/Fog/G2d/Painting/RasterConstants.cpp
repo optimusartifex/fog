@@ -99,6 +99,7 @@ const uint8_t _raster_blur_stack_8_shr[256] =
 // ============================================================================
 
 // ${IMAGE_FORMAT:BEGIN}
+// ${COMPOSITE:BEGIN}
 const RasterCompatibleFormat _raster_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_FORMAT_COUNT] =
 {
   // --------------------------------------------------------------------------
@@ -221,6 +222,322 @@ const RasterCompatibleFormat _raster_compatibleFormat[IMAGE_FORMAT_COUNT][IMAGE_
     /* A16       <- A16       */ { IMAGE_FORMAT_A16      , IMAGE_FORMAT_A16      , RASTER_VBLIT_A16_AND_A16       , 0 }
   }
 };
+// ${COMPOSITE:END}
+// ${IMAGE_FORMAT:END}
+
+// ============================================================================
+// [Fog::Raster - Data - ModifiedOperator]
+// ============================================================================
+
+// ${IMAGE_FORMAT:BEGIN}
+// ${COMPOSITE:BEGIN}
+const uint8_t _raster_modifiedOperator[IMAGE_FORMAT_COUNT][COMPOSITE_COUNT][2] =
+{
+  // --------------------------------------------------------------------------
+  // [PRGB32]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC_IN      , COMPOSITE_SRC_IN      },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_SRC_OUT     , COMPOSITE_SRC_OUT     },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_SRC_ATOP    , COMPOSITE_SRC_ATOP    },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_DST_OVER    , COMPOSITE_DST_OVER    },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_DST_IN      , COMPOSITE_DST_IN      },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_DST_OUT     },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_DST_ATOP    , COMPOSITE_DST_ATOP    },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_XOR         , COMPOSITE_XOR         },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SUBTRACT    , COMPOSITE_SUBTRACT    },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_MULTIPLY    , COMPOSITE_MULTIPLY    },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SCREEN      , COMPOSITE_SCREEN      },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_OVERLAY     , COMPOSITE_OVERLAY     },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_DARKEN      , COMPOSITE_DARKEN      },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_LIGHTEN     , COMPOSITE_LIGHTEN     },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_COLOR_DODGE , COMPOSITE_COLOR_DODGE },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_COLOR_BURN  , COMPOSITE_COLOR_BURN  },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SOFT_LIGHT  , COMPOSITE_SOFT_LIGHT  },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_HARD_LIGHT  , COMPOSITE_HARD_LIGHT  },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_DIFFERENCE  , COMPOSITE_DIFFERENCE  },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_EXCLUSION   , COMPOSITE_EXCLUSION   },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_INVERT      , COMPOSITE_INVERT      },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_INVERT_RGB  , COMPOSITE_INVERT_RGB  }
+  },
+  
+  // --------------------------------------------------------------------------
+  // [XRGB32]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_DST_IN      , COMPOSITE_DST_IN      },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_DST_OUT     },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_DST_IN      , COMPOSITE_DST_ATOP    },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_DST_OUT     , COMPOSITE_XOR         },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SUBTRACT    , COMPOSITE_SUBTRACT    },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_MULTIPLY    , COMPOSITE_MULTIPLY    },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SCREEN      , COMPOSITE_SCREEN      },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_OVERLAY     , COMPOSITE_OVERLAY     },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_DARKEN      , COMPOSITE_DARKEN      },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_LIGHTEN     , COMPOSITE_LIGHTEN     },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_COLOR_DODGE , COMPOSITE_COLOR_DODGE },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_COLOR_BURN  , COMPOSITE_COLOR_BURN  },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SOFT_LIGHT  , COMPOSITE_SOFT_LIGHT  },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_HARD_LIGHT  , COMPOSITE_HARD_LIGHT  },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_DIFFERENCE  , COMPOSITE_DIFFERENCE  },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_EXCLUSION   , COMPOSITE_EXCLUSION   },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_INVERT      , COMPOSITE_INVERT      },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_INVERT_RGB  , COMPOSITE_INVERT_RGB  }
+  },
+
+  // --------------------------------------------------------------------------
+  // [RGB24]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_DST_IN      , COMPOSITE_DST_IN      },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_DST_OUT     },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_DST_IN      , COMPOSITE_DST_ATOP    },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_DST_OUT     , COMPOSITE_XOR         },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SUBTRACT    , COMPOSITE_SUBTRACT    },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_MULTIPLY    , COMPOSITE_MULTIPLY    },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SCREEN      , COMPOSITE_SCREEN      },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_OVERLAY     , COMPOSITE_OVERLAY     },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_DARKEN      , COMPOSITE_DARKEN      },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_LIGHTEN     , COMPOSITE_LIGHTEN     },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_COLOR_DODGE , COMPOSITE_COLOR_DODGE },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_COLOR_BURN  , COMPOSITE_COLOR_BURN  },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SOFT_LIGHT  , COMPOSITE_SOFT_LIGHT  },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_HARD_LIGHT  , COMPOSITE_HARD_LIGHT  },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_DIFFERENCE  , COMPOSITE_DIFFERENCE  },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_EXCLUSION   , COMPOSITE_EXCLUSION   },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_INVERT      , COMPOSITE_INVERT      },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_INVERT_RGB  , COMPOSITE_INVERT_RGB  }
+  },
+
+  // --------------------------------------------------------------------------
+  // [A8]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC_IN      , COMPOSITE_DST         },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_SRC_OUT     , COMPOSITE_SRC_OUT     },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC_OVER    },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_SRC_IN      , COMPOSITE_DST         },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_CLEAR       },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_XOR         , COMPOSITE_SRC_OUT     },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         }
+  },
+
+  // --------------------------------------------------------------------------
+  // [I8]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_DST_IN      , COMPOSITE_DST_IN      },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_DST_OUT     },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_DST_IN      , COMPOSITE_DST_ATOP    },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_DST_OUT     , COMPOSITE_XOR         },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SUBTRACT    , COMPOSITE_SUBTRACT    },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_MULTIPLY    , COMPOSITE_MULTIPLY    },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SCREEN      , COMPOSITE_SCREEN      },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_OVERLAY     , COMPOSITE_OVERLAY     },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_DARKEN      , COMPOSITE_DARKEN      },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_LIGHTEN     , COMPOSITE_LIGHTEN     },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_COLOR_DODGE , COMPOSITE_COLOR_DODGE },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_COLOR_BURN  , COMPOSITE_COLOR_BURN  },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SOFT_LIGHT  , COMPOSITE_SOFT_LIGHT  },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_HARD_LIGHT  , COMPOSITE_HARD_LIGHT  },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_DIFFERENCE  , COMPOSITE_DIFFERENCE  },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_EXCLUSION   , COMPOSITE_EXCLUSION   },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_INVERT      , COMPOSITE_INVERT      },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_INVERT_RGB  , COMPOSITE_INVERT_RGB  }
+  },
+
+  // --------------------------------------------------------------------------
+  // [PRGB64]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC_IN      , COMPOSITE_SRC_IN      },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_SRC_OUT     , COMPOSITE_SRC_OUT     },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_SRC_ATOP    , COMPOSITE_SRC_ATOP    },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_DST_OVER    , COMPOSITE_DST_OVER    },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_DST_IN      , COMPOSITE_DST_IN      },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_DST_OUT     },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_DST_ATOP    , COMPOSITE_DST_ATOP    },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_XOR         , COMPOSITE_XOR         },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SUBTRACT    , COMPOSITE_SUBTRACT    },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_MULTIPLY    , COMPOSITE_MULTIPLY    },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SCREEN      , COMPOSITE_SCREEN      },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_OVERLAY     , COMPOSITE_OVERLAY     },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_DARKEN      , COMPOSITE_DARKEN      },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_LIGHTEN     , COMPOSITE_LIGHTEN     },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_COLOR_DODGE , COMPOSITE_COLOR_DODGE },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_COLOR_BURN  , COMPOSITE_COLOR_BURN  },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SOFT_LIGHT  , COMPOSITE_SOFT_LIGHT  },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_HARD_LIGHT  , COMPOSITE_HARD_LIGHT  },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_DIFFERENCE  , COMPOSITE_DIFFERENCE  },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_EXCLUSION   , COMPOSITE_EXCLUSION   },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_INVERT      , COMPOSITE_INVERT      },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_INVERT_RGB  , COMPOSITE_INVERT_RGB  }
+  },
+
+  // --------------------------------------------------------------------------
+  // [RGB48]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_DST_IN      , COMPOSITE_DST_IN      },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_DST_OUT     },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_DST_IN      , COMPOSITE_DST_ATOP    },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_DST_OUT     , COMPOSITE_XOR         },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SUBTRACT    , COMPOSITE_SUBTRACT    },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_MULTIPLY    , COMPOSITE_MULTIPLY    },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SCREEN      , COMPOSITE_SCREEN      },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_OVERLAY     , COMPOSITE_OVERLAY     },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_DARKEN      , COMPOSITE_DARKEN      },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_LIGHTEN     , COMPOSITE_LIGHTEN     },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_COLOR_DODGE , COMPOSITE_COLOR_DODGE },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_COLOR_BURN  , COMPOSITE_COLOR_BURN  },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SOFT_LIGHT  , COMPOSITE_SOFT_LIGHT  },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_HARD_LIGHT  , COMPOSITE_HARD_LIGHT  },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_DIFFERENCE  , COMPOSITE_DIFFERENCE  },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_EXCLUSION   , COMPOSITE_EXCLUSION   },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_INVERT      , COMPOSITE_INVERT      },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_INVERT_RGB  , COMPOSITE_INVERT_RGB  }
+  },
+
+  // --------------------------------------------------------------------------
+  // [A16]
+  // --------------------------------------------------------------------------
+
+  {
+    // -----------------------------+-----------------------+-----------------
+    // XX: Operator name            | Alpha+RGB             | RGB only
+    // -----------------------------+-----------------------+-----------------
+
+    /* 00: COMPOSITE_SRC         */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 01: COMPOSITE_SRC_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 02: COMPOSITE_SRC_IN      */ { COMPOSITE_SRC_IN      , COMPOSITE_DST         },
+    /* 03: COMPOSITE_SRC_OUT     */ { COMPOSITE_SRC_OUT     , COMPOSITE_SRC_OUT     },
+    /* 04: COMPOSITE_SRC_ATOP    */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 05: COMPOSITE_DST         */ { COMPOSITE_DST         , COMPOSITE_DST         },
+    /* 06: COMPOSITE_DST_OVER    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC_OVER    },
+    /* 07: COMPOSITE_DST_IN      */ { COMPOSITE_SRC_IN      , COMPOSITE_DST         },
+    /* 08: COMPOSITE_DST_OUT     */ { COMPOSITE_DST_OUT     , COMPOSITE_CLEAR       },
+    /* 09: COMPOSITE_DST_ATOP    */ { COMPOSITE_SRC         , COMPOSITE_SRC         },
+    /* 10: COMPOSITE_XOR         */ { COMPOSITE_XOR         , COMPOSITE_SRC_OUT     },
+    /* 11: COMPOSITE_CLEAR       */ { COMPOSITE_CLEAR       , COMPOSITE_CLEAR       },
+    /* 12: COMPOSITE_ADD         */ { COMPOSITE_ADD         , COMPOSITE_ADD         },
+    /* 13: COMPOSITE_SUBTRACT    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 14: COMPOSITE_MULTIPLY    */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 15: COMPOSITE_SCREEN      */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 16: COMPOSITE_OVERLAY     */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 17: COMPOSITE_DARKEN      */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 18: COMPOSITE_LIGHTEN     */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 19: COMPOSITE_COLOR_DODGE */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 20: COMPOSITE_COLOR_BURN  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 21: COMPOSITE_SOFT_LIGHT  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 22: COMPOSITE_HARD_LIGHT  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 23: COMPOSITE_DIFFERENCE  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 24: COMPOSITE_EXCLUSION   */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 25: COMPOSITE_INVERT      */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         },
+    /* 26: COMPOSITE_INVERT_RGB  */ { COMPOSITE_SRC_OVER    , COMPOSITE_SRC         }
+  }
+};
+// ${COMPOSITE:END}
 // ${IMAGE_FORMAT:END}
 
 } // Fog namespace

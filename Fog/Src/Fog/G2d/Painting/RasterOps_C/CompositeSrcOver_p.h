@@ -20,7 +20,7 @@ namespace RasterOps_C {
 //! @internal
 struct FOG_NO_EXPORT CompositeSrcOver
 {
-  enum { CHARACTERISTICS = COMPOSITE_SRC_OVER };
+  enum { COMBINE_FLAGS = RASTER_COMBINE_OP_SRC_OVER };
 
   // ==========================================================================
   // [PRGB32 - CBlit - PRGB32 - Line]
@@ -250,8 +250,11 @@ _VARGBGlyphMask:
       uint32_t sra0p;
 
       Face::p32Load4a(src0p, src);
-      if (Face::p32PRGB32IsAlpha00(src0p)) goto _C_Opaque_Skip;
-      if (Face::p32PRGB32IsAlphaFF(src0p)) goto _C_Opaque_Fill;
+
+      if (Face::p32PRGB32IsAlpha00(src0p))
+        goto _C_Opaque_Skip;
+      if (Face::p32PRGB32IsAlphaFF(src0p))
+        goto _C_Opaque_Fill;
 
       Face::p32Load4a(dst0p, dst);
       Face::p32ExtractPBB3(sra0p, src0p);

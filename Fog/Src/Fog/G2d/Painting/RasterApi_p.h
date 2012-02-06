@@ -497,33 +497,51 @@ struct FOG_NO_EXPORT ApiRaster
   FOG_INLINE RasterCBlitLineFunc getCBlitLine(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
   {
     if (RasterUtil::isCompositeCoreOp(op))
+    {
       return getCompositeCore(dstFormat, op)->cblit_line[isOpaque];
+    }
     else
+    {
       return getCompositeExt(dstFormat, op)->cblit_line[isOpaque];
+    }
   }
 
   FOG_INLINE RasterCBlitSpanFunc getCBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t isOpaque)
   {
     if (RasterUtil::isCompositeCoreOp(op))
+    {
       return getCompositeCore(dstFormat, op)->cblit_span[isOpaque];
+    }
     else
+    {
       return getCompositeExt(dstFormat, op)->cblit_span[isOpaque];
+    }
   }
 
   FOG_INLINE RasterVBlitLineFunc getVBlitLine(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
   {
     if (RasterUtil::isCompositeCoreOp(op))
+    {
       return getCompositeCore(dstFormat, op)->vblit_line[srcFormat];
+    }
     else
+    {
+      FOG_ASSERT(RasterUtil::getCompositeCompatFormat(dstFormat, srcFormat) == srcFormat);
       return getCompositeExt(dstFormat, op)->vblit_line[RasterUtil::getCompositeCompatVBlitId(dstFormat, srcFormat)];
+    }
   }
 
   FOG_INLINE RasterVBlitSpanFunc getVBlitSpan(uint32_t dstFormat, uint32_t op, uint32_t srcFormat)
   {
     if (RasterUtil::isCompositeCoreOp(op))
+    {
       return getCompositeCore(dstFormat, op)->vblit_span[srcFormat];
+    }
     else
+    {
+      FOG_ASSERT(RasterUtil::getCompositeCompatFormat(dstFormat, srcFormat) == srcFormat);
       return getCompositeExt(dstFormat, op)->vblit_span[RasterUtil::getCompositeCompatVBlitId(dstFormat, srcFormat)];
+    }
   }
 
   // --------------------------------------------------------------------------

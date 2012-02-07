@@ -338,7 +338,7 @@ enum RASTER_FETCH
 enum RASTER_PRGB_PREPARE
 {
   //! @brief There is nothing in prepare step.
-  RASTER_PRGB_PREPARE_XRGB = 0,
+  RASTER_PRGB_PREPARE_NONE = 0,
 
   //! @brief Prepare means to fill X byte or word to get PRGB32/PRGB64
   //! (FRGB32/FRGB64) result.

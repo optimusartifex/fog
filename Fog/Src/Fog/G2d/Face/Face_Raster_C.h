@@ -68,6 +68,16 @@ static FOG_INLINE void p32UnpackPBW256FromPBB255_20Z1(uint32_t& dst0_20, uint32_
   p32Cvt256PBWFrom255PBW_2x(dst0_20, dst0_20, dst0_31, dst0_31);
 }
 
+static FOG_INLINE void p32OpOverA8(uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
+{
+  uint32_t t0;
+  uint32_t t1;
+  
+  p32Add(t0, x0, y0);
+  p32MulDiv255SBW(t1, x0, y0);
+  p32Sub(t0, t0, t1);
+}
+
 // ============================================================================
 // [Fog::Face - XRGB32 - From - RGB24]
 // ============================================================================

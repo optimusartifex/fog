@@ -109,7 +109,34 @@ void AppWindow::onPaint(Painter* _p)
 
   p.setCompositingOperator(COMPOSITE_ADD);
 
+
+  p.translate(PointF(300.0f, 0.0f));
   LinearGradientF lg;
+  lg.setStart(100.0f, 100.0f);
+  lg.setEnd(300.0f, 100.0f);
+  lg.clearStops();
+  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(1.0f, Argb32(0xFF0000FF));
+  p.setSource(lg);
+  p.fillCircle(CircleF(200.0f, 200.0f, 100.0f));
+  
+  lg.setStart(150.0f, 150.0f);
+  lg.setEnd(150.0f, 350.0f);
+  lg.clearStops();
+  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(1.0f, Argb32(0xFFFF0000));
+  p.setSource(lg);
+  p.fillCircle(CircleF(250.0f, 250.0f, 100.0f));
+
+  lg.setStart(200.0f, 200.0f);
+  lg.setEnd(400.0f, 400.0f);
+  lg.clearStops();
+  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(1.0f, Argb32(0xFF00FF00));
+  p.setSource(lg);
+  p.fillCircle(CircleF(300.0f, 300.0f, 100.0f));
+  p.translate(PointF(-300.0f, 0.0f));
+
   lg.setStart(100.0f, 100.0f);
   lg.setEnd(300.0f, 100.0f);
   lg.clearStops();
@@ -118,32 +145,22 @@ void AppWindow::onPaint(Painter* _p)
   p.setSource(lg);
   p.fillRect(RectI(100, 100, 200, 200));
   
-  lg.setStart(150.0f, 150.0f);
-  lg.setEnd(150.0f, 350.0f);
+  lg.setStart(100.0f, 100.0f);
+  lg.setEnd(100.0f, 300.0f);
   lg.clearStops();
   lg.addStop(0.0f, Argb32(0xFF000000));
   lg.addStop(1.0f, Argb32(0xFFFF0000));
   p.setSource(lg);
   p.fillRect(RectI(150, 150, 200, 200));
 
-  lg.setStart(200.0f, 200.0f);
-  lg.setEnd(400.0f, 400.0f);
+  lg.setStart(100.0f, 100.0f);
+  lg.setEnd(300.0f, 300.0f);
   lg.clearStops();
   lg.addStop(0.0f, Argb32(0xFF000000));
   lg.addStop(1.0f, Argb32(0xFF00FF00));
   p.setSource(lg);
   p.fillRect(RectI(200, 200, 200, 200));
 
-/*
-  p.setSource(Argb32(0xFFFF0000));
-  p.fillCircle(CircleF(200.0f, 200.0f, 100.0f));
-  
-  p.setSource(Argb32(0xFF00FF00));
-  p.fillCircle(CircleF(250.0f, 250.0f, 100.0f));
-
-  p.setSource(Argb32(0xFF0000FF));
-  p.fillCircle(CircleF(300.0f, 300.0f, 100.0f));
-*/
 /*
   p.setSource(Argb32(0xFF000000));
   p.fillRect(RectI(100, 100, 100, 100));

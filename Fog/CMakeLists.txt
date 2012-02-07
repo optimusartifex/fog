@@ -371,7 +371,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_
   # -O3 doesn't improve the performance, because all inner loops used by Fog
   # are already optimized - there is nothing compiler can do. Another argument
   # to use -O2 is that -O3 produces larger binary without speed improvements.
-  # Set(FOG_CXX_FLAGS_OPTIMIZE "-O2")
+  Set(FOG_CXX_FLAGS_OPTIMIZE "-O2")
 
   # Setup FOG_CFLAGS specific to GCC.
   Set(FOG_CXX_FLAGS_MMX "${FOG_CXX_FLAGS_OPTIMIZE} -mmmx")

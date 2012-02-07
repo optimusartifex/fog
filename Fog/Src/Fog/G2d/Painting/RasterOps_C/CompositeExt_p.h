@@ -516,22 +516,22 @@ struct CompositeGeneric
     if (DstF::HAS_ALPHA)
     {
       if (SrcF::HAS_ALPHA)
-        CompositeOp::prgb32_op_prgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::prgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
       else if (PrepareToFRGB ||  SrcF::HAS_F)
-        CompositeOp::prgb32_op_frgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::prgb32_op_frgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
       else if (PrepareToZRGB || !SrcF::HAS_X)
-        CompositeOp::prgb32_op_zrgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::prgb32_op_zrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
       else
-        CompositeOp::prgb32_op_xrgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::prgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
     }
     else
     {
       if (SrcF::HAS_ALPHA)
-        CompositeOp::xrgb32_op_prgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::xrgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
       else if (DstF::HAS_X || SrcF::HAS_X)
-        CompositeOp::xrgb32_op_xrgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
       else
-        CompositeOp::zrgb32_op_zrgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+        CompositeOp::zrgb32_op_zrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, Pack);
     }
   }
 
@@ -1600,7 +1600,8 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeGeneric<CompositeAdd, RASTER
   // [Prepare]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE void prgb32_prepare_xrgb32(uint32_t& dst0p, const uint32_t& src0p)
+  static FOG_INLINE void prgb32_prepare_xrgb32(
+    uint32_t& dst0p, const uint32_t& src0p)
   {
     Face::p32FillPBB3(dst0p, src0p);
   }
@@ -1616,65 +1617,65 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeGeneric<CompositeAdd, RASTER
   // [Pixel32]
   // --------------------------------------------------------------------------
 
-  template<bool Pack>
   static FOG_INLINE void prgb32_op_prgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
     Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    if (Pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
-  template<bool Pack>
   static FOG_INLINE void prgb32_op_xrgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
     Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
     Face::p32FillPBW1(dst0p_31, dst0p_31);
-    if (Pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
-  template<bool Pack>
   static FOG_INLINE void prgb32_op_frgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
-    prgb32_op_prgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    prgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  template<bool Pack>
   static FOG_INLINE void prgb32_op_zrgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
-    prgb32_op_xrgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    prgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  template<bool Pack>
   static FOG_INLINE void xrgb32_op_prgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
     Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    if (Pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
-  template<bool Pack>
   static FOG_INLINE void xrgb32_op_xrgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
     Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    if (Pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
-  template<bool Pack>
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
-    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31)
+    uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
+    bool pack = false)
   {
-    xrgb32_op_xrgb32_2031<Pack>(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
   // --------------------------------------------------------------------------

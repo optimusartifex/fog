@@ -331,6 +331,24 @@ enum RASTER_FETCH
 };
 
 // ============================================================================
+// [Fog::RASTER_PRGB_PREPARE]
+// ============================================================================
+
+//! @brief Prepare steps done when compositing pixels.
+enum RASTER_PRGB_PREPARE
+{
+  //! @brief There is nothing in prepare step.
+  RASTER_PRGB_PREPARE_XRGB = 0,
+
+  //! @brief Prepare means to fill X byte or word to get PRGB32/PRGB64
+  //! (FRGB32/FRGB64) result.
+  RASTER_PRGB_PREPARE_FRGB = 1,
+
+  //! @brief Prepare means to clear X byte or word to get ZRGB32/ZRGB64 result.
+  RASTER_PRGB_PREPARE_ZRGB = 2
+};
+
+// ============================================================================
 // [Fog::RASTER_COMBINE]
 // ============================================================================
 

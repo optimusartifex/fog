@@ -349,11 +349,14 @@ _CreateImplicit:
 
     case VAR_TYPE_COLOR_STOP:
       goto _CreateSimple;
-
     case VAR_TYPE_COLOR_STOP_LIST:
+      goto _CreateImplicit;
+
     case VAR_TYPE_IMAGE:
     case VAR_TYPE_IMAGE_PALETTE:
     case VAR_TYPE_IMAGE_FILTER:
+      goto _CreateImplicit;
+
     case VAR_TYPE_FONT:
       goto _CreateImplicit;
 
@@ -1488,9 +1491,14 @@ _SetImplicit:
 
     case VAR_TYPE_COLOR_STOP:
       goto _SetSimple;
-
     case VAR_TYPE_COLOR_STOP_LIST:
+      goto _SetImplicit;
+
     case VAR_TYPE_IMAGE:
+    case VAR_TYPE_IMAGE_PALETTE:
+    case VAR_TYPE_IMAGE_FILTER:
+      goto _SetImplicit;
+
     case VAR_TYPE_FONT:
       goto _SetImplicit;
       

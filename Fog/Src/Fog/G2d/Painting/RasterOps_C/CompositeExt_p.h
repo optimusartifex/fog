@@ -931,7 +931,7 @@ _ARGB32_Mask:
       DstF::p32LoadPixel32(dst0p_20, dst);
       if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
         goto _C_Opaque_Skip;
-      SrcF::p32LoadPixel32(src0p_20, dst);
+      SrcF::p32LoadPixel32(src0p_20, src);
 
       Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
       Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
@@ -973,7 +973,7 @@ _C_Opaque_Skip:
         if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
           goto _C_Opaque_Skip;
 
-        SrcF::p32LoadPixel32(src0p_20, dst);
+        SrcF::p32LoadPixel32(src0p_20, src);
         if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrc(src0p_20))
           goto _C_Opaque_Skip;
 
@@ -1018,7 +1018,7 @@ _C_Opaque_Skip:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
             goto _C_Mask_Unbound_MskIn_Skip;
 
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrc(src0p_20))
             goto _C_Mask_Unbound_MskIn_Skip;
 
@@ -1056,7 +1056,7 @@ _C_Mask_Unbound_MskIn_Skip:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
             goto _C_Mask_Unbound_Skip;
 
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrc(src0p_20))
             goto _C_Mask_Unbound_Skip;
 
@@ -1089,7 +1089,7 @@ _C_Mask_Unbound_Skip:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
             goto _C_Mask_Skip;
 
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrc(src0p_20))
             goto _C_Mask_Skip;
 
@@ -1132,7 +1132,7 @@ _C_Mask_Skip:
             goto _A8_Glyph_Unbound_Skip;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
 
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
@@ -1183,7 +1183,7 @@ _A8_Glyph_Unbound_Mask:
             goto _A8_Glyph_Skip;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
 
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
@@ -1240,7 +1240,7 @@ _A8_Glyph_Mask:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
             goto _A8_Extra_Unbound_Skip;
 
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrc(src0p_20))
             goto _A8_Extra_Unbound_Skip;
 
@@ -1278,7 +1278,7 @@ _A8_Extra_Unbound_Skip:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDst(dst0p_20))
             goto _A8_Extra_Skip;
 
-          DstF::p32LoadPixel32(src0p_20, src);
+          SrcF::p32LoadPixel32(src0p_20, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrc(src0p_20))
             goto _A8_Extra_Skip;
 
@@ -1321,7 +1321,7 @@ _A8_Extra_Skip:
           goto _ARGB32_Skip;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        DstF::p32LoadPixel32(src0p_20, src);
+        SrcF::p32LoadPixel32(src0p_20, src);
 
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);

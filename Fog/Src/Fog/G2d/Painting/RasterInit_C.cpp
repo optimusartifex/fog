@@ -559,15 +559,15 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositeAdd::xrgb32_cblit_prgb32_span);
     FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
 
-    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_prgb32_line);
-    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_xrgb32_line);
-    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeAdd::xrgb32_vblit_rgb24_line);
-  //FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_A8    ]);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_XRGB32_AND_PRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_prgb32_line);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_XRGB32_AND_XRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_xrgb32_line);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_XRGB32_AND_RGB24 ], RasterOps_C::CompositeAdd::xrgb32_vblit_rgb24_line);
+  //FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_XRGB32_AND_A8    ]);
 
-    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_prgb32_span);
-    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_xrgb32_span);
-    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeAdd::xrgb32_vblit_rgb24_span);
-  //FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_A8    ]);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_XRGB32_AND_PRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_prgb32_span);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_XRGB32_AND_XRGB32], RasterOps_C::CompositeAdd::xrgb32_vblit_xrgb32_span);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_XRGB32_AND_RGB24 ], RasterOps_C::CompositeAdd::xrgb32_vblit_rgb24_span);
+  //FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_XRGB32_AND_A8    ]);
   }
 
 #endif // FOG_RASTER_INIT_C

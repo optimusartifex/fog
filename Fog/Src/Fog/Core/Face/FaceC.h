@@ -1686,7 +1686,7 @@ static FOG_INLINE void p32Negate255PBW1_2x(
 static FOG_INLINE void p32MinPBW_SBW(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0)
 {
-  uint32_t x0Lo = x0 & 0xFFU;
+  uint32_t x0Lo = x0 & 0xFFFFU;
   uint32_t x0Hi = x0 >> 16;
 
   if (x0Lo > u0) x0Lo = u0;
@@ -1705,14 +1705,14 @@ static FOG_INLINE void p32MinPBW_SBW_2x(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0,
   uint32_t& dst1, const uint32_t& x1, const uint32_t& u1)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
-  uint32_t x1Lo = x1 & 0x000000FFU;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
+  uint32_t x1Lo = x1 & 0x0000FFFFU;
 
   if (x0Lo > u0) x0Lo = u0;
   if (x1Lo > u1) x1Lo = u1;
 
-  uint32_t x0Hi = x0 & 0x00FF0000U;
-  uint32_t x1Hi = x1 & 0x00FF0000U;
+  uint32_t x0Hi = x0 & 0xFFFF0000U;
+  uint32_t x1Hi = x1 & 0xFFFF0000U;
 
   uint32_t t0Hi = u0 << 16;
   uint32_t t1Hi = u1 << 16;
@@ -1732,16 +1732,16 @@ static FOG_INLINE void p32MinPBW_SBW_2x(
 static FOG_INLINE void p32MinPBW(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
-  uint32_t y0Lo = y0 & 0x000000FFU;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
+  uint32_t y0Lo = y0 & 0x0000FFFFU;
 
-  uint32_t x0Hi = x0 & 0x00FF0000U;
-  uint32_t y0Hi = y0 & 0x00FF0000U;
+  uint32_t x0Hi = x0;
+  uint32_t y0Hi = y0;
 
   if (x0Lo > y0Lo) x0Lo = y0Lo;
   if (x0Hi > y0Hi) x0Hi = y0Hi;
 
-  dst0 = _FOG_FACE_COMBINE_2(x0Lo, x0Hi);
+  dst0 = _FOG_FACE_COMBINE_2(x0Lo, x0Hi & 0xFFFF0000);
 }
 
 //! @brief Take smaller value from @a x0/y0 and store it to @a dst0.
@@ -1753,8 +1753,8 @@ static FOG_INLINE void p32MinPBW(
 static FOG_INLINE void p32MinPBW_ZeroPBW1(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
-  uint32_t y0Lo = y0 & 0x000000FFU;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
+  uint32_t y0Lo = y0 & 0x0000FFFFU;
   if (x0Lo > y0Lo) x0Lo = y0Lo;
   dst0 = x0Lo;
 }
@@ -1800,7 +1800,7 @@ static FOG_INLINE void p32MinPBW_2x(
 static FOG_INLINE void p32MaxPBW_SBW(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
   uint32_t x0Hi = x0 >> 16;
 
   if (x0Lo < u0) x0Lo = u0;
@@ -1819,14 +1819,14 @@ static FOG_INLINE void p32MaxPBW_SBW_2x(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0,
   uint32_t& dst1, const uint32_t& x1, const uint32_t& u1)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
-  uint32_t x1Lo = x1 & 0x000000FFU;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
+  uint32_t x1Lo = x1 & 0x0000FFFFU;
 
   if (x0Lo < u0) x0Lo = u0;
   if (x1Lo < u1) x1Lo = u1;
 
-  uint32_t x0Hi = x0 & 0x00FF0000U;
-  uint32_t x1Hi = x1 & 0x00FF0000U;
+  uint32_t x0Hi = x0 & 0xFFFF0000U;
+  uint32_t x1Hi = x1 & 0xFFFF0000U;
 
   uint32_t t0Hi = u0 << 16;
   uint32_t t1Hi = u1 << 16;
@@ -1846,16 +1846,16 @@ static FOG_INLINE void p32MaxPBW_SBW_2x(
 static FOG_INLINE void p32MaxPBW(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
-  uint32_t x0Hi = x0 & 0x00FF0000U;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
+  uint32_t y0Lo = y0 & 0x0000FFFFU;
 
-  uint32_t y0Lo = y0 & 0x000000FFU;
-  uint32_t y0Hi = y0 & 0x00FF0000U;
+  uint32_t x0Hi = x0;
+  uint32_t y0Hi = y0;
 
   if (x0Lo < y0Lo) x0Lo = y0Lo;
   if (x0Hi < y0Hi) x0Hi = y0Hi;
 
-  dst0 = _FOG_FACE_COMBINE_2(x0Lo, x0Hi);
+  dst0 = _FOG_FACE_COMBINE_2(x0Lo, x0Hi & 0xFFFF0000);
 }
 
 //! @brief Take smaller value from @a x0/y0 and store it to @a dst0.
@@ -1867,8 +1867,8 @@ static FOG_INLINE void p32MaxPBW(
 static FOG_INLINE void p32MaxPBW_ZeroPBW1(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
 {
-  uint32_t x0Lo = x0 & 0x000000FFU;
-  uint32_t y0Lo = y0 & 0x000000FFU;
+  uint32_t x0Lo = x0 & 0x0000FFFFU;
+  uint32_t y0Lo = y0 & 0x0000FFFFU;
   if (x0Lo < y0Lo) x0Lo = y0Lo;
   dst0 = x0Lo;
 }
@@ -5976,10 +5976,10 @@ static FOG_INLINE void p64MinPBW_SBW(
 {
 #if defined(FOG_ARCH_NATIVE_P64)
 
-  uint64_t x0_0 = x0 & FOG_UINT64_C(0x00000000000000FF);
-  uint64_t x0_1 = x0 & FOG_UINT64_C(0x0000000000FF0000);
-  uint64_t x0_2 = x0 & FOG_UINT64_C(0x000000FF00000000);
-  uint64_t x0_3 = x0 & FOG_UINT64_C(0x00FF000000000000);
+  uint64_t x0_0 = x0 & FOG_UINT64_C(0x000000000000FFFF);
+  uint64_t x0_1 = x0 & FOG_UINT64_C(0x00000000FFFF0000);
+  uint64_t x0_2 = x0 & FOG_UINT64_C(0x0000FFFF00000000);
+  uint64_t x0_3 = x0 & FOG_UINT64_C(0xFFFF000000000000);
   uint64_t t0 = u0;
 
   if (x0_0 > t0) x0_0 = t0;
@@ -5997,10 +5997,10 @@ static FOG_INLINE void p64MinPBW_SBW(
 
 #else
 
-  uint32_t x0_0 = x0.u32Lo & 0x000000FFU;
-  uint32_t x0_1 = x0.u32Lo & 0x00FF0000U;
-  uint32_t x0_2 = x0.u32Hi & 0x000000FFU;
-  uint32_t x0_3 = x0.u32Hi & 0x00FF0000U;
+  uint32_t x0_0 = x0.u32Lo & 0x0000FFFFU;
+  uint32_t x0_1 = x0.u32Lo & 0xFFFF0000U;
+  uint32_t x0_2 = x0.u32Hi & 0x0000FFFFU;
+  uint32_t x0_3 = x0.u32Hi & 0xFFFF0000U;
 
   uint32_t t0_0 = u0.u32Lo;
   uint32_t t0_1 = u0.u32Lo << 16;
@@ -6047,24 +6047,24 @@ static FOG_INLINE void p64MinPBW(
   uint64_t t0_1;
   uint64_t t0_2;
 
-  t0_0 = x0 & FOG_UINT64_C(0x00000000000000FF);
-  t0_1 = y0 & FOG_UINT64_C(0x00000000000000FF);
+  t0_0 = x0 & FOG_UINT64_C(0x000000000000FFFF);
+  t0_1 = y0 & FOG_UINT64_C(0x000000000000FFFF);
   if (t0_0 > t0_1) t0_0 = t0_1;
 
-  t0_1 = x0 & FOG_UINT64_C(0x0000000000FF0000);
-  t0_2 = y0 & FOG_UINT64_C(0x0000000000FF0000);
+  t0_1 = x0 & FOG_UINT64_C(0x00000000FFFF0000);
+  t0_2 = y0 & FOG_UINT64_C(0x00000000FFFF0000);
   if (t0_1 > t0_2) t0_1 = t0_2;
 
   t0_0 = _FOG_FACE_COMBINE_2(t0_0, t0_1);
 
-  t0_1 = x0 & FOG_UINT64_C(0x000000FF00000000);
-  t0_2 = y0 & FOG_UINT64_C(0x000000FF00000000);
+  t0_1 = x0 & FOG_UINT64_C(0x0000FFFF00000000);
+  t0_2 = y0 & FOG_UINT64_C(0x0000FFFF00000000);
   if (t0_1 > t0_2) t0_1 = t0_2;
 
   t0_0 = _FOG_FACE_COMBINE_2(t0_0, t0_1);
 
-  t0_1 = x0 & FOG_UINT64_C(0x00FF000000000000);
-  t0_2 = y0 & FOG_UINT64_C(0x00FF000000000000);
+  t0_1 = x0 & FOG_UINT64_C(0xFFFF000000000000);
+  t0_2 = y0 & FOG_UINT64_C(0xFFFF000000000000);
   if (t0_1 > t0_2) t0_1 = t0_2;
 
   t0_0 = _FOG_FACE_COMBINE_2(t0_0, t0_1);
@@ -6076,22 +6076,22 @@ static FOG_INLINE void p64MinPBW(
   uint32_t t0_1;
   uint32_t t0_2;
 
-  t0_0 = x0.u32Lo & 0x000000FFU;
-  t0_1 = y0.u32Lo & 0x000000FFU;
+  t0_0 = x0.u32Lo & 0x0000FFFFU;
+  t0_1 = y0.u32Lo & 0x0000FFFFU;
   if (t0_0 > t0_1) t0_0 = t0_1;
 
-  t0_1 = x0.u32Lo & 0x00FF0000U;
-  t0_2 = y0.u32Lo & 0x00FF0000U;
+  t0_1 = x0.u32Lo & 0xFFFF0000U;
+  t0_2 = y0.u32Lo & 0xFFFF0000U;
   if (t0_1 > t0_2) t0_1 = t0_2;
 
   dst0.u32Lo = _FOG_FACE_COMBINE_2(t0_0, t0_1);
 
-  t0_0 = x0.u32Hi & 0x000000FFU;
-  t0_1 = y0.u32Hi & 0x000000FFU;
+  t0_0 = x0.u32Hi & 0x0000FFFFU;
+  t0_1 = y0.u32Hi & 0x0000FFFFU;
   if (t0_0 > t0_1) t0_0 = t0_1;
 
-  t0_1 = x0.u32Hi & 0x00FF0000U;
-  t0_2 = y0.u32Hi & 0x00FF0000U;
+  t0_1 = x0.u32Hi & 0xFFFF0000U;
+  t0_2 = y0.u32Hi & 0xFFFF0000U;
   if (t0_1 > t0_2) t0_1 = t0_2;
 
   dst0.u32Hi = _FOG_FACE_COMBINE_2(t0_0, t0_1);
@@ -6127,10 +6127,10 @@ static FOG_INLINE void p64MaxPBW_SBW(
 {
 #if defined(FOG_ARCH_NATIVE_P64)
 
-  uint64_t x0_0 = x0 & FOG_UINT64_C(0x00000000000000FF);
-  uint64_t x0_1 = x0 & FOG_UINT64_C(0x0000000000FF0000);
-  uint64_t x0_2 = x0 & FOG_UINT64_C(0x000000FF00000000);
-  uint64_t x0_3 = x0 & FOG_UINT64_C(0x00FF000000000000);
+  uint64_t x0_0 = x0 & FOG_UINT64_C(0x000000000000FFFF);
+  uint64_t x0_1 = x0 & FOG_UINT64_C(0x00000000FFFF0000);
+  uint64_t x0_2 = x0 & FOG_UINT64_C(0x0000FFFF00000000);
+  uint64_t x0_3 = x0 & FOG_UINT64_C(0xFFFF000000000000);
   uint64_t t0 = u0;
 
   if (x0_0 < t0) x0_0 = t0;
@@ -6148,10 +6148,10 @@ static FOG_INLINE void p64MaxPBW_SBW(
 
 #else
 
-  uint32_t x0_0 = x0.u32Lo & 0x000000FFU;
-  uint32_t x0_1 = x0.u32Lo & 0x00FF0000U;
-  uint32_t x0_2 = x0.u32Hi & 0x000000FFU;
-  uint32_t x0_3 = x0.u32Hi & 0x00FF0000U;
+  uint32_t x0_0 = x0.u32Lo & 0x0000FFFFU;
+  uint32_t x0_1 = x0.u32Lo & 0xFFFF0000U;
+  uint32_t x0_2 = x0.u32Hi & 0x0000FFFFU;
+  uint32_t x0_3 = x0.u32Hi & 0xFFFF0000U;
 
   uint32_t t0_0 = u0.u32Lo;
   uint32_t t0_1 = u0.u32Lo << 16;
@@ -6198,24 +6198,24 @@ static FOG_INLINE void p64MaxPBW(
   uint64_t t0_1;
   uint64_t t0_2;
 
-  t0_0 = x0 & FOG_UINT64_C(0x00000000000000FF);
-  t0_1 = y0 & FOG_UINT64_C(0x00000000000000FF);
+  t0_0 = x0 & FOG_UINT64_C(0x000000000000FFFF);
+  t0_1 = y0 & FOG_UINT64_C(0x000000000000FFFF);
   if (t0_0 < t0_1) t0_0 = t0_1;
 
-  t0_1 = x0 & FOG_UINT64_C(0x0000000000FF0000);
-  t0_2 = y0 & FOG_UINT64_C(0x0000000000FF0000);
+  t0_1 = x0 & FOG_UINT64_C(0x00000000FFFF0000);
+  t0_2 = y0 & FOG_UINT64_C(0x00000000FFFF0000);
   if (t0_1 < t0_2) t0_1 = t0_2;
 
   t0_0 = _FOG_FACE_COMBINE_2(t0_0, t0_1);
 
-  t0_1 = x0 & FOG_UINT64_C(0x000000FF00000000);
-  t0_2 = y0 & FOG_UINT64_C(0x000000FF00000000);
+  t0_1 = x0 & FOG_UINT64_C(0x0000FFFF00000000);
+  t0_2 = y0 & FOG_UINT64_C(0x0000FFFF00000000);
   if (t0_1 < t0_2) t0_1 = t0_2;
 
   t0_0 = _FOG_FACE_COMBINE_2(t0_0, t0_1);
 
-  t0_1 = x0 & FOG_UINT64_C(0x00FF000000000000);
-  t0_2 = y0 & FOG_UINT64_C(0x00FF000000000000);
+  t0_1 = x0 & FOG_UINT64_C(0xFFFF000000000000);
+  t0_2 = y0 & FOG_UINT64_C(0xFFFF000000000000);
   if (t0_1 < t0_2) t0_1 = t0_2;
 
   t0_0 = _FOG_FACE_COMBINE_2(t0_0, t0_1);
@@ -6227,22 +6227,22 @@ static FOG_INLINE void p64MaxPBW(
   uint32_t t0_1;
   uint32_t t0_2;
 
-  t0_0 = x0.u32Lo & 0x000000FFU;
-  t0_1 = y0.u32Lo & 0x000000FFU;
+  t0_0 = x0.u32Lo & 0x0000FFFFU;
+  t0_1 = y0.u32Lo & 0x0000FFFFU;
   if (t0_0 < t0_1) t0_0 = t0_1;
 
-  t0_1 = x0.u32Lo & 0x00FF0000U;
-  t0_2 = y0.u32Lo & 0x00FF0000U;
+  t0_1 = x0.u32Lo & 0xFFFF0000U;
+  t0_2 = y0.u32Lo & 0xFFFF0000U;
   if (t0_1 < t0_2) t0_1 = t0_2;
 
   dst0.u32Lo = _FOG_FACE_COMBINE_2(t0_0, t0_1);
 
-  t0_0 = x0.u32Hi & 0x000000FFU;
-  t0_1 = y0.u32Hi & 0x000000FFU;
+  t0_0 = x0.u32Hi & 0x0000FFFFU;
+  t0_1 = y0.u32Hi & 0x0000FFFFU;
   if (t0_0 < t0_1) t0_0 = t0_1;
 
-  t0_1 = x0.u32Hi & 0x00FF0000U;
-  t0_2 = y0.u32Hi & 0x00FF0000U;
+  t0_1 = x0.u32Hi & 0xFFFF0000U;
+  t0_2 = y0.u32Hi & 0xFFFF0000U;
   if (t0_1 < t0_2) t0_1 = t0_2;
 
   dst0.u32Hi = _FOG_FACE_COMBINE_2(t0_0, t0_1);

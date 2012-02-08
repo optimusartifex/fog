@@ -962,7 +962,7 @@ _ARGB32_Mask:
         goto _C_Opaque_Skip;
 
       SrcF::p32LoadPixel32(src0p_20, src);
-      pixel32_prepare_pixel32(src0p_20, src0p_20);
+      pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
       Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
       Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
@@ -1008,7 +1008,7 @@ _C_Opaque_Skip:
         if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixel32(src0p_20))
           goto _C_Opaque_Skip;
 
-        pixel32_prepare_pixel32(src0p_20, src0p_20);
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
@@ -1057,7 +1057,7 @@ _C_Opaque_Skip:
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32MulDiv256PBW_SBW_2x_Pack_1032(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
           Face::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
 
@@ -1096,7 +1096,7 @@ _C_Mask_Unbound_MskIn_Skip:
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32MulDiv256PBW_SBW_2x_Pack_1032(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, src0p_20,
@@ -1127,7 +1127,7 @@ _C_Mask_Unbound_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixel32(src0p_20))
             goto _C_Mask_Skip;
 
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
@@ -1169,7 +1169,7 @@ _C_Mask_Skip:
           DstF::p32LoadPixel32(dst0p_20, dst);
           SrcF::p32LoadPixel32(src0p_20, src);
 
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
@@ -1221,7 +1221,7 @@ _A8_Glyph_Unbound_Mask:
           DstF::p32LoadPixel32(dst0p_20, dst);
           SrcF::p32LoadPixel32(src0p_20, src);
 
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
@@ -1282,7 +1282,7 @@ _A8_Glyph_Mask:
             goto _A8_Extra_Unbound_Skip;
 
           Face::p32Load2a(msk0p, msk);
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
@@ -1321,7 +1321,7 @@ _A8_Extra_Unbound_Skip:
             goto _A8_Extra_Skip;
 
           Face::p32Load2a(msk0p, msk);
-          pixel32_prepare_pixel32(src0p_20, src0p_20);
+          pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
@@ -1362,7 +1362,7 @@ _A8_Extra_Skip:
         DstF::p32LoadPixel32(dst0p_20, dst);
         SrcF::p32LoadPixel32(src0p_20, src);
 
-        pixel32_prepare_pixel32(src0p_20, src0p_20);
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 

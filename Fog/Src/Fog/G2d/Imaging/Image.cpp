@@ -1234,8 +1234,6 @@ static err_t Image_blitImagePrivate(
     else
     {
       uint32_t compat  = RasterUtil::getCompositeCompatFormat(dFormat, sFormat);
-      uint32_t vBlitId = RasterUtil::getCompositeCompatVBlitId(dFormat, sFormat);
-
       blitLine = _api_raster.getCompositeExt(dFormat, compositingOperator)->vblit_line[compat];
 
       if (compat != sFormat)
@@ -1265,10 +1263,11 @@ static err_t Image_blitImagePrivate(
     }
     else
     {
+      uint8_t* bufferData = static_cast<uint8_t*>(buffer.getMem());
       for (int i = 0; i < h; i++, dPixels += dStride, sPixels += sStride)
       {
-        converter(reinterpret_cast<uint8_t*>(buffer.getMem()), sPixels, w, NULL);
-        blitLine(dPixels, reinterpret_cast<uint8_t*>(buffer.getMem()), w, &closure);
+        converter(bufferData, sPixels, w, NULL);
+        blitLine(dPixels, bufferData, w, &closure);
       }
     }
   }
@@ -1284,8 +1283,6 @@ static err_t Image_blitImagePrivate(
     else
     {
       uint32_t compat  = RasterUtil::getCompositeCompatFormat(dFormat, sFormat);
-      uint32_t vBlitId = RasterUtil::getCompositeCompatVBlitId(dFormat, sFormat);
-
       blitLine = _api_raster.getCompositeExt(dFormat, compositingOperator)->vblit_span[compat];
 
       if (compat != sFormat)
@@ -1319,11 +1316,12 @@ static err_t Image_blitImagePrivate(
     }
     else
     {
-      span.setData(reinterpret_cast<uint8_t*>(buffer.getMem()));
+      uint8_t* bufferData = static_cast<uint8_t*>(buffer.getMem());
+      span.setData(bufferData);
 
       for (int i = 0; i < h; i++, dPixels += dStride, sPixels += sStride)
       {
-        converter(reinterpret_cast<uint8_t*>(buffer.getMem()), sPixels, w, NULL);
+        converter(bufferData, sPixels, w, NULL);
         blitLine(dPixels, &span, &closure);
       }
     }

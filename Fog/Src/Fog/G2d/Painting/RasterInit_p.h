@@ -24,7 +24,7 @@ namespace Fog {
 //! @internal
 //!
 //! @brief Initialize the function poitner @a _Dst_ later by post-init (MARKER).
-#define FOG_RASTER_SKIP(_Dst_) FOG_NOP
+#define FOG_RASTER_SKIP(_Dst_) (void)funcs._Dst_
 
 } // Fog namespace
 

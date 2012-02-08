@@ -2219,76 +2219,8 @@ _ARGB32_Mask:
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ============================================================================
-// [Fog::RasterOps_C - CompositeExtGeneric]
+// [Fog::RasterOps_C - CompositeExtSrcInSrcOut]
 // ============================================================================
 
 //! @internal
@@ -2594,6 +2526,8 @@ _ARGB32_Mask:
         goto _C_Opaque_Skip;
 
       SrcF::p32LoadPixel32(src0p_20, src);
+      pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
+
       Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
       if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
 
@@ -2633,6 +2567,8 @@ _C_Opaque_Skip:
           goto _C_Opaque_Skip;
 
         SrcF::p32LoadPixel32(src0p_20, src);
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
+
         Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
         if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
 
@@ -2653,8 +2589,10 @@ _C_Opaque_Skip:
     {
       BLIT_LOOP_32x1_INIT()
 
+      uint32_t msk0p;
       uint32_t minv0p;
 
+      Face::p32Copy(msk0p, msk0);
       Face::p32Negate256SBW(minv0p, msk0);
 
       BLIT_LOOP_32x1_INIT()
@@ -2665,22 +2603,21 @@ _C_Opaque_Skip:
         uint32_t t0p;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        DstF::p32LoadPixel32(src0p_20, src);
+        SrcF::p32LoadPixel32(src0p_20, src);
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
         Face::p32ExtractPBB3(t0p, dst0p_31);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32Mul_2x(dst0p_20, dst0p_20, t0p, dst0p_31, dst0p_31, t0p);
-
         Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
-        //Face::p32MulDivSBW255(src0p_
-        //Face::p32Mul_2x(dst0p_20, dst0p_20, minv0p, dst0p_31, dst0p_31, minv0p);
-        //Face::p32Mul_2x(t0p_20, src0p_20, t0p_20, t0p_31, src0p_31, t0p_20);
-        //Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+        Face::p32MulDiv255SBW(t0p, t0p, msk0p);
+        Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
+        Face::p32Mul_2x(dst0p_20, dst0p_20, minv0p, dst0p_31, dst0p_31, minv0p);
 
-        Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+        Face::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
+        Face::p32Div256PBW_2x_Pack_2031(dst0p_20, dst0p_20, dst0p_31);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -2708,7 +2645,8 @@ _C_Opaque_Skip:
           goto _A8_Glyph_Skip;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        DstF::p32LoadPixel32(src0p_20, src);
+        SrcF::p32LoadPixel32(src0p_20, src);
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
         Face::p32ExtractPBB3(t0p, dst0p_31);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
@@ -2749,7 +2687,8 @@ _A8_Glyph_Skip:
         Face::p32Load2a(msk0p, msk);
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        DstF::p32LoadPixel32(src0p_20, src);
+        SrcF::p32LoadPixel32(src0p_20, src);
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
         Face::p32ExtractPBB3(t0p, dst0p_31);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
@@ -2777,10 +2716,63 @@ _A8_Glyph_Skip:
 
     V_BLIT_SPAN8_ARGB32_GLYPH()
     {
+      BLIT_LOOP_32x1_INIT()
+
+      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+        uint32_t dst0p_20, dst0p_31;
+        uint32_t src0p_20, src0p_31;
+        uint32_t t0p;
+        uint32_t msk0p_20, msk0p_31;
+
+        Face::p32Load4a(msk0p_20, msk);
+        if (msk0p_20 == 0x00000000)
+          goto _ARGB32_Skip;
+
+        DstF::p32LoadPixel32(dst0p_20, dst);
+        DstF::p32LoadPixel32(src0p_20, src);
+
+        pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
+        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+
+        if (msk0p_20 != 0xFFFFFFFF)
+          goto _ARGB32_Mask;
+
+        Face::p32RShift(dst0p_20, dst0p_20, 24);
+        if (NegateDA) Face::p32Negate255SBW(dst0p_20, dst0p_20);
+
+        Face::p32MulDiv255PBW_SBW_2x_Pack_2031(src0p_20, src0p_20, dst0p_20, src0p_31, dst0p_20);
+        DstF::p32StorePixel32(dst, src0p_20);
+
+_ARGB32_Skip:
+        dst += DstF::SIZE;
+        src += SrcF::SIZE;
+        msk += 4;
+        continue;
+
+_ARGB32_Mask:
+        Face::p32ExtractPBW1(t0p, dst0p_20);
+        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+
+        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+
+        Face::p32MulDiv255PBW_SBW_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
+        Face::p32MulDiv256PBW_2x_Pack_2031(src0p_20, src0p_20, msk0p_20, src0p_31, msk0p_31);
+
+        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+
+        Face::p32Add(dst0p_20, dst0p_20, src0p_20);
+        DstF::p32StorePixel32(dst, dst0p_20);
+
+        dst += DstF::SIZE;
+        src += SrcF::SIZE;
+        msk += 4;
+      BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     V_BLIT_SPAN8_END()
   }
+
 #if 0
   // ==========================================================================
   // [Pixel32 - CBlit - PixelA8 - Line]
@@ -3569,6 +3561,128 @@ _ARGB32_Mask:
     V_BLIT_SPAN8_END()
   }
 #endif
+
+  // ==========================================================================
+  // [PRGB32 - CBlit - PRGB32 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_cblit_prgb32_line(
+    uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
+  {
+    pixel32_cblit_pixel32_line<PixelPRGB32, PixelPRGB32>(dst, src, w, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - CBlit - PRGB32 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_cblit_prgb32_span(
+    uint8_t* dst, const RasterSolid* src, const RasterSpan* span, const RasterClosure* closure)
+  {
+    pixel32_cblit_pixel32_span<PixelPRGB32, PixelPRGB32>(dst, src, span, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - CBlit - XRGB32 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_cblit_xrgb32_line(
+    uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
+  {
+    pixel32_cblit_pixel32_line<PixelPRGB32, PixelFRGB32>(dst, src, w, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - CBlit - XRGB32 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_cblit_xrgb32_span(
+    uint8_t* dst, const RasterSolid* src, const RasterSpan* span, const RasterClosure* closure)
+  {
+    pixel32_cblit_pixel32_span<PixelPRGB32, PixelFRGB32>(dst, src, span, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - PRGB32 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_prgb32_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    pixel32_vblit_pixel32_line<PixelPRGB32, PixelPRGB32>(dst, src, w, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - PRGB32 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_prgb32_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    pixel32_vblit_pixel32_span<PixelPRGB32, PixelPRGB32>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - XRGB32 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_xrgb32_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    pixel32_vblit_pixel32_line<PixelPRGB32, PixelXRGB32>(dst, src, w, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - XRGB32 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_xrgb32_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    pixel32_vblit_pixel32_span<PixelPRGB32, PixelXRGB32>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - RGB24 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_rgb24_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    pixel32_vblit_pixel32_line<PixelPRGB32, PixelRGB24>(dst, src, w, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - RGB24 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_rgb24_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    pixel32_vblit_pixel32_span<PixelPRGB32, PixelRGB24>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - A8 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_a8_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    // TODO:
+    // pixel32_vblit_pixela8_line<PixelPRGB32, PixelA8>(dst, src, w, closure);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - A8 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_a8_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    // TODO:
+    // pixel32_vblit_pixela8_span<PixelPRGB32, PixelA8>(dst, span, closure);
+  }
 };
 
 
@@ -4058,9 +4172,55 @@ struct CompositeExtPrgbVsA
 
 
 
+// ============================================================================
+// [Fog::RasterOps_C - CompositeSrcIn]
+// ============================================================================
 
+//! @internal
+struct FOG_NO_EXPORT CompositeSrcIn : public CompositeExtSrcInSrcOut<
+  CompositeSrcIn, RASTER_COMBINE_OP_SRC_IN, RASTER_PRGB_PREPARE_NONE,
+  false>
+{
+  // --------------------------------------------------------------------------
+  // [Prepare]
+  // --------------------------------------------------------------------------
 
+  static FOG_INLINE void prgb32_prepare_xrgb32(
+    uint32_t& dst0p, const uint32_t& src0p)
+  {
+  }
 
+  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
+    uint32_t& dst0p_20, const uint32_t& src0p_20,
+    uint32_t& dst0p_31, const uint32_t& src0p_31)
+  {
+  }
+};
+
+// ============================================================================
+// [Fog::RasterOps_C - CompositeSrcIn]
+// ============================================================================
+
+//! @internal
+struct FOG_NO_EXPORT CompositeSrcOut : public CompositeExtSrcInSrcOut<
+  CompositeSrcOut, RASTER_COMBINE_OP_SRC_OUT, RASTER_PRGB_PREPARE_NONE,
+  true>
+{
+  // --------------------------------------------------------------------------
+  // [Prepare]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE void prgb32_prepare_xrgb32(
+    uint32_t& dst0p, const uint32_t& src0p)
+  {
+  }
+
+  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
+    uint32_t& dst0p_20, const uint32_t& src0p_20,
+    uint32_t& dst0p_31, const uint32_t& src0p_31)
+  {
+  }
+};
 
 // ============================================================================
 // [Fog::RasterOps_C - CompositeSrcAtop]

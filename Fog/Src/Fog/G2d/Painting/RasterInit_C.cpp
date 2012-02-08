@@ -521,7 +521,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_A8_AND_PRGB32    ], (RasterVBlitSpanFunc)RasterOps_C::CompositeClear::a8_vblit_span);
     FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_A8_AND_A8        ]);
   }
-#if 0
+
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcIn - PRGB32]
   // --------------------------------------------------------------------------
@@ -530,20 +530,20 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_EXT_SRC_IN];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositeSrcIn::prgb32_cblit_prgb32_line);
-    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcIn::prgb32_cblit_xrgb32_line);
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcIn::prgb32_cblit_xrgb32_line);
 
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositeSrcIn::prgb32_cblit_prgb32_span);
-    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcIn::prgb32_cblit_xrgb32_span);
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcIn::prgb32_cblit_xrgb32_span);
 
     FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositeSrcIn::prgb32_vblit_prgb32_line);
-    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcIn::prgb32_vblit_xrgb32_line);
-    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcIn::prgb32_vblit_rgb24_line);
-    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcIn::prgb32_vblit_a8_line);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcIn::prgb32_vblit_xrgb32_line);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcIn::prgb32_vblit_rgb24_line);
+//    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcIn::prgb32_vblit_a8_line);
 
     FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositeSrcIn::prgb32_vblit_prgb32_span);
-    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcIn::prgb32_vblit_xrgb32_span);
-    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcIn::prgb32_vblit_rgb24_span);
-    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcIn::prgb32_vblit_a8_span);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcIn::prgb32_vblit_xrgb32_span);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcIn::prgb32_vblit_rgb24_span);
+//    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcIn::prgb32_vblit_a8_span);
   }
 
   // --------------------------------------------------------------------------
@@ -576,20 +576,20 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_EXT_SRC_OUT];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositeSrcOut::prgb32_cblit_prgb32_line);
-    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcOut::prgb32_cblit_xrgb32_line);
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcOut::prgb32_cblit_xrgb32_line);
 
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositeSrcOut::prgb32_cblit_prgb32_span);
-    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcOut::prgb32_cblit_xrgb32_span);
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositeSrcOut::prgb32_cblit_xrgb32_span);
 
     FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositeSrcOut::prgb32_vblit_prgb32_line);
-    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcOut::prgb32_vblit_xrgb32_line);
-    FOG_RASTER_SKIP(vblit_line[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcOut::prgb32_vblit_rgb24_line);
-    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcOut::prgb32_vblit_a8_line);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcOut::prgb32_vblit_xrgb32_line);
+    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcOut::prgb32_vblit_rgb24_line);
+//    FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcOut::prgb32_vblit_a8_line);
 
     FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositeSrcOut::prgb32_vblit_prgb32_span);
-    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcOut::prgb32_vblit_xrgb32_span);
-    FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcOut::prgb32_vblit_rgb24_span);
-    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcOut::prgb32_vblit_a8_span);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositeSrcOut::prgb32_vblit_xrgb32_span);
+    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_RGB24 ], RasterOps_C::CompositeSrcOut::prgb32_vblit_rgb24_span);
+//    FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_PRGB32_AND_A8    ], RasterOps_C::CompositeSrcOut::prgb32_vblit_a8_span);
   }
 
   // --------------------------------------------------------------------------
@@ -613,7 +613,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_XRGB32_AND_XRGB32]);
     FOG_RASTER_SKIP(vblit_span[RASTER_VBLIT_XRGB32_AND_RGB24 ]);
   }
-#endif
+
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcAtop - PRGB32]
   // --------------------------------------------------------------------------

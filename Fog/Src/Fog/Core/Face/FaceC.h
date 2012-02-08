@@ -2393,6 +2393,15 @@ static FOG_INLINE void p32Div256PBW_2x(
   dst1 = t1;
 }
 
+static FOG_INLINE void p32Div256PBW_2x_Pack_2031(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& x1)
+{
+  uint32_t t0 = (x0 >> 8) & 0x00FF00FF;
+  uint32_t t1 = (x1     ) & 0xFF00FF00;
+
+  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+}
+
 //! @brief Scalar Divide by 65535.
 //!
 //! @verbatim

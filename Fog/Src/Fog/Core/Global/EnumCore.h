@@ -2036,11 +2036,11 @@ enum STREAM_SEEK_MODE
 };
 
 // ============================================================================
-// [Fog::STR_CODE]
+// [Fog::STR]
 // ============================================================================
 
-//! @brief Cached strings IDs used in @c fog_strings array.
-enum STR_CODE
+//! @brief Cached @ref InternedStringW IDs.
+enum STR
 {
   STR_1_0 = 0,
 
@@ -2081,6 +2081,7 @@ enum STR_CODE
   STR_clip_rule,
   STR_clipPath,
   STR_color,
+  STR_comp_op,
   STR_compression,
   STR_cursor,
   STR_cx,

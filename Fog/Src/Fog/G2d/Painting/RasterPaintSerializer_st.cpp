@@ -285,7 +285,7 @@ _Solid:
     _FOG_RASTER_ENSURE_PATTERN(engine);
 
     uint32_t srcFormat = engine->ctx.pc->getSrcFormat();
-    compositingOperator = RasterUtil::getCompositeModifiedOperator(dstFormat, compositingOperator, srcFormat);
+    compositingOperator = RasterUtil::getCompositeModifiedOperator(dstFormat, compositingOperator, engine->ctx.pc->isOpaque());
 
     if (compositingOperator == COMPOSITE_CLEAR)
       goto _Solid;
@@ -492,7 +492,7 @@ _Solid:
           RasterPatternFetcher pf;
 
           uint32_t srcFormat = pc->getSrcFormat();
-          compositingOperator = RasterUtil::getCompositeModifiedOperator(dstFormat, compositingOperator, srcFormat);
+          compositingOperator = RasterUtil::getCompositeModifiedOperator(dstFormat, compositingOperator, pc->isOpaque());
 
           if (compositingOperator == COMPOSITE_CLEAR)
             goto _Solid;

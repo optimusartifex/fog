@@ -804,6 +804,7 @@ static const char InternedStringCacheW_data[] =
   "clip-rule\0"
   "clipPath\0"
   "color\0"
+  "comp-op\0"
   "compression\0"
   "cursor\0"
   "cx\0"

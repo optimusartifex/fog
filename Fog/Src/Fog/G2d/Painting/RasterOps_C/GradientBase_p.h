@@ -209,6 +209,7 @@ struct FOG_NO_EXPORT PGradientBase
         ctx->_initDst(dstFormat);
         ctx->_srcFormat = srcFormat;
         ctx->_srcBPP = 4;
+        ctx->_isOpaque = isOpaque;
         ctx->_boundingBox = *boundingBox;
 
         ctx->_d.gradient.base.cache = cache;

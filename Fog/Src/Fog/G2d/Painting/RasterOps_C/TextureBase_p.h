@@ -153,6 +153,7 @@ _Has16BPC:
 
     ctx->_srcFormat = fetchFormat;
     ctx->_srcBPP = ImageFormatDescription::getByFormat(fetchFormat).getBytesPerPixel();
+    ctx->_isOpaque = !srcHasAlpha;
 
     // ------------------------------------------------------------------------
     // [Simple - Align or SubXY]

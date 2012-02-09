@@ -172,11 +172,13 @@ struct FOG_NO_EXPORT Helpers
         {
           ctx->_srcFormat = IMAGE_FORMAT_XRGB32;
           ctx->_srcBPP = 4;
+          ctx->_isOpaque = true;
         }
         else
         {
           ctx->_srcFormat = IMAGE_FORMAT_PRGB32;
           ctx->_srcBPP = 4;
+          ctx->_isOpaque = false;
         }
         break;
       }
@@ -185,6 +187,7 @@ struct FOG_NO_EXPORT Helpers
       {
         ctx->_srcFormat = IMAGE_FORMAT_A8;
         ctx->_srcBPP = 1;
+        ctx->_isOpaque = false;
         break;
       }
 
@@ -195,11 +198,13 @@ struct FOG_NO_EXPORT Helpers
         {
           ctx->_srcFormat = IMAGE_FORMAT_RGB48;
           ctx->_srcBPP = 6;
+          ctx->_isOpaque = true;
         }
         else
         {
           ctx->_srcFormat = IMAGE_FORMAT_PRGB64;
           ctx->_srcBPP = 8;
+          ctx->_isOpaque = false;
         }
         break;
       }
@@ -208,6 +213,7 @@ struct FOG_NO_EXPORT Helpers
       {
         ctx->_srcFormat = IMAGE_FORMAT_A16;
         ctx->_srcBPP = 2;
+        ctx->_isOpaque = false;
         break;
       }
 

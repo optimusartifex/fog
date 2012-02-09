@@ -9,6 +9,9 @@
 
 // [Dependencies]
 #include <Fog/G2d/Painting/RasterOps_C/CompositeBase_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/CompositeClear_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/CompositeSrc_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/CompositeSrcOver_p.h>
 
 namespace Fog {
 namespace RasterOps_C {
@@ -21,9 +24,9 @@ struct FOG_NO_EXPORT PixelPRGB32
 {
   enum { SIZE = 4, HAS_RGB = 1, HAS_ALPHA = 1, HAS_X = 0, HAS_F = 0, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -49,9 +52,9 @@ struct FOG_NO_EXPORT PixelPRGB32
     Face::p32Store4a(dst, src0p);
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -74,9 +77,9 @@ struct FOG_NO_EXPORT PixelXRGB32
 {
   enum { SIZE = 4, HAS_RGB = 1, HAS_ALPHA = 0, HAS_X = 1, HAS_F = 0, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -102,9 +105,9 @@ struct FOG_NO_EXPORT PixelXRGB32
     Face::p32Store4a(dst, src0p);
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -120,9 +123,9 @@ struct FOG_NO_EXPORT PixelFRGB32
 {
   enum { SIZE = 4, HAS_RGB = 1, HAS_ALPHA = 0, HAS_X = 0, HAS_F = 1, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -148,9 +151,9 @@ struct FOG_NO_EXPORT PixelFRGB32
     Face::p32Store4a(dst, src0p);
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -166,9 +169,9 @@ struct FOG_NO_EXPORT PixelRGB24
 {
   enum { SIZE = 3, HAS_RGB = 1, HAS_ALPHA = 0, HAS_X = 0, HAS_F = 0, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -194,9 +197,9 @@ struct FOG_NO_EXPORT PixelRGB24
     static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_R] = static_cast<uint8_t>(src0p_20 >> 16);
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -212,9 +215,9 @@ struct FOG_NO_EXPORT PixelA8
 {
   enum { SIZE = 1, HAS_RGB = 0, HAS_ALPHA = 1, HAS_X = 0, HAS_F = 0, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -241,9 +244,9 @@ struct FOG_NO_EXPORT PixelA8
     static_cast<uint8_t*>(dst)[0] = static_cast<uint8_t>(src0p_31 >> 16);
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -264,9 +267,9 @@ struct FOG_NO_EXPORT PixelPRGB64
 {
   enum { SIZE = 8, HAS_RGB = 1, HAS_ALPHA = 1, HAS_X = 0, HAS_F = 0, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -330,9 +333,9 @@ struct FOG_NO_EXPORT PixelPRGB64
 #endif
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -368,9 +371,9 @@ struct FOG_NO_EXPORT PixelA16
 {
   enum { SIZE = 1, HAS_RGB = 0, HAS_ALPHA = 1, HAS_X = 0, HAS_F = 0, IS_PREMULTIPLIED = 1 };
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixel32(uint32_t& dst0p, const void* src)
   {
@@ -400,9 +403,9 @@ struct FOG_NO_EXPORT PixelA16
     Face::p32Store2a(dst, a0p);
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
@@ -429,9 +432,9 @@ struct FOG_NO_EXPORT PixelA16
 template<uint32_t CombineFlags>
 struct CompositeExtCondition
 {
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE bool p32ProcessDstPixel32(const uint32_t& c0)
   {
@@ -453,9 +456,9 @@ struct CompositeExtCondition
       return true;
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE bool p32ProcessSrcPixelA8(const uint32_t& c0)
   {
@@ -467,9 +470,9 @@ struct CompositeExtCondition
       return true;
   }
 
-  // --------------------------------------------------------------------------
+  // ==========================================================================
   // [Pixel64]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
 
   static FOG_INLINE bool p64ProcessDstPixel64(const __p64& c0)
   {
@@ -521,7 +524,7 @@ struct CompositeExtGeneric
   };
 
   // ==========================================================================
-  // [Helpers - Prepare]
+  // [Func - Prepare]
   // ==========================================================================
 
   template<typename DstF, typename SrcF>
@@ -546,7 +549,7 @@ struct CompositeExtGeneric
   }
 
   // ==========================================================================
-  // [Helpers - Op]
+  // [Func - Op]
   // ==========================================================================
 
   template<typename DstF, typename SrcF, bool Pack>
@@ -2251,7 +2254,7 @@ struct CompositeExtSrcInSrcOut
   };
 
   // ==========================================================================
-  // [Helpers - Prepare]
+  // [Func - Prepare]
   // ==========================================================================
 
   template<typename DstF, typename SrcF>
@@ -2885,7 +2888,7 @@ _C_Opaque_Skip:
 
         DstF::p32LoadPixel32(dst0p, dst);
         if (pixel32_skip(dst0p))
-          goto _C_Opaque_Skip;
+          goto _C_Mask_Skip;
 
         SrcF::p32LoadPixelA8(src0p, src);
         Face::p32ExtractPBB3(t0p, dst0p);
@@ -3167,89 +3170,6 @@ _ARGB32_Mask:
     pixel32_vblit_pixela8_span<PixelPRGB32, PixelA8>(dst, span, closure);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 template<typename CompositeOp, uint32_t CombineFlags, uint32_t PrepareFlags>
 struct CompositeExtPrgbVsPrgb
@@ -3632,9 +3552,9 @@ struct FOG_NO_EXPORT CompositeSrcIn : public CompositeExtSrcInSrcOut<
   CompositeSrcIn, RASTER_COMBINE_OP_SRC_IN, RASTER_PRGB_PREPARE_NONE,
   false>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -3657,9 +3577,9 @@ struct FOG_NO_EXPORT CompositeSrcOut : public CompositeExtSrcInSrcOut<
   CompositeSrcOut, RASTER_COMBINE_OP_SRC_OUT, RASTER_PRGB_PREPARE_NONE,
   true>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -3681,9 +3601,9 @@ struct FOG_NO_EXPORT CompositeSrcOut : public CompositeExtSrcInSrcOut<
 struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
   CompositeSrcAtop, RASTER_COMBINE_OP_SRC_ATOP, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -3696,9 +3616,9 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Sca.Da + Dca.(1 - Sa)
   // Da'  = Sa.Da + Da.(1 - Sa) 
@@ -3737,7 +3657,13 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as SrcIn.
-    // TODO:
+    uint32_t a0p_a8;
+    Face::p32ExtractPBW1(a0p_a8, a0p_31);
+
+    if (pack)
+      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, b0p_20, a0p_a8, b0p_31, a0p_a8);
+    else
+      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, b0p_20, a0p_a8, dst0p_31, b0p_31, a0p_a8);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -3762,7 +3688,7 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as SrcOver.
-    // TODO:
+    CompositeSrcOver::xrgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_2031(
@@ -3771,7 +3697,7 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as Src.
-    // TODO:
+    CompositeSrc::xrgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -3782,17 +3708,26 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
-  // Dca' = Sa.(1 - Da) + Dca.(1 - Sa).
+  // Dca' = Sa.(Da - Dca) + Dca
   static FOG_INLINE void prgb32_op_a8_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20,
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_a8,
     bool pack = false)
   {
-    // TODO:
+    uint32_t t0p_20, t0p_31;
+    
+    Face::p32ExtractPBW1(t0p_20, a0p_31);
+    Face::p32ExtendPBWFromSBW(t0p_20, t0p_20);
+    Face::p32Copy(t0p_31, t0p_20);
+    Face::p32Sub_2x(t0p_20, t0p_20, a0p_20, t0p_31, t0p_31, a0p_31);
+    Face::p32MulDiv255PBW_SBW_2x(t0p_20, t0p_20, b0p_a8, t0p_31, t0p_31, b0p_a8);
+    Face::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    
+    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_a8_2031(
@@ -3801,12 +3736,12 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as SrcOver.
-    // TODO:
+    CompositeSrcOver::xrgb32_op_a8_2031(dst0p_20, a0p_20, dst0p_31, a0p_31, b0p_a8, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -3824,9 +3759,9 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
   CompositeDstOver, RASTER_COMBINE_OP_DST_OVER, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -3839,9 +3774,9 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Dca + Sca.(1 - Da)
   // Da'  = Da + Sa.(1 - Da)
@@ -3918,9 +3853,9 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     xrgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca + Sa.(1 - Da).
   // Da'  = Da + Sa.(1 - Da).
@@ -3929,7 +3864,23 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_a8,
     bool pack = false)
   {
-    // TODO:
+    uint32_t t0p;
+
+    Face::p32ExtractPBW1(t0p, a0p_31);
+    Face::p32Negate255SBW(t0p, t0p);
+    Face::p32MulDiv255SBW(t0p, t0p, b0p_a8);
+
+    if (pack)
+    {
+      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Face::p32ExtendPBBFromSBB(t0p, t0p);
+      Face::p32Add(dst0p_20, dst0p_20, t0p);
+    }
+    else
+    {
+      Face::p32ExtendPBWFromSBW(t0p, t0p);
+      Face::p32Add_2x(dst0p_20, a0p_20, t0p, dst0p_31, a0p_31, t0p);
+    }
   }
 
   // Dc' = Dc + Sa.(1 - Da).
@@ -3938,12 +3889,31 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_a8,
     bool pack = false)
   {
-    // TODO:
+    uint32_t t0p;
+
+    Face::p32ExtractPBW1(t0p, a0p_31);
+    Face::p32Negate255SBW(t0p, t0p);
+    Face::p32MulDiv255SBW(t0p, t0p, b0p_a8);
+
+    if (pack)
+    {
+      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Face::p32ExtendPBBFromSBB_Z210(t0p, t0p);
+      Face::p32Add(dst0p_20, dst0p_20, t0p);
+      Face::p32FillPBB3(dst0p_20, dst0p_20);
+    }
+    else
+    {
+      Face::p32Add(dst0p_31, a0p_31, t0p);
+      Face::p32ExtendPBWFromSBW(t0p, t0p);
+      Face::p32Add(dst0p_20, a0p_20, t0p);
+      Face::p32FillPBW1(dst0p_31, dst0p_31);
+    }
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -3961,9 +3931,9 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeDstIn : public CompositeExtPrgbVsA<
   CompositeDstIn, RASTER_COMBINE_OP_DST_IN, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca.Sa.
   // Da'  = Da.Sa.
@@ -3997,9 +3967,9 @@ struct FOG_NO_EXPORT CompositeDstIn : public CompositeExtPrgbVsA<
     }
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   // Da' = Da.Sa.
   static FOG_INLINE void a8_op_a8(
@@ -4017,9 +3987,9 @@ struct FOG_NO_EXPORT CompositeDstIn : public CompositeExtPrgbVsA<
 struct FOG_NO_EXPORT CompositeDstOut : public CompositeExtPrgbVsA<
   CompositeDstOut, RASTER_COMBINE_OP_DST_OUT, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca.(1 - Sa).
   // Da'  = Da.(1 - Sa).
@@ -4059,9 +4029,9 @@ struct FOG_NO_EXPORT CompositeDstOut : public CompositeExtPrgbVsA<
     }
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   // Da' = Da.(1 - Sa).
   static FOG_INLINE void a8_op_a8(
@@ -4081,9 +4051,9 @@ struct FOG_NO_EXPORT CompositeDstOut : public CompositeExtPrgbVsA<
 struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
   CompositeDstAtop, RASTER_COMBINE_OP_DST_ATOP, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -4096,9 +4066,9 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Dca.Sa + Sca.(1 - Da)
   // Da'  = Da.Sa + Sa.(1 - Da)
@@ -4184,9 +4154,9 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca.Sa + Sa.(1 - Da) = Sa.(Dca + 1 - Da).
   // Da'  = Da.Sa + Sa.(1 - Da) = Sa.(Da + 1 - Da).
@@ -4215,12 +4185,12 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as SrcOver.
-    // TODO:
+    CompositeSrcOver::xrgb32_op_a8_2031(dst0p_20, a0p_20, dst0p_31, a0p_31, b0p_a8, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -4238,9 +4208,9 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
   CompositeXor, RASTER_COMBINE_OP_XOR, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -4254,9 +4224,9 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Sca.(1 - Da) + Dca.(1 - Sa)
   // Da'  = Sa.(1 - Da) + Da.(1 - Sa)
@@ -4292,7 +4262,14 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as SrcOut.
-    // TODO:
+    uint32_t a0p_a8;
+    Face::p32ExtractPBW1(a0p_a8, a0p_31);
+    Face::p32Negate255SBW(a0p_a8, a0p_a8);
+
+    if (pack)
+      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, b0p_20, a0p_a8, b0p_31, a0p_a8);
+    else
+      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, b0p_20, a0p_a8, dst0p_31, b0p_31, a0p_a8);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -4341,9 +4318,9 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Sa.(1 - Da) + Dca.(1 - Sa).
   static FOG_INLINE void prgb32_op_a8_2031(
@@ -4383,9 +4360,9 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     CompositeDstOut::xrgb32_op_a8_2031(dst0p_20, a0p_20, dst0p_31, a0p_31, b0p_a8, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -4412,9 +4389,9 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
   CompositeAdd, RASTER_COMBINE_OP_ADD, RASTER_PRGB_PREPARE_FRGB>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -4429,9 +4406,9 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
     Face::p32FillPBB3(dst0p_31, src0p_31);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_op_prgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
@@ -4494,9 +4471,9 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_op_a8_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20,
@@ -4518,9 +4495,9 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
     prgb32_op_a8_2031(dst0p_20, a0p_20, dst0p_31, a0p_31, b0p_a8);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -4537,9 +4514,9 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
   CompositeSubtract, RASTER_COMBINE_OP_SUBTRACT, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -4552,9 +4529,9 @@ struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Dca - Sca.
   // Da'  = Sa + Da - Sa.Da.
@@ -4640,9 +4617,9 @@ struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
     prgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca - Sa.
   // Dc'  = Sa + Da - Sa.Da.
@@ -4694,9 +4671,9 @@ struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
     if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -4714,9 +4691,9 @@ struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
   CompositeMultiply, RASTER_COMBINE_OP_MULTIPLY, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -4729,9 +4706,9 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Dca.(Sca + 1 - Sa) + Sca.(1 - Da).
   // Da'  = Da.(Sa + 1 - Sa) + Sa.(1 - Sa).
@@ -4869,9 +4846,9 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca + Sa.(1 - Da).
   // Da'  = Da + Sa.(1 - Da).
@@ -4913,9 +4890,9 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
       Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -4933,9 +4910,9 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
   CompositeScreen, RASTER_COMBINE_OP_SCREEN, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -4948,9 +4925,9 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = Sca + Dca.(1 - Sca).
   // Da'  = Sa + Da.(1 - Sa).
@@ -5045,9 +5022,9 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Sa + Dca.(1 - Sa).
   // Da'  = Sa + Da.(1 - Sa).
@@ -5089,9 +5066,9 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
       Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -5109,9 +5086,9 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
   CompositeDarken, RASTER_COMBINE_OP_DARKEN, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -5124,9 +5101,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = min(Sca.Da, Dca.Sa) + Sca.(1 - Da) + Dca.(1 - Sa).
   // Da'  = min(Sa.Da, Da.Sa) + Sa.(1 - Da) + Da.(1 - Sa)
@@ -5266,9 +5243,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Dca + Sa.(1 - Da).
   // Da'  = Da + Sa.(1 - Da).
@@ -5293,9 +5270,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
       Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
@@ -5313,9 +5290,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
   CompositeLighten, RASTER_COMBINE_OP_LIGHTEN, RASTER_PRGB_PREPARE_NONE>
 {
-  // --------------------------------------------------------------------------
-  // [Prepare]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Prepare]
+  // ==========================================================================
 
   static FOG_INLINE void prgb32_prepare_xrgb32(
     uint32_t& dst0p, const uint32_t& src0p)
@@ -5328,9 +5305,9 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
   {
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - Pixel32]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - Pixel32]
+  // ==========================================================================
 
   // Dca' = max(Sca.Da, Dca.Sa) + Sca.(1 - Da) + Dca.(1 - Sa).
   // Da'  = max(Sa.Da, Da.Sa) + Sa.(1 - Da) + Da.(1 - Sa)
@@ -5470,9 +5447,9 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     xrgb32_op_xrgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
   }
 
-  // --------------------------------------------------------------------------
-  // [Pixel32 - Op - PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - Pixel32 - Op - PixelA8]
+  // ==========================================================================
 
   // Dca' = Sa + Dca.(1 - Sa).
   // Da'  = Sa + Da.(1 - Sa).
@@ -5509,9 +5486,9 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     }
   }
 
-  // --------------------------------------------------------------------------
-  // [PixelA8]
-  // --------------------------------------------------------------------------
+  // ==========================================================================
+  // [Func - PixelA8 - Op - PixelA8]
+  // ==========================================================================
 
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)

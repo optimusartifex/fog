@@ -95,7 +95,7 @@ static FOG_INLINE uint32_t getCompositeModifiedOperator(uint32_t dstFormat, uint
   FOG_ASSERT(dstFormat <= IMAGE_FORMAT_COUNT);
   FOG_ASSERT(compositingOperator < COMPOSITE_COUNT);
 
-  return _raster_modifiedOperator[dstFormat][compositingOperator][!isOpaque];
+  return _raster_modifiedOperator[dstFormat][compositingOperator][isOpaque];
 }
 
 // ============================================================================

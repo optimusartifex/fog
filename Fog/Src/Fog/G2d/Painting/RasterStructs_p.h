@@ -216,6 +216,8 @@ struct FOG_NO_EXPORT RasterPattern
   FOG_INLINE uint32_t getSrcFormat() const { return _srcFormat; }
   FOG_INLINE uint32_t getSrcBPP() const { return _srcBPP; }
 
+  FOG_INLINE uint16_t isOpaque() const { return _isOpaque; }
+
   template<typename T>
   FOG_INLINE T* getRaw() const { return (T*)(_d.raw); }
 
@@ -236,14 +238,14 @@ struct FOG_NO_EXPORT RasterPattern
     // Format is const, this should compile to a single instruction.
     switch (format)
     {
-      case IMAGE_FORMAT_PRGB32: _srcBPP = 4; break;
-      case IMAGE_FORMAT_XRGB32: _srcBPP = 4; break;
-      case IMAGE_FORMAT_RGB24 : _srcBPP = 3; break;
-      case IMAGE_FORMAT_A8    : _srcBPP = 1; break;
-      case IMAGE_FORMAT_I8    : _srcBPP = 1; break;
-      case IMAGE_FORMAT_PRGB64: _srcBPP = 8; break;
-      case IMAGE_FORMAT_RGB48 : _srcBPP = 6; break;
-      case IMAGE_FORMAT_A16   : _srcBPP = 2; break;
+      case IMAGE_FORMAT_PRGB32: _srcBPP = 4; _isOpaque = false; break;
+      case IMAGE_FORMAT_XRGB32: _srcBPP = 4; _isOpaque = true ; break;
+      case IMAGE_FORMAT_RGB24 : _srcBPP = 3; _isOpaque = true ; break;
+      case IMAGE_FORMAT_A8    : _srcBPP = 1; _isOpaque = false; break;
+      case IMAGE_FORMAT_I8    : _srcBPP = 1; _isOpaque = true ; break;
+      case IMAGE_FORMAT_PRGB64: _srcBPP = 8; _isOpaque = false; break;
+      case IMAGE_FORMAT_RGB48 : _srcBPP = 6; _isOpaque = true ; break;
+      case IMAGE_FORMAT_A16   : _srcBPP = 2; _isOpaque = false; break;
 
       default:
         FOG_ASSERT_NOT_REACHED();
@@ -301,9 +303,6 @@ struct FOG_NO_EXPORT RasterPattern
   //! @brief Destroy function.
   RasterPatternDestroyFunc _destroy;
 
-  //! @brief Bounding box.
-  BoxI _boundingBox;
-
   //! @brief Destination format.
   uint32_t _dstFormat;
   //! @brief Destination bytes-per-pixel.
@@ -312,7 +311,13 @@ struct FOG_NO_EXPORT RasterPattern
   //! @brief Source format.
   uint32_t _srcFormat;
   //! @brief Source bytes-per-pixel.
-  uint32_t _srcBPP;
+  uint16_t _srcBPP;
+
+  //! @brief Whether the source is fully-opaque.
+  uint16_t _isOpaque;
+
+  //! @brief Bounding box.
+  BoxI _boundingBox;
 
   // --------------------------------------------------------------------------
   // [Members - Texture]

@@ -126,7 +126,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/my/upload/img/svg/Map_Multilayer_Scaled.svg");
 
     //fileName = Ascii8("C:/my/svg/map-krasnaya-plyana.svg");
-    fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
+    //fileName = Ascii8("C:/my/svg/map-imeretinka.svg");
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
@@ -157,7 +157,8 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/paths-data-06-t.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/EiffelTower.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/svg-cards.svg");
-    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
+    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tommek_Car.svg");
   }
 
 /*

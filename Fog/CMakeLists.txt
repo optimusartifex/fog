@@ -1792,6 +1792,7 @@ If(NOT FOG_BUILD_NOTHING)
     Set(FOG_SAMPLE_SOURCES
       FogSvgView
       FogTestApp
+      FogTestBlend
     )
 
     ForEach(file ${FOG_SAMPLE_SOURCES})

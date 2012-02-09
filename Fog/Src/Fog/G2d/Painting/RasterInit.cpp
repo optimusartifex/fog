@@ -14,11 +14,25 @@
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
 #include <Fog/G2d/Painting/RasterInit_p.h>
+#include <Fog/G2d/Painting/RasterOps_C/CompositeNop_p.h>
 
 namespace Fog {
 
 FOG_NO_EXPORT void RasterOps_init_C(void);
 FOG_NO_EXPORT void RasterOps_init_skipped(void);
+
+// TODO: Rename, and use...
+static void fog_rasterengine_set_nops(RasterCompositeExtFuncs* funcs)
+{
+  funcs->cblit_line[RASTER_CBLIT_PRGB ] = RasterOps_C::CompositeNop::nop_cblit_line;
+  funcs->cblit_span[RASTER_CBLIT_PRGB ] = RasterOps_C::CompositeNop::nop_cblit_span;
+  funcs->cblit_line[RASTER_CBLIT_XRGB ] = RasterOps_C::CompositeNop::nop_cblit_line;
+  funcs->cblit_span[RASTER_CBLIT_XRGB ] = RasterOps_C::CompositeNop::nop_cblit_span;
+
+  uint i;
+  for (i = 0; i < RASTER_VBLIT_COUNT; i++) funcs->vblit_line[i] = RasterOps_C::CompositeNop::nop_vblit_line;
+  for (i = 0; i < RASTER_VBLIT_COUNT; i++) funcs->vblit_span[i] = RasterOps_C::CompositeNop::nop_vblit_span;
+}
 
 // ============================================================================
 // [Fog::G2d - Initialization / Finalization]
@@ -146,6 +160,27 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   api.compositeCore[IMAGE_FORMAT_A16   ][COMPOSITE_SRC].vblit_line[IMAGE_FORMAT_A16   ] = api.convert.copy[RASTER_COPY_16];
 
   // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Dst (NOP)]
+  // --------------------------------------------------------------------------
+
+  for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
+  {
+    RasterCompositeExtFuncs& fDst = api.compositeExt[i][RASTER_COMPOSITE_EXT_DST];
+
+    fDst.cblit_line[RASTER_CBLIT_PRGB] = RasterOps_C::CompositeNop::nop_cblit_line;
+    fDst.cblit_line[RASTER_CBLIT_XRGB] = RasterOps_C::CompositeNop::nop_cblit_line;
+
+    fDst.cblit_span[RASTER_CBLIT_PRGB] = RasterOps_C::CompositeNop::nop_cblit_span;
+    fDst.cblit_span[RASTER_CBLIT_XRGB] = RasterOps_C::CompositeNop::nop_cblit_span;
+
+    for (j = 0; j < RASTER_VBLIT_INVALID; j++)
+    {
+      fDst.vblit_line[j] = RasterOps_C::CompositeNop::nop_vblit_line;
+      fDst.vblit_span[j] = RasterOps_C::CompositeNop::nop_vblit_span;
+    }
+  }
+
+  // --------------------------------------------------------------------------
   // [RasterOps - Composite - Clear]
   // --------------------------------------------------------------------------
 
@@ -164,201 +199,182 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // [RasterOps - Composite - SrcIn]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'XRGB SrcIn PRGB' by 'XRGB Src PRGB'.
-    // Replace 'XRGB SrcIn XRGB' by 'XRGB Src XRGB'.
-    INIT_CBLIT_BY_COP(XRGB32, PRGB  , SRC_IN  , SRC     );
-    INIT_CBLIT_BY_COP(XRGB32, XRGB  , SRC_IN  , SRC     );
-    INIT_VBLIT_BY_COP(XRGB32, PRGB32, SRC_IN  , SRC     );
-    INIT_VBLIT_BY_COP(XRGB32, XRGB32, SRC_IN  , SRC     );
-    INIT_VBLIT_BY_COP(XRGB32, RGB24 , SRC_IN  , SRC     );
+  // Replace 'XRGB SrcIn PRGB' by 'XRGB Src PRGB'.
+  // Replace 'XRGB SrcIn XRGB' by 'XRGB Src XRGB'.
+  INIT_CBLIT_BY_COP(XRGB32, PRGB  , SRC_IN  , SRC     );
+  INIT_CBLIT_BY_COP(XRGB32, XRGB  , SRC_IN  , SRC     );
+  INIT_VBLIT_BY_COP(XRGB32, PRGB32, SRC_IN  , SRC     );
+  INIT_VBLIT_BY_COP(XRGB32, XRGB32, SRC_IN  , SRC     );
+  INIT_VBLIT_BY_COP(XRGB32, RGB24 , SRC_IN  , SRC     );
 
-    INIT_CBLIT_BY_COP(RGB24 , PRGB  , SRC_IN  , SRC     );
-    INIT_CBLIT_BY_COP(RGB24 , XRGB  , SRC_IN  , SRC     );
-    INIT_VBLIT_BY_COP(RGB24 , PRGB32, SRC_IN  , SRC     );
-    INIT_VBLIT_BY_COP(RGB24 , XRGB32, SRC_IN  , SRC     );
-    INIT_VBLIT_BY_COP(RGB24 , RGB24 , SRC_IN  , SRC     );
-  }
+  INIT_CBLIT_BY_COP(RGB24 , PRGB  , SRC_IN  , SRC     );
+  INIT_CBLIT_BY_COP(RGB24 , XRGB  , SRC_IN  , SRC     );
+  INIT_VBLIT_BY_COP(RGB24 , PRGB32, SRC_IN  , SRC     );
+  INIT_VBLIT_BY_COP(RGB24 , XRGB32, SRC_IN  , SRC     );
+  INIT_VBLIT_BY_COP(RGB24 , RGB24 , SRC_IN  , SRC     );
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcOut]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'XRGB SrcOut PRGB' by 'XRGB Clear PRGB'.
-    // Replace 'XRGB SrcOut XRGB' by 'XRGB Clear XRGB'.
-    INIT_CBLIT_BY_EOP(XRGB32, PRGB  , SRC_OUT , CLEAR   );
-    INIT_CBLIT_BY_EOP(XRGB32, XRGB  , SRC_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, PRGB32, SRC_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, XRGB32, SRC_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, RGB24 , SRC_OUT , CLEAR   );
+  // Replace 'XRGB SrcOut PRGB' by 'XRGB Clear PRGB'.
+  // Replace 'XRGB SrcOut XRGB' by 'XRGB Clear XRGB'.
+  INIT_CBLIT_BY_EOP(XRGB32, PRGB  , SRC_OUT , CLEAR   );
+  INIT_CBLIT_BY_EOP(XRGB32, XRGB  , SRC_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, PRGB32, SRC_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, XRGB32, SRC_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, RGB24 , SRC_OUT , CLEAR   );
 
-    INIT_CBLIT_BY_EOP(RGB24 , PRGB  , SRC_OUT , CLEAR   );
-    INIT_CBLIT_BY_EOP(RGB24 , XRGB  , SRC_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , PRGB32, SRC_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , XRGB32, SRC_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , RGB24 , SRC_OUT , CLEAR   );
-  }
+  INIT_CBLIT_BY_EOP(RGB24 , PRGB  , SRC_OUT , CLEAR   );
+  INIT_CBLIT_BY_EOP(RGB24 , XRGB  , SRC_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , PRGB32, SRC_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , XRGB32, SRC_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , RGB24 , SRC_OUT , CLEAR   );
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcAtop]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'PRGB SrcAtop XRGB' by 'PRGB SrcIn XRGB'.
-    INIT_CBLIT_BY_EOP(PRGB32, PRGB  , SRC_ATOP, SRC_IN  );
-    INIT_VBLIT_BY_EOP(PRGB32, XRGB32, SRC_ATOP, SRC_IN  );
-    INIT_VBLIT_BY_EOP(PRGB32, RGB24 , SRC_ATOP, SRC_IN  );
+  // Replace 'PRGB SrcAtop XRGB' by 'PRGB SrcIn XRGB'.
+  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , SRC_ATOP, SRC_IN  );
+  INIT_VBLIT_BY_EOP(PRGB32, XRGB32, SRC_ATOP, SRC_IN  );
+  INIT_VBLIT_BY_EOP(PRGB32, RGB24 , SRC_ATOP, SRC_IN  );
 
-    // Replace 'XRGB SrcAtop PRGB' by 'XRGB SrcOver PRGB'.
-    // Replace 'XRGB SrcAtop XRGB' by 'XRGB Src XRGB'.
-    INIT_CBLIT_BY_COP(XRGB32, PRGB  , SRC_ATOP, SRC_OVER);
-    INIT_CBLIT_BY_COP(XRGB32, XRGB  , SRC_ATOP, SRC     );
-    INIT_VBLIT_BY_COP(XRGB32, PRGB32, SRC_ATOP, SRC_OVER);
-    INIT_VBLIT_BY_COP(XRGB32, XRGB32, SRC_ATOP, SRC     );
-    INIT_VBLIT_BY_COP(XRGB32, RGB24 , SRC_ATOP, SRC     );
+  // Replace 'XRGB SrcAtop PRGB' by 'XRGB SrcOver PRGB'.
+  // Replace 'XRGB SrcAtop XRGB' by 'XRGB Src XRGB'.
+  INIT_CBLIT_BY_COP(XRGB32, PRGB  , SRC_ATOP, SRC_OVER);
+  INIT_CBLIT_BY_COP(XRGB32, XRGB  , SRC_ATOP, SRC     );
+  INIT_VBLIT_BY_COP(XRGB32, PRGB32, SRC_ATOP, SRC_OVER);
+  INIT_VBLIT_BY_COP(XRGB32, XRGB32, SRC_ATOP, SRC     );
+  INIT_VBLIT_BY_COP(XRGB32, RGB24 , SRC_ATOP, SRC     );
 
-    INIT_CBLIT_BY_COP(RGB24 , PRGB  , SRC_ATOP, SRC_OVER);
-    INIT_CBLIT_BY_COP(RGB24 , XRGB  , SRC_ATOP, SRC     );
-    INIT_VBLIT_BY_COP(RGB24 , PRGB32, SRC_ATOP, SRC_OVER);
-    INIT_VBLIT_BY_COP(RGB24 , XRGB32, SRC_ATOP, SRC     );
-    INIT_VBLIT_BY_COP(RGB24 , RGB24 , SRC_ATOP, SRC     );
+  INIT_CBLIT_BY_COP(RGB24 , PRGB  , SRC_ATOP, SRC_OVER);
+  INIT_CBLIT_BY_COP(RGB24 , XRGB  , SRC_ATOP, SRC     );
+  INIT_VBLIT_BY_COP(RGB24 , PRGB32, SRC_ATOP, SRC_OVER);
+  INIT_VBLIT_BY_COP(RGB24 , XRGB32, SRC_ATOP, SRC     );
+  INIT_VBLIT_BY_COP(RGB24 , RGB24 , SRC_ATOP, SRC     );
 
-    // Replace 'A SrcAtop A' by 'A Dst A'.
-    INIT_CBLIT_BY_EOP(A8    , PRGB  , SRC_ATOP, DST     );
-    INIT_VBLIT_BY_EOP(A8    , PRGB32, SRC_ATOP, DST     );
-    INIT_VBLIT_BY_EOP(A8    , A8    , SRC_ATOP, DST     );
-  }
+  // Replace 'A SrcAtop A' by 'A Dst A'.
+  INIT_CBLIT_BY_EOP(A8    , PRGB  , SRC_ATOP, DST     );
+  INIT_VBLIT_BY_EOP(A8    , PRGB32, SRC_ATOP, DST     );
+  INIT_VBLIT_BY_EOP(A8    , A8    , SRC_ATOP, DST     );
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - DstOver]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'XRGB DstOver PRGB' by 'XRGB Dst PRGB'.
-    // Replace 'XRGB DstOver XRGB' by 'XRGB Dst XRGB'.
-    INIT_CBLIT_BY_EOP(XRGB32, PRGB  , DST_OVER, DST     );
-    INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_OVER, DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, PRGB32, DST_OVER, DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_OVER, DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_OVER, DST     );
+  // Replace 'XRGB DstOver PRGB' by 'XRGB Dst PRGB'.
+  // Replace 'XRGB DstOver XRGB' by 'XRGB Dst XRGB'.
+  INIT_CBLIT_BY_EOP(XRGB32, PRGB  , DST_OVER, DST     );
+  INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_OVER, DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, PRGB32, DST_OVER, DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_OVER, DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_OVER, DST     );
 
-    INIT_CBLIT_BY_EOP(RGB24 , PRGB  , DST_OVER, DST     );
-    INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_OVER, DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , PRGB32, DST_OVER, DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_OVER, DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_OVER, DST     );
+  INIT_CBLIT_BY_EOP(RGB24 , PRGB  , DST_OVER, DST     );
+  INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_OVER, DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , PRGB32, DST_OVER, DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_OVER, DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_OVER, DST     );
 
-    // Replace 'A DstOver A' by 'A SrcOver A'.
-    INIT_CBLIT_BY_COP(A8    , PRGB  , DST_OVER, SRC_OVER);
-    INIT_VBLIT_BY_COP(A8    , PRGB32, DST_OVER, SRC_OVER);
-    INIT_VBLIT_BY_COP(A8    , A8    , DST_OVER, SRC_OVER);
-  }
+  // Replace 'A DstOver A' by 'A SrcOver A'.
+  INIT_CBLIT_BY_COP(A8    , PRGB  , DST_OVER, SRC_OVER);
+  INIT_VBLIT_BY_COP(A8    , PRGB32, DST_OVER, SRC_OVER);
+  INIT_VBLIT_BY_COP(A8    , A8    , DST_OVER, SRC_OVER);
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - DstIn]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'PRGB DstIn XRGB' by 'PRGB Dst XRGB'.
-    INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_IN  , DST     );
-    INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_IN  , DST     );
-    INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_IN  , DST     );
+  // Replace 'PRGB DstIn XRGB' by 'PRGB Dst XRGB'.
+  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_IN  , DST     );
+  INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_IN  , DST     );
+  INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_IN  , DST     );
 
-    // Replace 'XRGB DstIn PRGB' by 'XRGB DstIn PRGB'.
-    // Replace 'XRGB DstIn XRGB' by 'XRGB Dst XRGB'.
-    INIT_CBLIT_BY_EOP(XRGB32, PRGB  , DST_IN  , DST_IN  );
-    INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_IN  , DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, PRGB32, DST_IN  , DST_IN  );
-    INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_IN  , DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_IN  , DST     );
+  // Replace 'XRGB DstIn XRGB' by 'XRGB Dst XRGB'.
+  INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_IN  , DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_IN  , DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_IN  , DST     );
 
-    INIT_CBLIT_BY_EOP(RGB24 , PRGB  , DST_IN  , DST_IN  );
-    INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_IN  , DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , PRGB32, DST_IN  , DST_IN  );
-    INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_IN  , DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_IN  , DST     );
-  }
+  INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_IN  , DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_IN  , DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_IN  , DST     );
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - DstOut]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'PRGB DstOut XRGB' by 'PRGB Clear XRGB'.
-    INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_OUT , CLEAR   );
+  // Replace 'PRGB DstOut XRGB' by 'PRGB Clear XRGB'.
+  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_OUT , CLEAR   );
 
-    // Replace 'XRGB DstOut PRGB' by 'XRGB DstOut PRGB'.
-    // Replace 'XRGB DstOut XRGB' by 'XRGB Clear XRGB'.
-    INIT_CBLIT_BY_EOP(XRGB32, PRGB  , DST_OUT , DST_OUT );
-    INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, PRGB32, DST_OUT , DST_OUT );
-    INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_OUT , CLEAR   );
+  // Replace 'XRGB DstOut XRGB' by 'XRGB Clear XRGB'.
+  INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_OUT , CLEAR   );
 
-    INIT_CBLIT_BY_EOP(RGB24 , PRGB  , DST_OUT , DST_OUT );
-    INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , PRGB32, DST_OUT , DST_OUT );
-    INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_OUT , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_OUT , CLEAR   );
-  }
+  INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_OUT , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_OUT , CLEAR   );
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - DstAtop]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'PRGB DstAtop XRGB' by 'PRGB DstOver XRGB'.
-    INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_ATOP, DST_OVER);
-    INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_ATOP, DST_OVER);
-    INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_ATOP, DST_OVER);
+  // Replace 'PRGB DstAtop XRGB' by 'PRGB DstOver XRGB'.
+  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_ATOP, DST_OVER);
+  INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_ATOP, DST_OVER);
+  INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_ATOP, DST_OVER);
 
-    // Replace 'XRGB DstAtop PRGB' by 'XRGB DstIn PRGB'.
-    // Replace 'XRGB DstAtop XRGB' by 'XRGB Dst XRGB'.
-    INIT_CBLIT_BY_EOP(XRGB32, PRGB  , DST_ATOP, DST_IN  );
-    INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_ATOP, DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, PRGB32, DST_ATOP, DST_IN  );
-    INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_ATOP, DST     );
-    INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_ATOP, DST     );
+  // Replace 'XRGB DstAtop PRGB' by 'XRGB DstIn PRGB'.
+  // Replace 'XRGB DstAtop XRGB' by 'XRGB Dst XRGB'.
+  INIT_CBLIT_BY_EOP(XRGB32, PRGB  , DST_ATOP, DST_IN  );
+  INIT_CBLIT_BY_EOP(XRGB32, XRGB  , DST_ATOP, DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, PRGB32, DST_ATOP, DST_IN  );
+  INIT_VBLIT_BY_EOP(XRGB32, XRGB32, DST_ATOP, DST     );
+  INIT_VBLIT_BY_EOP(XRGB32, RGB24 , DST_ATOP, DST     );
 
-    INIT_CBLIT_BY_EOP(RGB24 , PRGB  , DST_ATOP, DST_IN  );
-    INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_ATOP, DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , PRGB32, DST_ATOP, DST_IN  );
-    INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_ATOP, DST     );
-    INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_ATOP, DST     );
+  INIT_CBLIT_BY_EOP(RGB24 , PRGB  , DST_ATOP, DST_IN  );
+  INIT_CBLIT_BY_EOP(RGB24 , XRGB  , DST_ATOP, DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , PRGB32, DST_ATOP, DST_IN  );
+  INIT_VBLIT_BY_EOP(RGB24 , XRGB32, DST_ATOP, DST     );
+  INIT_VBLIT_BY_EOP(RGB24 , RGB24 , DST_ATOP, DST     );
 
-    // Replace 'A DstOver A' by 'A Src A'.
-    INIT_CBLIT_BY_COP(A8    , PRGB  , DST_OVER, SRC     );
-    INIT_VBLIT_BY_COP(A8    , PRGB32, DST_OVER, SRC     );
-    INIT_VBLIT_BY_COP(A8    , A8    , DST_OVER, SRC     );
-  }
+  // Replace 'A DstOver A' by 'A Src A'.
+  INIT_CBLIT_BY_COP(A8    , PRGB  , DST_OVER, SRC     );
+  INIT_VBLIT_BY_COP(A8    , PRGB32, DST_OVER, SRC     );
+  INIT_VBLIT_BY_COP(A8    , A8    , DST_OVER, SRC     );
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - Xor]
   // --------------------------------------------------------------------------
 
-  {
-    // Replace 'PRGB Xor XRGB' by 'PRGB SrcOut XRGB'.
-    INIT_CBLIT_BY_EOP(PRGB32, PRGB  , XOR     , SRC_OUT );
-    INIT_VBLIT_BY_EOP(PRGB32, XRGB32, XOR     , SRC_OUT );
-    INIT_VBLIT_BY_EOP(PRGB32, RGB24 , XOR     , SRC_OUT );
+  // Replace 'PRGB Xor XRGB' by 'PRGB SrcOut XRGB'.
+  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , XOR     , SRC_OUT );
+  INIT_VBLIT_BY_EOP(PRGB32, XRGB32, XOR     , SRC_OUT );
+  INIT_VBLIT_BY_EOP(PRGB32, RGB24 , XOR     , SRC_OUT );
 
-    // Replace 'XRGB Xor PRGB' by 'XRGB DstOut PRGB'.
-    // Replace 'XRGB Xor XRGB' by 'XRGB Clear XRGB'.
-    INIT_CBLIT_BY_EOP(XRGB32, PRGB  , XOR     , DST_OUT );
-    INIT_CBLIT_BY_EOP(XRGB32, XRGB  , XOR     , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, PRGB32, XOR     , DST_OUT );
-    INIT_VBLIT_BY_EOP(XRGB32, XRGB32, XOR     , CLEAR   );
-    INIT_VBLIT_BY_EOP(XRGB32, RGB24 , XOR     , CLEAR   );
+  // Replace 'XRGB Xor PRGB' by 'XRGB DstOut PRGB'.
+  // Replace 'XRGB Xor XRGB' by 'XRGB Clear XRGB'.
+  INIT_CBLIT_BY_EOP(XRGB32, PRGB  , XOR     , DST_OUT );
+  INIT_CBLIT_BY_EOP(XRGB32, XRGB  , XOR     , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, PRGB32, XOR     , DST_OUT );
+  INIT_VBLIT_BY_EOP(XRGB32, XRGB32, XOR     , CLEAR   );
+  INIT_VBLIT_BY_EOP(XRGB32, RGB24 , XOR     , CLEAR   );
 
-    INIT_CBLIT_BY_EOP(RGB24 , PRGB  , XOR     , DST_OUT );
-    INIT_CBLIT_BY_EOP(RGB24 , XRGB  , XOR     , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , PRGB32, XOR     , DST_OUT );
-    INIT_VBLIT_BY_EOP(RGB24 , XRGB32, XOR     , CLEAR   );
-    INIT_VBLIT_BY_EOP(RGB24 , RGB24 , XOR     , CLEAR   );
-  }
+  INIT_CBLIT_BY_EOP(RGB24 , PRGB  , XOR     , DST_OUT );
+  INIT_CBLIT_BY_EOP(RGB24 , XRGB  , XOR     , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , PRGB32, XOR     , DST_OUT );
+  INIT_VBLIT_BY_EOP(RGB24 , XRGB32, XOR     , CLEAR   );
+  INIT_VBLIT_BY_EOP(RGB24 , RGB24 , XOR     , CLEAR   );
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - Exclusion]
+  // --------------------------------------------------------------------------
+
+  // Replace 'PRGB Exclusion A8' by 'PRGB Difference A8'.
+  INIT_VBLIT_BY_EOP(PRGB32, A8    , EXCLUSION, DIFFERENCE);
 }
 
 } // Fog namespace

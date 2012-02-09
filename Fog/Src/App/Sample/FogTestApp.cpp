@@ -112,29 +112,29 @@ void AppWindow::onPaint(Painter* _p)
   lg.setStart(100.0f, 100.0f);
   lg.setEnd(300.0f, 100.0f);
   lg.clearStops();
-  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(0.0f, Argb32(0x00000000));
   lg.addStop(1.0f, Argb32(0xFF0000FF));
   p.setSource(lg);
-  p.setCompositingOperator(COMPOSITE_ADD);
+//  p.setCompositingOperator(COMPOSITE_ADD);
   p.fillCircle(CircleF(200.0f, 200.0f, 100.0f));
   
   lg.setStart(150.0f, 150.0f);
   lg.setEnd(150.0f, 350.0f);
   lg.clearStops();
-  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(0.0f, Argb32(0x00000000));
   lg.addStop(1.0f, Argb32(0xFFFF0000));
   p.setSource(lg);
-  p.setCompositingOperator(COMPOSITE_ADD);
+//  p.setCompositingOperator(COMPOSITE_ADD);
   p.fillCircle(CircleF(250.0f, 250.0f, 100.0f));
 
   lg.setStart(200.0f, 200.0f);
   lg.setEnd(400.0f, 400.0f);
   lg.clearStops();
-  lg.addStop(0.0f, Argb32(0xFF000000));
+  lg.addStop(0.0f, Argb32(0x00000000));
   lg.addStop(1.0f, Argb32(0xFF00FF00));
   p.setSource(lg);
   p.fillCircle(CircleF(300.0f, 300.0f, 100.0f));
-  p.setCompositingOperator(COMPOSITE_MULTIPLY);
+//  p.setCompositingOperator(COMPOSITE_MULTIPLY);
   p.translate(PointF(-300.0f, 0.0f));
 
   lg.setStart(100.0f, 100.0f);

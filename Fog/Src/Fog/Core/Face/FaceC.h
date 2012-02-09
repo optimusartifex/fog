@@ -896,8 +896,8 @@ static FOG_INLINE void p32ZeroPBB1(uint32_t& dst0, const uint32_t& x0) { dst0 = 
 static FOG_INLINE void p32ZeroPBB2(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0xFF00FFFFU; }
 static FOG_INLINE void p32ZeroPBB3(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0x00FFFFFFU; }
 
-static FOG_INLINE void p32ZeroPBW0(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0xFFFFFF00U; }
-static FOG_INLINE void p32ZeroPBW1(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0xFF00FFFFU; }
+static FOG_INLINE void p32ZeroPBW0(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0xFFFF0000U; }
+static FOG_INLINE void p32ZeroPBW1(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0x0000FFFFU; }
 
 static FOG_INLINE void p32ZeroPWW0(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0xFFFF0000U; }
 static FOG_INLINE void p32ZeroPWW1(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 & 0x0000FFFFU; }
@@ -907,8 +907,8 @@ static FOG_INLINE void p32FillPBB1(uint32_t& dst0, const uint32_t& x0) { dst0 = 
 static FOG_INLINE void p32FillPBB2(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0x00FF0000U; }
 static FOG_INLINE void p32FillPBB3(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0xFF000000U; }
 
-static FOG_INLINE void p32FillPBW0(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0x00FF0000U; }
-static FOG_INLINE void p32FillPBW1(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0x000000FFU; }
+static FOG_INLINE void p32FillPBW0(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0x000000FFU; }
+static FOG_INLINE void p32FillPBW1(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0x00FF0000U; }
 
 static FOG_INLINE void p32FillPWW0(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0x0000FFFFU; }
 static FOG_INLINE void p32FillPWW1(uint32_t& dst0, const uint32_t& x0) { dst0 = x0 | 0xFFFF0000U; }
@@ -917,16 +917,16 @@ static FOG_INLINE void p32FillPWW1(uint32_t& dst0, const uint32_t& x0) { dst0 = 
 // [Fog::Face - P32 - Replace]
 // ============================================================================
 
-static FOG_INLINE void p32ReplacePBB0(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x000000FFU, u0      ); }
-static FOG_INLINE void p32ReplacePBB1(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x0000FF00U, u0 <<  8); }
-static FOG_INLINE void p32ReplacePBB2(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x00FF0000U, u0 << 16); }
-static FOG_INLINE void p32ReplacePBB3(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0xFF000000U, u0 << 24); }
+static FOG_INLINE void p32ReplacePBB0(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0xFFFFFF00U, u0      ); }
+static FOG_INLINE void p32ReplacePBB1(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0xFFFF00FFU, u0 <<  8); }
+static FOG_INLINE void p32ReplacePBB2(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0xFF00FFFFU, u0 << 16); }
+static FOG_INLINE void p32ReplacePBB3(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x00FFFFFFU, u0 << 24); }
 
-static FOG_INLINE void p32ReplacePBW0(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x000000FFU, u0      ); }
-static FOG_INLINE void p32ReplacePBW1(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x00FF0000U, u0 << 16); }
+static FOG_INLINE void p32ReplacePBW0(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0xFFFF0000U, u0      ); }
+static FOG_INLINE void p32ReplacePBW1(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x0000FFFFU, u0 << 16); }
 
-static FOG_INLINE void p32ReplacePWW0(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x000000FFU, u0      ); }
-static FOG_INLINE void p32ReplacePWW1(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x00FF0000U, u0 << 16); }
+static FOG_INLINE void p32ReplacePWW0(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0xFFFF0000U, u0      ); }
+static FOG_INLINE void p32ReplacePWW1(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & 0x0000FFFFU, u0 << 16); }
 
 // ============================================================================
 // [Fog::Face - P32 - Logical / Arithmetic]
@@ -1678,6 +1678,23 @@ static FOG_INLINE void p32Negate255PBW1_2x(
 // [Fog::Face - P32 - Min]
 // ============================================================================
 
+static FOG_INLINE void p32Min(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
+{
+  dst0 = x0 < y0 ? x0 : y0;
+};
+
+static FOG_INLINE void p32Min_2x(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0,
+  uint32_t& dst1, const uint32_t& x1, const uint32_t& y1)
+{
+  uint32_t t0 = x0 < y0 ? x0 : y0;
+  uint32_t t1 = x1 < y1 ? x1 : y1;
+  
+  dst0 = t0;
+  dst1 = t1;
+};
+
 //! @brief Take smaller value from @a u0 and @a u and store it to @a dst0.
 //!
 //! @verbatim
@@ -1791,6 +1808,23 @@ static FOG_INLINE void p32MinPBW_2x(
 // ============================================================================
 // [Fog::Face - P32 - Max]
 // ============================================================================
+
+static FOG_INLINE void p32Max(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
+{
+  dst0 = x0 > y0 ? x0 : y0;
+};
+
+static FOG_INLINE void p32Max_2x(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0,
+  uint32_t& dst1, const uint32_t& x1, const uint32_t& y1)
+{
+  uint32_t t0 = x0 > y0 ? x0 : y0;
+  uint32_t t1 = x1 > y1 ? x1 : y1;
+  
+  dst0 = t0;
+  dst1 = t1;
+};
 
 //! @brief Take larger value from @a x0/u0 and store it to @a dst0.
 //!
@@ -2292,6 +2326,37 @@ static FOG_INLINE void p32Div255PBW_2x(
 {
   uint32_t t0 = ((x0 + ((x0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
   uint32_t t1 = ((x1 + ((x1 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
+
+  dst0 = t0;
+  dst1 = t1;
+}
+
+//! @brief Packed divide by 255.
+//!
+//! @verbatim
+//! dst0.u16[0] = (x0.u16[0] / 255).
+//! dst0.u16[1] = (x0.u16[1] / 255).
+//! @endverbatim
+static FOG_INLINE void p32Div255PBW_LShift1(
+  uint32_t& dst0, const uint32_t& x0)
+{
+  dst0 = ((x0 + ((x0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 7) & 0x01FE01FEU;
+}
+
+//! @brief Packed divide by 255 (2x).
+//!
+//! @verbatim
+//! dst0.u16[0] = (x0.u16[0] / 255).
+//! dst0.u16[1] = (x0.u16[1] / 255).
+//! dst1.u16[0] = (x1.u16[0] / 255).
+//! dst1.u16[1] = (x1.u16[1] / 255).
+//! @endverbatim
+static FOG_INLINE void p32Div255PBW_LShift1_2x(
+  uint32_t& dst0, const uint32_t& x0,
+  uint32_t& dst1, const uint32_t& x1)
+{
+  uint32_t t0 = ((x0 + ((x0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 7) & 0x01FE01FEU;
+  uint32_t t1 = ((x1 + ((x1 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 7) & 0x01FE01FEU;
 
   dst0 = t0;
   dst1 = t1;
@@ -3013,7 +3078,7 @@ static FOG_INLINE void p32MulDiv255PBW(
 static FOG_INLINE void p32MulDiv255PBW_ZeroPBW1(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
 {
-  dst0 = (x0 & 0xFF) * (y0 & 0xFF);
+  dst0 = ((x0 & 0xFF) * y0) & 0xFFFF;
   dst0 = ((dst0 + (dst0 >> 8) + 0x80U) >> 8);
 }
 
@@ -4750,7 +4815,7 @@ static FOG_INLINE void p64UnpackPBWFromPBB20Z1(
 
 #if defined(FOG_ARCH_NATIVE_P64)
 
-static FOG_INLINE void p64ZeroPBB0(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFFFFFFFFFF); }
+static FOG_INLINE void p64ZeroPBB0(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFFFFFFFF00); }
 static FOG_INLINE void p64ZeroPBB1(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFFFFFF00FF); }
 static FOG_INLINE void p64ZeroPBB2(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFFFF00FFFF); }
 static FOG_INLINE void p64ZeroPBB3(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFF00FFFFFF); }
@@ -4769,8 +4834,8 @@ static FOG_INLINE void p64ZeroPWW1(__p64& dst0, const __p64& x0) { dst0 = x0 & F
 static FOG_INLINE void p64ZeroPWW2(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFF0000FFFFFFFF); }
 static FOG_INLINE void p64ZeroPWW3(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0x0000FFFFFFFFFFFF); }
 
-static FOG_INLINE void p64ZeroPWD0(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFFFFFF0000); }
-static FOG_INLINE void p64ZeroPWD1(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFF0000FFFFFFFF); }
+static FOG_INLINE void p64ZeroPWD0(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFF00000000); }
+static FOG_INLINE void p64ZeroPWD1(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0x00000000FFFFFFFF); }
 
 static FOG_INLINE void p64ZeroPDD0(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0xFFFFFFFF00000000); }
 static FOG_INLINE void p64ZeroPDD1(__p64& dst0, const __p64& x0) { dst0 = x0 & FOG_UINT64_C(0x00000000FFFFFFFF); }
@@ -4866,76 +4931,76 @@ static FOG_INLINE void p64FillPBB3_7(__p64& dst0, const __p64& x0) { dst0.u32Lo 
 
 #if defined(FOG_ARCH_NATIVE_P64)
 
-static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000000000FF), u0      ); }
-static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000000000FF00), u0 <<  8); }
-static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000000000FF0000), u0 << 16); }
-static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FF000000), u0 << 24); }
-static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000FF00000000), u0 << 32); }
-static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FF0000000000), u0 << 40); }
-static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00FF000000000000), u0 << 48); }
-static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFF00000000000000), u0 << 56); }
+static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFFFF00), u0      ); }
+static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFF00FF), u0 <<  8); }
+static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFF00FFFF), u0 << 16); }
+static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00FFFFFF), u0 << 24); }
+static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFF00FFFFFFFF), u0 << 32); }
+static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF00FFFFFFFFFF), u0 << 40); }
+static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFF00FFFFFFFFFFFF), u0 << 48); }
+static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00FFFFFFFFFFFFFF), u0 << 56); }
 
-static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000000000FF), u0      ); }
-static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000000000FF0000), u0 << 16); }
-static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000FF00000000), u0 << 32); }
-static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00FF000000000000), u0 << 48); }
+static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFF0000), u0      ); }
+static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF0000FFFF), u0 << 16); }
+static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF0000FFFFFFFF), u0 << 32); }
+static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFFFFFFFFFF), u0 << 48); }
 
-static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000000000FFFF), u0      ); }
-static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFF0000), u0 << 16); }
-static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFF00000000), u0 << 32); }
-static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF000000000000), u0 << 48); }
+static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFF0000), u0      ); }
+static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF0000FFFF), u0 << 16); }
+static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF0000FFFFFFFF), u0 << 32); }
+static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFFFFFFFFFF), u0 << 48); }
 
-static FOG_INLINE void p64ReplacePWD0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000000000FFFF), u0      ); }
-static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFF00000000), u0 << 32); }
+static FOG_INLINE void p64ReplacePWD0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00000000), u0      ); }
+static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFFFFFF), u0 << 32); }
 
-static FOG_INLINE void p64ReplacePDD0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFFFFFF), u0      ); }
-static FOG_INLINE void p64ReplacePDD1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00000000), u0 << 32); }
+static FOG_INLINE void p64ReplacePDD0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00000000), u0      ); }
+static FOG_INLINE void p64ReplacePDD1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFFFFFF), u0 << 32); }
 
-static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000000000FF), (uint64_t)u0      ); }
-static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000000000FF00), (uint64_t)u0 <<  8); }
-static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000000000FF0000), (uint64_t)u0 << 16); }
-static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FF000000), (uint64_t)u0 << 24); }
-static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000FF00000000), (uint64_t)u0 << 32); }
-static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FF0000000000), (uint64_t)u0 << 40); }
-static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00FF000000000000), (uint64_t)u0 << 48); }
-static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFF00000000000000), (uint64_t)u0 << 56); }
+static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFFFF00), (uint64_t)u0      ); }
+static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFF00FF), (uint64_t)u0 <<  8); }
+static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFF00FFFF), (uint64_t)u0 << 16); }
+static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00FFFFFF), (uint64_t)u0 << 24); }
+static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFF00FFFFFFFF), (uint64_t)u0 << 32); }
+static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF00FFFFFFFFFF), (uint64_t)u0 << 40); }
+static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFF00FFFFFFFFFFFF), (uint64_t)u0 << 48); }
+static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00FFFFFFFFFFFFFF), (uint64_t)u0 << 56); }
 
-static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000000000FF), (uint64_t)u0      ); }
-static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000000000FF0000), (uint64_t)u0 << 16); }
-static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000FF00000000), (uint64_t)u0 << 32); }
-static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00FF000000000000), (uint64_t)u0 << 48); }
+static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFF0000), (uint64_t)u0      ); }
+static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF0000FFFF), (uint64_t)u0 << 16); }
+static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF0000FFFFFFFF), (uint64_t)u0 << 32); }
+static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFFFFFFFFFF), (uint64_t)u0 << 48); }
 
-static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000000000FFFF), (uint64_t)u0      ); }
-static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFF0000), (uint64_t)u0 << 16); }
-static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFF00000000), (uint64_t)u0 << 32); }
-static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF000000000000), (uint64_t)u0 << 48); }
+static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFFFFFF0000), (uint64_t)u0      ); }
+static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF0000FFFF), (uint64_t)u0 << 16); }
+static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFF0000FFFFFFFF), (uint64_t)u0 << 32); }
+static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFFFFFFFFFF), (uint64_t)u0 << 48); }
 
-static FOG_INLINE void p64ReplacePWD0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x000000000000FFFF), (uint64_t)u0      ); }
-static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x0000FFFF00000000), (uint64_t)u0 << 32); }
+static FOG_INLINE void p64ReplacePWD0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00000000), (uint64_t)u0      ); }
+static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFFFFFF), (uint64_t)u0 << 32); }
 
-static FOG_INLINE void p64ReplacePDD0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFFFFFF), (uint64_t)u0      ); }
-static FOG_INLINE void p64ReplacePDD1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00000000), (uint64_t)u0 << 32); }
+static FOG_INLINE void p64ReplacePDD0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0xFFFFFFFF00000000), (uint64_t)u0      ); }
+static FOG_INLINE void p64ReplacePDD1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0 = _FOG_FACE_COMBINE_2(x0 & FOG_UINT64_C(0x00000000FFFFFFFF), (uint64_t)u0 << 32); }
 
 #else
 
-static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x000000FFU, u0.u32Lo      ); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FF00U, u0.u32Lo <<  8); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x00FF0000U, u0.u32Lo << 16); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFF000000U, u0.u32Lo << 24); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x000000FFU, u0.u32Lo      ); }
-static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FF00U, u0.u32Lo <<  8); }
-static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x00FF0000U, u0.u32Lo << 16); }
-static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFF000000U, u0.u32Lo << 24); }
+static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFFFF00U, u0.u32Lo      ); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF00FFU, u0.u32Lo <<  8); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFF00FFFFU, u0.u32Lo << 16); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x00FFFFFFU, u0.u32Lo << 24); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFFFF00U, u0.u32Lo      ); }
+static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF00FFU, u0.u32Lo <<  8); }
+static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFF00FFFFU, u0.u32Lo << 16); }
+static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x00FFFFFFU, u0.u32Lo << 24); }
 
-static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x000000FFU, u0.u32Lo      ); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x00FF0000U, u0.u32Lo << 16); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x000000FFU, u0.u32Lo      ); }
-static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x00FF0000U, u0.u32Lo << 16); }
+static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF0000U, u0.u32Lo      ); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FFFFU, u0.u32Lo << 16); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF0000U, u0.u32Lo      ); }
+static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FFFFU, u0.u32Lo << 16); }
 
-static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FFFFU, u0.u32Lo      ); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF0000U, u0.u32Lo << 16); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FFFFU, u0.u32Lo      ); }
-static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF0000U, u0.u32Lo << 16); }
+static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF0000U, u0.u32Lo      ); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FFFFU, u0.u32Lo << 16); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF0000U, u0.u32Lo      ); }
+static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FFFFU, u0.u32Lo << 16); }
 
 static FOG_INLINE void p64ReplacePWD0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = u0.u32Lo; dst0.u32Hi = x0.u32Hi; }
 static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = u0.u32Lo; }
@@ -4943,24 +5008,24 @@ static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const __p64&
 static FOG_INLINE void p64ReplacePDD0(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = u0.u32Lo; dst0.u32Hi = x0.u32Hi; }
 static FOG_INLINE void p64ReplacePDD1(__p64& dst0, const __p64& x0, const __p64& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = u0.u32Lo; }
 
-static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x000000FFU, u0      ); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FF00U, u0 <<  8); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x00FF0000U, u0 << 16); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFF000000U, u0 << 24); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x000000FFU, u0     ); }
-static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FF00U, u0 <<  8); }
-static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x00FF0000U, u0 << 16); }
-static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFF000000U, u0 << 24); }
+static FOG_INLINE void p64ReplacePBB0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFFFF00U, u0      ); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF00FFU, u0 <<  8); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFF00FFFFU, u0 << 16); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x00FFFFFFU, u0 << 24); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBB4(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFFFF00U, u0     ); }
+static FOG_INLINE void p64ReplacePBB5(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF00FFU, u0 <<  8); }
+static FOG_INLINE void p64ReplacePBB6(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFF00FFFFU, u0 << 16); }
+static FOG_INLINE void p64ReplacePBB7(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x00FFFFFFU, u0 << 24); }
 
-static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x000000FFU, u0      ); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x00FF0000U, u0 << 16); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x000000FFU, u0      ); }
-static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x00FF0000U, u0 << 16); }
+static FOG_INLINE void p64ReplacePBW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF0000U, u0      ); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FFFFU, u0 << 16); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePBW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF0000U, u0      ); }
+static FOG_INLINE void p64ReplacePBW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FFFFU, u0 << 16); }
 
-static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FFFFU, u0      ); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF0000U, u0 << 16); dst0.u32Hi = x0.u32Hi; }
-static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FFFFU, u0      ); }
-static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF0000U, u0 << 16); }
+static FOG_INLINE void p64ReplacePWW0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0xFFFF0000U, u0      ); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePWW1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = _FOG_FACE_COMBINE_2(x0.u32Lo & 0x0000FFFFU, u0 << 16); dst0.u32Hi = x0.u32Hi; }
+static FOG_INLINE void p64ReplacePWW2(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0xFFFF0000U, u0      ); }
+static FOG_INLINE void p64ReplacePWW3(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = _FOG_FACE_COMBINE_2(x0.u32Hi & 0x0000FFFFU, u0 << 16); }
 
 static FOG_INLINE void p64ReplacePWD0(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = u0; dst0.u32Hi = x0.u32Hi; }
 static FOG_INLINE void p64ReplacePWD1(__p64& dst0, const __p64& x0, const uint32_t& u0) { dst0.u32Lo = x0.u32Lo; dst0.u32Hi = u0; }

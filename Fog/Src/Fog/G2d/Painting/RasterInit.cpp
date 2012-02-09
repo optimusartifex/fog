@@ -161,27 +161,6 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   }
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Composite - CBlit]
-  // --------------------------------------------------------------------------
-
-  // If CBLIT operator doesn't contain implementation for XRGB then we link it
-  // with PRGB operator, because it's guaranteed that alpha component is always
-  // set to fully opaque for CBLITs.
-
-  for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
-  {
-    for (j = 0; j < RASTER_COMPOSITE_EXT_COUNT; j++)
-    {
-      RasterCompositeExtFuncs& fOp = api.compositeExt[i][j];
-
-      if (fOp.cblit_line[RASTER_CBLIT_XRGB] == NULL)
-        fOp.cblit_line[RASTER_CBLIT_XRGB] = fOp.cblit_line[RASTER_CBLIT_PRGB];
-      if (fOp.cblit_span[RASTER_CBLIT_XRGB] == NULL)
-        fOp.cblit_span[RASTER_CBLIT_XRGB] = fOp.cblit_span[RASTER_CBLIT_PRGB];
-    }
-  }
-
-  // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcIn]
   // --------------------------------------------------------------------------
 

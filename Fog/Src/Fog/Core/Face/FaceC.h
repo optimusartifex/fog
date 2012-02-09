@@ -3183,11 +3183,11 @@ static FOG_INLINE void p32MulDiv255PBW_SBW_2x_Pack_20F1(
   const uint32_t& x0, const uint32_t& u0,
   const uint32_t& x1, const uint32_t& u1)
 {
-  uint32_t t0 = x0 * u0;
-  uint32_t t1 = x1 * u1;
+  uint32_t t0 = (x0       ) * u0;
+  uint32_t t1 = (x1 & 0xFF) * u1;
 
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
-  t1 = ((t1 + ((t1 >> 8) & 0x000000FFU) + 0xFF000080U)     ) & 0xFF00FF00U;
+  t1 = ((t1 + ((t1 >> 8)              ) + 0xFF000080U)     ) & 0xFF00FF00U;
 
   dst0 = _FOG_FACE_COMBINE_2(t0, t1);
 }

@@ -5650,11 +5650,22 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t da, dr, dg, db;
+    uint32_t sa,
+
+    uint32_t t0p_20;
+    uint32_t t0p_31;
 
     Face::p32ExtractPBW1(da, a0p_31);
+    Face::p32ExtractPBW1(sa, b0p_31);
+
     Face::p32ExtractPBW1(dr, a0p_20);
     Face::p32ExtractPBW0(dg, a0p_31);
     Face::p32ExtractPBW0(db, a0p_20);
+
+    if (pack)
+      Face::p32Pack(dst0p_20, t0p_20, t0p_31);
+    else
+      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_2031(

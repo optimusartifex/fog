@@ -5611,7 +5611,7 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
 
 
 
-#if 0
+#if 1
 // ============================================================================
 // [Fog::RasterOps_C - CompositeColorDodge]
 // ============================================================================
@@ -5639,6 +5639,53 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
+  static FOG_INLINE uint32_t div255(uint32_t x) 
+  {
+    return (x * 0x0101 + 256) >> 16;
+  }
+
+#define COMPOSITE_EXT_SEPARABLE(_Equation_) \
+  FOG_MACRO_BEGIN \
+    uint32_t t0p_20, t0p_31; \
+    \
+    if (pack) \
+      t0p_20 = (sa + da - div255(saDa)) << 24; \
+    else \
+      t0p_31 = (sa + da - div255(saDa)) << 16; \
+    \
+    Face::p32ExtractPBW1(dca, a0p_20); \
+    Face::p32ExtractPBW1(sca, b0p_20); \
+    \
+    _Equation_ \
+    \
+    if (pack) \
+      t0p_20 += dca << 16; \
+    else \
+      t0p_20 = dca << 16; \
+    \
+    Face::p32ExtractPBW0(dca, a0p_31); \
+    Face::p32ExtractPBW0(sca, b0p_31); \
+    \
+    _Equation_ \
+    \
+    if (pack) \
+      t0p_20 += dca << 8; \
+    else \
+      t0p_31 += dca; \
+    \
+    Face::p32ExtractPBW0(dca, a0p_20); \
+    Face::p32ExtractPBW0(sca, b0p_20); \
+    \
+    _Equation_ \
+    \
+    t0p_20 += dca; \
+    \
+    if (pack) \
+      Face::p32Copy(dst0p_20, t0p_20); \
+    else \
+      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+  FOG_MACRO_END
+
   // Dca' = if (Sca.Da + Dca.Sa >= Sa.Da)
   //          Sa.Da + Sca.(1 - Da) + Dca.(1 - Sa).
   //        else
@@ -5649,25 +5696,26 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    uint32_t da, dr, dg, db;
-    uint32_t sa,
-
-    uint32_t t0p_20;
-    uint32_t t0p_31;
+    uint32_t dca, da;
+    uint32_t sca, sa, saDa;
 
     Face::p32ExtractPBW1(da, a0p_31);
     Face::p32ExtractPBW1(sa, b0p_31);
+    Face::p32Mul(saDa, da, sa);
 
-    Face::p32ExtractPBW1(dr, a0p_20);
-    Face::p32ExtractPBW0(dg, a0p_31);
-    Face::p32ExtractPBW0(db, a0p_20);
-
-    if (pack)
-      Face::p32Pack(dst0p_20, t0p_20, t0p_31);
-    else
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31);
+    COMPOSITE_EXT_SEPARABLE(
+    {
+      uint32_t x = dca * sa;
+      uint32_t y = sca * da + x;
+      dca = div255( (dca + sca) * 0xFF + ((y >= saDa) ? (saDa - y) : (x * sa / (sa - sca) - y)) );
+    });
   }
 
+  // Dca' = if (Sc.Da + Dca >= Da)
+  //          Da + Sc.(1 - Da).
+  //        else
+  //          Dca/(1 - Sc) + Sca.(1 - Da).
+  // Da'  = Sa + Da - Sa.Da
   static FOG_INLINE void prgb32_op_xrgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,

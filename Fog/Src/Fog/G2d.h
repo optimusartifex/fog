@@ -82,6 +82,7 @@
 #include <Fog/G2d/Imaging/Filters/FeColorMatrix.h>
 #include <Fog/G2d/Imaging/Filters/FeComponentFunction.h>
 #include <Fog/G2d/Imaging/Filters/FeComponentTransfer.h>
+#include <Fog/G2d/Imaging/Filters/FeCompositingFunction.h>
 #include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
 #include <Fog/G2d/Imaging/Filters/FeConvolveSeparable.h>
 #include <Fog/G2d/Imaging/Filters/FeMorphology.h>

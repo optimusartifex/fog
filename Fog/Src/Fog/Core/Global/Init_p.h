@@ -163,6 +163,7 @@ FOG_NO_EXPORT void FeColorLutArray_init(void);
 FOG_NO_EXPORT void FeColorMatrix_init(void);
 FOG_NO_EXPORT void FeComponentFunction_init(void);
 FOG_NO_EXPORT void FeComponentTransfer_init(void);
+FOG_NO_EXPORT void FeCompositingFunction_init(void);
 FOG_NO_EXPORT void FeConvolveMatrix_init(void);
 FOG_NO_EXPORT void FeConvolveSeparable_init(void);
 FOG_NO_EXPORT void FeMorphology_init(void);

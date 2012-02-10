@@ -174,6 +174,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   FeBlur_init();
   FeConvolveMatrix_init();
   FeConvolveSeparable_init();
+  FeCompositingFunction_init();
   FeMorphology_init();
 
   // [G2d/Painting]

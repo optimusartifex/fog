@@ -2293,6 +2293,18 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(bool, fecomponenttransfer_eq)(const FeComponentTransfer* a, const FeComponentTransfer* b);
 
   // --------------------------------------------------------------------------
+  // [G2d/Imaging/Filters - FeCompositingFunction]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(fecompositingfunction_ctor)(FeCompositingFunction* self);
+  FOG_CAPI_CTOR(fecompositingfunction_ctorCopy)(FeCompositingFunction* self, const FeCompositingFunction* other);
+  FOG_CAPI_CTOR(fecompositingfunction_dtor)(FeCompositingFunction* self);
+
+  FOG_CAPI_METHOD(void, fecompositingfunction_reset)(FeCompositingFunction* self);
+  FOG_CAPI_METHOD(err_t, fecompositingfunction_copy)(FeCompositingFunction* self, const FeCompositingFunction* other);
+  FOG_CAPI_STATIC(bool, fecompositingfunction_eq)(const FeCompositingFunction* a, const FeCompositingFunction* b);
+
+  // --------------------------------------------------------------------------
   // [G2d/Imaging/Filters - FeConvolveMatrix]
   // --------------------------------------------------------------------------
 

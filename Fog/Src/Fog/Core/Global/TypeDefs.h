@@ -248,6 +248,8 @@ struct FeComponentFunction;
 struct FeComponentFunctionData;
 struct FeComponentFunctionGamma;
 struct FeComponentFunctionLinear;
+struct FeCompositingFunction;
+struct FeCompositingFunctionData;
 struct FeConvolveMatrix;
 struct FeConvolveSeparable;
 struct FeMorphology;
@@ -419,7 +421,11 @@ typedef EventLoopImpl* (*EventLoopConstructor)();
 // [TypeDefs - Functions - Fog/G2d]
 // ============================================================================
 
-typedef err_t (FOG_CDECL *CSSStyleHandlerFunc)(void* ctx, const StringW* name, const StringW* value);
+typedef void (FOG_CDECL* FeCompositingFunctionFloatFunc)(
+  ArgbF* dst, const ArgbF* a, const ArgbF* b, FeCompositingFunctionData* data);
+
+typedef err_t (FOG_CDECL *CSSStyleHandlerFunc)(
+  void* ctx, const StringW* name, const StringW* value);
 
 // ============================================================================
 // [TypeDefs - Functions - Fog/UI]

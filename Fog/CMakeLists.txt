@@ -1090,6 +1090,7 @@ Set(FOG_G2D_IMAGING_FILTERS_SOURCES
   Src/Fog/G2d/Imaging/Filters/FeColorMatrix.cpp
   Src/Fog/G2d/Imaging/Filters/FeComponentFunction.cpp
   Src/Fog/G2d/Imaging/Filters/FeComponentTransfer.cpp
+  Src/Fog/G2d/Imaging/Filters/FeCompositingFunction.cpp
   Src/Fog/G2d/Imaging/Filters/FeConvolveMatrix.cpp
   Src/Fog/G2d/Imaging/Filters/FeConvolveSeparable.cpp
   Src/Fog/G2d/Imaging/Filters/FeMorphology.cpp
@@ -1104,6 +1105,7 @@ Set(FOG_G2D_IMAGING_FILTERS_HEADERS
   Src/Fog/G2d/Imaging/Filters/FeColorMatrix.h
   Src/Fog/G2d/Imaging/Filters/FeComponentFunction.h
   Src/Fog/G2d/Imaging/Filters/FeComponentTransfer.h
+  Src/Fog/G2d/Imaging/Filters/FeCompositingFunction.h
   Src/Fog/G2d/Imaging/Filters/FeConvolveMatrix.h
   Src/Fog/G2d/Imaging/Filters/FeConvolveSeparable.h
   Src/Fog/G2d/Imaging/Filters/FeMorphology.h
@@ -1220,6 +1222,7 @@ Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
   Src/Fog/G2d/Painting/RasterOps_C/CompositeBase_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeClear_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeExt_p.h
+  Src/Fog/G2d/Painting/RasterOps_C/CompositeFunc_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeNop_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeSrc_p.h
   Src/Fog/G2d/Painting/RasterOps_C/CompositeSrcOver_p.h

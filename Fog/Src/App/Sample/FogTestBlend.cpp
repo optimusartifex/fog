@@ -5,7 +5,7 @@
 using namespace Fog;
 
 // ============================================================================
-// [SampleWindow - Declaration]
+// [AppWindow - Declaration]
 // ============================================================================
 
 struct AppWindow : public UIEngineWindow

@@ -87,14 +87,6 @@ void AppWindow::onPaint(Painter* _p)
 
   for (uint32_t op = 0; op < COMPOSITE_COUNT; op++)
   {
-    if (op == COMPOSITE_OVERLAY    ) continue;
-    if (op == COMPOSITE_COLOR_BURN ) continue;
-    if (op == COMPOSITE_COLOR_DODGE) continue;
-    if (op == COMPOSITE_HARD_LIGHT ) continue;
-    if (op == COMPOSITE_SOFT_LIGHT ) continue;
-    if (op == COMPOSITE_INVERT     ) continue;
-    if (op == COMPOSITE_INVERT_RGB ) continue;
-  
     Image ti;
     ti.create(s, IMAGE_FORMAT_PRGB32);
 

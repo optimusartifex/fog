@@ -554,6 +554,27 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_COLOR_BURN = 20,
 
+  //! @brief Multiplies or screens the colors, dependent on the source color value.
+  //!
+  //! If the source color is lighter than 0.5, the destination is lightened as
+  //! if it were screened. If the source color is darker than 0.5, the destination
+  //! is darkened, as if it were multiplied. The degree of lightening or darkening
+  //! is proportional to the difference between the source color and 0.5. If it is
+  //! equal to 0.5 the destination is unchanged. Painting with pure black or white
+  //! produces black or white.
+  //!
+  //! @verbatim
+  //! Formulas for PRGB(dst), PRGB(src) colorspaces (HARD_LIGHT):
+  //!
+  //! if (2.Sca <= Sa)
+  //!   Dca' = 2.Sca.Dca + Sca.(1 - Da) + Dca.(1 - Sa)
+  //!   Da'  = Sa + Da - Sa.Da
+  //! else
+  //!   Dca' = Sa.Da - 2.(Da - Dca).(Sa - Sca) + Sca.(1 - Da) + Dca.(1 - Sa)
+  //!   Da'  = Sa + Da - Sa.Da
+  //! @endverbatim
+  COMPOSITE_HARD_LIGHT = 21,
+
   //! @brief Darkens or lightens the colors, dependent on the source color value.
   //!
   //! If the source color is lighter than 0.5, the destination is lightened. If
@@ -577,28 +598,7 @@ enum COMPOSITE_OP
   //!   Dca' = Dca.Sa + (2.Sca.Da - Sa.Da).((Dca.Sa)^0.5 - Dca.Sa) + Sca.(1 - Da) + Dca.(1 - Sa)
   //!   Da'  = Sa + Da - Sa.Da
   //! @endverbatim
-  COMPOSITE_SOFT_LIGHT = 21,
-
-  //! @brief Multiplies or screens the colors, dependent on the source color value.
-  //!
-  //! If the source color is lighter than 0.5, the destination is lightened as
-  //! if it were screened. If the source color is darker than 0.5, the destination
-  //! is darkened, as if it were multiplied. The degree of lightening or darkening
-  //! is proportional to the difference between the source color and 0.5. If it is
-  //! equal to 0.5 the destination is unchanged. Painting with pure black or white
-  //! produces black or white.
-  //!
-  //! @verbatim
-  //! Formulas for PRGB(dst), PRGB(src) colorspaces (HARD_LIGHT):
-  //!
-  //! if (2.Sca <= Sa)
-  //!   Dca' = 2.Sca.Dca + Sca.(1 - Da) + Dca.(1 - Sa)
-  //!   Da'  = Sa + Da - Sa.Da
-  //! else
-  //!   Dca' = Sa.Da - 2.(Da - Dca).(Sa - Sca) + Sca.(1 - Da) + Dca.(1 - Sa)
-  //!   Da'  = Sa + Da - Sa.Da
-  //! @endverbatim
-  COMPOSITE_HARD_LIGHT = 22,
+  COMPOSITE_SOFT_LIGHT = 22,
 
   //! @brief Subtracts the darker of the two constituent colors from the
   //! lighter.
@@ -629,26 +629,8 @@ enum COMPOSITE_OP
   //! @endverbatim
   COMPOSITE_EXCLUSION = 24,
 
-  //! @brief Invert.
-  //!
-  //! @verbatim
-  //! Formulas for PRGB(dst), PRGB(src) colorspaces (INVERT):
-  //!   Dca' = (Da - Dca) * Sa + Dca.(1 - Sa)
-  //!   Da'  = (1) * Sa + Da.(1 - Sa)
-  //! @endverbatim
-  COMPOSITE_INVERT = 25,
-
-  //! @brief Invert RGB.
-  //!
-  //! @verbatim
-  //! Formulas for PRGB(dst), PRGB(src) colorspaces (INVERT_RGB):
-  //!   Dca' = (Da - Dca) * Sca + Dca.(1 - Sa)
-  //!   Da'  = (1) * Sa + Da.(1 - Sa)
-  //! @endverbatim
-  COMPOSITE_INVERT_RGB = 26,
-
   //! @brief Count of compositing operators (for error checking).
-  COMPOSITE_COUNT = 27
+  COMPOSITE_COUNT = 25
 };
 
 // ============================================================================

@@ -370,6 +370,27 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   INIT_VBLIT_BY_EOP(RGB24 , RGB24 , XOR     , CLEAR   );
 
   // --------------------------------------------------------------------------
+  // [RasterOps - Composite - ColorDodge]
+  // --------------------------------------------------------------------------
+
+  // Replace 'PRGB ColorDodge A8' by 'PRGB Screen A8'.
+  INIT_VBLIT_BY_EOP(PRGB32, A8    , COLOR_DODGE, SCREEN);
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - ColorBurn]
+  // --------------------------------------------------------------------------
+
+  // Replace 'PRGB ColorBurn A8' by 'PRGB DstOver A8'.
+  INIT_VBLIT_BY_EOP(PRGB32, A8    , COLOR_BURN, DST_OVER);
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Composite - HardLight]
+  // --------------------------------------------------------------------------
+
+  // Replace 'PRGB HardLight A8' by 'PRGB Screen A8'.
+  INIT_VBLIT_BY_EOP(PRGB32, A8    , HARD_LIGHT, SCREEN);
+
+  // --------------------------------------------------------------------------
   // [RasterOps - Composite - Exclusion]
   // --------------------------------------------------------------------------
 

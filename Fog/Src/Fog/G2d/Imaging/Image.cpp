@@ -1911,7 +1911,7 @@ _Fail:
 //   A'  = (1 - A)
 //
 // If the image format is premultiplied, but alpha is not modified then the
-// formula looks like COMPOSITE_INVERT:
+// formula looks like:
 //
 //   Ca' = A - Ca
 //   A'  = A

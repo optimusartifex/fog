@@ -236,7 +236,7 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // --------------------------------------------------------------------------
 
   // Replace 'PRGB SrcAtop XRGB' by 'PRGB SrcIn XRGB'.
-  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , SRC_ATOP, SRC_IN  );
+  INIT_CBLIT_BY_EOP(PRGB32, XRGB  , SRC_ATOP, SRC_IN  );
   INIT_VBLIT_BY_EOP(PRGB32, XRGB32, SRC_ATOP, SRC_IN  );
   INIT_VBLIT_BY_EOP(PRGB32, RGB24 , SRC_ATOP, SRC_IN  );
 
@@ -287,7 +287,7 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // --------------------------------------------------------------------------
 
   // Replace 'PRGB DstIn XRGB' by 'PRGB Dst XRGB'.
-  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_IN  , DST     );
+  INIT_CBLIT_BY_EOP(PRGB32, XRGB  , DST_IN  , DST     );
   INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_IN  , DST     );
   INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_IN  , DST     );
 
@@ -305,7 +305,7 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // --------------------------------------------------------------------------
 
   // Replace 'PRGB DstOut XRGB' by 'PRGB Clear XRGB'.
-  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_OUT , CLEAR   );
+  INIT_CBLIT_BY_EOP(PRGB32, XRGB  , DST_OUT , CLEAR   );
   INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_OUT , CLEAR   );
   INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_OUT , CLEAR   );
 
@@ -323,7 +323,7 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // --------------------------------------------------------------------------
 
   // Replace 'PRGB DstAtop XRGB' by 'PRGB DstOver XRGB'.
-  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , DST_ATOP, DST_OVER);
+  INIT_CBLIT_BY_EOP(PRGB32, XRGB  , DST_ATOP, DST_OVER);
   INIT_VBLIT_BY_EOP(PRGB32, XRGB32, DST_ATOP, DST_OVER);
   INIT_VBLIT_BY_EOP(PRGB32, RGB24 , DST_ATOP, DST_OVER);
 
@@ -351,7 +351,7 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // --------------------------------------------------------------------------
 
   // Replace 'PRGB Xor XRGB' by 'PRGB SrcOut XRGB'.
-  INIT_CBLIT_BY_EOP(PRGB32, PRGB  , XOR     , SRC_OUT );
+  INIT_CBLIT_BY_EOP(PRGB32, XRGB  , XOR     , SRC_OUT );
   INIT_VBLIT_BY_EOP(PRGB32, XRGB32, XOR     , SRC_OUT );
   INIT_VBLIT_BY_EOP(PRGB32, RGB24 , XOR     , SRC_OUT );
 

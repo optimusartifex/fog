@@ -34,6 +34,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW1(sca, b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dca << 16; \
@@ -44,6 +45,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sca, b0p_31); \
     \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dca << 8; \
@@ -54,6 +56,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sca, b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     t0p_20 += dca; \
     \
@@ -77,6 +80,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW1(sc , b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dca << 16; \
@@ -87,6 +91,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sc , b0p_31); \
     \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dca << 8; \
@@ -97,6 +102,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sc , b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     t0p_20 += dca; \
     \
@@ -120,6 +126,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW1(sca, b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dc << 16; \
@@ -130,6 +137,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sca, b0p_31); \
     \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dc << 8; \
@@ -140,6 +148,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sca, b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     t0p_20 += dc; \
     \
@@ -163,6 +172,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW1(sc , b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dc << 16; \
@@ -173,6 +183,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sc , b0p_31); \
     \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dc << 8; \
@@ -183,6 +194,7 @@ namespace RasterOps_C {
     Face::p32ExtractPBW0(sc , b0p_20); \
     \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     t0p_20 += dc; \
     \
@@ -204,6 +216,7 @@ namespace RasterOps_C {
     \
     Face::p32ExtractPBW1(dca, a0p_20); \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dca << 16; \
@@ -212,6 +225,7 @@ namespace RasterOps_C {
     \
     Face::p32ExtractPBW0(dca, a0p_31); \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dca << 8; \
@@ -220,6 +234,7 @@ namespace RasterOps_C {
     \
     Face::p32ExtractPBW0(dca, a0p_20); \
     _Equation_ \
+    FOG_ASSERT(dca <= 0xFF); \
     \
     t0p_20 += dca; \
     \
@@ -241,6 +256,7 @@ namespace RasterOps_C {
     \
     Face::p32ExtractPBW1(dc, a0p_20); \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dc << 16; \
@@ -249,6 +265,7 @@ namespace RasterOps_C {
     \
     Face::p32ExtractPBW0(dc, a0p_31); \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     if (pack) \
       t0p_20 += dc << 8; \
@@ -257,6 +274,7 @@ namespace RasterOps_C {
     \
     Face::p32ExtractPBW0(dc, a0p_20); \
     _Equation_ \
+    FOG_ASSERT(dc <= 0xFF); \
     \
     t0p_20 += dc; \
     \
@@ -304,9 +322,9 @@ struct CompositeExtCondition
   static FOG_INLINE bool p32ProcessSrcPixelA8(const uint32_t& c0)
   {
     if (CombineFlags & RASTER_COMBINE_NOP_IF_SA_ZERO)
-      return c0 == 0x00;
+      return c0 != 0x00;
     else if (CombineFlags & RASTER_COMBINE_NOP_IF_SA_FULL)
-      return c0 == 0xFF;
+      return c0 != 0xFF;
     else
       return true;
   }
@@ -372,9 +390,12 @@ struct CompositeExtGeneric
   static FOG_INLINE void pixel32_prepare_pixel32(
     uint32_t& dst0p, const uint32_t& src0p)
   {
-    if (DstF::HAS_ALPHA && !SrcF::HAS_ALPHA && SrcF::HAS_X && PrepareNeeded)
+    if (DstF::HAS_ALPHA && !SrcF::HAS_ALPHA && PrepareNeeded)
     {
-      CompositeOp::prgb32_prepare_xrgb32(dst0p, src0p);
+      if (PrepareToFRGB)
+        Face::p32FillPBB3(dst0p, src0p);
+      else 
+        Face::p32ZeroPBB3(dst0p, src0p);
     }
   }
 
@@ -382,10 +403,19 @@ struct CompositeExtGeneric
   static FOG_INLINE void pixel32_prepare_pixel32_2031(
     uint32_t& dst0p_20, const uint32_t& src0p_20,
     uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-    if (DstF::HAS_ALPHA && !SrcF::HAS_ALPHA && SrcF::HAS_X && PrepareNeeded)
+  { 
+    Face::p32Copy(dst0p_20, src0p_20);
+
+    if (DstF::HAS_ALPHA && !SrcF::HAS_ALPHA && PrepareNeeded)
     {
-      CompositeOp::prgb32_prepare_xrgb32_2031(dst0p_20, src0p_20, dst0p_31, src0p_31);
+      if (PrepareToFRGB)
+        Face::p32FillPBW1(dst0p_31, src0p_31);
+      else 
+        Face::p32ZeroPBW1(dst0p_31, src0p_31);
+    }
+    else
+    {
+      Face::p32Copy(dst0p_31, src0p_31);
     }
   }
 
@@ -2102,10 +2132,10 @@ struct CompositeExtSrcInSrcOut
   static FOG_INLINE void pixel32_prepare_pixel32(
     uint32_t& dst0p, const uint32_t& src0p)
   {
-    if (!SrcF::HAS_ALPHA && SrcF::HAS_X && PrepareNeeded)
-    {
-      CompositeOp::prgb32_prepare_xrgb32(dst0p, src0p);
-    }
+    if (!SrcF::HAS_ALPHA && !SrcF::HAS_F)
+      Face::p32FillPBB3(dst0p, src0p);
+    else
+      Face::p32Copy(dst0p, src0p);
   }
 
   template<typename DstF, typename SrcF>
@@ -2113,10 +2143,12 @@ struct CompositeExtSrcInSrcOut
     uint32_t& dst0p_20, const uint32_t& src0p_20,
     uint32_t& dst0p_31, const uint32_t& src0p_31)
   {
-    if (!SrcF::HAS_ALPHA && SrcF::HAS_X && PrepareNeeded)
-    {
-      CompositeOp::prgb32_prepare_xrgb32_2031(dst0p_20, src0p_20, dst0p_31, src0p_31);
-    }
+    Face::p32Copy(dst0p_20, src0p_20);
+
+    if (!SrcF::HAS_ALPHA && !SrcF::HAS_F)
+      Face::p32FillPBW1(dst0p_31, src0p_31);
+    else
+      Face::p32Copy(dst0p_31, src0p_31);
   }
 
   static FOG_INLINE bool pixel32_skip(const uint32_t& pix0)
@@ -2258,7 +2290,7 @@ _C_Mask_Skip:
         if (NegateDA) Face::p32Negate255SBW(t0p_20, t0p_20);
 
         Face::p32MulDiv255SBW(t0p_20, t0p_20, msk0p);
-        Face::p32Negate255PBW(msk0p, msk0p);
+        Face::p32Negate255SBW(msk0p, msk0p);
 
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         Face::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
@@ -2295,12 +2327,12 @@ _A8_Glyph_Skip:
         Face::p32ExtractPBB3(t0p, dst0p_20);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
 
-        Face::p32MulDiv256SBW(t0p, t0p, msk0p);
-        Face::p32Negate256PBW(msk0p, msk0p);
+        Face::p32MulDiv255SBW(t0p, t0p, msk0p);
+        Face::p32Negate256SBW(msk0p, msk0p);
 
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-        Face::p32MulDiv255PBW_SBW_2x_Pack_2031(t0p, sro0p_20, t0p, sro0p_31, t0p);
+        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(t0p, sro0p_20, t0p, sro0p_31, t0p);
         Face::p32Add(dst0p_20, dst0p_20, t0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
@@ -2465,11 +2497,11 @@ _C_Opaque_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32ExtractPBB3(t0p, dst0p_31);
+        Face::p32ExtractPBB3(t0p, dst0p_20);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
 
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
         Face::p32MulDiv255SBW(t0p, t0p, msk0p);
         Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
@@ -2507,13 +2539,15 @@ _C_Opaque_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32ExtractPBB3(t0p, dst0p_31);
+        Face::p32ExtractPBB3(t0p, dst0p_20);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
 
         Face::p32MulDiv255SBW(t0p, t0p, msk0p);
-        Face::p32Negate255PBW(msk0p, msk0p);
+        Face::p32Negate255SBW(msk0p, msk0p);
 
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+
         Face::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
         Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
         Face::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
@@ -2549,13 +2583,15 @@ _A8_Glyph_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32ExtractPBB3(t0p, dst0p_31);
+        Face::p32ExtractPBB3(t0p, dst0p_20);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
 
         Face::p32MulDiv255SBW(t0p, t0p, msk0p);
-        Face::p32Negate255PBW(msk0p, msk0p);
+        Face::p32Negate256SBW(msk0p, msk0p);
 
         Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+
         Face::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
         Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
         Face::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
@@ -2609,6 +2645,7 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
+        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         Face::p32ExtractPBW1(t0p, dst0p_20);
         if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
 
@@ -3393,20 +3430,6 @@ struct FOG_NO_EXPORT CompositeSrcIn : public CompositeExtSrcInSrcOut<
   CompositeSrcIn, RASTER_COMBINE_OP_SRC_IN, RASTER_PRGB_PREPARE_NONE,
   false>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
 };
 
 // ============================================================================
@@ -3418,20 +3441,6 @@ struct FOG_NO_EXPORT CompositeSrcOut : public CompositeExtSrcInSrcOut<
   CompositeSrcOut, RASTER_COMBINE_OP_SRC_OUT, RASTER_PRGB_PREPARE_NONE,
   true>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
 };
 
 // ============================================================================
@@ -3442,21 +3451,6 @@ struct FOG_NO_EXPORT CompositeSrcOut : public CompositeExtSrcInSrcOut<
 struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
   CompositeSrcAtop, RASTER_COMBINE_OP_SRC_ATOP, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -3601,21 +3595,6 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
   CompositeDstOver, RASTER_COMBINE_OP_DST_OVER, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -3646,8 +3625,21 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    // We can use PRGB32 OP PRGB32 function, there is no difference.
-    prgb32_op_prgb32_2031(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31, pack);
+    uint32_t t0p_20, t0p_31;
+
+    // Sc.(1 - Da).
+    Face::p32ExtractPBW1(t0p_20, a0p_31);
+    Face::p32Negate255SBW(t0p_20, t0p_20);
+
+    Face::p32ZeroPBW1(t0p_31, b0p_31);
+    Face::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
+    Face::p32MulDiv255PBW_SBW(t0p_20, b0p_20, t0p_20);
+
+    // Dca + Sc.(1 - Da).
+    Face::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    Face::p32FillPBW1(dst0p_31, dst0p_31);
+
+    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -3893,21 +3885,6 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
   CompositeDstAtop, RASTER_COMBINE_OP_DST_ATOP, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -4050,22 +4027,6 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
   CompositeXor, RASTER_COMBINE_OP_XOR, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-    
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -4085,16 +4046,14 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
 
     Face::p32Negate255SBW(t0p_20, t0p_20);
     Face::p32Negate255SBW(sa, sa);
-    
-    Face::p32Copy(t0p_31, t0p_20);
 
     // Sca.(1 - Da).
-    Face::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_31, b0p_31);
+    Face::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_20, b0p_31);
     // Dca.(1 - Sa).
     Face::p32Mul_2x(dst0p_20, a0p_20, sa, dst0p_31, a0p_31, sa);
     // Sca.(1 - Da) + Dca.(1 - Sa).
     Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
-    
+
     if (pack)
       Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
@@ -4236,23 +4195,6 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
   CompositeAdd, RASTER_COMBINE_OP_ADD, RASTER_PRGB_PREPARE_FRGB>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-    Face::p32FillPBB3(dst0p, src0p);
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-    Face::p32FillPBB3(dst0p_31, src0p_31);
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -4360,21 +4302,6 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
   CompositeSubtract, RASTER_COMBINE_OP_SUBTRACT, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -4537,21 +4464,6 @@ struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
   CompositeMultiply, RASTER_COMBINE_OP_MULTIPLY, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -4757,21 +4669,6 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
   CompositeScreen, RASTER_COMBINE_OP_SCREEN, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -4933,21 +4830,6 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
   CompositeOverlay, RASTER_COMBINE_OP_OVERLAY, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -4977,9 +4859,11 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
   }
 
   // Dca' = if (2.Dca < Da)
-  //          Dca.Sc + Sc.
+  //          Sc.(2.Dca + 1 - Da).
   //        else
-  //          Dca - Dca.Sc + Sc - Da.
+  //          Da - 2.(Da - Dca).(1 - Sc) + Sc.(1 - Da).
+  //          Da - 2.(Da.1 - Dca.1 - Da.Sc + Dca.Sc) + Sc.(1 - Da).
+  //          Da + 2.(Dca - Da) + Sc(-2.Dca + 1 + Da).
   // Da'  = 1
   static FOG_INLINE void prgb32_op_xrgb32_2031(
     uint32_t& dst0p_20, const uint32_t& a0p_20, const uint32_t& b0p_20,
@@ -4991,8 +4875,8 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
-      uint32_t t = Math::udiv255(dca * sc);
-      dca = (2 * dca < da) ? t + sc : dca - t + sc - da;
+      dca = (2 * dca < da) ? Math::udiv255(sc * (2 * dca + (da ^ 0xFF)))
+                           : 2 * dca - da + Math::udiv255(sc * (0xFF + da - 2 * dca));
     });
   }
 
@@ -5026,7 +4910,7 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
-      dc = (dc < 128) ? Math::udiv255(dc * (2 * sca + 1 - sa)) : 2 * sca - sa + Math::udiv255(dc * (sa + 1 - 2 * sca));
+      dc = (dc < 128) ? Math::udiv255(dc * (2 * sca + 0xFF - sa)) : 2 * sca - sa + Math::udiv255(dc * (sa + 0xFF - 2 * sca));
     });
   }
 
@@ -5121,21 +5005,6 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
   CompositeDarken, RASTER_COMBINE_OP_DARKEN, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -5342,21 +5211,6 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
   CompositeLighten, RASTER_COMBINE_OP_LIGHTEN, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -5576,21 +5430,6 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
   CompositeColorDodge, RASTER_COMBINE_OP_COLOR_DODGE, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -5749,21 +5588,6 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
   CompositeColorBurn, RASTER_COMBINE_OP_COLOR_BURN, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -5859,7 +5683,7 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
   {
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_XRGB32(
     {
-      dc = (sc + dc <= 0xFF) ? 0 : (sc + dc - 1) * 0xFF / sc;
+      dc = (sc + dc <= 0xFF) ? 0 : (sc + dc - 0xFF) * 0xFF / sc;
     });
   }
 
@@ -5919,21 +5743,6 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
   CompositeHardLight, RASTER_COMBINE_OP_HARD_LIGHT, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -6012,7 +5821,7 @@ struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
       uint32_t t = dc * (sa ^ 0xFF);
-      dc = Math::udiv255( (2 * sca < sa) ? (2 * sca * dc + t) : (sa * 0xFFFF - 2 * (dc ^ 0xFF) * (sa - sca) + t) );
+      dc = Math::udiv255( (2 * sca < sa) ? (2 * sca * dc + t) : (sa * 0xFF - 2 * (dc ^ 0xFF) * (sa - sca) + t) );
     });
   }
 
@@ -6027,7 +5836,7 @@ struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
   {
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_XRGB32(
     {
-      dc = Math::udiv255( (sc < 128) ? (2 * sc * dc) : (0xFFFF - 2 * (dc ^ 0xFF) * (sc ^ 0xFF)) );
+      dc = Math::udiv255( (sc < 128) ? (2 * sc * dc) : (0xFF * 0xFF - 2 * (dc ^ 0xFF) * (sc ^ 0xFF)) );
     });
   }
 
@@ -6085,21 +5894,6 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
   CompositeSoftLight, RASTER_COMBINE_OP_SOFT_LIGHT, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Helpers]
   // ==========================================================================
 
@@ -6110,7 +5904,8 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
 
   static FOG_INLINE uint32_t usqrt(uint32_t x)
   {
-    return (int)Math::sqrt(float(int(x)));
+    FOG_ASSERT(x <= 0xFF);
+    return Face::_u8_sqrt_table_b[x];
   }
 
   // ==========================================================================
@@ -6149,7 +5944,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
       else if (4 * dca <= da)
         dca = udiv65025(t + int32_t(da * (2 * sca - sa)) * udiv65025(int32_t(dc) * (int32_t(dc) * (16 * int32_t(dc) - 12 * 0xFF) + 3 * 0xFF * 0xFF)));
       else
-        dca = udiv65025(t + int32_t(da * (2 * sca - sa)) * (int32_t(usqrt(dc * 0xFF)) - int32_t(dc)));
+        dca = udiv65025(t + int32_t(da * (2 * sca - sa)) * (int32_t(usqrt(dc)) - int32_t(dc)));
     });
   }
 
@@ -6175,14 +5970,14 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
       uint32_t dc = ((dca * daRecip) >> 16);
-      uint32_t t = sc * daInv * 0xFF + dca * (0xFF * 0xFF);
-      
+      uint32_t t = sc * daInv + dca * (0xFF * 0xFF);
+
       if (sc < 128)
         dca = udiv65025(t - dca * (0xFF - 2 * sc) * (dc ^ 0xFF));
       else if (4 * dca <= da)
         dca = udiv65025(t + int32_t(da * (2 * sc - 0xFF)) * udiv65025(int32_t(dc) * (int32_t(dc) * (16 * int32_t(dc) - 12 * 0xFF) + 3 * 0xFF * 0xFF)));
       else
-        dca = udiv65025(t + int32_t(da * (2 * sc - 0xFF)) * (int32_t(usqrt(dc * 0xFF)) - int32_t(dc)));
+        dca = udiv65025(t + int32_t(da * (2 * sc - 0xFF)) * (int32_t(usqrt(dc)) - int32_t(dc)));
     });
   }
 
@@ -6226,7 +6021,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
       else if (dc < 64)
         dc = udiv65025(t + int32_t(0xFF * (2 * sca - sa)) * udiv65025(int32_t(dc) * (int32_t(dc) * (16 * int32_t(dc) - 12 * 0xFF) + 3 * 0xFF * 0xFF)));
       else
-        dc = udiv65025(t + int32_t(0xFF * (2 * sca - sa)) * (int32_t(usqrt(dc * 0xFF)) - int32_t(dc)));
+        dc = udiv65025(t + int32_t(0xFF * (2 * sca - sa)) * (int32_t(usqrt(dc)) - int32_t(dc)));
     });
   }
 
@@ -6250,7 +6045,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
       else if (dc < 64)
         dc = udiv65025(t + int32_t(0xFF * (2 * sc - 0xFF)) * udiv65025(int32_t(dc) * (int32_t(dc) * (16 * int32_t(dc) - 12 * 0xFF) + 3 * 0xFF * 0xFF)));
       else
-        dc = udiv65025(t + int32_t(0xFF * (2 * sc - 0xFF)) * (int32_t(usqrt(dc * 0xFF)) - int32_t(dc)));
+        dc = udiv65025(t + int32_t(0xFF * (2 * sc - 0xFF)) * (int32_t(usqrt(dc)) - int32_t(dc)));
     });
   }
 
@@ -6294,7 +6089,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
       if (4 * dca <= da)
         dca = udiv65025(t + int32_t(da * sa) * udiv65025(int32_t(dc) * (int32_t(dc) * (16 * int32_t(dc) - 12 * 0xFF) + 3 * 0xFF * 0xFF)));
       else
-        dca = udiv65025(t + int32_t(da * sa) * (int32_t(usqrt(dc * 0xFF)) - int32_t(dc)));
+        dca = udiv65025(t + int32_t(da * sa) * (int32_t(usqrt(dc)) - int32_t(dc)));
     });
   }
 
@@ -6317,7 +6112,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
       if (dc < 64)
         dc = udiv65025(t + int32_t(0xFF * sa) * udiv65025(int32_t(dc) * (int32_t(dc) * (16 * int32_t(dc) - 12 * 0xFF) + 3 * 0xFF * 0xFF)));
       else
-        dc = udiv65025(t + int32_t(0xFF * sa) * (int32_t(usqrt(dc * 0xFF)) - int32_t(dc)));
+        dc = udiv65025(t + int32_t(0xFF * sa) * (int32_t(usqrt(dc)) - int32_t(dc)));
     });
   }
 
@@ -6341,21 +6136,6 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
   CompositeDifference, RASTER_COMBINE_OP_DIFFERENCE, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
@@ -6609,21 +6389,6 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
 struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
   CompositeExclusion, RASTER_COMBINE_OP_EXCLUSION, RASTER_PRGB_PREPARE_NONE>
 {
-  // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================

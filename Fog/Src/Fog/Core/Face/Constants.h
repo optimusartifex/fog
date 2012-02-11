@@ -78,6 +78,11 @@ extern FOG_API const uint16_t _u8_divide_table_w[256 * 4];
 //! point accuracy).
 extern FOG_API const float _u8_divide_table_f[256];
 
+//! @internal
+//!
+//! @brief Square root table with can be used to do "isqrt(x * 0xFF)".
+extern FOG_API const uint8_t _u8_sqrt_table_b[256];
+
 } // Face namespace
 } // Fog namespace
 

@@ -484,21 +484,21 @@ static FOG_INLINE void p32Load3b(uint32_t& dst0, const void* srcp)
 
 #if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
 # if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  dst0 = _FOG_FACE_COMBINE_2( (uint32_t)((const uint16_t*)(src8 + 0))[0],
-                              (uint32_t)((const uint8_t *)(src8 + 2))[0] << 16);
+  dst0 = _FOG_FACE_COMBINE_2( static_cast<uint32_t>(((const uint16_t*)(src8 + 0))[0]),
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 2))[0]) << 16);
 # else
-  dst0 = _FOG_FACE_COMBINE_2( (uint32_t)((const uint8_t *)(src8 + 0))[0] << 16),
-                              (uint32_t)((const uint16_t*)(src8 + 1))[0]);
+  dst0 = _FOG_FACE_COMBINE_2( static_cast<uint32_t>(((const uint8_t *)(src8 + 0))[0]) << 16),
+                              static_cast<uint32_t>(((const uint16_t*)(src8 + 1))[0]));
 # endif // FOG_BYTE_ORDER
 #else
 # if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  dst0 = _FOG_FACE_COMBINE_3( (uint32_t)((const uint8_t *)(src8 + 0))[0] << 16,
-                              (uint32_t)((const uint8_t *)(src8 + 1))[0] <<  8,
-                              (uint32_t)((const uint8_t *)(src8 + 2))[0]      );
+  dst0 = _FOG_FACE_COMBINE_3( static_cast<uint32_t>(((const uint8_t *)(src8 + 0))[0]) << 16,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 1))[0]) <<  8,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 2))[0])      );
 # else
-  dst0 = _FOG_FACE_COMBINE_3( (uint32_t)((const uint8_t *)(src8 + 0))[0]      ,
-                              (uint32_t)((const uint8_t *)(src8 + 1))[0] <<  8,
-                              (uint32_t)((const uint8_t *)(src8 + 2))[0] << 16);
+  dst0 = _FOG_FACE_COMBINE_3( static_cast<uint32_t>(((const uint8_t *)(src8 + 0))[0])      ,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 1))[0]) <<  8,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 2))[0]) << 16);
 # endif // FOG_BYTE_ORDER
 #endif
 }
@@ -508,13 +508,13 @@ static FOG_INLINE void p32Load3bBSwap(uint32_t& dst0, const void* srcp)
   const uint8_t* src8 = reinterpret_cast<const uint8_t*>(srcp);
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  dst0 = _FOG_FACE_COMBINE_3( (uint32_t)((const uint8_t *)(src8 + 0))[0]      ,
-                              (uint32_t)((const uint8_t *)(src8 + 1))[0] <<  8,
-                              (uint32_t)((const uint8_t *)(src8 + 2))[0] << 16);
+  dst0 = _FOG_FACE_COMBINE_3( static_cast<uint32_t>(((const uint8_t *)(src8 + 0))[0])      ,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 1))[0]) <<  8,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 2))[0]) << 16);
 #else
-  dst0 = _FOG_FACE_COMBINE_3( (uint32_t)((const uint8_t *)(src8 + 0))[0] << 16,
-                              (uint32_t)((const uint8_t *)(src8 + 1))[0] <<  8,
-                              (uint32_t)((const uint8_t *)(src8 + 2))[0]      );
+  dst0 = _FOG_FACE_COMBINE_3( static_cast<uint32_t>(((const uint8_t *)(src8 + 0))[0]) << 16,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 1))[0]) <<  8,
+                              static_cast<uint32_t>(((const uint8_t *)(src8 + 2))[0])      );
 #endif // FOG_BYTE_ORDER
 }
 

@@ -205,210 +205,6 @@ DomObj::DomObj() {}
 DomObj::~DomObj() {}
 
 // ============================================================================
-// [Fog::DomDocumentIdMap - Declaration]
-// ============================================================================
-
-struct FOG_NO_EXPORT DomDocumentIdMap
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  DomDocumentIdMap();
-  ~DomDocumentIdMap();
-
-  // --------------------------------------------------------------------------
-  // [Methods]
-  // --------------------------------------------------------------------------
-
-  void add(DomElement* element);
-  void remove(DomElement* element);
-
-  DomElement* get(const StringW& id) const;
-  DomElement* get(const StubW& id) const;
-
-  // --------------------------------------------------------------------------
-  // [Internal]
-  // --------------------------------------------------------------------------
-
-  void _rehash(size_t capacity);
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! @brief Count of buckets.
-  size_t _capacity;
-  //! @brief Count of nodes.
-  size_t _length;
-
-  //! @brief Count of buckets we will expand to if length exceeds _expandLength.
-  size_t _expandCapacity;
-  //! @brief Count of nodes to grow.
-  size_t _expandLength;
-
-  //! @brief Count of buckeds we will shrink to if length gets _shinkLength.
-  size_t _shrinkCapacity;
-  //! @brief Count of nodes to shrink.
-  size_t _shrinkLength;
-
-  //! @brief Buckets.
-  DomElement** _buckets;
-  //! @brief Initial buckets.
-  DomElement* _bucketsBuffer[13];
-  
-private:
-  _FOG_NO_COPY(DomDocumentIdMap)
-};
-
-// ============================================================================
-// [Fog::DomDocumentIdMap - Construction / Destruction]
-// ============================================================================
-
-DomDocumentIdMap::DomDocumentIdMap() :
-  _capacity(13),
-  _length(0),
-  _expandCapacity(47),
-  _expandLength(13),
-  _shrinkCapacity(0),
-  _shrinkLength(0),
-  _buckets(_bucketsBuffer)
-{
-  MemOps::zero(_bucketsBuffer, sizeof(_bucketsBuffer));
-}
-
-DomDocumentIdMap::~DomDocumentIdMap()
-{
-  if (_buckets != _bucketsBuffer)
-    MemMgr::free(_buckets);
-}
-
-void DomDocumentIdMap::add(DomElement* element)
-{
-  uint32_t hashCode = element->_id._d->hashCode;
-  uint32_t hashMod = hashCode % _capacity;
-
-  DomElement** pPrev = &_buckets[hashMod];
-  DomElement* cur = *pPrev;
-
-  while (cur)
-  {
-    pPrev = &cur->_nextId;
-    cur = *pPrev;
-  }
-
-  *pPrev = element;
-  if (++_length >= _expandLength)
-    _rehash(_expandCapacity);
-}
-
-void DomDocumentIdMap::remove(DomElement* element)
-{
-  uint32_t hashCode = element->_id._d->hashCode;
-  uint32_t hashMod = hashCode % _capacity;
-
-  DomElement** pPrev = &_buckets[hashMod];
-  DomElement* cur = *pPrev;
-
-  while (cur)
-  {
-    if (cur == element)
-    {
-      *pPrev = cur->_nextId;
-      cur->_nextId = NULL;
-
-      if (--_length <= _shrinkLength)
-        _rehash(_shrinkCapacity);
-      return;
-    }
-
-    pPrev = &cur->_nextId;
-    cur = *pPrev;
-  }
-}
-
-DomElement* DomDocumentIdMap::get(const StringW& id) const
-{
-  uint32_t hashCode = id.getHashCode();
-  uint32_t hashMod = hashCode % _capacity;
-
-  DomElement* cur = _buckets[hashMod];
-  while (cur)
-  {
-    if (cur->_id == id)
-      return cur;
-    cur = cur->_nextId;
-  }
-  return NULL;
-}
-
-DomElement* DomDocumentIdMap::get(const StubW& id) const
-{
-  size_t idLength = id.getComputedLength();
-  const CharW* idData = id.getData();
-
-  uint32_t hashCode = HashUtil::hash(StubW(idData, idLength));
-  uint32_t hashMod = hashCode % _capacity;
-
-  DomElement* cur = _buckets[hashMod];
-  while (cur)
-  {
-    const StringDataW* curId = cur->_id._d;
-    if (curId->length == idLength && StringUtil::eq(curId->data, idData, idLength))
-      return cur;
-    cur = cur->_nextId;
-  }
-  return NULL;
-}
-
-void DomDocumentIdMap::_rehash(size_t capacity)
-{
-  DomElement** oldBuckets = _buckets;
-  DomElement** newBuckets = (DomElement**)MemMgr::calloc(capacity * sizeof(DomElement*));
-
-  if (newBuckets == NULL)
-    return;
-
-  size_t i, len = _capacity;
-  for (i = 0; i < len; i++)
-  {
-    DomElement* cur = oldBuckets[i];
-    while (cur)
-    {
-      uint32_t hashMod = cur->_id._d->hashCode % capacity;
-      DomElement* next = cur->_nextId;
-
-      DomElement** newPPrev = &newBuckets[hashMod];
-      DomElement* newCur = *newPPrev;
-
-      while (newCur)
-      {
-        newPPrev = &newCur->_nextId;
-        newCur = *newPPrev;
-      }
-
-      *newPPrev = cur;
-      cur->_nextId = NULL;
-
-      cur = next;
-    }
-  }
-
-  _capacity = capacity;
-
-  _expandCapacity = fog_api.hashhelper_calcExpandCapacity(capacity);
-  _expandLength = (size_t)((ssize_t)_capacity * 0.92);
-
-  _shrinkCapacity = fog_api.hashhelper_calcShrinkCapacity(capacity);
-  _shrinkLength = (size_t)((ssize_t)_shrinkCapacity * 0.70);
-
-  atomicPtrXchg(&_buckets, newBuckets);
-
-  if (oldBuckets != _bucketsBuffer)
-    MemMgr::free(oldBuckets);
-}
-
-// ============================================================================
 // [Fog::DomContainer_ChildNodeList - Declaration]
 // ============================================================================
 
@@ -1945,7 +1741,7 @@ err_t DomElement::setId(const StringW& id)
   // Remove old ID if used.
   if (!_id.isEmpty())
   {
-    static_cast<DomDocumentIdMap*>(getOwnerDocument()->_domIdHash)->remove(this);
+    getOwnerDocument()->_idHash.remove(this);
   }
 
   // This should never fail.
@@ -1958,7 +1754,7 @@ err_t DomElement::setId(const StringW& id)
     // Ensure that the hash code stored in _id is valid, because it's accessed
     // directly without calling getHashCode() again.
     _id.getHashCode();
-    static_cast<DomDocumentIdMap*>(getOwnerDocument()->_domIdHash)->add(this);
+    getOwnerDocument()->_idHash.add(this);
   }
 
   return ERR_OK;
@@ -2341,6 +2137,153 @@ DomDocumentType::~DomDocumentType()
 }
 
 // ============================================================================
+// [Fog::DomDocumentIdHash - Construction / Destruction]
+// ============================================================================
+
+DomDocumentIdHash::DomDocumentIdHash() :
+  _capacity(13),
+  _length(0),
+  _expandCapacity(47),
+  _expandLength(13),
+  _shrinkCapacity(0),
+  _shrinkLength(0),
+  _buckets(_bucketsBuffer)
+{
+  MemOps::zero(_bucketsBuffer, sizeof(_bucketsBuffer));
+}
+
+DomDocumentIdHash::~DomDocumentIdHash()
+{
+  if (_buckets != _bucketsBuffer)
+    MemMgr::free(_buckets);
+}
+
+void DomDocumentIdHash::add(DomElement* element)
+{
+  uint32_t hashCode = element->_id._d->hashCode;
+  uint32_t hashMod = hashCode % _capacity;
+
+  DomElement** pPrev = &_buckets[hashMod];
+  DomElement* cur = *pPrev;
+
+  while (cur)
+  {
+    pPrev = &cur->_nextId;
+    cur = *pPrev;
+  }
+
+  *pPrev = element;
+  if (++_length >= _expandLength)
+    _rehash(_expandCapacity);
+}
+
+void DomDocumentIdHash::remove(DomElement* element)
+{
+  uint32_t hashCode = element->_id._d->hashCode;
+  uint32_t hashMod = hashCode % _capacity;
+
+  DomElement** pPrev = &_buckets[hashMod];
+  DomElement* cur = *pPrev;
+
+  while (cur)
+  {
+    if (cur == element)
+    {
+      *pPrev = cur->_nextId;
+      cur->_nextId = NULL;
+
+      if (--_length <= _shrinkLength)
+        _rehash(_shrinkCapacity);
+      return;
+    }
+
+    pPrev = &cur->_nextId;
+    cur = *pPrev;
+  }
+}
+
+DomElement* DomDocumentIdHash::get(const StringW& id) const
+{
+  uint32_t hashCode = id.getHashCode();
+  uint32_t hashMod = hashCode % _capacity;
+
+  DomElement* cur = _buckets[hashMod];
+  while (cur)
+  {
+    if (cur->_id == id)
+      return cur;
+    cur = cur->_nextId;
+  }
+  return NULL;
+}
+
+DomElement* DomDocumentIdHash::get(const StubW& id) const
+{
+  size_t idLength = id.getComputedLength();
+  const CharW* idData = id.getData();
+
+  uint32_t hashCode = HashUtil::hash(StubW(idData, idLength));
+  uint32_t hashMod = hashCode % _capacity;
+
+  DomElement* cur = _buckets[hashMod];
+  while (cur)
+  {
+    const StringDataW* curId = cur->_id._d;
+    if (curId->length == idLength && StringUtil::eq(curId->data, idData, idLength))
+      return cur;
+    cur = cur->_nextId;
+  }
+  return NULL;
+}
+
+void DomDocumentIdHash::_rehash(size_t capacity)
+{
+  DomElement** oldBuckets = _buckets;
+  DomElement** newBuckets = (DomElement**)MemMgr::calloc(capacity * sizeof(DomElement*));
+
+  if (newBuckets == NULL)
+    return;
+
+  size_t i, len = _capacity;
+  for (i = 0; i < len; i++)
+  {
+    DomElement* cur = oldBuckets[i];
+    while (cur)
+    {
+      uint32_t hashMod = cur->_id._d->hashCode % capacity;
+      DomElement* next = cur->_nextId;
+
+      DomElement** newPPrev = &newBuckets[hashMod];
+      DomElement* newCur = *newPPrev;
+
+      while (newCur)
+      {
+        newPPrev = &newCur->_nextId;
+        newCur = *newPPrev;
+      }
+
+      *newPPrev = cur;
+      cur->_nextId = NULL;
+
+      cur = next;
+    }
+  }
+
+  _capacity = capacity;
+
+  _expandCapacity = fog_api.hashhelper_calcExpandCapacity(capacity);
+  _expandLength = (size_t)((ssize_t)_capacity * 0.92);
+
+  _shrinkCapacity = fog_api.hashhelper_calcShrinkCapacity(capacity);
+  _shrinkLength = (size_t)((ssize_t)_shrinkCapacity * 0.70);
+
+  atomicPtrXchg(&_buckets, newBuckets);
+
+  if (oldBuckets != _bucketsBuffer)
+    MemMgr::free(oldBuckets);
+}
+
+// ============================================================================
 // [Fog::DomDocument - Construction / Destruction]
 // ============================================================================
 
@@ -2393,9 +2336,6 @@ DomDocument::DomDocument() :
   _xmlEncoding(static_cast<const StringW&>(FOG_S(UTF_8))),
   _xmlStandalone(false)
 {
-  // TODO: This can fail, it's better to embed this into DomDocument, but in
-  // that case we need to export DomDocumentIdMap.
-  _domIdHash = static_cast<void*>(fog_new DomDocumentIdMap());
 }
 
 DomDocument::~DomDocument()
@@ -2406,7 +2346,6 @@ DomDocument::~DomDocument()
     DomContainer_removeChildNodes(this);
 
   _gc.collect();
-  fog_delete(static_cast<DomDocumentIdMap*>(_domIdHash));
 }
 
 // ============================================================================
@@ -2571,7 +2510,7 @@ _Fail:
 
 DomElement* DomDocument::getElementById(const StringW& id) const
 {
-  DomElement* element = static_cast<DomDocumentIdMap*>(_domIdHash)->get(id);
+  DomElement* element = _idHash.get(id);
 
   // Not found.
   if (element == NULL)
@@ -2597,7 +2536,7 @@ DomElement* DomDocument::getElementById(const StubW& id) const
   const CharW* idData = id.getData();
   size_t idLength = id.getComputedLength();
 
-  DomElement* element = static_cast<DomDocumentIdMap*>(_domIdHash)->get(StubW(idData, idLength));
+  DomElement* element = _idHash.get(StubW(idData, idLength));
 
   // Not found.
   if (element == NULL)

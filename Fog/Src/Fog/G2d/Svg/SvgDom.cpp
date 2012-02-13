@@ -139,6 +139,38 @@ _Bail:
 // [Fog::SvgDom - Enumerations]
 // ============================================================================
 
+static const PropertyEnum svgEnum_compOp[] =
+{
+  { "src"           , COMPOSITE_SRC         },
+  { "src-over"      , COMPOSITE_SRC_OVER    },
+  { "src-in"        , COMPOSITE_SRC_IN      },
+  { "src-out"       , COMPOSITE_SRC_OUT     },
+  { "src-atop"      , COMPOSITE_SRC_ATOP    },
+  { "dst"           , COMPOSITE_DST         },
+  { "dst-over"      , COMPOSITE_DST_OVER    },
+  { "dst-in"        , COMPOSITE_DST_IN      },
+  { "dst-out"       , COMPOSITE_DST_OUT     },
+  { "dst-atop"      , COMPOSITE_DST_ATOP    },
+  { "xor"           , COMPOSITE_XOR         },
+  { "clear"         , COMPOSITE_CLEAR       },
+  { "plus"          , COMPOSITE_PLUS        },
+  { "minus"         , COMPOSITE_MINUS       }, // Extension.
+  { "multiply"      , COMPOSITE_MULTIPLY    },
+  { "screen"        , COMPOSITE_SCREEN      },
+  { "overlay"       , COMPOSITE_OVERLAY     },
+  { "darken"        , COMPOSITE_DARKEN      },
+  { "lighten"       , COMPOSITE_LIGHTEN     },
+  { "color-dodge"   , COMPOSITE_COLOR_DODGE },
+  { "color-burn"    , COMPOSITE_COLOR_BURN  },
+  { "hard-light"    , COMPOSITE_HARD_LIGHT  },
+  { "soft-light"    , COMPOSITE_SOFT_LIGHT  },
+  { "difference"    , COMPOSITE_DIFFERENCE  },
+  { "exclusion"     , COMPOSITE_EXCLUSION   },
+
+  { "inherit"       , SVG_INHERIT           },
+  { ""              , COMPOSITE_SRC_OVER    }
+};
+
 static const PropertyEnum svgEnum_fillRule[] =
 {
   { "nonzero", FILL_RULE_NON_ZERO },
@@ -274,7 +306,6 @@ SvgElement::~SvgElement()
 
 err_t SvgElement::onPrepare(SvgContext* context, SvgContextGState* state) const
 {
-  // Should be reimplemented.
   return ERR_OK;
 }
 
@@ -370,7 +401,9 @@ SvgStyleData::SvgStyleData() :
   strokeMiterLimitUnit(UNIT_NONE),
   strokeWidthUnit(UNIT_NONE),
   fontSizeUnit(UNIT_NONE),
+  compOp(COMPOSITE_SRC_OVER),
   letterSpacingUnit(UNIT_NONE),
+  wordSpacingUnit(UNIT_NONE),
   unused(0),
   fillColor(0x00000000),
   strokeColor(0x00000000),
@@ -459,6 +492,7 @@ static const uint32_t SvgStyle_nameToIdData[] =
   STR_lighting_color,
   STR_stop_color,
   STR_stop_opacity,
+  STR_comp_op,
   STR_fill,
   STR_fill_opacity,
   STR_fill_rule,
@@ -601,6 +635,13 @@ err_t SvgStyle::_getProperty(size_t index, StringW& value) const
     // ------------------------------------------------------------------------
     // [Color and Painting Properties]
     // ------------------------------------------------------------------------
+
+    case SVG_STYLE_COMP_OP:
+      if (_d.compOp == SVG_INHERIT)
+        value.append(Ascii8("inherit"));
+      else
+        value.append(Ascii8(svgEnum_compOp[_d.compOp].name));
+      break;
 
     case SVG_STYLE_FILL:
       switch (_d.fillSource)
@@ -803,6 +844,11 @@ err_t SvgStyle::_setProperty(size_t index, const StringW& value)
     // [Color and Painting Properties]
     // ------------------------------------------------------------------------
 
+    case SVG_STYLE_COMP_OP:
+      i = svgGetEnum(value, svgEnum_compOp);
+      _d.compOp = i;
+      break;
+
     case SVG_STYLE_FILL:
     {
       _d.fillSource = (uint8_t)SvgUtil::parseColor(_d.fillColor, value);
@@ -922,7 +968,7 @@ err_t SvgStyle::_setProperty(size_t index, const StringW& value)
   if (err == ERR_OK)
     _styleMask |= ((uint64_t)1 << index);
   else
-    _styleMask &= ~((uint64_t)1 << index);
+    _resetProperty(index);
 
   return err;
 }
@@ -931,6 +977,134 @@ err_t SvgStyle::_resetProperty(size_t index)
 {
   if (index >= FOG_ARRAY_SIZE(SvgStyle_nameToIdData))
     return ERR_OBJ_PROPERTY_NOT_FOUND;
+
+  switch (index)
+  {
+    // ------------------------------------------------------------------------
+    // [Font Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_FONT_FAMILY:
+      _d.fontFamily.reset();
+      break;
+
+    case SVG_STYLE_FONT_SIZE:
+      _d.fontSizeValue = 0.0f;
+      _d.fontSizeUnit = UNIT_NONE;
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Text Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_LETTER_SPACING:
+      _d.letterSpacingValue = 0.0f;
+      _d.letterSpacingUnit = UNIT_NONE;
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Other Properties for Visual Media]
+    // ------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------
+    // [Clipping, Masking, and Compositing Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_CLIP_PATH:
+      break;
+
+    case SVG_STYLE_CLIP_RULE:
+      _d.clipRule = FILL_RULE_NON_ZERO;
+      break;
+
+    case SVG_STYLE_MASK:
+      break;
+
+    case SVG_STYLE_OPACITY:
+      _d.opacity = 1.0f;
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Filter Effects Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_ENABLE_BACKGROUND:
+      break;
+
+    case SVG_STYLE_FILTER:
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Gradient Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_STOP_COLOR:
+      _d.stopColor.reset();
+      break;
+
+    case SVG_STYLE_STOP_OPACITY:
+      _d.stopOpacity = 1.0f;
+      break;
+
+    // ------------------------------------------------------------------------
+    // [Color and Painting Properties]
+    // ------------------------------------------------------------------------
+
+    case SVG_STYLE_COMP_OP:
+      _d.compOp = COMPOSITE_SRC_OVER;
+      break;
+
+    case SVG_STYLE_FILL:
+      _d.fillSource = SVG_SOURCE_NONE;
+      _d.fillUri.reset();
+      break;
+
+    case SVG_STYLE_FILL_OPACITY:
+      _d.fillOpacity = 1.0f;
+      break;
+
+    case SVG_STYLE_FILL_RULE:
+      _d.fillRule = FILL_RULE_NON_ZERO;
+      break;
+
+    case SVG_STYLE_STROKE:
+      _d.strokeSource = SVG_SOURCE_NONE;
+      _d.strokeUri.reset();
+      break;
+
+    case SVG_STYLE_STROKE_DASH_ARRAY:
+      break;
+
+    case SVG_STYLE_STROKE_DASH_OFFSET:
+      _d.strokeDashOffsetValue = 0.0f;
+      _d.strokeDashOffsetUnit = UNIT_NONE;
+      break;
+
+    case SVG_STYLE_STROKE_LINE_CAP:
+      _d.strokeLineCap = LINE_CAP_DEFAULT;
+      break;
+
+    case SVG_STYLE_STROKE_LINE_JOIN:
+      _d.strokeLineJoin = LINE_JOIN_DEFAULT;
+      break;
+
+    case SVG_STYLE_STROKE_MITER_LIMIT:
+      _d.strokeMiterLimitValue = 4.0f;
+      _d.strokeMiterLimitUnit = UNIT_NONE;
+      break;
+
+    case SVG_STYLE_STROKE_OPACITY:
+      _d.strokeOpacity = 1.0f;
+      break;
+
+    case SVG_STYLE_STROKE_WIDTH:
+      _d.strokeWidthValue = 1.0f;
+      _d.strokeWidthUnit = UNIT_NONE;
+      break;
+
+    default:
+      break;
+  }
 
   _styleMask &= ~(1 << index);
   return ERR_OK;
@@ -1022,6 +1196,7 @@ FOG_CORE_OBJ_DEF(SvgStylableElement)
   FOG_CORE_OBJ_PROPERTY_REDIRECT(LightingColor   , FOG_S(lighting_color   ), &_style, SVG_STYLE_LIGHTING_COLOR    )
   FOG_CORE_OBJ_PROPERTY_REDIRECT(StopColor       , FOG_S(stop_color       ), &_style, SVG_STYLE_STOP_COLOR        )
   FOG_CORE_OBJ_PROPERTY_REDIRECT(StopOpacity     , FOG_S(stop_opacity     ), &_style, SVG_STYLE_STOP_OPACITY      )
+  FOG_CORE_OBJ_PROPERTY_REDIRECT(CompOp          , FOG_S(comp_op          ), &_style, SVG_STYLE_COMP_OP           )
   FOG_CORE_OBJ_PROPERTY_REDIRECT(Fill            , FOG_S(fill             ), &_style, SVG_STYLE_FILL              )
   FOG_CORE_OBJ_PROPERTY_REDIRECT(FillOpacity     , FOG_S(fill_opacity     ), &_style, SVG_STYLE_FILL_OPACITY      )
   FOG_CORE_OBJ_PROPERTY_REDIRECT(FillRule        , FOG_S(fill_rule        ), &_style, SVG_STYLE_FILL_RULE         )
@@ -1055,11 +1230,21 @@ err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state
   {
     SvgDocument* doc = reinterpret_cast<SvgDocument*>(getOwnerDocument());
 
-    // Setup global parameters.
+    // Comp-op.
+    if (styleMask & (((uint64_t)1 << SVG_STYLE_COMP_OP)))
+    {
+      if (_style._d.compOp != SVG_INHERIT)
+        context->setCompOp(_style._d.compOp);
+    }
+    else
+    {
+      // Non-inheritable value.
+      context->setCompOp(COMPOSITE_SRC_OVER);
+    }
+
+    // Opacity.
     if (styleMask & (((uint64_t)1 << SVG_STYLE_OPACITY)))
     {
-      if (state)
-        state->saveGlobal();
       context->setOpacity(_style._d.opacity);
     }
 
@@ -1207,11 +1392,16 @@ err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state
       }
     }
   }
+  else
+  {
+    // Set compositing operator to src-over (default, non-ihneritable).
+    context->setCompOp(COMPOSITE_SRC_OVER);
+    // Set opacity 1.0 (default, non-ihneritable).
+    context->setOpacity(1.0f);
+  }
 
   return ERR_OK;
 }
-
-
 
 // ============================================================================
 // [Fog::SvgTransformableElement]
@@ -2354,7 +2544,9 @@ SvgSymbolElement::~SvgSymbolElement()
 
 err_t SvgSymbolElement::onProcess(SvgContext* context) const
 {
-  if (!hasChildNodes()) return ERR_OK;
+  if (!hasChildNodes())
+    return ERR_OK;
+
   return _visitContainer(context);
 }
 
@@ -2516,7 +2708,7 @@ err_t SvgUseElement::onPrepare(SvgContext* context, SvgContextGState* state) con
         ref->getBoundingBox(bbox);
 
         
-        // TODO: SVG - SVG<use> width/height support.
+        // TODO: SVG - <use> width/height support.
       }
     }
 

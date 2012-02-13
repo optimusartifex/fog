@@ -111,9 +111,14 @@ struct FOG_API SvgStyleData
   uint32_t strokeMiterLimitUnit : 4;
   uint32_t strokeWidthUnit : 4;
   uint32_t fontSizeUnit : 4;
+
+  uint32_t compOp : 8;
   uint32_t letterSpacingUnit : 4;
 
-  uint32_t unused : 28;
+  // TODO: SVG - Currently unused.
+  uint32_t wordSpacingUnit : 4;
+
+  uint32_t unused : 16;
 
   Argb32 fillColor;
   Argb32 strokeColor;
@@ -271,6 +276,18 @@ struct FOG_API SvgStyle : public DomObj
   // --------------------------------------------------------------------------
   // [Properties - Color and Painting properties]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getCompOp() const
+  {
+    return _d.compOp;
+  }
+  
+  FOG_INLINE err_t setCompOp(uint32_t compOp)
+  {
+    _d.compOp = compOp;
+
+    return ERR_OK;
+  }
 
   FOG_INLINE CoordF getStrokeDashOffset() const
   {
@@ -440,6 +457,7 @@ struct FOG_API SvgStylableElement : public SvgElement
     FOG_PROPERTY_STYLE_LINK(LightingColor, SVG_STYLE_LIGHTING_COLOR)
     FOG_PROPERTY_STYLE_LINK(StopColor, SVG_STYLE_STOP_COLOR)
     FOG_PROPERTY_STYLE_LINK(StopOpacity, SVG_STYLE_STOP_OPACITY)
+    FOG_PROPERTY_STYLE_LINK(CompOp, SVG_STYLE_COMP_OP)
     FOG_PROPERTY_STYLE_LINK(Fill, SVG_STYLE_FILL)
     FOG_PROPERTY_STYLE_LINK(FillOpacity, SVG_STYLE_FILL_OPACITY)
     FOG_PROPERTY_STYLE_LINK(FillRule, SVG_STYLE_FILL_RULE)

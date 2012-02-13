@@ -25,7 +25,9 @@ SvgContext::SvgContext(SvgContextExtension* contextExtension)
   _strokeSource.type = SVG_SOURCE_NONE;
   _fillSource.type = SVG_SOURCE_COLOR;
 
+  _compOp = COMPOSITE_SRC_OVER;
   _fillRule = FILL_RULE_EVEN_ODD;
+  _unused = 0;
   _opacity = 1.0f;
 
   _textCursor.reset();
@@ -103,86 +105,6 @@ SvgContextExtension::~SvgContextExtension()
 }
 
 // ============================================================================
-// [Fog::SvgRenderContext - Helpers]
-// ============================================================================
-
-static FOG_INLINE bool SvgRenderContext_setupFill(SvgRenderContext* visitor, SvgElement* obj)
-{
-  Painter* p = visitor->_painter;
-
-  switch (visitor->_fillSource.type)
-  {
-    case SVG_SOURCE_NONE:
-    case SVG_SOURCE_INVALID:
-    {
-      break;
-    }
-
-    case SVG_SOURCE_COLOR:
-    {
-      p->setSource(visitor->_fillSource.color);
-      goto _FillUsed;
-    }
-
-    case SVG_SOURCE_URI:
-    {
-      Pattern pattern;
-      visitor->_fillSource.uriRef->onPattern(visitor, obj, &pattern);
-      p->setSource(pattern);
-      goto _FillUsed;
-    }
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-  return false;
-
-_FillUsed:
-  p->setOpacity(visitor->_fillSource.opacity * visitor->_opacity);
-  p->setFillRule(visitor->_fillRule);
-  return true;
-}
-
-static FOG_INLINE bool SvgRenderContext_setupStroke(SvgRenderContext* visitor, SvgElement* obj)
-{
-  Painter* p = visitor->_painter;
-
-  switch (visitor->_strokeSource.type)
-  {
-    case SVG_SOURCE_NONE:
-    case SVG_SOURCE_INVALID:
-    {
-      break;
-    }
-
-    case SVG_SOURCE_COLOR:
-    {
-      p->setSource(visitor->_strokeSource.color);
-      goto _StrokeUsed;
-    }
-
-    case SVG_SOURCE_URI:
-    {
-      Pattern pattern;
-
-      visitor->_strokeSource.uriRef->onPattern(visitor, obj, &pattern);
-      p->setSource(pattern);
-      goto _StrokeUsed;
-    }
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
-  }
-
-  return false;
-
-_StrokeUsed:
-  p->setOpacity(visitor->_strokeSource.opacity * visitor->_opacity);
-  p->setStrokeParams(visitor->_strokeParams);
-  return true;
-}
-
-// ============================================================================
 // [Fog::SvgRenderContext - Construction / Destruction]
 // ============================================================================
 
@@ -212,29 +134,140 @@ void SvgRenderContext::initPainter()
 // [Fog::SvgRenderContext - Interface]
 // ============================================================================
 
+static FOG_INLINE bool SvgRenderContext_canPaint(uint32_t sourceType)
+{
+  return sourceType != SVG_SOURCE_NONE && sourceType != SVG_SOURCE_INVALID;
+}
+
+static FOG_INLINE void SvgRenderContext_setupFill(SvgRenderContext* context, SvgElement* obj)
+{
+  Painter* p = context->_painter;
+
+  switch (context->_fillSource.type)
+  {
+    case SVG_SOURCE_COLOR:
+      p->setSource(context->_fillSource.color);
+      break;
+
+    case SVG_SOURCE_URI:
+      context->_fillSource.uriRef->onPattern(context, obj, &context->_patternTmp);
+      p->setSource(context->_patternTmp);
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  context->_painter->setFillRule(context->_fillRule);
+}
+
+static FOG_INLINE void SvgRenderContext_setupStroke(SvgRenderContext* context, SvgElement* obj)
+{
+  Painter* p = context->_painter;
+  switch (context->_strokeSource.type)
+  {
+    case SVG_SOURCE_COLOR:
+      p->setSource(context->_strokeSource.color);
+      break;
+
+    case SVG_SOURCE_URI:
+      context->_strokeSource.uriRef->onPattern(context, obj, &context->_patternTmp);
+      p->setSource(context->_patternTmp);
+      break;
+
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+
+  context->_painter->setStrokeParams(context->_strokeParams);
+}
+
 err_t SvgRenderContext::onShape(SvgElement* obj, const ShapeF& shape)
 {
-  _painter->save();
-  _painter->transform(_transform);
+  bool canFill   = shape.isClosed() && 
+                   SvgRenderContext_canPaint(_fillSource.type);
+  bool canStroke = SvgRenderContext_canPaint(_strokeSource.type);
 
-  if (shape.isClosed() && SvgRenderContext_setupFill(this, obj))
-    _painter->fillShape(shape);
+  if (canFill | canStroke)
+  {
+    // ------------------------------------------------------------------------
+    // [Save]
+    // ------------------------------------------------------------------------
 
-  if (SvgRenderContext_setupStroke(this, obj))
-    _painter->drawShape(shape);
+    _painter->save();
+    _painter->transform(_transform);
 
-  _painter->restore();
+    // TODO: SVG - This is not completed, we need to create new group if opacity
+    // is not 1.0 and if compositing operator is not SRC_OVER and we need to 
+    // fill and stroke. This should be completely rewritten after groups will
+    // be supported in Painter, because we can optimize them better there than
+    // here.
+
+    if (canFill != canStroke)
+    {
+      // ----------------------------------------------------------------------
+      // [Fill Or Stroke]
+      // ----------------------------------------------------------------------
+
+      _painter->setCompositingOperator(_compOp);
+
+      if (canFill)
+      {
+        SvgRenderContext_setupFill(this, obj);
+        _painter->setOpacity(_fillSource.opacity * _opacity);
+        _painter->fillShape(shape);
+      }
+      
+      if (canStroke)
+      {
+        SvgRenderContext_setupStroke(this, obj);
+        _painter->setOpacity(_strokeSource.opacity * _opacity);
+        _painter->drawShape(shape);
+      }
+    }
+    else
+    {
+      // ----------------------------------------------------------------------
+      // [Fill And Stroke]
+      // ----------------------------------------------------------------------
+
+      _painter->setCompositingOperator(COMPOSITE_SRC_OVER);
+
+      if (canFill)
+      {
+        SvgRenderContext_setupFill(this, obj);
+        _painter->setOpacity(_fillSource.opacity * _opacity);
+        _painter->fillShape(shape);
+      }
+      
+      if (canStroke)
+      {
+        SvgRenderContext_setupStroke(this, obj);
+        _painter->setOpacity(_strokeSource.opacity * _opacity);
+        _painter->drawShape(shape);
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // [Restore]
+    // ------------------------------------------------------------------------
+
+    _painter->restore();
+  }
+
   return ERR_OK;
 }
 
 err_t SvgRenderContext::onImage(SvgElement* obj, const PointF& pt, const Image& image)
 {
+  if (image.isEmpty())
+    return ERR_OK;
+
   _painter->save();
   _painter->transform(_transform);
-
   _painter->blitImage(pt, image);
-
   _painter->restore();
+
   return ERR_OK;
 }
 

@@ -885,10 +885,10 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_EXT_PLUS];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositePlus::prgb32_cblit_prgb32_line);
-    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ]);
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositePlus::prgb32_cblit_prgb32_line);
 
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositePlus::prgb32_cblit_prgb32_span);
-    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositePlus::prgb32_cblit_prgb32_span);
 
     FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_PRGB32], RasterOps_C::CompositePlus::prgb32_vblit_prgb32_line);
     FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_PRGB32_AND_XRGB32], RasterOps_C::CompositePlus::prgb32_vblit_xrgb32_line);
@@ -909,10 +909,10 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     RasterCompositeExtFuncs& funcs = api.compositeExt[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_EXT_PLUS];
 
     FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositePlus::xrgb32_cblit_prgb32_line);
-    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB             ]);
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositePlus::xrgb32_cblit_prgb32_line);
 
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB             ], RasterOps_C::CompositePlus::xrgb32_cblit_prgb32_span);
-    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB             ]);
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_XRGB             ], RasterOps_C::CompositePlus::xrgb32_cblit_prgb32_span);
 
     FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_XRGB32_AND_PRGB32], RasterOps_C::CompositePlus::xrgb32_vblit_prgb32_line);
     FOG_RASTER_INIT(vblit_line[RASTER_VBLIT_XRGB32_AND_XRGB32], RasterOps_C::CompositePlus::xrgb32_vblit_xrgb32_line);

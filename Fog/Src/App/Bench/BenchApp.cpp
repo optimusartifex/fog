@@ -338,7 +338,7 @@ void BenchApp::logInfo()
     yesno[Fog::Cpu::get()->hasFeature(Fog::CPU_FEATURE_MMX_EXT)],
     yesno[Fog::Cpu::get()->hasFeature(Fog::CPU_FEATURE_3DNOW)],
     yesno[Fog::Cpu::get()->hasFeature(Fog::CPU_FEATURE_3DNOW_EXT)]);
-  logf("Features2: SSE=%s, SSE2=%s, SSE3=%s, SSSE3=%s SSE4.1=%s, SSE4.2=%s \n",
+  logf("Features2: SSE=%s, SSE2=%s, SSE3=%s, SSSE3=%s SSE4.1=%s, SSE4.2=%s\n",
     yesno[Fog::Cpu::get()->hasFeature(Fog::CPU_FEATURE_SSE)],
     yesno[Fog::Cpu::get()->hasFeature(Fog::CPU_FEATURE_SSE2)],
     yesno[Fog::Cpu::get()->hasFeature(Fog::CPU_FEATURE_SSE3)],

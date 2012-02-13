@@ -1812,7 +1812,7 @@ _C_Mask_Unbound_MskIn_Skip:
 
           SrcF::p32LoadPixelA8(src0p_a8, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
-            goto _C_Mask_Unbound_MskIn_Skip;
+            goto _C_Mask_Unbound_Skip;
 
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
@@ -1843,7 +1843,7 @@ _C_Mask_Unbound_Skip:
 
           SrcF::p32LoadPixelA8(src0p_a8, src);
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
-            goto _C_Mask_Unbound_MskIn_Skip;
+            goto _C_Mask_Skip;
 
           Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           Face::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);

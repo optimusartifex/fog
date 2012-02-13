@@ -350,7 +350,7 @@ If(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_
   #
   # Use link-time optimization.
 
-  # TODO: Disabled, not working properly!
+  # TODO: CMake - Disabled, not working properly!
   # If (${FOG_CC_HAS_FLTO})
   #   Set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
   # EndIf()
@@ -1673,7 +1673,7 @@ Configure_File(${CMAKE_CURRENT_LIST_DIR}/Src/Fog/Core/C++/ConfigCMake.h.cmake
 # [Setup - Fix]
 # =============================================================================
 
-# TODO: Quick hack, do not open freetype dynamically, we can link to it.
+# TODO: CMake - Quick hack, do not open freetype dynamically, we can link to it.
 If(FOG_FONT_FREETYPE)
   Include_Directories(/usr/include/freetype2)
 EndIf()

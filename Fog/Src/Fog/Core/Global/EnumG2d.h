@@ -2798,6 +2798,11 @@ enum SVG_STYLE
   SVG_STYLE_STOP_OPACITY,
 
   //! @note Part of SVG - Color and Painting properties.
+  //!
+  //! @note Introduced in SVG 1.2 specification.
+  SVG_STYLE_COMP_OP,
+
+  //! @note Part of SVG - Color and Painting properties.
   SVG_STYLE_FILL,
   //! @note Part of SVG - Color and Painting properties.
   SVG_STYLE_FILL_OPACITY,
@@ -2848,6 +2853,9 @@ enum SVG_SOURCE
   SVG_SOURCE_COLOR = 1,
   SVG_SOURCE_URI = 2,
 
+  // TODO: SVG - currentColor
+  // SVG_SOURCE_CURRENT_COLOR = 3,
+
   SVG_SOURCE_INVALID
 };
 
@@ -2889,6 +2897,16 @@ enum SVG_CONTEXT
   SVG_CONTEXT_MEASURE = 2,
   //! @brief SVG context is @ref SvgHitTestContext.
   SVG_CONTEXT_HIT_TEST = 3
+};
+
+// ============================================================================
+// [Fog::SVG_MISC]
+// ============================================================================
+
+enum SVG_MISC
+{
+  //! @brief Inherit.
+  SVG_INHERIT = 0xFF
 };
 
 // ============================================================================

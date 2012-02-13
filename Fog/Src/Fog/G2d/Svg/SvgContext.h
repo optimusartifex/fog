@@ -156,7 +156,10 @@ struct FOG_API SvgContext
   // [Global Parameters]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE float getOpacity() { return _opacity; }
+  FOG_INLINE uint32_t getCompOp() const { return _compOp; }
+  FOG_INLINE void setCompOp(uint32_t compOp) { _compOp = compOp; }
+
+  FOG_INLINE float getOpacity() const { return _opacity; }
   FOG_INLINE void setOpacity(float opacity) { _opacity = opacity; }
 
   // --------------------------------------------------------------------------
@@ -284,7 +287,9 @@ struct FOG_API SvgContext
   SvgContextSource _strokeSource;
 
   PathStrokerParamsF _strokeParams;
-  uint32_t _fillRule;
+  uint32_t _compOp : 8;
+  uint32_t _fillRule : 8;
+  uint32_t _unused : 16;
   float _opacity;
 
   PointF _textCursor;
@@ -321,11 +326,14 @@ struct FOG_NO_EXPORT SvgContextGState
     _context(context),
     _flags(NO_FLAGS)
   {
+    _compOp = _context->_compOp;
+    _opacity = _context->_opacity;
   }
 
   FOG_INLINE ~SvgContextGState()
   {
     uint32_t flags = _flags;
+
     if (flags != NO_FLAGS)
     {
       if (flags & SAVED_GLOBAL   ) restoreGlobal();
@@ -334,6 +342,9 @@ struct FOG_NO_EXPORT SvgContextGState
       if (flags & SAVED_FILL     ) restoreFill();
       if (flags & SAVED_STROKE   ) restoreStroke();
     }
+    
+    _context->_compOp = _compOp;
+    _context->_opacity = _opacity;
   }
 
   // --------------------------------------------------------------------------
@@ -366,14 +377,12 @@ struct FOG_NO_EXPORT SvgContextGState
 
   FOG_INLINE void saveGlobal()
   {
-    _opacity = _context->getOpacity();
     _cursor = _context->_textCursor;
     _flags |= SAVED_GLOBAL;
   }
 
   FOG_INLINE void restoreGlobal()
   {
-    _context->_opacity = _opacity;
     _context->_textCursor = _cursor;
   }
 
@@ -439,7 +448,9 @@ struct FOG_NO_EXPORT SvgContextGState
   SvgContext* _context;
 
   uint32_t _flags;
-  uint32_t _fillRule;
+  uint32_t _fillRule : 8;
+  uint32_t _compOp : 8;
+  uint32_t _unused : 16;
 
   Static<TransformF> _transform;
 
@@ -516,6 +527,7 @@ struct FOG_API SvgRenderContext : public SvgContext
   // --------------------------------------------------------------------------
 
   Painter* _painter;
+  Pattern _patternTmp;
 
 private:
   _FOG_NO_COPY(SvgRenderContext)

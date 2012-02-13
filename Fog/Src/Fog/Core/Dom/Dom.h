@@ -760,6 +760,63 @@ struct FOG_API DomDocumentType : public DomNode
 };
 
 // ============================================================================
+// [Fog::DomDocumentIdHash]
+// ============================================================================
+
+struct FOG_API DomDocumentIdHash
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  DomDocumentIdHash();
+  ~DomDocumentIdHash();
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  void add(DomElement* element);
+  void remove(DomElement* element);
+
+  DomElement* get(const StringW& id) const;
+  DomElement* get(const StubW& id) const;
+
+  // --------------------------------------------------------------------------
+  // [Internal]
+  // --------------------------------------------------------------------------
+
+  void _rehash(size_t capacity);
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Count of buckets.
+  size_t _capacity;
+  //! @brief Count of elements.
+  size_t _length;
+
+  //! @brief Count of buckets we will expand to if length exceeds _expandLength.
+  size_t _expandCapacity;
+  //! @brief Count of elements to grow.
+  size_t _expandLength;
+
+  //! @brief Count of buckets we will shrink to if length gets _shinkLength.
+  size_t _shrinkCapacity;
+  //! @brief Count of elements to shrink.
+  size_t _shrinkLength;
+
+  //! @brief Buckets.
+  DomElement** _buckets;
+  //! @brief Initial buckets.
+  DomElement* _bucketsBuffer[13];
+  
+private:
+  _FOG_NO_COPY(DomDocumentIdHash)
+};
+
+// ============================================================================
 // [Fog::DomDocument]
 // ============================================================================
 
@@ -929,19 +986,17 @@ struct FOG_API DomDocument : public DomContainer
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Element<->ID table.
+  DomDocumentIdHash _idHash;
+  //! @brief Memory allocator and garbage collector.
+  MemGCAllocator _gc;
+  //! @brief Resource manager.
+  DomResourceManager _resourceManager;
+
   //! @brief Document type.
   DomDocumentType* _documentType;
   //! @brief Document element (root).
   DomElement* _documentElement;
-
-  //! @brief Resource manager.
-  DomResourceManager _resourceManager;
-
-  //! @brief Memory allocator and garbage collector.
-  MemGCAllocator _gc;
-
-  //! @brief Element<->ID table.
-  void* _domIdHash;
 
   //! @brief Document URI.
   StringW _documentURI;

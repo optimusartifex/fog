@@ -188,6 +188,9 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   {
     RasterCompositeExtFuncs& fClear = api.compositeExt[i][RASTER_COMPOSITE_EXT_CLEAR];
 
+    fClear.cblit_line[RASTER_CBLIT_XRGB] = fClear.cblit_line[RASTER_CBLIT_PRGB];
+    fClear.cblit_span[RASTER_CBLIT_XRGB] = fClear.cblit_span[RASTER_CBLIT_PRGB];
+
     for (j = 1; j < RASTER_VBLIT_INVALID; j++)
     {
       fClear.vblit_line[j] = fClear.vblit_line[0];

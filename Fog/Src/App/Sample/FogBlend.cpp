@@ -47,8 +47,8 @@ AppWindow::AppWindow(UIEngine* engine, uint32_t hints) :
   background.fillRect(RectI( 0, 20, 20, 20), Argb32(0xFFCFCFCF));
   background.fillRect(RectI(20, 20, 20, 20), Argb32(0xFFFFFFFF));
 
-  sprite[0].readFromBuffer(_resource_ktip_png   , FOG_ARRAY_SIZE(_resource_ktip_png   ));
-  sprite[1].readFromBuffer(_resource_ksplash_png, FOG_ARRAY_SIZE(_resource_ksplash_png));
+  sprite[0].readFromBuffer(_resource_babelfish_png, FOG_ARRAY_SIZE(_resource_babelfish_png));
+  sprite[1].readFromBuffer(_resource_firewall_png, FOG_ARRAY_SIZE(_resource_firewall_png));
 }
 
 AppWindow::~AppWindow()

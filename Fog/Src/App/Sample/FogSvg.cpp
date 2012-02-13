@@ -130,7 +130,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/my/svg/Map_Multilayer_Scaled.svg");
     //fileName = Ascii8("C:/my/svg/froggy.svg");
     //fileName = Ascii8("C:/my/svg/fire_engine.svg");
-    fileName = Ascii8("C:/my/svg/tommek_Car.svg");
+    //fileName = Ascii8("C:/my/svg/tommek_Car.svg");
     //fileName = Ascii8("C:/my/svg/TestFOGFeatures.svg");
     //fileName = Ascii8("C:/My/svg/linear3.svg");
     //fileName = Ascii8("C:/my/svg/ISO_12233-reschart.svg");
@@ -159,6 +159,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/svg-cards.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tommek_Car.svg");
+    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/GroupTest.svg");
   }
 
 /*

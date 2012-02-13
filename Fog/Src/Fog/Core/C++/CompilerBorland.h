@@ -88,9 +88,9 @@
 // [Fog::Core::C++ - Borland/CodeGear - Native Types]
 // ============================================================================
 
-// TODO: Borland support: Is char native type?
+// TODO: Borland Compiler - Is char native type?
 #define FOG_CC_HAS_NATIVE_CHAR_TYPE
-// TODO: Borland support: Is wchar_t native type?
+// TODO: Borland Compiler - Is wchar_t native type?
 #define FOG_CC_HAS_NATIVE_WCHAR_TYPE
 
 // ============================================================================
@@ -127,7 +127,7 @@
 //   http://docs.codegear.com/products/rad_studio/delphiAndcpp2009/HelpUpdate2/EN/html/devcommon/whatsnewtiburon_xml.html
 
 // Features setup.
-// TODO: Has Borland compiler partial template specialization, which version?
+// TODO: Borland Compiler - Has BCC partial template specialization, which version?
 
 #if FOG_CC_BORLAND >= 0x0610
 # define FOG_CC_HAS_DECLTYPE

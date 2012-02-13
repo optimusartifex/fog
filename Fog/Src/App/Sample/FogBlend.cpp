@@ -2,6 +2,8 @@
 #include <Fog/G2d.h>
 #include <Fog/UI.h>
 
+#include "Resources.h"
+
 using namespace Fog;
 
 // ============================================================================
@@ -45,8 +47,8 @@ AppWindow::AppWindow(UIEngine* engine, uint32_t hints) :
   background.fillRect(RectI( 0, 20, 20, 20), Argb32(0xFFCFCFCF));
   background.fillRect(RectI(20, 20, 20, 20), Argb32(0xFFFFFFFF));
 
-  sprite[0].readFromFile(StringW::fromAscii8("/Users/petr/Workspace/Files/PNG/msn.png"));
-  sprite[1].readFromFile(StringW::fromAscii8("/Users/petr/Workspace/Files/PNG/kopete.png"));
+  sprite[0].readFromBuffer(_resource_ktip_png   , FOG_ARRAY_SIZE(_resource_ktip_png   ));
+  sprite[1].readFromBuffer(_resource_ksplash_png, FOG_ARRAY_SIZE(_resource_ksplash_png));
 }
 
 AppWindow::~AppWindow()

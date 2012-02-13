@@ -1793,13 +1793,15 @@ EndIf()
 If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
     Set(FOG_SAMPLE_SOURCES
-      FogSvgView
-      FogTestApp
-      FogTestBlend
+      FogBlend
+      FogTest
+      FogSvg
     )
 
     ForEach(file ${FOG_SAMPLE_SOURCES})
-      Add_Executable(${file} WIN32 MACOSX_BUNDLE Src/App/Sample/${file}.cpp)
+      Add_Executable(${file} WIN32 MACOSX_BUNDLE
+        Src/App/Sample/${file}.cpp
+        Src/App/Sample/Resources.h)
       Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
     EndForEach(file)
 

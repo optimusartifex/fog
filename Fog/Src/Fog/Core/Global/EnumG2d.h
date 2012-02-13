@@ -266,8 +266,8 @@ enum COLOR_MIX_OP
 {
   COLOR_MIX_OP_NONE = 0,
   COLOR_MIX_OP_BLEND = 1,
-  COLOR_MIX_OP_ADD = 2,
-  COLOR_MIX_OP_SUBTRACT = 3,
+  COLOR_MIX_OP_PLUS = 2,
+  COLOR_MIX_OP_MINUS = 3,
   COLOR_MIX_OP_MULTIPLY = 4,
   COLOR_MIX_OP_DIVIDE = 5,
   COLOR_MIX_OP_SCREEN = 6,
@@ -427,24 +427,24 @@ enum COMPOSITE_OP
   //! @brief The source is added to the destination and replaces the destination.
   //!
   //! @verbatim
-  //! Formulas for PRGB(dst), PRGB(src) colorspaces (ADD):
+  //! Formulas for PRGB(dst), PRGB(src) colorspaces (PLUS):
   //!   Dca' = Sca.Da + Dca.Sa + Sca.(1 - Da) + Dca.(1 - Sa)
   //!        = Dca + Sca
   //!   Da'  = Sa.Da + Da.Sa + Sa.(1 - Da) + Da.(1 - Sa)
   //!        = Da + Sa
   //! @endverbatim
-  COMPOSITE_ADD = 12,
+  COMPOSITE_PLUS = 12,
 
   //! @brief The source is subtracted from the destination and replaces
   //! the destination.
   //!
   //! @verbatim
-  //! Formulas for PRGB(dst), PRGB(src) colorspaces (SUBTRACT):
+  //! Formulas for PRGB(dst), PRGB(src) colorspaces (MINUS):
   //!   Dca' = Dca - Sca
   //!   Da'  = 1 - (1 - Sa).(1 - Da)
   //!        = Sa + Da - Sa.Da
   //! @endverbatim
-  COMPOSITE_SUBTRACT = 13,
+  COMPOSITE_MINUS = 13,
 
   //! @brief The source is multiplied by the destination and replaces
   //! the destination.

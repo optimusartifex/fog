@@ -4187,12 +4187,12 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
 };
 
 // ============================================================================
-// [Fog::RasterOps_C - CompositeAdd]
+// [Fog::RasterOps_C - CompositePlus]
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
-  CompositeAdd, RASTER_COMBINE_OP_ADD, RASTER_PRGB_PREPARE_FRGB>
+struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
+  CompositePlus, RASTER_COMBINE_OP_PLUS, RASTER_PRGB_PREPARE_FRGB>
 {
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
@@ -4295,12 +4295,12 @@ struct FOG_NO_EXPORT CompositeAdd : public CompositeExtPrgbVsPrgb<
 };
 
 // ============================================================================
-// [Fog::RasterOps_C - CompositeSubtract]
+// [Fog::RasterOps_C - CompositeMinus]
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT CompositeSubtract : public CompositeExtPrgbVsPrgb<
-  CompositeSubtract, RASTER_COMBINE_OP_SUBTRACT, RASTER_PRGB_PREPARE_NONE>
+struct FOG_NO_EXPORT CompositeMinus : public CompositeExtPrgbVsPrgb<
+  CompositeMinus, RASTER_COMBINE_OP_MINUS, RASTER_PRGB_PREPARE_NONE>
 {
   // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]

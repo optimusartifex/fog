@@ -115,7 +115,7 @@ void AppWindow::onPaint(Painter* _p)
   lg.addStop(0.0f, Argb32(0x00000000));
   lg.addStop(1.0f, Argb32(0xFF0000FF));
   p.setSource(lg);
-//  p.setCompositingOperator(COMPOSITE_ADD);
+//  p.setCompositingOperator(COMPOSITE_PLUS);
   p.fillCircle(CircleF(200.0f, 200.0f, 100.0f));
   
   lg.setStart(150.0f, 150.0f);
@@ -124,7 +124,7 @@ void AppWindow::onPaint(Painter* _p)
   lg.addStop(0.0f, Argb32(0x00000000));
   lg.addStop(1.0f, Argb32(0xFFFF0000));
   p.setSource(lg);
-//  p.setCompositingOperator(COMPOSITE_ADD);
+//  p.setCompositingOperator(COMPOSITE_PLUS);
   p.fillCircle(CircleF(250.0f, 250.0f, 100.0f));
 
   lg.setStart(200.0f, 200.0f);
@@ -143,7 +143,7 @@ void AppWindow::onPaint(Painter* _p)
   lg.addStop(0.0f, Argb32(0xFF000000));
   lg.addStop(1.0f, Argb32(0xFF0000FF));
   p.setSource(lg);
-  p.setCompositingOperator(COMPOSITE_ADD);
+  p.setCompositingOperator(COMPOSITE_PLUS);
   p.fillRect(RectI(100, 100, 200, 200));
   
   lg.setStart(100.0f, 100.0f);
@@ -152,7 +152,7 @@ void AppWindow::onPaint(Painter* _p)
   lg.addStop(0.0f, Argb32(0xFF000000));
   lg.addStop(1.0f, Argb32(0xFFFF0000));
   p.setSource(lg);
-  p.setCompositingOperator(COMPOSITE_ADD);
+  p.setCompositingOperator(COMPOSITE_PLUS);
   p.fillRect(RectI(150, 150, 200, 200));
 
   lg.setStart(100.0f, 100.0f);

@@ -300,6 +300,15 @@ struct RectangularGradientF;
 struct RectangularGradientD;
 struct Texture;
 
+// These are not different types, but we like to mark whether the
+// color is premultiplied or not in the API, it's more clear.
+typedef Argb32 Prgb32;
+typedef ArgbBase32 Prgb32Base;
+typedef Argb64 Prgb64;
+typedef ArgbBase64 PrgbBase64;
+typedef ArgbF PrgbF;
+typedef ArgbBaseF PrgbBaseF;
+
 // Fog/G2d/Svg.
 struct SvgAElement;
 struct SvgCircleElement;
@@ -421,8 +430,11 @@ typedef EventLoopImpl* (*EventLoopConstructor)();
 // [TypeDefs - Functions - Fog/G2d]
 // ============================================================================
 
-typedef void (FOG_CDECL* FeCompositingFunctionFloatFunc)(
-  ArgbF* dst, const ArgbF* a, const ArgbF* b, FeCompositingFunctionData* data);
+typedef void (FOG_CDECL* FeCompositingFunctionPrgb32Func)(
+  const FeCompositingFunctionData* self, Prgb32* dst, const Prgb32* a, const Prgb32* b, size_t length);
+
+typedef void (FOG_CDECL* FeCompositingFunctionPrgb64Func)(
+  const FeCompositingFunctionData* self, Prgb64* dst, const Prgb64* a, const Prgb64* b, size_t length);
 
 typedef err_t (FOG_CDECL *CSSStyleHandlerFunc)(
   void* ctx, const StringW* name, const StringW* value);

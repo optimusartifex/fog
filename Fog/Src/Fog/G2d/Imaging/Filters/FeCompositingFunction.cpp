@@ -10,6 +10,7 @@
 
 // [Dependencies]
 #include <Fog/G2d/Imaging/Filters/FeCompositingFunction.h>
+#include <Fog/G2d/Source/Argb.h>
 
 namespace Fog {
 
@@ -39,7 +40,7 @@ FeCompositingFunctionData* FeCompositingFunctionData::addRef() const
 void FeCompositingFunctionData::release()
 {
   if (reference.deref())
-    delete this;
+    fog_delete(this);
 }
 
 // ============================================================================
@@ -56,16 +57,24 @@ struct FOG_NO_EXPORT FeCompositingFunctionNull : public FeCompositingFunctionDat
   virtual ~FeCompositingFunctionNull();
 
   // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  virtual FeCompositingFunctionData* addRef() const override;
+  virtual void release() override;
+
+  // --------------------------------------------------------------------------
   // [Clone]
   // --------------------------------------------------------------------------
 
-  virtual FeCompositingFunctionData* clone() const;
+  virtual FeCompositingFunctionData* clone() const override;
 
   // --------------------------------------------------------------------------
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual FeCompositingFunctionFloatFunc* getFloatFunc() const;
+  virtual FeCompositingFunctionPrgb32Func getPrgb32Func() const override;
+  virtual FeCompositingFunctionPrgb64Func getPrgb64Func() const override;
 };
 
 // ============================================================================
@@ -76,21 +85,53 @@ FeCompositingFunctionNull::FeCompositingFunctionNull() {}
 FeCompositingFunctionNull::~FeCompositingFunctionNull() {}
 
 // ============================================================================
+// [Fog::FeCompositingFunctionNull - AddRef / Release]
+// ============================================================================
+
+FeCompositingFunctionData* FeCompositingFunctionNull::addRef() const
+{
+  return const_cast<FeCompositingFunctionNull*>(this);
+}
+
+void FeCompositingFunctionNull::release()
+{
+}
+
+// ============================================================================
 // [Fog::FeCompositingFunctionNull - Clone]
 // ============================================================================
 
 FeCompositingFunctionData* FeCompositingFunctionNull::clone() const
 {
-  return addRef();
+  return const_cast<FeCompositingFunctionNull*>(this);
 }
 
 // ============================================================================
 // [Fog::FeCompositingFunctionNull - Interface]
 // ============================================================================
 
-FeCompositingFunctionFloatFunc* FeCompositingFunctionNull::getFloatFunc() const
+static void FOG_CDECL FeCompositingFunctionNull_prgb32(
+  const FeCompositingFunctionData* self, Prgb32* dst, const Prgb32* a, const Prgb32* b, size_t length)
 {
-  return NULL;
+  if (dst != a)
+    MemOps::copy(dst, a, length * sizeof(Prgb32));
+}
+
+static void FOG_CDECL FeCompositingFunctionNull_prgb64(
+  const FeCompositingFunctionData* self, Prgb64* dst, const Prgb64* a, const Prgb64* b, size_t length)
+{
+  if (dst != a)
+    MemOps::copy(dst, a, length * sizeof(Prgb64));
+}
+
+FeCompositingFunctionPrgb32Func FeCompositingFunctionNull::getPrgb32Func() const
+{
+  return FeCompositingFunctionNull_prgb32;
+}
+
+FeCompositingFunctionPrgb64Func FeCompositingFunctionNull::getPrgb64Func() const
+{
+  return FeCompositingFunctionNull_prgb64;
 }
 
 static Static<FeCompositingFunctionNull> FeCompositingFunctionNull_oInstance;

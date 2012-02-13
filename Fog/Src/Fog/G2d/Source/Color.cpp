@@ -586,8 +586,8 @@ static err_t FOG_CDECL Color_setData(Color* self, uint32_t modelExtended, const 
 struct FOG_NO_EXPORT ColorMix_C
 {
   static FOG_INLINE float blend     (float S0, float S1, float M, float MI) { return (S1 - S0)*M; }
-  static FOG_INLINE float add       (float S0, float S1, float M, float MI) { return S0 + S1*M; }
-  static FOG_INLINE float subtract  (float S0, float S1, float M, float MI) { return S0 - S1*M; }
+  static FOG_INLINE float plus      (float S0, float S1, float M, float MI) { return S0 + S1*M; }
+  static FOG_INLINE float minus     (float S0, float S1, float M, float MI) { return S0 - S1*M; }
   static FOG_INLINE float multiply  (float S0, float S1, float M, float MI) { return (S0 * (MI + S1*M)); }
   static FOG_INLINE float divide    (float S0, float S1, float M, float MI) { return Math::isFuzzyZero(S1) ? S0 : S0*MI + S0*M / S1; }
   static FOG_INLINE float screen    (float S0, float S1, float M, float MI) { return 1.0f - (MI + (1.0f - S1)*M) * (1.0f - S0); }
@@ -595,7 +595,7 @@ struct FOG_NO_EXPORT ColorMix_C
   static FOG_INLINE float darken    (float S0, float S1, float M, float MI) { return Math::min(S0, S1*M); }
   static FOG_INLINE float lighten   (float S0, float S1, float M, float MI) { return Math::max(S0, S1*M); }
   static FOG_INLINE float dodge     (float S0, float S1, float M, float MI) { float D = S1*M     ; return (D <= 0.0f) ? 1.0f : Math::min(S0 / D, 1.0f); }
-  static FOG_INLINE float burn      (float S0, float S1, float M, float MI) { float D = S1*M + MI; return (D <= 0.0f) ? 0.0f : Math::bound(D, 0.0f, 1.0f); }
+  static FOG_INLINE float burn      (float S0, float S1, float M, float MI) { float D = S1*M + MI; return (D <= 0.0f) ? 0.0f : Math::min(D, 1.0f); }
   static FOG_INLINE float difference(float S0, float S1, float M, float MI) { return MI * S0 + Math::abs(S0 - S1)*M; }
 };
 
@@ -640,8 +640,8 @@ static err_t FOG_CDECL Color_mix(Color* self, uint32_t mixOp, uint32_t alphaOp, 
       return ERR_OK;
 
     case COLOR_MIX_OP_BLEND     : _MIX_FN( ColorMix_C::blend     (S0, S1, M, MI) ); break;
-    case COLOR_MIX_OP_ADD       : _MIX_FN( ColorMix_C::add       (S0, S1, M, MI) ); break;
-    case COLOR_MIX_OP_SUBTRACT  : _MIX_FN( ColorMix_C::subtract  (S0, S1, M, MI) ); break;
+    case COLOR_MIX_OP_PLUS      : _MIX_FN( ColorMix_C::plus      (S0, S1, M, MI) ); break;
+    case COLOR_MIX_OP_MINUS     : _MIX_FN( ColorMix_C::minus     (S0, S1, M, MI) ); break;
     case COLOR_MIX_OP_MULTIPLY  : _MIX_FN( ColorMix_C::multiply  (S0, S1, M, MI) ); break;
     case COLOR_MIX_OP_DIVIDE    : _MIX_FN( ColorMix_C::divide    (S0, S1, M, MI) ); break;
     case COLOR_MIX_OP_SCREEN    : _MIX_FN( ColorMix_C::screen    (S0, S1, M, MI) ); break;

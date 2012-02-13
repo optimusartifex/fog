@@ -48,7 +48,8 @@ struct FOG_API FeCompositingFunctionData
   // [Interface]
   // --------------------------------------------------------------------------
 
-  virtual FeCompositingFunctionFloatFunc* getFloatFunc() const = 0;
+  virtual FeCompositingFunctionPrgb32Func getPrgb32Func() const = 0;
+  virtual FeCompositingFunctionPrgb64Func getPrgb64Func() const = 0;
 
   // --------------------------------------------------------------------------
   // [Members]

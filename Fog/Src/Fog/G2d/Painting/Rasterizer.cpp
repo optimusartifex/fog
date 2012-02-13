@@ -2609,7 +2609,7 @@ _Continue:
           // reserves some bytes for these optimizations.
           //
           // This optimization increased performance of FogBench for about 1-2%,
-          // depending on raterized shape and size. It's very cheap, and gives
+          // depending on rasterized shape and size. It's very cheap, and gives
           // good results.
           FOG_ASSERT(RASTER_SPAN_C_THRESHOLD <= 4);
 

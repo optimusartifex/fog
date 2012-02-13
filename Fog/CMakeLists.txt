@@ -1253,7 +1253,6 @@ Set(FOG_G2D_SOURCE_SOURCES
   Src/Fog/G2d/Source/ColorStop.cpp
   Src/Fog/G2d/Source/ColorStopCache.cpp
   Src/Fog/G2d/Source/ColorStopList.cpp
-  Src/Fog/G2d/Source/ColorUtil.cpp
   Src/Fog/G2d/Source/ConicalGradient.cpp
   Src/Fog/G2d/Source/Gradient.cpp
   Src/Fog/G2d/Source/LinearGradient.cpp

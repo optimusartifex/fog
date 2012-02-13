@@ -19,6 +19,10 @@
 #include "BenchQt4.h"
 #endif // FOG_BENCH_QT4
 
+// [Dependencies - Resources]
+#include "../Sample/Resources.h"
+
+// [Dependencies - C]
 #include <stdlib.h>
 
 // ============================================================================
@@ -213,45 +217,19 @@ void BenchApp::deleteModules()
 
 void BenchApp::loadData()
 {
-  static const char* spriteName[4] =
-  {
-    "babelfish.png",
-    "blockdevice.png",
-    "drop.png",
-    "kweather.png"
-  };
+  Fog::Image sprite;
 
-  size_t i;
-  bool spritesNotFound = false;
+  sprite.readFromBuffer(_resource_ktip_png, FOG_ARRAY_SIZE(_resource_ktip_png));
+  sprites.append(sprite);
 
-  for (i = 0; i < FOG_ARRAY_SIZE(spriteName); i++)
-  {
-    Fog::Image image;
-    if (image.readFromFile(Fog::StringW::fromAscii8(spriteName[i])) != Fog::ERR_OK)
-    {
-      logf("Warning: Can't load sprite '%s'\n", spriteName[i]);
-      spritesNotFound = true;
-    }
-    else
-    {
-      sprites.append(image);
-    }
-  }
+  sprite.readFromBuffer(_resource_ksplash_png, FOG_ARRAY_SIZE(_resource_ksplash_png));
+  sprites.append(sprite);
 
-  if (spritesNotFound)
-  {
-    logf("\n");
-    logf("If you want to benchmark the image backends you need to place the\n");
-    logf("sprites into the FogBench working directory. The sprites can be\n");
-    logf("downloaded here:\n");
+  sprite.readFromBuffer(_resource_babelfish_png, FOG_ARRAY_SIZE(_resource_babelfish_png));
+  sprites.append(sprite);
 
-    for (i = 0; i < FOG_ARRAY_SIZE(spriteName); i++)
-    {
-      logf("  http://kobalicek.com/data/fog/sprites/%s\n", spriteName[i]);
-    }
-
-    logf("\n");
-  }
+  sprite.readFromBuffer(_resource_firewall_png, FOG_ARRAY_SIZE(_resource_firewall_png));
+  sprites.append(sprite);
 }
 
 void BenchApp::makeRand()

@@ -1094,6 +1094,7 @@ Set(FOG_G2D_IMAGING_FILTERS_SOURCES
   Src/Fog/G2d/Imaging/Filters/FeConvolveMatrix.cpp
   Src/Fog/G2d/Imaging/Filters/FeConvolveSeparable.cpp
   Src/Fog/G2d/Imaging/Filters/FeMorphology.cpp
+  Src/Fog/G2d/Imaging/Filters/FeTurbulence.cpp
 )
 
 Set(FOG_G2D_IMAGING_FILTERS_HEADERS
@@ -1109,6 +1110,7 @@ Set(FOG_G2D_IMAGING_FILTERS_HEADERS
   Src/Fog/G2d/Imaging/Filters/FeConvolveMatrix.h
   Src/Fog/G2d/Imaging/Filters/FeConvolveSeparable.h
   Src/Fog/G2d/Imaging/Filters/FeMorphology.h
+  Src/Fog/G2d/Imaging/Filters/FeTurbulence.h
 )
 
 FogAddOptimizedSources(FOG_G2D_IMAGING_FILTERS_SOURCES SSE

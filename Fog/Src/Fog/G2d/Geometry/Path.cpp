@@ -3963,11 +3963,11 @@ FOG_NO_EXPORT void Path_init(void)
   PathDataD* dd = PathT_getDEmpty<double>();
 
   df->reference.init(1);
-  df->vType = VAR_TYPE_PATHF | VAR_FLAG_NONE;
+  df->vType = VAR_TYPE_PATH_F | VAR_FLAG_NONE;
   df->boundingBox.reset();
 
   dd->reference.init(1);
-  dd->vType = VAR_TYPE_PATHD | VAR_FLAG_NONE;
+  dd->vType = VAR_TYPE_PATH_D | VAR_FLAG_NONE;
   dd->boundingBox.reset();
 
   fog_api.pathf_oEmpty = PathF_oEmpty.initCustom1(df);

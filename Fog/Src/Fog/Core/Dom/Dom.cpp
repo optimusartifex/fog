@@ -2329,9 +2329,9 @@ static const MemGCFuncs DomDocument_gcFuncs =
 
 DomDocument::DomDocument() :
   DomContainer(NULL, DOM_NODE_TYPE_DOCUMENT),
+  _gc(&DomDocument_gcFuncs),
   _documentType(NULL),
   _documentElement(NULL),
-  _gc(&DomDocument_gcFuncs),
   _xmlVersion(static_cast<const StringW&>(FOG_S(1_0))),
   _xmlEncoding(static_cast<const StringW&>(FOG_S(UTF_8))),
   _xmlStandalone(false)

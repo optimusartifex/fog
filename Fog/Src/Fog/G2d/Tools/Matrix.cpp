@@ -404,10 +404,10 @@ FOG_NO_EXPORT void Matrix_init(void)
   MatrixDataD* dd = &MatrixD_dEmpty;
 
   df->reference.init(1);
-  df->vType = VAR_TYPE_MATRIXF | VAR_FLAG_NONE;
+  df->vType = VAR_TYPE_MATRIX_F | VAR_FLAG_NONE;
 
   dd->reference.init(1);
-  dd->vType = VAR_TYPE_MATRIXF | VAR_FLAG_NONE;
+  dd->vType = VAR_TYPE_MATRIX_F | VAR_FLAG_NONE;
 
   fog_api.matrixf_oEmpty = MatrixF_oEmpty.initCustom1(df);
   fog_api.matrixd_oEmpty = MatrixD_oEmpty.initCustom1(dd);

@@ -2334,11 +2334,21 @@ struct FOG_NO_EXPORT Api
 
   FOG_CAPI_CTOR(femorphology_ctor)(FeMorphology* self);
   FOG_CAPI_CTOR(femorphology_ctorCopy)(FeMorphology* self, const FeMorphology* other);
-  FOG_CAPI_CTOR(femorphology_dtor)(FeMorphology* self);
 
   FOG_CAPI_METHOD(void, femorphology_reset)(FeMorphology* self);
   FOG_CAPI_METHOD(err_t, femorphology_copy)(FeMorphology* self, const FeMorphology* other);
   FOG_CAPI_STATIC(bool, femorphology_eq)(const FeMorphology* a, const FeMorphology* b);
+
+  // --------------------------------------------------------------------------
+  // [G2d/Imaging/Filters - FeTurbulence]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(feturbulence_ctor)(FeTurbulence* self);
+  FOG_CAPI_CTOR(feturbulence_ctorCopy)(FeTurbulence* self, const FeTurbulence* other);
+
+  FOG_CAPI_METHOD(void, feturbulence_reset)(FeTurbulence* self);
+  FOG_CAPI_METHOD(err_t, feturbulence_copy)(FeTurbulence* self, const FeTurbulence* other);
+  FOG_CAPI_STATIC(bool, feturbulence_eq)(const FeTurbulence* a, const FeTurbulence* b);
 
   // --------------------------------------------------------------------------
   // [G2d/OS - WinUtil / Support]

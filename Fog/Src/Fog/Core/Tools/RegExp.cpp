@@ -840,7 +840,7 @@ FOG_NO_EXPORT void RegExp_init(void)
   RegExpDataW* dw = &RegExpW_dEmpty;
 
   da->reference.init(1);
-  da->vType = VAR_TYPE_REGEXPA | VAR_FLAG_NONE;
+  da->vType = VAR_TYPE_REGEXP_A | VAR_FLAG_NONE;
   da->type = REGEXP_TYPE_NONE;
   da->internalType = REGEXP_INTERNAL_NONE;
   da->caseSensitivity = CASE_SENSITIVE;
@@ -853,7 +853,7 @@ FOG_NO_EXPORT void RegExp_init(void)
   da->fixedLength = INVALID_INDEX;
 
   dw->reference.init(1);
-  dw->vType = VAR_TYPE_REGEXPW | VAR_FLAG_NONE;
+  dw->vType = VAR_TYPE_REGEXP_W | VAR_FLAG_NONE;
   dw->type = REGEXP_TYPE_NONE;
   dw->internalType = REGEXP_INTERNAL_NONE;
   dw->caseSensitivity = CASE_SENSITIVE;

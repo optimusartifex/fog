@@ -174,38 +174,38 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE bool isInteger() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_INTEGER_START, _VAR_TYPE_INTEGER_END); }
   FOG_INLINE bool isReal() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_FLOAT, VAR_TYPE_DOUBLE); }
   FOG_INLINE bool isNumber() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_NUMBER_START, _VAR_TYPE_NUMBER_END);  }
-  FOG_INLINE bool isString() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_STRINGA, VAR_TYPE_STRINGW); }
+  FOG_INLINE bool isString() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_STRING_A, VAR_TYPE_STRING_W); }
 
-  FOG_INLINE bool isList() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_LIST_STRINGA, VAR_TYPE_LIST_VAR); }
-  FOG_INLINE bool isHashA() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRINGA_STRINGA, VAR_TYPE_HASH_STRINGA_VAR); }
-  FOG_INLINE bool isHashW() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRINGW_STRINGW, VAR_TYPE_HASH_STRINGW_VAR); }
+  FOG_INLINE bool isList() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_LIST_STRING_A, VAR_TYPE_LIST_VAR); }
+  FOG_INLINE bool isHashA() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRING_A_STRING_A, VAR_TYPE_HASH_STRING_A_VAR); }
+  FOG_INLINE bool isHashW() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_HASH_STRING_W_STRING_W, VAR_TYPE_HASH_STRING_W_VAR); }
 
-  FOG_INLINE bool isRegExp() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_REGEXPA, VAR_TYPE_REGEXPW); }
+  FOG_INLINE bool isRegExp() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_REGEXP_A, VAR_TYPE_REGEXP_W); }
   FOG_INLINE bool isLocale() const { return getVarType() == VAR_TYPE_LOCALE; }
   FOG_INLINE bool isDate() const { return getVarType() == VAR_TYPE_DATE; }
   FOG_INLINE bool isTime() const { return getVarType() == VAR_TYPE_TIME; }
 
   FOG_INLINE bool isGeometry() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_GEOMETRY_START, _VAR_TYPE_GEOMETRY_END); }
-  FOG_INLINE bool isPoint() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POINTI, VAR_TYPE_POINTD); }
-  FOG_INLINE bool isSize() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_SIZEI, VAR_TYPE_SIZED); }
-  FOG_INLINE bool isBox() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_BOXI, VAR_TYPE_BOXD); }
-  FOG_INLINE bool isRect() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_RECTI, VAR_TYPE_RECTD); }
-  FOG_INLINE bool isLine() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_LINEF, VAR_TYPE_LINED); }
-  FOG_INLINE bool isQBezier() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_QBEZIERF, VAR_TYPE_QBEZIERD); }
-  FOG_INLINE bool isCBezier() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CBEZIERF, VAR_TYPE_CBEZIERD); }
-  FOG_INLINE bool isTriangle() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRIANGLEF, VAR_TYPE_TRIANGLED); }
-  FOG_INLINE bool isRound() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ROUNDF, VAR_TYPE_ROUNDD); }
-  FOG_INLINE bool isCircle() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CIRCLEF, VAR_TYPE_CIRCLED); }
-  FOG_INLINE bool isEllipse() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ELLIPSEF, VAR_TYPE_ELLIPSED); }
-  FOG_INLINE bool isArc() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ARCF, VAR_TYPE_ARCD); }
-  FOG_INLINE bool isChord() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CHORDF, VAR_TYPE_CHORDD); }
-  FOG_INLINE bool isPie() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_PIEF, VAR_TYPE_PIED); }
-  FOG_INLINE bool isPolygon() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POLYGONF, VAR_TYPE_POLYGOND); }
-  FOG_INLINE bool isPath() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_PATHF, VAR_TYPE_PATHD); }
+  FOG_INLINE bool isPoint() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POINT_I, VAR_TYPE_POINT_D); }
+  FOG_INLINE bool isSize() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_SIZE_I, VAR_TYPE_SIZE_D); }
+  FOG_INLINE bool isBox() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_BOX_I, VAR_TYPE_BOX_D); }
+  FOG_INLINE bool isRect() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_RECT_I, VAR_TYPE_RECT_D); }
+  FOG_INLINE bool isLine() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_LINE_F, VAR_TYPE_LINE_D); }
+  FOG_INLINE bool isQBezier() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_QBEZIER_F, VAR_TYPE_QBEZIER_D); }
+  FOG_INLINE bool isCBezier() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CBEZIER_F, VAR_TYPE_CBEZIER_D); }
+  FOG_INLINE bool isTriangle() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRIANGLE_F, VAR_TYPE_TRIANGLE_D); }
+  FOG_INLINE bool isRound() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ROUND_F, VAR_TYPE_ROUND_D); }
+  FOG_INLINE bool isCircle() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CIRCLE_F, VAR_TYPE_CIRCLE_D); }
+  FOG_INLINE bool isEllipse() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ELLIPSE_F, VAR_TYPE_ELLIPSE_D); }
+  FOG_INLINE bool isArc() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_ARC_F, VAR_TYPE_ARC_D); }
+  FOG_INLINE bool isChord() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_CHORD_F, VAR_TYPE_CHORD_D); }
+  FOG_INLINE bool isPie() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_PIE_F, VAR_TYPE_PIE_D); }
+  FOG_INLINE bool isPolygon() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_POLYGON_F, VAR_TYPE_POLYGON_D); }
+  FOG_INLINE bool isPath() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_PATH_F, VAR_TYPE_PATH_D); }
   FOG_INLINE bool isRegion() const { return getVarType() == VAR_TYPE_REGION; }
 
-  FOG_INLINE bool isTransform() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRANSFORMF, VAR_TYPE_TRANSFORMD); }
-  FOG_INLINE bool isMatrix() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_MATRIXF, VAR_TYPE_MATRIXD); }
+  FOG_INLINE bool isTransform() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_TRANSFORM_F, VAR_TYPE_TRANSFORM_D); }
+  FOG_INLINE bool isMatrix() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_MATRIX_F, VAR_TYPE_MATRIX_D); }
 
   FOG_INLINE bool isColor() const { return getVarType() == VAR_TYPE_COLOR; }
   FOG_INLINE bool isPattern() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_PATTERN_START, _VAR_TYPE_PATTERN_END); }
@@ -484,12 +484,12 @@ struct FOG_NO_EXPORT Var
   // [Accessors - String]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t getString(StringA& dst) const { return fog_api.var_getType(this, VAR_TYPE_STRINGA, &dst); }
-  FOG_INLINE err_t getString(StringW& dst) const { return fog_api.var_getType(this, VAR_TYPE_STRINGW, &dst); }
+  FOG_INLINE err_t getString(StringA& dst) const { return fog_api.var_getType(this, VAR_TYPE_STRING_A, &dst); }
+  FOG_INLINE err_t getString(StringW& dst) const { return fog_api.var_getType(this, VAR_TYPE_STRING_W, &dst); }
 
-  FOG_INLINE err_t setString(const StringA& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGA, &src); }
-  FOG_INLINE err_t setString(const StringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
-  FOG_INLINE err_t setString(const InternedStringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRINGW, &src); }
+  FOG_INLINE err_t setString(const StringA& src) { return fog_api.var_setType(this, VAR_TYPE_STRING_A, &src); }
+  FOG_INLINE err_t setString(const StringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRING_W, &src); }
+  FOG_INLINE err_t setString(const InternedStringW& src) { return fog_api.var_setType(this, VAR_TYPE_STRING_W, &src); }
 
   // --------------------------------------------------------------------------
   // [Accessors - Image]
@@ -590,8 +590,8 @@ struct FOG_NO_EXPORT Var
   static FOG_INLINE Var fromReal(float val) { return fromFloat(val); }
   static FOG_INLINE Var fromReal(double val) { return fromDouble(val); }
 
-  static FOG_INLINE Var fromStringA(const StringA& val) { return Var(VAR_TYPE_STRINGA, &val); }
-  static FOG_INLINE Var fromStringW(const StringW& val) { return Var(VAR_TYPE_STRINGW, &val); }
+  static FOG_INLINE Var fromStringA(const StringA& val) { return Var(VAR_TYPE_STRING_A, &val); }
+  static FOG_INLINE Var fromStringW(const StringW& val) { return Var(VAR_TYPE_STRING_W, &val); }
 
   static FOG_INLINE Var fromImage(const Image& val) { return Var(VAR_TYPE_IMAGE, &val); }
   static FOG_INLINE Var fromImagePalette(const ImagePalette& val) { return Var(VAR_TYPE_IMAGE_PALETTE, &val); }

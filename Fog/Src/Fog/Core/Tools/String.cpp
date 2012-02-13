@@ -6006,10 +6006,10 @@ FOG_NO_EXPORT void String_init(void)
   StringDataW* dw = &StringW_dEmpty;
 
   da->reference.init(1);
-  da->vType = VAR_TYPE_STRINGA | VAR_FLAG_STRING_INTERNED;
+  da->vType = VAR_TYPE_STRING_A | VAR_FLAG_STRING_INTERNED;
 
   dw->reference.init(1);
-  dw->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_INTERNED;
+  dw->vType = VAR_TYPE_STRING_W | VAR_FLAG_STRING_INTERNED;
 
   fog_api.stringa_oEmpty = StringA_oEmpty.initCustom1(da);
   fog_api.stringw_oEmpty = StringW_oEmpty.initCustom1(dw);

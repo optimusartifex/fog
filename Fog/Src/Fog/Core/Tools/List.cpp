@@ -1241,10 +1241,10 @@ static ListUntypedData* List_Unknown_getDEmptyForType(uint32_t vType)
     case VAR_TYPE_UNKNOWN:
       return &List_Unknown_dEmpty;
 
-    case VAR_TYPE_LIST_STRINGA:
+    case VAR_TYPE_LIST_STRING_A:
       return &List_StringA_dEmpty;
 
-    case VAR_TYPE_LIST_STRINGW:
+    case VAR_TYPE_LIST_STRING_W:
       return &List_StringW_dEmpty;
 
     case VAR_TYPE_LIST_VAR:
@@ -3237,7 +3237,7 @@ FOG_NO_EXPORT void List_init(void)
   // List<StringA>
   d = &List_StringA_dEmpty;
   d->reference.init(1);
-  d->vType = VAR_TYPE_LIST_STRINGA | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_LIST_STRING_A | VAR_FLAG_NONE;
   d->data = d->getArray();
 
   List_StringA_oEmpty->_d = d;
@@ -3251,7 +3251,7 @@ FOG_NO_EXPORT void List_init(void)
   // List<StringW>
   d = &List_StringW_dEmpty;
   d->reference.init(1);
-  d->vType = VAR_TYPE_LIST_STRINGW | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_LIST_STRING_W | VAR_FLAG_NONE;
   d->data = d->getArray();
 
   List_StringW_oEmpty->_d = d;

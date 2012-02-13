@@ -919,6 +919,19 @@ enum FE_MORPHOLOGY_TYPE
 };
 
 // ============================================================================
+// [Fog::FE_TURBULENCE_TYPE]
+// ============================================================================
+
+enum FE_TURBULENCE_TYPE
+{
+  FE_TURBULENCE_TYPE_TURBULENCE = 0,
+  FE_TURBULENCE_TYPE_FRACTAL_NOUSE = 1,
+
+  FE_TURBULENCE_TYPE_DEFAULT = FE_TURBULENCE_TYPE_TURBULENCE,
+  FE_TURBULENCE_TYPE_COUNT = 2
+};
+
+// ============================================================================
 // [Fog::FE_TYPE]
 // ============================================================================
 
@@ -952,8 +965,15 @@ enum FE_TYPE
   //! @brief @ref FeMorphology filter
   FE_TYPE_MORPHOLOGY = 7,
 
+  // --------------------------------------------------------------------------
+  // [Image Generators]
+  // --------------------------------------------------------------------------
+
+  //! @brief @ref FeTurbulence filter.
+  FE_TYPE_TURBULENCE = 8,
+
   //! @brief Count of image filter types.
-  FE_TYPE_COUNT = 8
+  FE_TYPE_COUNT = 9
 };
 
 // ============================================================================

@@ -136,7 +136,7 @@ StringDataW* InternedStringHashW::addStubA(const char* sData, size_t sLength, ui
 
   StringDataW* d = reinterpret_cast<StringDataW*>(node + 1);
   d->reference.init(2);
-  d->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_INTERNED;
+  d->vType = VAR_TYPE_STRING_W | VAR_FLAG_STRING_INTERNED;
   d->hashCode = hashCode;
   d->capacity = sLength;
   d->length = sLength;
@@ -178,7 +178,7 @@ StringDataW* InternedStringHashW::addStubW(const CharW* sData, size_t sLength, u
 
   StringDataW* d = reinterpret_cast<StringDataW*>(node + 1);
   d->reference.init(2);
-  d->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_INTERNED;
+  d->vType = VAR_TYPE_STRING_W | VAR_FLAG_STRING_INTERNED;
   d->hashCode = hashCode;
   d->capacity = sLength;
   d->length = sLength;
@@ -729,7 +729,7 @@ static InternedStringCacheW* FOG_CDECL InternedStringCacheW_create(const char* s
       node->string->_d = d;
 
       d->reference.init(2);
-      d->vType = VAR_TYPE_STRINGW | VAR_FLAG_STRING_INTERNED | VAR_FLAG_STRING_CACHED;
+      d->vType = VAR_TYPE_STRING_W | VAR_FLAG_STRING_INTERNED | VAR_FLAG_STRING_CACHED;
       d->hashCode = HashUtil::hash(StubA(sMark, len));
       d->length = len;
       d->capacity = len;

@@ -18,10 +18,10 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::Blur]
+// [Fog::FeMorphology]
 // ============================================================================
 
-#include <Fog/Core/C++/PackByte.h>
+#include <Fog/Core/C++/PackDWord.h>
 //! @brief Morphology.
 struct FOG_NO_EXPORT FeMorphology : public FeBorder
 {

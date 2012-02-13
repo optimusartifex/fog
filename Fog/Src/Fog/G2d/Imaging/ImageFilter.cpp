@@ -20,6 +20,7 @@
 #include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
 #include <Fog/G2d/Imaging/Filters/FeConvolveSeparable.h>
 #include <Fog/G2d/Imaging/Filters/FeMorphology.h>
+#include <Fog/G2d/Imaging/Filters/FeTurbulence.h>
 
 namespace Fog {
 
@@ -49,7 +50,8 @@ static const uint32_t ImageFilter_dSize[FE_TYPE_COUNT] =
   /* 04: FE_TYPE_BLUR               */ sizeof(ImageFilterData) + sizeof(FeBlur),
   /* 05: FE_TYPE_CONVOLVE_MATRIX    */ sizeof(ImageFilterData) + sizeof(FeConvolveMatrix),
   /* 06: FE_TYPE_CONVOLVE_SEPARABLE */ sizeof(ImageFilterData) + sizeof(FeConvolveSeparable),
-  /* 07: FE_TYPE_MORPHOLOGY         */ sizeof(ImageFilterData) + sizeof(FeMorphology)
+  /* 07: FE_TYPE_MORPHOLOGY         */ sizeof(ImageFilterData) + sizeof(FeMorphology),
+  /* 08: FE_TYPE_TURBULENCE         */ sizeof(ImageFilterData) + sizeof(FeTurbulence)
 };
 // ${FE_TYPE:END}
 
@@ -109,6 +111,7 @@ static err_t FOG_CDECL ImageFilter_getData(const ImageFilter* self, FeBase* feDa
     case FE_TYPE_CONVOLVE_MATRIX   : FE_GET_DATA(FeConvolveMatrix)   ; return ERR_OK;
     case FE_TYPE_CONVOLVE_SEPARABLE: FE_GET_DATA(FeConvolveSeparable); return ERR_OK;
     case FE_TYPE_MORPHOLOGY        : FE_GET_DATA(FeMorphology)       ; return ERR_OK;
+    case FE_TYPE_TURBULENCE        : FE_GET_DATA(FeTurbulence)       ; return ERR_OK;
 
     default:
       return ERR_RT_INVALID_STATE;
@@ -148,6 +151,7 @@ static err_t FOG_CDECL ImageFilter_setData(ImageFilter* self, const FeBase* feDa
     case FE_TYPE_CONVOLVE_MATRIX   : FE_SET_DATA(FeConvolveMatrix)   ; return ERR_OK;
     case FE_TYPE_CONVOLVE_SEPARABLE: FE_SET_DATA(FeConvolveSeparable); return ERR_OK;
     case FE_TYPE_MORPHOLOGY        : FE_SET_DATA(FeMorphology)       ; return ERR_OK;
+    case FE_TYPE_TURBULENCE        : FE_SET_DATA(FeTurbulence)       ; return ERR_OK;
 
     default:
       return ERR_RT_INVALID_STATE;
@@ -202,6 +206,7 @@ static bool FOG_CDECL ImageFilter_eq(const ImageFilter* a, const ImageFilter* b)
     case FE_TYPE_CONVOLVE_MATRIX   : return FOG_FE_EQ(FeConvolveMatrix);
     case FE_TYPE_CONVOLVE_SEPARABLE: return FOG_FE_EQ(FeConvolveSeparable);
     case FE_TYPE_MORPHOLOGY        : return FOG_FE_EQ(FeMorphology);
+    case FE_TYPE_TURBULENCE        : return FOG_FE_EQ(FeTurbulence);
     default                        : return false;
   }
 }
@@ -242,6 +247,7 @@ static ImageFilterData* FOG_CDECL ImageFilter_dCreate(const FeBase* feData)
     case FE_TYPE_CONVOLVE_MATRIX   : FOG_FE_CREATE(FeConvolveMatrix)   ; break;
     case FE_TYPE_CONVOLVE_SEPARABLE: FOG_FE_CREATE(FeConvolveSeparable); break;
     case FE_TYPE_MORPHOLOGY        : FOG_FE_CREATE(FeMorphology)       ; break;
+    case FE_TYPE_TURBULENCE        : FOG_FE_CREATE(FeTurbulence)       ; break;
 
     default:
       FOG_ASSERT_NOT_REACHED();
@@ -267,6 +273,7 @@ static void FOG_CDECL ImageFilter_dFree(ImageFilterData* d)
     case FE_TYPE_CONVOLVE_MATRIX   : FOG_FE_FREE(FeConvolveMatrix)   ; break;
     case FE_TYPE_CONVOLVE_SEPARABLE: FOG_FE_FREE(FeConvolveSeparable); break;
     case FE_TYPE_MORPHOLOGY        : FOG_FE_FREE(FeMorphology)       ; break;
+    case FE_TYPE_TURBULENCE        : FOG_FE_FREE(FeTurbulence)       ; break;
 
     default:
       FOG_ASSERT_NOT_REACHED();

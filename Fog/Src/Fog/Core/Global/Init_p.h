@@ -167,6 +167,7 @@ FOG_NO_EXPORT void FeCompositingFunction_init(void);
 FOG_NO_EXPORT void FeConvolveMatrix_init(void);
 FOG_NO_EXPORT void FeConvolveSeparable_init(void);
 FOG_NO_EXPORT void FeMorphology_init(void);
+FOG_NO_EXPORT void FeTurbulence_init(void);
 
 // [Fog/G2d/Painting]
 FOG_NO_EXPORT void NullPaintEngine_init(void);

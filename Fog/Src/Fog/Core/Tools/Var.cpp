@@ -103,110 +103,110 @@ static FOG_INLINE VarData* Var_dImplicitAddRef(VarData* d)
 // ${VAR_TYPE:BEGIN}
 static const uint8_t Var_dataSize[] =
 {
-  /* 0000: VAR_TYPE_NULL                 */ 0,
+  /* 0000: VAR_TYPE_NULL                   */ 0,
 
-  /* 0001: VAR_TYPE_BOOL                 */ sizeof(bool),
-  /* 0002: VAR_TYPE_CHAR                 */ sizeof(CharW),
-  /* 0003: VAR_TYPE_INT32                */ sizeof(int32_t),
-  /* 0004: VAR_TYPE_UINT32               */ sizeof(uint32_t),
-  /* 0005: VAR_TYPE_INT64                */ sizeof(int64_t),
-  /* 0006: VAR_TYPE_UINT64               */ sizeof(uint64_t),
-  /* 0007: VAR_TYPE_FLOAT                */ sizeof(float),
-  /* 0008: VAR_TYPE_DOUBLE               */ sizeof(double),
+  /* 0001: VAR_TYPE_BOOL                   */ sizeof(bool),
+  /* 0002: VAR_TYPE_CHAR                   */ sizeof(CharW),
+  /* 0003: VAR_TYPE_INT32                  */ sizeof(int32_t),
+  /* 0004: VAR_TYPE_UINT32                 */ sizeof(uint32_t),
+  /* 0005: VAR_TYPE_INT64                  */ sizeof(int64_t),
+  /* 0006: VAR_TYPE_UINT64                 */ sizeof(uint64_t),
+  /* 0007: VAR_TYPE_FLOAT                  */ sizeof(float),
+  /* 0008: VAR_TYPE_DOUBLE                 */ sizeof(double),
 
-  /* 0009: VAR_TYPE_STRINGA              */ 0,
-  /* 0010: VAR_TYPE_STRINGW              */ 0,
+  /* 0009: VAR_TYPE_STRING_A               */ 0,
+  /* 0010: VAR_TYPE_STRING_W               */ 0,
 
-  /* 0011: VAR_TYPE_LIST_STRINGA         */ 0,
-  /* 0012: VAR_TYPE_LIST_STRINGW         */ 0,
-  /* 0013: VAR_TYPE_LIST_VAR             */ 0,
+  /* 0011: VAR_TYPE_LIST_STRING_A          */ 0,
+  /* 0012: VAR_TYPE_LIST_STRING_W          */ 0,
+  /* 0013: VAR_TYPE_LIST_VAR               */ 0,
 
-  /* 0014: VAR_TYPE_HASH_STRINGA_STRINGA */ 0,
-  /* 0015: VAR_TYPE_HASH_STRINGA_VAR     */ 0,
-  /* 0016: VAR_TYPE_HASH_STRINGW_STRINGW */ 0,
-  /* 0017: VAR_TYPE_HASH_STRINGW_VAR     */ 0,
+  /* 0014: VAR_TYPE_HASH_STRING_A_STRING_A */ 0,
+  /* 0015: VAR_TYPE_HASH_STRING_A_VAR      */ 0,
+  /* 0016: VAR_TYPE_HASH_STRING_W_STRING_W */ 0,
+  /* 0017: VAR_TYPE_HASH_STRING_W_VAR      */ 0,
 
-  /* 0018: VAR_TYPE_REGEXPA              */ 0,
-  /* 0019: VAR_TYPE_REGEXPW              */ 0,
+  /* 0018: VAR_TYPE_REGEXP_A               */ 0,
+  /* 0019: VAR_TYPE_REGEXP_W               */ 0,
 
-  /* 0020: VAR_TYPE_LOCALE               */ 0,
+  /* 0020: VAR_TYPE_LOCALE                 */ 0,
 
-  /* 0021: VAR_TYPE_DATE                 */ sizeof(Date),
-  /* 0022: VAR_TYPE_TIME                 */ sizeof(Time),
-
-  // --------------------------------------------------------------------------
-
-  /* 0023:                               */ 0,
-  /* 0024:                               */ 0,
-  /* 0025:                               */ 0,
-  /* 0026:                               */ 0,
-  /* 0027:                               */ 0,
-  /* 0028:                               */ 0,
-  /* 0029:                               */ 0,
-  /* 0030:                               */ 0,
-  /* 0031:                               */ 0,
+  /* 0021: VAR_TYPE_DATE                   */ sizeof(Date),
+  /* 0022: VAR_TYPE_TIME                   */ sizeof(Time),
 
   // --------------------------------------------------------------------------
 
-  /* 0032: VAR_TYPE_POINTI               */ sizeof(PointI),
-  /* 0033: VAR_TYPE_POINTF               */ sizeof(PointF),
-  /* 0034: VAR_TYPE_POINTD               */ sizeof(PointD),
-  /* 0035: VAR_TYPE_SIZEI                */ sizeof(SizeI),
-  /* 0036: VAR_TYPE_SIZEF                */ sizeof(SizeF),
-  /* 0037: VAR_TYPE_SIZED                */ sizeof(SizeD),
-  /* 0038: VAR_TYPE_BOXI                 */ sizeof(BoxI),
-  /* 0039: VAR_TYPE_BOXF                 */ sizeof(BoxF),
-  /* 0040: VAR_TYPE_BOXD                 */ sizeof(BoxD),
-  /* 0041: VAR_TYPE_RECTI                */ sizeof(RectI),
-  /* 0042: VAR_TYPE_RECTF                */ sizeof(RectF),
-  /* 0043: VAR_TYPE_RECTD                */ sizeof(RectD),
-  /* 0044:                               */ 0,
-  /* 0045: VAR_TYPE_LINEF                */ sizeof(LineF),
-  /* 0046: VAR_TYPE_LINED                */ sizeof(LineD),
-  /* 0047: VAR_TYPE_QBEZIERF             */ sizeof(QBezierF),
-  /* 0048: VAR_TYPE_QBEZIERD             */ sizeof(QBezierD),
-  /* 0049: VAR_TYPE_CBEZIERF             */ sizeof(CBezierF),
-  /* 0050: VAR_TYPE_CBEZIERD             */ sizeof(CBezierD),
-  /* 0051: VAR_TYPE_TRIANGLEF            */ sizeof(TriangleF),
-  /* 0052: VAR_TYPE_TRIANGLED            */ sizeof(TriangleD),
-  /* 0053: VAR_TYPE_ROUNDF               */ sizeof(RoundF),
-  /* 0054: VAR_TYPE_ROUNDD               */ sizeof(RoundD),
-  /* 0055: VAR_TYPE_CIRCLEF              */ sizeof(CircleF),
-  /* 0056: VAR_TYPE_CIRCLED              */ sizeof(CircleD),
-  /* 0057: VAR_TYPE_ELLIPSEF             */ sizeof(EllipseF),
-  /* 0058: VAR_TYPE_ELLIPSED             */ sizeof(EllipseD),
-  /* 0059: VAR_TYPE_ARCF                 */ sizeof(ArcF),
-  /* 0060: VAR_TYPE_ARCD                 */ sizeof(ArcD),
-  /* 0061: VAR_TYPE_CHORDF               */ sizeof(ChordF),
-  /* 0062: VAR_TYPE_CHORDD               */ sizeof(ChordD),
-  /* 0063: VAR_TYPE_PIEF                 */ sizeof(PieF),
-  /* 0064: VAR_TYPE_PIED                 */ sizeof(PieD),
-  /* 0065: VAR_TYPE_POLYGONF             */ 0,
-  /* 0066: VAR_TYPE_POLYGOND             */ 0,
-  /* 0067: VAR_TYPE_PATHF                */ 0,
-  /* 0068: VAR_TYPE_PATHD                */ 0,
-  /* 0069: VAR_TYPE_REGION               */ 0,
-  /* 0070: VAR_TYPE_TRANSFORMF           */ sizeof(TransformF),
-  /* 0071: VAR_TYPE_TRANSFORMD           */ sizeof(TransformD),
-  /* 0072: VAR_TYPE_MATRIXF              */ 0,
-  /* 0073: VAR_TYPE_MATRIXD              */ 0,
-  /* 0074: VAR_TYPE_COLOR                */ 0,
-  /* 0075: VAR_TYPE_TEXTUREF             */ 0,
-  /* 0076: VAR_TYPE_TEXTURED             */ 0,
-  /* 0077: VAR_TYPE_LINEAR_GRADIENTF     */ 0,
-  /* 0078: VAR_TYPE_LINEAR_GRADIENTD     */ 0,
-  /* 0079: VAR_TYPE_RADIAL_GRADIENTF     */ 0,
-  /* 0080: VAR_TYPE_RADIAL_GRADIENTD     */ 0,
-  /* 0081: VAR_TYPE_CONICAL_GRADIENTF    */ 0,
-  /* 0082: VAR_TYPE_CONICAL_GRADIENTD    */ 0,
-  /* 0083: VAR_TYPE_RECTANGULAR_GRADIENTF*/ 0,
-  /* 0084: VAR_TYPE_RECTANGULAR_GRADIENTD*/ 0,
-  /* 0085: VAR_TYPE_COLOR_STOP           */ sizeof(ColorStop),
-  /* 0086: VAR_TYPE_COLOR_STOP_LIST      */ 0,
-  /* 0087: VAR_TYPE_IMAGE                */ 0,
-  /* 0088: VAR_TYPE_IMAGE_PALETTE        */ 0,
-  /* 0089: VAR_TYPE_IMAGE_FILTER         */ 0,
-  /* 0090: VAR_TYPE_FONT                 */ 0
+  /* 0023:                                 */ 0,
+  /* 0024:                                 */ 0,
+  /* 0025:                                 */ 0,
+  /* 0026:                                 */ 0,
+  /* 0027:                                 */ 0,
+  /* 0028:                                 */ 0,
+  /* 0029:                                 */ 0,
+  /* 0030:                                 */ 0,
+  /* 0031:                                 */ 0,
+
+  // --------------------------------------------------------------------------
+
+  /* 0032: VAR_TYPE_POINT_I                */ sizeof(PointI),
+  /* 0033: VAR_TYPE_POINT_F                */ sizeof(PointF),
+  /* 0034: VAR_TYPE_POINT_D                */ sizeof(PointD),
+  /* 0035: VAR_TYPE_SIZE_I                 */ sizeof(SizeI),
+  /* 0036: VAR_TYPE_SIZE_F                 */ sizeof(SizeF),
+  /* 0037: VAR_TYPE_SIZE_D                 */ sizeof(SizeD),
+  /* 0038: VAR_TYPE_BOX_I                  */ sizeof(BoxI),
+  /* 0039: VAR_TYPE_BOX_F                  */ sizeof(BoxF),
+  /* 0040: VAR_TYPE_BOX_D                  */ sizeof(BoxD),
+  /* 0041: VAR_TYPE_RECT_I                 */ sizeof(RectI),
+  /* 0042: VAR_TYPE_RECT_F                 */ sizeof(RectF),
+  /* 0043: VAR_TYPE_RECT_D                 */ sizeof(RectD),
+  /* 0044:                                 */ 0,
+  /* 0045: VAR_TYPE_LINE_F                 */ sizeof(LineF),
+  /* 0046: VAR_TYPE_LINE_D                 */ sizeof(LineD),
+  /* 0047: VAR_TYPE_QBEZIER_F              */ sizeof(QBezierF),
+  /* 0048: VAR_TYPE_QBEZIER_D              */ sizeof(QBezierD),
+  /* 0049: VAR_TYPE_CBEZIER_F              */ sizeof(CBezierF),
+  /* 0050: VAR_TYPE_CBEZIER_D              */ sizeof(CBezierD),
+  /* 0051: VAR_TYPE_TRIANGLE_F             */ sizeof(TriangleF),
+  /* 0052: VAR_TYPE_TRIANGLE_D             */ sizeof(TriangleD),
+  /* 0053: VAR_TYPE_ROUND_F                */ sizeof(RoundF),
+  /* 0054: VAR_TYPE_ROUND_D                */ sizeof(RoundD),
+  /* 0055: VAR_TYPE_CIRCLE_F               */ sizeof(CircleF),
+  /* 0056: VAR_TYPE_CIRCLE_D               */ sizeof(CircleD),
+  /* 0057: VAR_TYPE_ELLIPSE_F              */ sizeof(EllipseF),
+  /* 0058: VAR_TYPE_ELLIPSE_D              */ sizeof(EllipseD),
+  /* 0059: VAR_TYPE_ARC_F                  */ sizeof(ArcF),
+  /* 0060: VAR_TYPE_ARC_D                  */ sizeof(ArcD),
+  /* 0061: VAR_TYPE_CHORD_F                */ sizeof(ChordF),
+  /* 0062: VAR_TYPE_CHORD_D                */ sizeof(ChordD),
+  /* 0063: VAR_TYPE_PIE_F                  */ sizeof(PieF),
+  /* 0064: VAR_TYPE_PIE_D                  */ sizeof(PieD),
+  /* 0065: VAR_TYPE_POLYGON_F              */ 0,
+  /* 0066: VAR_TYPE_POLYGON_D              */ 0,
+  /* 0067: VAR_TYPE_PATH_F                 */ 0,
+  /* 0068: VAR_TYPE_PATH_D                 */ 0,
+  /* 0069: VAR_TYPE_REGION                 */ 0,
+  /* 0070: VAR_TYPE_TRANSFORM_F            */ sizeof(TransformF),
+  /* 0071: VAR_TYPE_TRANSFORM_D            */ sizeof(TransformD),
+  /* 0072: VAR_TYPE_MATRIX_F               */ 0,
+  /* 0073: VAR_TYPE_MATRIX_D               */ 0,
+  /* 0074: VAR_TYPE_COLOR                  */ 0,
+  /* 0075: VAR_TYPE_TEXTUREF               */ 0,
+  /* 0076: VAR_TYPE_TEXTURED               */ 0,
+  /* 0077: VAR_TYPE_LINEAR_GRADIENTF       */ 0,
+  /* 0078: VAR_TYPE_LINEAR_GRADIENTD       */ 0,
+  /* 0079: VAR_TYPE_RADIAL_GRADIENTF       */ 0,
+  /* 0080: VAR_TYPE_RADIAL_GRADIENTD       */ 0,
+  /* 0081: VAR_TYPE_CONICAL_GRADIENTF      */ 0,
+  /* 0082: VAR_TYPE_CONICAL_GRADIENTD      */ 0,
+  /* 0083: VAR_TYPE_RECTANGULAR_GRADIENTF  */ 0,
+  /* 0084: VAR_TYPE_RECTANGULAR_GRADIENTD  */ 0,
+  /* 0085: VAR_TYPE_COLOR_STOP             */ sizeof(ColorStop),
+  /* 0086: VAR_TYPE_COLOR_STOP_LIST        */ 0,
+  /* 0087: VAR_TYPE_IMAGE                  */ 0,
+  /* 0088: VAR_TYPE_IMAGE_PALETTE          */ 0,
+  /* 0089: VAR_TYPE_IMAGE_FILTER           */ 0,
+  /* 0090: VAR_TYPE_FONT                   */ 0
 };
 // ${VAR_TYPE:END}
 
@@ -252,17 +252,17 @@ _CreateNull:
     case VAR_TYPE_DOUBLE:
       goto _CreateSimple;
 
-    case VAR_TYPE_STRINGA:
-    case VAR_TYPE_STRINGW:
-    case VAR_TYPE_LIST_STRINGA:
-    case VAR_TYPE_LIST_STRINGW:
+    case VAR_TYPE_STRING_A:
+    case VAR_TYPE_STRING_W:
+    case VAR_TYPE_LIST_STRING_A:
+    case VAR_TYPE_LIST_STRING_W:
     case VAR_TYPE_LIST_VAR:
-    case VAR_TYPE_HASH_STRINGA_STRINGA:
-    case VAR_TYPE_HASH_STRINGA_VAR:
-    case VAR_TYPE_HASH_STRINGW_STRINGW:
-    case VAR_TYPE_HASH_STRINGW_VAR:
-    case VAR_TYPE_REGEXPA:
-    case VAR_TYPE_REGEXPW:
+    case VAR_TYPE_HASH_STRING_A_STRING_A:
+    case VAR_TYPE_HASH_STRING_A_VAR:
+    case VAR_TYPE_HASH_STRING_W_STRING_W:
+    case VAR_TYPE_HASH_STRING_W_VAR:
+    case VAR_TYPE_REGEXP_A:
+    case VAR_TYPE_REGEXP_W:
     case VAR_TYPE_LOCALE:
 _CreateImplicit:
       self->_d = static_cast<const Var*>(vData)->_d->addRef();
@@ -272,53 +272,53 @@ _CreateImplicit:
     case VAR_TYPE_TIME:
       goto _CreateSimple;
 
-    case VAR_TYPE_POINTI:
-    case VAR_TYPE_POINTF:
-    case VAR_TYPE_POINTD:
-    case VAR_TYPE_SIZEI:
-    case VAR_TYPE_SIZEF:
-    case VAR_TYPE_SIZED:
-    case VAR_TYPE_BOXI:
-    case VAR_TYPE_BOXF:
-    case VAR_TYPE_BOXD:
-    case VAR_TYPE_RECTI:
-    case VAR_TYPE_RECTF:
-    case VAR_TYPE_RECTD:
-    case VAR_TYPE_LINEF:
-    case VAR_TYPE_LINED:
-    case VAR_TYPE_QBEZIERF:
-    case VAR_TYPE_QBEZIERD:
-    case VAR_TYPE_CBEZIERF:
-    case VAR_TYPE_CBEZIERD:
-    case VAR_TYPE_TRIANGLEF:
-    case VAR_TYPE_TRIANGLED:
-    case VAR_TYPE_ROUNDF:
-    case VAR_TYPE_ROUNDD:
-    case VAR_TYPE_CIRCLEF:
-    case VAR_TYPE_CIRCLED:
-    case VAR_TYPE_ELLIPSEF:
-    case VAR_TYPE_ELLIPSED:
-    case VAR_TYPE_ARCF:
-    case VAR_TYPE_ARCD:
-    case VAR_TYPE_CHORDF:
-    case VAR_TYPE_CHORDD:
-    case VAR_TYPE_PIEF:
-    case VAR_TYPE_PIED:
+    case VAR_TYPE_POINT_I:
+    case VAR_TYPE_POINT_F:
+    case VAR_TYPE_POINT_D:
+    case VAR_TYPE_SIZE_I:
+    case VAR_TYPE_SIZE_F:
+    case VAR_TYPE_SIZE_D:
+    case VAR_TYPE_BOX_I:
+    case VAR_TYPE_BOX_F:
+    case VAR_TYPE_BOX_D:
+    case VAR_TYPE_RECT_I:
+    case VAR_TYPE_RECT_F:
+    case VAR_TYPE_RECT_D:
+    case VAR_TYPE_LINE_F:
+    case VAR_TYPE_LINE_D:
+    case VAR_TYPE_QBEZIER_F:
+    case VAR_TYPE_QBEZIER_D:
+    case VAR_TYPE_CBEZIER_F:
+    case VAR_TYPE_CBEZIER_D:
+    case VAR_TYPE_TRIANGLE_F:
+    case VAR_TYPE_TRIANGLE_D:
+    case VAR_TYPE_ROUND_F:
+    case VAR_TYPE_ROUND_D:
+    case VAR_TYPE_CIRCLE_F:
+    case VAR_TYPE_CIRCLE_D:
+    case VAR_TYPE_ELLIPSE_F:
+    case VAR_TYPE_ELLIPSE_D:
+    case VAR_TYPE_ARC_F:
+    case VAR_TYPE_ARC_D:
+    case VAR_TYPE_CHORD_F:
+    case VAR_TYPE_CHORD_D:
+    case VAR_TYPE_PIE_F:
+    case VAR_TYPE_PIE_D:
       goto _CreateSimple;
 
-    case VAR_TYPE_POLYGONF:
-    case VAR_TYPE_POLYGOND:
-    case VAR_TYPE_PATHF:
-    case VAR_TYPE_PATHD:
+    case VAR_TYPE_POLYGON_F:
+    case VAR_TYPE_POLYGON_D:
+    case VAR_TYPE_PATH_F:
+    case VAR_TYPE_PATH_D:
     case VAR_TYPE_REGION:
       goto _CreateImplicit;
 
-    case VAR_TYPE_TRANSFORMF:
-    case VAR_TYPE_TRANSFORMD:
+    case VAR_TYPE_TRANSFORM_F:
+    case VAR_TYPE_TRANSFORM_D:
       goto _CreateSimple;
 
-    case VAR_TYPE_MATRIXF:
-    case VAR_TYPE_MATRIXD:
+    case VAR_TYPE_MATRIX_F:
+    case VAR_TYPE_MATRIX_D:
       goto _CreateImplicit;
 
     case VAR_TYPE_COLOR:
@@ -562,13 +562,13 @@ static err_t FOG_CDECL Var_getI32(const Var* self, int32_t* dst)
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
     {
       const StringA* val = reinterpret_cast<const StringA*>(self);
       return val->parseI32(dst);
     }
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
     {
       const StringW* val = reinterpret_cast<const StringW*>(self);
       return val->parseI32(dst);
@@ -718,13 +718,13 @@ static err_t FOG_CDECL Var_getU32(const Var* self, uint32_t* dst)
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
     {
       const StringA* val = reinterpret_cast<const StringA*>(self);
       return val->parseU32(dst);
     }
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
     {
       const StringW* val = reinterpret_cast<const StringW*>(self);
       return val->parseU32(dst);
@@ -852,13 +852,13 @@ static err_t FOG_CDECL Var_getI64(const Var* self, int64_t* dst)
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
     {
       const StringA* val = reinterpret_cast<const StringA*>(self);
       return val->parseI64(dst);
     }
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
     {
       const StringW* val = reinterpret_cast<const StringW*>(self);
       return val->parseI64(dst);
@@ -994,13 +994,13 @@ static err_t FOG_CDECL Var_getU64(const Var* self, uint64_t* dst)
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
     {
       const StringA* val = reinterpret_cast<const StringA*>(self);
       return val->parseU64(dst);
     }
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
     {
       const StringW* val = reinterpret_cast<const StringW*>(self);
       return val->parseU64(dst);
@@ -1100,13 +1100,13 @@ static err_t FOG_CDECL Var_getFloat(const Var* self, float* dst)
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
     {
       const StringA* val = reinterpret_cast<const StringA*>(self);
       return val->parseReal(dst);
     }
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
     {
       const StringW* val = reinterpret_cast<const StringW*>(self);
       return val->parseReal(dst);
@@ -1192,13 +1192,13 @@ static err_t FOG_CDECL Var_getDouble(const Var* self, double* dst)
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
     {
       const StringA* val = reinterpret_cast<const StringA*>(self);
       return val->parseReal(dst);
     }
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
     {
       const StringW* val = reinterpret_cast<const StringW*>(self);
       return val->parseReal(dst);
@@ -1250,17 +1250,17 @@ _SetSimple:
         MemOps::copy(vData, d->getData(), Var_getDataSize(vType));
         return ERR_OK;
 
-      case VAR_TYPE_STRINGA:
-      case VAR_TYPE_STRINGW:
-      case VAR_TYPE_LIST_STRINGA:
-      case VAR_TYPE_LIST_STRINGW:
+      case VAR_TYPE_STRING_A:
+      case VAR_TYPE_STRING_W:
+      case VAR_TYPE_LIST_STRING_A:
+      case VAR_TYPE_LIST_STRING_W:
       case VAR_TYPE_LIST_VAR:
-      case VAR_TYPE_HASH_STRINGA_STRINGA:
-      case VAR_TYPE_HASH_STRINGA_VAR:
-      case VAR_TYPE_HASH_STRINGW_STRINGW:
-      case VAR_TYPE_HASH_STRINGW_VAR:
-      case VAR_TYPE_REGEXPA:
-      case VAR_TYPE_REGEXPW:
+      case VAR_TYPE_HASH_STRING_A_STRING_A:
+      case VAR_TYPE_HASH_STRING_A_VAR:
+      case VAR_TYPE_HASH_STRING_W_STRING_W:
+      case VAR_TYPE_HASH_STRING_W_VAR:
+      case VAR_TYPE_REGEXP_A:
+      case VAR_TYPE_REGEXP_W:
       case VAR_TYPE_LOCALE:
 _SetImplicit:
         atomicPtrXchg(&static_cast<Var*>(vData)->_d, Var_dImplicitAddRef(d))->release();
@@ -1270,52 +1270,52 @@ _SetImplicit:
       case VAR_TYPE_TIME:
         // ... Fall through ...
 
-      case VAR_TYPE_POINTI:
-      case VAR_TYPE_POINTF:
-      case VAR_TYPE_POINTD:
-      case VAR_TYPE_SIZEI:
-      case VAR_TYPE_SIZEF:
-      case VAR_TYPE_SIZED:
-      case VAR_TYPE_BOXI:
-      case VAR_TYPE_BOXF:
-      case VAR_TYPE_BOXD:
-      case VAR_TYPE_RECTI:
-      case VAR_TYPE_RECTF:
-      case VAR_TYPE_RECTD:
+      case VAR_TYPE_POINT_I:
+      case VAR_TYPE_POINT_F:
+      case VAR_TYPE_POINT_D:
+      case VAR_TYPE_SIZE_I:
+      case VAR_TYPE_SIZE_F:
+      case VAR_TYPE_SIZE_D:
+      case VAR_TYPE_BOX_I:
+      case VAR_TYPE_BOX_F:
+      case VAR_TYPE_BOX_D:
+      case VAR_TYPE_RECT_I:
+      case VAR_TYPE_RECT_F:
+      case VAR_TYPE_RECT_D:
       // Reserved for VAR_TYPE_LINEI.
-      case VAR_TYPE_LINEF:
-      case VAR_TYPE_LINED:
-      case VAR_TYPE_QBEZIERF:
-      case VAR_TYPE_QBEZIERD:
-      case VAR_TYPE_CBEZIERF:
-      case VAR_TYPE_CBEZIERD:
-      case VAR_TYPE_TRIANGLEF:
-      case VAR_TYPE_TRIANGLED:
-      case VAR_TYPE_ROUNDF:
-      case VAR_TYPE_ROUNDD:
-      case VAR_TYPE_CIRCLEF:
-      case VAR_TYPE_CIRCLED:
-      case VAR_TYPE_ELLIPSEF:
-      case VAR_TYPE_ELLIPSED:
-      case VAR_TYPE_ARCF:
-      case VAR_TYPE_ARCD:
-      case VAR_TYPE_CHORDF:
-      case VAR_TYPE_CHORDD:
-      case VAR_TYPE_PIEF:
-      case VAR_TYPE_PIED:
+      case VAR_TYPE_LINE_F:
+      case VAR_TYPE_LINE_D:
+      case VAR_TYPE_QBEZIER_F:
+      case VAR_TYPE_QBEZIER_D:
+      case VAR_TYPE_CBEZIER_F:
+      case VAR_TYPE_CBEZIER_D:
+      case VAR_TYPE_TRIANGLE_F:
+      case VAR_TYPE_TRIANGLE_D:
+      case VAR_TYPE_ROUND_F:
+      case VAR_TYPE_ROUND_D:
+      case VAR_TYPE_CIRCLE_F:
+      case VAR_TYPE_CIRCLE_D:
+      case VAR_TYPE_ELLIPSE_F:
+      case VAR_TYPE_ELLIPSE_D:
+      case VAR_TYPE_ARC_F:
+      case VAR_TYPE_ARC_D:
+      case VAR_TYPE_CHORD_F:
+      case VAR_TYPE_CHORD_D:
+      case VAR_TYPE_PIE_F:
+      case VAR_TYPE_PIE_D:
         goto _SetSimple;
 
-      case VAR_TYPE_PATHF:
-      case VAR_TYPE_PATHD:
+      case VAR_TYPE_PATH_F:
+      case VAR_TYPE_PATH_D:
       case VAR_TYPE_REGION:
         goto _SetImplicit;
 
-      case VAR_TYPE_TRANSFORMF:
-      case VAR_TYPE_TRANSFORMD:
+      case VAR_TYPE_TRANSFORM_F:
+      case VAR_TYPE_TRANSFORM_D:
         goto _SetSimple;
 
-      case VAR_TYPE_MATRIXF:
-      case VAR_TYPE_MATRIXD:
+      case VAR_TYPE_MATRIX_F:
+      case VAR_TYPE_MATRIX_D:
         goto _SetImplicit;
 
       case VAR_TYPE_COLOR:
@@ -1401,17 +1401,17 @@ _SetSimple:
       return ERR_OK;
     }
 
-    case VAR_TYPE_STRINGA:
-    case VAR_TYPE_STRINGW:
-    case VAR_TYPE_LIST_STRINGA:
-    case VAR_TYPE_LIST_STRINGW:
+    case VAR_TYPE_STRING_A:
+    case VAR_TYPE_STRING_W:
+    case VAR_TYPE_LIST_STRING_A:
+    case VAR_TYPE_LIST_STRING_W:
     case VAR_TYPE_LIST_VAR:
-    case VAR_TYPE_HASH_STRINGA_STRINGA:
-    case VAR_TYPE_HASH_STRINGA_VAR:
-    case VAR_TYPE_HASH_STRINGW_STRINGW:
-    case VAR_TYPE_HASH_STRINGW_VAR:
-    case VAR_TYPE_REGEXPA:
-    case VAR_TYPE_REGEXPW:
+    case VAR_TYPE_HASH_STRING_A_STRING_A:
+    case VAR_TYPE_HASH_STRING_A_VAR:
+    case VAR_TYPE_HASH_STRING_W_STRING_W:
+    case VAR_TYPE_HASH_STRING_W_VAR:
+    case VAR_TYPE_REGEXP_A:
+    case VAR_TYPE_REGEXP_W:
     case VAR_TYPE_LOCALE:
 _SetImplicit:
       atomicPtrXchg(&self->_d, Var_dImplicitAddRef(static_cast<const Var*>(vData)->_d))->release();
@@ -1421,52 +1421,52 @@ _SetImplicit:
     case VAR_TYPE_TIME:
       // ... Fall through ...
 
-    case VAR_TYPE_POINTI:
-    case VAR_TYPE_POINTF:
-    case VAR_TYPE_POINTD:
-    case VAR_TYPE_SIZEI:
-    case VAR_TYPE_SIZEF:
-    case VAR_TYPE_SIZED:
-    case VAR_TYPE_BOXI:
-    case VAR_TYPE_BOXF:
-    case VAR_TYPE_BOXD:
-    case VAR_TYPE_RECTI:
-    case VAR_TYPE_RECTF:
-    case VAR_TYPE_RECTD:
+    case VAR_TYPE_POINT_I:
+    case VAR_TYPE_POINT_F:
+    case VAR_TYPE_POINT_D:
+    case VAR_TYPE_SIZE_I:
+    case VAR_TYPE_SIZE_F:
+    case VAR_TYPE_SIZE_D:
+    case VAR_TYPE_BOX_I:
+    case VAR_TYPE_BOX_F:
+    case VAR_TYPE_BOX_D:
+    case VAR_TYPE_RECT_I:
+    case VAR_TYPE_RECT_F:
+    case VAR_TYPE_RECT_D:
     // Reserved for VAR_TYPE_LINEI.
-    case VAR_TYPE_LINEF:
-    case VAR_TYPE_LINED:
-    case VAR_TYPE_QBEZIERF:
-    case VAR_TYPE_QBEZIERD:
-    case VAR_TYPE_CBEZIERF:
-    case VAR_TYPE_CBEZIERD:
-    case VAR_TYPE_TRIANGLEF:
-    case VAR_TYPE_TRIANGLED:
-    case VAR_TYPE_ROUNDF:
-    case VAR_TYPE_ROUNDD:
-    case VAR_TYPE_CIRCLEF:
-    case VAR_TYPE_CIRCLED:
-    case VAR_TYPE_ELLIPSEF:
-    case VAR_TYPE_ELLIPSED:
-    case VAR_TYPE_ARCF:
-    case VAR_TYPE_ARCD:
-    case VAR_TYPE_CHORDF:
-    case VAR_TYPE_CHORDD:
-    case VAR_TYPE_PIEF:
-    case VAR_TYPE_PIED:
+    case VAR_TYPE_LINE_F:
+    case VAR_TYPE_LINE_D:
+    case VAR_TYPE_QBEZIER_F:
+    case VAR_TYPE_QBEZIER_D:
+    case VAR_TYPE_CBEZIER_F:
+    case VAR_TYPE_CBEZIER_D:
+    case VAR_TYPE_TRIANGLE_F:
+    case VAR_TYPE_TRIANGLE_D:
+    case VAR_TYPE_ROUND_F:
+    case VAR_TYPE_ROUND_D:
+    case VAR_TYPE_CIRCLE_F:
+    case VAR_TYPE_CIRCLE_D:
+    case VAR_TYPE_ELLIPSE_F:
+    case VAR_TYPE_ELLIPSE_D:
+    case VAR_TYPE_ARC_F:
+    case VAR_TYPE_ARC_D:
+    case VAR_TYPE_CHORD_F:
+    case VAR_TYPE_CHORD_D:
+    case VAR_TYPE_PIE_F:
+    case VAR_TYPE_PIE_D:
       goto _SetSimple;
 
-    case VAR_TYPE_PATHF:
-    case VAR_TYPE_PATHD:
+    case VAR_TYPE_PATH_F:
+    case VAR_TYPE_PATH_D:
     case VAR_TYPE_REGION:
       goto _SetImplicit;
 
-    case VAR_TYPE_TRANSFORMF:
-    case VAR_TYPE_TRANSFORMD:
+    case VAR_TYPE_TRANSFORM_F:
+    case VAR_TYPE_TRANSFORM_D:
       goto _SetSimple;
 
-    case VAR_TYPE_MATRIXF:
-    case VAR_TYPE_MATRIXD:
+    case VAR_TYPE_MATRIX_F:
+    case VAR_TYPE_MATRIX_D:
       goto _SetImplicit;
 
     // TODO:
@@ -1689,33 +1689,33 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
       case VAR_TYPE_DOUBLE:
         return VAR_SIMPLE_C(a_d, uint64_t) == VAR_SIMPLE_C(b_d, uint64_t);
 
-      case VAR_TYPE_STRINGA:
+      case VAR_TYPE_STRING_A:
         return *reinterpret_cast<const StringA*>(a) == *reinterpret_cast<const StringA*>(b);
-      case VAR_TYPE_STRINGW:
+      case VAR_TYPE_STRING_W:
         return *reinterpret_cast<const StringW*>(a) == *reinterpret_cast<const StringW*>(b);
 
-      case VAR_TYPE_LIST_STRINGA:
+      case VAR_TYPE_LIST_STRING_A:
         return *reinterpret_cast<const List<StringA>*>(a) == *reinterpret_cast<const List<StringA>*>(b);
-      case VAR_TYPE_LIST_STRINGW:
+      case VAR_TYPE_LIST_STRING_W:
         return *reinterpret_cast<const List<StringW>*>(a) == *reinterpret_cast<const List<StringW>*>(b);
       case VAR_TYPE_LIST_VAR:
         return *reinterpret_cast<const List<Var>*>(a) == *reinterpret_cast<const List<Var>*>(b);
 
-      case VAR_TYPE_HASH_STRINGA_STRINGA:
+      case VAR_TYPE_HASH_STRING_A_STRING_A:
         return *reinterpret_cast<const Hash<StringA, StringA>*>(a) == *reinterpret_cast<const Hash<StringA, StringA>*>(b);
-      case VAR_TYPE_HASH_STRINGA_VAR:
+      case VAR_TYPE_HASH_STRING_A_VAR:
         return *reinterpret_cast<const Hash<StringA, Var>*>(a) == *reinterpret_cast<const Hash<StringA, Var>*>(b);
 
-      case VAR_TYPE_HASH_STRINGW_STRINGW:
+      case VAR_TYPE_HASH_STRING_W_STRING_W:
         return *reinterpret_cast<const Hash<StringW, StringW>*>(a) == *reinterpret_cast<const Hash<StringW, StringW>*>(b);
-      case VAR_TYPE_HASH_STRINGW_VAR:
+      case VAR_TYPE_HASH_STRING_W_VAR:
         return *reinterpret_cast<const Hash<StringW, Var>*>(a) == *reinterpret_cast<const Hash<StringW, Var>*>(b);
 
-      case VAR_TYPE_REGEXPA:
+      case VAR_TYPE_REGEXP_A:
         //return *reinterpret_cast<const RegExpA*>(a) == *reinterpret_cast<const RegExpA*>(b);
         // TODO:
         return false;
-      case VAR_TYPE_REGEXPW:
+      case VAR_TYPE_REGEXP_W:
         //return *reinterpret_cast<const RegExpW*>(a) == *reinterpret_cast<const RegExpW*>(b);
         // TODO:
         return false;
@@ -1728,107 +1728,107 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
       case VAR_TYPE_TIME:
         return VAR_SIMPLE_C(a_d, Time) == VAR_SIMPLE_C(b_d, Time);
 
-      case VAR_TYPE_POINTI:
+      case VAR_TYPE_POINT_I:
         return VAR_SIMPLE_C(a_d, PointI) == VAR_SIMPLE_C(b_d, PointI);
-      case VAR_TYPE_POINTF:
+      case VAR_TYPE_POINT_F:
         return VAR_SIMPLE_C(a_d, PointF) == VAR_SIMPLE_C(b_d, PointF);
-      case VAR_TYPE_POINTD:
+      case VAR_TYPE_POINT_D:
         return VAR_SIMPLE_C(a_d, PointD) == VAR_SIMPLE_C(b_d, PointD);
 
-      case VAR_TYPE_SIZEI:
+      case VAR_TYPE_SIZE_I:
         return VAR_SIMPLE_C(a_d, SizeI) == VAR_SIMPLE_C(b_d, SizeI);
-      case VAR_TYPE_SIZEF:
+      case VAR_TYPE_SIZE_F:
         return VAR_SIMPLE_C(a_d, SizeF) == VAR_SIMPLE_C(b_d, SizeF);
-      case VAR_TYPE_SIZED:
+      case VAR_TYPE_SIZE_D:
         return VAR_SIMPLE_C(a_d, SizeD) == VAR_SIMPLE_C(b_d, SizeD);
 
-      case VAR_TYPE_BOXI:
+      case VAR_TYPE_BOX_I:
         return VAR_SIMPLE_C(a_d, BoxI) == VAR_SIMPLE_C(b_d, BoxI);
-      case VAR_TYPE_BOXF:
+      case VAR_TYPE_BOX_F:
         return VAR_SIMPLE_C(a_d, BoxF) == VAR_SIMPLE_C(b_d, BoxF);
-      case VAR_TYPE_BOXD:
+      case VAR_TYPE_BOX_D:
         return VAR_SIMPLE_C(a_d, BoxD) == VAR_SIMPLE_C(b_d, BoxD);
 
-      case VAR_TYPE_RECTI:
+      case VAR_TYPE_RECT_I:
         return VAR_SIMPLE_C(a_d, RectI) == VAR_SIMPLE_C(b_d, RectI);
-      case VAR_TYPE_RECTF:
+      case VAR_TYPE_RECT_F:
         return VAR_SIMPLE_C(a_d, RectF) == VAR_SIMPLE_C(b_d, RectF);
-      case VAR_TYPE_RECTD:
+      case VAR_TYPE_RECT_D:
         return VAR_SIMPLE_C(a_d, RectD) == VAR_SIMPLE_C(b_d, RectD);
 
-      case VAR_TYPE_LINEF:
+      case VAR_TYPE_LINE_F:
         return VAR_SIMPLE_C(a_d, LineF) == VAR_SIMPLE_C(b_d, LineF);
-      case VAR_TYPE_LINED:
+      case VAR_TYPE_LINE_D:
         return VAR_SIMPLE_C(a_d, LineD) == VAR_SIMPLE_C(b_d, LineD);
 
-      case VAR_TYPE_QBEZIERF:
+      case VAR_TYPE_QBEZIER_F:
         return VAR_SIMPLE_C(a_d, QBezierF) == VAR_SIMPLE_C(b_d, QBezierF);
-      case VAR_TYPE_QBEZIERD:
+      case VAR_TYPE_QBEZIER_D:
         return VAR_SIMPLE_C(a_d, QBezierD) == VAR_SIMPLE_C(b_d, QBezierD);
 
-      case VAR_TYPE_CBEZIERF:
+      case VAR_TYPE_CBEZIER_F:
         return VAR_SIMPLE_C(a_d, CBezierF) == VAR_SIMPLE_C(b_d, CBezierF);
-      case VAR_TYPE_CBEZIERD:
+      case VAR_TYPE_CBEZIER_D:
         return VAR_SIMPLE_C(a_d, CBezierD) == VAR_SIMPLE_C(b_d, CBezierD);
 
-      case VAR_TYPE_TRIANGLEF:
+      case VAR_TYPE_TRIANGLE_F:
         return VAR_SIMPLE_C(a_d, TriangleF) == VAR_SIMPLE_C(b_d, TriangleF);
-      case VAR_TYPE_TRIANGLED:
+      case VAR_TYPE_TRIANGLE_D:
         return VAR_SIMPLE_C(a_d, TriangleD) == VAR_SIMPLE_C(b_d, TriangleD);
 
-      case VAR_TYPE_ROUNDF:
+      case VAR_TYPE_ROUND_F:
         return VAR_SIMPLE_C(a_d, RoundF) == VAR_SIMPLE_C(b_d, RoundF);
-      case VAR_TYPE_ROUNDD:
+      case VAR_TYPE_ROUND_D:
         return VAR_SIMPLE_C(a_d, RoundD) == VAR_SIMPLE_C(b_d, RoundD);
 
-      case VAR_TYPE_CIRCLEF:
+      case VAR_TYPE_CIRCLE_F:
         return VAR_SIMPLE_C(a_d, CircleF) == VAR_SIMPLE_C(b_d, CircleF);
-      case VAR_TYPE_CIRCLED:
+      case VAR_TYPE_CIRCLE_D:
         return VAR_SIMPLE_C(a_d, CircleD) == VAR_SIMPLE_C(b_d, CircleD);
 
-      case VAR_TYPE_ELLIPSEF:
+      case VAR_TYPE_ELLIPSE_F:
         return VAR_SIMPLE_C(a_d, EllipseF) == VAR_SIMPLE_C(b_d, EllipseF);
-      case VAR_TYPE_ELLIPSED:
+      case VAR_TYPE_ELLIPSE_D:
         return VAR_SIMPLE_C(a_d, EllipseD) == VAR_SIMPLE_C(b_d, EllipseD);
 
-      case VAR_TYPE_ARCF:
+      case VAR_TYPE_ARC_F:
         return VAR_SIMPLE_C(a_d, ArcF) == VAR_SIMPLE_C(b_d, ArcF);
-      case VAR_TYPE_ARCD:
+      case VAR_TYPE_ARC_D:
         return VAR_SIMPLE_C(a_d, ArcD) == VAR_SIMPLE_C(b_d, ArcD);
 
-      case VAR_TYPE_CHORDF:
+      case VAR_TYPE_CHORD_F:
         return VAR_SIMPLE_C(a_d, ChordF) == VAR_SIMPLE_C(b_d, ChordF);
-      case VAR_TYPE_CHORDD:
+      case VAR_TYPE_CHORD_D:
         return VAR_SIMPLE_C(a_d, ChordD) == VAR_SIMPLE_C(b_d, ChordD);
 
-      case VAR_TYPE_PIEF:
+      case VAR_TYPE_PIE_F:
         return VAR_SIMPLE_C(a_d, PieF) == VAR_SIMPLE_C(b_d, PieF);
-      case VAR_TYPE_PIED:
+      case VAR_TYPE_PIE_D:
         return VAR_SIMPLE_C(a_d, PieD) == VAR_SIMPLE_C(b_d, PieD);
 
-      case VAR_TYPE_POLYGONF:
+      case VAR_TYPE_POLYGON_F:
         // TODO: Var.
         return false;
-      case VAR_TYPE_POLYGOND:
+      case VAR_TYPE_POLYGON_D:
         // TODO: Var.
         return false;
 
-      case VAR_TYPE_PATHF:
+      case VAR_TYPE_PATH_F:
         return *reinterpret_cast<const PathF*>(a) == *reinterpret_cast<const PathF*>(b);
-      case VAR_TYPE_PATHD:
+      case VAR_TYPE_PATH_D:
         return *reinterpret_cast<const PathD*>(a) == *reinterpret_cast<const PathD*>(b);
 
       case VAR_TYPE_REGION:
         return *reinterpret_cast<const Region*>(a) == *reinterpret_cast<const Region*>(b);
 
-      case VAR_TYPE_TRANSFORMF:
+      case VAR_TYPE_TRANSFORM_F:
         return *reinterpret_cast<const TransformF*>(a) == *reinterpret_cast<const TransformF*>(b);
-      case VAR_TYPE_TRANSFORMD:
+      case VAR_TYPE_TRANSFORM_D:
         return *reinterpret_cast<const TransformD*>(a) == *reinterpret_cast<const TransformD*>(b);
 
-      case VAR_TYPE_MATRIXF:
+      case VAR_TYPE_MATRIX_F:
         return *reinterpret_cast<const MatrixF*>(a) == *reinterpret_cast<const MatrixF*>(b);
-      case VAR_TYPE_MATRIXD:
+      case VAR_TYPE_MATRIX_D:
         return *reinterpret_cast<const MatrixD*>(a) == *reinterpret_cast<const MatrixD*>(b);
 
       case VAR_TYPE_COLOR:
@@ -2094,20 +2094,20 @@ static void FOG_CDECL Var_dRelease(VarData* d)
     case VAR_TYPE_DOUBLE:
       goto _ReleaseSimple;
 
-    case VAR_TYPE_STRINGA:
+    case VAR_TYPE_STRING_A:
       reinterpret_cast<StringDataA*>(d)->release();
       return;
 
-    case VAR_TYPE_STRINGW:
+    case VAR_TYPE_STRING_W:
       reinterpret_cast<StringDataW*>(d)->release();
       return;
 
-    case VAR_TYPE_LIST_STRINGA:
+    case VAR_TYPE_LIST_STRING_A:
       if (reinterpret_cast<ListUntypedData*>(d)->reference.deref())
         fog_api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), fog_api.list_stringa_vTable);
       return;
 
-    case VAR_TYPE_LIST_STRINGW:
+    case VAR_TYPE_LIST_STRING_W:
       if (reinterpret_cast<ListUntypedData*>(d)->reference.deref())
         fog_api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), fog_api.list_stringw_vTable);
       return;
@@ -2117,31 +2117,31 @@ static void FOG_CDECL Var_dRelease(VarData* d)
         fog_api.list_unknown_dFree(reinterpret_cast<ListUntypedData*>(d), fog_api.list_var_vTable);
       return;
 
-    case VAR_TYPE_HASH_STRINGA_STRINGA:
+    case VAR_TYPE_HASH_STRING_A_STRING_A:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
         fog_api.hash_stringa_stringa_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
-    case VAR_TYPE_HASH_STRINGA_VAR:
+    case VAR_TYPE_HASH_STRING_A_VAR:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
         fog_api.hash_stringa_var_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
-    case VAR_TYPE_HASH_STRINGW_STRINGW:
+    case VAR_TYPE_HASH_STRING_W_STRING_W:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
         fog_api.hash_stringw_stringw_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
-    case VAR_TYPE_HASH_STRINGW_VAR:
+    case VAR_TYPE_HASH_STRING_W_VAR:
       if (reinterpret_cast<HashUntypedData*>(d)->reference.deref())
         fog_api.hash_stringw_var_dFree(reinterpret_cast<HashUntypedData*>(d));
       return;
 
-    case VAR_TYPE_REGEXPA:
+    case VAR_TYPE_REGEXP_A:
       reinterpret_cast<RegExpDataA*>(d)->release();
       return;
 
-    case VAR_TYPE_REGEXPW:
+    case VAR_TYPE_REGEXP_W:
       reinterpret_cast<RegExpDataW*>(d)->release();
       return;
 
@@ -2153,53 +2153,53 @@ static void FOG_CDECL Var_dRelease(VarData* d)
     case VAR_TYPE_TIME:
       goto _ReleaseSimple;
 
-    case VAR_TYPE_POINTI:
-    case VAR_TYPE_POINTF:
-    case VAR_TYPE_POINTD:
-    case VAR_TYPE_SIZEI:
-    case VAR_TYPE_SIZEF:
-    case VAR_TYPE_SIZED:
-    case VAR_TYPE_BOXI:
-    case VAR_TYPE_BOXF:
-    case VAR_TYPE_BOXD:
-    case VAR_TYPE_RECTI:
-    case VAR_TYPE_RECTF:
-    case VAR_TYPE_RECTD:
-    case VAR_TYPE_LINEF:
-    case VAR_TYPE_LINED:
-    case VAR_TYPE_QBEZIERF:
-    case VAR_TYPE_QBEZIERD:
-    case VAR_TYPE_CBEZIERF:
-    case VAR_TYPE_CBEZIERD:
-    case VAR_TYPE_TRIANGLEF:
-    case VAR_TYPE_TRIANGLED:
-    case VAR_TYPE_ROUNDF:
-    case VAR_TYPE_ROUNDD:
-    case VAR_TYPE_CIRCLEF:
-    case VAR_TYPE_CIRCLED:
-    case VAR_TYPE_ELLIPSEF:
-    case VAR_TYPE_ELLIPSED:
-    case VAR_TYPE_ARCF:
-    case VAR_TYPE_ARCD:
-    case VAR_TYPE_CHORDF:
-    case VAR_TYPE_CHORDD:
-    case VAR_TYPE_PIEF:
-    case VAR_TYPE_PIED:
+    case VAR_TYPE_POINT_I:
+    case VAR_TYPE_POINT_F:
+    case VAR_TYPE_POINT_D:
+    case VAR_TYPE_SIZE_I:
+    case VAR_TYPE_SIZE_F:
+    case VAR_TYPE_SIZE_D:
+    case VAR_TYPE_BOX_I:
+    case VAR_TYPE_BOX_F:
+    case VAR_TYPE_BOX_D:
+    case VAR_TYPE_RECT_I:
+    case VAR_TYPE_RECT_F:
+    case VAR_TYPE_RECT_D:
+    case VAR_TYPE_LINE_F:
+    case VAR_TYPE_LINE_D:
+    case VAR_TYPE_QBEZIER_F:
+    case VAR_TYPE_QBEZIER_D:
+    case VAR_TYPE_CBEZIER_F:
+    case VAR_TYPE_CBEZIER_D:
+    case VAR_TYPE_TRIANGLE_F:
+    case VAR_TYPE_TRIANGLE_D:
+    case VAR_TYPE_ROUND_F:
+    case VAR_TYPE_ROUND_D:
+    case VAR_TYPE_CIRCLE_F:
+    case VAR_TYPE_CIRCLE_D:
+    case VAR_TYPE_ELLIPSE_F:
+    case VAR_TYPE_ELLIPSE_D:
+    case VAR_TYPE_ARC_F:
+    case VAR_TYPE_ARC_D:
+    case VAR_TYPE_CHORD_F:
+    case VAR_TYPE_CHORD_D:
+    case VAR_TYPE_PIE_F:
+    case VAR_TYPE_PIE_D:
       goto _ReleaseSimple;
 
-    case VAR_TYPE_POLYGONF:
+    case VAR_TYPE_POLYGON_F:
       // TODO: Var.
       return;
 
-    case VAR_TYPE_POLYGOND:
+    case VAR_TYPE_POLYGON_D:
       // TODO: Var.
       return;
 
-    case VAR_TYPE_PATHF:
+    case VAR_TYPE_PATH_F:
       reinterpret_cast<PathDataF*>(d)->release();
       return;
 
-    case VAR_TYPE_PATHD:
+    case VAR_TYPE_PATH_D:
       reinterpret_cast<PathDataD*>(d)->release();
       return;
 
@@ -2207,15 +2207,15 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       reinterpret_cast<RegionData*>(d)->release();
       return;
 
-    case VAR_TYPE_TRANSFORMF:
-    case VAR_TYPE_TRANSFORMD:
+    case VAR_TYPE_TRANSFORM_F:
+    case VAR_TYPE_TRANSFORM_D:
       goto _ReleaseSimple;
 
-    case VAR_TYPE_MATRIXF:
+    case VAR_TYPE_MATRIX_F:
       reinterpret_cast<MatrixDataF*>(d)->release();
       return;
 
-    case VAR_TYPE_MATRIXD:
+    case VAR_TYPE_MATRIX_D:
       reinterpret_cast<MatrixDataD*>(d)->release();
       return;
 

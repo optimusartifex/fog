@@ -253,6 +253,7 @@ struct FeCompositingFunctionData;
 struct FeConvolveMatrix;
 struct FeConvolveSeparable;
 struct FeMorphology;
+struct FeTurbulence;
 
 // Fog/G2d/Painting.
 struct Painter;

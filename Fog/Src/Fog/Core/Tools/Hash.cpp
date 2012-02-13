@@ -81,16 +81,16 @@ static HashUntypedData* Hash_Unknown_Unknown_getDEmptyForType(uint32_t vType)
     case VAR_TYPE_UNKNOWN:
       return &Hash_Unknown_Unknown_dEmpty;
 
-    case VAR_TYPE_HASH_STRINGA_STRINGA:
+    case VAR_TYPE_HASH_STRING_A_STRING_A:
       return &Hash_StringA_StringA_dEmpty;
 
-    case VAR_TYPE_HASH_STRINGA_VAR:
+    case VAR_TYPE_HASH_STRING_A_VAR:
       return &Hash_StringA_Var_dEmpty;
 
-    case VAR_TYPE_HASH_STRINGW_STRINGW:
+    case VAR_TYPE_HASH_STRING_W_STRING_W:
       return &Hash_StringW_StringW_dEmpty;
 
-    case VAR_TYPE_HASH_STRINGW_VAR:
+    case VAR_TYPE_HASH_STRING_W_VAR:
       return &Hash_StringW_Var_dEmpty;
 
     default:
@@ -2157,7 +2157,7 @@ FOG_NO_EXPORT void Hash_init(void)
   // Hash<StringA, StringA>
   d = &Hash_StringA_StringA_dEmpty;
   d->reference.init(1);
-  d->vType = VAR_TYPE_HASH_STRINGA_STRINGA | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_HASH_STRING_A_STRING_A | VAR_FLAG_NONE;
   d->capacity = 1;
   d->expandCapacity = firstPrime;
   d->expandLength = 1;
@@ -2180,7 +2180,7 @@ FOG_NO_EXPORT void Hash_init(void)
   // Hash<StringA, Var>
   d = &Hash_StringW_Var_dEmpty;
   d->reference.init(1);
-  d->vType = VAR_TYPE_HASH_STRINGA_VAR | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_HASH_STRING_A_VAR | VAR_FLAG_NONE;
   d->capacity = 1;
   d->expandCapacity = firstPrime;
   d->expandLength = 1;
@@ -2203,7 +2203,7 @@ FOG_NO_EXPORT void Hash_init(void)
   // Hash<StringW, StringW>
   d = &Hash_StringW_StringW_dEmpty;
   d->reference.init(1);
-  d->vType = VAR_TYPE_HASH_STRINGW_STRINGW | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_HASH_STRING_W_STRING_W | VAR_FLAG_NONE;
   d->capacity = 1;
   d->expandCapacity = firstPrime;
   d->expandLength = 1;
@@ -2226,7 +2226,7 @@ FOG_NO_EXPORT void Hash_init(void)
   // Hash<StringW, Var>
   d = &Hash_StringW_Var_dEmpty;
   d->reference.init(1);
-  d->vType = VAR_TYPE_HASH_STRINGW_VAR | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_HASH_STRING_W_VAR | VAR_FLAG_NONE;
   d->capacity = 1;
   d->expandCapacity = firstPrime;
   d->expandLength = 1;

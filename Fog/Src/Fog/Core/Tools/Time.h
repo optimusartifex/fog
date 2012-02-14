@@ -282,12 +282,12 @@ struct FOG_NO_EXPORT TimeTicks
   //! @brief Get the platform dependent tick-count.
   //!
   //! The precision can be adjusted using @c ticksPrecision argument. If the
-  //! low precision is requested (@c TICKS_PRECISION_LOW) then the precision
+  //! low precision is requested (@c CPU_TICKS_PRECISION_LOW) then the precision
   //! varies between 1-15ms, otherwise the high-resolution tick-count is used.
   //!
   //! @note The high-resolution tick-count is generally slower and should be
   //! used only when it is really needed (benchmarking, for example)
-  static FOG_INLINE TimeTicks now(uint32_t ticksPrecision = TICKS_PRECISION_LOW)
+  static FOG_INLINE TimeTicks now(uint32_t ticksPrecision = CPU_TICKS_PRECISION_LOW)
   {
     return TimeTicks(fog_api.timeticks_now(ticksPrecision));
   }

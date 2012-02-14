@@ -345,7 +345,7 @@ struct FOG_NO_EXPORT FeComponentFunction
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const FeComponentFunction& identity()
+  static FOG_INLINE const FeComponentFunction& getIdentityInstance()
   {
     return *fog_api.fecomponentfunction_oIdentity;
   }

@@ -86,6 +86,7 @@
 #include <Fog/G2d/Imaging/Filters/FeConvolveMatrix.h>
 #include <Fog/G2d/Imaging/Filters/FeConvolveSeparable.h>
 #include <Fog/G2d/Imaging/Filters/FeMorphology.h>
+#include <Fog/G2d/Imaging/Filters/FeTurbulence.h>
 
 // ============================================================================
 // [Fog/G2d/OS]

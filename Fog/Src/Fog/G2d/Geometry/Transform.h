@@ -1305,7 +1305,7 @@ struct FOG_NO_EXPORT TransformF
   // [Statics - Instances]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const TransformF& identity()
+  static FOG_INLINE const TransformF& getIdentityInstance()
   {
     return *fog_api.transformf_oIdentity;
   }
@@ -2554,7 +2554,7 @@ struct FOG_NO_EXPORT TransformD
   // [Statics - Instances]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const TransformD& identity()
+  static FOG_INLINE const TransformD& getIdentityInstance()
   {
     return *fog_api.transformd_oIdentity;
   }

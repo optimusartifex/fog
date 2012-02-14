@@ -209,6 +209,7 @@ struct FOG_NO_EXPORT Var
 
   FOG_INLINE bool isColor() const { return getVarType() == VAR_TYPE_COLOR; }
   FOG_INLINE bool isPattern() const { return Math::isBounded<uint32_t>(getVarType(), _VAR_TYPE_PATTERN_START, _VAR_TYPE_PATTERN_END); }
+  // FOG_INLINE bool isColorOrPattern() const { return Math::isBounded<uint32_t>(getVarType(), VAR_TYPE_COLOR, VAR_TYPE_PATTERN); }
 
   FOG_INLINE bool isColorStop() const { return getVarType() == VAR_TYPE_COLOR_STOP; }
   FOG_INLINE bool isColorStopList() const { return getVarType() == VAR_TYPE_COLOR_STOP_LIST; }
@@ -545,7 +546,7 @@ struct FOG_NO_EXPORT Var
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Var& null() { return *fog_api.var_oNull; }
+  static FOG_INLINE const Var& getNullInstance() { return *fog_api.var_oNull; }
 
   // --------------------------------------------------------------------------
   // [Statics - From]

@@ -1231,6 +1231,16 @@ enum CPU_FEATURE
 };
 
 // ============================================================================
+// [Fog::CPU_TICKS_PRECISION]
+// ============================================================================
+
+enum CPU_TICKS_PRECISION
+{
+  CPU_TICKS_PRECISION_LOW = 0,
+  CPU_TICKS_PRECISION_HIGH = 1
+};
+
+// ============================================================================
 // [Fog::CPU_VENDOR]
 // ============================================================================
 
@@ -2596,16 +2606,6 @@ enum TEXT_SCRIPT
 };
 
 // ============================================================================
-// [Fog::TICKS_PRECISION]
-// ============================================================================
-
-enum TICKS_PRECISION
-{
-  TICKS_PRECISION_LOW = 0,
-  TICKS_PRECISION_HIGH = 1
-};
-
-// ============================================================================
 // [Fog::TIME_MS_PER_... / TIME_US_PER_...]
 // ============================================================================
 
@@ -2775,6 +2775,10 @@ enum USER_DIRECTORY
 //! created and immutable until the instance is destroyed.
 enum VAR_TYPE
 {
+  // --------------------------------------------------------------------------
+  // [Fog/Core]
+  // --------------------------------------------------------------------------
+
   VAR_TYPE_NULL = 0,
   VAR_TYPE_UNKNOWN = 0,
 
@@ -2787,17 +2791,32 @@ enum VAR_TYPE
   VAR_TYPE_FLOAT = 7,
   VAR_TYPE_DOUBLE = 8,
 
+  _VAR_TYPE_INTEGER_START = 2,
+  _VAR_TYPE_INTEGER_END = 6,
+
+  _VAR_TYPE_NUMBER_START = 2,
+  _VAR_TYPE_NUMBER_END = 8,
+
   VAR_TYPE_STRING_A = 9,
   VAR_TYPE_STRING_W = 10,
+
+  _VAR_TYPE_STRING_START = 9,
+  _VAR_TYPE_STRING_END = 10,
 
   VAR_TYPE_LIST_STRING_A = 11,
   VAR_TYPE_LIST_STRING_W = 12,
   VAR_TYPE_LIST_VAR = 13,
 
+  _VAR_TYPE_LIST_START = 11,
+  _VAR_TYPE_LIST_END = 13,
+
   VAR_TYPE_HASH_STRING_A_STRING_A = 14,
   VAR_TYPE_HASH_STRING_A_VAR = 15,
   VAR_TYPE_HASH_STRING_W_STRING_W = 16,
   VAR_TYPE_HASH_STRING_W_VAR = 17,
+
+  _VAR_TYPE_HASH_START = 14,
+  _VAR_TYPE_HASH_END = 17,
 
   VAR_TYPE_REGEXP_A = 18,
   VAR_TYPE_REGEXP_W = 19,
@@ -2806,6 +2825,10 @@ enum VAR_TYPE
 
   VAR_TYPE_DATE = 21,
   VAR_TYPE_TIME = 22,
+
+  // --------------------------------------------------------------------------
+  // [Fog/G2d]
+  // --------------------------------------------------------------------------
 
   VAR_TYPE_POINT_I = 32,
   VAR_TYPE_POINT_F = 33,
@@ -2846,6 +2869,9 @@ enum VAR_TYPE
   VAR_TYPE_PATH_D = 68,
   VAR_TYPE_REGION = 69,
 
+  _VAR_TYPE_GEOMETRY_START = 32,
+  _VAR_TYPE_GEOMETRY_END = 69,
+
   VAR_TYPE_TRANSFORM_F = 70,
   VAR_TYPE_TRANSFORM_D = 71,
 
@@ -2853,47 +2879,30 @@ enum VAR_TYPE
   VAR_TYPE_MATRIX_D = 73,
 
   VAR_TYPE_COLOR = 74,
-  VAR_TYPE_TEXTUREF = 75,
-  VAR_TYPE_TEXTURED = 76,
-  VAR_TYPE_LINEAR_GRADIENTF = 77,
-  VAR_TYPE_LINEAR_GRADIENTD = 78,
-  VAR_TYPE_RADIAL_GRADIENTF = 79,
-  VAR_TYPE_RADIAL_GRADIENTD = 80,
-  VAR_TYPE_CONICAL_GRADIENTF = 81,
-  VAR_TYPE_CONICAL_GRADIENTD = 82,
-  VAR_TYPE_RECTANGULAR_GRADIENTF = 83,
-  VAR_TYPE_RECTANGULAR_GRADIENTD = 84,
+  VAR_TYPE_PATTERN = 75,
 
-  VAR_TYPE_COLOR_STOP = 85,
-  VAR_TYPE_COLOR_STOP_LIST = 86,
+  _VAR_TYPE_PATTERN_START = 74,
+  _VAR_TYPE_PATTERN_END = 75,
 
-  VAR_TYPE_IMAGE = 87,
-  VAR_TYPE_IMAGE_PALETTE = 88,
-  VAR_TYPE_IMAGE_FILTER = 89,
+  VAR_TYPE_COLOR_STOP = 76,
+  VAR_TYPE_COLOR_STOP_LIST = 77,
 
-  VAR_TYPE_FONT = 90,
+  VAR_TYPE_IMAGE = 78,
+  VAR_TYPE_IMAGE_PALETTE = 79,
+  VAR_TYPE_IMAGE_FILTER = 80,
+
+  VAR_TYPE_FONT = 81,
+
+  // --------------------------------------------------------------------------
+  // [Ref]
+  // --------------------------------------------------------------------------
 
   VAR_TYPE_DOM_NODE = 1000,
   VAR_TYPE_DOM_NODE_LIST = 1001,
 
   VAR_TYPE_OBJECT_REF = 0x00FFFFFF,
 
-  VAR_TYPE_MASK = 0x00FFFFFF,
-
-  _VAR_TYPE_INTEGER_START = 2,
-  _VAR_TYPE_INTEGER_END = 6,
-
-  _VAR_TYPE_NUMBER_START = 2,
-  _VAR_TYPE_NUMBER_END = 8,
-
-  _VAR_TYPE_GEOMETRY_START = VAR_TYPE_POINT_I,
-  _VAR_TYPE_GEOMETRY_END = VAR_TYPE_REGION,
-
-  _VAR_TYPE_PATTERN_START = VAR_TYPE_COLOR,
-  _VAR_TYPE_PATTERN_END = VAR_TYPE_RECTANGULAR_GRADIENTD,
-
-  _VAR_TYPE_GRADIENT_START = VAR_TYPE_LINEAR_GRADIENTF,
-  _VAR_TYPE_GRADIENT_END = VAR_TYPE_RECTANGULAR_GRADIENTD
+  VAR_TYPE_MASK = 0x00FFFFFF
 };
 
 // ============================================================================

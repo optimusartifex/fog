@@ -117,7 +117,7 @@ struct FOG_NO_EXPORT Time_Global
     for (;;)
     {
       // Calculate the time elapsed since we started our timer
-      int64_t ticks = getTicks(TICKS_PRECISION_LOW);
+      int64_t ticks = getTicks(CPU_TICKS_PRECISION_LOW);
       int64_t elapsed = ticks - initialTicks;
 
       // Check if enough time has elapsed.
@@ -125,7 +125,7 @@ struct FOG_NO_EXPORT Time_Global
         return elapsed + initialTime;
 
       // Otherwise resync the clock.
-      initialTicks = getTicks(TICKS_PRECISION_LOW);
+      initialTicks = getTicks(CPU_TICKS_PRECISION_LOW);
       initialTime = Time_getCurrentWallClock();
     }
   }
@@ -133,7 +133,7 @@ struct FOG_NO_EXPORT Time_Global
   int64_t getTicks(uint32_t ticksPrecision)
   {
     // High-precision ticks.
-    if (ticksPrecision == TICKS_PRECISION_HIGH && hasHiResClock())
+    if (ticksPrecision == CPU_TICKS_PRECISION_HIGH && hasHiResClock())
     {
       LARGE_INTEGER now;
       ::QueryPerformanceCounter(&now);

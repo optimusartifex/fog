@@ -83,8 +83,9 @@ struct FOG_NO_EXPORT PatternData
   //! @brief Variable type and flags.
   uint32_t vType;
 
-  //! @brief Pattern type, see @ref PATTERN_TYPE.
-  uint32_t patternType;
+  //! @brief Pattern type and precision, see @ref PATTERN_TYPE and @ref
+  //! PATTERN_PRECISION.
+  uint32_t pType;
 };
 
 // ============================================================================
@@ -97,43 +98,57 @@ struct FOG_NO_EXPORT PatternColorData : public PatternData
 };
 
 // ============================================================================
+// [Fog::PatternBaseDataF]
+// ============================================================================
+
+struct FOG_NO_EXPORT PatternBaseDataF : public PatternData
+{
+  Static<TransformF> transform;
+};
+
+// ============================================================================
+// [Fog::PatternBaseDataD]
+// ============================================================================
+
+struct FOG_NO_EXPORT PatternBaseDataD : public PatternData
+{
+  Static<TransformD> transform;
+};
+
+// ============================================================================
 // [Fog::PatternTextureDataF]
 // ============================================================================
 
-struct FOG_NO_EXPORT PatternTextureDataF : public PatternData
+struct FOG_NO_EXPORT PatternTextureDataF : public PatternBaseDataF
 {
   Static<Texture> texture;
-  Static<TransformF> transform;
 };
 
 // ============================================================================
 // [Fog::PatternTextureDataD]
 // ============================================================================
 
-struct FOG_NO_EXPORT PatternTextureDataD : public PatternData
+struct FOG_NO_EXPORT PatternTextureDataD : public PatternBaseDataD
 {
   Static<Texture> texture;
-  Static<TransformD> transform;
 };
 
 // ============================================================================
 // [Fog::PatternGradientDataF]
 // ============================================================================
 
-struct FOG_NO_EXPORT PatternGradientDataF : public PatternData
+struct FOG_NO_EXPORT PatternGradientDataF : public PatternBaseDataF
 {
   Static<GradientF> gradient;
-  Static<TransformF> transform;
 };
 
 // ============================================================================
 // [Fog::PatternGradientDataD]
 // ============================================================================
 
-struct FOG_NO_EXPORT PatternGradientDataD : public PatternData
+struct FOG_NO_EXPORT PatternGradientDataD : public PatternBaseDataD
 {
   Static<GradientD> gradient;
-  Static<TransformD> transform;
 };
 
 // ============================================================================
@@ -230,19 +245,18 @@ struct FOG_NO_EXPORT Pattern
   // --------------------------------------------------------------------------
 
   FOG_INLINE uint32_t getVarType() const { return _d->vType; }
-  FOG_INLINE uint32_t getPatternType() const { return _d->patternType; }
+  FOG_INLINE uint32_t getPatternType() const { return _d->pType & PATTERN_TYPE_MASK; }
 
-  FOG_INLINE bool isNull() const { return getPatternType() == PATTERN_TYPE_NULL; }
-  FOG_INLINE bool isColor() const { return getPatternType() == PATTERN_TYPE_COLOR; }
-  FOG_INLINE bool isTexture() const { return getPatternType() == PATTERN_TYPE_TEXTURE; }
-  FOG_INLINE bool isGradient() const { return getPatternType() == PATTERN_TYPE_GRADIENT; }
+  FOG_INLINE bool isNull() const { return _d->pType == PATTERN_TYPE_NULL; }
+  FOG_INLINE bool isColor() const { return _d->pType  == PATTERN_TYPE_COLOR; }
 
-  // TODO:
-  //! @overload
-  //FOG_INLINE bool isGradient(uint32_t gradientType) const
-  //{
-  //  return (_d->type == PATTERN_TYPE_GRADIENT) && _d->gradient->getGradientType() == gradientType;
-  //}
+  FOG_INLINE bool isTexture() const { return (_d->pType & PATTERN_TYPE_MASK) == PATTERN_TYPE_TEXTURE; }
+  FOG_INLINE bool isTextureF() const { return _d->pType == (PATTERN_TYPE_TEXTURE | PATTERN_PRECISION_F); }
+  FOG_INLINE bool isTextureD() const { return _d->pType == (PATTERN_TYPE_TEXTURE | PATTERN_PRECISION_D); }
+
+  FOG_INLINE bool isGradient() const { return (_d->pType & PATTERN_TYPE_MASK) == PATTERN_TYPE_GRADIENT; }
+  FOG_INLINE bool isGradientF() const { return _d->pType == (PATTERN_TYPE_GRADIENT | PATTERN_PRECISION_F); }
+  FOG_INLINE bool isGradientD() const { return _d->pType == (PATTERN_TYPE_GRADIENT | PATTERN_PRECISION_D); }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -508,7 +522,7 @@ struct FOG_NO_EXPORT Pattern
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const Pattern& null() { return *fog_api.pattern_oNull; }
+  static FOG_INLINE const Pattern& getNullInstance() { return *fog_api.pattern_oNull; }
 
   // --------------------------------------------------------------------------
   // [Statics - Equality]

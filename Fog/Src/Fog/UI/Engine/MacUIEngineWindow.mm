@@ -30,7 +30,7 @@
 
 namespace Fog {
 
-static FOG_INLINE Fog::RectI RectI_fromNSRect(const NSRect& nsRect)
+static FOG_INLINE RectI RectI_fromNSRect(const NSRect& nsRect)
 {
   return RectI(
     int(nsRect.origin.x),
@@ -39,7 +39,7 @@ static FOG_INLINE Fog::RectI RectI_fromNSRect(const NSRect& nsRect)
     int(nsRect.size.height));
 }
 
-static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
+static FOG_INLINE PointI PointI_fromNSPoint(const NSPoint& nsPoint)
 {
   return PointI(
     int(nsPoint.x),
@@ -93,9 +93,11 @@ static FOG_INLINE Fog::PointI PointI_fromNSPoint(const NSPoint& nsPoint)
   CGRect cgRect = CGRectMake(CGFloat(0.0), CGFloat(0.0), CGFloat(cacheW), CGFloat(cacheH));
   CGFloat yTranslation = -float(cacheH - _d->_bufferData._size.h);
 
+  // CGContextClipToRect(ctx, CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+
   CGContextTranslateCTM(ctx, 0.0f, yTranslation);
   CGContextDrawImage(ctx, cgRect, cgImage);
-  CGContextTranslateCTM(ctx, 0.0f, yTranslation);
+  CGContextTranslateCTM(ctx, 0.0f, -yTranslation);
 }
 @end
 

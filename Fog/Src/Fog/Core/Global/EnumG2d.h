@@ -925,7 +925,7 @@ enum FE_MORPHOLOGY_TYPE
 enum FE_TURBULENCE_TYPE
 {
   FE_TURBULENCE_TYPE_TURBULENCE = 0,
-  FE_TURBULENCE_TYPE_FRACTAL_NOUSE = 1,
+  FE_TURBULENCE_TYPE_FRACTAL_NOISE = 1,
 
   FE_TURBULENCE_TYPE_DEFAULT = FE_TURBULENCE_TYPE_TURBULENCE,
   FE_TURBULENCE_TYPE_COUNT = 2
@@ -2441,7 +2441,21 @@ enum PATTERN_TYPE
   //! @brief Texture pattern (@c Texture).
   PATTERN_TYPE_TEXTURE = 2,
   //! @brief Gradient pattern (@c GradientF or @c GradientD).
-  PATTERN_TYPE_GRADIENT = 3
+  PATTERN_TYPE_GRADIENT = 3,
+
+  PATTERN_TYPE_MASK = 0x0F,
+};
+
+// ============================================================================
+// [Fog::PATTERN_PRECISION]
+// ============================================================================
+
+//! @brief Precision of @c Pattern.
+enum PATTERN_PRECISION
+{
+  PATTERN_PRECISION_F = 0x10,
+  PATTERN_PRECISION_D = 0x20,
+  PATTERN_PRECISION_MASK = 0xF0
 };
 
 // ============================================================================

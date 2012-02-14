@@ -180,7 +180,7 @@ struct FOG_NO_EXPORT FeColorLutArray
   // [Statics - Instance]
   // --------------------------------------------------------------------------
 
-  static FOG_INLINE const FeColorLutArray& identity()
+  static FOG_INLINE const FeColorLutArray& getIdentityInstance()
   {
     return *fog_api.fecolorlutarray_oIdentity;
   }

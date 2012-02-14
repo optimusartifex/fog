@@ -1949,37 +1949,36 @@ static err_t FOG_CDECL RasterPaintEngine_setSourcePattern(Painter* self, const P
       return self->_vtable->setSourceNone(self);
 
     case VAR_TYPE_COLOR:
-      return self->_vtable->setSourceColor(self,
-        &reinterpret_cast<PatternColorData*>(d)->color);
+      return self->_vtable->setSourceColor(self, &static_cast<PatternColorData*>(d)->color);
 
-    case VAR_TYPE_TEXTUREF:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_F,
-        &reinterpret_cast<PatternTextureDataF*>(d)->texture,
-        &reinterpret_cast<PatternTextureDataF*>(d)->transform);
+    case VAR_TYPE_PATTERN:
+      switch (d->pType)
+      {
+        case PATTERN_TYPE_TEXTURE | PATTERN_PRECISION_F:
+          return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_F,
+            &reinterpret_cast<PatternTextureDataF*>(d)->texture,
+            &reinterpret_cast<PatternTextureDataF*>(d)->transform);
+          break;
 
-    case VAR_TYPE_TEXTURED:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_D,
-        &reinterpret_cast<PatternTextureDataD*>(d)->texture,
-        &reinterpret_cast<PatternTextureDataD*>(d)->transform);
+        case PATTERN_TYPE_TEXTURE | PATTERN_PRECISION_D:
+          return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_TEXTURE_D,
+            &reinterpret_cast<PatternTextureDataD*>(d)->texture,
+            &reinterpret_cast<PatternTextureDataD*>(d)->transform);
+          break;
 
-    case VAR_TYPE_LINEAR_GRADIENTF:
-    case VAR_TYPE_RADIAL_GRADIENTF:
-    case VAR_TYPE_CONICAL_GRADIENTF:
-    case VAR_TYPE_RECTANGULAR_GRADIENTF:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_F,
-        &reinterpret_cast<PatternGradientDataF*>(d)->gradient,
-        &reinterpret_cast<PatternGradientDataF*>(d)->transform);
+        case PATTERN_TYPE_GRADIENT | PATTERN_PRECISION_F:
+          return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_F,
+            &reinterpret_cast<PatternGradientDataF*>(d)->gradient,
+            &reinterpret_cast<PatternGradientDataF*>(d)->transform);
+          break;
 
-    case VAR_TYPE_LINEAR_GRADIENTD:
-    case VAR_TYPE_RADIAL_GRADIENTD:
-    case VAR_TYPE_CONICAL_GRADIENTD:
-    case VAR_TYPE_RECTANGULAR_GRADIENTD:
-      return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_D,
-        &reinterpret_cast<PatternGradientDataD*>(d)->gradient,
-        &reinterpret_cast<PatternGradientDataD*>(d)->transform);
-
-    default:
-      FOG_ASSERT_NOT_REACHED();
+        case PATTERN_TYPE_GRADIENT | PATTERN_PRECISION_D:
+          return self->_vtable->setSourceAbstract(self, PAINTER_SOURCE_GRADIENT_D,
+            &reinterpret_cast<PatternGradientDataD*>(d)->gradient,
+            &reinterpret_cast<PatternGradientDataD*>(d)->transform);
+          break;
+      }
+      break;
   }
 
   return ERR_RT_INVALID_STATE;

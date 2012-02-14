@@ -114,37 +114,37 @@ static const uint8_t Var_dataSize[] =
   /* 0007: VAR_TYPE_FLOAT                  */ sizeof(float),
   /* 0008: VAR_TYPE_DOUBLE                 */ sizeof(double),
 
-  /* 0009: VAR_TYPE_STRING_A               */ 0,
-  /* 0010: VAR_TYPE_STRING_W               */ 0,
+  /* 0009: VAR_TYPE_STRING_A               */ 0, // Implicit.
+  /* 0010: VAR_TYPE_STRING_W               */ 0, // Implicit.
 
-  /* 0011: VAR_TYPE_LIST_STRING_A          */ 0,
-  /* 0012: VAR_TYPE_LIST_STRING_W          */ 0,
-  /* 0013: VAR_TYPE_LIST_VAR               */ 0,
+  /* 0011: VAR_TYPE_LIST_STRING_A          */ 0, // Implicit.
+  /* 0012: VAR_TYPE_LIST_STRING_W          */ 0, // Implicit.
+  /* 0013: VAR_TYPE_LIST_VAR               */ 0, // Implicit.
 
-  /* 0014: VAR_TYPE_HASH_STRING_A_STRING_A */ 0,
-  /* 0015: VAR_TYPE_HASH_STRING_A_VAR      */ 0,
-  /* 0016: VAR_TYPE_HASH_STRING_W_STRING_W */ 0,
-  /* 0017: VAR_TYPE_HASH_STRING_W_VAR      */ 0,
+  /* 0014: VAR_TYPE_HASH_STRING_A_STRING_A */ 0, // Implicit.
+  /* 0015: VAR_TYPE_HASH_STRING_A_VAR      */ 0, // Implicit.
+  /* 0016: VAR_TYPE_HASH_STRING_W_STRING_W */ 0, // Implicit.
+  /* 0017: VAR_TYPE_HASH_STRING_W_VAR      */ 0, // Implicit.
 
-  /* 0018: VAR_TYPE_REGEXP_A               */ 0,
-  /* 0019: VAR_TYPE_REGEXP_W               */ 0,
+  /* 0018: VAR_TYPE_REGEXP_A               */ 0, // Implicit.
+  /* 0019: VAR_TYPE_REGEXP_W               */ 0, // Implicit.
 
-  /* 0020: VAR_TYPE_LOCALE                 */ 0,
+  /* 0020: VAR_TYPE_LOCALE                 */ 0, // Implicit.
 
   /* 0021: VAR_TYPE_DATE                   */ sizeof(Date),
   /* 0022: VAR_TYPE_TIME                   */ sizeof(Time),
 
   // --------------------------------------------------------------------------
 
-  /* 0023:                                 */ 0,
-  /* 0024:                                 */ 0,
-  /* 0025:                                 */ 0,
-  /* 0026:                                 */ 0,
-  /* 0027:                                 */ 0,
-  /* 0028:                                 */ 0,
-  /* 0029:                                 */ 0,
-  /* 0030:                                 */ 0,
-  /* 0031:                                 */ 0,
+  /* 0023:                                 */ 0, // Reserved.
+  /* 0024:                                 */ 0, // Reserved.
+  /* 0025:                                 */ 0, // Reserved.
+  /* 0026:                                 */ 0, // Reserved.
+  /* 0027:                                 */ 0, // Reserved.
+  /* 0028:                                 */ 0, // Reserved.
+  /* 0029:                                 */ 0, // Reserved.
+  /* 0030:                                 */ 0, // Reserved.
+  /* 0031:                                 */ 0, // Reserved.
 
   // --------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ static const uint8_t Var_dataSize[] =
   /* 0041: VAR_TYPE_RECT_I                 */ sizeof(RectI),
   /* 0042: VAR_TYPE_RECT_F                 */ sizeof(RectF),
   /* 0043: VAR_TYPE_RECT_D                 */ sizeof(RectD),
-  /* 0044:                                 */ 0,
+  /* 0044:                                 */ 0, // Reserved.
   /* 0045: VAR_TYPE_LINE_F                 */ sizeof(LineF),
   /* 0046: VAR_TYPE_LINE_D                 */ sizeof(LineD),
   /* 0047: VAR_TYPE_QBEZIER_F              */ sizeof(QBezierF),
@@ -181,32 +181,23 @@ static const uint8_t Var_dataSize[] =
   /* 0062: VAR_TYPE_CHORD_D                */ sizeof(ChordD),
   /* 0063: VAR_TYPE_PIE_F                  */ sizeof(PieF),
   /* 0064: VAR_TYPE_PIE_D                  */ sizeof(PieD),
-  /* 0065: VAR_TYPE_POLYGON_F              */ 0,
-  /* 0066: VAR_TYPE_POLYGON_D              */ 0,
-  /* 0067: VAR_TYPE_PATH_F                 */ 0,
-  /* 0068: VAR_TYPE_PATH_D                 */ 0,
-  /* 0069: VAR_TYPE_REGION                 */ 0,
+  /* 0065: VAR_TYPE_POLYGON_F              */ 0, // Reserved.
+  /* 0066: VAR_TYPE_POLYGON_D              */ 0, // Reserved.
+  /* 0067: VAR_TYPE_PATH_F                 */ 0, // Implicit.
+  /* 0068: VAR_TYPE_PATH_D                 */ 0, // Implicit.
+  /* 0069: VAR_TYPE_REGION                 */ 0, // Implicit.
   /* 0070: VAR_TYPE_TRANSFORM_F            */ sizeof(TransformF),
   /* 0071: VAR_TYPE_TRANSFORM_D            */ sizeof(TransformD),
-  /* 0072: VAR_TYPE_MATRIX_F               */ 0,
-  /* 0073: VAR_TYPE_MATRIX_D               */ 0,
-  /* 0074: VAR_TYPE_COLOR                  */ 0,
-  /* 0075: VAR_TYPE_TEXTUREF               */ 0,
-  /* 0076: VAR_TYPE_TEXTURED               */ 0,
-  /* 0077: VAR_TYPE_LINEAR_GRADIENTF       */ 0,
-  /* 0078: VAR_TYPE_LINEAR_GRADIENTD       */ 0,
-  /* 0079: VAR_TYPE_RADIAL_GRADIENTF       */ 0,
-  /* 0080: VAR_TYPE_RADIAL_GRADIENTD       */ 0,
-  /* 0081: VAR_TYPE_CONICAL_GRADIENTF      */ 0,
-  /* 0082: VAR_TYPE_CONICAL_GRADIENTD      */ 0,
-  /* 0083: VAR_TYPE_RECTANGULAR_GRADIENTF  */ 0,
-  /* 0084: VAR_TYPE_RECTANGULAR_GRADIENTD  */ 0,
-  /* 0085: VAR_TYPE_COLOR_STOP             */ sizeof(ColorStop),
-  /* 0086: VAR_TYPE_COLOR_STOP_LIST        */ 0,
-  /* 0087: VAR_TYPE_IMAGE                  */ 0,
-  /* 0088: VAR_TYPE_IMAGE_PALETTE          */ 0,
-  /* 0089: VAR_TYPE_IMAGE_FILTER           */ 0,
-  /* 0090: VAR_TYPE_FONT                   */ 0
+  /* 0072: VAR_TYPE_MATRIX_F               */ 0, // Implicit.
+  /* 0073: VAR_TYPE_MATRIX_D               */ 0, // Implicit.
+  /* 0074: VAR_TYPE_COLOR                  */ 0, // Special.
+  /* 0075: VAR_TYPE_PATTERN                */ 0, // Implicit.
+  /* 0076: VAR_TYPE_COLOR_STOP             */ sizeof(ColorStop),
+  /* 0077: VAR_TYPE_COLOR_STOP_LIST        */ 0, // Implicit.
+  /* 0078: VAR_TYPE_IMAGE                  */ 0, // Implicit.
+  /* 0079: VAR_TYPE_IMAGE_PALETTE          */ 0, // Implicit.
+  /* 0080: VAR_TYPE_IMAGE_FILTER           */ 0, // Implicit.
+  /* 0081: VAR_TYPE_FONT                   */ 0  // Implicit.
 };
 // ${VAR_TYPE:END}
 
@@ -325,26 +316,8 @@ _CreateImplicit:
       fog_api.pattern_ctorColor(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Color*>(vData));
       return;
 
-    case VAR_TYPE_TEXTUREF:
-      fog_api.pattern_ctorTextureF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
-      return;
-
-    case VAR_TYPE_TEXTURED:
-      fog_api.pattern_ctorTextureD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Texture*>(vData), NULL);
-      return;
-
-    case VAR_TYPE_LINEAR_GRADIENTF:
-    case VAR_TYPE_RADIAL_GRADIENTF:
-    case VAR_TYPE_CONICAL_GRADIENTF:
-    case VAR_TYPE_RECTANGULAR_GRADIENTF:
-      fog_api.pattern_ctorGradientF(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientF*>(vData), NULL);
-      return;
-
-    case VAR_TYPE_LINEAR_GRADIENTD:
-    case VAR_TYPE_RADIAL_GRADIENTD:
-    case VAR_TYPE_CONICAL_GRADIENTD:
-    case VAR_TYPE_RECTANGULAR_GRADIENTD:
-      fog_api.pattern_ctorGradientD(reinterpret_cast<Pattern*>(self), reinterpret_cast<const GradientD*>(vData), NULL);
+    case VAR_TYPE_PATTERN:
+      fog_api.pattern_ctorCopy(reinterpret_cast<Pattern*>(self), reinterpret_cast<const Pattern*>(vData));
       return;
 
     case VAR_TYPE_COLOR_STOP:
@@ -1321,28 +1294,8 @@ _SetImplicit:
       case VAR_TYPE_COLOR:
         *static_cast<Color*>(vData) = reinterpret_cast<PatternColorData*>(d)->color();
         return ERR_OK;
-
-      case VAR_TYPE_TEXTUREF:
-        *static_cast<Texture*>(vData) = reinterpret_cast<PatternTextureDataF*>(d)->texture();
-        return ERR_OK;
-
-      case VAR_TYPE_TEXTURED:
-        *static_cast<Texture*>(vData) = reinterpret_cast<PatternTextureDataD*>(d)->texture();
-        return ERR_OK;
-
-      case VAR_TYPE_LINEAR_GRADIENTF:
-      case VAR_TYPE_RADIAL_GRADIENTF:
-      case VAR_TYPE_CONICAL_GRADIENTF:
-      case VAR_TYPE_RECTANGULAR_GRADIENTF:
-        *static_cast<GradientF*>(vData) = reinterpret_cast<PatternGradientDataF*>(d)->gradient();
-        return ERR_OK;
-
-      case VAR_TYPE_LINEAR_GRADIENTD:
-      case VAR_TYPE_RADIAL_GRADIENTD:
-      case VAR_TYPE_CONICAL_GRADIENTD:
-      case VAR_TYPE_RECTANGULAR_GRADIENTD:
-        *static_cast<GradientD*>(vData) = reinterpret_cast<PatternGradientDataD*>(d)->gradient();
-        return ERR_OK;
+      case VAR_TYPE_PATTERN:
+        goto _SetImplicit;
 
       case VAR_TYPE_COLOR_STOP:
         goto _SetSimple;
@@ -1357,13 +1310,13 @@ _SetImplicit:
       case VAR_TYPE_FONT:
         goto _SetImplicit;
         
-      // TODO:
+      // TODO: Var::getType() - Support other types as well.
+
       default:
         break;
     }
   }
 
-  // TODO:
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
@@ -1469,26 +1422,23 @@ _SetImplicit:
     case VAR_TYPE_MATRIX_D:
       goto _SetImplicit;
 
-    // TODO:
     case VAR_TYPE_COLOR:
-      break;
+      if ((d->vType & VAR_TYPE_MASK) == VAR_TYPE_COLOR &&
+          (reinterpret_cast<PatternColorData*>(d)->reference.get() == 1))
+      {
+        reinterpret_cast<PatternColorData*>(d)->color() = *static_cast<const Color*>(vData);
+        return ERR_OK;
+      }
+      else
+      {
+        d->release();
+        fog_api.pattern_ctorColor(reinterpret_cast<Pattern*>(self), static_cast<const Color*>(vData));
+        return ERR_OK;
+      }
 
-    // TODO:
-    case VAR_TYPE_TEXTUREF:
-    case VAR_TYPE_TEXTURED:
-      break;
+    case VAR_TYPE_PATTERN:
+      goto _SetImplicit;
     
-    // TODO:
-    case VAR_TYPE_LINEAR_GRADIENTF:
-    case VAR_TYPE_LINEAR_GRADIENTD:
-    case VAR_TYPE_RADIAL_GRADIENTF:
-    case VAR_TYPE_RADIAL_GRADIENTD:
-    case VAR_TYPE_CONICAL_GRADIENTF:
-    case VAR_TYPE_CONICAL_GRADIENTD:
-    case VAR_TYPE_RECTANGULAR_GRADIENTF:
-    case VAR_TYPE_RECTANGULAR_GRADIENTD:
-      break;
-
     case VAR_TYPE_COLOR_STOP:
       goto _SetSimple;
     case VAR_TYPE_COLOR_STOP_LIST:
@@ -1501,8 +1451,8 @@ _SetImplicit:
 
     case VAR_TYPE_FONT:
       goto _SetImplicit;
-      
-    // TODO:
+
+    // TODO: Var::setType() - Support other types as well.
 
     default:
       return ERR_RT_INVALID_STATE;
@@ -1833,28 +1783,8 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
 
       case VAR_TYPE_COLOR:
         return VAR_OBJECT_C(a_d, PatternColorData)->color() == VAR_OBJECT_C(b_d, PatternColorData)->color();
-
-      case VAR_TYPE_TEXTUREF:
-        return VAR_OBJECT_C(a_d, PatternTextureDataF)->texture()   == VAR_OBJECT_C(b_d, PatternTextureDataF)->texture() &&
-               VAR_OBJECT_C(a_d, PatternTextureDataF)->transform() == VAR_OBJECT_C(b_d, PatternTextureDataF)->transform();
-
-      case VAR_TYPE_TEXTURED:
-        return VAR_OBJECT_C(a_d, PatternTextureDataD)->texture()   == VAR_OBJECT_C(b_d, PatternTextureDataD)->texture() &&
-               VAR_OBJECT_C(a_d, PatternTextureDataD)->transform() == VAR_OBJECT_C(b_d, PatternTextureDataD)->transform();
-
-      case VAR_TYPE_LINEAR_GRADIENTF:
-      case VAR_TYPE_RADIAL_GRADIENTF:
-      case VAR_TYPE_CONICAL_GRADIENTF:
-      case VAR_TYPE_RECTANGULAR_GRADIENTF:
-        return VAR_OBJECT_C(a_d, PatternGradientDataF)->gradient()  == VAR_OBJECT_C(b_d, PatternGradientDataF)->gradient() &&
-               VAR_OBJECT_C(a_d, PatternGradientDataF)->transform() == VAR_OBJECT_C(b_d, PatternGradientDataF)->transform();
-
-      case VAR_TYPE_LINEAR_GRADIENTD:
-      case VAR_TYPE_RADIAL_GRADIENTD:
-      case VAR_TYPE_CONICAL_GRADIENTD:
-      case VAR_TYPE_RECTANGULAR_GRADIENTD:
-        return VAR_OBJECT_C(a_d, PatternGradientDataD)->gradient()  == VAR_OBJECT_C(b_d, PatternGradientDataD)->gradient() &&
-               VAR_OBJECT_C(a_d, PatternGradientDataD)->transform() == VAR_OBJECT_C(b_d, PatternGradientDataD)->transform();
+      case VAR_TYPE_PATTERN:
+        return *reinterpret_cast<const Pattern*>(a) == *reinterpret_cast<const Pattern*>(b);
 
       case VAR_TYPE_COLOR_STOP:
         return VAR_SIMPLE_C(a_d, ColorStop) == VAR_SIMPLE_C(b_d, ColorStop);
@@ -2220,16 +2150,7 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       return;
 
     case VAR_TYPE_COLOR:
-    case VAR_TYPE_TEXTUREF:
-    case VAR_TYPE_TEXTURED:
-    case VAR_TYPE_LINEAR_GRADIENTF:
-    case VAR_TYPE_LINEAR_GRADIENTD:
-    case VAR_TYPE_RADIAL_GRADIENTF:
-    case VAR_TYPE_RADIAL_GRADIENTD:
-    case VAR_TYPE_CONICAL_GRADIENTF:
-    case VAR_TYPE_CONICAL_GRADIENTD:
-    case VAR_TYPE_RECTANGULAR_GRADIENTF:
-    case VAR_TYPE_RECTANGULAR_GRADIENTD:
+    case VAR_TYPE_PATTERN:
       reinterpret_cast<PatternData*>(d)->release();
       return;
 

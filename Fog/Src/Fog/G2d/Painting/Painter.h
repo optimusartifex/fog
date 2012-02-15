@@ -1460,11 +1460,11 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t resetClip() { return _vtable->resetClip(this); }
 
   // --------------------------------------------------------------------------
-  // [Layer]
+  // [Group]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t beginLayer(uint32_t layerFlags) { return _vtable->beginLayer(this, layerFlags); }
-  FOG_INLINE err_t endLayer() { return _vtable->endLayer(this); }
+  FOG_INLINE err_t newGroup(uint32_t flags = NO_FLAGS) { return _vtable->newGroup(this, flags); }
+  FOG_INLINE err_t endGroup() { return _vtable->endGroup(this); }
 
   // --------------------------------------------------------------------------
   // [Flush]

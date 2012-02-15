@@ -14,17 +14,17 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::RasterContext - Construction / Destruction]
+// [Fog::RasterPaintContext - Construction / Destruction]
 // ============================================================================
 
-RasterContext::RasterContext() :
+RasterPaintContext::RasterPaintContext() :
   engine(NULL),
   precision(0xFFFFFFFF),
   clipType(RASTER_CLIP_BOX),
   clipBoxI(0, 0, 0, 0)
 {
   scope.reset();
-  layer.reset();
+  buffer.reset();
 
   paintHints.packed = 0;
   rasterHints.packed = 0;
@@ -38,23 +38,23 @@ RasterContext::RasterContext() :
   closure.data = NULL;
 }
 
-RasterContext::~RasterContext()
+RasterPaintContext::~RasterPaintContext()
 {
   _initPrecision(0xFFFFFFFF);
 }
 
 // ============================================================================
-// [Fog::RasterContext - Init / Reset]
+// [Fog::RasterPaintContext - Init / Reset]
 // ============================================================================
 
-err_t RasterContext::_initByMaster(const RasterContext& master)
+err_t RasterPaintContext::_initByMaster(const RasterPaintContext& master)
 {
   // If mask was created we can't copy the data from master context into thread's
   // own. The RasterEngine must check for this condition before and must return
   // @c ERR_PAINTER_NOT_ALLOWED error.
   //FOG_ASSERT(mask == NULL && master.mask == NULL);
 
-  layer = master.layer;
+  target = master.target;
 
   clipType = master.clipType;
   clipRegion = master.clipRegion;
@@ -71,7 +71,7 @@ err_t RasterContext::_initByMaster(const RasterContext& master)
   return _initPrecision(master.precision);
 }
 
-err_t RasterContext::_initPrecision(uint32_t precision)
+err_t RasterPaintContext::_initPrecision(uint32_t precision)
 {
   if (this->precision != precision)
   {
@@ -122,7 +122,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
     }
   }
 
-  uint32_t pcBpl = layer.size.w;
+  uint32_t pcBpl = target.size.w;
   switch (this->precision)
   {
     case IMAGE_PRECISION_BYTE:
@@ -143,7 +143,7 @@ err_t RasterContext::_initPrecision(uint32_t precision)
   return pcBuf != NULL ? (err_t)ERR_OK : (err_t)ERR_RT_OUT_OF_MEMORY;
 }
 
-void RasterContext::_reset()
+void RasterPaintContext::_reset()
 {
   // TODO: Not used.
 }

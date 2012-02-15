@@ -31,9 +31,10 @@
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintContext_p.h>
 #include <Fog/G2d/Painting/RasterPaintEngine_p.h>
+#include <Fog/G2d/Painting/RasterPaintGroup_p.h>
 #include <Fog/G2d/Painting/RasterPaintSerializer_p.h>
-#include <Fog/G2d/Painting/RasterPaintWork_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterState_p.h>
@@ -86,7 +87,7 @@ static const uint32_t RasterPaintEngine_clipAllFlags[CLIP_OP_COUNT] =
 
 // Called by all 'stroke' functions. This macro simply ensures that all stroke
 // parameters are correct (it's possible to stroke something). Note that stroke
-// is implemented normally using fill pipe-line, there are only few exceptions.
+// is implemented normally using fill pipeline, there are only few exceptions.
 //
 // Please see RASTER_NO_PAINT flags to better understand how this works.
 #define _FOG_RASTER_ENTER_STROKE_FUNC() \
@@ -176,7 +177,7 @@ static err_t FOG_CDECL RasterPaintEngine_setMetaParams(Painter* self, const Regi
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   engine->discardStates();
 
-  BoxI screen(0, 0, engine->ctx.layer.size.w, engine->ctx.layer.size.h);
+  BoxI screen(0, 0, engine->ctx.target.size.w, engine->ctx.target.size.h);
   engine->metaOrigin = *origin;
 
   if (region->isInfinite())
@@ -195,7 +196,7 @@ static err_t FOG_CDECL RasterPaintEngine_resetMetaParams(Painter* self)
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   engine->discardStates();
 
-  BoxI screen(0, 0, engine->ctx.layer.size.w, engine->ctx.layer.size.h);
+  BoxI screen(0, 0, engine->ctx.target.size.w, engine->ctx.target.size.h);
 
   engine->metaOrigin.reset();
   engine->metaRegion = screen;
@@ -220,25 +221,25 @@ static err_t FOG_CDECL RasterPaintEngine_getParameter(const Painter* self, uint3
 
     case PAINTER_PARAMETER_SIZE_I:
     {
-      _PARAM_M(SizeI).set(engine->ctx.layer.size);
+      _PARAM_M(SizeI).set(engine->ctx.target.size);
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_SIZE_F:
     {
-      _PARAM_M(SizeF).set(engine->ctx.layer.size);
+      _PARAM_M(SizeF).set(engine->ctx.target.size);
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_SIZE_D:
     {
-      _PARAM_M(SizeD).set(engine->ctx.layer.size);
+      _PARAM_M(SizeD).set(engine->ctx.target.size);
       return ERR_OK;
     }
 
     case PAINTER_PARAMETER_FORMAT_I:
     {
-      _PARAM_M(uint32_t) = engine->ctx.layer.primaryFormat;
+      _PARAM_M(uint32_t) = engine->ctx.target.format;
       return ERR_OK;
     }
 
@@ -254,7 +255,7 @@ static err_t FOG_CDECL RasterPaintEngine_getParameter(const Painter* self, uint3
 
     case PAINTER_PARAMETER_MULTITHREADED_I:
     {
-      _PARAM_M(uint32_t) = engine->wm ? true : false;
+      _PARAM_M(uint32_t) = false;
       return ERR_OK;
     }
 
@@ -668,8 +669,11 @@ static err_t FOG_CDECL RasterPaintEngine_setParameter(Painter* self, uint32_t pa
     {
       uint32_t v = _PARAM_C(uint32_t);
 
-      if (v == 0) return ERR_RT_INVALID_ARGUMENT;
-      if (v > RASTER_MAX_THREADS_USED) v = RASTER_MAX_THREADS_USED;
+      if (v == 0)
+        return ERR_RT_INVALID_ARGUMENT;
+
+      if (v > RASTER_MAX_THREADS_LIMIT)
+        v = RASTER_MAX_THREADS_LIMIT;
 
       engine->maxThreads = v;
       return ERR_OK;
@@ -3877,10 +3881,10 @@ static err_t FOG_CDECL RasterPaintEngine_resetClip(Painter* self)
 }
 
 // ============================================================================
-// [Fog::RasterPaintEngine - Layer]
+// [Fog::RasterPaintEngine - Group]
 // ============================================================================
 
-static err_t FOG_CDECL RasterPaintEngine_beginLayer(Painter* self, uint32_t layerFlags)
+static err_t FOG_CDECL RasterPaintEngine_newGroup(Painter* self, uint32_t flags)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 
@@ -3888,7 +3892,7 @@ static err_t FOG_CDECL RasterPaintEngine_beginLayer(Painter* self, uint32_t laye
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_endLayer(Painter* self)
+static err_t FOG_CDECL RasterPaintEngine_endGroup(Painter* self)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 
@@ -3931,7 +3935,6 @@ RasterPaintEngine::RasterPaintEngine() :
   state(NULL),
   pcAllocator(16300),
   pcPool(NULL),
-  wm(NULL),
   maxThreads(0),
   finalizing(0)
 {
@@ -3957,8 +3960,8 @@ RasterPaintEngine::RasterPaintEngine() :
 
 RasterPaintEngine::~RasterPaintEngine()
 {
-  if (ctx.layer.imageData)
-    ctx.layer.imageData->locked--;
+  if (ctx.target.imageData)
+    ctx.target.imageData->locked--;
 
   discardStates();
   discardSource();
@@ -3969,20 +3972,20 @@ RasterPaintEngine::~RasterPaintEngine()
 
 err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uint32_t initFlags)
 {
-  // Setup the primary layer.
-  ctx.layer.pixels = imageBits.getData();
-  ctx.layer.size = imageBits.getSize();
-  ctx.layer.stride = imageBits.getStride();
-  ctx.layer.primaryFormat = imageBits.getFormat();
+  // Setup the primary group.
+  ctx.target.pixels = imageBits.getData();
+  ctx.target.size = imageBits.getSize();
+  ctx.target.stride = imageBits.getStride();
+  ctx.target.format = imageBits.getFormat();
 
-  ctx.layer.imageData = imaged;
+  ctx.target.imageData = imaged;
   if (imaged) imaged->locked++;
 
-  vtable = &RasterPaintEngine_vtable[ctx.layer.precision];
+  vtable = &RasterPaintEngine_vtable[ctx.target.precision];
   serializer = &RasterPaintSerializer_vtable[RASTER_MODE_ST];
 
   setupLayer();
-  FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.layer.precision));
+  FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.target.precision));
 
   setupOps();
   setupDefaultClip();
@@ -4284,51 +4287,12 @@ _DiscardSourceContinue:
 
 void RasterPaintEngine::setupLayer()
 {
-  // ${IMAGE_FORMAT:BEGIN}
-  static const uint8_t secondaryFromPrimary[] =
-  {
-    /* 00: PRGB32    -> */ IMAGE_FORMAT_PRGB32,
-    /* 01: XRGB32    -> */ IMAGE_FORMAT_XRGB32,
-    /* 02: RGB24     -> */ IMAGE_FORMAT_XRGB32,
-    /* 03: A8        -> */ IMAGE_FORMAT_PRGB32,
-    /* 04: I8        -> */ IMAGE_FORMAT_NULL  ,
-    /* 05: PRGB64    -> */ IMAGE_FORMAT_PRGB64,
-    /* 06: RGB48     -> */ IMAGE_FORMAT_PRGB64,
-    /* 07: A16       -> */ IMAGE_FORMAT_PRGB64
-  };
-  // ${IMAGE_FORMAT:END}
+  uint32_t format = ctx.target.format;
+  const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(format);
 
-  uint32_t primaryFormat = ctx.layer.primaryFormat;
-  uint32_t secondaryFormat = secondaryFromPrimary[primaryFormat];
-
-  const ImageFormatDescription& primaryDescription = ImageFormatDescription::getByFormat(primaryFormat);
-  const ImageFormatDescription& secondaryDescription = ImageFormatDescription::getByFormat(secondaryFormat);
-
-  ctx.layer.primaryBPP = (uint32_t)primaryDescription.getBytesPerPixel();
-  ctx.layer.primaryBPL = (uint32_t)ctx.layer.size.w * ctx.layer.primaryBPP;
-  ctx.layer.precision = primaryDescription.getPrecision();
-
-  if (primaryFormat != secondaryFormat)
-  {
-    ctx.layer.secondaryFormat = secondaryFormat;
-    ctx.layer.secondaryBPP = (uint32_t)secondaryDescription.getBytesPerPixel();
-    ctx.layer.secondaryBPL = (uint32_t)ctx.layer.size.w * ctx.layer.secondaryBPP;
-
-    ctx.layer.cvtSecondaryFromPrimary = _api_raster.getCompositeCore(secondaryFormat, COMPOSITE_SRC)->vblit_line[primaryFormat];
-    ctx.layer.cvtPrimaryFromSecondary = _api_raster.getCompositeCore(primaryFormat, COMPOSITE_SRC)->vblit_line[secondaryFormat];
-
-    FOG_ASSERT(ctx.layer.cvtSecondaryFromPrimary != NULL);
-    FOG_ASSERT(ctx.layer.cvtPrimaryFromSecondary != NULL);
-  }
-  else
-  {
-    ctx.layer.secondaryFormat = IMAGE_FORMAT_NULL;
-    ctx.layer.secondaryBPP = 0;
-    ctx.layer.secondaryBPL = 0;
-
-    ctx.layer.cvtSecondaryFromPrimary = NULL;
-    ctx.layer.cvtPrimaryFromSecondary = NULL;
-  }
+  ctx.target.bpp = (uint32_t)desc.getBytesPerPixel();
+  ctx.target.bpl = (uint32_t)ctx.target.size.w * ctx.target.bpp;
+  ctx.target.precision = desc.getPrecision();
 }
 
 void RasterPaintEngine::setupOps()
@@ -4359,7 +4323,7 @@ void RasterPaintEngine::setupOps()
 
 void RasterPaintEngine::setupDefaultClip()
 {
-  BoxI bounds(0, 0, (int)ctx.layer.size.w, (int)ctx.layer.size.h);
+  BoxI bounds(0, 0, (int)ctx.target.size.w, (int)ctx.target.size.h);
   FOG_ASSERT(bounds.isValid());
 
   // Final matrix is translated by the finalOrigin, we are translating it back.
@@ -4448,7 +4412,7 @@ err_t RasterPaintEngine::createPatternContext()
     case RASTER_SOURCE_TEXTURE:
     {
       err = _api_raster.texture.create(pc,
-        ctx.layer.primaryFormat,
+        ctx.target.format,
         &metaClipBoxI,
         &source.texture->_image,
         &source.texture->_fragment,
@@ -4463,7 +4427,7 @@ err_t RasterPaintEngine::createPatternContext()
     {
       uint32_t gradientType = source.gradient->getGradientType();
       err = _api_raster.gradient.create[gradientType](pc,
-        ctx.layer.primaryFormat,
+        ctx.target.format,
         &metaClipBoxI,
         &source.gradient,
         &source.adjusted,
@@ -4499,7 +4463,7 @@ void RasterPaintEngine::destroyPatternContext(RasterPattern* pc)
 
 void RasterPaintEngine::changedMetaParams()
 {
-  BoxI bounds(0, 0, ctx.layer.size.w, ctx.layer.size.h);
+  BoxI bounds(0, 0, ctx.target.size.w, ctx.target.size.h);
 
   metaClipBoxI = metaRegion.getBoundingBox();
   if (!metaClipBoxI.isValid())
@@ -5015,11 +4979,11 @@ static void RasterPaintEngine_init_vtable()
   v->resetClip = RasterPaintEngine_resetClip;
 
   // --------------------------------------------------------------------------
-  // [Layer]
+  // [Group]
   // --------------------------------------------------------------------------
 
-  v->beginLayer = RasterPaintEngine_beginLayer;
-  v->endLayer = RasterPaintEngine_endLayer;
+  v->newGroup = RasterPaintEngine_newGroup;
+  v->endGroup = RasterPaintEngine_endGroup;
 
   // --------------------------------------------------------------------------
   // [Flush]

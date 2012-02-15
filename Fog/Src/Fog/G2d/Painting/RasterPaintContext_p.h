@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_PAINTING_RASTERCONTEXT_P_H
-#define _FOG_G2D_PAINTING_RASTERCONTEXT_P_H
+#ifndef _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
+#define _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -18,6 +18,7 @@
 #include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Imaging/ImageFilterScale.h>
 #include <Fog/G2d/Painting/PaintParams.h>
+#include <Fog/G2d/Painting/RasterPaintGroup_p.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterStructs_p.h>
@@ -31,24 +32,24 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::RasterContext]
+// [Fog::RasterPaintContext]
 // ============================================================================
 
 //! @internal
-struct FOG_NO_EXPORT RasterContext
+struct FOG_NO_EXPORT RasterPaintContext
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  RasterContext();
-  ~RasterContext();
+  RasterPaintContext();
+  ~RasterPaintContext();
 
   // --------------------------------------------------------------------------
   // [Init / Reset]
   // --------------------------------------------------------------------------
 
-  err_t _initByMaster(const RasterContext& master);
+  err_t _initByMaster(const RasterPaintContext& master);
   err_t _initPrecision(uint32_t precision);
 
   void _reset();
@@ -96,11 +97,11 @@ struct FOG_NO_EXPORT RasterContext
   ImageFilterScaleD filterScale;
 
   // --------------------------------------------------------------------------
-  // [Members - Layer]
+  // [Members - Target / Group]
   // --------------------------------------------------------------------------
 
-  //! @brief Layer.
-  RasterLayer layer;
+  //! @brief Target.
+  RasterPaintTarget target;
 
   // --------------------------------------------------------------------------
   // [Members - Render]
@@ -175,7 +176,7 @@ struct FOG_NO_EXPORT RasterContext
   PathD tmpPathD[3];
 
 private:
-  _FOG_NO_COPY(RasterContext)
+  _FOG_NO_COPY(RasterPaintContext)
 };
 
 //! @}
@@ -183,4 +184,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_PAINTING_RASTERCONTEXT_P_H
+#endif // _FOG_G2D_PAINTING_RASTERPAINTCONTEXT_P_H

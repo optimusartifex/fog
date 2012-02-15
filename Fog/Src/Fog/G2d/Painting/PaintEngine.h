@@ -383,18 +383,18 @@ struct FOG_NO_EXPORT PaintEngineVTable
   ResetClip resetClip;
 
   // --------------------------------------------------------------------------
-  // [Types - Layer]
+  // [Types - Group]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL *BeginLayer)(Painter* self, uint32_t flags);
-  typedef err_t (FOG_CDECL *EndLayer)(Painter* self);
+  typedef err_t (FOG_CDECL *NewGroup)(Painter* self, uint32_t flags);
+  typedef err_t (FOG_CDECL *EndGroup)(Painter* self);
 
   // --------------------------------------------------------------------------
-  // [Funcs - Layer]
+  // [Funcs - Group]
   // --------------------------------------------------------------------------
 
-  BeginLayer beginLayer;
-  EndLayer endLayer;
+  NewGroup newGroup;
+  EndGroup endGroup;
 
   // --------------------------------------------------------------------------
   // [Types - Flush]

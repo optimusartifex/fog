@@ -24,7 +24,9 @@
 #include <Fog/G2d/Painting/Painter.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintContext_p.h>
 #include <Fog/G2d/Painting/RasterPaintEngine_p.h>
+#include <Fog/G2d/Painting/RasterPaintGroup_p.h>
 #include <Fog/G2d/Painting/RasterPaintSerializer_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
@@ -60,7 +62,7 @@ FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_vtable[RASTER_MODE_COU
 
 struct FOG_NO_EXPORT RasterPaintFiller : public RasterFiller
 {
-  RasterContext* ctx;
+  RasterPaintContext* ctx;
 
   uint8_t* dstPixels;
   ssize_t dstStride;
@@ -256,9 +258,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPa
 {
   RasterPaintFiller filler;
 
-  uint8_t* dstPixels = engine->ctx.layer.pixels;
-  ssize_t dstStride = engine->ctx.layer.stride;
-  uint32_t dstFormat = engine->ctx.layer.primaryFormat;
+  uint8_t* dstPixels = engine->ctx.target.pixels;
+  ssize_t dstStride = engine->ctx.target.stride;
+  uint32_t dstFormat = engine->ctx.target.format;
   uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
 
   filler.ctx = &engine->ctx;
@@ -460,9 +462,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
       // Fast-path (clip-box and full-opacity).
       if (engine->ctx.rasterHints.opacity == 0x100 && engine->ctx.clipType == RASTER_CLIP_BOX)
       {
-        uint8_t* dstPixels = engine->ctx.layer.pixels;
-        ssize_t dstStride = engine->ctx.layer.stride;
-        uint32_t dstFormat = engine->ctx.layer.primaryFormat;
+        uint8_t* dstPixels = engine->ctx.target.pixels;
+        ssize_t dstStride = engine->ctx.target.stride;
+        uint32_t dstFormat = engine->ctx.target.format;
         uint32_t compositingOperator = engine->ctx.paintHints.compositingOperator;
 
         int y0 = box->y0;
@@ -478,7 +480,7 @@ _Solid:
           bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
           RasterCBlitLineFunc blitLine = _api_raster.getCBlitLine(dstFormat, compositingOperator, isSrcOpaque);
 
-          dstPixels += box->x0 * engine->ctx.layer.primaryBPP;
+          dstPixels += box->x0 * engine->ctx.target.bpp;
           do {
             blitLine(dstPixels, &engine->ctx.solid, w, &engine->ctx.closure);
             dstPixels += dstStride;
@@ -506,7 +508,7 @@ _Solid:
           {
             pc->prepare(&pf, y0, 1, RASTER_FETCH_COPY);
 
-            dstPixels += box->x0 * engine->ctx.layer.primaryBPP;
+            dstPixels += box->x0 * engine->ctx.target.bpp;
             do {
               pf.fetch(span, dstPixels);
               dstPixels += dstStride;
@@ -519,7 +521,7 @@ _Solid:
             RasterVBlitLineFunc blitLine = _api_raster.getVBlitLine(dstFormat, compositingOperator, srcFormat);
             uint8_t* srcPixels = reinterpret_cast<uint8_t*>(engine->ctx.buffer.getMem());
 
-            dstPixels += box->x0 * engine->ctx.layer.primaryBPP;
+            dstPixels += box->x0 * engine->ctx.target.bpp;
 
             do {
               pf.fetch(span, srcPixels);
@@ -730,7 +732,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitImageD_st(
 
   FOG_RETURN_ON_ERROR(
     _api_raster.texture.create(&pc,
-      engine->ctx.layer.primaryFormat,
+      engine->ctx.target.format,
       &engine->metaClipBoxI,
       srcImage, srcFragment,
       srcTransform, &engine->dummyColor, TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
@@ -762,9 +764,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_st(
       // Fast-path (clip-box and full-opacity).
       if (engine->ctx.clipType == RASTER_CLIP_BOX)
       {
-        uint8_t* pixels = engine->ctx.layer.pixels;
-        ssize_t stride = engine->ctx.layer.stride;
-        uint32_t format = engine->ctx.layer.primaryFormat;
+        uint8_t* pixels = engine->ctx.target.pixels;
+        ssize_t stride = engine->ctx.target.stride;
+        uint32_t format = engine->ctx.target.format;
 
         const ImageData* srcD = srcImage->_d;
         const uint8_t* srcPixels = srcD->first;
@@ -785,7 +787,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_st(
         int y0 = pt->y;
 
         int i = srcHeight;
-        FOG_ASSERT(y0 + srcHeight <= engine->ctx.layer.size.h);
+        FOG_ASSERT(y0 + srcHeight <= engine->ctx.target.size.h);
 
         pixels += y0 * stride;
         srcPixels += srcFragment->y * srcStride;
@@ -794,7 +796,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_st(
         {
           RasterVBlitLineFunc blitLine;
 
-          pixels += x0 * engine->ctx.layer.primaryBPP;
+          pixels += x0 * engine->ctx.target.bpp;
           srcPixels += srcFragment->x * srcD->bytesPerPixel;
           engine->ctx.closure.palette = srcD->palette->_d;
 
@@ -906,7 +908,7 @@ _BlitImageA8_Alpha:
         TransformD tr(TransformD::fromTranslation(PointD(*pt)));
         FOG_RETURN_ON_ERROR(
           _api_raster.texture.create(&pc,
-            engine->ctx.layer.primaryFormat,
+            engine->ctx.target.format,
             &engine->metaClipBoxI,
             srcImage, srcFragment,
             &tr, &engine->dummyColor, TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
@@ -950,7 +952,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageI_st(
 
   FOG_RETURN_ON_ERROR(
     _api_raster.texture.create(&pc,
-      engine->ctx.layer.primaryFormat,
+      engine->ctx.target.format,
       &engine->metaClipBoxI,
       srcImage, srcFragment,
       srcTransform, &engine->dummyColor, TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
@@ -975,7 +977,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageD_st(
 
   FOG_RETURN_ON_ERROR(
     _api_raster.texture.create(&pc,
-      engine->ctx.layer.primaryFormat,
+      engine->ctx.target.format,
       &engine->metaClipBoxI,
       srcImage, srcFragment,
       srcTransform, &engine->dummyColor, TEXTURE_TILE_PAD, engine->ctx.paintHints.imageQuality)
@@ -1125,8 +1127,8 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterRasterizedShape8_st(Raster
   FOG_RETURN_ON_ERROR(_api_raster.filter.create[feBase->getFeType()](&ctx,
     feBase, &engine->ctx.filterScale,
     &engine->ctx.buffer,
-    engine->ctx.layer.primaryFormat,
-    engine->ctx.layer.primaryFormat));
+    engine->ctx.target.format,
+    engine->ctx.target.format));
 
   err_t err;
 
@@ -1140,11 +1142,11 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterRasterizedShape8_st(Raster
   dImage.stride = 0;
   dImage.data = NULL;
 
-  sImage.size = engine->ctx.layer.size;
-  sImage.stride = engine->ctx.layer.stride;
-  sImage.data = engine->ctx.layer.pixels;
+  sImage.size = engine->ctx.target.size;
+  sImage.stride = engine->ctx.target.stride;
+  sImage.data = engine->ctx.target.pixels;
 
-  uint32_t bpp = engine->ctx.layer.primaryBPP;
+  uint32_t bpp = engine->ctx.target.bpp;
 
   MemBuffer intermediateBuffer;
   err = ctx.doRect(&ctx, &dImage, &dPos, &sImage, &sRect, &intermediateBuffer);
@@ -1158,14 +1160,14 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterRasterizedShape8_st(Raster
   RasterPaintFiller filler;
 
   filler.ctx = &engine->ctx;
-  filler.dstPixels = engine->ctx.layer.pixels;
-  filler.dstStride = engine->ctx.layer.stride;
+  filler.dstPixels = engine->ctx.target.pixels;
+  filler.dstStride = engine->ctx.target.stride;
 
   filler._prepare = (RasterFiller::PrepareFunc)RasterPaintFiller_prepare_filter_st;
   filler._process = (RasterFiller::ProcessFunc)RasterPaintFiller_process_filter;
   filler._skip = (RasterFiller::SkipFunc)RasterPaintFiller_skip_filter;
 
-  uint32_t format = engine->ctx.layer.primaryFormat;
+  uint32_t format = engine->ctx.target.format;
   filler.f.blit = _api_raster.getVBlitSpan(format, COMPOSITE_SRC, format);
   filler.f.closure = &engine->ctx.closure;
 
@@ -1195,17 +1197,17 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_st(
   FOG_RETURN_ON_ERROR(_api_raster.filter.create[feBase->getFeType()](&ctx,
     feBase, &engine->ctx.filterScale,
     &engine->ctx.buffer,
-    engine->ctx.layer.primaryFormat,
-    engine->ctx.layer.primaryFormat));
+    engine->ctx.target.format,
+    engine->ctx.target.format));
 
   err_t err;
 
   RasterFilterImage dImage;
   RasterFilterImage sImage;
 
-  sImage.size = engine->ctx.layer.size;
-  sImage.stride = engine->ctx.layer.stride;
-  sImage.data = engine->ctx.layer.pixels;
+  sImage.size = engine->ctx.target.size;
+  sImage.stride = engine->ctx.target.stride;
+  sImage.data = engine->ctx.target.pixels;
 
   PointI dPos;
   RectI sRect(box->x0, box->y0, box->x1 - box->x0, box->y1 - box->y0);
@@ -1217,9 +1219,9 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_st(
   {
     // In case that we are painting with full opacity we can render the effect
     // directly to the destination buffer.
-    dImage.size = engine->ctx.layer.size;
-    dImage.stride = engine->ctx.layer.stride;
-    dImage.data = engine->ctx.layer.pixels;
+    dImage.size = engine->ctx.target.size;
+    dImage.stride = engine->ctx.target.stride;
+    dImage.data = engine->ctx.target.pixels;
     dPos.set(box->x0, box->y0);
 
     err = ctx.doRect(&ctx, &dImage, &dPos, &sImage, &sRect, &intermediateBuffer);
@@ -1240,12 +1242,12 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_st(
       int i = sRect.h;
 
       RasterVBlitSpanFunc blitSpan;
-      blitSpan = _api_raster.getCompositeCore(engine->ctx.layer.primaryFormat, COMPOSITE_SRC)->vblit_span[engine->ctx.layer.primaryFormat];
+      blitSpan = _api_raster.getCompositeCore(engine->ctx.target.format, COMPOSITE_SRC)->vblit_span[engine->ctx.target.format];
 
-      ssize_t dstStride = engine->ctx.layer.stride;
+      ssize_t dstStride = engine->ctx.target.stride;
       ssize_t srcStride = dImage.stride;
 
-      uint8_t* dstPixels = engine->ctx.layer.pixels + box->y0 * srcStride;
+      uint8_t* dstPixels = engine->ctx.target.pixels + box->y0 * srcStride;
       uint8_t* srcPixels = dImage.data;
 
       FOG_ASSERT(srcPixels != NULL);

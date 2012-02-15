@@ -42,7 +42,7 @@ struct BoxRasterizer16;
 struct PathRasterizer8;
 struct PathRasterizer16;
 
-struct RasterContext;
+struct RasterPaintContext;
 struct RasterFiller;
 struct RasterPaintEngine;
 struct RasterPaintSerializer;

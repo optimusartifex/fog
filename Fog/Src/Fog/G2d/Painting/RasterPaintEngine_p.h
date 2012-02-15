@@ -22,8 +22,10 @@
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintContext_p.h>
+#include <Fog/G2d/Painting/RasterPaintGroup_p.h>
 #include <Fog/G2d/Painting/RasterPaintSerializer_p.h>
-#include <Fog/G2d/Painting/RasterPaintWork_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
 #include <Fog/G2d/Painting/RasterState_p.h>
@@ -81,9 +83,9 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief The final transformation matrix (float).
-  FOG_INLINE const TransformF& getFinalTransformF() { return stroker.f->_transform; }
+  FOG_INLINE const TransformF& getFinalTransformF() const { return stroker.f->_transform; }
   //! @brief The final transformation matrix (double).
-  FOG_INLINE const TransformD& getFinalTransformD() { return stroker.d->_transform; }
+  FOG_INLINE const TransformD& getFinalTransformD() const { return stroker.d->_transform; }
 
   FOG_INLINE bool ensureFinalTransformF()
   {
@@ -216,13 +218,13 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Context (st).
-  RasterContext ctx;
+  RasterPaintContext ctx;
 
   // --------------------------------------------------------------------------
   // [Members - Flags]
   // --------------------------------------------------------------------------
 
-  //! @brief 'NoPaint', 'Pending' and 'Error' flags.
+  //! @brief 'NoPaint', 'Group' and 'Error' flags.
   uint32_t masterFlags;
 
   // --------------------------------------------------------------------------
@@ -312,7 +314,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // --------------------------------------------------------------------------
 
   //! @brief Source.
-  RasterSource source;
+  RasterPaintSource source;
   //! @brief opacity (in floating-point format).
   float opacityF;
 
@@ -359,8 +361,8 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Members - Multithreading]
   // --------------------------------------------------------------------------
 
-  //! @brief The worker manager.
-  RasterPaintWorkMgr* wm;
+  // @brief The worker manager.
+  // RasterPaintWorkMgr* wm;
 
   //! @brief The maximum number of threads that can be used for rendering after
   //! the multithreading is initialized.

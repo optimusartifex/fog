@@ -2106,37 +2106,6 @@ enum PAINTER_INIT
 };
 
 // ============================================================================
-// [Fog::PAINTER_LAYER]
-// ============================================================================
-
-//! @brief Flags which can be passed to @c Painter::beginLayer() method.
-enum PAINTER_LAYER
-{
-  //! @brief No flags, used to create compatible layer with the destination
-  //! format.
-  //!
-  //! @note This is the default behavior always overridden by using @c
-  //! PAINTER_LAYER_ALPHA, @c PAINTER_LAYER_RGB, or both.
-  PAINTER_LAYER_DETECT = 0x00000000,
-
-  //! @brief Include alpha-channel in the layer.
-  PAINTER_LAYER_ALPHA = 0x00000001,
-
-  //! @brief Include RGB in the layer.
-  PAINTER_LAYER_RGB = 0x00000002,
-
-  //! @brief Include alpha-channel and RGB in the layer.
-  PAINTER_LAYER_ARGB = PAINTER_LAYER_ALPHA | PAINTER_LAYER_RGB,
-
-  //! @brief Always use high quality pixel format (16-bpc).
-  //!
-  //! This flag can improve quality when working with effects or when working
-  //! with gamma correction. Does nothing when used on vector-based destination
-  //! like PDF/PS/SVG.
-  PAINTER_LAYER_HIGH_QUALITY = 0x00000010
-};
-
-// ============================================================================
 // [Fog::PAINTER_MAP]
 // ============================================================================
 

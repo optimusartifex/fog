@@ -656,16 +656,16 @@ static err_t FOG_CDECL MyPaintEngine_resetClip(Painter* self)
 }
 
 // ============================================================================
-// [Fog::MyPaintEngine - Layer]
+// [Fog::MyPaintEngine - Group]
 // ============================================================================
 
-static err_t FOG_CDECL MyPaintEngine_beginLayer(Painter* self, uint32_t layerFlags)
+static err_t FOG_CDECL MyPaintEngine_newGroup(Painter* self, uint32_t flags)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_endLayer(Painter* self)
+static err_t FOG_CDECL MyPaintEngine_endGroup(Painter* self)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -881,11 +881,11 @@ static void MyPaintEngine_init()
   v->resetClip = MyPaintEngine_resetClip;
 
   // --------------------------------------------------------------------------
-  // [Layer]
+  // [Group]
   // --------------------------------------------------------------------------
 
-  v->beginLayer = MyPaintEngine_beginLayer;
-  v->endLayer = MyPaintEngine_endLayer;
+  v->newGroup = MyPaintEngine_newGroup;
+  v->endGroup = MyPaintEngine_endGroup;
 
   // --------------------------------------------------------------------------
   // [Flush]
@@ -1153,7 +1153,7 @@ static err_t FOG_CDECL NullPaintEngine_blitMaskedImage(Painter* self, const Any*
 }
 
 // ============================================================================
-// [Fog::NullPaintEngine - Layer]
+// [Fog::NullPaintEngine - Filter]
 // ============================================================================
 
 static err_t FOG_CDECL NullPaintEngine_filterAll(Painter* self, const FeBase* fe)
@@ -1221,15 +1221,15 @@ static err_t FOG_CDECL NullPaintEngine_resetClip(Painter* self)
 }
 
 // ============================================================================
-// [Fog::NullPaintEngine - Layer]
+// [Fog::NullPaintEngine - Group]
 // ============================================================================
 
-static err_t FOG_CDECL NullPaintEngine_beginLayer(Painter* self, uint32_t layerFlags)
+static err_t FOG_CDECL NullPaintEngine_newGroup(Painter* self, uint32_t flags)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_endLayer(Painter* self)
+static err_t FOG_CDECL NullPaintEngine_endGroup(Painter* self)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1452,11 +1452,11 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   v->resetClip = NullPaintEngine_resetClip;
 
   // --------------------------------------------------------------------------
-  // [Layer]
+  // [Group]
   // --------------------------------------------------------------------------
 
-  v->beginLayer = NullPaintEngine_beginLayer;
-  v->endLayer = NullPaintEngine_endLayer;
+  v->newGroup = NullPaintEngine_newGroup;
+  v->endGroup = NullPaintEngine_endGroup;
 
   // --------------------------------------------------------------------------
   // [Flush]

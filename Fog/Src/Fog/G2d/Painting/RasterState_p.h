@@ -102,7 +102,7 @@ struct FOG_NO_EXPORT RasterState
   // [Source]
   // ------------------------------------------------------------------------
 
-  RasterSource source;
+  RasterPaintSource source;
   RasterSolid solid;
   RasterPattern* pc;
 

@@ -18,34 +18,16 @@
 
 namespace Fog {
 
+// ============================================================================
+// [Fog::G2d - Prototypes]
+// ============================================================================
+
 FOG_NO_EXPORT void RasterOps_init_C(void);
 FOG_NO_EXPORT void RasterOps_init_skipped(void);
 
-// TODO: Rename, and use...
-static void fog_rasterengine_set_nops(RasterCompositeExtFuncs* funcs)
-{
-  funcs->cblit_line[RASTER_CBLIT_PRGB ] = RasterOps_C::CompositeNop::nop_cblit_line;
-  funcs->cblit_span[RASTER_CBLIT_PRGB ] = RasterOps_C::CompositeNop::nop_cblit_span;
-  funcs->cblit_line[RASTER_CBLIT_XRGB ] = RasterOps_C::CompositeNop::nop_cblit_line;
-  funcs->cblit_span[RASTER_CBLIT_XRGB ] = RasterOps_C::CompositeNop::nop_cblit_span;
-
-  uint i;
-  for (i = 0; i < RASTER_VBLIT_COUNT; i++) funcs->vblit_line[i] = RasterOps_C::CompositeNop::nop_vblit_line;
-  for (i = 0; i < RASTER_VBLIT_COUNT; i++) funcs->vblit_span[i] = RasterOps_C::CompositeNop::nop_vblit_span;
-}
-
 // ============================================================================
-// [Fog::G2d - Initialization / Finalization]
+// [Fog::G2d - Defs]
 // ============================================================================
-
-FOG_NO_EXPORT void RasterOps_init(void)
-{
-  // Install C optimized code (default).
-  RasterOps_init_C();
-
-  // Initialize functions marked as 'SKIP'.
-  RasterOps_init_skipped();
-}
 
 // Initialize CBlit by CompositeCore operator.
 #define INIT_CBLIT_BY_COP(_DstFormat_, _SrcFormat_, _DstExtFormat_, _ByExtFormat_) \
@@ -78,6 +60,19 @@ FOG_NO_EXPORT void RasterOps_init(void)
     \
     api.compositeExt[IMAGE_FORMAT_##_DstFormat_][RASTER_COMPOSITE_EXT_##_DstExtFormat_].vblit_span[RASTER_VBLIT_##_DstFormat_##_AND_##_SrcFormat_] = \
       api.compositeExt[IMAGE_FORMAT_##_DstFormat_][RASTER_COMPOSITE_EXT_##_ByExtFormat_].vblit_span[RASTER_VBLIT_##_DstFormat_##_AND_##_SrcFormat_]
+
+// ============================================================================
+// [Fog::G2d - Initialization / Finalization]
+// ============================================================================
+
+FOG_NO_EXPORT void RasterOps_init(void)
+{
+  // Install C optimized code (default).
+  RasterOps_init_C();
+
+  // Initialize functions marked as 'SKIP'.
+  RasterOps_init_skipped();
+}
 
 FOG_NO_EXPORT void RasterOps_init_skipped(void)
 {

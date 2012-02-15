@@ -37,9 +37,9 @@ namespace Fog {
 struct RasterCalc;
 struct RasterCmd;
 
-struct RasterContext;
 union RasterHints;
-struct RasterLayer;
+struct RasterPaintGroup;
+struct RasterPaintContext;
 struct RasterPaintEngine;
 struct RasterScope;
 
@@ -108,10 +108,10 @@ union FOG_NO_EXPORT RasterHints
 };
 
 // ============================================================================
-// [Fog::RasterSource]
+// [Fog::RasterPaintSource]
 // ============================================================================
 
-struct FOG_NO_EXPORT RasterSource
+struct FOG_NO_EXPORT RasterPaintSource
 {
   // --------------------------------------------------------------------------
   // [Members]
@@ -132,13 +132,13 @@ struct FOG_NO_EXPORT RasterSource
 };
 
 // ============================================================================
-// [Fog::RasterLayer]
+// [Fog::RasterPaintTarget]
 // ============================================================================
 
 //! @internal
 //!
-//! @brief The Raster layer.
-struct FOG_NO_EXPORT RasterLayer
+//! @brief Raster paint engine group.
+struct FOG_NO_EXPORT RasterPaintTarget
 {
   // --------------------------------------------------------------------------
   // [Reset]
@@ -150,7 +150,7 @@ struct FOG_NO_EXPORT RasterLayer
   }
 
   // --------------------------------------------------------------------------
-  // [Members - Primary Format]
+  // [Members - Buffer]
   // --------------------------------------------------------------------------
 
   //! @brief The raster-layer size, NEEDED FOR _setupLayer().
@@ -159,30 +159,15 @@ struct FOG_NO_EXPORT RasterLayer
   ssize_t stride;
   //! @brief Pointer to the first scanline, NEEDED FOR _setupLayer().
   uint8_t* pixels;
+
   //! @brief The raster-layer format, NEEDED FOR _setupLayer().
-  uint32_t primaryFormat;
+  uint32_t format;
   //! @brief The raster-layer bytes-per-pixel.
-  uint32_t primaryBPP;
+  uint32_t bpp;
   //! @brief The raster-layer bytes-per-line.
-  uint32_t primaryBPL;
+  uint32_t bpl;
   //! @brief The raster-layer pixel precision.
   uint32_t precision;
-
-  // --------------------------------------------------------------------------
-  // [Members - Secondary Format]
-  // --------------------------------------------------------------------------
-
-  //! @brief The secondary-layer format.
-  uint32_t secondaryFormat;
-  //! @brief The secondary-layer bytes-per-pixel.
-  uint32_t secondaryBPP;
-  //! @brief The secondary-layer bytes-per-line.
-  uint32_t secondaryBPL;
-
-  //! @brief The 'secondary-from-primary' format blitter.
-  RasterVBlitLineFunc cvtSecondaryFromPrimary;
-  //! @brief The 'primary-from-secondary' format blitter.
-  RasterVBlitLineFunc cvtPrimaryFromSecondary;
 
   // --------------------------------------------------------------------------
   // [Members - Image Data]

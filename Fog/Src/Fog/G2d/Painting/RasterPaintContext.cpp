@@ -24,7 +24,7 @@ RasterPaintContext::RasterPaintContext() :
   clipBoxI(0, 0, 0, 0)
 {
   scope.reset();
-  buffer.reset();
+  target.reset();
 
   paintHints.packed = 0;
   rasterHints.packed = 0;

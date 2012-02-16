@@ -358,6 +358,17 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   Color dummyColor;
 
   // --------------------------------------------------------------------------
+  // [Members - Groups]
+  // --------------------------------------------------------------------------
+
+  //! @brief Group allocator.
+  MemZoneAllocator groupAllocator;
+  //! @brief Top-most group (statically allocated).
+  RasterPaintGroup topGroup;
+  //! @brief Current group.
+  RasterPaintGroup* curGroup;
+
+  // --------------------------------------------------------------------------
   // [Members - Multithreading]
   // --------------------------------------------------------------------------
 

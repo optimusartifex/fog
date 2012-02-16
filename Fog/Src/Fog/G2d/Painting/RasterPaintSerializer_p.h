@@ -152,9 +152,11 @@ struct FOG_NO_EXPORT RasterPaintSerializer
 // [Fog::RasterPaintSerializer - VTable]
 // ============================================================================
 
-extern FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_vtable[RASTER_MODE_COUNT];
+extern FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_render_vtable[RASTER_MODE_COUNT];
+extern FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_group_vtable[RASTER_MODE_COUNT];
 
-void FOG_NO_EXPORT RasterPaintSerializer_init_st(void);
+void FOG_NO_EXPORT RasterPaintSerializer_init_render_st(void);
+void FOG_NO_EXPORT RasterPaintSerializer_init_group_st(void);
 
 //! @}
 

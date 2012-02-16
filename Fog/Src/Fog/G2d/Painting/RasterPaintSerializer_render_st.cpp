@@ -17,8 +17,8 @@
 #include <Fog/G2d/Geometry/PathStroker.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
-#include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
+#include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Imaging/ImageFormatDescription.h>
 #include <Fog/G2d/Imaging/Filters/FeBase.h>
 #include <Fog/G2d/Painting/Painter.h>
@@ -42,7 +42,7 @@ namespace Fog {
 // [Fog::RasterPaintSerializer - VTable]
 // ============================================================================
 
-FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_vtable[RASTER_MODE_COUNT];
+FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_render_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
 // [Fog::RasterPaintSerializer - Defs]
@@ -224,10 +224,10 @@ static void FOG_FASTCALL RasterPaintFiller_skip_filter(RasterPaintFiller* self, 
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - PrepareRasterizer (st)]
+// [Fog::RasterPaintSerializer - Render(st) - PrepareRasterizer]
 // ============================================================================
 
-static void FOG_INLINE RasterPaintSerializer_prepareRasterizer_st(RasterPaintEngine* engine, Rasterizer8* rasterizer)
+static void FOG_INLINE RasterPaintSerializer_render_prepareRasterizer_st(RasterPaintEngine* engine, Rasterizer8* rasterizer)
 {
   rasterizer->setSceneBox(engine->ctx.clipBoxI);
   rasterizer->setOpacity(engine->ctx.rasterHints.opacity);
@@ -251,10 +251,10 @@ static void FOG_INLINE RasterPaintSerializer_prepareRasterizer_st(RasterPaintEng
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FillRasterizedShape (st)]
+// [Fog::RasterPaintSerializer - Render(st) - FillRasterizedShape]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillRasterizedShape8_st(RasterPaintEngine* engine, Rasterizer8* rasterizer)
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillRasterizedShape8_st(RasterPaintEngine* engine, Rasterizer8* rasterizer)
 {
   RasterPaintFiller filler;
 
@@ -308,20 +308,20 @@ _Solid:
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FillAll (st)]
+// [Fog::RasterPaintSerializer - Render(st) - FillAll]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillAll_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillAll_st(
   RasterPaintEngine* engine)
 {
   return engine->serializer->fillNormalizedBoxI(engine, &engine->ctx.clipBoxI);
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FillPath (st)]
+// [Fog::RasterPaintSerializer - Render(st) - FillPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillPathF_st(
   RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
 {
   PathF& tmp = engine->ctx.tmpPathF[1];
@@ -356,7 +356,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillPathF_st(
   }
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillPathD_st(
   RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
 {
   PathD* tmp = &engine->ctx.tmpPathD[1];
@@ -392,10 +392,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - StrokeAndFillPath (st)]
+// [Fog::RasterPaintSerializer - Render(st) - StrokeAndFillPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillStrokedPathF_st(
   RasterPaintEngine* engine, const PathF* path)
 {
   if (!engine->ctx.rasterHints.finalTransformF)
@@ -427,7 +427,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathF_st(
   return engine->serializer->fillNormalizedPathF(engine, &tmp, FILL_RULE_NON_ZERO);
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillStrokedPathD_st(
   RasterPaintEngine* engine, const PathD* path)
 {
   if (engine->strokerPrecision == RASTER_PRECISION_F)
@@ -447,10 +447,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FillNormalizedBox (st)]
+// [Fog::RasterPaintSerializer - Render(st) - FillNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillNormalizedBoxI_st(
   RasterPaintEngine* engine, const BoxI* box)
 {
   FOG_ASSERT(box->isValid());
@@ -535,10 +535,10 @@ _Solid:
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+        RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
         rasterizer->init32x0(*box);
-        return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
+        return RasterPaintSerializer_render_fillRasterizedShape8_st(engine, rasterizer);
       }
     }
 
@@ -556,7 +556,7 @@ _Solid:
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillNormalizedBoxF_st(
   RasterPaintEngine* engine, const BoxF* box)
 {
   switch (engine->ctx.precision)
@@ -576,10 +576,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_st(
       }
 
       BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+      RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->init24x8(box24x8);
-      return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
+      return RasterPaintSerializer_render_fillRasterizedShape8_st(engine, rasterizer);
     }
 
     case IMAGE_PRECISION_WORD:
@@ -596,7 +596,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_st(
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillNormalizedBoxD_st(
   RasterPaintEngine* engine, const BoxD* box)
 {
   switch (engine->ctx.precision)
@@ -616,10 +616,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_st(
       }
 
       BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+      RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->init24x8(box24x8);
-      return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
+      return RasterPaintSerializer_render_fillRasterizedShape8_st(engine, rasterizer);
     }
 
     case IMAGE_PRECISION_WORD:
@@ -637,10 +637,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FillNormalizedPath (st)]
+// [Fog::RasterPaintSerializer - Render(st) - FillNormalizedPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillNormalizedPathF_st(
   RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
@@ -648,7 +648,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
-      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+      RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->setFillRule(fillRule);
       if (FOG_IS_ERROR(rasterizer->init()))
@@ -658,7 +658,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_st(
       rasterizer->finalize();
 
       if (rasterizer->isValid())
-        return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
+        return RasterPaintSerializer_render_fillRasterizedShape8_st(engine, rasterizer);
       else
         return ERR_OK;
     }
@@ -677,7 +677,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_st(
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_fillNormalizedPathD_st(
   RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
@@ -685,7 +685,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
-      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+      RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->setFillRule(fillRule);
       if (FOG_IS_ERROR(rasterizer->init()))
@@ -695,7 +695,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_st(
       rasterizer->finalize();
 
       if (rasterizer->isValid())
-        return RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
+        return RasterPaintSerializer_render_fillRasterizedShape8_st(engine, rasterizer);
       else
         return ERR_OK;
     }
@@ -715,10 +715,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - BlitImage (st)]
+// [Fog::RasterPaintSerializer - Render(st) - BlitImage]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitImageD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_blitImageD_st(
   RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform)
 {
   BoxD boxClipped(*box);
@@ -751,10 +751,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitImageD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - BlitNormalizedImageA (st)]
+// [Fog::RasterPaintSerializer - Render(st) - BlitNormalizedImageA]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_blitNormalizedImageA_st(
   RasterPaintEngine* engine, const PointI* pt, const Image* srcImage, const RectI* srcFragment)
 {
   switch (engine->ctx.precision)
@@ -897,7 +897,7 @@ _BlitImageA8_Alpha:
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+        RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
         BoxI box(pt->x, pt->y, pt->x + srcFragment->w, pt->y + srcFragment->h);
         rasterizer->init32x0(box);
@@ -915,7 +915,7 @@ _BlitImageA8_Alpha:
         );
 
         engine->ctx.pc = &pc;
-        err_t err = RasterPaintSerializer_fillRasterizedShape8_st(engine, rasterizer);
+        err_t err = RasterPaintSerializer_render_fillRasterizedShape8_st(engine, rasterizer);
         engine->ctx.pc = old;
 
         pc.destroy();
@@ -938,10 +938,10 @@ _BlitImageA8_Alpha:
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - BlitNormalizedImage (st)]
+// [Fog::RasterPaintSerializer - Render(st) - BlitNormalizedImage]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageI_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_blitNormalizedImageI_st(
   RasterPaintEngine* engine, const BoxI* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform)
 {
   // Must be already clipped.
@@ -966,7 +966,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageI_st(
   return err;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_blitNormalizedImageD_st(
   RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform)
 {
   // Must be already clipped.
@@ -992,10 +992,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FilterPath]
+// [Fog::RasterPaintSerializer - Render(st) - FilterPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterPathF_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule)
 {
   PathF* tmp = &engine->ctx.tmpPathF[1];
@@ -1030,7 +1030,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterPathF_st(
   }
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterPathD_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule)
 {
   PathD* tmp = &engine->ctx.tmpPathD[1];
@@ -1065,7 +1065,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterPathD_st(
   }
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterStrokedPathF_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path)
 {
   if (!engine->ctx.rasterHints.finalTransformF)
@@ -1097,7 +1097,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathF_st(
   return engine->serializer->filterNormalizedPathF(engine, feBase, &tmp, FILL_RULE_NON_ZERO);
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterStrokedPathD_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path)
 {
   if (engine->strokerPrecision == RASTER_PRECISION_F)
@@ -1117,10 +1117,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FilterRasterizerShape]
+// [Fog::RasterPaintSerializer - Render(st) - FilterRasterizerShape]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterRasterizedShape8_st(RasterPaintEngine* engine, const FeBase* feBase, Rasterizer8* rasterizer, const BoxI* bBox)
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterRasterizedShape8_st(RasterPaintEngine* engine, const FeBase* feBase, Rasterizer8* rasterizer, const BoxI* bBox)
 {
   // Destination and source formats are the same.
   RasterFilter ctx;
@@ -1184,10 +1184,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterRasterizedShape8_st(Raster
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FilterNormalizedBox]
+// [Fog::RasterPaintSerializer - Render(st) - FilterNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterNormalizedBoxI_st(
   RasterPaintEngine* engine, const FeBase* feBase, const BoxI* box)
 {
   FOG_ASSERT(box->isValid());
@@ -1287,7 +1287,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_st(
   return err;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterNormalizedBoxF_st(
   RasterPaintEngine* engine, const FeBase* feBase, const BoxF* box)
 {
   switch (engine->ctx.precision)
@@ -1308,10 +1308,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxF_st(
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+        RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
         rasterizer->init24x8(box24x8);
-        return RasterPaintSerializer_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boxBounds);
+        return RasterPaintSerializer_render_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boxBounds);
       }
     }
     
@@ -1329,7 +1329,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxF_st(
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterNormalizedBoxD_st(
   RasterPaintEngine* engine, const FeBase* feBase, const BoxD* box)
 {
   switch (engine->ctx.precision)
@@ -1350,10 +1350,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxD_st(
       else
       {
         BoxRasterizer8* rasterizer = &engine->ctx.boxRasterizer8;
-        RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+        RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
         rasterizer->init24x8(box24x8);
-        return RasterPaintSerializer_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boxBounds);
+        return RasterPaintSerializer_render_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boxBounds);
       }
     }
     
@@ -1372,10 +1372,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - FilterNormalizedPath]
+// [Fog::RasterPaintSerializer - Render(st) - FilterNormalizedPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterNormalizedPathF_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
@@ -1383,7 +1383,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathF_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
-      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+      RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->setFillRule(fillRule);
       if (FOG_IS_ERROR(rasterizer->init()))
@@ -1393,7 +1393,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathF_st(
       rasterizer->finalize();
 
       if (rasterizer->isValid())
-        return RasterPaintSerializer_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boundingBox);
+        return RasterPaintSerializer_render_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boundingBox);
       else
         return ERR_OK;
     }
@@ -1412,7 +1412,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathF_st(
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_filterNormalizedPathD_st(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
@@ -1420,7 +1420,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_st(
     case IMAGE_PRECISION_BYTE:
     {
       PathRasterizer8* rasterizer = &engine->ctx.pathRasterizer8;
-      RasterPaintSerializer_prepareRasterizer_st(engine, rasterizer);
+      RasterPaintSerializer_render_prepareRasterizer_st(engine, rasterizer);
 
       rasterizer->setFillRule(fillRule);
       if (FOG_IS_ERROR(rasterizer->init()))
@@ -1430,7 +1430,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_st(
       rasterizer->finalize();
 
       if (rasterizer->isValid())
-        return RasterPaintSerializer_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boundingBox);
+        return RasterPaintSerializer_render_filterRasterizedShape8_st(engine, feBase, rasterizer, &rasterizer->_boundingBox);
       else
         return ERR_OK;
     }
@@ -1450,10 +1450,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - ClipAll (st)]
+// [Fog::RasterPaintSerializer - Render(st) - ClipAll]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipAll_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipAll_st(
   RasterPaintEngine* engine)
 {
   if ((engine->savedStateFlags & RASTER_STATE_CLIPPING) == 0)
@@ -1470,10 +1470,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipAll_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - ClipPath (st)]
+// [Fog::RasterPaintSerializer - Render(st) - ClipPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipPathF(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipPathF(
   RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule)
 {
   PathF* tmp = &engine->ctx.tmpPathF[1];
@@ -1508,7 +1508,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipPathF(
   }
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipPathD(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipPathD(
   RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule)
 {
   PathD* tmp = &engine->ctx.tmpPathD[1];
@@ -1543,7 +1543,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipPathD(
   }
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipStrokedPathF(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipStrokedPathF(
   RasterPaintEngine* engine, uint32_t clipOp, const PathF* path)
 {
   if (engine->strokerPrecision == RASTER_PRECISION_D)
@@ -1561,7 +1561,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipStrokedPathF(
   return engine->serializer->clipNormalizedPathF(engine, clipOp, tmp, FILL_RULE_NON_ZERO);
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipStrokedPathD(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipStrokedPathD(
   RasterPaintEngine* engine, uint32_t clipOp, const PathD* path)
 {
   if (engine->strokerPrecision == RASTER_PRECISION_F)
@@ -1580,10 +1580,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipStrokedPathD(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - ClipNormalizedBox (st)]
+// [Fog::RasterPaintSerializer - Render(st) - ClipNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipNormalizedBoxI_st(
   RasterPaintEngine* engine, uint32_t clipOp, const BoxI* box)
 {
   FOG_ASSERT(box->isValid());
@@ -1700,7 +1700,7 @@ _ReplaceClipRegion:
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipNormalizedBoxF_st(
   RasterPaintEngine* engine, uint32_t clipOp, const BoxF* box)
 {
   switch (engine->ctx.precision)
@@ -1725,7 +1725,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_st(
 
       rasterizer->init24x8(box24x8);
       // TODO:
-      // return RasterPaintSerializer_filterRasterizedShape8_st(engine, rasterizer, &rasterizer->_boxBounds);
+      // return RasterPaintSerializer_render_filterRasterizedShape8_st(engine, rasterizer, &rasterizer->_boxBounds);
     }
 
     case IMAGE_PRECISION_WORD:
@@ -1742,7 +1742,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_st(
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipNormalizedBoxD_st(
   RasterPaintEngine* engine, uint32_t clipOp, const BoxD* box)
 {
   switch (engine->ctx.precision)
@@ -1767,7 +1767,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxD_st(
 
       rasterizer->init24x8(box24x8);
       // TODO:
-      // return RasterPaintSerializer_filterRasterizedShape8_st(engine, rasterizer, &rasterizer->_boxBounds);
+      // return RasterPaintSerializer_render_filterRasterizedShape8_st(engine, rasterizer, &rasterizer->_boxBounds);
     }
 
     case IMAGE_PRECISION_WORD:
@@ -1785,17 +1785,17 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - ClipNormalizedPath (st)]
+// [Fog::RasterPaintSerializer - Render(st) - ClipNormalizedPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedPathF_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipNormalizedPathF_st(
   RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedPathD_st(
+static err_t FOG_FASTCALL RasterPaintSerializer_render_clipNormalizedPathD_st(
   RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule)
 {
   // TODO: Raster paint-engine.
@@ -1803,74 +1803,74 @@ static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedPathD_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Init (st)]
+// [Fog::RasterPaintSerializer - Render(st) - Init]
 // ============================================================================
 
-void FOG_NO_EXPORT RasterPaintSerializer_init_st(void)
+void FOG_NO_EXPORT RasterPaintSerializer_render_init_st(void)
 {
-  RasterPaintSerializer* s = &RasterPaintSerializer_vtable[RASTER_MODE_ST];
+  RasterPaintSerializer* s = &RasterPaintSerializer_render_vtable[RASTER_MODE_ST];
 
   // --------------------------------------------------------------------------
   // [Fill/Stroke]
   // --------------------------------------------------------------------------
 
-  s->fillAll = RasterPaintSerializer_fillAll_st;
+  s->fillAll = RasterPaintSerializer_render_fillAll_st;
 
-  s->fillPathF = RasterPaintSerializer_fillPathF_st;
-  s->fillPathD = RasterPaintSerializer_fillPathD_st;
+  s->fillPathF = RasterPaintSerializer_render_fillPathF_st;
+  s->fillPathD = RasterPaintSerializer_render_fillPathD_st;
 
-  s->fillStrokedPathF = RasterPaintSerializer_fillStrokedPathF_st;
-  s->fillStrokedPathD = RasterPaintSerializer_fillStrokedPathD_st;
+  s->fillStrokedPathF = RasterPaintSerializer_render_fillStrokedPathF_st;
+  s->fillStrokedPathD = RasterPaintSerializer_render_fillStrokedPathD_st;
 
-  s->fillNormalizedBoxI = RasterPaintSerializer_fillNormalizedBoxI_st;
-  s->fillNormalizedBoxF = RasterPaintSerializer_fillNormalizedBoxF_st;
-  s->fillNormalizedBoxD = RasterPaintSerializer_fillNormalizedBoxD_st;
-  s->fillNormalizedPathF = RasterPaintSerializer_fillNormalizedPathF_st;
-  s->fillNormalizedPathD = RasterPaintSerializer_fillNormalizedPathD_st;
+  s->fillNormalizedBoxI = RasterPaintSerializer_render_fillNormalizedBoxI_st;
+  s->fillNormalizedBoxF = RasterPaintSerializer_render_fillNormalizedBoxF_st;
+  s->fillNormalizedBoxD = RasterPaintSerializer_render_fillNormalizedBoxD_st;
+  s->fillNormalizedPathF = RasterPaintSerializer_render_fillNormalizedPathF_st;
+  s->fillNormalizedPathD = RasterPaintSerializer_render_fillNormalizedPathD_st;
 
   // --------------------------------------------------------------------------
   // [Blit]
   // --------------------------------------------------------------------------
 
-  s->blitImageD = RasterPaintSerializer_blitImageD_st;
+  s->blitImageD = RasterPaintSerializer_render_blitImageD_st;
 
-  s->blitNormalizedImageA = RasterPaintSerializer_blitNormalizedImageA_st;
-  s->blitNormalizedImageI = RasterPaintSerializer_blitNormalizedImageI_st;
-  s->blitNormalizedImageD = RasterPaintSerializer_blitNormalizedImageD_st;
+  s->blitNormalizedImageA = RasterPaintSerializer_render_blitNormalizedImageA_st;
+  s->blitNormalizedImageI = RasterPaintSerializer_render_blitNormalizedImageI_st;
+  s->blitNormalizedImageD = RasterPaintSerializer_render_blitNormalizedImageD_st;
 
   // --------------------------------------------------------------------------
   // [Filter]
   // --------------------------------------------------------------------------
 
-  s->filterPathF = RasterPaintSerializer_filterPathF_st;
-  s->filterPathD = RasterPaintSerializer_filterPathD_st;
+  s->filterPathF = RasterPaintSerializer_render_filterPathF_st;
+  s->filterPathD = RasterPaintSerializer_render_filterPathD_st;
 
-  s->filterStrokedPathF = RasterPaintSerializer_filterStrokedPathF_st;
-  s->filterStrokedPathD = RasterPaintSerializer_filterStrokedPathD_st;
+  s->filterStrokedPathF = RasterPaintSerializer_render_filterStrokedPathF_st;
+  s->filterStrokedPathD = RasterPaintSerializer_render_filterStrokedPathD_st;
 
-  s->filterNormalizedBoxI = RasterPaintSerializer_filterNormalizedBoxI_st;
-  s->filterNormalizedBoxF = RasterPaintSerializer_filterNormalizedBoxF_st;
-  s->filterNormalizedBoxD = RasterPaintSerializer_filterNormalizedBoxD_st;
-  s->filterNormalizedPathF = RasterPaintSerializer_filterNormalizedPathF_st;
-  s->filterNormalizedPathD = RasterPaintSerializer_filterNormalizedPathD_st;
+  s->filterNormalizedBoxI = RasterPaintSerializer_render_filterNormalizedBoxI_st;
+  s->filterNormalizedBoxF = RasterPaintSerializer_render_filterNormalizedBoxF_st;
+  s->filterNormalizedBoxD = RasterPaintSerializer_render_filterNormalizedBoxD_st;
+  s->filterNormalizedPathF = RasterPaintSerializer_render_filterNormalizedPathF_st;
+  s->filterNormalizedPathD = RasterPaintSerializer_render_filterNormalizedPathD_st;
 
   // --------------------------------------------------------------------------
   // [Clip]
   // --------------------------------------------------------------------------
 
-  s->clipAll = RasterPaintSerializer_clipAll_st;
+  s->clipAll = RasterPaintSerializer_render_clipAll_st;
 
-  s->clipPathF = RasterPaintSerializer_clipPathF;
-  s->clipPathD = RasterPaintSerializer_clipPathD;
+  s->clipPathF = RasterPaintSerializer_render_clipPathF;
+  s->clipPathD = RasterPaintSerializer_render_clipPathD;
 
-  s->clipStrokedPathF = RasterPaintSerializer_clipStrokedPathF;
-  s->clipStrokedPathD = RasterPaintSerializer_clipStrokedPathD;
+  s->clipStrokedPathF = RasterPaintSerializer_render_clipStrokedPathF;
+  s->clipStrokedPathD = RasterPaintSerializer_render_clipStrokedPathD;
 
-  s->clipNormalizedBoxI = RasterPaintSerializer_clipNormalizedBoxI_st;
-  s->clipNormalizedBoxF = RasterPaintSerializer_clipNormalizedBoxF_st;
-  s->clipNormalizedBoxD = RasterPaintSerializer_clipNormalizedBoxD_st;
-  s->clipNormalizedPathF = RasterPaintSerializer_clipNormalizedPathF_st;
-  s->clipNormalizedPathD = RasterPaintSerializer_clipNormalizedPathD_st;
+  s->clipNormalizedBoxI = RasterPaintSerializer_render_clipNormalizedBoxI_st;
+  s->clipNormalizedBoxF = RasterPaintSerializer_render_clipNormalizedBoxF_st;
+  s->clipNormalizedBoxD = RasterPaintSerializer_render_clipNormalizedBoxD_st;
+  s->clipNormalizedPathF = RasterPaintSerializer_render_clipNormalizedPathF_st;
+  s->clipNormalizedPathD = RasterPaintSerializer_render_clipNormalizedPathD_st;
 }
 
 } // Fog namespace

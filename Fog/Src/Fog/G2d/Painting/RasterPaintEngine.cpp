@@ -3887,9 +3887,30 @@ static err_t FOG_CDECL RasterPaintEngine_resetClip(Painter* self)
 static err_t FOG_CDECL RasterPaintEngine_newGroup(Painter* self, uint32_t flags)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+  MemZoneRecord* record = engine->groupAllocator.record();
 
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintGroup* g = static_cast<RasterPaintGroup*>(
+    engine->groupAllocator.alloc(sizeof(RasterPaintGroup)));
+
+  if (FOG_IS_NULL(g))
+  {
+    engine->groupAllocator.revert(record);
+    return ERR_RT_OUT_OF_MEMORY;
+  }
+
+  g->reset();
+  g->top = engine->curGroup;
+  g->record = record;
+
+  err_t err = engine->vtable->save(self);
+  if (FOG_IS_ERROR(err))
+  {
+    engine->groupAllocator.revert(record);
+    return err;
+  }
+
+  engine->curGroup = g;
+  return ERR_OK;
 }
 
 static err_t FOG_CDECL RasterPaintEngine_endGroup(Painter* self)
@@ -3935,6 +3956,8 @@ RasterPaintEngine::RasterPaintEngine() :
   state(NULL),
   pcAllocator(16300),
   pcPool(NULL),
+  groupAllocator(16300),
+  curGroup(&topGroup),
   maxThreads(0),
   finalizing(0)
 {
@@ -3954,6 +3977,8 @@ RasterPaintEngine::RasterPaintEngine() :
   stroker.f->_isClippingEnabled = true;
   stroker.d.init();
   stroker.d->_isClippingEnabled = true;
+
+  topGroup.reset();
 
   maxThreads = detectMaxThreads();
 }
@@ -3982,7 +4007,7 @@ err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uin
   if (imaged) imaged->locked++;
 
   vtable = &RasterPaintEngine_vtable[ctx.target.precision];
-  serializer = &RasterPaintSerializer_vtable[RASTER_MODE_ST];
+  serializer = &RasterPaintSerializer_render_vtable[RASTER_MODE_ST];
 
   setupLayer();
   FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.target.precision));
@@ -4790,13 +4815,14 @@ _Fail:
 FOG_CPU_DECLARE_INITIALIZER_SSE2( RasterPaintEngine_init_SSE2(void) )
 
 template<int _PRECISION>
-static void RasterPaintEngine_init_vtable()
+static void RasterPaintEngine_init_vtable_t()
 {
+  PaintEngineVTable* v = &RasterPaintEngine_vtable[_PRECISION];
+
   // --------------------------------------------------------------------------
   // [AddRef / Release]
   // --------------------------------------------------------------------------
 
-  PaintEngineVTable* v = &RasterPaintEngine_vtable[_PRECISION];
   v->release = RasterPaintEngine_release;
 
   // --------------------------------------------------------------------------
@@ -4992,6 +5018,12 @@ static void RasterPaintEngine_init_vtable()
   v->flush = RasterPaintEngine_flush;
 }
 
+FOG_NO_EXPORT void RasterPaintEngine_init_vtable()
+{
+  RasterPaintEngine_init_vtable_t<IMAGE_PRECISION_BYTE>();
+  RasterPaintEngine_init_vtable_t<IMAGE_PRECISION_WORD>();
+}
+
 FOG_NO_EXPORT void RasterPaintEngine_init(void)
 {
   // --------------------------------------------------------------------------
@@ -5008,10 +5040,9 @@ FOG_NO_EXPORT void RasterPaintEngine_init(void)
   // [RasterPaintEngine / RasterPaintSerializer - Init]
   // --------------------------------------------------------------------------
 
-  RasterPaintEngine_init_vtable<IMAGE_PRECISION_BYTE>();
-  RasterPaintEngine_init_vtable<IMAGE_PRECISION_WORD>();
-
-  RasterPaintSerializer_init_st();
+  RasterPaintEngine_init_vtable();
+  RasterPaintSerializer_init_render_st();
+  RasterPaintSerializer_init_group_st();
 
   // --------------------------------------------------------------------------
   // [RasterPaintEngine - CPU Based Optimizations]

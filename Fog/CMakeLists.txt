@@ -1174,6 +1174,7 @@ Set(FOG_G2D_PAINTING_SOURCES
   Src/Fog/G2d/Painting/RasterPaintContext.cpp
   Src/Fog/G2d/Painting/RasterPaintEngine.cpp
   Src/Fog/G2d/Painting/RasterPaintGroup.cpp
+  Src/Fog/G2d/Painting/RasterPaintSerializer_group_st.cpp
   Src/Fog/G2d/Painting/RasterPaintSerializer_render_st.cpp
   Src/Fog/G2d/Painting/RasterScanline.cpp
   Src/Fog/G2d/Painting/Rasterizer.cpp

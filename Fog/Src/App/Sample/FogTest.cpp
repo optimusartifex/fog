@@ -405,8 +405,8 @@ void AppWindow::onPaint(Painter* _p)
   TimeTicks startTime = TimeTicks::now();
 
   FeTurbulence fe;
-  fe.setBaseFrequency(0.01f);
-  fe.setNumOctaves(1);
+  fe.setBaseFrequency(0.007f);
+  fe.setNumOctaves(2);
   fe.setTurbulenceType(FE_TURBULENCE_TYPE_FRACTAL_NOISE);
   fe.setSeed(1000);
 

@@ -219,7 +219,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
       if (FOG_IS_NULL(cmd))
         return NULL;
 
-      nc->init(reinterpret_cast<uint8_t*>(cmd));
+      nc->init(RASTER_PAINT_CMD_NEXT, reinterpret_cast<uint8_t*>(cmd));
       return cmd;
     }
     else

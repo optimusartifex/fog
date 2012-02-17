@@ -102,7 +102,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxI_st(
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  cmd->init(*box, engine->ctx.paintHints.fillRule);
+  cmd->init(RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I, *box, engine->ctx.paintHints.fillRule);
   return ERR_OK;
 }
 
@@ -113,7 +113,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxF_st(
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  cmd->init(*box, engine->ctx.paintHints.fillRule);
+  cmd->init(RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_F, *box, engine->ctx.paintHints.fillRule);
   return ERR_OK;
 }
 
@@ -124,7 +124,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxD_st(
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  cmd->init(*box, engine->ctx.paintHints.fillRule);
+  cmd->init(RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_D, *box, engine->ctx.paintHints.fillRule);
   return ERR_OK;
 }
 
@@ -139,7 +139,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedPathF_st(
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  cmd->init(*path, engine->ctx.paintHints.fillRule);
+  cmd->init(RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_F, *path, engine->ctx.paintHints.fillRule);
   return ERR_OK;
 }
 
@@ -150,7 +150,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedPathD_st(
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  cmd->init(*path, engine->ctx.paintHints.fillRule);
+  cmd->init(RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_D, *path, engine->ctx.paintHints.fillRule);
   return ERR_OK;
 }
 

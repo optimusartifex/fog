@@ -418,13 +418,16 @@ void AppWindow::onPaint(Painter* _p)
 #endif
 
   p.newGroup();
+  p.setSource(Argb32(0xFF000000));
   p.fillRect(RectI(100, 100, 200, 200));
+  p.setSource(Argb32(0xFF7F0000));
+  p.fillRect(RectI(150, 150, 200, 200));
   p.endGroup();
 
   p.save();
   p.setCompositingOperator(COMPOSITE_SRC_OVER);
   p.setSource(Argb32(0x7F0000FF));
-  p.fillRect(RectI(100, 100, 200, 200));
+  p.fillRect(RectI(200, 200, 200, 200));
   p.restore();
 
   TimeDelta t = TimeTicks::now() - startTime;

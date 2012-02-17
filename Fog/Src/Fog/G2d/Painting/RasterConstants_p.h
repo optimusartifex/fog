@@ -386,13 +386,22 @@ enum RASTER_PAINT_CMD
   RASTER_PAINT_CMD_NEXT = 1,
   
   //! @brief Do 'FillNormalizedRectI' operation.
-  RASTER_PAINT_CMD_FILL_NORMALIZED_RECT_I,
+  RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I,
 
   //! @brief Do 'FillNormalizedRectF' operation.
-  RASTER_PAINT_CMD_FILL_NORMALIZED_RECT_F,
+  RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_F,
 
   //! @brief Do 'FillNormalizedRectD' operation.
-  RASTER_PAINT_CMD_FILL_NORMALIZED_RECT_D
+  RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_D,
+
+  //! @brief Do 'FillNormalizedPathF' operation.
+  RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_F,
+
+  //! @brief Do 'FillNormalizedPathD' operation.
+  RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_D,
+
+  //! @brief Count of raster paint commands (for checking / asserts).
+  RASTER_PAINT_CMD_COUNT
 };
 
 // ============================================================================

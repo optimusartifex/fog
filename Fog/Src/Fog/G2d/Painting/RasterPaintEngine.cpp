@@ -3823,9 +3823,10 @@ static err_t FOG_CDECL RasterPaintEngine_resetClip(Painter* self)
 // [Fog::RasterPaintEngine - Group]
 // ============================================================================
 
-static void RasterPaintEngine_runCommands(Painter* self, uint8_t* p)
+static void RasterPaintEngine_runCommands(Painter* self, uint8_t* p, uint8_t* pEnd)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+  const RasterPaintSerializer* serializer = engine->serializer;
 
   for (;;)
   {
@@ -3833,11 +3834,47 @@ static void RasterPaintEngine_runCommands(Painter* self, uint8_t* p)
     {
       case RASTER_PAINT_CMD_NULL:
       default:
+      {
         break;
+      }
 
       case RASTER_PAINT_CMD_NEXT:
+      {
+        RasterPaintCmd_Next* cmd = reinterpret_cast<RasterPaintCmd_Next*>(p);
+        p = cmd->getPtr();
         break;
+      }
+      
+      case RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I:
+      {
+        RasterPaintCmd_FillNormalizedShape<BoxI>* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedShape<BoxI>*>(p);
+        p += sizeof(RasterPaintCmd_FillNormalizedShape<RectI>);
+
+        serializer->fillNormalizedBoxI(engine, &cmd->_shape);
+        break;
+      }
+
+      case RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_F:
+      {
+        RasterPaintCmd_FillNormalizedShape<BoxF>* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedShape<BoxF>*>(p);
+        p += sizeof(RasterPaintCmd_FillNormalizedShape<RectF>);
+
+        serializer->fillNormalizedBoxF(engine, &cmd->_shape);
+        break;
+      }
+
+      case RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_D:
+      {
+        RasterPaintCmd_FillNormalizedShape<BoxD>* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedShape<BoxD>*>(p);
+        p += sizeof(RasterPaintCmd_FillNormalizedShape<RectD>);
+
+        serializer->fillNormalizedBoxD(engine, &cmd->_shape);
+        break;
+      }
     }
+    
+    if (p == pEnd)
+      break;
   }
 }
 
@@ -3863,6 +3900,7 @@ static err_t FOG_CDECL RasterPaintEngine_newGroup(Painter* self, uint32_t flags)
   g->top = engine->curGroup;
   g->groupRecord = gRecord;
   g->cmdRecord = cRecord;
+  g->cmdStart = engine->cmdAllocator._pos;
 
   err_t err = engine->vtable->save(self);
   if (FOG_IS_ERROR(err))
@@ -3889,7 +3927,7 @@ static err_t FOG_CDECL RasterPaintEngine_endGroup(Painter* self)
   engine->curGroup = g->top;
 
   engine->serializer = &RasterPaintSerializer_render_vtable[RASTER_MODE_ST];
-  RasterPaintEngine_runCommands(self, g->cmdStart);
+  RasterPaintEngine_runCommands(self, g->cmdStart, engine->cmdAllocator._pos);
 
   if (engine->curGroup != &engine->topGroup)
     engine->serializer = &RasterPaintSerializer_group_vtable[RASTER_MODE_ST];

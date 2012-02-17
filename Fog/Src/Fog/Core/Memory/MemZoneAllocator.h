@@ -143,6 +143,23 @@ struct FOG_NO_EXPORT MemZoneAllocator
     return (void*)p;
   }
 
+  //! @brief Get whether the specific count of bytes can be allocated on the
+  //! current node.
+  FOG_INLINE bool canAlloc(size_t size)
+  {
+    return _pos + size <= _end;
+  }
+
+  FOG_INLINE void* allocNoCheck(size_t size)
+  {
+    FOG_ASSERT(canAlloc(size));
+
+    uint8_t* p = _pos;
+    _pos += size;
+    
+    return (void*)p;
+  }
+
   // --------------------------------------------------------------------------
   // [Reuse / Reset]
   // --------------------------------------------------------------------------

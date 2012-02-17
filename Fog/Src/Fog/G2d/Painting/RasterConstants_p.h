@@ -373,6 +373,29 @@ enum RASTER_INTEGRAL_TRANSFORM
 };
 
 // ============================================================================
+// [Fog::Raster - RASTER_PAINT_CMD]
+// ============================================================================
+
+//! @internal
+enum RASTER_PAINT_CMD
+{
+  //! @brief Reserved command, never used.
+  RASTER_PAINT_CMD_NULL = 0,
+
+  //! @brief Use next command buffer.
+  RASTER_PAINT_CMD_NEXT = 1,
+  
+  //! @brief Do 'FillNormalizedRectI' operation.
+  RASTER_PAINT_CMD_FILL_NORMALIZED_RECT_I,
+
+  //! @brief Do 'FillNormalizedRectF' operation.
+  RASTER_PAINT_CMD_FILL_NORMALIZED_RECT_F,
+
+  //! @brief Do 'FillNormalizedRectD' operation.
+  RASTER_PAINT_CMD_FILL_NORMALIZED_RECT_D
+};
+
+// ============================================================================
 // [Fog::RASTER_PRGB_PREPARE]
 // ============================================================================
 

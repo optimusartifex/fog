@@ -497,9 +497,11 @@ enum ERR_CODE
   //! @sa @c Painter::setEngine().
   ERR_PAINTER_NOT_ALLOWED,
 
-  //! @brief There is not state to restore, might be caused by
-  //! @ref Painter::restore().
+  //! @brief There is no state to restore, can be returned by @ref Painter::restore().
   ERR_PAINTER_NO_STATE,
+
+  //! @brief There is no group to pop, can be returned by @ref Painter::endGroup().
+  ERR_PAINTER_NO_GROUP,
 
   // --------------------------------------------------------------------------
   // [G2d/Text]

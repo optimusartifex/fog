@@ -4,6 +4,7 @@
 
 using namespace Fog;
 
+#if 0
 // ============================================================================
 // [FeTurbulenceContext]
 // ============================================================================
@@ -329,6 +330,7 @@ static Image makeTurbulence(FeTurbulence* feData)
 
   return image;
 }
+#endif
 
 // ============================================================================
 // [SampleWindow - Declaration]
@@ -404,6 +406,7 @@ void AppWindow::onPaint(Painter* _p)
 
   TimeTicks startTime = TimeTicks::now();
 
+#if 0
   FeTurbulence fe;
   fe.setBaseFrequency(0.007f);
   fe.setNumOctaves(2);
@@ -412,6 +415,17 @@ void AppWindow::onPaint(Painter* _p)
 
   Image image = makeTurbulence(&fe);
   p.blitImage(PointI(0, 0), image);
+#endif
+
+  p.newGroup();
+  p.fillRect(RectI(100, 100, 200, 200));
+  p.endGroup();
+
+  p.save();
+  p.setCompositingOperator(COMPOSITE_SRC_OVER);
+  p.setSource(Argb32(0x7F0000FF));
+  p.fillRect(RectI(100, 100, 200, 200));
+  p.restore();
 
   TimeDelta t = TimeTicks::now() - startTime;
 

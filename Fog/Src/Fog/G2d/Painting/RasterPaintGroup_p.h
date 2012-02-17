@@ -39,20 +39,64 @@ namespace Fog {
 struct FOG_NO_EXPORT RasterPaintCmd
 {
   // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(uint8_t cmd) { _setCommand(cmd); }
+  FOG_INLINE void destroy() {}
+
+  // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint8_t getCommand() const { return _cmd; }
-  FOG_INLINE void setCommand(uint8_t cmd) { _cmd = cmd; }
+  FOG_INLINE uint8_t getCommand() const { return _command; }
+  FOG_INLINE void _setCommand(uint8_t command) { _command = command; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Command bytecode.
-  uint32_t _cmd : 8;
+  uint32_t _command : 8;
   //! @brief Command embedded data (24-bits).
   uint32_t _data24 : 24;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_Next]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_Next : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(uint8_t cmd, uint8_t* ptr)
+  {
+    Base::init(cmd);
+    _setPtr(ptr);
+  }
+
+  FOG_INLINE void destroy()
+  { 
+    Base::destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint8_t* getPtr() const { return _ptr; }
+  FOG_INLINE void _setPtr(uint8_t* ptr) { _ptr = ptr; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint8_t* _ptr;
 };
 
 // ============================================================================
@@ -67,8 +111,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_Source : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init() {}
-  FOG_INLINE void destroy() {}
+  FOG_INLINE void init(uint8_t cmd)
+  {
+    Base::init(cmd);
+  }
+
+  FOG_INLINE void destroy()
+  {
+    Base::destroy();
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -90,8 +141,16 @@ struct FOG_NO_EXPORT RasterPaintCmd_SourcePrgb32 : public RasterPaintCmd_Source
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init() { Base::init(); }
-  FOG_INLINE void destroy() { Base::destroy(); }
+  FOG_INLINE void init(uint8_t cmd, uint32_t prgb32)
+  {
+    Base::init(cmd);
+    _setPrgb32(prgb32);
+  }
+
+  FOG_INLINE void destroy()
+  {
+    Base::destroy();
+  }
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -119,13 +178,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_Fill : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint32_t fillRule)
+  FOG_INLINE void init(uint8_t cmd, uint32_t fillRule)
   {
+    Base::init(cmd);
     _setFillRule(fillRule); 
   }
 
   FOG_INLINE void destroy()
   {
+    Base::destroy();
   }
 
   // --------------------------------------------------------------------------
@@ -137,7 +198,30 @@ struct FOG_NO_EXPORT RasterPaintCmd_Fill : public RasterPaintCmd
 };
 
 // ============================================================================
-// [Fog::RasterPaintCmd_FillShapeF]
+// [Fog::RasterPaintCmd_Fill]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_FillAll : public RasterPaintCmd_Fill
+{
+  typedef RasterPaintCmd_Fill Base;
+
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(uint8_t cmd)
+  {
+    Base::init(cmd, FILL_RULE_NON_ZERO);
+  }
+
+  FOG_INLINE void destroy()
+  {
+    Base::destroy();
+  }
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_FillShape<ShapeT>]
 // ============================================================================
 
 template<typename ShapeT>
@@ -149,9 +233,9 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillShape : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const ShapeT& shape, uint32_t fillRule)
+  FOG_INLINE void init(uint8_t cmd, const ShapeT& shape, uint32_t fillRule)
   {
-    Base::init(fillRule);
+    Base::init(cmd, fillRule);
     _shape.init(shape);
   }
 
@@ -186,9 +270,9 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillPathF : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const PathF& path, uint32_t fillRule)
+  FOG_INLINE void init(uint8_t cmd, const PathF& path, uint32_t fillRule)
   {
-    Base::init(fillRule);
+    Base::init(cmd, fillRule);
     _path.init(path);
   }
 
@@ -217,9 +301,9 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillPathD : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const PathD& path, uint32_t fillRule)
+  FOG_INLINE void init(uint8_t cmd, const PathD& path, uint32_t fillRule)
   {
-    Base::init(fillRule);
+    Base::init(cmd, fillRule);
     _path.init(path);
   }
 
@@ -237,6 +321,38 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillPathD : public RasterPaintCmd_Fill
 };
 
 // ============================================================================
+// [Fog::RasterPaintCmd_FillNormalizedShape<ShapeT>]
+// ============================================================================
+
+template<typename ShapeT>
+struct RasterPaintCmd_FillNormalizedShape : public RasterPaintCmd_Fill
+{
+  typedef RasterPaintCmd_Fill Base;
+  
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(uint8_t cmd, const ShapeT& shape, uint32_t fillRule)
+  {
+    Base::init(cmd, fillRule);
+    _shape.init(shape);
+  }
+
+  FOG_INLINE void destroy()
+  {
+    Base::destroy();
+    _shape.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<ShapeT> _shape;
+};
+
+// ============================================================================
 // [Fog::RasterPaintCmd_StrokeF]
 // ============================================================================
 
@@ -248,13 +364,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokeF : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const PathStrokerParamsF& params)
+  FOG_INLINE void init(uint8_t cmd, const PathStrokerParamsF& params)
   {
+    Base::init(cmd);
     _params.init(params);
   }
 
   FOG_INLINE void destroy()
   {
+    Base::destroy();
     _params.destroy();
   }
 
@@ -283,13 +401,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokeD : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const PathStrokerParamsD& params)
+  FOG_INLINE void init(uint8_t cmd, const PathStrokerParamsD& params)
   {
+    Base::init(cmd);
     _params.init(params);
   }
 
   FOG_INLINE void destroy()
   {
+    Base::destroy();
     _params.destroy();
   }
 
@@ -318,9 +438,9 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokePathF : public RasterPaintCmd_StrokeF
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const PathF& path, const PathStrokerParamsF& params)
+  FOG_INLINE void init(uint8_t cmd, const PathF& path, const PathStrokerParamsF& params)
   {
-    Base::init(params);
+    Base::init(cmd, params);
     _path.init(path);
   }
 
@@ -344,14 +464,14 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokePathF : public RasterPaintCmd_StrokeF
 struct FOG_NO_EXPORT RasterPaintCmd_StrokePathD : public RasterPaintCmd_StrokeD
 {
   typedef RasterPaintCmd_StrokeD Base;
-  
+
   // --------------------------------------------------------------------------
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(const PathD& path, const PathStrokerParamsD& params)
+  FOG_INLINE void init(uint8_t cmd, const PathD& path, const PathStrokerParamsD& params)
   {
-    Base::init(params);
+    Base::init(cmd, params);
     _path.init(path);
   }
 
@@ -387,7 +507,10 @@ struct FOG_NO_EXPORT RasterPaintGroup
     opacityF = 1.0f;
 
     boundingBox.reset();
-    record = NULL;
+
+    groupRecord = NULL;
+    cmdRecord = NULL;
+    cmdStart = NULL;
   }
 
   // --------------------------------------------------------------------------
@@ -414,8 +537,12 @@ struct FOG_NO_EXPORT RasterPaintGroup
   BoxI boundingBox;
 #endif
 
-  //! @brief Mem-zone record.
-  MemZoneRecord* record;
+  //! @brief Group record (recorded position in groupAllocator).
+  MemZoneRecord* groupRecord;
+  //! @brief Commands record (recorded position in cmdAllocator).
+  MemZoneRecord* cmdRecord;
+  //! @brief Commands start pointer.
+  uint8_t* cmdStart;
 };
 
 //! @}

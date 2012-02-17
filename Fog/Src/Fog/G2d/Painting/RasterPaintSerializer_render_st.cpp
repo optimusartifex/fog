@@ -45,18 +45,6 @@ namespace Fog {
 FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_render_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Defs]
-// ============================================================================
-
-#define _FOG_RASTER_ENSURE_PATTERN(_Engine_) \
-  FOG_MACRO_BEGIN \
-    if (_Engine_->ctx.pc == NULL) \
-    { \
-      FOG_RETURN_ON_ERROR(_Engine_->createPatternContext()); \
-    } \
-  FOG_MACRO_END
-
-// ============================================================================
 // [Fog::RasterPaintSerializer - Filler - Declaration]
 // ============================================================================
 
@@ -1806,7 +1794,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_render_clipNormalizedPathD_st(
 // [Fog::RasterPaintSerializer - Render(st) - Init]
 // ============================================================================
 
-void FOG_NO_EXPORT RasterPaintSerializer_render_init_st(void)
+void FOG_NO_EXPORT RasterPaintSerializer_init_render_st(void)
 {
   RasterPaintSerializer* s = &RasterPaintSerializer_render_vtable[RASTER_MODE_ST];
 

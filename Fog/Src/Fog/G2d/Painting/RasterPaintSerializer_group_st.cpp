@@ -45,25 +45,14 @@ namespace Fog {
 FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_group_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Defs]
-// ============================================================================
-
-#define _FOG_RASTER_ENSURE_PATTERN(_Engine_) \
-  FOG_MACRO_BEGIN \
-    if (_Engine_->ctx.pc == NULL) \
-    { \
-      FOG_RETURN_ON_ERROR(_Engine_->createPatternContext()); \
-    } \
-  FOG_MACRO_END
-
-// ============================================================================
 // [Fog::RasterPaintSerializer - Group(st) - FillAll]
 // ============================================================================
 
 static err_t FOG_FASTCALL RasterPaintSerializer_group_fillAll_st(
   RasterPaintEngine* engine)
 {
-  return engine->serializer->fillNormalizedBoxI(engine, &engine->ctx.clipBoxI);
+  // TODO: Raster paint-engine.
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
@@ -109,22 +98,34 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillStrokedPathD_st(
 static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxI_st(
   RasterPaintEngine* engine, const BoxI* box)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintCmd_FillShape<BoxI>* cmd = engine->newCmd< RasterPaintCmd_FillShape<BoxI> >();
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(*box, engine->ctx.paintHints.fillRule);
+  return ERR_OK;
 }
 
 static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxF_st(
   RasterPaintEngine* engine, const BoxF* box)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintCmd_FillShape<BoxF>* cmd = engine->newCmd< RasterPaintCmd_FillShape<BoxF> >();
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(*box, engine->ctx.paintHints.fillRule);
+  return ERR_OK;
 }
 
 static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxD_st(
   RasterPaintEngine* engine, const BoxD* box)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintCmd_FillShape<BoxD>* cmd = engine->newCmd< RasterPaintCmd_FillShape<BoxD> >();
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(*box, engine->ctx.paintHints.fillRule);
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -134,15 +135,23 @@ static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedBoxD_st(
 static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedPathF_st(
   RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintCmd_FillShape<PathF>* cmd = engine->newCmd< RasterPaintCmd_FillShape<PathF> >();
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(*path, engine->ctx.paintHints.fillRule);
+  return ERR_OK;
 }
 
 static err_t FOG_FASTCALL RasterPaintSerializer_group_fillNormalizedPathD_st(
   RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintCmd_FillShape<PathD>* cmd = engine->newCmd< RasterPaintCmd_FillShape<PathD> >();
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(*path, engine->ctx.paintHints.fillRule);
+  return ERR_OK;
 }
 
 // ============================================================================

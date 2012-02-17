@@ -71,67 +71,6 @@ static const uint32_t RasterPaintEngine_clipAllFlags[CLIP_OP_COUNT] =
 // [Fog::RasterPaintEngine - Defs]
 // ============================================================================
 
-// Called by all 'fill' functions. This macro simply ensures that all fill
-// parameters are correct (it's possible to fill something).
-//
-// Please see RASTER_NO_PAINT flags to better understand how this works.
-#define _FOG_RASTER_ENTER_FILL_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_SOURCE         | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
-// Called by all 'stroke' functions. This macro simply ensures that all stroke
-// parameters are correct (it's possible to stroke something). Note that stroke
-// is implemented normally using fill pipeline, there are only few exceptions.
-//
-// Please see RASTER_NO_PAINT flags to better understand how this works.
-#define _FOG_RASTER_ENTER_STROKE_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_SOURCE         | \
-                                             RASTER_NO_PAINT_STROKE         | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_BLIT_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_CLIP_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) \
-    { \
-      return ERR_RT_INVALID_ARGUMENT; \
-    } \
-    \
-    if (FOG_UNLIKELY((engine->masterFlags & RasterPaintEngine_clipAllFlags[clipOp]) != 0)) \
-    { \
-      return engine->serializer->clipAll(engine); \
-    } \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_FILTER_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
 #define _PARAM_C(_Type_) (*static_cast<const _Type_*>(value))
 #define _PARAM_M(_Type_) (*static_cast<_Type_*>(value))
 
@@ -3884,41 +3823,77 @@ static err_t FOG_CDECL RasterPaintEngine_resetClip(Painter* self)
 // [Fog::RasterPaintEngine - Group]
 // ============================================================================
 
+static void RasterPaintEngine_runCommands(Painter* self, uint8_t* p)
+{
+  RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+
+  for (;;)
+  {
+    switch (reinterpret_cast<RasterPaintCmd*>(p)->getCommand())
+    {
+      case RASTER_PAINT_CMD_NULL:
+      default:
+        break;
+
+      case RASTER_PAINT_CMD_NEXT:
+        break;
+    }
+  }
+}
+
 static err_t FOG_CDECL RasterPaintEngine_newGroup(Painter* self, uint32_t flags)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
-  MemZoneRecord* record = engine->groupAllocator.record();
+
+  MemZoneRecord* cRecord = engine->cmdAllocator.record();
+  MemZoneRecord* gRecord = engine->groupAllocator.record();
 
   RasterPaintGroup* g = static_cast<RasterPaintGroup*>(
     engine->groupAllocator.alloc(sizeof(RasterPaintGroup)));
 
   if (FOG_IS_NULL(g))
   {
-    engine->groupAllocator.revert(record);
+    engine->cmdAllocator.revert(cRecord);
+    engine->groupAllocator.revert(gRecord);
+
     return ERR_RT_OUT_OF_MEMORY;
   }
 
   g->reset();
   g->top = engine->curGroup;
-  g->record = record;
+  g->groupRecord = gRecord;
+  g->cmdRecord = cRecord;
 
   err_t err = engine->vtable->save(self);
   if (FOG_IS_ERROR(err))
   {
-    engine->groupAllocator.revert(record);
+    engine->cmdAllocator.revert(cRecord);
+    engine->groupAllocator.revert(gRecord);
+
     return err;
   }
 
   engine->curGroup = g;
+  engine->serializer = &RasterPaintSerializer_group_vtable[RASTER_MODE_ST];
   return ERR_OK;
 }
 
 static err_t FOG_CDECL RasterPaintEngine_endGroup(Painter* self)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+  RasterPaintGroup* g = engine->curGroup;
 
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  if (g == &engine->topGroup)
+    return ERR_PAINTER_NO_GROUP;
+
+  engine->curGroup = g->top;
+
+  engine->serializer = &RasterPaintSerializer_render_vtable[RASTER_MODE_ST];
+  RasterPaintEngine_runCommands(self, g->cmdStart);
+
+  if (engine->curGroup != &engine->topGroup)
+    engine->serializer = &RasterPaintSerializer_group_vtable[RASTER_MODE_ST];
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -3956,8 +3931,9 @@ RasterPaintEngine::RasterPaintEngine() :
   state(NULL),
   pcAllocator(16300),
   pcPool(NULL),
-  groupAllocator(16300),
+  groupAllocator(500),
   curGroup(&topGroup),
+  cmdAllocator(16300),
   maxThreads(0),
   finalizing(0)
 {

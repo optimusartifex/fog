@@ -118,6 +118,7 @@ struct FOG_NO_EXPORT RasterPaintSerializer
   // --------------------------------------------------------------------------
 
   typedef err_t (FOG_FASTCALL *ClipAll)(RasterPaintEngine* engine);
+
   typedef err_t (FOG_FASTCALL *ClipPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *ClipPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule);
   typedef err_t (FOG_FASTCALL *ClipStrokedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path);

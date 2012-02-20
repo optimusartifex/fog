@@ -68,6 +68,8 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32_byte_SSE2(Painter* self
 
   engine->source.color->_argb32.u32 = argb32;
   Face::m128iStore4(&engine->ctx.solid.prgb32, xmmARGB);
+
+  engine->masterFlags |= RASTER_PENDING_SOURCE;
   return ERR_OK;
 }
 
@@ -123,6 +125,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64_byte_SSE2(Painter* self
   // Store Prgb32 (raster-solid context).
   Face::m128iStore4(&engine->ctx.solid.prgb32, xmmARGB32);
 
+  engine->masterFlags |= RASTER_PENDING_SOURCE;
   return ERR_OK;
 }
 
@@ -169,6 +172,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceColor_byte_SSE2(Painter* self,
   Face::m128iStore8(reinterpret_cast<char*>(&engine->source.color) + 16, xmm2);
   Face::m128iStore4(&engine->ctx.solid.prgb32, xmmARGB32);
 
+  engine->masterFlags |= RASTER_PENDING_SOURCE;
   return ERR_OK;
 }
 

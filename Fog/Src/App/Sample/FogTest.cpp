@@ -4,7 +4,7 @@
 
 using namespace Fog;
 
-#if 0
+#if 1
 // ============================================================================
 // [FeTurbulenceContext]
 // ============================================================================
@@ -400,8 +400,8 @@ void AppWindow::onPaint(Painter* _p)
   Painter& p = *_p;
   RectI geom = getClientGeometry();
 
-  //p.setSource(Texture(background));
-  p.setSource(Argb32(0xFFFFFFFF));
+  p.setSource(Texture(background));
+  //p.setSource(Argb32(0xFFFFFFFF));
   p.fillAll();
 
   TimeTicks startTime = TimeTicks::now();
@@ -418,9 +418,20 @@ void AppWindow::onPaint(Painter* _p)
 #endif
 
   p.newGroup();
-  p.setSource(Argb32(0xFF000000));
+  
+  LinearGradientF gr;
+  gr.setStart(100.0f, 100.0f);
+  gr.setEnd(300.0f, 100.0f);
+  gr.addStop(0.0f, Argb32(0x00000000));
+  gr.addStop(1.0f, Argb32(0xFF0000FF));
+  p.setSource(gr);
+  
+  p.clipRect(CLIP_OP_INTERSECT, RectI(150, 150, 50, 50));
+  //p.setSource(Argb32(0xFF000000));
   p.fillRect(RectI(100, 100, 200, 200));
-  p.setSource(Argb32(0xFF7F0000));
+  p.resetClip();
+
+  p.setSource(Argb32(0x7FFF0000));
   p.fillRect(RectI(150, 150, 200, 200));
   p.endGroup();
 

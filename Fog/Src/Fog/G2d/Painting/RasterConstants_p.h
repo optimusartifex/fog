@@ -383,22 +383,34 @@ enum RASTER_PAINT_CMD
   RASTER_PAINT_CMD_NULL = 0,
 
   //! @brief Use next command buffer.
-  RASTER_PAINT_CMD_NEXT = 1,
+  RASTER_PAINT_CMD_NEXT,
+
+  //! @brief Do 'SetOpacity' command.
+  //!
+  //! @note This command is only used when opacity was changed, but source was
+  //! unchanged.
+  RASTER_PAINT_CMD_SET_OPACITY,
+  //! @brief Do 'SetOpacity' and 'SetSource(Prgb32)' commands.
+  RASTER_PAINT_CMD_SET_OPACITY_AND_PRGB32,
+  //! @brief Do 'SetOpacity' and 'SetSource(PatternContext*)' commands.
+  RASTER_PAINT_CMD_SET_OPACITY_AND_PATTERN,
   
-  //! @brief Do 'FillNormalizedRectI' operation.
+  //! @brief Do 'FillNormalizedRectI' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I,
-
-  //! @brief Do 'FillNormalizedRectF' operation.
+  //! @brief Do 'FillNormalizedRectF' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_F,
-
-  //! @brief Do 'FillNormalizedRectD' operation.
+  //! @brief Do 'FillNormalizedRectD' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_D,
 
-  //! @brief Do 'FillNormalizedPathF' operation.
+  //! @brief Do 'FillNormalizedPathF' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_F,
-
-  //! @brief Do 'FillNormalizedPathD' operation.
+  //! @brief Do 'FillNormalizedPathD' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_D,
+
+  //! @brief Do 'SetClipBox' command.
+  RASTER_PAINT_CMD_SET_CLIP_BOX,
+  //! @brief Do 'SetClipRegion' command.
+  RASTER_PAINT_CMD_SET_CLIP_REGION,
 
   //! @brief Count of raster paint commands (for checking / asserts).
   RASTER_PAINT_CMD_COUNT
@@ -590,14 +602,11 @@ enum RASTER_MASTER_FLAGS
 {
   // --------------------------------------------------------------------------
   // [No-Paint Flags]
-  //
+  // --------------------------------------------------------------------------
+
   // If any of the no-paint flags is set then painting command will be terminated
   // before the parameters are evaluated. It's one of fastest checking available
   // if raster painter engine.
-  // --------------------------------------------------------------------------
-
-  //! @brief Mask including all no-paint states and fatal-error.
-  RASTER_NO_PAINT_ALL_FLAGS = 0x8000FFFF,
 
   //! @brief The meta clip-region doens't contain painting area.
   RASTER_NO_PAINT_META_REGION = 0x00000001,
@@ -609,10 +618,10 @@ enum RASTER_MASTER_FLAGS
   RASTER_NO_PAINT_USER_CLIP = 0x00000004,
 
   //! @brief The user clip mask doesn't contain painting area.
-  RASTER_NO_PAINT_USER_MASK = 0x00000010,
+  RASTER_NO_PAINT_USER_MASK = 0x00000008,
 
   //! @brief The user transform is invalid.
-  RASTER_NO_PAINT_USER_TRANSFORM = 0x00000008,
+  RASTER_NO_PAINT_USER_TRANSFORM = 0x00000010,
 
   //! @brief The compositing operator produces no painting onto the current layer.
   RASTER_NO_PAINT_COMPOSITING_OPERATOR = 0x00000020,
@@ -625,70 +634,63 @@ enum RASTER_MASTER_FLAGS
 
   //! @brief Some of the stroke parameters contains degenerated value (for
   //! example line-width set to zero), so, using stroke is no-paint.
-  RASTER_NO_PAINT_STROKE = 0x00001000,
+  RASTER_NO_PAINT_STROKE = 0x00000100,
 
-  RASTER_NO_PAINT_BASE_FLAGS   = RASTER_NO_PAINT_META_REGION          |
-                                 RASTER_NO_PAINT_META_TRANSFORM       |
-                                 RASTER_NO_PAINT_USER_CLIP            |
-                                 RASTER_NO_PAINT_USER_MASK            |
-                                 RASTER_NO_PAINT_USER_TRANSFORM       |
-                                 RASTER_NO_PAINT_COMPOSITING_OPERATOR |
-                                 RASTER_NO_PAINT_OPACITY              ,
+  RASTER_NO_PAINT_BASE_FLAGS =
+    RASTER_NO_PAINT_META_REGION          |
+    RASTER_NO_PAINT_META_TRANSFORM       |
+    RASTER_NO_PAINT_USER_CLIP            |
+    RASTER_NO_PAINT_USER_MASK            |
+    RASTER_NO_PAINT_USER_TRANSFORM       |
+    RASTER_NO_PAINT_COMPOSITING_OPERATOR |
+    RASTER_NO_PAINT_OPACITY              ,
+
+  //! @brief Mask including all no-paint states and fatal-error.
+  RASTER_NO_PAINT_ALL_FLAGS = 0x80000FFF,
+
+  // --------------------------------------------------------------------------
+  // [Pending Flags]
+  // --------------------------------------------------------------------------
+
+  // The pending flags are evaluated from top-to-bottom order. The evaluation
+  // of pending flags can result in no-paint flags so it's needed to check for
+  // no-paint flags after pending flags are processed.
+
+  //! @brief Pending opacity change.
+  RASTER_PENDING_OPACITY = 0x00010000,
+  //! @brief Pending source change.
+  RASTER_PENDING_SOURCE = 0x00020000,
+  //! @brief Pending raster/paint hints change.
+  RASTER_PENDING_HINTS = 0x00040000,
+  //! @brief Pending transform change.
+  RASTER_PENDING_TRANSFORM = 0x00080000,
+  //! @brief Pending clip change.
+  RASTER_PENDING_CLIP = 0x00100000,
+  //! @brief Pending stroke parameters change.
+  RASTER_PENDING_STROKE_PARAMS = 0x00200000,
+  //! @brief Pending filter parameters change.
+  RASTER_PENDING_FILTER_PARAMS = 0x00800000,
+
+  //! @brief Base pending flags, useful for all painter commands.
+  RASTER_PENDING_BASE_FLAGS =
+    RASTER_PENDING_OPACITY |
+    RASTER_PENDING_HINTS   |
+    RASTER_PENDING_CLIP    ,
+
+  //! @brief All pending flags (mask).
+  RASTER_PENDING_ALL_FLAGS = 0x7FFF0000,
+
+  // --------------------------------------------------------------------------
+  // [Fatal Flags]
+  // --------------------------------------------------------------------------
 
   //! @brief Painting is disabled, because something bad happened, for example
   //! memory allocation error for core objects. This error can be cleared only
-  //! by @ref Painter::switchTo()or @ref Painter::begin() methods.
+  //! by @ref Painter::switchTo() or @ref Painter::begin() methods.
   //!
   //! This is fatal error that can disable all painting until the paint engine
   //! is destroyed or reused.
-  RASTER_NO_PAINT_FATAL = 0x80000000,
-
-#if 0
-  // --------------------------------------------------------------------------
-  // [Pending Flags - TOP-TO-BOTTOM Order]
-  //
-  // The pending flags are evaluated from top-to-bottom order. The evaluation
-  // of pending flags can result in no-paint flags so it's needed to check them
-  // again after processed.
-  // --------------------------------------------------------------------------
-
-  //! @brief Mask that contains all pending states.
-  RASTER_PENDING_ALL_FLAGS = 0x7FF00000,
-
-  //! @brief Global transformation matrix was changed, it's needed to
-  //! recalculate other members related to transformations before a final
-  //! transformation matrix may be used.
-  RASTER_PENDING_GLOBAL_TRANSFORM = 0x00100000,
-
-  RASTER_PENDING_CLIP_RECT = 0x00200000,
-  RASTER_PENDING_CLIP_REGION = 0x00400000,
-  RASTER_PENDING_CLIP_STACK = 0x00800000
-
-  // TODO: Finish
-
-  //! @brief The mask has been marked for saving.
-  //!
-  //! This flag is used in situation that user called save(RASTER_STATE_CLIP)
-  //RASTER_PENDING_MASK_SAVE = 0,
-  //RASTER_PENDING_MASK_RESTORE = 0,
-
-  // TODO: Remove...
-
-  //! @brief Clipping was changed so the first paint call (that is likely to
-  //! paint something) must ensure to call methods that will send the changes
-  //! to the workers (making command). If not running in multithreaded mode
-  //! then this flag shouldn't be set.
-  RASTER_CONTEXT_PENDING_CLIP_REGION = 0x00010000,
-
-  //! @brief Clip state need to be saved (send the command to the workers).
-  RASTER_CONTEXT_PENDING_CLIP_SAVE = 0x00020000,
-
-  //! @brief Clip mask initialization is pending.
-  RASTER_CONTEXT_PENDING_CLIP_MASK_CREATED = 0x00040000,
-
-  //! @brief Clip state need to be restored (send the command to the workers).
-  RASTER_CONTEXT_PENDING_CLIP_MASK_DELETED = 0x00080000,
-#endif
+  RASTER_NO_PAINT_FATAL = 0x80000000
 };
 
 // ============================================================================

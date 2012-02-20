@@ -179,8 +179,40 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
 
   err_t createPatternContext();
 
-  FOG_INLINE void discardSource();
-  FOG_INLINE void destroyPatternContext(RasterPattern* pc);
+  FOG_INLINE void discardSource()
+  {
+    switch (sourceType)
+    {
+      case RASTER_SOURCE_NONE:
+      case RASTER_SOURCE_ARGB32:
+      case RASTER_SOURCE_COLOR:
+        break;
+
+      case RASTER_SOURCE_TEXTURE:
+        source.texture.destroy();
+        goto _DiscardContinue;
+
+      case RASTER_SOURCE_GRADIENT:
+        source.gradient.destroy();
+_DiscardContinue:
+        if (source.transform->_type != TRANSFORM_TYPE_IDENTITY)
+          source.transform->reset();
+        if (RasterUtil::isPatternContext(ctx.pc) && ctx.pc->_reference.deref())
+          destroyPatternContext(ctx.pc);
+        break;
+
+      default:
+        FOG_ASSERT_NOT_REACHED();
+    }
+  }
+  
+  FOG_INLINE void destroyPatternContext(RasterPattern* pc)
+  {
+    pc->destroy();
+
+    reinterpret_cast<RasterAbstractLinkedList*>(pc)->next = pcPool;
+    pcPool = reinterpret_cast<RasterAbstractLinkedList*>(pc);
+  }
 
   // --------------------------------------------------------------------------
   // [Helpers - Region]
@@ -219,7 +251,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
       if (FOG_IS_NULL(cmd))
         return NULL;
 
-      nc->init(RASTER_PAINT_CMD_NEXT, reinterpret_cast<uint8_t*>(cmd));
+      nc->init(this, RASTER_PAINT_CMD_NEXT, reinterpret_cast<uint8_t*>(cmd));
       return cmd;
     }
     else
@@ -433,6 +465,17 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // Temporary regions.
   Region tmpRegion[4];
 };
+
+// ============================================================================
+// [Fog::RasterPaintEngine - Implemented-Later]
+// ============================================================================
+
+FOG_INLINE void RasterPaintCmd_SetOpacityAndPattern::destroy(RasterPaintEngine* engine)
+{
+  if (_pc->_reference.deref())
+    engine->destroyPatternContext(_pc);
+  Base::destroy(engine);
+}
 
 // ============================================================================
 // [Fog::RasterPaintEngine - VTable]

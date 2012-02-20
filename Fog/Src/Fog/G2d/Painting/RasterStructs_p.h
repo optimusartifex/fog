@@ -929,9 +929,9 @@ struct FOG_NO_EXPORT RasterFilter
     _ComponentTransfer componentTransfer;
 
     _Blur blur;
-
     _ConvolveMatrix convolveMatrix;
     _ConvolveSeparable convolveSeparable;
+
     _Morphology morphology;
   };
 };

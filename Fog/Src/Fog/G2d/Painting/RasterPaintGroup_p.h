@@ -42,8 +42,8 @@ struct FOG_NO_EXPORT RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd) { _setCommand(cmd); }
-  FOG_INLINE void destroy() {}
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd) { _setCommand(cmd); }
+  FOG_INLINE void destroy(RasterPaintEngine* engine) {}
 
   // --------------------------------------------------------------------------
   // [Accessors]
@@ -74,15 +74,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_Next : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, uint8_t* ptr)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, uint8_t* ptr)
   {
-    Base::init(cmd);
+    Base::init(engine, cmd);
     _setPtr(ptr);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   { 
-    Base::destroy();
+    Base::destroy(engine);
   }
 
   // --------------------------------------------------------------------------
@@ -100,10 +100,10 @@ struct FOG_NO_EXPORT RasterPaintCmd_Next : public RasterPaintCmd
 };
 
 // ============================================================================
-// [Fog::RasterPaintCmd_FillSource]
+// [Fog::RasterPaintCmd_SetOpacity]
 // ============================================================================
 
-struct FOG_NO_EXPORT RasterPaintCmd_Source : public RasterPaintCmd
+struct FOG_NO_EXPORT RasterPaintCmd_SetOpacity : public RasterPaintCmd
 {
   typedef RasterPaintCmd Base;
 
@@ -111,14 +111,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_Source : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, uint32_t opacity)
   {
-    Base::init(cmd);
+    Base::init(engine, cmd);
+    _setOpacity(opacity);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
   }
 
   // --------------------------------------------------------------------------
@@ -130,26 +131,27 @@ struct FOG_NO_EXPORT RasterPaintCmd_Source : public RasterPaintCmd
 };
 
 // ============================================================================
-// [Fog::RasterPaintCmd_FillSourcePrgb32]
+// [Fog::RasterPaintCmd_SetOpacityAndPrgb32]
 // ============================================================================
 
-struct FOG_NO_EXPORT RasterPaintCmd_SourcePrgb32 : public RasterPaintCmd_Source
+struct FOG_NO_EXPORT RasterPaintCmd_SetOpacityAndPrgb32 :
+  public RasterPaintCmd_SetOpacity
 {
-  typedef RasterPaintCmd_Source Base;
+  typedef RasterPaintCmd_SetOpacity Base;
 
   // --------------------------------------------------------------------------
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, uint32_t prgb32)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, uint32_t opacity, uint32_t prgb32)
   {
-    Base::init(cmd);
+    Base::init(engine, cmd, opacity);
     _setPrgb32(prgb32);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
   }
 
   // --------------------------------------------------------------------------
@@ -167,6 +169,44 @@ struct FOG_NO_EXPORT RasterPaintCmd_SourcePrgb32 : public RasterPaintCmd_Source
 };
 
 // ============================================================================
+// [Fog::RasterPaintCmd_SetOpacityAndPattern]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_SetOpacityAndPattern :
+  public RasterPaintCmd_SetOpacity
+{
+  typedef RasterPaintCmd_SetOpacity Base;
+
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, uint32_t opacity, RasterPattern* pc)
+  {
+    Base::init(engine, cmd, opacity);
+    
+    FOG_ASSERT(pc != NULL);
+    _pc = pc;
+    _pc->_reference.inc();
+  }
+
+  // Implemented-Later: RasterPaintEngine_p.h
+  FOG_INLINE void destroy(RasterPaintEngine* engine);
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE RasterPattern* getPatternContext() const { return _pc; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  RasterPattern* _pc;
+};
+
+// ============================================================================
 // [Fog::RasterPaintCmd_Fill]
 // ============================================================================
 
@@ -178,15 +218,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_Fill : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, uint32_t fillRule)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, uint32_t fillRule)
   {
-    Base::init(cmd);
+    Base::init(engine, cmd);
     _setFillRule(fillRule); 
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
   }
 
   // --------------------------------------------------------------------------
@@ -209,14 +249,14 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillAll : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd)
   {
-    Base::init(cmd, FILL_RULE_NON_ZERO);
+    Base::init(engine, cmd, FILL_RULE_NON_ZERO);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
   }
 };
 
@@ -233,15 +273,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillShape : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const ShapeT& shape, uint32_t fillRule)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const ShapeT& shape, uint32_t fillRule)
   {
-    Base::init(cmd, fillRule);
+    Base::init(engine, cmd, fillRule);
     _shape.init(shape);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _shape.destroy();
   }
 
@@ -270,15 +310,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillPathF : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const PathF& path, uint32_t fillRule)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PathF& path, uint32_t fillRule)
   {
-    Base::init(cmd, fillRule);
+    Base::init(engine, cmd, fillRule);
     _path.init(path);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _path.destroy();
   }
 
@@ -301,15 +341,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillPathD : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const PathD& path, uint32_t fillRule)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PathD& path, uint32_t fillRule)
   {
-    Base::init(cmd, fillRule);
+    Base::init(engine, cmd, fillRule);
     _path.init(path);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _path.destroy();
   }
 
@@ -333,15 +373,15 @@ struct RasterPaintCmd_FillNormalizedShape : public RasterPaintCmd_Fill
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const ShapeT& shape, uint32_t fillRule)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const ShapeT& shape, uint32_t fillRule)
   {
-    Base::init(cmd, fillRule);
+    Base::init(engine, cmd, fillRule);
     _shape.init(shape);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _shape.destroy();
   }
 
@@ -364,15 +404,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokeF : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const PathStrokerParamsF& params)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PathStrokerParamsF& params)
   {
-    Base::init(cmd);
+    Base::init(engine, cmd);
     _params.init(params);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _params.destroy();
   }
 
@@ -401,15 +441,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokeD : public RasterPaintCmd
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const PathStrokerParamsD& params)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PathStrokerParamsD& params)
   {
-    Base::init(cmd);
+    Base::init(engine, cmd);
     _params.init(params);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _params.destroy();
   }
 
@@ -438,15 +478,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokePathF : public RasterPaintCmd_StrokeF
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const PathF& path, const PathStrokerParamsF& params)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PathF& path, const PathStrokerParamsF& params)
   {
-    Base::init(cmd, params);
+    Base::init(engine, cmd, params);
     _path.init(path);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _path.destroy();
   }
 
@@ -469,15 +509,15 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokePathD : public RasterPaintCmd_StrokeD
   // [Init / Destroy]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void init(uint8_t cmd, const PathD& path, const PathStrokerParamsD& params)
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PathD& path, const PathStrokerParamsD& params)
   {
-    Base::init(cmd, params);
+    Base::init(engine, cmd, params);
     _path.init(path);
   }
 
-  FOG_INLINE void destroy()
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
   {
-    Base::destroy();
+    Base::destroy(engine);
     _path.destroy();
   }
 
@@ -486,6 +526,79 @@ struct FOG_NO_EXPORT RasterPaintCmd_StrokePathD : public RasterPaintCmd_StrokeD
   // --------------------------------------------------------------------------
 
   Static<PathD> _path;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_SetClipBox]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_SetClipBox : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const BoxI& clipBox)
+  {
+    Base::init(engine, cmd);
+    _clipBox.init(clipBox);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const BoxI& getClipBox() const { return _clipBox(); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<BoxI> _clipBox;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_SetClipRegion]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_SetClipRegion : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const Region& clipRegion)
+  {
+    Base::init(engine, cmd);
+    _clipRegion.init(clipRegion);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+    _clipRegion.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const Region& getClipRegion() const { return _clipRegion(); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<Region> _clipRegion;
 };
 
 // ============================================================================

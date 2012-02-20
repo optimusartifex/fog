@@ -18,7 +18,6 @@
 #include <Fog/G2d/Imaging/ImageFilter.h>
 #include <Fog/G2d/Imaging/ImageFilterScale.h>
 #include <Fog/G2d/Painting/PaintParams.h>
-#include <Fog/G2d/Painting/RasterPaintGroup_p.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterStructs_p.h>

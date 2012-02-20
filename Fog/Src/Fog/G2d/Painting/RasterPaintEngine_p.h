@@ -22,8 +22,8 @@
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Painting/PaintEngine.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
+#include <Fog/G2d/Painting/RasterPaintCmd_p.h>
 #include <Fog/G2d/Painting/RasterPaintContext_p.h>
-#include <Fog/G2d/Painting/RasterPaintGroup_p.h>
 #include <Fog/G2d/Painting/RasterPaintSerializer_p.h>
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>

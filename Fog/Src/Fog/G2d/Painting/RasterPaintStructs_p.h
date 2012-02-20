@@ -177,6 +177,63 @@ struct FOG_NO_EXPORT RasterPaintTarget
   ImageData* imageData;
 };
 
+// ============================================================================
+// [Fog::RasterPaintGroup]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintGroup
+{
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    top = NULL;
+    flags = NO_FLAGS;
+
+    numGroups = 0;
+    opacityF = 1.0f;
+
+    boundingBox.reset();
+
+    groupRecord = NULL;
+    cmdRecord = NULL;
+    cmdStart = NULL;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Link to the top group.
+  RasterPaintGroup* top;
+
+  //! @brief Group flags (types of commands used in this group).
+  uint32_t flags;
+  //! @brief How many groups are inside of this group.
+  uint32_t numGroups;
+
+#if FOG_ARCH_BITS >= 64
+  //! @brief The group bounding box (it can only grow).
+  BoxI boundingBox;
+  //! @brief The group opacity;
+  float opacityF;
+#else
+  //! @brief The group opacity;
+  float opacityF;
+  //! @brief The group bounding box (it can only grow).
+  BoxI boundingBox;
+#endif
+
+  //! @brief Group record (recorded position in groupAllocator).
+  MemZoneRecord* groupRecord;
+  //! @brief Commands record (recorded position in cmdAllocator).
+  MemZoneRecord* cmdRecord;
+  //! @brief Commands start pointer.
+  uint8_t* cmdStart;
+};
+
 //! @}
 
 } // Fog namespace

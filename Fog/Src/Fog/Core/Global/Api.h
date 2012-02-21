@@ -1832,6 +1832,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, pathclipperf_continuePath)(PathClipperF* self, PathF* dst, const PathF* src);
   FOG_CAPI_METHOD(err_t, pathclipperf_continuePathData)(PathClipperF* self, PathF* dst, const PointF* srcPts, const uint8_t* srcCmd, size_t srcLength);
   FOG_CAPI_METHOD(err_t, pathclipperf_clipPath)(PathClipperF* self, PathF* dst, const PathF* src, const TransformF* tr);
+  FOG_CAPI_METHOD(err_t, pathclipperf_clipBox)(PathClipperF* self, PathF* dst, const BoxF* src, const TransformF* tr);
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - PathClipperD]
@@ -1841,6 +1842,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, pathclipperd_continuePath)(PathClipperD* self, PathD* dst, const PathD* src);
   FOG_CAPI_METHOD(err_t, pathclipperd_continuePathData)(PathClipperD* self, PathD* dst, const PointD* srcPts, const uint8_t* srcCmd, size_t srcLength);
   FOG_CAPI_METHOD(err_t, pathclipperd_clipPath)(PathClipperD* self, PathD* dst, const PathD* src, const TransformD* tr);
+  FOG_CAPI_METHOD(err_t, pathclipperd_clipBox)(PathClipperD* self, PathD* dst, const BoxD* src, const TransformD* tr);
 
   // --------------------------------------------------------------------------
   // [G2d/Geometry - PathInfoF]

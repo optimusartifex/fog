@@ -500,7 +500,7 @@ enum ERR_CODE
   //! @brief There is no state to restore, can be returned by @ref Painter::restore().
   ERR_PAINTER_NO_STATE,
 
-  //! @brief There is no group to pop, can be returned by @ref Painter::endGroup().
+  //! @brief There is no group to paint/clip, can be returned by @ref Painter::paintGroup().
   ERR_PAINTER_NO_GROUP,
 
   // --------------------------------------------------------------------------

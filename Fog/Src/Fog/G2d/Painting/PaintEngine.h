@@ -386,15 +386,15 @@ struct FOG_NO_EXPORT PaintEngineVTable
   // [Types - Group]
   // --------------------------------------------------------------------------
 
-  typedef err_t (FOG_CDECL *NewGroup)(Painter* self, uint32_t flags);
-  typedef err_t (FOG_CDECL *EndGroup)(Painter* self);
+  typedef err_t (FOG_CDECL *BeginGroup)(Painter* self, uint32_t flags);
+  typedef err_t (FOG_CDECL *PaintGroup)(Painter* self);
 
   // --------------------------------------------------------------------------
   // [Funcs - Group]
   // --------------------------------------------------------------------------
 
-  NewGroup newGroup;
-  EndGroup endGroup;
+  BeginGroup beginGroup;
+  PaintGroup paintGroup;
 
   // --------------------------------------------------------------------------
   // [Types - Flush]
@@ -420,7 +420,7 @@ struct FOG_NO_EXPORT PaintEngine
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief The pointer to the painter-engine virtual table.
+  //! @brief The pointer to the paint-engine vtable.
   const PaintEngineVTable* vtable;
 };
 

@@ -659,13 +659,13 @@ static err_t FOG_CDECL MyPaintEngine_resetClip(Painter* self)
 // [Fog::MyPaintEngine - Group]
 // ============================================================================
 
-static err_t FOG_CDECL MyPaintEngine_newGroup(Painter* self, uint32_t flags)
+static err_t FOG_CDECL MyPaintEngine_beginGroup(Painter* self, uint32_t flags)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_endGroup(Painter* self)
+static err_t FOG_CDECL MyPaintEngine_paintGroup(Painter* self)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -884,8 +884,8 @@ static void MyPaintEngine_init()
   // [Group]
   // --------------------------------------------------------------------------
 
-  v->newGroup = MyPaintEngine_newGroup;
-  v->endGroup = MyPaintEngine_endGroup;
+  v->beignGroup = MyPaintEngine_beginGroup;
+  v->paintGroup = MyPaintEngine_paintGroup;
 
   // --------------------------------------------------------------------------
   // [Flush]
@@ -1224,12 +1224,12 @@ static err_t FOG_CDECL NullPaintEngine_resetClip(Painter* self)
 // [Fog::NullPaintEngine - Group]
 // ============================================================================
 
-static err_t FOG_CDECL NullPaintEngine_newGroup(Painter* self, uint32_t flags)
+static err_t FOG_CDECL NullPaintEngine_beginGroup(Painter* self, uint32_t flags)
 {
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullPaintEngine_endGroup(Painter* self)
+static err_t FOG_CDECL NullPaintEngine_paintGroup(Painter* self)
 {
   return ERR_RT_INVALID_STATE;
 }
@@ -1455,8 +1455,8 @@ FOG_NO_EXPORT void NullPaintEngine_init()
   // [Group]
   // --------------------------------------------------------------------------
 
-  v->newGroup = NullPaintEngine_newGroup;
-  v->endGroup = NullPaintEngine_endGroup;
+  v->beginGroup = NullPaintEngine_beginGroup;
+  v->paintGroup = NullPaintEngine_paintGroup;
 
   // --------------------------------------------------------------------------
   // [Flush]

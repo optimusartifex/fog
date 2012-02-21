@@ -27,7 +27,6 @@
 #include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
-#include <Fog/G2d/Painting/RasterState_p.h>
 #include <Fog/G2d/Painting/RasterUtil_p.h>
 #include <Fog/G2d/Painting/Rasterizer_p.h>
 
@@ -111,23 +110,21 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [State]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE RasterState* createState()
+  FOG_INLINE RasterPaintState* createState()
   {
-    RasterState* s = statePool;
+    RasterPaintState* s = statePool;
     if (FOG_IS_NULL(s))
-      s = reinterpret_cast<RasterState*>(stateAllocator.alloc(sizeof(RasterState)));
+      s = reinterpret_cast<RasterPaintState*>(stateAllocator.alloc(sizeof(RasterPaintState)));
     else
       statePool = s->prevState;
     return s;
   }
 
-  FOG_INLINE void poolState(RasterState* state)
+  FOG_INLINE void poolState(RasterPaintState* state)
   {
     state->prevState = statePool;
     statePool = state;
   }
-
-  void saveSourceAndDiscard();
 
   FOG_INLINE void saveSourceArgb32()
   {
@@ -157,12 +154,15 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
     }
   }
 
+  void saveSource();
+  void saveSourceAndDiscard();
   void saveStroke();
   void saveTransform();
   void saveClipping();
   void saveFilter();
+  void saveAll();
 
-  void discardStates();
+  void discardStates(RasterPaintState* top);
 
   // --------------------------------------------------------------------------
   // [Setup]
@@ -325,7 +325,7 @@ _DiscardContinue:
 
   //! @brief 'Saved-State' flags.
   //!
-  //! Which states was saved to the last @c RasterState instance. If there is
+  //! Which states was saved to the last @c RasterPaintState instance. If there is
   //! no such instance (the initial state) all bits are set to logical ones.
   uint8_t savedStateFlags;
 
@@ -397,12 +397,12 @@ _DiscardContinue:
   // [Members - State]
   // --------------------------------------------------------------------------
 
-  //! @brief Zone memory allocator for @c RasterState objects.
+  //! @brief Zone memory allocator for @c RasterPaintState objects.
   MemZoneAllocator stateAllocator;
   //! @brief Unused states pool.
-  RasterState* statePool;
+  RasterPaintState* statePool;
   //! @brief State.
-  RasterState* state;
+  RasterPaintState* state;
 
   // --------------------------------------------------------------------------
   // [Members - Pattern Context]
@@ -418,6 +418,8 @@ _DiscardContinue:
   // --------------------------------------------------------------------------
 
   Color dummyColor;
+  PointF dummyPointF;
+  PointD dummyPointD;
   PaintHints dummyPaintHints;
 
   // --------------------------------------------------------------------------

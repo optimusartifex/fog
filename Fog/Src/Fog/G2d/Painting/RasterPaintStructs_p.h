@@ -17,9 +17,11 @@
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
+#include <Fog/G2d/Painting/PaintParams.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 #include <Fog/G2d/Painting/RasterConstants_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
+#include <Fog/G2d/Painting/RasterStructs_p.h>
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Tools/Region.h>
@@ -38,6 +40,7 @@ struct RasterPaintCmd;
 struct RasterPaintGroup;
 struct RasterPaintContext;
 struct RasterPaintEngine;
+struct RasterPaintState;
 struct RasterScope;
 
 // ============================================================================
@@ -150,20 +153,20 @@ struct FOG_NO_EXPORT RasterPaintTarget
   // [Members - Buffer]
   // --------------------------------------------------------------------------
 
-  //! @brief The raster-layer size, NEEDED FOR _setupLayer().
+  //! @brief Target size, needed by _setupLayer().
   SizeI size;
-  //! @brief The raster-layer stride, NEEDED FOR _setupLayer().
+  //! @brief Target stride, needed by _setupLayer().
   ssize_t stride;
-  //! @brief Pointer to the first scanline, NEEDED FOR _setupLayer().
+  //! @brief Pointer to the first scanline, needed by _setupLayer().
   uint8_t* pixels;
 
-  //! @brief The raster-layer format, NEEDED FOR _setupLayer().
+  //! @brief Target format, needed by _setupLayer().
   uint32_t format;
-  //! @brief The raster-layer bytes-per-pixel.
+  //! @brief Target bytes-per-pixel.
   uint32_t bpp;
-  //! @brief The raster-layer bytes-per-line.
+  //! @brief Target bytes-per-line.
   uint32_t bpl;
-  //! @brief The raster-layer pixel precision.
+  //! @brief Target pixel precision.
   uint32_t precision;
 
   // --------------------------------------------------------------------------
@@ -223,12 +226,156 @@ struct FOG_NO_EXPORT RasterPaintGroup
   BoxI boundingBox;
 #endif
 
+  RasterPaintState* savedState;
+
   //! @brief Group record (recorded position in groupAllocator).
   MemZoneRecord* groupRecord;
   //! @brief Commands record (recorded position in cmdAllocator).
   MemZoneRecord* cmdRecord;
   //! @brief Commands start pointer.
   uint8_t* cmdStart;
+};
+
+// ============================================================================
+// [Fog::RasterPaintState]
+// ============================================================================
+
+//! @internal
+//!
+//! @brief Raster paint engine state.
+struct FOG_NO_EXPORT RasterPaintState
+{
+  // --------------------------------------------------------------------------
+  // [Previous]
+  // --------------------------------------------------------------------------
+
+  //! @brief The previous state.
+  RasterPaintState* prevState;
+
+  //! @brief RasterPaintEngine::masterFlags copy.
+  uint32_t prevMasterFlags;
+
+  // --------------------------------------------------------------------------
+  // [Id]
+  // --------------------------------------------------------------------------
+
+  //! @brief Layer id.
+  //!
+  //! Used internally to detect if @c PaintEngine::release() is not changing
+  //! the state of different layer.
+  uint32_t layerId;
+
+  //! @brief State id.
+  uint32_t stateId;
+
+  // ------------------------------------------------------------------------
+  // [Always Saved / Restored]
+  // ------------------------------------------------------------------------
+
+  //! @brief RasterPaintEngine::paintHints copy.
+  PaintHints paintHints;
+  //! @brief RasterPaintEngine::rasterHints copy.
+  RasterHints rasterHints;
+
+  //! @brief The original opacity (float).
+  float opacityF;
+
+  // ------------------------------------------------------------------------
+  // [Type & Precision]
+  // ------------------------------------------------------------------------
+
+  //! @brief Source type (see @ref RASTER_SOURCE).
+  uint8_t sourceType;
+  //! @brief RasterPaintEngine::masterSave copy.
+  uint8_t savedStateFlags;
+  //! @brief The strokeParams[F|D] precision.
+  uint8_t strokerPrecision;
+
+  // ------------------------------------------------------------------------
+  // [Integral Transform]
+  // ------------------------------------------------------------------------
+
+  //! @brief The integralTransform type, see @c RASTER_INTEGRAL_TRANSFORM.
+  uint8_t integralTransformType;
+
+  // ------------------------------------------------------------------------
+  // [Clipping]
+  // ------------------------------------------------------------------------
+
+  uint8_t clipType;  
+
+  // ------------------------------------------------------------------------
+  // [Clipping]
+  // ------------------------------------------------------------------------
+
+  uint8_t lockedByGroup;
+
+  // ------------------------------------------------------------------------
+  // [Reserved]
+  // ------------------------------------------------------------------------
+
+  uint8_t reserved[2];
+
+  // ------------------------------------------------------------------------
+  // [Integral Transform - Data]
+  // ------------------------------------------------------------------------
+
+  struct _IntegralTransform
+  {
+    int _sx, _sy;
+    int _tx, _ty;
+  } integralTransform;
+
+  // ------------------------------------------------------------------------
+  // [Source]
+  // ------------------------------------------------------------------------
+
+  RasterPaintSource source;
+  RasterSolid solid;
+  RasterPattern* pc;
+
+  // ------------------------------------------------------------------------
+  // [Stroke]
+  // ------------------------------------------------------------------------
+
+  struct StrokeParamsData
+  {
+    //! @brief Stroke parameters (float).
+    Static<PathStrokerParamsF> f;
+    //! @brief Stroke parameters (double).
+    Static<PathStrokerParamsD> d;
+  } strokeParams;
+
+  // --------------------------------------------------------------------------
+  // [RASTER_STATE_TRANSFORM]
+  // --------------------------------------------------------------------------
+
+  //! @brief The user transformation matrix (double).
+  Static<TransformD> userTransformD;
+  //! @brief The final transformation matrix (double).
+  Static<TransformD> finalTransformD;
+  //! @brief The final transformation matrix (float).
+  Static<TransformF> finalTransformF;
+
+  // ------------------------------------------------------------------------
+  // [RASTER_STATE_CLIPPING]
+  // ------------------------------------------------------------------------
+
+  //! @brief The clip-box (int).
+  BoxI clipBoxI;
+  //! @brief The clip-box (float).
+  BoxF clipBoxF;
+  //! @brief The clip-box (double).
+  BoxD clipBoxD;
+
+  //! @brief The clip-region.
+  Static<Region> clipRegion;
+
+  // ------------------------------------------------------------------------
+  // [RASTER_STATE_FILTER]
+  // ------------------------------------------------------------------------
+
+  Static<ImageFilterScaleD> filterScale;
 };
 
 // ============================================================================
@@ -241,7 +388,7 @@ struct FOG_NO_EXPORT RasterPaintGroup
 //!
 //! This class contains function pointers (vtable) to the lowest-level painter
 //! operations used by raster paint engine. The vtable is different for ST/MT
-//! modes, and for using groups - @refPainter::newGroup() and @ref Painter::endGroup().
+//! modes, and for using groups - @refPainter::beginGroup() and @ref Painter::paintGroup().
 struct FOG_NO_EXPORT RasterPaintDoCmd
 {
   // --------------------------------------------------------------------------
@@ -249,15 +396,11 @@ struct FOG_NO_EXPORT RasterPaintDoCmd
   // --------------------------------------------------------------------------
 
   err_t (FOG_FASTCALL *fillAll)(RasterPaintEngine* engine);
-  err_t (FOG_FASTCALL *fillPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *fillPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *fillStrokedPathF)(RasterPaintEngine* engine, const PathF* path);
-  err_t (FOG_FASTCALL *fillStrokedPathD)(RasterPaintEngine* engine, const PathD* path);
   err_t (FOG_FASTCALL *fillNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
   err_t (FOG_FASTCALL *fillNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
   err_t (FOG_FASTCALL *fillNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
-  err_t (FOG_FASTCALL *fillNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *fillNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *fillNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, const PointF* pt, uint32_t fillRule);
+  err_t (FOG_FASTCALL *fillNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, const PointD* pt, uint32_t fillRule);
 
   // --------------------------------------------------------------------------
   // [Funcs - Blit]
@@ -272,16 +415,11 @@ struct FOG_NO_EXPORT RasterPaintDoCmd
   // [Funcs - Filter]
   // --------------------------------------------------------------------------
 
-  err_t (FOG_FASTCALL *filterAll)(RasterPaintEngine* engine, const FeBase* feBase);
-  err_t (FOG_FASTCALL *filterPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *filterPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *filterStrokedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path);
-  err_t (FOG_FASTCALL *filterStrokedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path);
   err_t (FOG_FASTCALL *filterNormalizedBoxI)(RasterPaintEngine* engine, const FeBase* feBase, const BoxI* box);
   err_t (FOG_FASTCALL *filterNormalizedBoxF)(RasterPaintEngine* engine, const FeBase* feBase, const BoxF* box);
   err_t (FOG_FASTCALL *filterNormalizedBoxD)(RasterPaintEngine* engine, const FeBase* feBase, const BoxD* box);
-  err_t (FOG_FASTCALL *filterNormalizedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *filterNormalizedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *filterNormalizedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, const PointF* pt, uint32_t fillRule);
+  err_t (FOG_FASTCALL *filterNormalizedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, const PointD* pt, uint32_t fillRule);
 
   // --------------------------------------------------------------------------
   // [Funcs - Mask]

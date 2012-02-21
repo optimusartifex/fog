@@ -2082,23 +2082,23 @@ enum PAINTER_FLUSH
 // [Fog::PAINTER_GROUP]
 // ============================================================================
 
-//! @brief Painter group flags.
+//! @brief Painter group flags, used by @ref Painter::beginGroup().
 enum PAINTER_GROUP
 {
   // --------------------------------------------------------------------------
   // [Format]
   // --------------------------------------------------------------------------
 
-  PAINTER_GROUP_RGB = 0x00000001,
-  PAINTER_GROUP_ALPHA = 0x00000002,
-  PAINTER_GROUP_ARGB = 0x00000003,
+  //! @brief Detect group format (default).
+  PAINTER_GROUP_DETECT = 0x00000000,
 
-  // --------------------------------------------------------------------------
-  // [Addons]
-  // --------------------------------------------------------------------------
-
-  PAINTER_GROUP_EXTEND = 0x40000000,
-  PAINTER_GROUP_CLIP = 0x80000000
+  //! @brief Create Alpha group (can be combined with @ref PAINTER_GROUP_RGB).
+  PAINTER_GROUP_ALPHA = 0x00000001,
+  //! @brief Create RGB group (can be combined with @ref PAINTER_GROUP_ALPHA).
+  PAINTER_GROUP_RGB = 0x00000002,
+  //! @brief Create ARGB group (combination of @ref PAINTER_GROUP_ALPHA and 
+  //! @ref PAINTER_GROUP_RGB).
+  PAINTER_GROUP_ARGB = 0x00000003
 };
 
 // ============================================================================
@@ -2156,8 +2156,8 @@ enum PAINT_DEVICE
   //! @brief Same as @c PAINT_DEVICE_NULL.
   PAINT_DEVICE_UNKNOWN = 0,
 
-  //! @brief Raster paint-device.
-  PAINT_DEVICE_RASTER = 1,
+  //! @brief @ref Image paint-device (raster-based).
+  PAINT_DEVICE_IMAGE = 1,
 
   //! @brief Count of paint-device IDs.
   PAINT_DEVICE_COUNT = 2

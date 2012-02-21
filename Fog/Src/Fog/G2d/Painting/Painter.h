@@ -259,7 +259,7 @@ struct FOG_NO_EXPORT Painter
     return _vtable->getParameter(this, PAINTER_PARAMETER_FORMAT_I, &val);
   }
 
-  //! @brief Get the painter-engine type (see @c PAINT_DEVICE).
+  //! @brief Get the paint-device type (see @c PAINT_DEVICE).
   FOG_INLINE err_t getDeviceId(uint32_t& val) const
   {
     return _vtable->getParameter(this, PAINTER_PARAMETER_DEVICE_I, &val);
@@ -1463,8 +1463,8 @@ struct FOG_NO_EXPORT Painter
   // [Group]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t newGroup(uint32_t flags = NO_FLAGS) { return _vtable->newGroup(this, flags); }
-  FOG_INLINE err_t endGroup() { return _vtable->endGroup(this); }
+  FOG_INLINE err_t beginGroup(uint32_t flags = NO_FLAGS) { return _vtable->beginGroup(this, flags); }
+  FOG_INLINE err_t paintGroup() { return _vtable->paintGroup(this); }
 
   // --------------------------------------------------------------------------
   // [Flush]

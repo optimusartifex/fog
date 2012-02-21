@@ -124,6 +124,30 @@ struct FOG_NO_EXPORT PathClipperF
     return fog_api.pathclipperf_clipPath(this, &dst, &src, &tr);
   }
 
+  //! @brief Clip transformed path @a src to @a dst.
+  FOG_INLINE err_t clipPath(PathF& dst, const PathF& src, const TransformF* tr)
+  {
+    return fog_api.pathclipperf_clipPath(this, &dst, &src, tr);
+  }
+
+  //! @brief Clip box @a src to @a dst.
+  FOG_INLINE err_t clipBox(PathF& dst, const BoxF& src)
+  {
+    return fog_api.pathclipperf_clipBox(this, &dst, &src, NULL);
+  }
+
+  //! @brief Clip transformed box @a src to @a dst.
+  FOG_INLINE err_t clipBox(PathF& dst, const BoxF& src, const TransformF& tr)
+  {
+    return fog_api.pathclipperf_clipBox(this, &dst, &src, &tr);
+  }
+
+  //! @brief Clip transformed box @a src to @a dst.
+  FOG_INLINE err_t clipBox(PathF& dst, const BoxF& src, const TransformF* tr)
+  {
+    return fog_api.pathclipperf_clipBox(this, &dst, &src, tr);
+  }
+
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
@@ -248,6 +272,30 @@ struct FOG_NO_EXPORT PathClipperD
   FOG_INLINE err_t clipPath(PathD& dst, const PathD& src, const TransformD& tr)
   {
     return fog_api.pathclipperd_clipPath(this, &dst, &src, &tr);
+  }
+
+  //! @brief Clip transformed path @a src to @a dst.
+  FOG_INLINE err_t clipPath(PathD& dst, const PathD& src, const TransformD* tr)
+  {
+    return fog_api.pathclipperd_clipPath(this, &dst, &src, tr);
+  }
+
+  //! @brief Clip box @a src to @a dst.
+  FOG_INLINE err_t clipBox(PathD& dst, const BoxD& src)
+  {
+    return fog_api.pathclipperd_clipBox(this, &dst, &src, NULL);
+  }
+
+  //! @brief Clip transformed box @a src to @a dst.
+  FOG_INLINE err_t clipBox(PathD& dst, const BoxD& src, const TransformD& tr)
+  {
+    return fog_api.pathclipperd_clipBox(this, &dst, &src, &tr);
+  }
+
+  //! @brief Clip transformed box @a src to @a dst.
+  FOG_INLINE err_t clipBox(PathD& dst, const BoxD& src, const TransformD* tr)
+  {
+    return fog_api.pathclipperd_clipBox(this, &dst, &src, tr);
   }
 
   // --------------------------------------------------------------------------

@@ -1455,8 +1455,7 @@ _OutOfMemory:
 
 template<typename NumT>
 static err_t FOG_CDECL PathClipperT_clipPath(NumT_(PathClipper)* self,
-  NumT_(Path)* dst, const NumT_(Path)* src, const
-  NumT_(Transform)* tr)
+  NumT_(Path)* dst, const NumT_(Path)* src, const NumT_(Transform)* tr)
 {
   self->_lastIndex = INVALID_INDEX;
 
@@ -1498,7 +1497,6 @@ static err_t FOG_CDECL PathClipperT_clipPath(NumT_(PathClipper)* self,
     }
 
     // TODO: Specialize the SWAP/ROTATION/AFFINE case.
-
     default:
     {
       if (dst == src)
@@ -1521,6 +1519,70 @@ static err_t FOG_CDECL PathClipperT_clipPath(NumT_(PathClipper)* self,
 }
 
 // ============================================================================
+// [Fog::PathClipper - ClipBox]
+// ============================================================================
+
+template<typename NumT>
+static err_t FOG_CDECL PathClipperT_clipBox(NumT_(PathClipper)* self,
+  NumT_(Path)* dst, const NumT_(Box)* src, const NumT_(Transform)* tr)
+{
+  uint32_t transformType = TRANSFORM_TYPE_IDENTITY;
+  if (tr != NULL)
+    transformType = tr->getType();
+
+  NumT_(Box) tmpBox;
+
+  switch (transformType)
+  {
+    case TRANSFORM_TYPE_IDENTITY:
+      if (NumI_(Box)::intersect(tmpBox, *src, self->_clipBox))
+        return dst->box(tmpBox);
+      else
+        return ERR_OK;
+
+    case TRANSFORM_TYPE_TRANSLATION:
+      tmpBox = *src;
+
+_Translate:
+      tmpBox.x0 += tr->_20;
+      tmpBox.y0 += tr->_21;
+      tmpBox.x1 += tr->_20;
+      tmpBox.y1 += tr->_21;
+
+      if (NumI_(Box)::intersect(tmpBox, *src, self->_clipBox))
+        return dst->box(tmpBox);
+      else
+        return ERR_OK;
+
+    case TRANSFORM_TYPE_SCALING:
+      tmpBox.x0 = src->x0 * tr->_00;
+      tmpBox.y0 = src->y0 * tr->_11;
+      tmpBox.x1 = src->x1 * tr->_00;
+      tmpBox.y1 = src->y1 * tr->_11;
+      goto _Translate;
+
+    case TRANSFORM_TYPE_SWAP:
+      tmpBox.x0 = src->y0 * tr->_10;
+      tmpBox.y0 = src->x0 * tr->_01;
+      tmpBox.x1 = src->y1 * tr->_10;
+      tmpBox.y1 = src->x1 * tr->_01;
+      goto _Translate;
+
+    case TRANSFORM_TYPE_ROTATION:
+    case TRANSFORM_TYPE_AFFINE:
+    case TRANSFORM_TYPE_PROJECTION:
+    {
+      NumT_T1(PathTmp, 32) tmp;
+      tmp.box(*src);
+      return self->clipPath(*dst, tmp, tr);
+    }
+
+    default:
+      return ERR_GEOMETRY_DEGENERATE;
+  }
+}
+
+// ============================================================================
 // [Init / Fini]
 // ============================================================================
 
@@ -1533,11 +1595,13 @@ FOG_NO_EXPORT void PathClipper_init(void)
   fog_api.pathclipperf_continuePath = PathClipperT_continuePath<float>;
   fog_api.pathclipperf_continuePathData = PathClipperT_continuePathData<float>;
   fog_api.pathclipperf_clipPath = PathClipperT_clipPath<float>;
+  fog_api.pathclipperf_clipBox = PathClipperT_clipBox<float>;
 
   fog_api.pathclipperd_measurePath = PathClipperT_measurePath<double>;
   fog_api.pathclipperd_continuePath = PathClipperT_continuePath<double>;
   fog_api.pathclipperd_continuePathData = PathClipperT_continuePathData<double>;
   fog_api.pathclipperd_clipPath = PathClipperT_clipPath<double>;
+  fog_api.pathclipperd_clipBox = PathClipperT_clipBox<double>;
 
   // --------------------------------------------------------------------------
   // [CPU Based Optimizations]

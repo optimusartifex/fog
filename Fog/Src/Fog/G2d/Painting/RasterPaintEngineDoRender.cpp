@@ -15,6 +15,7 @@
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/G2d/Geometry/PathClipper.h>
 #include <Fog/G2d/Geometry/PathStroker.h>
+#include <Fog/G2d/Geometry/PathTmp_p.h>
 #include <Fog/G2d/Geometry/Transform.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
@@ -26,9 +27,9 @@
 #include <Fog/G2d/Painting/RasterConstants_p.h>
 #include <Fog/G2d/Painting/RasterPaintContext_p.h>
 #include <Fog/G2d/Painting/RasterPaintEngine_p.h>
+#include <Fog/G2d/Painting/RasterPaintStructs_p.h>
 #include <Fog/G2d/Painting/RasterScanline_p.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>
-#include <Fog/G2d/Painting/RasterState_p.h>
 #include <Fog/G2d/Painting/RasterUtil_p.h>
 #include <Fog/G2d/Painting/Rasterizer_p.h>
 #include <Fog/G2d/Source/Color.h>
@@ -304,135 +305,6 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillAll(
 }
 
 // ============================================================================
-// [Fog::RasterPaintDoRender - FillPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterPaintDoRender_fillPathF(
-  RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
-{
-  PathF& tmp = engine->ctx.tmpPathF[1];
-
-  bool hasTransform = engine->ensureFinalTransformF();
-  PathClipperF clipper(engine->getClipBoxF());
-
-  if (!hasTransform)
-  {
-    switch (clipper.measurePath(*path))
-    {
-      case PATH_CLIPPER_MEASURE_BOUNDED:
-        engine->doCmd->fillNormalizedPathF(engine, path, fillRule);
-        return ERR_OK;
-
-      case PATH_CLIPPER_MEASURE_UNBOUNDED:
-        tmp.clear();
-        FOG_RETURN_ON_ERROR(clipper.continuePath(tmp, *path));
-        engine->doCmd->fillNormalizedPathF(engine, &tmp, fillRule);
-        return ERR_OK;
-
-      default:
-        return ERR_GEOMETRY_INVALID;
-    }
-  }
-  else
-  {
-    tmp.clear();
-    FOG_RETURN_ON_ERROR(clipper.clipPath(tmp, *path, engine->getFinalTransformF()));
-    engine->doCmd->fillNormalizedPathF(engine, &tmp, fillRule);
-    return ERR_OK;
-  }
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_fillPathD(
-  RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
-{
-  PathD* tmp = &engine->ctx.tmpPathD[1];
-
-  bool hasTransform = (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY);
-  PathClipperD clipper(engine->getClipBoxD());
-
-  if (!hasTransform)
-  {
-    switch (clipper.measurePath(*path))
-    {
-      case PATH_CLIPPER_MEASURE_BOUNDED:
-        engine->doCmd->fillNormalizedPathD(engine, path, fillRule);
-        return ERR_OK;
-
-      case PATH_CLIPPER_MEASURE_UNBOUNDED:
-        tmp->clear();
-        FOG_RETURN_ON_ERROR(clipper.continuePath(*tmp, *path));
-        engine->doCmd->fillNormalizedPathD(engine, tmp, fillRule);
-        return ERR_OK;
-
-      default:
-        return ERR_GEOMETRY_INVALID;
-    }
-  }
-  else
-  {
-    tmp->clear();
-    FOG_RETURN_ON_ERROR(clipper.clipPath(*tmp, *path, engine->getFinalTransformD()));
-    engine->doCmd->fillNormalizedPathD(engine, tmp, fillRule);
-    return ERR_OK;
-  }
-}
-
-// ============================================================================
-// [Fog::RasterPaintDoRender - StrokeAndFillPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterPaintDoRender_fillStrokedPathF(
-  RasterPaintEngine* engine, const PathF* path)
-{
-  if (!engine->ctx.rasterHints.finalTransformF)
-  {
-    if (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY)
-    {
-      engine->stroker.f->_transform->setTransform(engine->stroker.d->getTransform());
-      engine->ctx.rasterHints.finalTransformF = 1;
-    }
-    else
-    {
-      engine->stroker.f->_transform->reset();
-    }
-    engine->stroker.f->_isDirty = true;
-  }
-
-  if (engine->strokerPrecision == RASTER_PRECISION_D)
-  {
-    engine->strokerPrecision = RASTER_PRECISION_BOTH;
-    engine->stroker.f->_params() = engine->stroker.d->_params();
-  }
-
-  PathStrokerF& stroker = engine->stroker.f;
-  PathF& tmp = engine->ctx.tmpPathF[0];
-
-  tmp.clear();
-  FOG_RETURN_ON_ERROR(stroker.strokePath(tmp, *path));
-
-  return engine->doCmd->fillNormalizedPathF(engine, &tmp, FILL_RULE_NON_ZERO);
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_fillStrokedPathD(
-  RasterPaintEngine* engine, const PathD* path)
-{
-  if (engine->strokerPrecision == RASTER_PRECISION_F)
-  {
-    engine->strokerPrecision = RASTER_PRECISION_BOTH;
-    engine->stroker.d->_params() = engine->stroker.f->_params();
-    engine->stroker.d->_isDirty = true;
-  }
-
-  PathStrokerD& stroker = engine->stroker.d;
-  PathD& tmp = engine->ctx.tmpPathD[0];
-
-  tmp.clear();
-  FOG_RETURN_ON_ERROR(stroker.strokePath(tmp, *path));
-
-  return engine->doCmd->fillNormalizedPathD(engine, &tmp, FILL_RULE_NON_ZERO);
-}
-
-// ============================================================================
 // [Fog::RasterPaintDoRender - FillNormalizedBox]
 // ============================================================================
 
@@ -627,7 +499,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedBoxD(
 // ============================================================================
 
 static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedPathF(
-  RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
+  RasterPaintEngine* engine, const PathF* path, const PointF* pt, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
   {
@@ -640,7 +512,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedPathF(
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
-      rasterizer->addPath(*path);
+      rasterizer->addPath(*path, *pt);
       rasterizer->finalize();
 
       if (rasterizer->isValid())
@@ -664,7 +536,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedPathF(
 }
 
 static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedPathD(
-  RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
+  RasterPaintEngine* engine, const PathD* path, const PointD* pt, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
   {
@@ -677,7 +549,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedPathD(
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
-      rasterizer->addPath(*path);
+      rasterizer->addPath(*path, *pt);
       rasterizer->finalize();
 
       if (rasterizer->isValid())
@@ -728,9 +600,17 @@ static err_t FOG_FASTCALL RasterPaintDoRender_blitImageD(
   path->clear();
   path->box(*box);
 
-  engine->ctx.pc = &pc;
-  err_t err = engine->doCmd->fillPathD(engine, path, FILL_RULE_NON_ZERO);
-  engine->ctx.pc = old;
+  PathClipperD clipper(engine->getClipBoxD());
+  PathTmpD<32> tmp;
+
+  err_t err = clipper.clipBox(tmp, *box, engine->getFinalTransformD());
+  if (err == ERR_OK)
+  {
+    PointD pt(0.0, 0.0);
+    engine->ctx.pc = &pc;
+    err = engine->doCmd->fillNormalizedPathD(engine, &tmp, &pt, FILL_RULE_NON_ZERO);
+    engine->ctx.pc = old;
+  }
 
   pc.destroy();
   return err;
@@ -975,131 +855,6 @@ static err_t FOG_FASTCALL RasterPaintDoRender_blitNormalizedImageD(
 
   pc.destroy();
   return err;
-}
-
-// ============================================================================
-// [Fog::RasterPaintDoRender - FilterPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterPaintDoRender_filterPathF(
-  RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule)
-{
-  PathF* tmp = &engine->ctx.tmpPathF[1];
-
-  bool hasTransform = engine->ensureFinalTransformF();
-  PathClipperF clipper(engine->getClipBoxF());
-
-  if (!hasTransform)
-  {
-    switch (clipper.measurePath(*path))
-    {
-      case PATH_CLIPPER_MEASURE_BOUNDED:
-        engine->doCmd->filterNormalizedPathF(engine, feBase, path, fillRule);
-        return ERR_OK;
-
-      case PATH_CLIPPER_MEASURE_UNBOUNDED:
-        tmp->clear();
-        FOG_RETURN_ON_ERROR(clipper.continuePath(*tmp, *path));
-        engine->doCmd->filterNormalizedPathF(engine, feBase, tmp, fillRule);
-        return ERR_OK;
-
-      default:
-        return ERR_GEOMETRY_INVALID;
-    }
-  }
-  else
-  {
-    tmp->clear();
-    FOG_RETURN_ON_ERROR(clipper.clipPath(*tmp, *path, engine->getFinalTransformF()));
-    engine->doCmd->filterNormalizedPathF(engine, feBase, tmp, fillRule);
-    return ERR_OK;
-  }
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_filterPathD(
-  RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule)
-{
-  PathD* tmp = &engine->ctx.tmpPathD[1];
-
-  bool hasTransform = (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY);
-  PathClipperD clipper(engine->getClipBoxD());
-
-  if (!hasTransform)
-  {
-    switch (clipper.measurePath(*path))
-    {
-      case PATH_CLIPPER_MEASURE_BOUNDED:
-        engine->doCmd->filterNormalizedPathD(engine, feBase, path, fillRule);
-        return ERR_OK;
-
-      case PATH_CLIPPER_MEASURE_UNBOUNDED:
-        tmp->clear();
-        FOG_RETURN_ON_ERROR(clipper.continuePath(*tmp, *path));
-        engine->doCmd->filterNormalizedPathD(engine, feBase, tmp, fillRule);
-        return ERR_OK;
-
-      default:
-        return ERR_GEOMETRY_INVALID;
-    }
-  }
-  else
-  {
-    tmp->clear();
-    FOG_RETURN_ON_ERROR(clipper.clipPath(*tmp, *path, engine->getFinalTransformD()));
-    engine->doCmd->filterNormalizedPathD(engine, feBase, tmp, fillRule);
-    return ERR_OK;
-  }
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_filterStrokedPathF(
-  RasterPaintEngine* engine, const FeBase* feBase, const PathF* path)
-{
-  if (!engine->ctx.rasterHints.finalTransformF)
-  {
-    if (engine->getFinalTransformD()._getType() != TRANSFORM_TYPE_IDENTITY)
-    {
-      engine->stroker.f->_transform->setTransform(engine->stroker.d->getTransform());
-      engine->ctx.rasterHints.finalTransformF = 1;
-    }
-    else
-    {
-      engine->stroker.f->_transform->reset();
-    }
-    engine->stroker.f->_isDirty = true;
-  }
-
-  if (engine->strokerPrecision == RASTER_PRECISION_D)
-  {
-    engine->strokerPrecision = RASTER_PRECISION_BOTH;
-    engine->stroker.f->_params() = engine->stroker.d->_params();
-  }
-
-  PathStrokerF& stroker = engine->stroker.f;
-  PathF& tmp = engine->ctx.tmpPathF[0];
-
-  tmp.clear();
-  FOG_RETURN_ON_ERROR(stroker.strokePath(tmp, *path));
-
-  return engine->doCmd->filterNormalizedPathF(engine, feBase, &tmp, FILL_RULE_NON_ZERO);
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_filterStrokedPathD(
-  RasterPaintEngine* engine, const FeBase* feBase, const PathD* path)
-{
-  if (engine->strokerPrecision == RASTER_PRECISION_F)
-  {
-    engine->strokerPrecision = RASTER_PRECISION_BOTH;
-    engine->stroker.d->_params() = engine->stroker.f->_params();
-    engine->stroker.d->_isDirty = true;
-  }
-
-  PathStrokerD& stroker = engine->stroker.d;
-  PathD& tmp = engine->ctx.tmpPathD[0];
-
-  tmp.clear();
-  FOG_RETURN_ON_ERROR(stroker.strokePath(tmp, *path));
-
-  return engine->doCmd->filterNormalizedPathD(engine, feBase, &tmp, FILL_RULE_NON_ZERO);
 }
 
 // ============================================================================
@@ -1362,7 +1117,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_filterNormalizedBoxD(
 // ============================================================================
 
 static err_t FOG_FASTCALL RasterPaintDoRender_filterNormalizedPathF(
-  RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule)
+  RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, const PointF* pt, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
   {
@@ -1375,7 +1130,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_filterNormalizedPathF(
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
-      rasterizer->addPath(*path);
+      rasterizer->addPath(*path, *pt);
       rasterizer->finalize();
 
       if (rasterizer->isValid())
@@ -1399,7 +1154,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_filterNormalizedPathF(
 }
 
 static err_t FOG_FASTCALL RasterPaintDoRender_filterNormalizedPathD(
-  RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule)
+  RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, const PointD* pt, uint32_t fillRule)
 {
   switch (engine->ctx.precision)
   {
@@ -1412,7 +1167,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_filterNormalizedPathD(
       if (FOG_IS_ERROR(rasterizer->init()))
         return rasterizer->getError();
 
-      rasterizer->addPath(*path);
+      rasterizer->addPath(*path, *pt);
       rasterizer->finalize();
 
       if (rasterizer->isValid())
@@ -1556,13 +1311,6 @@ void FOG_NO_EXPORT RasterPaintDoRender_init(void)
   // --------------------------------------------------------------------------
 
   v->fillAll = RasterPaintDoRender_fillAll;
-
-  v->fillPathF = RasterPaintDoRender_fillPathF;
-  v->fillPathD = RasterPaintDoRender_fillPathD;
-
-  v->fillStrokedPathF = RasterPaintDoRender_fillStrokedPathF;
-  v->fillStrokedPathD = RasterPaintDoRender_fillStrokedPathD;
-
   v->fillNormalizedBoxI = RasterPaintDoRender_fillNormalizedBoxI;
   v->fillNormalizedBoxF = RasterPaintDoRender_fillNormalizedBoxF;
   v->fillNormalizedBoxD = RasterPaintDoRender_fillNormalizedBoxD;
@@ -1574,7 +1322,6 @@ void FOG_NO_EXPORT RasterPaintDoRender_init(void)
   // --------------------------------------------------------------------------
 
   v->blitImageD = RasterPaintDoRender_blitImageD;
-
   v->blitNormalizedImageA = RasterPaintDoRender_blitNormalizedImageA;
   v->blitNormalizedImageI = RasterPaintDoRender_blitNormalizedImageI;
   v->blitNormalizedImageD = RasterPaintDoRender_blitNormalizedImageD;
@@ -1582,12 +1329,6 @@ void FOG_NO_EXPORT RasterPaintDoRender_init(void)
   // --------------------------------------------------------------------------
   // [Filter]
   // --------------------------------------------------------------------------
-
-  v->filterPathF = RasterPaintDoRender_filterPathF;
-  v->filterPathD = RasterPaintDoRender_filterPathD;
-
-  v->filterStrokedPathF = RasterPaintDoRender_filterStrokedPathF;
-  v->filterStrokedPathD = RasterPaintDoRender_filterStrokedPathD;
 
   v->filterNormalizedBoxI = RasterPaintDoRender_filterNormalizedBoxI;
   v->filterNormalizedBoxF = RasterPaintDoRender_filterNormalizedBoxF;

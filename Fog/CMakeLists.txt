@@ -1196,7 +1196,6 @@ Set(FOG_G2D_PAINTING_HEADERS
   Src/Fog/G2d/Painting/RasterPaintStructs_p.h
   Src/Fog/G2d/Painting/RasterScanline_p.h
   Src/Fog/G2d/Painting/RasterSpan_p.h
-  Src/Fog/G2d/Painting/RasterState_p.h
   Src/Fog/G2d/Painting/RasterStructs_p.h
   Src/Fog/G2d/Painting/RasterUtil_p.h
   Src/Fog/G2d/Painting/Rasterizer_p.h

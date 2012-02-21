@@ -320,12 +320,12 @@ static Image makeTurbulence(FeTurbulence* feData)
 
   uint8_t* p = image.getFirstX();
   ssize_t stride = image.getStride();
-  
+
   for (y = 0; y < h; y++)
   {
     for (x = 0; x < w; x++)
     {
-      float pt[2] = { x, y };
+      float pt[2] = { float(x), float(y) };
 
       uint32_t pix = ctx.turbulence(pt,
         feData->getHorizontalBaseFrequency(),
@@ -333,7 +333,7 @@ static Image makeTurbulence(FeTurbulence* feData)
         feData->getNumOctaves(),
         feData->getTurbulenceType(),
         feData->getStitchTitles(),
-        x, y, w, h);
+        float(x), float(y), float(w), float(h));
       
       reinterpret_cast<uint32_t*>(p)[x] = pix;
     }
@@ -430,15 +430,21 @@ void AppWindow::onPaint(Painter* _p)
   p.blitImage(PointI(0, 0), image);
 #endif
 
-  p.setSource(Argb32(0xFF0000FF));
-  p.fillRect(RectI(200, 200, 200, 200));
+  //p.setSource(Argb32(0xFF0000FF));
+  //p.fillRect(RectI(200, 200, 200, 200));
 
-  p.newGroup();
+  p.save();
+  p.setOpacity(0.5f);
+  p.beginGroup();
     p.setSource(Argb32(0xFF000000));
     p.fillRect(RectI(100, 100, 200, 200));
     p.setSource(Argb32(0xFFFF0000));
-    p.fillRect(RectI(150, 150, 200, 200));
-  p.endGroup();
+    p.fillRound(RoundF(150.0f, 150.0f, 200.0f, 200.0f, 50.0f));
+  p.paintGroup();
+  
+  p.setSource(Argb32(0xFF0000FF));
+  p.fillRect(RectI(250, 250, 200, 200));
+  p.restore();
 
   TimeDelta t = TimeTicks::now() - startTime;
 

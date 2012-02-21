@@ -33,11 +33,8 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-// TODO: Remove?
-struct RasterCalc;
-struct RasterCmd;
-
 union RasterHints;
+struct RasterPaintCmd;
 struct RasterPaintGroup;
 struct RasterPaintContext;
 struct RasterPaintEngine;
@@ -232,6 +229,81 @@ struct FOG_NO_EXPORT RasterPaintGroup
   MemZoneRecord* cmdRecord;
   //! @brief Commands start pointer.
   uint8_t* cmdStart;
+};
+
+// ============================================================================
+// [Fog::RasterPaintDoCmd]
+// ============================================================================
+
+//! @internal
+//!
+//! @brief Raster paint engine command handler (renderer, serializer, etc...).
+//!
+//! This class contains function pointers (vtable) to the lowest-level painter
+//! operations used by raster paint engine. The vtable is different for ST/MT
+//! modes, and for using groups - @refPainter::newGroup() and @ref Painter::endGroup().
+struct FOG_NO_EXPORT RasterPaintDoCmd
+{
+  // --------------------------------------------------------------------------
+  // [Funcs - Paint]
+  // --------------------------------------------------------------------------
+
+  err_t (FOG_FASTCALL *fillAll)(RasterPaintEngine* engine);
+  err_t (FOG_FASTCALL *fillPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *fillPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *fillStrokedPathF)(RasterPaintEngine* engine, const PathF* path);
+  err_t (FOG_FASTCALL *fillStrokedPathD)(RasterPaintEngine* engine, const PathD* path);
+  err_t (FOG_FASTCALL *fillNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
+  err_t (FOG_FASTCALL *fillNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
+  err_t (FOG_FASTCALL *fillNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
+  err_t (FOG_FASTCALL *fillNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *fillNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
+
+  // --------------------------------------------------------------------------
+  // [Funcs - Blit]
+  // --------------------------------------------------------------------------
+
+  err_t (FOG_FASTCALL *blitImageD)(RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality);
+  err_t (FOG_FASTCALL *blitNormalizedImageA)(RasterPaintEngine* engine, const PointI* pt, const Image* srcImage, const RectI* srcFragment);
+  err_t (FOG_FASTCALL *blitNormalizedImageI)(RasterPaintEngine* engine, const BoxI* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality);
+  err_t (FOG_FASTCALL *blitNormalizedImageD)(RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality);
+
+  // --------------------------------------------------------------------------
+  // [Funcs - Filter]
+  // --------------------------------------------------------------------------
+
+  err_t (FOG_FASTCALL *filterAll)(RasterPaintEngine* engine, const FeBase* feBase);
+  err_t (FOG_FASTCALL *filterPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *filterPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *filterStrokedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path);
+  err_t (FOG_FASTCALL *filterStrokedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path);
+  err_t (FOG_FASTCALL *filterNormalizedBoxI)(RasterPaintEngine* engine, const FeBase* feBase, const BoxI* box);
+  err_t (FOG_FASTCALL *filterNormalizedBoxF)(RasterPaintEngine* engine, const FeBase* feBase, const BoxF* box);
+  err_t (FOG_FASTCALL *filterNormalizedBoxD)(RasterPaintEngine* engine, const FeBase* feBase, const BoxD* box);
+  err_t (FOG_FASTCALL *filterNormalizedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *filterNormalizedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
+
+  // --------------------------------------------------------------------------
+  // [Funcs - Mask]
+  // --------------------------------------------------------------------------
+
+  err_t (FOG_FASTCALL *switchToMask)(RasterPaintEngine* engine);
+  err_t (FOG_FASTCALL *discardMask)(RasterPaintEngine* engine);
+
+  err_t (FOG_FASTCALL *saveMask)(RasterPaintEngine* engine);
+  err_t (FOG_FASTCALL *restoreMask)(RasterPaintEngine* engine);
+
+  err_t (FOG_FASTCALL *maskFromNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
+  err_t (FOG_FASTCALL *maskFromNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
+  err_t (FOG_FASTCALL *maskFromNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
+  err_t (FOG_FASTCALL *maskFromNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *maskFromNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
+
+  err_t (FOG_FASTCALL *maskIntersectNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
+  err_t (FOG_FASTCALL *maskIntersectNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
+  err_t (FOG_FASTCALL *maskIntersectNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
+  err_t (FOG_FASTCALL *maskIntersectNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *maskIntersectNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
 };
 
 //! @}

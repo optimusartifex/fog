@@ -93,6 +93,44 @@ struct FOG_NO_EXPORT RasterPaintCmd_Next : public RasterPaintCmd
 };
 
 // ============================================================================
+// [Fog::RasterPaintCmd_SetPaintHints]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_SetPaintHints : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd,
+    const PaintHints& paintHints)
+  {
+    Base::init(engine, cmd);
+    _setPaintHints(paintHints);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const PaintHints& getPaintHints() const { return _paintHints; }
+  FOG_INLINE void _setPaintHints(const PaintHints& paintHints) { _paintHints.packed = paintHints.packed; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PaintHints _paintHints;
+};
+
+// ============================================================================
 // [Fog::RasterPaintCmd_SetOpacity]
 // ============================================================================
 

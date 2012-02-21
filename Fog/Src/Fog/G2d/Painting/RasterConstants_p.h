@@ -395,6 +395,9 @@ enum RASTER_PAINT_CMD
   //! @brief Do 'SetOpacity' and 'SetSource(PatternContext*)' commands.
   RASTER_PAINT_CMD_SET_OPACITY_AND_PATTERN,
   
+  //! @brief Do 'SetPaintHints' command.
+  RASTER_PAINT_CMD_SET_PAINT_HINTS,
+
   //! @brief Do 'FillNormalizedRectI' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I,
   //! @brief Do 'FillNormalizedRectF' command.
@@ -660,22 +663,20 @@ enum RASTER_MASTER_FLAGS
   RASTER_PENDING_OPACITY = 0x00010000,
   //! @brief Pending source change.
   RASTER_PENDING_SOURCE = 0x00020000,
-  //! @brief Pending raster/paint hints change.
-  RASTER_PENDING_HINTS = 0x00040000,
+  //! @brief Pending paint-hints change.
+  RASTER_PENDING_PAINT_HINTS = 0x00040000,
   //! @brief Pending transform change.
   RASTER_PENDING_TRANSFORM = 0x00080000,
   //! @brief Pending clip change.
   RASTER_PENDING_CLIP = 0x00100000,
   //! @brief Pending stroke parameters change.
   RASTER_PENDING_STROKE_PARAMS = 0x00200000,
-  //! @brief Pending filter parameters change.
-  RASTER_PENDING_FILTER_PARAMS = 0x00800000,
 
   //! @brief Base pending flags, useful for all painter commands.
   RASTER_PENDING_BASE_FLAGS =
-    RASTER_PENDING_OPACITY |
-    RASTER_PENDING_HINTS   |
-    RASTER_PENDING_CLIP    ,
+    RASTER_PENDING_OPACITY     |
+    RASTER_PENDING_PAINT_HINTS |
+    RASTER_PENDING_CLIP        ,
 
   //! @brief All pending flags (mask).
   RASTER_PENDING_ALL_FLAGS = 0x7FFF0000,

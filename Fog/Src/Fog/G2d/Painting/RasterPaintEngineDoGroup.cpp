@@ -38,16 +38,16 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - VTable]
+// [Fog::RasterPaintDoGroup - VTable]
 // ============================================================================
 
-FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_group_vtable[RASTER_MODE_COUNT];
+FOG_NO_EXPORT RasterPaintDoCmd RasterPaintDoGroup_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - Pending]
+// [Fog::RasterPaintDoGroup - Pending]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintEngine* engine, uint32_t pending)
+static err_t FOG_FASTCALL RasterPaintDoGroup_processPendingFlags(RasterPaintEngine* engine, uint32_t pending)
 {
   FOG_ASSERT(pending != 0);
   engine->masterFlags ^= pending;
@@ -63,10 +63,11 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
     }
     else
     {
+      _FOG_RASTER_ENSURE_PATTERN(engine);
+
       RasterPaintCmd_SetOpacityAndPattern* cmd = engine->newCmd<RasterPaintCmd_SetOpacityAndPattern>();
       if (FOG_IS_NULL(cmd))
         return ERR_RT_OUT_OF_MEMORY;
-      _FOG_RASTER_ENSURE_PATTERN(engine);
       cmd->init(engine, RASTER_PAINT_CMD_SET_OPACITY_AND_PATTERN, engine->ctx.rasterHints.opacity, engine->ctx.pc);
     }
   }
@@ -78,8 +79,12 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
     cmd->init(engine, RASTER_PAINT_CMD_SET_OPACITY, engine->ctx.rasterHints.opacity);
   }
 
-  if (pending & RASTER_PENDING_HINTS)
+  if (pending & RASTER_PENDING_PAINT_HINTS)
   {
+    RasterPaintCmd_SetPaintHints* cmd = engine->newCmd<RasterPaintCmd_SetPaintHints>();
+    if (FOG_IS_NULL(cmd))
+      return ERR_RT_OUT_OF_MEMORY;
+    cmd->init(engine, RASTER_PAINT_CMD_SET_PAINT_HINTS, engine->ctx.paintHints);
   }
 
   if (pending & RASTER_PENDING_TRANSFORM)
@@ -110,10 +115,6 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
   {
   }
 
-  if (pending & RASTER_PENDING_FILTER_PARAMS)
-  {
-  }
-
   engine->masterFlags ^= pending;
   return ERR_OK;
 }
@@ -126,7 +127,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
     \
     if (pending != 0) \
     { \
-      FOG_RETURN_ON_ERROR(RasterPaintSerializer_processPendingFlags(engine, pending)); \
+      FOG_RETURN_ON_ERROR(RasterPaintDoGroup_processPendingFlags(engine, pending)); \
     } \
   FOG_MACRO_END
 
@@ -139,7 +140,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
     \
     if (pending != 0) \
     { \
-      FOG_RETURN_ON_ERROR(RasterPaintSerializer_processPendingFlags(engine, pending)); \
+      FOG_RETURN_ON_ERROR(RasterPaintDoGroup_processPendingFlags(engine, pending)); \
     } \
   FOG_MACRO_END
 
@@ -153,7 +154,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
     \
     if (pending != 0) \
     { \
-      FOG_RETURN_ON_ERROR(RasterPaintSerializer_processPendingFlags(engine, pending)); \
+      FOG_RETURN_ON_ERROR(RasterPaintDoGroup_processPendingFlags(engine, pending)); \
     } \
   FOG_MACRO_END
 
@@ -165,15 +166,15 @@ static err_t FOG_FASTCALL RasterPaintSerializer_processPendingFlags(RasterPaintE
     \
     if (pending != 0) \
     { \
-      FOG_RETURN_ON_ERROR(RasterPaintSerializer_processPendingFlags(engine, pending)); \
+      FOG_RETURN_ON_ERROR(RasterPaintDoGroup_processPendingFlags(engine, pending)); \
     } \
   FOG_MACRO_END
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FillAll]
+// [Fog::RasterPaintDoGroup - FillAll]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillAll_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillAll(
   RasterPaintEngine* engine)
 {
   _SERIALIZE_PENDING_FLAGS_FILL_NORMALIZED_BOX();
@@ -183,10 +184,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillAll_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FillPath]
+// [Fog::RasterPaintDoGroup - FillPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillPathF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillPathF(
   RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
 {
   _SERIALIZE_PENDING_FLAGS_FILL();
@@ -195,7 +196,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillPathF_group_st(
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillPathD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillPathD(
   RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
 {
   _SERIALIZE_PENDING_FLAGS_FILL();
@@ -205,10 +206,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillPathD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - StrokeAndFillPath]
+// [Fog::RasterPaintDoGroup - StrokeAndFillPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillStrokedPathF(
   RasterPaintEngine* engine, const PathF* path)
 {
   _SERIALIZE_PENDING_FLAGS_STROKE();
@@ -217,7 +218,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathF_group_st(
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillStrokedPathD(
   RasterPaintEngine* engine, const PathD* path)
 {
   _SERIALIZE_PENDING_FLAGS_STROKE();
@@ -227,10 +228,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillStrokedPathD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FillNormalizedBox]
+// [Fog::RasterPaintDoGroup - FillNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxI(
   RasterPaintEngine* engine, const BoxI* box)
 {
   _SERIALIZE_PENDING_FLAGS_FILL_NORMALIZED_BOX();
@@ -243,7 +244,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxI_group_st(
   return ERR_OK;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxF(
   RasterPaintEngine* engine, const BoxF* box)
 {
   _SERIALIZE_PENDING_FLAGS_FILL_NORMALIZED_BOX();
@@ -256,7 +257,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxF_group_st(
   return ERR_OK;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxD(
   RasterPaintEngine* engine, const BoxD* box)
 {
   _SERIALIZE_PENDING_FLAGS_FILL_NORMALIZED_BOX();
@@ -271,10 +272,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedBoxD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FillNormalizedPath]
+// [Fog::RasterPaintDoGroup - FillNormalizedPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedPathF(
   RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
 {
   _SERIALIZE_PENDING_FLAGS_FILL();
@@ -288,7 +289,7 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathF_group_st(
   return ERR_OK;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedPathD(
   RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
 {
   _SERIALIZE_PENDING_FLAGS_FILL();
@@ -303,11 +304,11 @@ static err_t FOG_FASTCALL RasterPaintSerializer_fillNormalizedPathD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - BlitImage]
+// [Fog::RasterPaintDoGroup - BlitImage]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitImageD_group_st(
-  RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform)
+static err_t FOG_FASTCALL RasterPaintDoGroup_blitImageD(
+  RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality)
 {
   _SERIALIZE_PENDING_FLAGS_BLIT();
 
@@ -316,10 +317,10 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitImageD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - BlitNormalizedImageA]
+// [Fog::RasterPaintDoGroup - BlitNormalizedImageA]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageA(
   RasterPaintEngine* engine, const PointI* pt, const Image* srcImage, const RectI* srcFragment)
 {
   _SERIALIZE_PENDING_FLAGS_BLIT();
@@ -329,49 +330,49 @@ static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageA_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - BlitNormalizedImage]
+// [Fog::RasterPaintDoGroup - BlitNormalizedImage]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageI_group_st(
-  RasterPaintEngine* engine, const BoxI* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform)
+static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageI(
+  RasterPaintEngine* engine, const BoxI* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_blitNormalizedImageD_group_st(
-  RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform)
+static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageD(
+  RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FilterPath]
+// [Fog::RasterPaintDoGroup - FilterPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterPathF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterPathF(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterPathD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterPathD(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterStrokedPathF(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterStrokedPathD(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path)
 {
   // TODO: Raster paint-engine.
@@ -379,24 +380,24 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterStrokedPathD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FilterNormalizedBox]
+// [Fog::RasterPaintDoGroup - FilterNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxI_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterNormalizedBoxI(
   RasterPaintEngine* engine, const FeBase* feBase, const BoxI* box)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterNormalizedBoxF(
   RasterPaintEngine* engine, const FeBase* feBase, const BoxF* box)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterNormalizedBoxD(
   RasterPaintEngine* engine, const FeBase* feBase, const BoxD* box)
 {
   // TODO: Raster paint-engine.
@@ -404,17 +405,17 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedBoxD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - FilterNormalizedPath]
+// [Fog::RasterPaintDoGroup - FilterNormalizedPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathF_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterNormalizedPathF(
   RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule)
 {
   // TODO: Raster paint-engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_group_st(
+static err_t FOG_FASTCALL RasterPaintDoGroup_filterNormalizedPathD(
   RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule)
 {
   // TODO: Raster paint-engine.
@@ -422,160 +423,186 @@ static err_t FOG_FASTCALL RasterPaintSerializer_filterNormalizedPathD_group_st(
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - ClipAll]
+// [Fog::RasterPaintDoGroup - SwitchToMask / DiscardMask]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipAll_group_st(
-  RasterPaintEngine* engine)
+static err_t FOG_FASTCALL RasterPaintDoGroup_switchToMask(RasterPaintEngine* engine)
 {
-  // TODO: Raster paint-engine.
+  // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-// ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - ClipPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterPaintSerializer_clipPathF(
-  RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule)
+static err_t FOG_FASTCALL RasterPaintDoGroup_discardMask(RasterPaintEngine* engine)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintSerializer_clipPathD(
-  RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule)
-{
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintSerializer_clipStrokedPathF(
-  RasterPaintEngine* engine, uint32_t clipOp, const PathF* path)
-{
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintSerializer_clipStrokedPathD(
-  RasterPaintEngine* engine, uint32_t clipOp, const PathD* path)
-{
-  // TODO: Raster paint-engine.
+  // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - ClipNormalizedBox]
+// [Fog::RasterPaintDoGroup - SaveMask / RestoreMask]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxI_group_st(
-  RasterPaintEngine* engine, uint32_t clipOp, const BoxI* box)
+static err_t FOG_FASTCALL RasterPaintDoGroup_saveMask(RasterPaintEngine* engine)
 {
-  // TODO: Raster paint-engine.
+  // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxF_group_st(
-  RasterPaintEngine* engine, uint32_t clipOp, const BoxF* box)
+static err_t FOG_FASTCALL RasterPaintDoGroup_restoreMask(RasterPaintEngine* engine)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedBoxD_group_st(
-  RasterPaintEngine* engine, uint32_t clipOp, const BoxD* box)
-{
-  // TODO: Raster paint-engine.
+  // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - ClipNormalizedPath]
+// [Fog::RasterPaintDoGroup - MaskFromNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedPathF_group_st(
-  RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule)
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskFromNormalizedBoxI(RasterPaintEngine* engine, const BoxI* box)
 {
-  // TODO: Raster paint-engine.
+  // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintSerializer_clipNormalizedPathD_group_st(
-  RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule)
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskFromNormalizedBoxF(RasterPaintEngine* engine, const BoxF* box)
 {
-  // TODO: Raster paint-engine.
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskFromNormalizedBoxD(RasterPaintEngine* engine, const BoxD* box)
+{
+  // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
-// [Fog::RasterPaintSerializer - Group(st) - Init]
+// [Fog::RasterPaintDoGroup - MaskFromNormalizedPath]
 // ============================================================================
 
-void FOG_NO_EXPORT RasterPaintSerializer_init_group_st(void)
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskFromNormalizedPathF(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
 {
-  RasterPaintSerializer* s = &RasterPaintSerializer_group_vtable[RASTER_MODE_ST];
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskFromNormalizedPathD(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
+{
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::RasterPaintDoGroup - MaskIntersectNormalizedBox]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskIntersectNormalizedBoxI(RasterPaintEngine* engine, const BoxI* box)
+{
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskIntersectNormalizedBoxF(RasterPaintEngine* engine, const BoxF* box)
+{
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskIntersectNormalizedBoxD(RasterPaintEngine* engine, const BoxD* box)
+{
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::RasterPaintDoGroup - MaskIntersectNormalizedPath]
+// ============================================================================
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskIntersectNormalizedPathF(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
+{
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_FASTCALL RasterPaintDoGroup_maskIntersectNormalizedPathD(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
+{
+  // TODO: Raster paint engine.
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+// ============================================================================
+// [Fog::RasterPaintDoGroup - Init]
+// ============================================================================
+
+void FOG_NO_EXPORT RasterPaintDoGroup_init(void)
+{
+  RasterPaintDoCmd* v = &RasterPaintDoGroup_vtable[RASTER_MODE_ST];
 
   // --------------------------------------------------------------------------
   // [Fill/Stroke]
   // --------------------------------------------------------------------------
 
-  s->fillAll = RasterPaintSerializer_fillAll_group_st;
+  v->fillAll = RasterPaintDoGroup_fillAll;
 
-  s->fillPathF = RasterPaintSerializer_fillPathF_group_st;
-  s->fillPathD = RasterPaintSerializer_fillPathD_group_st;
+  v->fillPathF = RasterPaintDoGroup_fillPathF;
+  v->fillPathD = RasterPaintDoGroup_fillPathD;
 
-  s->fillStrokedPathF = RasterPaintSerializer_fillStrokedPathF_group_st;
-  s->fillStrokedPathD = RasterPaintSerializer_fillStrokedPathD_group_st;
+  v->fillStrokedPathF = RasterPaintDoGroup_fillStrokedPathF;
+  v->fillStrokedPathD = RasterPaintDoGroup_fillStrokedPathD;
 
-  s->fillNormalizedBoxI = RasterPaintSerializer_fillNormalizedBoxI_group_st;
-  s->fillNormalizedBoxF = RasterPaintSerializer_fillNormalizedBoxF_group_st;
-  s->fillNormalizedBoxD = RasterPaintSerializer_fillNormalizedBoxD_group_st;
-  s->fillNormalizedPathF = RasterPaintSerializer_fillNormalizedPathF_group_st;
-  s->fillNormalizedPathD = RasterPaintSerializer_fillNormalizedPathD_group_st;
+  v->fillNormalizedBoxI = RasterPaintDoGroup_fillNormalizedBoxI;
+  v->fillNormalizedBoxF = RasterPaintDoGroup_fillNormalizedBoxF;
+  v->fillNormalizedBoxD = RasterPaintDoGroup_fillNormalizedBoxD;
+  v->fillNormalizedPathF = RasterPaintDoGroup_fillNormalizedPathF;
+  v->fillNormalizedPathD = RasterPaintDoGroup_fillNormalizedPathD;
 
   // --------------------------------------------------------------------------
   // [Blit]
   // --------------------------------------------------------------------------
 
-  s->blitImageD = RasterPaintSerializer_blitImageD_group_st;
+  v->blitImageD = RasterPaintDoGroup_blitImageD;
 
-  s->blitNormalizedImageA = RasterPaintSerializer_blitNormalizedImageA_group_st;
-  s->blitNormalizedImageI = RasterPaintSerializer_blitNormalizedImageI_group_st;
-  s->blitNormalizedImageD = RasterPaintSerializer_blitNormalizedImageD_group_st;
+  v->blitNormalizedImageA = RasterPaintDoGroup_blitNormalizedImageA;
+  v->blitNormalizedImageI = RasterPaintDoGroup_blitNormalizedImageI;
+  v->blitNormalizedImageD = RasterPaintDoGroup_blitNormalizedImageD;
 
   // --------------------------------------------------------------------------
   // [Filter]
   // --------------------------------------------------------------------------
 
-  s->filterPathF = RasterPaintSerializer_filterPathF_group_st;
-  s->filterPathD = RasterPaintSerializer_filterPathD_group_st;
+  v->filterPathF = RasterPaintDoGroup_filterPathF;
+  v->filterPathD = RasterPaintDoGroup_filterPathD;
 
-  s->filterStrokedPathF = RasterPaintSerializer_filterStrokedPathF_group_st;
-  s->filterStrokedPathD = RasterPaintSerializer_filterStrokedPathD_group_st;
+  v->filterStrokedPathF = RasterPaintDoGroup_filterStrokedPathF;
+  v->filterStrokedPathD = RasterPaintDoGroup_filterStrokedPathD;
 
-  s->filterNormalizedBoxI = RasterPaintSerializer_filterNormalizedBoxI_group_st;
-  s->filterNormalizedBoxF = RasterPaintSerializer_filterNormalizedBoxF_group_st;
-  s->filterNormalizedBoxD = RasterPaintSerializer_filterNormalizedBoxD_group_st;
-  s->filterNormalizedPathF = RasterPaintSerializer_filterNormalizedPathF_group_st;
-  s->filterNormalizedPathD = RasterPaintSerializer_filterNormalizedPathD_group_st;
+  v->filterNormalizedBoxI = RasterPaintDoGroup_filterNormalizedBoxI;
+  v->filterNormalizedBoxF = RasterPaintDoGroup_filterNormalizedBoxF;
+  v->filterNormalizedBoxD = RasterPaintDoGroup_filterNormalizedBoxD;
+  v->filterNormalizedPathF = RasterPaintDoGroup_filterNormalizedPathF;
+  v->filterNormalizedPathD = RasterPaintDoGroup_filterNormalizedPathD;
 
   // --------------------------------------------------------------------------
-  // [Clip]
+  // [Mask]
   // --------------------------------------------------------------------------
 
-  s->clipAll = RasterPaintSerializer_clipAll_group_st;
+  v->switchToMask = RasterPaintDoGroup_switchToMask;
+  v->discardMask = RasterPaintDoGroup_discardMask;
 
-  s->clipPathF = RasterPaintSerializer_clipPathF;
-  s->clipPathD = RasterPaintSerializer_clipPathD;
+  v->saveMask = RasterPaintDoGroup_saveMask;
+  v->restoreMask = RasterPaintDoGroup_restoreMask;
 
-  s->clipStrokedPathF = RasterPaintSerializer_clipStrokedPathF;
-  s->clipStrokedPathD = RasterPaintSerializer_clipStrokedPathD;
+  v->maskFromNormalizedBoxI = RasterPaintDoGroup_maskFromNormalizedBoxI;
+  v->maskFromNormalizedBoxF = RasterPaintDoGroup_maskFromNormalizedBoxF;
+  v->maskFromNormalizedBoxD = RasterPaintDoGroup_maskFromNormalizedBoxD;
+  v->maskFromNormalizedPathF = RasterPaintDoGroup_maskFromNormalizedPathF;
+  v->maskFromNormalizedPathD = RasterPaintDoGroup_maskFromNormalizedPathD;
 
-  s->clipNormalizedBoxI = RasterPaintSerializer_clipNormalizedBoxI_group_st;
-  s->clipNormalizedBoxF = RasterPaintSerializer_clipNormalizedBoxF_group_st;
-  s->clipNormalizedBoxD = RasterPaintSerializer_clipNormalizedBoxD_group_st;
-  s->clipNormalizedPathF = RasterPaintSerializer_clipNormalizedPathF_group_st;
-  s->clipNormalizedPathD = RasterPaintSerializer_clipNormalizedPathD_group_st;
+  v->maskIntersectNormalizedBoxI = RasterPaintDoGroup_maskIntersectNormalizedBoxI;
+  v->maskIntersectNormalizedBoxF = RasterPaintDoGroup_maskIntersectNormalizedBoxF;
+  v->maskIntersectNormalizedBoxD = RasterPaintDoGroup_maskIntersectNormalizedBoxD;
+  v->maskIntersectNormalizedPathF = RasterPaintDoGroup_maskIntersectNormalizedPathF;
+  v->maskIntersectNormalizedPathD = RasterPaintDoGroup_maskIntersectNormalizedPathD;
 }
 
 } // Fog namespace

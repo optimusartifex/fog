@@ -37,150 +37,6 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::RasterPaintSerializer]
-// ============================================================================
-
-//! @internal
-//!
-//! @brief Raster paint-engine serializer.
-//!
-//! This class contains function pointers to low-level painter operations. When
-//! single-threaded mode is used, the serializer contains function pointers to
-//! render functions, otherwise serialize functions are used.
-struct FOG_NO_EXPORT RasterPaintSerializer
-{
-  // --------------------------------------------------------------------------
-  // [Types - Paint]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_FASTCALL *FillAll)(RasterPaintEngine* engine);
-  typedef err_t (FOG_FASTCALL *FillPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FillPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FillStrokedPathF)(RasterPaintEngine* engine, const PathF* path);
-  typedef err_t (FOG_FASTCALL *FillStrokedPathD)(RasterPaintEngine* engine, const PathD* path);
-  typedef err_t (FOG_FASTCALL *FillNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
-  typedef err_t (FOG_FASTCALL *FillNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
-  typedef err_t (FOG_FASTCALL *FillNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
-  typedef err_t (FOG_FASTCALL *FillNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FillNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
-
-  // --------------------------------------------------------------------------
-  // [Funcs - Paint]
-  // --------------------------------------------------------------------------
-
-  FillAll fillAll;
-
-  FillPathF fillPathF;
-  FillPathD fillPathD;
-
-  FillStrokedPathF fillStrokedPathF;
-  FillStrokedPathD fillStrokedPathD;
-
-  FillNormalizedBoxI fillNormalizedBoxI;
-  FillNormalizedBoxF fillNormalizedBoxF;
-  FillNormalizedBoxD fillNormalizedBoxD;
-
-  FillNormalizedPathF fillNormalizedPathF;
-  FillNormalizedPathD fillNormalizedPathD;
-
-  // --------------------------------------------------------------------------
-  // [Types - Blit]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_FASTCALL *BlitImageD)(RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform);
-  typedef err_t (FOG_FASTCALL *BlitNormalizedImageA)(RasterPaintEngine* engine, const PointI* pt, const Image* srcImage, const RectI* srcFragment);
-  typedef err_t (FOG_FASTCALL *BlitNormalizedImageI)(RasterPaintEngine* engine, const BoxI* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform);
-  typedef err_t (FOG_FASTCALL *BlitNormalizedImageD)(RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform);
-
-  // --------------------------------------------------------------------------
-  // [Funcs - Blit]
-  // --------------------------------------------------------------------------
-
-  BlitImageD blitImageD;
-
-  BlitNormalizedImageA blitNormalizedImageA;
-  BlitNormalizedImageI blitNormalizedImageI;
-  BlitNormalizedImageD blitNormalizedImageD;
-
-  // --------------------------------------------------------------------------
-  // [Types - Filter]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_FASTCALL *FilterAll)(RasterPaintEngine* engine, const FeBase* feBase);
-  typedef err_t (FOG_FASTCALL *FilterPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FilterPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FilterStrokedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path);
-  typedef err_t (FOG_FASTCALL *FilterStrokedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path);
-  typedef err_t (FOG_FASTCALL *FilterNormalizedBoxI)(RasterPaintEngine* engine, const FeBase* feBase, const BoxI* box);
-  typedef err_t (FOG_FASTCALL *FilterNormalizedBoxF)(RasterPaintEngine* engine, const FeBase* feBase, const BoxF* box);
-  typedef err_t (FOG_FASTCALL *FilterNormalizedBoxD)(RasterPaintEngine* engine, const FeBase* feBase, const BoxD* box);
-  typedef err_t (FOG_FASTCALL *FilterNormalizedPathF)(RasterPaintEngine* engine, const FeBase* feBase, const PathF* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *FilterNormalizedPathD)(RasterPaintEngine* engine, const FeBase* feBase, const PathD* path, uint32_t fillRule);
-
-  // --------------------------------------------------------------------------
-  // [Funcs - Filter]
-  // --------------------------------------------------------------------------
-
-  FilterPathF filterPathF;
-  FilterPathD filterPathD;
-
-  FilterStrokedPathF filterStrokedPathF;
-  FilterStrokedPathD filterStrokedPathD;
-
-  FilterNormalizedBoxI filterNormalizedBoxI;
-  FilterNormalizedBoxF filterNormalizedBoxF;
-  FilterNormalizedBoxD filterNormalizedBoxD;
-
-  FilterNormalizedPathF filterNormalizedPathF;
-  FilterNormalizedPathD filterNormalizedPathD;
-
-  // --------------------------------------------------------------------------
-  // [Types - Clip]
-  // --------------------------------------------------------------------------
-
-  typedef err_t (FOG_FASTCALL *ClipAll)(RasterPaintEngine* engine);
-
-  typedef err_t (FOG_FASTCALL *ClipPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *ClipPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *ClipStrokedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path);
-  typedef err_t (FOG_FASTCALL *ClipStrokedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path);
-  typedef err_t (FOG_FASTCALL *ClipNormalizedBoxI)(RasterPaintEngine* engine, uint32_t clipOp, const BoxI* box);
-  typedef err_t (FOG_FASTCALL *ClipNormalizedBoxF)(RasterPaintEngine* engine, uint32_t clipOp, const BoxF* box);
-  typedef err_t (FOG_FASTCALL *ClipNormalizedBoxD)(RasterPaintEngine* engine, uint32_t clipOp, const BoxD* box);
-  typedef err_t (FOG_FASTCALL *ClipNormalizedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule);
-  typedef err_t (FOG_FASTCALL *ClipNormalizedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule);
-
-  // --------------------------------------------------------------------------
-  // [Funcs - Clip]
-  // --------------------------------------------------------------------------
-
-  ClipAll clipAll;
-
-  ClipPathF clipPathF;
-  ClipPathD clipPathD;
-
-  ClipStrokedPathF clipStrokedPathF;
-  ClipStrokedPathD clipStrokedPathD;
-
-  ClipNormalizedBoxI clipNormalizedBoxI;
-  ClipNormalizedBoxF clipNormalizedBoxF;
-  ClipNormalizedBoxD clipNormalizedBoxD;
-
-  ClipNormalizedPathF clipNormalizedPathF;
-  ClipNormalizedPathD clipNormalizedPathD;
-};
-
-// ============================================================================
-// [Fog::RasterPaintSerializer - VTable]
-// ============================================================================
-
-extern FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_render_vtable[RASTER_MODE_COUNT];
-extern FOG_NO_EXPORT RasterPaintSerializer RasterPaintSerializer_group_vtable[RASTER_MODE_COUNT];
-
-void FOG_NO_EXPORT RasterPaintSerializer_init_render_st(void);
-void FOG_NO_EXPORT RasterPaintSerializer_init_group_st(void);
-
-// ============================================================================
 // [Fog::RasterPaintEngine]
 // ============================================================================
 
@@ -417,7 +273,7 @@ _DiscardContinue:
   // --------------------------------------------------------------------------
 
   //! @brief Serializer (st/mt).
-  const RasterPaintSerializer* serializer;
+  const RasterPaintDoCmd* doCmd;
 
   // --------------------------------------------------------------------------
   // [Members - Context]
@@ -562,6 +418,7 @@ _DiscardContinue:
   // --------------------------------------------------------------------------
 
   Color dummyColor;
+  PaintHints dummyPaintHints;
 
   // --------------------------------------------------------------------------
   // [Members - Groups]
@@ -625,71 +482,12 @@ FOG_INLINE void RasterPaintCmd_SetOpacityAndPattern::destroy(RasterPaintEngine* 
 // ============================================================================
 
 extern FOG_NO_EXPORT PaintEngineVTable RasterPaintEngine_vtable[IMAGE_PRECISION_COUNT];
+extern FOG_NO_EXPORT RasterPaintDoCmd RasterPaintDoRender_vtable[RASTER_MODE_COUNT];
+extern FOG_NO_EXPORT RasterPaintDoCmd RasterPaintDoGroup_vtable[RASTER_MODE_COUNT];
 
 // ============================================================================
 // [Fog::RasterPaintEngine - Defs]
 // ============================================================================
-
-// Called by all 'fill' functions. This macro simply ensures that all fill
-// parameters are correct (it's possible to fill something).
-//
-// Please see RASTER_NO_PAINT flags to better understand how this works.
-#define _FOG_RASTER_ENTER_FILL_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_SOURCE         | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
-// Called by all 'stroke' functions. This macro simply ensures that all stroke
-// parameters are correct (it's possible to stroke something). Note that stroke
-// is implemented normally using fill pipeline, there are only few exceptions.
-//
-// Please see RASTER_NO_PAINT flags to better understand how this works.
-#define _FOG_RASTER_ENTER_STROKE_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_SOURCE         | \
-                                             RASTER_NO_PAINT_STROKE         | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_BLIT_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_CLIP_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY(clipOp >= CLIP_OP_COUNT)) \
-    { \
-      return ERR_RT_INVALID_ARGUMENT; \
-    } \
-    \
-    if (FOG_UNLIKELY((engine->masterFlags & RasterPaintEngine_clipAllFlags[clipOp]) != 0)) \
-    { \
-      return engine->serializer->clipAll(engine); \
-    } \
-  FOG_MACRO_END
-
-#define _FOG_RASTER_ENTER_FILTER_FUNC() \
-  FOG_MACRO_BEGIN \
-    if (FOG_UNLIKELY((engine->masterFlags & (RASTER_NO_PAINT_BASE_FLAGS     | \
-                                             RASTER_NO_PAINT_FATAL          )) != 0)) \
-    { \
-      return ERR_OK; \
-    } \
-  FOG_MACRO_END
 
 #define _FOG_RASTER_ENSURE_PATTERN(_Engine_) \
   FOG_MACRO_BEGIN \

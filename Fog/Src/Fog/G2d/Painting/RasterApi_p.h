@@ -33,6 +33,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
+// Raster low-level API.
 struct Rasterizer8;
 struct Rasterizer16;
 
@@ -42,14 +43,9 @@ struct BoxRasterizer16;
 struct PathRasterizer8;
 struct PathRasterizer16;
 
-struct RasterPaintContext;
 struct RasterFiller;
-struct RasterPaintEngine;
-struct RasterPaintSerializer;
-
 struct RasterScanline8;
 struct RasterScanline16;
-
 struct RasterSpan;
 struct RasterSpan8;
 struct RasterSpan16;
@@ -61,6 +57,11 @@ struct RasterPatternFetcher;
 struct RasterFilter;
 struct RasterFilterBlur;
 struct RasterFilterImage;
+
+// Raster paint-engine.
+struct RasterPaintContext;
+struct RasterPaintDoCmd;
+struct RasterPaintEngine;
 
 // ============================================================================
 // [Fog::Raster - TypeDefs - RasterClosure]

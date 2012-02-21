@@ -113,7 +113,7 @@ FOG_UI_MAIN()
   Application app(StringW::fromAscii8("UI"));
   AppWindow wnd(app.getUIEngine());
 
-  wnd.setWindowTitle(StringW::fromAscii8("Fog - Blend Playground"));
+  wnd.setWindowTitle(StringW::fromAscii8("FogBlend"));
   wnd.setWindowSize(SizeI(700, 700));
   wnd.show();
 

@@ -5092,6 +5092,14 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
   }
 }
 
+static void FOG_CDECL RasterPaintEngine_resetGroupStates(RasterPaintEngine* engine)
+{
+  engine->opacityF = 1.0f;
+  engine->ctx.paintHints.compositingOperator = COMPOSITE_SRC_OVER;
+  engine->ctx.rasterHints.opacity = engine->ctx.fullOpacity.u;
+  engine->masterFlags &= ~(RASTER_NO_PAINT_OPACITY | RASTER_NO_PAINT_COMPOSITING_OPERATOR);
+}
+
 static err_t FOG_CDECL RasterPaintEngine_beginGroup(Painter* self, uint32_t flags)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
@@ -5135,10 +5143,7 @@ static err_t FOG_CDECL RasterPaintEngine_beginGroup(Painter* self, uint32_t flag
 
   // Reset core states which are always set to default values when new group
   // is created.
-  engine->opacityF = 1.0f;
-  engine->ctx.paintHints.compositingOperator = COMPOSITE_SRC_OVER;
-  engine->ctx.rasterHints.opacity = engine->ctx.fullOpacity.u;
-  engine->masterFlags &= ~(RASTER_NO_PAINT_OPACITY | RASTER_NO_PAINT_COMPOSITING_OPERATOR);
+  RasterPaintEngine_resetGroupStates(engine);
 
   // Set the current group to 'g' and set the command handler to 'RasterPaintDoGroup'.
   engine->curGroup = g;
@@ -5201,6 +5206,10 @@ static err_t FOG_CDECL RasterPaintEngine_paintGroup(Painter* self)
     engine->ctx.paintHints.packed = oldPaintHints;
     engine->ctx.solid.prgb32.u32 = oldPrgb32;
     engine->ctx.pc = oldPc;
+
+    // Reset core states which are always set to default values when new group
+    // is created.
+    RasterPaintEngine_resetGroupStates(engine);
 
     // Run commands.
     RasterPaintEngine_doCommands<true, true>(self, g->cmdStart, engine->cmdAllocator._pos);

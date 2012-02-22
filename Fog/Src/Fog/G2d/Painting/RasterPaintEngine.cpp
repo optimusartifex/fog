@@ -2818,8 +2818,8 @@ static err_t FOG_FASTCALL RasterPaintEngine_fillRawPathF(
   switch (transformType)
   {
     case TRANSFORM_TYPE_TRANSLATION:
-      pt.set(-transform._20, -transform._21);
-      clipper._clipBox.translate(pt);
+      pt.set(transform._20, transform._21);
+      clipper._clipBox.translate(-transform._20, -transform._21);
       // ... Fall through ...
 
     case TRANSFORM_TYPE_IDENTITY:
@@ -2855,8 +2855,8 @@ static err_t FOG_FASTCALL RasterPaintEngine_fillRawPathD(
   switch (transformType)
   {
     case TRANSFORM_TYPE_TRANSLATION:
-      pt.set(-transform._20, -transform._21);
-      clipper._clipBox.translate(pt);
+      pt.set(transform._20, transform._21);
+      clipper._clipBox.translate(-transform._20, -transform._21);
       // ... Fall through ...
 
     case TRANSFORM_TYPE_IDENTITY:
@@ -3754,8 +3754,8 @@ static err_t FOG_FASTCALL RasterPaintEngine_filterRawPathF(
   switch (transformType)
   {
     case TRANSFORM_TYPE_TRANSLATION:
-      pt.set(-transform._20, -transform._21);
-      clipper._clipBox.translate(pt);
+      pt.set(transform._20, transform._21);
+      clipper._clipBox.translate(-transform._20, -transform._21);
       // ... Fall through ...
 
     case TRANSFORM_TYPE_IDENTITY:
@@ -3791,8 +3791,8 @@ static err_t FOG_FASTCALL RasterPaintEngine_filterRawPathD(
   switch (transformType)
   {
     case TRANSFORM_TYPE_TRANSLATION:
-      pt.set(-transform._20, -transform._21);
-      clipper._clipBox.translate(pt);
+      pt.set(transform._20, transform._21);
+      clipper._clipBox.translate(-transform._20, -transform._21);
       // ... Fall through ...
 
     case TRANSFORM_TYPE_IDENTITY:

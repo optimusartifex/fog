@@ -94,6 +94,7 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
       return true;
 
     stroker.f->_transform->setTransform(getFinalTransformD());
+    stroker.f->_transform->updateType();
     ctx.rasterHints.finalTransformF = 1;
 
     return true;

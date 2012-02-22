@@ -1648,8 +1648,6 @@ static err_t FOG_CDECL RasterPaintEngine_resetParameter(Painter* self, uint32_t 
         engine->stroker.d->_params->reset();
 
       engine->strokerPrecision = RASTER_PRECISION_NONE;
-
-      // TODO: Stroke params changed.
       return ERR_OK;
     }
 

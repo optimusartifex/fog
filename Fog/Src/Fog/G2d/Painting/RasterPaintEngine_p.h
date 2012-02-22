@@ -169,7 +169,6 @@ struct FOG_NO_EXPORT RasterPaintEngine : public PaintEngine
   // [Setup]
   // --------------------------------------------------------------------------
 
-  void setupLayer();
   void setupOps();
   void setupDefaultClip();
 

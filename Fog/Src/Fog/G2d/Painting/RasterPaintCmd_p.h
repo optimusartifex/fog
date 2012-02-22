@@ -480,6 +480,182 @@ struct FOG_NO_EXPORT RasterPaintCmd_FillNormalizedPathD : public RasterPaintCmd_
 };
 
 // ============================================================================
+// [Fog::RasterPaintCmd_BlitNormalizedImageA]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_BlitNormalizedImageA : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+  
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PointI& pt, const Image& srcImage)
+  {
+    Base::init(engine, cmd);
+    _pt.init(pt);
+    _srcImage.initCustom1(srcImage);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+    _srcImage.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const PointI& getPt() const { return _pt; }
+  FOG_INLINE const Image& getSrcImage() const { return _srcImage; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<PointI> _pt;
+  Static<Image> _srcImage;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_BlitNormalizedImageFragmentA]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_BlitNormalizedImageFragmentA : public RasterPaintCmd_BlitNormalizedImageA
+{
+  typedef RasterPaintCmd_BlitNormalizedImageA Base;
+  
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const PointI& dstPt, const Image& srcImage, const RectI& srcFragment)
+  {
+    Base::init(engine, cmd, dstPt, srcImage);
+    _srcFragment.init(srcFragment);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const RectI& getSrcFragment() const { return _srcFragment; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<RectI> _srcFragment;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_BlitNormalizedImageI]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_BlitNormalizedImageI : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+  
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const BoxI& box,
+    const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform, uint32_t imageQuality)
+  {
+    Base::init(engine, cmd);
+    _data24 = imageQuality;
+
+    _box.initCustom1(box);
+    _srcImage.initCustom1(srcImage);
+    _srcFragment.initCustom1(srcFragment);
+    _srcTransform.initCustom1(srcTransform);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+    _srcImage.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getImageQuality() const { return _data24; }
+  FOG_INLINE const BoxI& getBox() const { return _box(); }
+  FOG_INLINE const Image& getSrcImage() const { return _srcImage(); }
+  FOG_INLINE const RectI& getSrcFragment() const { return _srcFragment(); }
+  FOG_INLINE const TransformD& getSrcTransform() const { return _srcTransform(); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<BoxI> _box;
+  Static<Image> _srcImage;
+  Static<RectI> _srcFragment;
+  Static<TransformD> _srcTransform;
+};
+
+// ============================================================================
+// [Fog::RasterPaintCmd_BlitNormalizedImageD]
+// ============================================================================
+
+struct FOG_NO_EXPORT RasterPaintCmd_BlitNormalizedImageD : public RasterPaintCmd
+{
+  typedef RasterPaintCmd Base;
+  
+  // --------------------------------------------------------------------------
+  // [Init / Destroy]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void init(RasterPaintEngine* engine, uint8_t cmd, const BoxD& box,
+    const Image& srcImage, const RectI& srcFragment, const TransformD& srcTransform, uint32_t imageQuality)
+  {
+    Base::init(engine, cmd);
+    _data24 = imageQuality;
+
+    _box.initCustom1(box);
+    _srcImage.initCustom1(srcImage);
+    _srcFragment.initCustom1(srcFragment);
+    _srcTransform.initCustom1(srcTransform);
+  }
+
+  FOG_INLINE void destroy(RasterPaintEngine* engine)
+  {
+    Base::destroy(engine);
+    _srcImage.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getImageQuality() const { return _data24; }
+  FOG_INLINE const BoxD& getBox() const { return _box(); }
+  FOG_INLINE const Image& getSrcImage() const { return _srcImage(); }
+  FOG_INLINE const RectI& getSrcFragment() const { return _srcFragment(); }
+  FOG_INLINE const TransformD& getSrcTransform() const { return _srcTransform(); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static<BoxD> _box;
+  Static<Image> _srcImage;
+  Static<RectI> _srcFragment;
+  Static<TransformD> _srcTransform;
+};
+
+// ============================================================================
 // [Fog::RasterPaintCmd_SetClipBox]
 // ============================================================================
 

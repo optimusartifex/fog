@@ -89,17 +89,15 @@ void AppWindow::onPaint(Painter* _p)
 
   for (uint32_t op = 0; op < COMPOSITE_COUNT; op++)
   {
-    Image ti;
-    ti.create(s, IMAGE_FORMAT_PRGB32);
+    PointI pos(x * (s.w + 5) + 5, y * (s.h + 5) + 5);
 
-    Painter tp(ti);
-    tp.setCompositingOperator(COMPOSITE_SRC);
-    tp.blitImage(PointI(0, 0), sprite[0]);
-    tp.setCompositingOperator(op);
-    tp.blitImage(PointI(0, 0), sprite[1]);
-    tp.end();
+    p.beginGroup();
+    p.setCompositingOperator(COMPOSITE_SRC);
+    p.blitImage(pos, sprite[0]);
+    p.setCompositingOperator(op);
+    p.blitImage(pos, sprite[1]);
+    p.paintGroup();
 
-    p.blitImage(PointI(x * (s.w + 5) + 5, y * (s.h + 5) + 5), ti);
     if (++x >= 5) { y++; x = 0; }
   }
 }

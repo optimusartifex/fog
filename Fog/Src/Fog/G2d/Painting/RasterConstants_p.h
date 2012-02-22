@@ -398,6 +398,9 @@ enum RASTER_PAINT_CMD
   //! @brief Do 'SetPaintHints' command.
   RASTER_PAINT_CMD_SET_PAINT_HINTS,
 
+  //! @brief Do 'FillAll' command.
+  RASTER_PAINT_CMD_FILL_ALL,
+
   //! @brief Do 'FillNormalizedRectI' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I,
   //! @brief Do 'FillNormalizedRectF' command.
@@ -409,6 +412,14 @@ enum RASTER_PAINT_CMD
   RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_F,
   //! @brief Do 'FillNormalizedPathD' command.
   RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_D,
+
+  //! @brief Do 'BlitNormalizedImageA(DstPt, SrcImage, NULL)' command.
+  RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_A,
+  //! @brief Do 'BlitNormalizedImageA(DstPt, SrcImage, SrcFragment)' command.
+  RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_FRAGMENT_A,
+
+  RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_I,
+  RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_D,
 
   //! @brief Do 'SetClipBox' command.
   RASTER_PAINT_CMD_SET_CLIP_BOX,

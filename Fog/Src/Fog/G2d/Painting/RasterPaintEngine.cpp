@@ -2285,13 +2285,6 @@ static err_t FOG_CDECL RasterPaintEngine_save(Painter* self)
   state->savedStateFlags = engine->savedStateFlags;
 
   // --------------------------------------------------------------------------
-  // [Id]
-  // --------------------------------------------------------------------------
-
-  state->layerId = engine->masterLayerId;
-  state->stateId = prev ? prev->stateId + 1 : 0;
-
-  // --------------------------------------------------------------------------
   // [Always Saved / Restored]
   // --------------------------------------------------------------------------
 
@@ -4868,14 +4861,16 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_NEXT:
       {
-        RasterPaintCmd_Next* cmd = reinterpret_cast<RasterPaintCmd_Next*>(p);
+        RasterPaintCmd_Next* cmd =
+          reinterpret_cast<RasterPaintCmd_Next*>(p);
         p = cmd->getPtr();
         break;
       }
 
       case RASTER_PAINT_CMD_SET_OPACITY:
       {
-        RasterPaintCmd_SetOpacity* cmd = reinterpret_cast<RasterPaintCmd_SetOpacity*>(p);
+        RasterPaintCmd_SetOpacity* cmd =
+          reinterpret_cast<RasterPaintCmd_SetOpacity*>(p);
         p += sizeof(RasterPaintCmd_SetOpacity);
 
         if (Evaluate)
@@ -4888,7 +4883,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_SET_OPACITY_AND_PRGB32:
       {
-        RasterPaintCmd_SetOpacityAndPrgb32* cmd = reinterpret_cast<RasterPaintCmd_SetOpacityAndPrgb32*>(p);
+        RasterPaintCmd_SetOpacityAndPrgb32* cmd =
+          reinterpret_cast<RasterPaintCmd_SetOpacityAndPrgb32*>(p);
         p += sizeof(RasterPaintCmd_SetOpacityAndPrgb32);
 
         if (Evaluate)
@@ -4908,7 +4904,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
       
       case RASTER_PAINT_CMD_SET_OPACITY_AND_PATTERN:
       {
-        RasterPaintCmd_SetOpacityAndPattern* cmd = reinterpret_cast<RasterPaintCmd_SetOpacityAndPattern*>(p);
+        RasterPaintCmd_SetOpacityAndPattern* cmd =
+          reinterpret_cast<RasterPaintCmd_SetOpacityAndPattern*>(p);
         p += sizeof(RasterPaintCmd_SetOpacityAndPattern);
 
         if (Evaluate)
@@ -4929,7 +4926,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_SET_PAINT_HINTS:
       {
-        RasterPaintCmd_SetPaintHints* cmd = reinterpret_cast<RasterPaintCmd_SetPaintHints*>(p);
+        RasterPaintCmd_SetPaintHints* cmd =
+          reinterpret_cast<RasterPaintCmd_SetPaintHints*>(p);
         p += sizeof(RasterPaintCmd_SetPaintHints);
 
         if (Evaluate)
@@ -4940,9 +4938,24 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
         break;
       }
 
+      case RASTER_PAINT_CMD_FILL_ALL:
+      {
+        RasterPaintCmd_FillAll* cmd =
+          reinterpret_cast<RasterPaintCmd_FillAll*>(p);
+        p += sizeof(RasterPaintCmd_FillAll);
+
+        if (Evaluate)
+          doCmd->fillAll(engine);
+        
+        if (Destroy)
+          cmd->destroy(engine);
+        break;
+      }
+
       case RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I:
       {
-        RasterPaintCmd_FillNormalizedBoxI* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedBoxI*>(p);
+        RasterPaintCmd_FillNormalizedBoxI* cmd =
+          reinterpret_cast<RasterPaintCmd_FillNormalizedBoxI*>(p);
         p += sizeof(RasterPaintCmd_FillNormalizedBoxI);
 
         if (Evaluate)
@@ -4955,7 +4968,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_F:
       {
-        RasterPaintCmd_FillNormalizedBoxF* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedBoxF*>(p);
+        RasterPaintCmd_FillNormalizedBoxF* cmd =
+          reinterpret_cast<RasterPaintCmd_FillNormalizedBoxF*>(p);
         p += sizeof(RasterPaintCmd_FillNormalizedBoxF);
 
         if (Evaluate)
@@ -4968,7 +4982,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_D:
       {
-        RasterPaintCmd_FillNormalizedBoxD* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedBoxD*>(p);
+        RasterPaintCmd_FillNormalizedBoxD* cmd =
+          reinterpret_cast<RasterPaintCmd_FillNormalizedBoxD*>(p);
         p += sizeof(RasterPaintCmd_FillNormalizedBoxD);
 
         if (Evaluate)
@@ -4981,7 +4996,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_F:
       {
-        RasterPaintCmd_FillNormalizedPathF* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedPathF*>(p);
+        RasterPaintCmd_FillNormalizedPathF* cmd =
+          reinterpret_cast<RasterPaintCmd_FillNormalizedPathF*>(p);
         p += sizeof(RasterPaintCmd_FillNormalizedPathF);
 
         if (Evaluate)
@@ -4994,7 +5010,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_D:
       {
-        RasterPaintCmd_FillNormalizedPathD* cmd = reinterpret_cast<RasterPaintCmd_FillNormalizedPathD*>(p);
+        RasterPaintCmd_FillNormalizedPathD* cmd =
+          reinterpret_cast<RasterPaintCmd_FillNormalizedPathD*>(p);
         p += sizeof(RasterPaintCmd_FillNormalizedPathD);
 
         if (Evaluate)
@@ -5004,10 +5021,43 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
           cmd->destroy(engine);
         break;
       }
+      
+      case RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_A:
+      {
+        RasterPaintCmd_BlitNormalizedImageA* cmd =
+          reinterpret_cast<RasterPaintCmd_BlitNormalizedImageA*>(p);
+        p += sizeof(RasterPaintCmd_BlitNormalizedImageA);
+
+        if (Evaluate)
+        {
+          const Image& srcImage = cmd->getSrcImage();
+          RectI srcFragment(0, 0, srcImage.getWidth(), srcImage.getHeight());
+          doCmd->blitNormalizedImageA(engine, &cmd->_pt, &srcImage, &srcFragment);
+        }
+
+        if (Destroy)
+          cmd->destroy(engine);
+        break;
+      }
+
+      case RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_FRAGMENT_A:
+      {
+        RasterPaintCmd_BlitNormalizedImageFragmentA* cmd =
+          reinterpret_cast<RasterPaintCmd_BlitNormalizedImageFragmentA*>(p);
+        p += sizeof(RasterPaintCmd_BlitNormalizedImageFragmentA);
+
+        if (Evaluate)
+          doCmd->blitNormalizedImageA(engine, &cmd->_pt, &cmd->_srcImage, &cmd->_srcFragment);
+
+        if (Destroy)
+          cmd->destroy(engine);
+        break;
+      }
 
       case RASTER_PAINT_CMD_SET_CLIP_BOX:
       {
-        RasterPaintCmd_SetClipBox* cmd = reinterpret_cast<RasterPaintCmd_SetClipBox*>(p);
+        RasterPaintCmd_SetClipBox* cmd =
+          reinterpret_cast<RasterPaintCmd_SetClipBox*>(p);
         p += sizeof(RasterPaintCmd_SetClipBox);
 
         if (Evaluate)
@@ -5023,7 +5073,8 @@ static void RasterPaintEngine_doCommands(Painter* self, uint8_t* p, uint8_t* pEn
 
       case RASTER_PAINT_CMD_SET_CLIP_REGION:
       {
-        RasterPaintCmd_SetClipRegion* cmd = reinterpret_cast<RasterPaintCmd_SetClipRegion*>(p);
+        RasterPaintCmd_SetClipRegion* cmd =
+          reinterpret_cast<RasterPaintCmd_SetClipRegion*>(p);
         p += sizeof(RasterPaintCmd_SetClipRegion);
 
         if (Evaluate)
@@ -5108,19 +5159,84 @@ static err_t FOG_CDECL RasterPaintEngine_paintGroup(Painter* self)
 
   if (engine->state != g->savedState)
     engine->discardStates(g->savedState);
+  
+  Static<Image> image;
+  BoxI targetBBox = g->boundingBox;
 
+  image->_d = NULL;
   engine->curGroup = g->top;
-  engine->doCmd = &RasterPaintDoRender_vtable[RASTER_MODE_ST];
 
-  RasterPaintEngine_doCommands<true, true>(self, g->cmdStart, engine->cmdAllocator._pos);
+  if (targetBBox.isValid())
+  {
+    RasterPaintTarget savedTarget = engine->ctx.target;
+    SizeI targetSize(targetBBox.getWidth(), targetBBox.getHeight());
+
+    image.init();
+    if (image->create(targetSize, IMAGE_FORMAT_PRGB32) != ERR_OK)
+      goto _DiscardCommands;
+
+    // We don't change target size.
+    engine->ctx.target.stride = image->getStride();
+    engine->ctx.target.pixels = image->getFirstX();
+    engine->ctx.target.format = IMAGE_FORMAT_PRGB32;
+    engine->ctx.target.setup();
+
+    // Offset target buffer.
+    engine->ctx.target.pixels -= targetBBox.x0 * engine->ctx.target.bpp;
+    engine->ctx.target.pixels -= targetBBox.y0 * engine->ctx.target.stride;
+
+    engine->doCmd = &RasterPaintDoRender_vtable[RASTER_MODE_ST];
+
+    // Clear the temporary image.
+    uint32_t oldPaintHints = engine->ctx.paintHints.packed;
+    uint32_t oldPrgb32 = engine->ctx.solid.prgb32.u32;
+    RasterPattern* oldPc = engine->ctx.pc;
+
+    engine->ctx.paintHints.compositingOperator = COMPOSITE_SRC;
+    engine->ctx.solid.prgb32.u32 = 0x00000000;
+    engine->ctx.pc = (RasterPattern*)(size_t)0x1;
+
+    engine->doCmd->fillNormalizedBoxI(engine, &targetBBox);
+
+    engine->ctx.paintHints.packed = oldPaintHints;
+    engine->ctx.solid.prgb32.u32 = oldPrgb32;
+    engine->ctx.pc = oldPc;
+
+    // Run commands.
+    RasterPaintEngine_doCommands<true, true>(self, g->cmdStart, engine->cmdAllocator._pos);
+
+    // Switch 'doCmd' interface to previous group.
+    if (engine->curGroup != &engine->topGroup)
+      engine->doCmd = &RasterPaintDoGroup_vtable[RASTER_MODE_ST];
+
+    // Revert target, and everything else.
+    engine->ctx.target = savedTarget;
+  }
+  else
+  {
+_DiscardCommands:
+    RasterPaintEngine_doCommands<false, true>(self, g->cmdStart, engine->cmdAllocator._pos);
+  }
+
+  // We must discard pattern context, because it's invalid at the moment.
   engine->ctx.pc = NULL;
-
-  if (engine->curGroup != &engine->topGroup)
-    engine->doCmd = &RasterPaintDoGroup_vtable[RASTER_MODE_ST];
 
   FOG_ASSERT(engine->state == g->savedState);
   engine->state->lockedByGroup = false;
   engine->vtable->restore(self);
+
+  // Revert group and command allocators.
+  engine->cmdAllocator.revert(g->cmdRecord);
+  engine->groupAllocator.revert(g->groupRecord);
+
+  // Destroy image buffer, if created.
+  if (image->_d != NULL)
+  {
+    PointI dPos(targetBBox.x0, targetBBox.y0);
+    RectI sRect(0, 0, image->getWidth(), image->getHeight());
+    engine->doCmd->blitNormalizedImageA(engine, &dPos, &image, &sRect);
+    image.destroy();
+  }
 
   return ERR_OK;
 }
@@ -5219,7 +5335,7 @@ err_t RasterPaintEngine::init(const ImageBits& imageBits, ImageData* imaged, uin
   vtable = &RasterPaintEngine_vtable[ctx.target.precision];
   doCmd = &RasterPaintDoRender_vtable[RASTER_MODE_ST];
 
-  setupLayer();
+  ctx.target.setup();
   FOG_RETURN_ON_ERROR(ctx._initPrecision(ctx.target.precision));
 
   setupOps();
@@ -5634,16 +5750,6 @@ _DiscardSourceContinue:
 // ============================================================================
 // [Fog::RasterPaintEngine - Setup]
 // ============================================================================
-
-void RasterPaintEngine::setupLayer()
-{
-  uint32_t format = ctx.target.format;
-  const ImageFormatDescription& desc = ImageFormatDescription::getByFormat(format);
-
-  ctx.target.bpp = (uint32_t)desc.getBytesPerPixel();
-  ctx.target.bpl = (uint32_t)ctx.target.size.w * ctx.target.bpp;
-  ctx.target.precision = desc.getPrecision();
-}
 
 void RasterPaintEngine::setupOps()
 {

@@ -179,8 +179,13 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_fillAll(
 {
   _SERIALIZE_PENDING_FLAGS_FILL_NORMALIZED_BOX();
 
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  RasterPaintCmd_FillAll* cmd = engine->newCmd<RasterPaintCmd_FillAll>();
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+  cmd->init(engine, RASTER_PAINT_CMD_FILL_ALL);
+
+  engine->curGroup->mergeBoundingBox(engine->ctx.clipBoxI);
+  return ERR_OK;
 }
 
 
@@ -196,8 +201,9 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxI(
   RasterPaintCmd_FillNormalizedBoxI* cmd = engine->newCmd<RasterPaintCmd_FillNormalizedBoxI>();
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
-
   cmd->init(engine, RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_I, *box);
+
+  engine->curGroup->mergeBoundingBox(*box);
   return ERR_OK;
 }
 
@@ -209,8 +215,13 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxF(
   RasterPaintCmd_FillNormalizedBoxF* cmd = engine->newCmd<RasterPaintCmd_FillNormalizedBoxF>();
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
-
   cmd->init(engine, RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_F, *box);
+
+  engine->curGroup->mergeBoundingBox(
+    Math::ifloor(box->x0),
+    Math::ifloor(box->y0),
+    Math::iceil(box->x1),
+    Math::iceil(box->y1));
   return ERR_OK;
 }
 
@@ -222,8 +233,13 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxD(
   RasterPaintCmd_FillNormalizedBoxD* cmd = engine->newCmd<RasterPaintCmd_FillNormalizedBoxD>();
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
-
   cmd->init(engine, RASTER_PAINT_CMD_FILL_NORMALIZED_BOX_D, *box);
+
+  engine->curGroup->mergeBoundingBox(
+    Math::ifloor(box->x0),
+    Math::ifloor(box->y0),
+    Math::iceil(box->x1),
+    Math::iceil(box->y1));
   return ERR_OK;
 }
 
@@ -234,28 +250,44 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedBoxD(
 static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedPathF(
   RasterPaintEngine* engine, const PathF* path, const PointF* pt, uint32_t fillRule)
 {
+  BoxF boundingBox;
+  FOG_RETURN_ON_ERROR(path->getBoundingBox(boundingBox));
+
   _SERIALIZE_PENDING_FLAGS_FILL();
 
   RasterPaintCmd_FillNormalizedPathF* cmd = engine->newCmd<RasterPaintCmd_FillNormalizedPathF>();
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
-
   cmd->init(engine, RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_F,
     *path, *pt, engine->ctx.paintHints.fillRule);
+
+  engine->curGroup->mergeBoundingBox(
+    Math::ifloor(boundingBox.x0),
+    Math::ifloor(boundingBox.y0),
+    Math::iceil(boundingBox.x1),
+    Math::iceil(boundingBox.y1));
   return ERR_OK;
 }
 
 static err_t FOG_FASTCALL RasterPaintDoGroup_fillNormalizedPathD(
   RasterPaintEngine* engine, const PathD* path, const PointD* pt, uint32_t fillRule)
 {
+  BoxD boundingBox;
+  FOG_RETURN_ON_ERROR(path->getBoundingBox(boundingBox));
+
   _SERIALIZE_PENDING_FLAGS_FILL();
 
   RasterPaintCmd_FillNormalizedPathD* cmd = engine->newCmd<RasterPaintCmd_FillNormalizedPathD>();
   if (FOG_IS_NULL(cmd))
     return ERR_RT_OUT_OF_MEMORY;
-
   cmd->init(engine, RASTER_PAINT_CMD_FILL_NORMALIZED_PATH_D,
     *path, *pt, engine->ctx.paintHints.fillRule);
+
+  engine->curGroup->mergeBoundingBox(
+    Math::ifloor(boundingBox.x0),
+    Math::ifloor(boundingBox.y0),
+    Math::iceil(boundingBox.x1),
+    Math::iceil(boundingBox.y1));
   return ERR_OK;
 }
 
@@ -281,8 +313,40 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageA(
 {
   _SERIALIZE_PENDING_FLAGS_BLIT();
 
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  ImageData* srcD = srcImage->_d;
+
+  if (srcFragment->x == 0 &&
+      srcFragment->y == 0 &&
+      srcFragment->w == srcD->size.w &&
+      srcFragment->h == srcD->size.h)
+  {
+    RasterPaintCmd_BlitNormalizedImageA* cmd =
+      engine->newCmd<RasterPaintCmd_BlitNormalizedImageA>();
+
+    if (FOG_IS_NULL(cmd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    cmd->init(engine, RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_A,
+      *pt, *srcImage);
+  }
+  else
+  {
+    RasterPaintCmd_BlitNormalizedImageFragmentA* cmd =
+      engine->newCmd<RasterPaintCmd_BlitNormalizedImageFragmentA>();
+
+    if (FOG_IS_NULL(cmd))
+      return ERR_RT_OUT_OF_MEMORY;
+
+    cmd->init(engine, RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_FRAGMENT_A,
+      *pt, *srcImage, *srcFragment);
+  }
+
+  engine->curGroup->mergeBoundingBox(
+    pt->x,
+    pt->y,
+    pt->x + srcFragment->w,
+    pt->y + srcFragment->h);
+  return ERR_OK;
 }
 
 // ============================================================================
@@ -292,15 +356,41 @@ static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageA(
 static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageI(
   RasterPaintEngine* engine, const BoxI* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  _SERIALIZE_PENDING_FLAGS_BLIT();
+
+  RasterPaintCmd_BlitNormalizedImageI* cmd =
+    engine->newCmd<RasterPaintCmd_BlitNormalizedImageI>();
+
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(engine, RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_I,
+    *box, *srcImage, *srcFragment, *srcTransform, imageQuality);
+
+  engine->curGroup->mergeBoundingBox(*box);
+  return ERR_OK;
 }
 
 static err_t FOG_FASTCALL RasterPaintDoGroup_blitNormalizedImageD(
   RasterPaintEngine* engine, const BoxD* box, const Image* srcImage, const RectI* srcFragment, const TransformD* srcTransform, uint32_t imageQuality)
 {
-  // TODO: Raster paint-engine.
-  return ERR_RT_NOT_IMPLEMENTED;
+  _SERIALIZE_PENDING_FLAGS_BLIT();
+
+  RasterPaintCmd_BlitNormalizedImageD* cmd =
+    engine->newCmd<RasterPaintCmd_BlitNormalizedImageD>();
+
+  if (FOG_IS_NULL(cmd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  cmd->init(engine, RASTER_PAINT_CMD_BLIT_NORMALIZED_IMAGE_D,
+    *box, *srcImage, *srcFragment, *srcTransform, imageQuality);
+
+  engine->curGroup->mergeBoundingBox(
+    Math::ifloor(box->x0),
+    Math::ifloor(box->y0),
+    Math::iceil(box->x1),
+    Math::iceil(box->y1));
+  return ERR_OK;
 }
 
 // ============================================================================

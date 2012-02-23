@@ -241,7 +241,7 @@ _DiscardContinue:
   template<typename CmdT>
   FOG_INLINE CmdT* newCmd()
   {
-    if (!cmdAllocator.canAlloc(sizeof(CmdT) + sizeof(RasterPaintCmd_Next)))
+    if (FOG_UNLIKELY(!cmdAllocator.canAlloc(sizeof(CmdT) + sizeof(RasterPaintCmd_Next))))
     {
       RasterPaintCmd_Next* nc = static_cast<RasterPaintCmd_Next*>(
         cmdAllocator.allocNoCheck(sizeof(RasterPaintCmd_Next)));
@@ -325,8 +325,8 @@ _DiscardContinue:
 
   //! @brief 'Saved-State' flags.
   //!
-  //! Which states was saved to the last @c RasterPaintState instance. If there is
-  //! no such instance (the initial state) all bits are set to logical ones.
+  //! Which states was saved to the last @c RasterPaintState instance. If there
+  //! is no such instance (the initial state) all bits are set to logical ones.
   uint8_t savedStateFlags;
 
   //! @brief The strokeParams[F|D] precision.

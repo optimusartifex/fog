@@ -1223,76 +1223,38 @@ static err_t FOG_FASTCALL RasterPaintDoRender_restoreMask(RasterPaintEngine* eng
 }
 
 // ============================================================================
-// [Fog::RasterPaintDoRender - MaskFromNormalizedBox]
+// [Fog::RasterPaintDoGroup - MaskNormalizedBox]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintDoRender_maskFromNormalizedBoxI(RasterPaintEngine* engine, const BoxI* box)
+static err_t FOG_FASTCALL RasterPaintDoRender_maskNormalizedBoxI(RasterPaintEngine* engine, uint32_t clipOp, const BoxI* box)
 {
   // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintDoRender_maskFromNormalizedBoxF(RasterPaintEngine* engine, const BoxF* box)
+static err_t FOG_FASTCALL RasterPaintDoRender_maskNormalizedBoxF(RasterPaintEngine* engine, uint32_t clipOp, const BoxF* box)
 {
   // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintDoRender_maskFromNormalizedBoxD(RasterPaintEngine* engine, const BoxD* box)
-{
-  // TODO: Raster paint engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPaintDoRender - MaskFromNormalizedPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterPaintDoRender_maskFromNormalizedPathF(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
-{
-  // TODO: Raster paint engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_maskFromNormalizedPathD(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
+static err_t FOG_FASTCALL RasterPaintDoRender_maskNormalizedBoxD(RasterPaintEngine* engine, uint32_t clipOp, const BoxD* box)
 {
   // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
-// [Fog::RasterPaintDoRender - MaskIntersectNormalizedBox]
+// [Fog::RasterPaintDoGroup - MaskNormalizedPath]
 // ============================================================================
 
-static err_t FOG_FASTCALL RasterPaintDoRender_maskIntersectNormalizedBoxI(RasterPaintEngine* engine, const BoxI* box)
+static err_t FOG_FASTCALL RasterPaintDoRender_maskNormalizedPathF(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule)
 {
   // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_FASTCALL RasterPaintDoRender_maskIntersectNormalizedBoxF(RasterPaintEngine* engine, const BoxF* box)
-{
-  // TODO: Raster paint engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_maskIntersectNormalizedBoxD(RasterPaintEngine* engine, const BoxD* box)
-{
-  // TODO: Raster paint engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-// ============================================================================
-// [Fog::RasterPaintDoRender - MaskIntersectNormalizedPath]
-// ============================================================================
-
-static err_t FOG_FASTCALL RasterPaintDoRender_maskIntersectNormalizedPathF(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule)
-{
-  // TODO: Raster paint engine.
-  return ERR_RT_NOT_IMPLEMENTED;
-}
-
-static err_t FOG_FASTCALL RasterPaintDoRender_maskIntersectNormalizedPathD(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule)
+static err_t FOG_FASTCALL RasterPaintDoRender_maskNormalizedPathD(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule)
 {
   // TODO: Raster paint engine.
   return ERR_RT_NOT_IMPLEMENTED;
@@ -1345,17 +1307,11 @@ void FOG_NO_EXPORT RasterPaintDoRender_init(void)
   v->saveMask = RasterPaintDoRender_saveMask;
   v->restoreMask = RasterPaintDoRender_restoreMask;
 
-  v->maskFromNormalizedBoxI = RasterPaintDoRender_maskFromNormalizedBoxI;
-  v->maskFromNormalizedBoxF = RasterPaintDoRender_maskFromNormalizedBoxF;
-  v->maskFromNormalizedBoxD = RasterPaintDoRender_maskFromNormalizedBoxD;
-  v->maskFromNormalizedPathF = RasterPaintDoRender_maskFromNormalizedPathF;
-  v->maskFromNormalizedPathD = RasterPaintDoRender_maskFromNormalizedPathD;
-
-  v->maskIntersectNormalizedBoxI = RasterPaintDoRender_maskIntersectNormalizedBoxI;
-  v->maskIntersectNormalizedBoxF = RasterPaintDoRender_maskIntersectNormalizedBoxF;
-  v->maskIntersectNormalizedBoxD = RasterPaintDoRender_maskIntersectNormalizedBoxD;
-  v->maskIntersectNormalizedPathF = RasterPaintDoRender_maskIntersectNormalizedPathF;
-  v->maskIntersectNormalizedPathD = RasterPaintDoRender_maskIntersectNormalizedPathD;
+  v->maskNormalizedBoxI = RasterPaintDoRender_maskNormalizedBoxI;
+  v->maskNormalizedBoxF = RasterPaintDoRender_maskNormalizedBoxF;
+  v->maskNormalizedBoxD = RasterPaintDoRender_maskNormalizedBoxD;
+  v->maskNormalizedPathF = RasterPaintDoRender_maskNormalizedPathF;
+  v->maskNormalizedPathD = RasterPaintDoRender_maskNormalizedPathD;
 }
 
 } // Fog namespace

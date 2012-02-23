@@ -418,7 +418,7 @@ struct FOG_NO_EXPORT RasterPaintState
 
 //! @internal
 //!
-//! @brief Raster paint engine command handler (renderer, serializer, etc...).
+//! @brief Raster paint engine command handler.
 //!
 //! This class contains function pointers (vtable) to the lowest-level painter
 //! operations used by raster paint engine. The vtable is different for ST/MT
@@ -465,17 +465,11 @@ struct FOG_NO_EXPORT RasterPaintDoCmd
   err_t (FOG_FASTCALL *saveMask)(RasterPaintEngine* engine);
   err_t (FOG_FASTCALL *restoreMask)(RasterPaintEngine* engine);
 
-  err_t (FOG_FASTCALL *maskFromNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
-  err_t (FOG_FASTCALL *maskFromNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
-  err_t (FOG_FASTCALL *maskFromNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
-  err_t (FOG_FASTCALL *maskFromNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *maskFromNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
-
-  err_t (FOG_FASTCALL *maskIntersectNormalizedBoxI)(RasterPaintEngine* engine, const BoxI* box);
-  err_t (FOG_FASTCALL *maskIntersectNormalizedBoxF)(RasterPaintEngine* engine, const BoxF* box);
-  err_t (FOG_FASTCALL *maskIntersectNormalizedBoxD)(RasterPaintEngine* engine, const BoxD* box);
-  err_t (FOG_FASTCALL *maskIntersectNormalizedPathF)(RasterPaintEngine* engine, const PathF* path, uint32_t fillRule);
-  err_t (FOG_FASTCALL *maskIntersectNormalizedPathD)(RasterPaintEngine* engine, const PathD* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *maskNormalizedBoxI)(RasterPaintEngine* engine, uint32_t clipOp, const BoxI* box);
+  err_t (FOG_FASTCALL *maskNormalizedBoxF)(RasterPaintEngine* engine, uint32_t clipOp, const BoxF* box);
+  err_t (FOG_FASTCALL *maskNormalizedBoxD)(RasterPaintEngine* engine, uint32_t clipOp, const BoxD* box);
+  err_t (FOG_FASTCALL *maskNormalizedPathF)(RasterPaintEngine* engine, uint32_t clipOp, const PathF* path, uint32_t fillRule);
+  err_t (FOG_FASTCALL *maskNormalizedPathD)(RasterPaintEngine* engine, uint32_t clipOp, const PathD* path, uint32_t fillRule);
 };
 
 //! @}

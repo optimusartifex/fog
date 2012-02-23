@@ -121,7 +121,7 @@ UCD_FILES = [
 ]
 
 # Unicode version.
-UCD_VERSION="6.0.0"
+UCD_VERSION="6.1.0"
 
 # Local directory to store the files.
 UCD_DIRECTORY = "tmp/"
@@ -438,7 +438,11 @@ CHAR_LINE_BREAK = Enum(name="LINE_BREAK", default=16,
     ["BA"             , "BA"                   ],
     ["SA"             , "SA"                   ],
     ["AI"             , "AI"                   ],
-    ["B2"             , "B2"                   ]
+    ["B2"             , "B2"                   ],
+
+    # New in Unicode 6.1.0
+    ["HL"             , "HL"                   ],
+    ["CJ"             , "CJ"                   ]
   ]
 )
 
@@ -505,7 +509,8 @@ CHAR_VERSION = Enum(name="CHAR_VERSION", default=0,
     ["5.0"            , "V5_0"                 ],
     ["5.1"            , "V5_1"                 ],
     ["5.2"            , "V5_2"                 ],
-    ["6.0"            , "V6_0"                 ]
+    ["6.0"            , "V6_0"                 ],
+    ["6.1"            , "V6_1"                 ]
   ],
   # Alternative map, used by NormalizationCorrections.txt.
   alt={
@@ -536,6 +541,7 @@ TEXT_SCRIPT = Enum(name="TEXT_SCRIPT", default=0,
     ["Buhid"                 , "BUHID"                ],
     ["Canadian_Aboriginal"   , "CANADIAN_ABORIGINAL"  ],
     ["Carian"                , "CARIAN"               ],
+    ["Chakma"                , "CHAKMA"               ],
     ["Cham"                  , "CHAM"                 ],
     ["Cherokee"              , "CHEROKEE"             ],
     ["Coptic"                , "COPTIC"               ],
@@ -577,6 +583,9 @@ TEXT_SCRIPT = Enum(name="TEXT_SCRIPT", default=0,
     ["Malayalam"             , "MALAYALAM"            ],
     ["Mandaic"               , "MANDAIC"              ],
     ["Meetei_Mayek"          , "MEETEI_MAYEK"         ],
+    ["Meroitic_Cursive"      , "MEROITIC_CURSIVE"     ],
+    ["Meroitic_Hieroglyphs"  , "MEROITIC_HIEROGLYPHS" ],
+    ["Miao"                  , "MIAO"                 ],
     ["Mongolian"             , "MONGOLIAN"            ],
     ["Myanmar"               , "MAYANMAR"             ],
     ["New_Tai_Lue"           , "NEW_TAI_LUE"          ],
@@ -596,7 +605,9 @@ TEXT_SCRIPT = Enum(name="TEXT_SCRIPT", default=0,
     ["Samaritan"             , "SAMARITAN"            ],
     ["Saurashtra"            , "SAURASHTRA"           ],
     ["Shavian"               , "SHAVIAN"              ],
+    ["Sharada"               , "SHARADA"              ],
     ["Sinhala"               , "SINHALA"              ],
+    ["Sora_Sompeng"          , "SORA_SOMPENG"         ],
     ["Sundanese"             , "SUNDANESE"            ],
     ["Syloti_Nagri"          , "SYLOTI_NAGRI"         ],
     ["Syriac"                , "SYRIAC"               ],
@@ -605,6 +616,7 @@ TEXT_SCRIPT = Enum(name="TEXT_SCRIPT", default=0,
     ["Tai_Le"                , "TAI_LE"               ],
     ["Tai_Tham"              , "TAI_THAM"             ],
     ["Tai_Viet"              , "TAI_VIET"             ],
+    ["Takri"                 , "TAKRI"                ],
     ["Tamil"                 , "TAMIL"                ],
     ["Telugu"                , "TELUGU"               ],
     ["Thaana"                , "THAANA"               ],
@@ -859,18 +871,25 @@ def ReadUnicodeData():
         # The unassigned code points that default to AL are in the ranges:
         #     [\u0600-\u07BF \uFB50-\uFDFF \uFE70-\uFEFF]
         #   - minus noncharacter code points.
-        if code >= 0x0600 and code <= 0x07BF: c.bidi = CHAR_BIDI.get("AL")
-        if code >= 0xFB50 and code <= 0xFDFF: c.bidi = CHAR_BIDI.get("AL")
-        if code >= 0xFE70 and code <= 0xFEFF: c.bidi = CHAR_BIDI.get("AL")
+        if code >= 0x00000600 and code <= 0x000007BF: c.bidi = CHAR_BIDI.get("AL")
+        if code >= 0x0000FB50 and code <= 0x0000FDFF: c.bidi = CHAR_BIDI.get("AL")
+        if code >= 0x0000FE70 and code <= 0x0000FEFF: c.bidi = CHAR_BIDI.get("AL")
 
         # The unassigned code points that default to R are in the ranges:
         #     [\u0590-\u05FF \u07C0-\u08FF \uFB1D-\uFB4F \U00010800-\U00010FFF \U0001E800-\U0001EFFF]
-        if code >= 0x0590 and code <= 0x05FF: c.bidi = CHAR_BIDI.get("R")
-        if code >= 0x07C0 and code <= 0x08FF: c.bidi = CHAR_BIDI.get("R")
-        if code >= 0xFB1D and code <= 0xFB4F: c.bidi = CHAR_BIDI.get("R")
+        if code >= 0x00000590 and code <= 0x000005FF: c.bidi = CHAR_BIDI.get("R")
+        if code >= 0x000007C0 and code <= 0x000008FF: c.bidi = CHAR_BIDI.get("R")
+        if code >= 0x0000FB1D and code <= 0x0000FB4F: c.bidi = CHAR_BIDI.get("R")
 
         if code >= 0x00010800 and code <= 0x00010FFF: c.bidi = CHAR_BIDI.get("R")
         if code >= 0x0001E800 and code <= 0x0001EFFF: c.bidi = CHAR_BIDI.get("R")
+
+        # ----------------------------------------------------------------------
+        # Changed in Unicode 6.1.0 - U+08A0..U+08FF and U+1EE00..U+1EEFF changed
+        # from R to AL.
+        # ----------------------------------------------------------------------
+        if code >= 0x000008A0 and code <= 0x000008FF: c.bidi = CHAR_BIDI.get("AL")
+        if code >= 0x0001EE00 and code <= 0x0001EEFF: c.bidi = CHAR_BIDI.get("AL")
 
       # Digit value.
       if len(data[UCD_DIGIT_VALUE]):

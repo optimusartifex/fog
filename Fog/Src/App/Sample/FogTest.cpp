@@ -433,7 +433,6 @@ void AppWindow::onPaint(Painter* _p)
   //p.setSource(Argb32(0xFF0000FF));
   //p.fillRect(RectI(200, 200, 200, 200));
 
-  p.save();
   p.setOpacity(0.5f);
   p.beginGroup();
     LinearGradientF lg;
@@ -441,17 +440,16 @@ void AppWindow::onPaint(Painter* _p)
     lg.setEnd(100.0f, 300.0f);
     lg.addStop(0.0f, Argb32(0xFFFFFF00));
     lg.addStop(1.0f, Argb32(0xFF00FF00));
-
-    //p.setSource(Argb32(0xFF000000));
     p.setSource(lg);
     p.fillRect(RectI(100, 100, 200, 200));
+    
     p.setSource(Argb32(0xFFFF0000));
     p.fillRound(RoundF(150.0f, 150.0f, 200.0f, 200.0f, 50.0f));
+
+    p.setSource(Argb32(0xFF0000FF));
+    p.fillRect(RectI(200, 200, 200, 200));
   p.paintGroup();
-  
-  p.setSource(Argb32(0xFF0000FF));
-  p.fillRect(RectI(250, 250, 200, 200));
-  p.restore();
+  p.resetOpacity();
 
   TimeDelta t = TimeTicks::now() - startTime;
 

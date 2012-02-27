@@ -1604,7 +1604,9 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
   {
     ObjInfo info;
     self->getObjInfo(&info);
-    FOG_ASSERT(info.getObjectPropertyCount() == self->_objectPropertyCount);
+    FOG_ASSERT_X(info.getObjectPropertyCount() == self->_objectPropertyCount,
+      "Fog::DomElement::verifyPropertyCount() - Property count mismatch, verify "
+      "that you didn't forget to use FOG_DOM_ELEMENT_INIT() macro.");
   }
 #endif // FOG_DEBUG
 

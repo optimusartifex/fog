@@ -5193,7 +5193,6 @@ static err_t FOG_CDECL RasterPaintEngine_paintGroup(Painter* self)
     // Clear the temporary image.
     uint32_t oldPaintHints = engine->ctx.paintHints.packed;
     uint32_t oldPrgb32 = engine->ctx.solid.prgb32.u32;
-    RasterPattern* oldPc = engine->ctx.pc;
 
     engine->ctx.paintHints.compositingOperator = COMPOSITE_SRC;
     engine->ctx.solid.prgb32.u32 = 0x00000000;
@@ -5203,7 +5202,7 @@ static err_t FOG_CDECL RasterPaintEngine_paintGroup(Painter* self)
 
     engine->ctx.paintHints.packed = oldPaintHints;
     engine->ctx.solid.prgb32.u32 = oldPrgb32;
-    engine->ctx.pc = oldPc;
+    engine->ctx.pc = NULL;
 
     // Reset core states which are always set to default values when new group
     // is created.

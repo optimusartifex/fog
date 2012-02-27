@@ -104,6 +104,7 @@ struct FOG_API CoreObj
 
   enum { _PROPERTY_INDEX = 0 };
   enum { _PROPERTY_COUNT = 0 };
+  enum { _PROPERTY_TOTAL = 0 };
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -141,11 +142,6 @@ struct FOG_API CoreObj
   virtual err_t _unresolvedProperty(size_t& newIndex,
     const CharW* name, size_t nameLength, const InternedStringW* nameInterned,
     const StringW* initialValue);
-
-  //! @internal
-  //!
-  //! @brief Get count of declared properties.
-  FOG_INLINE uint32_t _getObjectPropertyCount() const { return 0; }
 
   //! @internal
   //!
@@ -196,12 +192,12 @@ public: \
   typedef _Self_ Self; \
   typedef _Base_ Base; \
   \
-  enum { _PROPERTY_INDEX = Base::_PROPERTY_INDEX + Base::_PROPERTY_COUNT }; \
+  enum { _PROPERTY_INDEX = Base::_PROPERTY_TOTAL }; \
   \
   virtual void getObjInfo(::Fog::ObjInfo* info) const override \
   { \
     info->_objectSize = static_cast<uint32_t>(sizeof(Self)); \
-    info->_objectPropertyCount = static_cast<uint32_t>(Self::_getObjectPropertyCount()); \
+    info->_objectPropertyCount = static_cast<uint32_t>(Self::_PROPERTY_TOTAL); \
     info->_dynamicPropertyCount = static_cast<uint32_t>(Self::_getDynamicPropertyCount()); \
   }
 
@@ -258,12 +254,7 @@ public: \
 //! @brief End of property list definition.
 #define FOG_PROPERTY_END() \
   enum { _PROPERTY_COUNT = (__COUNTER__ - _PROPERTY_COUNTER_BASE) }; \
-  \
-  FOG_INLINE uint32_t _getObjectPropertyCount() const \
-  { \
-    return Base::_getObjectPropertyCount() + Self::_PROPERTY_COUNT; \
-  }
-  
+  enum { _PROPERTY_TOTAL = _PROPERTY_COUNT };
 
 // ============================================================================
 // [...]

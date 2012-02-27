@@ -160,20 +160,6 @@
 //! @ingroup Fog_G2d
 
 #include <Fog/G2d/Text/Font.h>
-#include <Fog/G2d/Text/FontFace.h>
-#include <Fog/G2d/Text/FontFaceCache.h>
-#include <Fog/G2d/Text/FontHints.h>
-#include <Fog/G2d/Text/FontKerning.h>
-#include <Fog/G2d/Text/FontManager.h>
-#include <Fog/G2d/Text/FontMetrics.h>
-#include <Fog/G2d/Text/FontProvider.h>
-#include <Fog/G2d/Text/GlyphMetrics.h>
-#include <Fog/G2d/Text/GlyphBitmap.h>
-#include <Fog/G2d/Text/GlyphBitmapCache.h>
-#include <Fog/G2d/Text/GlyphOutline.h>
-#include <Fog/G2d/Text/GlyphOutlineCache.h>
-#include <Fog/G2d/Text/TextLayout.h>
-#include <Fog/G2d/Text/TextRect.h>
 
 // ============================================================================
 // [Fog/G2d/Tools]

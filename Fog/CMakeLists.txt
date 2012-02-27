@@ -1302,80 +1302,36 @@ Set(FOG_G2D_SVG_HEADERS
 # [Fog/G2d/Text]
 Set(FOG_G2D_TEXT_SOURCES
   Src/Fog/G2d/Text/Font.cpp
-  Src/Fog/G2d/Text/FontFace.cpp
-  Src/Fog/G2d/Text/FontFaceCache.cpp
-  Src/Fog/G2d/Text/FontKerning.cpp
-  Src/Fog/G2d/Text/FontManager.cpp
-  Src/Fog/G2d/Text/FontProvider.cpp
-  Src/Fog/G2d/Text/GlyphBitmap.cpp
-  Src/Fog/G2d/Text/GlyphBitmapCache.cpp
-  Src/Fog/G2d/Text/GlyphOutline.cpp
-  Src/Fog/G2d/Text/GlyphOutlineCache.cpp
-  Src/Fog/G2d/Text/NullFontFace.cpp
-  Src/Fog/G2d/Text/TextExtents.cpp
-  Src/Fog/G2d/Text/TextLayout.cpp
-  Src/Fog/G2d/Text/TextRect.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS
   Src/Fog/G2d/Text/Font.h
-  Src/Fog/G2d/Text/FontFace.h
-  Src/Fog/G2d/Text/FontFaceCache.h
-  Src/Fog/G2d/Text/FontHints.h
-  Src/Fog/G2d/Text/FontKerning.h
-  Src/Fog/G2d/Text/FontManager.h
-  Src/Fog/G2d/Text/FontMetrics.h
-  Src/Fog/G2d/Text/FontProvider.h
-  Src/Fog/G2d/Text/GlyphBitmap.h
-  Src/Fog/G2d/Text/GlyphBitmapCache.h
-  Src/Fog/G2d/Text/GlyphMetrics.h
-  Src/Fog/G2d/Text/GlyphOutline.h
-  Src/Fog/G2d/Text/GlyphOutlineCache.h
-  Src/Fog/G2d/Text/NullFontFace_p.h
-  Src/Fog/G2d/Text/TextExtents.h
-  Src/Fog/G2d/Text/TextHints.h
-  Src/Fog/G2d/Text/TextLayout.h
-  Src/Fog/G2d/Text/TextRect.h
 )
 
 # [Fog/G2d/Text - Windows]
 Set(FOG_G2D_TEXT_SOURCES_WIN
-  Src/Fog/G2d/Text/WinFontFace.cpp
-  Src/Fog/G2d/Text/WinFontMaster.cpp
-  Src/Fog/G2d/Text/WinFontProvider.cpp
-  Src/Fog/G2d/Text/WinFontUtil.cpp
+  Src/Fog/G2d/Text/WinFont.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS_WIN
-  Src/Fog/G2d/Text/WinFontFace.h
-  Src/Fog/G2d/Text/WinFontMaster.h
-  Src/Fog/G2d/Text/WinFontProvider.h
-  Src/Fog/G2d/Text/WinFontUtil_p.h
+  Src/Fog/G2d/Text/WinFont.h
 )
 
 # [Fog/G2d/Text - Mac]
 Set(FOG_G2D_TEXT_SOURCES_MAC
-  Src/Fog/G2d/Text/MacFontFace.mm
-  Src/Fog/G2d/Text/MacFontMaster.mm
-  Src/Fog/G2d/Text/MacFontProvider.mm
+  Src/Fog/G2d/Text/MacFont.mm
 )
 Set(FOG_G2D_TEXT_HEADERS_MAC
-  Src/Fog/G2d/Text/MacFontFace.h
-  Src/Fog/G2d/Text/MacFontMaster.h
-  Src/Fog/G2d/Text/MacFontProvider.h
+  Src/Fog/G2d/Text/MacFont.h
 )
 
 # [Fog/G2d/Text - FreeType]
 Set(FOG_G2D_TEXT_SOURCES_FREETYPE
-  Src/Fog/G2d/Text/FTFontFace.cpp
-  Src/Fog/G2d/Text/FTFontMaster.cpp
-  Src/Fog/G2d/Text/FTFontProvider.cpp
+  Src/Fog/G2d/Text/FTFont.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS_FREETYPE
-  Src/Fog/G2d/Text/FTFontFace.h
-  Src/Fog/G2d/Text/FTFontMaster.h
-  Src/Fog/G2d/Text/FTFontProvider.h
+  Src/Fog/G2d/Text/FTFont.h
 )
 
 # [Fog/G2d/Text - Detect]

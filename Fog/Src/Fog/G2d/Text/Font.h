@@ -15,15 +15,380 @@
 #include <Fog/G2d/Geometry/Rect.h>
 #include <Fog/G2d/Geometry/Size.h>
 #include <Fog/G2d/Geometry/Transform.h>
-#include <Fog/G2d/Text/FontFace.h>
-#include <Fog/G2d/Text/FontHints.h>
-#include <Fog/G2d/Text/FontKerning.h>
-#include <Fog/G2d/Text/FontMetrics.h>
 
 namespace Fog {
 
 //! @addtogroup Fog_G2d_Text
 //! @{
+
+// ============================================================================
+// [Fog::FontMetrics]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontMetrics
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+  
+  FOG_INLINE FontMetrics()
+  {
+    MemOps::zero_t<FontMetrics>(this);
+  }
+
+  explicit FOG_INLINE FontMetrics(_Uninitialized) {}
+
+  FOG_INLINE FontMetrics(const FontMetrics& other)
+  {
+    MemOps::copy_t<FontMetrics>(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE float getSize() const { return _size; }
+  FOG_INLINE void setSize(float size) { _size = size; }
+
+  FOG_INLINE float getAscent() const { return _ascent; }
+  FOG_INLINE void setAscent(float ascent) { _ascent = ascent; }
+
+  FOG_INLINE float getDescent() const { return _descent; }
+  FOG_INLINE void setDescent(float descent) { _descent = descent; }
+
+  FOG_INLINE float getCapHeight() const { return _capHeight; }
+  FOG_INLINE void setCapHeight(float capHeight) { _capHeight = capHeight; }
+
+  FOG_INLINE float getExHeight() const { return _exHeight; }
+  FOG_INLINE void setExHeight(float exHeight) { _exHeight = exHeight; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero_t<FontMetrics>(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontMetrics& operator=(const FontMetrics& other)
+  {
+    MemOps::copy_t<FontMetrics>(this, &other);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Font size (difference between two base-lines).
+  float _size;
+  //! @brief Font ascent (positive).
+  float _ascent;
+  //! @brief Font descent (positive).
+  float _descent;
+  //! @brief Capital letter height (positive).
+  float _capHeight;
+  //! @brief Small 'x' letter height (positive).
+  float _exHeight;
+};
+
+// ============================================================================
+// [Fog::FontFeatures]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontFeatures
+{
+  // --------------------------------------------------------------------------
+  // [FontFeatures]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t FontFeature()
+  {
+    reset();
+  }
+
+  explicit FOG_INLINE FontFeatures(_Uninitialized) {}
+
+  FOG_INLINE FontFeatures(const FontFeatures& other)
+  {
+    _packed = other._packed;
+    _letterSpacingValue = other._letterSpacingValue;
+    _wordSpacingValue = other._wordSpacingValue;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getKerning() const { return _kerning; }
+  FOG_INLINE void setKerning(uint32_t kerning) { _kerning = kerning; }
+
+  FOG_INLINE uint32_t getCommonLigatures() const { return _commonLigatures; }
+  FOG_INLINE void setCommonLigatures(uint32_t commonLigatures) { _commonLigatures = commonLigatures; }
+
+  FOG_INLINE uint32_t getDiscretionaryLigatures() const { return _discretionaryLigatures; }
+  FOG_INLINE void setDiscretionaryLigatures(uint32_t discretionaryLigatures) { _discretionaryLigatures = discretionaryLigatures; }
+
+  FOG_INLINE uint32_t getHistoricalLigatures() const { return _historicalLigatures; }
+  FOG_INLINE void setHistoricalLigatures(uint32_t historicalLigatures) { _historicalLigatures = historicalLigatures; }
+
+  FOG_INLINE uint32_t getCapsVariant() const { return _capsVariant; }
+  FOG_INLINE void setCapsVariant(uint32_t capsVariant) { _capsVariant = capsVariant; }
+
+  FOG_INLINE uint32_t getNumericFigureVariant() const { return _numericFigureVariant; }
+  FOG_INLINE void setx(uint32_t numericFigureVariant) { _numericFigureVariant = numericFigureVariant; }
+
+  FOG_INLINE uint32_t getNumericProportionalVariant() const { return _numericProportionalVariant; }
+  FOG_INLINE void setNumericProportionalVariant(uint32_t numericProportionalVariant) { _numericProportionalVariant = numericProportionalVariant; }
+
+  FOG_INLINE uint32_t getNumericFractionVariant() const { return _numericFractionVariant; }
+  FOG_INLINE void setNumericFractionVariant(uint32_t numericFractionVariant) { _numericFractionVariant = numericFractionVariant; }
+
+  FOG_INLINE uint32_t getNumericSlashedZero() const { return _numericSlashedZero; }
+  FOG_INLINE void setNumericSlashedZero(uint32_t numericSlashedZero) { _numericSlashedZero = numericSlashedZero; }
+
+  FOG_INLINE uint32_t getEastAsianVariant() const { return _eastAsianVariant; }
+  FOG_INLINE void setEastAsianVariant(uint32_t eastAsianVariant) { _eastAsianVariant = eastAsianVariant; }
+
+  FOG_INLINE uint32_t getEastAsianWidth() const { return _eastAsianWidth; }
+  FOG_INLINE void setEastAsianWidth(uint32_t eastAsianWidth) { _eastAsianWidth = eastAsianWidth; }
+
+  FOG_INLINE uint32_t getLetterSpacingMode() const { return _letterSpacingMode; }
+  FOG_INLINE void setLetterSpacingMode(uint32_t letterSpacingMode) { _letterSpacingMode = letterSpacingMode; }
+
+  FOG_INLINE uint32_t getWordSpacingMode() const { return _wordSpacingMode; }
+  FOG_INLINE void setWordSpacingMode(uint32_t wordSpacingMode) { _wordSpacingMode = wordSpacingMode; }
+
+  FOG_INLINE float getLetterSpacingValue() const { return _letterSpacingValue; }
+  FOG_INLINE void setLetterSpacingValue(float val) { _letterSpacingValue = val; }
+
+  FOG_INLINE float getWordSpacingValue() const { return _wordSpacingValue; }
+  FOG_INLINE void setWordSpacingValue(float val) { _wordSpacingValue = val; }
+
+  FOG_INLINE float getSizeAdjust() const { return _sizeAdjust; }
+  FOG_INLINE void setSizeAdjust(float val) { _sizeAdjust = val; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    _packed = 0;
+    _letterSpacingValue = 0.0f;
+    _wordSpacingValue = 0.0f;
+    _sizeAdjust = 0.0f;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontFeatures& operator=(const FontFeatures& other)
+  {
+    _packed = other._packed;
+    _letterSpacingValue = other._letterSpacingValue;
+    _wordSpacingValue = other._wordSpacingValue;
+
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  union
+  {
+    struct
+    {
+      //! @brief Whether to use kerning (if supported).
+      uint32_t _kerning : 2;
+
+      //! @brief Whether to use common ligatures (if supported).
+      uint32_t _commonLigatures : 2;
+      //! @brief Whether to use discretionary ligatures (if supported).
+      uint32_t _discretionaryLigatures : 2;
+      //! @brief Whether to use historical ligatures (if supported).
+      uint32_t _historicalLigatures : 2;
+
+      //! @brief Caps variant.
+      uint32_t _capsVariant : 4;
+
+      //! @brief Numeric figure variant.
+      uint32_t _numericFigureVariant : 2;
+      //! @brief Numeric proportional variant.
+      uint32_t _numericProportionalVariant : 2;
+      //! @brief Numeric fraction variant.
+      uint32_t _numericFractionVariant : 2;
+      //! @brief Whether to use slashed zero.
+      uint32_t _numericSlashedZero : 1;
+
+      //! @brief East asian variant
+      uint32_t _eastAsianVariant : 3;
+      //! @brief East asian width.
+      uint32_t _eastAsianWidth : 2;
+
+      //! @brief Letter spacing mode.
+      uint32_t _letterSpacingMode : 2;
+      //! @brief Word spacing mode.
+      uint32_t _wordSpacingMode : 2;
+
+      //! @brief Reserved for future use, always zero.
+      uint32_t _reserved : 4;
+    };
+
+    uint32_t _packed;
+  };
+
+  //! @brief Letter spacing value.
+  float _letterSpacingValue;
+  //! @brief Word spacing value.
+  float _wordSpacingValue;
+
+  //! @brief Size adjust.
+  float _sizeAdjust;
+};
+
+// ============================================================================
+// [Fog::FontMatrix]
+// ============================================================================
+
+//! @brief Transformation matrix used by @ref Font.
+struct FOG_NO_EXPORT FontMatrix
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontMatrix()
+  {
+    _xx = 1.0f; _xy = 0.0f;
+    _yx = 0.0f; _yy = 1.0f;
+  }
+
+  explicit FOG_INLINE FontMatrix(_Uninitialized) {}
+
+  FOG_INLINE FontMatrix(const FontMatrix& other)
+  {
+    MemOps::copy_t<FontMatrix>(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontMatrix& operator=(const FontMatrix& other)
+  {
+    MemOps::copy_t<FontMatrix>(this, &other);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  union
+  {
+    struct
+    {
+      float _xx, _xy;
+      float _yx, _yy;
+    };
+
+    float _m[4];
+  };
+};
+
+// ============================================================================
+// [Fog::TextGlyphItem]
+// ============================================================================
+
+struct FOG_NO_EXPORT TextGlyphItem
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+  
+  uint32_t _glyphIndex;
+  uint32_t _properties;
+  uint32_t _cluster;
+  uint16_t _component;
+  uint16_t _ligatureId;
+};
+
+// ============================================================================
+// [Fog::TextGlyphPos]
+// ============================================================================
+
+struct FOG_NO_EXPORT TextGlyphPos
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PointF _position;
+  PointF _advance;
+
+  uint32_t _newAdvance : 1;
+  uint32_t _back : 15;
+  int32_t _cursiveChain : 16;
+};
+
+// ============================================================================
+// [Fog::TextGlyphRun]
+// ============================================================================
+
+struct FOG_NO_EXPORT TextGlyphRun
+{
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  List<TextGlyphItem> _glyphs;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ============================================================================
 // [Fog::FontData]
@@ -74,44 +439,21 @@ struct FOG_NO_EXPORT FontData
 
   //! @brief Variable type and flags.
   uint32_t vType;
-
-  //! @brief Unit of all font attributes.
-  uint8_t unit;
-  //! @brief Letter spacing mode.
-  uint8_t letterSpacingMode;
-  //! @brief Word spacing mode.
-  uint8_t wordSpacingMode;
-  //! @brief Font data flags (various interesting flags for internal use).
-  uint8_t dataFlags;
+  //! @brief Font flags (internal).
+  uint32_t flags;
 
   //! @brief Font-face.
   FontFace* face;
 
-  //! @brief Aligned height (should be used only when dataFlags member contains
-  //! @c FONT_DATA_IS_ALIGNED flag).
-  uint32_t alignedHeight;
+  //! @brief Custom transformation matrix to apply to glyphs.
+  FontMatrix matrix;
+  //! @brief Font metrics (scaled).
+  FontMetrics metrics;
+  //! @brief Font features.
+  FontFeatures features;
+
   //! @brief Scale constant to get the scaled metrics from the design-metrics.
   float scale;
-
-  //! @brief Letter spacing value.
-  float letterSpacing;
-  //! @brief Word spacing value.
-  float wordSpacing;
-
-  //! @brief Font hints.
-  FontHints hints;
-  //! @brief Font transform.
-  TransformF transform;
-  //! @brief Font metrics.
-  FontMetricsF metrics;
-
-  //! @brief Whether to force caching.
-  //!
-  //! Caching is done by font management automatically, but fonts which are
-  //! not aligned to a pixel grid or rotated fonts are normally not cached.
-  //! This variable can force caching on for these, but memory usage is
-  //! rapidly increased.
-  bool forceCaching;
 };
 
 // ============================================================================
@@ -161,9 +503,6 @@ struct FOG_NO_EXPORT Font
   // --------------------------------------------------------------------------
   // [Flags]
   // --------------------------------------------------------------------------
-
-  FOG_INLINE bool isPhysical() const { return (_d->dataFlags & FONT_DATA_IS_PHYSICAL) != 0; }
-  FOG_INLINE bool isAligned() const { return (_d->dataFlags & FONT_DATA_IS_ALIGNED) != 0; }
 
   FOG_INLINE bool hasLetterSpacing() const { return (_d->dataFlags & FONT_DATA_HAS_LETTER_SPACING) != 0; }
   FOG_INLINE bool hasWordSpacing() const { return (_d->dataFlags & FONT_DATA_HAS_WORD_SPACING) != 0; }

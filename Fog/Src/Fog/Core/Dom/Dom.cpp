@@ -1599,8 +1599,21 @@ DomElement::~DomElement()
 //! @brief Property handler used by @c DomElement.
 struct FOG_NO_EXPORT DomElement_PropertyHandler
 {
+#if defined(FOG_DEBUG)
+  static FOG_INLINE void verifyPropertyCount(DomElement* self)
+  {
+    ObjInfo info;
+    self->getObjInfo(&info);
+    FOG_ASSERT(info.getObjectPropertyCount() == self->_objectPropertyCount);
+  }
+#endif // FOG_DEBUG
+
   static FOG_INLINE size_t getPropertyIndex(DomElement* self, const InternedStringW& name)
   {
+#if defined(FOG_DEBUG)
+    verifyPropertyCount(self);
+#endif // FOG_DEBUG
+
     ListIterator<DomAttr> it(self->_attrArray);
 
     while (it.isValid())
@@ -1615,6 +1628,10 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE size_t getPropertyIndex(DomElement* self, const CharW* name, size_t length)
   {
+#if defined(FOG_DEBUG)
+    verifyPropertyCount(self);
+#endif // FOG_DEBUG
+
     ListIterator<DomAttr> it(self->_attrArray);
 
     while (it.isValid())
@@ -1629,6 +1646,10 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE err_t getPropertyInfo(DomElement* self, size_t index, PropertyInfo& info)
   {
+#if defined(FOG_DEBUG)
+    verifyPropertyCount(self);
+#endif // FOG_DEBUG
+
     size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
@@ -1645,6 +1666,10 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE err_t getProperty(DomElement* self, size_t index, StringW& value)
   {
+#if defined(FOG_DEBUG)
+    verifyPropertyCount(self);
+#endif // FOG_DEBUG
+
     size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
@@ -1654,6 +1679,10 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE err_t setProperty(DomElement* self, size_t index, const StringW& value)
   {
+#if defined(FOG_DEBUG)
+    verifyPropertyCount(self);
+#endif // FOG_DEBUG
+
     size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
@@ -1663,6 +1692,10 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
   
   static FOG_INLINE err_t resetProperty(DomElement* self, size_t index)
   {
+#if defined(FOG_DEBUG)
+    verifyPropertyCount(self);
+#endif // FOG_DEBUG
+
     size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;

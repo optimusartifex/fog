@@ -517,7 +517,7 @@ struct FOG_API DomElement : public DomContainer
 
 #define FOG_DOM_ELEMENT_INIT() \
   FOG_MACRO_BEGIN \
-    _objectPropertyCount = _PROPERTY_INDEX + _PROPERTY_COUNT; \
+    _objectPropertyCount = Self::_getObjectPropertyCount(); \
   FOG_MACRO_END
 
 // ============================================================================

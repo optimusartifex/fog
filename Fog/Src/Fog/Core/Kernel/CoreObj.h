@@ -144,6 +144,11 @@ struct FOG_API CoreObj
 
   //! @internal
   //!
+  //! @brief Get count of declared properties.
+  FOG_INLINE uint32_t _getObjectPropertyCount() const { return 0; }
+
+  //! @internal
+  //!
   //! @brief Get count of dynamic properties.
   //!
   //! This member function is used to fill @ref ObjInfo structure, used by @ref
@@ -196,8 +201,8 @@ public: \
   virtual void getObjInfo(::Fog::ObjInfo* info) const override \
   { \
     info->_objectSize = static_cast<uint32_t>(sizeof(Self)); \
-    info->_objectPropertyCount = static_cast<uint32_t>(Self::_PROPERTY_INDEX + Self::_PROPERTY_COUNT); \
-    info->_dynamicPropertyCount = static_cast<uint32_t>(_getDynamicPropertyCount()); \
+    info->_objectPropertyCount = static_cast<uint32_t>(Self::_getObjectPropertyCount()); \
+    info->_dynamicPropertyCount = static_cast<uint32_t>(Self::_getDynamicPropertyCount()); \
   }
 
 // ============================================================================
@@ -252,7 +257,13 @@ public: \
 
 //! @brief End of property list definition.
 #define FOG_PROPERTY_END() \
-  enum { _PROPERTY_COUNT = (__COUNTER__ - _PROPERTY_COUNTER_BASE) };
+  enum { _PROPERTY_COUNT = (__COUNTER__ - _PROPERTY_COUNTER_BASE) }; \
+  \
+  FOG_INLINE uint32_t _getObjectPropertyCount() const \
+  { \
+    return Base::_getObjectPropertyCount() + Self::_PROPERTY_COUNT; \
+  }
+  
 
 // ============================================================================
 // [...]

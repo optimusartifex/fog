@@ -442,7 +442,7 @@ void AppWindow::onPaint(Painter* _p)
     lg.addStop(1.0f, Argb32(0xFF00FF00));
     p.setSource(lg);
     p.fillRect(RectI(100, 100, 200, 200));
-    
+
     p.setSource(Argb32(0xFFFF0000));
     p.fillRound(RoundF(150.0f, 150.0f, 200.0f, 200.0f, 50.0f));
 

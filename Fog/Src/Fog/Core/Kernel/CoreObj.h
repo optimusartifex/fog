@@ -20,15 +20,15 @@
 //! @internal
 //!
 //! @brief CoreObj base call implementation, used by property system.
-template<typename Base>
+template<typename BaseT>
 struct _Fog_CoreObjBaseCall
 {
-  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::InternedStringW& name)      { return self->Base::_getPropertyIndex(name); }
-  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::CharW* name, size_t length) { return self->Base::_getPropertyIndex(name, length); }
-  static FOG_INLINE err_t getPropertyInfo(Base* self, size_t index, Fog::PropertyInfo& info)   { return self->Base::_getPropertyInfo(index, info); }
-  static FOG_INLINE err_t getProperty(Base* self, size_t index, Fog::StringW& value)           { return self->Base::_getProperty(index, value); }
-  static FOG_INLINE err_t setProperty(Base* self, size_t index, const Fog::StringW& value)     { return self->Base::_setProperty(index, value); }
-  static FOG_INLINE err_t resetProperty(Base* self, size_t index)                              { return self->Base::_resetProperty(index); }
+  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::InternedStringW& name)      { return self->Base::_getPropertyIndex(name); }
+  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::CharW* name, size_t length) { return self->Base::_getPropertyIndex(name, length); }
+  static FOG_INLINE err_t getPropertyInfo(BaseT* self, size_t index, Fog::PropertyInfo& info)   { return self->Base::_getPropertyInfo(index, info); }
+  static FOG_INLINE err_t getProperty(BaseT* self, size_t index, Fog::StringW& value)           { return self->Base::_getProperty(index, value); }
+  static FOG_INLINE err_t setProperty(BaseT* self, size_t index, const Fog::StringW& value)     { return self->Base::_setProperty(index, value); }
+  static FOG_INLINE err_t resetProperty(BaseT* self, size_t index)                              { return self->Base::_resetProperty(index); }
 };
 
 //! @internal
@@ -40,14 +40,14 @@ struct _Fog_CoreObjBaseCall
 template<>
 struct _Fog_CoreObjBaseCall<Fog::CoreObj>
 {
-  typedef Fog::CoreObj Base;
+  typedef Fog::CoreObj BaseT;
 
-  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::InternedStringW& name)      { return Fog::INVALID_INDEX; }
-  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::CharW* name, size_t length) { return Fog::INVALID_INDEX; }
-  static FOG_INLINE err_t getPropertyInfo(Base* self, size_t index, Fog::PropertyInfo& info)   { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
-  static FOG_INLINE err_t getProperty(Base* self, size_t index, Fog::StringW& value)           { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
-  static FOG_INLINE err_t setProperty(Base* self, size_t index, const Fog::StringW& value)     { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
-  static FOG_INLINE err_t resetProperty(Base* self, size_t index)                              { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::InternedStringW& name)      { return Fog::INVALID_INDEX; }
+  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::CharW* name, size_t length) { return Fog::INVALID_INDEX; }
+  static FOG_INLINE err_t getPropertyInfo(BaseT* self, size_t index, Fog::PropertyInfo& info)   { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE err_t getProperty(BaseT* self, size_t index, Fog::StringW& value)           { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE err_t setProperty(BaseT* self, size_t index, const Fog::StringW& value)     { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE err_t resetProperty(BaseT* self, size_t index)                              { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
 };
 
 namespace Fog {

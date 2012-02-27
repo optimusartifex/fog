@@ -139,7 +139,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("C:/my/Files/svg/lion.svg");
     //fileName = Ascii8("C:/my/Files/svg/Minimap_fixed.svg");
     //fileName = Ascii8("C:/my/Files/svg/path-lines-BE-01.svg");
-    fileName = Ascii8("C:/my/Files/svg/gradPatt-linearGr-BE-01.svg");
+    //fileName = Ascii8("C:/my/Files/svg/gradPatt-linearGr-BE-01.svg");
     //fileName = Ascii8("C:/my/Files/svg/brown_fish_01.svg");
     //fileName = Ascii8("C:/my/Files/svg/pattern.svg");
     //fileName = Ascii8("C:/my/Files/svg/paint-fill-BE-01.svg");
@@ -151,7 +151,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/filters.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/map-imeretinka.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/PatternTest.svg");
-    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tiger.svg");
+    fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tiger.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/gradient.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/pservers-grad-13-b.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/paths-data-06-t.svg");

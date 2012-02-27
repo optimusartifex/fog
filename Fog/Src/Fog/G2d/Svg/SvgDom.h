@@ -186,8 +186,7 @@ struct FOG_API SvgStyle : public DomObj
   // the last defined property overrides the first defined one, there is no way
   // to specify joining priority.
 
-  enum { _PROPERTY_COUNT = SVG_STYLE_COUNT };
-  enum { _PROPERTY_TOTAL = _PROPERTY_INDEX + _PROPERTY_COUNT };
+  enum { _PROPERTY_COUNT = _PROPERTY_INDEX + SVG_STYLE_COUNT };
 
   virtual size_t _getPropertyIndex(const InternedStringW& name) const override;
   virtual size_t _getPropertyIndex(const CharW* name, size_t length) const override;

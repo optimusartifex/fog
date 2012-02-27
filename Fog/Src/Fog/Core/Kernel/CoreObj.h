@@ -23,12 +23,12 @@
 template<typename BaseT>
 struct _Fog_CoreObjBaseCall
 {
-  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::InternedStringW& name)      { return self->Base::_getPropertyIndex(name); }
-  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::CharW* name, size_t length) { return self->Base::_getPropertyIndex(name, length); }
-  static FOG_INLINE err_t getPropertyInfo(BaseT* self, size_t index, Fog::PropertyInfo& info)   { return self->Base::_getPropertyInfo(index, info); }
-  static FOG_INLINE err_t getProperty(BaseT* self, size_t index, Fog::StringW& value)           { return self->Base::_getProperty(index, value); }
-  static FOG_INLINE err_t setProperty(BaseT* self, size_t index, const Fog::StringW& value)     { return self->Base::_setProperty(index, value); }
-  static FOG_INLINE err_t resetProperty(BaseT* self, size_t index)                              { return self->Base::_resetProperty(index); }
+  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::InternedStringW& name)      { return self->BaseT::_getPropertyIndex(name); }
+  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::CharW* name, size_t length) { return self->BaseT::_getPropertyIndex(name, length); }
+  static FOG_INLINE err_t getPropertyInfo(BaseT* self, size_t index, Fog::PropertyInfo& info)   { return self->BaseT::_getPropertyInfo(index, info); }
+  static FOG_INLINE err_t getProperty(BaseT* self, size_t index, Fog::StringW& value)           { return self->BaseT::_getProperty(index, value); }
+  static FOG_INLINE err_t setProperty(BaseT* self, size_t index, const Fog::StringW& value)     { return self->BaseT::_setProperty(index, value); }
+  static FOG_INLINE err_t resetProperty(BaseT* self, size_t index)                              { return self->BaseT::_resetProperty(index); }
 };
 
 //! @internal
@@ -104,7 +104,6 @@ struct FOG_API CoreObj
 
   enum { _PROPERTY_INDEX = 0 };
   enum { _PROPERTY_COUNT = 0 };
-  enum { _PROPERTY_TOTAL = 0 };
 
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
@@ -192,12 +191,12 @@ public: \
   typedef _Self_ Self; \
   typedef _Base_ Base; \
   \
-  enum { _PROPERTY_INDEX = Base::_PROPERTY_TOTAL }; \
+  enum { _PROPERTY_INDEX = Base::_PROPERTY_COUNT }; \
   \
   virtual void getObjInfo(::Fog::ObjInfo* info) const override \
   { \
     info->_objectSize = static_cast<uint32_t>(sizeof(Self)); \
-    info->_objectPropertyCount = static_cast<uint32_t>(Self::_PROPERTY_TOTAL); \
+    info->_objectPropertyCount = static_cast<uint32_t>(Self::_PROPERTY_COUNT); \
     info->_dynamicPropertyCount = static_cast<uint32_t>(Self::_getDynamicPropertyCount()); \
   }
 
@@ -253,8 +252,7 @@ public: \
 
 //! @brief End of property list definition.
 #define FOG_PROPERTY_END() \
-  enum { _PROPERTY_COUNT = (__COUNTER__ - _PROPERTY_COUNTER_BASE) }; \
-  enum { _PROPERTY_TOTAL = _PROPERTY_INDEX + _PROPERTY_COUNT };
+  enum { _PROPERTY_COUNT = _PROPERTY_INDEX + (__COUNTER__ - _PROPERTY_COUNTER_BASE) };
 
 // ============================================================================
 // [...]

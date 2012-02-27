@@ -2089,8 +2089,8 @@ enum PAINTER_GROUP
   // [Format]
   // --------------------------------------------------------------------------
 
-  //! @brief Detect group format (default).
-  PAINTER_GROUP_DETECT = 0x00000000,
+  //! @brief Default group format.
+  PAINTER_GROUP_DEFAULT = 0x00000000,
 
   //! @brief Create Alpha group (can be combined with @ref PAINTER_GROUP_RGB).
   PAINTER_GROUP_ALPHA = 0x00000001,
@@ -2153,9 +2153,6 @@ enum PAINT_DEVICE
 {
   //! @brief Null paint-device (not initialized or invalid).
   PAINT_DEVICE_NULL = 0,
-  //! @brief Same as @c PAINT_DEVICE_NULL.
-  PAINT_DEVICE_UNKNOWN = 0,
-
   //! @brief @ref Image paint-device (raster-based).
   PAINT_DEVICE_IMAGE = 1,
 
@@ -2397,8 +2394,6 @@ enum PATH_FLAG
 enum PATH_FLATTEN
 {
   //! @brief Flattening is disabled.
-  //!
-  //!
   PATH_FLATTEN_DISABLED = 0,
 
   //! @brief Flatten all cubic Bezier curves to quadratic Bezier curves.

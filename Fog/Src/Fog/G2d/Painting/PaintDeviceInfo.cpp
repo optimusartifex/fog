@@ -183,7 +183,7 @@ FOG_NO_EXPORT void PaintDeviceInfo_init(void)
   PaintDeviceInfoData* d = &PaintDeviceInfo_dnull;
 
   d->reference.init(1);
-  d->paintDevice = PAINT_DEVICE_UNKNOWN;
+  d->paintDevice = PAINT_DEVICE_NULL;
   d->fontKerning = FONT_KERNING_ENABLED;
   d->fontHinting = FONT_HINTING_DISABLED;
   d->fontAlignMode = FONT_ALIGN_MODE_NONE;

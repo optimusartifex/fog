@@ -61,7 +61,7 @@ err_t SvgContext::advance(SvgElement* obj)
     if (parent == doc || parent == NULL)
       break;
 
-    if (!parent->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+    if (!parent->isSvgNode(DOM_NODE_TYPE_ELEMENT))
       return ERR_RT_INVALID_STATE;
 
     obj = static_cast<SvgElement*>(parent);

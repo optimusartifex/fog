@@ -729,8 +729,8 @@ DomNode::DomNode(DomDocument* ownerDocument, uint32_t nodeType) :
   _vType(VAR_TYPE_DOM_NODE),
   _nodeType(static_cast<uint8_t>(nodeType & 0xFF)),
   _nodeFlags(NO_FLAGS),
-  _objectModel(DOM_OBJECT_MODEL_XML),
   _objectType(nodeType),
+  _objectPropertyCount(0),
   _ownerDocument(ownerDocument),
   _parentNode(NULL),
   _previousSibling(NULL),
@@ -1583,6 +1583,7 @@ DomElement::DomElement(DomDocument* ownerDocument, const InternedStringW& tagNam
   _tagName(tagName),
   _nextId(NULL)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 DomElement::~DomElement()
@@ -1595,10 +1596,7 @@ DomElement::~DomElement()
 
 //! @internal
 //!
-//! @brief Specialization for a class directly inheriting from @ref CoreObj.
-//!
-//! In such case we want to return default values instead of calling base 
-//! class virtual methods.
+//! @brief Property handler used by @c DomElement.
 struct FOG_NO_EXPORT DomElement_PropertyHandler
 {
   static FOG_INLINE size_t getPropertyIndex(DomElement* self, const InternedStringW& name)
@@ -1608,7 +1606,7 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
     while (it.isValid())
     {
       if (it.getItem().getName() == name)
-        return static_cast<size_t>(self->getObjInfo()->getPropertyCount()) + it.getIndex();
+        return static_cast<size_t>(self->_objectPropertyCount) + it.getIndex();
       it.next();
     }
 
@@ -1622,7 +1620,7 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
     while (it.isValid())
     {
       if (it.getItem().getName().eqInline(name, length))
-        return static_cast<size_t>(self->getObjInfo()->getPropertyCount()) + it.getIndex();
+        return static_cast<size_t>(self->_objectPropertyCount) + it.getIndex();
       it.next();
     }
 
@@ -1631,7 +1629,7 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE err_t getPropertyInfo(DomElement* self, size_t index, PropertyInfo& info)
   {
-    size_t attrIndex = index - static_cast<size_t>(self->getObjInfo()->getPropertyCount());
+    size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
 
@@ -1647,7 +1645,7 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE err_t getProperty(DomElement* self, size_t index, StringW& value)
   {
-    size_t attrIndex = index - static_cast<size_t>(self->getObjInfo()->getPropertyCount());
+    size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
 
@@ -1656,7 +1654,7 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
 
   static FOG_INLINE err_t setProperty(DomElement* self, size_t index, const StringW& value)
   {
-    size_t attrIndex = index - static_cast<size_t>(self->getObjInfo()->getPropertyCount());
+    size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
 
@@ -1665,7 +1663,7 @@ struct FOG_NO_EXPORT DomElement_PropertyHandler
   
   static FOG_INLINE err_t resetProperty(DomElement* self, size_t index)
   {
-    size_t attrIndex = index - static_cast<size_t>(self->getObjInfo()->getPropertyCount());
+    size_t attrIndex = index - static_cast<size_t>(self->_objectPropertyCount);
     if (attrIndex >= self->_attrArray.getLength())
       return ERR_OBJ_PROPERTY_NOT_FOUND;
 
@@ -1684,7 +1682,7 @@ err_t DomElement::_unresolvedProperty(size_t& newIndex,
   const CharW* name, size_t nameLength, const InternedStringW* nameInterned,
   const StringW* initialValue)
 {
-  size_t attrBase = getObjInfo()->getPropertyCount();
+  size_t attrBase = _objectPropertyCount;
   size_t attrIndex = attrBase + _attrArray.getLength();
   err_t err;
 
@@ -1787,7 +1785,7 @@ DomCharacterData::DomCharacterData(DomDocument* ownerDocument, uint32_t nodeType
   _data(data)
 {
   if (DomUtil_isWhitespaceOnly(_data.getData(), _data.getLength()))
-    _nodeFlags |= DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+    _nodeFlags |= DOM_NODE_FLAG_WHITESPACE_CONTENT;
 }
 
 DomCharacterData::~DomCharacterData()
@@ -1804,9 +1802,9 @@ err_t DomCharacterData::setData(const StringW& data)
     return ERR_DOM_NO_MODIFICATION_ALLOWED;
   FOG_RETURN_ON_ERROR(_data.set(data));
 
-  _nodeFlags &= ~DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+  _nodeFlags &= ~DOM_NODE_FLAG_WHITESPACE_CONTENT;
   if (DomUtil_isWhitespaceOnly(_data.getData(), _data.getLength()))
-    _nodeFlags |= DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+    _nodeFlags |= DOM_NODE_FLAG_WHITESPACE_CONTENT;
 
   return ERR_OK;
 }
@@ -1817,10 +1815,10 @@ err_t DomCharacterData::appendData(const StringW& arg)
     return ERR_DOM_NO_MODIFICATION_ALLOWED;
   FOG_RETURN_ON_ERROR(_data.append(arg));
 
-  if ((_nodeFlags & DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT) != 0 &&
+  if ((_nodeFlags & DOM_NODE_FLAG_WHITESPACE_CONTENT) != 0 &&
       DomUtil_isWhitespaceOnly(arg.getData(), arg.getLength()))
   {
-    _nodeFlags &= ~DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+    _nodeFlags &= ~DOM_NODE_FLAG_WHITESPACE_CONTENT;
   }
 
   return ERR_OK;
@@ -1832,10 +1830,10 @@ err_t DomCharacterData::insertData(size_t offset, const StringW& arg)
     return ERR_DOM_NO_MODIFICATION_ALLOWED;
   FOG_RETURN_ON_ERROR(_data.insert(offset, arg));
 
-  if ((_nodeFlags & DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT) != 0 &&
+  if ((_nodeFlags & DOM_NODE_FLAG_WHITESPACE_CONTENT) != 0 &&
       DomUtil_isWhitespaceOnly(arg.getData(), arg.getLength()))
   {
-    _nodeFlags &= ~DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+    _nodeFlags &= ~DOM_NODE_FLAG_WHITESPACE_CONTENT;
   }
 
   return ERR_OK;
@@ -1892,15 +1890,15 @@ err_t DomCharacterData::replaceData(const Range& range, const StringW& arg)
     return ERR_DOM_INDEX_SIZE;
   FOG_RETURN_ON_ERROR(_data.replace(range, arg));
 
-  if ((_nodeFlags & DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT) != 0)
+  if ((_nodeFlags & DOM_NODE_FLAG_WHITESPACE_CONTENT) != 0)
   {
     if (DomUtil_isWhitespaceOnly(arg.getData(), arg.getLength()))
-      _nodeFlags &= ~DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+      _nodeFlags &= ~DOM_NODE_FLAG_WHITESPACE_CONTENT;
   }
   else
   {
     if (DomUtil_isWhitespaceOnly(_data.getData(), _data.getLength()))
-      _nodeFlags |= DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+      _nodeFlags |= DOM_NODE_FLAG_WHITESPACE_CONTENT;
   }
 
   return ERR_OK;
@@ -1951,7 +1949,7 @@ DomText::~DomText()
 
 bool DomText::isElementContentWhitespace() const
 {
-  return _nodeFlags & DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT;
+  return _nodeFlags & DOM_NODE_FLAG_WHITESPACE_CONTENT;
 }
 
 StringW DomText::getWholeText() const
@@ -2296,7 +2294,9 @@ struct DomDocumentGCFuncs
 
   static size_t FOG_CDECL getObjectSize(void* p)
   {
-    return static_cast<DomObj*>(p)->getObjInfo()->getSize();
+    ObjInfo info;
+    static_cast<DomObj*>(p)->getObjInfo(&info);
+    return info.getObjectSize();
   }
 
   static bool FOG_CDECL isObjectUsed(void* p)

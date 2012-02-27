@@ -224,35 +224,22 @@ struct FOG_API DomNode : public DomObj
   }
 
   // --------------------------------------------------------------------------
-  // [ObjectModel / ObjectType]
+  // [Svg Support]
   // --------------------------------------------------------------------------
 
-  //! @brief Get node object model.
-  FOG_INLINE uint32_t getObjectModel() const { return _objectModel; }
-
-  //! @brief Get node object type.
-  //!
-  //! @note Object type of @ref DOM_OBJECT_MODEL_XML is the same as node type.
-  FOG_INLINE uint32_t getObjectType() const { return _objectType; }
-
-  //! @brief Get whether the DOM node is using @a objectModel.
-  FOG_INLINE bool isObjectModel(uint32_t objectModel) const
+  FOG_INLINE bool isSvg() const
   {
-    return _objectModel == objectModel;
+    return (_nodeFlags & DOM_NODE_FLAG_IS_SVG) != 0;
   }
 
-  //! @brief Get whether the DOM object model is @a objectModel and object type
-  //! is @a objectType.
-  FOG_INLINE bool isObjectModelAndObjectType(uint32_t objectModel, uint32_t objectType) const
+  FOG_INLINE bool isSvgNode(uint32_t nodeType) const
   {
-    return (_objectModel == objectModel) & (_objectType == objectType);
+    return (_nodeFlags & DOM_NODE_FLAG_IS_SVG) != 0 && _nodeType == nodeType;
   }
 
-  //! @brief Get whether the DOM object model is @a objectModel and node type
-  //! is @a nodeType.
-  FOG_INLINE bool isObjectModelAndNodeType(uint32_t objectModel, uint32_t nodeType) const
+  FOG_INLINE bool isSvgObject(uint32_t objectType) const
   {
-    return (_objectModel == objectModel) & (_nodeType == nodeType);
+    return (_nodeFlags & DOM_NODE_FLAG_IS_SVG) != 0 && _objectType == objectType;
   }
 
   // --------------------------------------------------------------------------
@@ -356,10 +343,10 @@ struct FOG_API DomNode : public DomObj
   uint8_t _nodeType;
   //! @brief DOM node flags, see @ref DOM_NODE_FLAG.
   uint8_t _nodeFlags;
-  //! @brief DOM object model, see @ref DOM_OBJECT_MODEL.
-  uint8_t _objectModel;
-  //! @brief DOM object class, see @ref DOM_OBJECT_TYPE.
+  //! @brief DOM object type, see @ref DOM_OBJECT_TYPE.
   uint8_t _objectType;
+  //! @brief Count of DOM element built-in properties.
+  uint8_t _objectPropertyCount;
 
   //! @brief Reference count.
   Atomic<size_t> _reference;
@@ -447,8 +434,13 @@ struct FOG_API DomElement : public DomContainer
     const StringW* initialValue) override;
 
   // --------------------------------------------------------------------------
-  // [Attributes]
+  // [Properties / Attributes]
   // --------------------------------------------------------------------------
+
+  //! @internal
+  //!
+  //! @brief See CoreObj::_getDynamicPropertyCount().
+  FOG_INLINE uint32_t _getDynamicPropertyCount() const { return static_cast<uint32_t>(_attrArray.getLength()); }
 
   //! @brief Get whether an attribute with a given @a name is specified.
   FOG_INLINE bool hasAttribute(const StringW& name) const { return hasProperty(name); }
@@ -522,6 +514,11 @@ struct FOG_API DomElement : public DomContainer
     FOG_PROPERTY_RW(Id, StringW)
   FOG_PROPERTY_END()
 };
+
+#define FOG_DOM_ELEMENT_INIT() \
+  FOG_MACRO_BEGIN \
+    _objectPropertyCount = _PROPERTY_INDEX + _PROPERTY_COUNT; \
+  FOG_MACRO_END
 
 // ============================================================================
 // [Fog::DomCharacterData]

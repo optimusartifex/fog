@@ -292,8 +292,9 @@ SvgElement::SvgElement(
   _unused_0(0),
   _unused_1(0)
 {
-  _objectModel = DOM_OBJECT_MODEL_SVG;
+  _nodeFlags |= DOM_NODE_FLAG_IS_SVG;
   _objectType = svgType;
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgElement::~SvgElement()
@@ -340,7 +341,7 @@ err_t SvgElement::_visitContainer(SvgContext* context) const
 
   for (node = getFirstChild(); node != NULL; node = node->getNextSibling())
   {
-    if (node->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT) &&
+    if (node->isSvgNode(DOM_NODE_TYPE_ELEMENT) &&
         static_cast<SvgElement*>(node)->getVisible())
     {
       err = context->onVisit(static_cast<SvgElement*>(node));
@@ -1162,6 +1163,7 @@ SvgStylableElement::SvgStylableElement(DomDocument* ownerDocument, const Interne
   SvgElement(ownerDocument, tagName, svgType),
   _style(this)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgStylableElement::~SvgStylableElement()
@@ -1300,7 +1302,7 @@ err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state
             DomElement* uriRef = getOwnerDocument()->getElementById(
               parseCssLinkId(_style._d.fillUri));
 
-            if (uriRef != NULL && uriRef->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+            if (uriRef != NULL && uriRef->isSvgNode(DOM_NODE_TYPE_ELEMENT))
               context->setFillPattern(static_cast<SvgElement*>(uriRef));
             else
               context->setFillNone();
@@ -1353,7 +1355,7 @@ err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state
             DomElement* uriRef = getOwnerDocument()->getElementById(
               parseCssLinkId(_style._d.strokeUri));
 
-            if (uriRef != NULL && uriRef->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+            if (uriRef != NULL && uriRef->isSvgNode(DOM_NODE_TYPE_ELEMENT))
               context->setStrokePattern(static_cast<SvgElement*>(uriRef));
             else
               context->setStrokeNone();
@@ -1412,6 +1414,7 @@ SvgTransformableElement::SvgTransformableElement(DomDocument* ownerDocument,
   :
   SvgStylableElement(ownerDocument, tagName, svgType)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgTransformableElement::~SvgTransformableElement()
@@ -1428,6 +1431,8 @@ FOG_CORE_OBJ_END()
 
 err_t SvgTransformableElement::setTransform(const TransformF& transform)
 {
+  FOG_DOM_ELEMENT_INIT();
+
   _transform = transform;
   _setDirty();
 
@@ -1474,6 +1479,7 @@ SvgRootElement::SvgRootElement(DomDocument* ownerDocument) :
   _widthUnit(UNIT_NONE),
   _heightUnit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgRootElement::~SvgRootElement()
@@ -1665,6 +1671,7 @@ SizeF SvgRootElement::getRootSize() const
 SvgSolidColorElement::SvgSolidColorElement(DomDocument* ownerDocument) :
   SvgStylableElement(ownerDocument, FOG_S(solidColor), SVG_ELEMENT_SOLID_COLOR)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgSolidColorElement::~SvgSolidColorElement()
@@ -1686,6 +1693,7 @@ SvgGradientElement::SvgGradientElement(DomDocument* ownerDocument, const Interne
   _spreadMethod(GRADIENT_SPREAD_PAD),
   _gradientUnits(SVG_OBJECT_BOUNDING_BOX)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgGradientElement::~SvgGradientElement()
@@ -1775,7 +1783,7 @@ void SvgGradientElement::_walkAndAddColorStops(DomElement* root, GradientF& grad
   {
     for (node = root->getFirstChild(); node != NULL; node = node->getNextSibling())
     {
-      if (node->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_STOP))
+      if (node->isSvgObject(SVG_ELEMENT_STOP))
       {
         SvgStopElement* stop = static_cast<SvgStopElement*>(node);
 
@@ -1833,6 +1841,7 @@ SvgLinearGradientElement::SvgLinearGradientElement(DomDocument* ownerDocument) :
   _x2Unit(UNIT_NONE),
   _y2Unit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgLinearGradientElement::~SvgLinearGradientElement()
@@ -1988,6 +1997,7 @@ SvgRadialGradientElement::SvgRadialGradientElement(DomDocument* ownerDocument) :
   _fxAssigned(false),
   _fyAssigned(false)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgRadialGradientElement::~SvgRadialGradientElement()
@@ -2182,6 +2192,7 @@ SvgPatternElement::SvgPatternElement(DomDocument* ownerDocument) :
   _heightUnit(UNIT_NONE),
   _patternUnits(SVG_OBJECT_BOUNDING_BOX)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgPatternElement::~SvgPatternElement()
@@ -2349,7 +2360,7 @@ err_t SvgPatternElement::_createPattern(Pattern& pattern, SvgElement* obj) const
     DomElement* element = doc->getElementById(StubW(link.getData() + 1, link.getLength() - 1));
 
     if (element != NULL &&
-        element->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_PATTERN))
+        element->isSvgObject(SVG_ELEMENT_PATTERN))
     {
       SvgPatternElement* pe = static_cast<SvgPatternElement*>(element);
       FOG_RETURN_ON_ERROR(pe->_createPattern(pattern, obj));
@@ -2420,6 +2431,7 @@ SvgStopElement::SvgStopElement(DomDocument* ownerDocument) :
   _offset(0.0f),
   _offsetAssigned(false)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgStopElement::~SvgStopElement()
@@ -2471,6 +2483,7 @@ err_t SvgStopElement::onProcess(SvgContext* context) const
 SvgDefsElement::SvgDefsElement(DomDocument* ownerDocument) :
   SvgElement(ownerDocument, FOG_S(defs), SVG_ELEMENT_DEFS)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgDefsElement::~SvgDefsElement()
@@ -2494,6 +2507,7 @@ err_t SvgDefsElement::onProcess(SvgContext* context) const
 SvgGElement::SvgGElement(DomDocument* ownerDocument) :
   SvgTransformableElement(ownerDocument, FOG_S(g), SVG_ELEMENT_G)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgGElement::~SvgGElement()
@@ -2506,7 +2520,8 @@ SvgGElement::~SvgGElement()
 
 err_t SvgGElement::onProcess(SvgContext* context) const
 {
-  if (!hasChildNodes()) return ERR_OK;
+  if (!hasChildNodes())
+    return ERR_OK;
   return _visitContainer(context);
 }
 
@@ -2532,6 +2547,7 @@ err_t SvgGElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) const
 SvgSymbolElement::SvgSymbolElement(DomDocument* ownerDocument) :
   SvgStylableElement(ownerDocument, FOG_S(symbol), SVG_ELEMENT_SYMBOL)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgSymbolElement::~SvgSymbolElement()
@@ -2567,6 +2583,7 @@ SvgUseElement::SvgUseElement(DomDocument* ownerDocument) :
   _widthAssigned(false),
   _heightAssigned(false)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgUseElement::~SvgUseElement()
@@ -2678,7 +2695,7 @@ SvgElement* SvgUseElement::getLinkedElement() const
   if (ref == NULL)
     return NULL;
 
-  if (ref->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT))
+  if (ref->isSvgNode(DOM_NODE_TYPE_ELEMENT))
     return static_cast<SvgElement*>(ref);
 
   return NULL;
@@ -2745,6 +2762,7 @@ SvgViewElement::SvgViewElement(DomDocument* ownerDocument) :
   SvgElement(ownerDocument, FOG_S(svg), SVG_ELEMENT_VIEW),
   _viewBox(0.0f, 0.0f, 0.0f, 0.0f)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgViewElement::~SvgViewElement()
@@ -2804,6 +2822,7 @@ SvgCircleElement::SvgCircleElement(DomDocument* ownerDocument) :
   _cyUnit(UNIT_NONE),
   _rUnit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgCircleElement::~SvgCircleElement()
@@ -2934,6 +2953,7 @@ SvgEllipseElement::SvgEllipseElement(DomDocument* ownerDocument) :
   _rxUnit(UNIT_NONE),
   _ryUnit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgEllipseElement::~SvgEllipseElement()
@@ -3087,6 +3107,7 @@ SvgLineElement::SvgLineElement(DomDocument* ownerDocument) :
   _x2Unit(UNIT_NONE),
   _y2Unit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgLineElement::~SvgLineElement()
@@ -3215,6 +3236,7 @@ err_t SvgLineElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) con
 SvgPathElement::SvgPathElement(DomDocument* ownerDocument) :
   SvgTransformableElement(ownerDocument, FOG_S(path), SVG_ELEMENT_PATH)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgPathElement::~SvgPathElement()
@@ -3278,6 +3300,7 @@ SvgPolygonElement::SvgPolygonElement(DomDocument* ownerDocument) :
   SvgTransformableElement(ownerDocument, FOG_S(polygon), SVG_ELEMENT_POLYGON),
   _points()
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgPolygonElement::~SvgPolygonElement()
@@ -3341,6 +3364,7 @@ SvgPolylineElement::SvgPolylineElement(DomDocument* ownerDocument) :
   SvgTransformableElement(ownerDocument, FOG_S(polyline), SVG_ELEMENT_POLYLINE),
   _points()
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgPolylineElement::~SvgPolylineElement()
@@ -3417,6 +3441,7 @@ SvgRectElement::SvgRectElement(DomDocument* ownerDocument) :
   _rxAssigned(false),
   _ryAssigned(false)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgRectElement::~SvgRectElement()
@@ -3631,6 +3656,7 @@ SvgImageElement::SvgImageElement(DomDocument* ownerDocument) :
   _widthUnit(UNIT_NONE),
   _heightUnit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgImageElement::~SvgImageElement()
@@ -3857,6 +3883,7 @@ SvgTextPositioningElement::SvgTextPositioningElement(DomDocument* ownerDocument,
   _dxUnit(UNIT_NONE),
   _dyUnit(UNIT_NONE)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgTextPositioningElement::~SvgTextPositioningElement()
@@ -3953,6 +3980,7 @@ err_t SvgTextPositioningElement::resetDy()
 SvgTextElement::SvgTextElement(DomDocument* ownerDocument) :
   SvgTextPositioningElement(ownerDocument, FOG_S(text), SVG_ELEMENT_TEXT)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgTextElement::~SvgTextElement()
@@ -3988,8 +4016,7 @@ err_t SvgTextElement::onProcess(SvgContext* context) const
   DomNode* node;
   for (node = getFirstChild(); node != NULL; node = node->getNextSibling())
   {
-    if (node->isObjectModelAndNodeType(DOM_OBJECT_MODEL_SVG, DOM_NODE_TYPE_ELEMENT) && 
-        static_cast<SvgElement*>(node)->getVisible())
+    if (node->isSvgNode(DOM_NODE_TYPE_ELEMENT) && static_cast<SvgElement*>(node)->getVisible())
     {
       err = context->onVisit(static_cast<SvgElement*>(node));
       if (FOG_IS_ERROR(err))
@@ -4027,6 +4054,7 @@ err_t SvgTextElement::onGeometryBoundingBox(BoxF& box, const TransformF* tr) con
 SvgTSpanElement::SvgTSpanElement(DomDocument* ownerDocument) :
   SvgTextPositioningElement(ownerDocument, FOG_S(tspan), SVG_ELEMENT_TSPAN)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgTSpanElement::~SvgTSpanElement()
@@ -4081,6 +4109,7 @@ err_t SvgTSpanElement::onProcess(SvgContext* context) const
 SvgAElement::SvgAElement(DomDocument* ownerDocument) :
   SvgTransformableElement(ownerDocument, FOG_S(a), SVG_ELEMENT_A)
 {
+  FOG_DOM_ELEMENT_INIT();
 }
 
 SvgAElement::~SvgAElement()
@@ -4103,7 +4132,7 @@ err_t SvgAElement::onProcess(SvgContext* context) const
 SvgDocument::SvgDocument() :
   _dpi(96.0f)
 {
-  _objectModel = DOM_OBJECT_MODEL_SVG;
+  _nodeFlags |= DOM_NODE_FLAG_IS_SVG;
   _objectType = SVG_ELEMENT_NONE;
 }
 
@@ -4173,7 +4202,7 @@ SizeF SvgDocument::getDocumentSize() const
 {
   DomElement* root = getDocumentElement();
 
-  if (root == NULL || !root->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_SVG))
+  if (root == NULL || !root->isSvgObject(SVG_ELEMENT_SVG))
     return SizeF(0.0f, 0.0f);
   else
     return static_cast<SvgRootElement*>(root)->getRootSize();
@@ -4187,7 +4216,7 @@ err_t SvgDocument::onProcess(SvgContext* context)
 {
   DomElement* root = getDocumentElement();
 
-  if (root == NULL || !root->isObjectModelAndObjectType(DOM_OBJECT_MODEL_SVG, SVG_ELEMENT_SVG))
+  if (root == NULL || !root->isSvgObject(SVG_ELEMENT_SVG))
     return ERR_OK;
 
   return context->onVisit(static_cast<SvgElement*>(root));

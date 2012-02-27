@@ -14,44 +14,21 @@
 #include <Fog/Core/Tools/String.h>
 
 // ============================================================================
-// [Fog::PropertyBaseCall]
+// [Fog::CoreObjBaseCall]
 // ============================================================================
 
 //! @internal
 //!
 //! @brief CoreObj base call implementation, used by property system.
-template<typename BaseT>
-struct _Fog_PropertyBaseCall
+template<typename Base>
+struct _Fog_CoreObjBaseCall
 {
-  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::InternedStringW& name)
-  {
-    return self->BaseT::_getPropertyIndex(name);
-  }
-
-  static FOG_INLINE size_t getPropertyIndex(BaseT* self, const Fog::CharW* name, size_t length)
-  {
-    return self->BaseT::_getPropertyIndex(name, length);
-  }
-
-  static FOG_INLINE err_t getPropertyInfo(BaseT* self, size_t index, Fog::PropertyInfo& info)
-  {
-    return self->BaseT::_getPropertyInfo(index, info);
-  }
-
-  static FOG_INLINE err_t getProperty(BaseT* self, size_t index, Fog::StringW& value)
-  {
-    return self->BaseT::_getProperty(index, value);
-  }
-
-  static FOG_INLINE err_t setProperty(BaseT* self, size_t index, const Fog::StringW& value)
-  {
-    return self->BaseT::_setProperty(index, value);
-  }
-
-  static FOG_INLINE err_t resetProperty(BaseT* self, size_t index)
-  {
-    return self->BaseT::_resetProperty(index);
-  }
+  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::InternedStringW& name)      { return self->Base::_getPropertyIndex(name); }
+  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::CharW* name, size_t length) { return self->Base::_getPropertyIndex(name, length); }
+  static FOG_INLINE err_t getPropertyInfo(Base* self, size_t index, Fog::PropertyInfo& info)   { return self->Base::_getPropertyInfo(index, info); }
+  static FOG_INLINE err_t getProperty(Base* self, size_t index, Fog::StringW& value)           { return self->Base::_getProperty(index, value); }
+  static FOG_INLINE err_t setProperty(Base* self, size_t index, const Fog::StringW& value)     { return self->Base::_setProperty(index, value); }
+  static FOG_INLINE err_t resetProperty(Base* self, size_t index)                              { return self->Base::_resetProperty(index); }
 };
 
 //! @internal
@@ -61,37 +38,16 @@ struct _Fog_PropertyBaseCall
 //! In such case we want to return default values instead of calling base 
 //! class virtual methods.
 template<>
-struct _Fog_PropertyBaseCall<Fog::CoreObj>
+struct _Fog_CoreObjBaseCall<Fog::CoreObj>
 {
-  static FOG_INLINE size_t getPropertyIndex(Fog::CoreObj* self, const Fog::InternedStringW& name)
-  {
-    return Fog::INVALID_INDEX;
-  }
+  typedef Fog::CoreObj Base;
 
-  static FOG_INLINE size_t getPropertyIndex(Fog::CoreObj* self, const Fog::CharW* name, size_t length)
-  {
-    return Fog::INVALID_INDEX;
-  }
-
-  static FOG_INLINE err_t getPropertyInfo(Fog::CoreObj* self, size_t index, Fog::PropertyInfo& info)
-  {
-    return Fog::ERR_OBJ_PROPERTY_NOT_FOUND;
-  }
-
-  static FOG_INLINE err_t getProperty(Fog::CoreObj* self, size_t index, Fog::StringW& value)
-  {
-    return Fog::ERR_OBJ_PROPERTY_NOT_FOUND;
-  }
-
-  static FOG_INLINE err_t setProperty(Fog::CoreObj* self, size_t index, const Fog::StringW& value)
-  {
-    return Fog::ERR_OBJ_PROPERTY_NOT_FOUND;
-  }
-
-  static FOG_INLINE err_t resetProperty(Fog::CoreObj* self, size_t index)
-  {
-    return Fog::ERR_OBJ_PROPERTY_NOT_FOUND;
-  }
+  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::InternedStringW& name)      { return Fog::INVALID_INDEX; }
+  static FOG_INLINE size_t getPropertyIndex(Base* self, const Fog::CharW* name, size_t length) { return Fog::INVALID_INDEX; }
+  static FOG_INLINE err_t getPropertyInfo(Base* self, size_t index, Fog::PropertyInfo& info)   { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE err_t getProperty(Base* self, size_t index, Fog::StringW& value)           { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE err_t setProperty(Base* self, size_t index, const Fog::StringW& value)     { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
+  static FOG_INLINE err_t resetProperty(Base* self, size_t index)                              { return Fog::ERR_OBJ_PROPERTY_NOT_FOUND; }
 };
 
 namespace Fog {
@@ -110,20 +66,32 @@ struct FOG_NO_EXPORT ObjInfo
   // --------------------------------------------------------------------------
 
   //! @brief Get size of the object, returned by sizeof(className) operator.
-  FOG_INLINE uint32_t getSize() const { return _size; }
+  FOG_INLINE uint32_t getObjectSize() const { return _objectSize; }
   
-  //! @brief Get count of all properties defined by the object + base objects.
-  FOG_INLINE uint32_t getPropertyCount() const { return _propertyCount; }
+  //! @brief Get count of properties defined by the object + all base objects,
+  //! excluding dynamic properties.
+  FOG_INLINE uint32_t getObjectPropertyCount() const { return _objectPropertyCount; }
+
+  //! @brief Get whether the object has dynamic properties.
+  FOG_INLINE bool hasDynamicProperties() const { return _dynamicPropertyCount != 0; }
+
+  //! @brief Get count of dynamic properties (properties not part of the object
+  //! declaration).
+  FOG_INLINE uint32_t getDynamicPropertyCount() const { return _dynamicPropertyCount; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
   //! @brief Object size in bytes.
-  uint32_t _size;
-  
-  //! @brief Count of all properties defined by the object + all base objects.
-  uint32_t _propertyCount;
+  uint32_t _objectSize;
+
+  //! @brief Count of properties defined by the object + all base objects,
+  //! excluding dynamic properties.
+  uint32_t _objectPropertyCount;
+
+  //! @brief Count of dynamic properties.
+  uint32_t _dynamicPropertyCount;
 };
 
 // ============================================================================
@@ -153,8 +121,9 @@ struct FOG_API CoreObj
   //! @note This function must return size of the last object in inheritance
   //! hierarchy. Strictly speaking, each class should override this method so
   //! the returned information matches the instantiated object. To make life
-  //! easier, @ref FOG_CORE_OBJ() takes care of that.
-  virtual const ObjInfo* getObjInfo() const = 0;
+  //! easier, @ref FOG_CORE_OBJ(), or other object-specific macros take care 
+  //! of that.
+  virtual void getObjInfo(ObjInfo* info) const = 0;
 
   // --------------------------------------------------------------------------
   // [Properties - Interface]
@@ -173,14 +142,28 @@ struct FOG_API CoreObj
     const CharW* name, size_t nameLength, const InternedStringW* nameInterned,
     const StringW* initialValue);
 
+  //! @internal
+  //!
+  //! @brief Get count of dynamic properties.
+  //!
+  //! This member function is used to fill @ref ObjInfo structure, used by @ref
+  //! getObjInfo(). This means that it doesn't need to be virtual, because the
+  //! @ref getObjInfo() method is declared by each class which inherits @ref
+  //! CoreObj.
+  FOG_INLINE uint32_t _getDynamicPropertyCount() const { return 0; }
+
   // --------------------------------------------------------------------------
   // [Properties - Public]
   // --------------------------------------------------------------------------
 
+  //! @brief Get index of property of a given @a name.
   FOG_INLINE size_t getPropertyIndex(const InternedStringW& name) const { return _getPropertyIndex(name); }
+  //! @overload.
   FOG_INLINE size_t getPropertyIndex(const CharW* name, size_t length) const { return _getPropertyIndex(name, length); }
 
+  //! @brief Get whether the object has property of a given @a name.
   bool hasProperty(const StringW& name) const;
+  //! @overload
   bool hasProperty(const StubW& name) const;
 
   err_t getProperty(const StringW& name, StringW& value) const;
@@ -210,15 +193,11 @@ public: \
   \
   enum { _PROPERTY_INDEX = Base::_PROPERTY_INDEX + Base::_PROPERTY_COUNT }; \
   \
-  virtual const ::Fog::ObjInfo* getObjInfo() const override \
+  virtual void getObjInfo(::Fog::ObjInfo* info) const override \
   { \
-    static const ::Fog::ObjInfo _info = \
-    { \
-      static_cast<uint32_t>(sizeof(Self)), \
-      static_cast<uint32_t>(Self::_PROPERTY_INDEX + Self::_PROPERTY_COUNT) \
-    }; \
-    \
-    return &_info; \
+    info->_objectSize = static_cast<uint32_t>(sizeof(Self)); \
+    info->_objectPropertyCount = static_cast<uint32_t>(Self::_PROPERTY_INDEX + Self::_PROPERTY_COUNT); \
+    info->_dynamicPropertyCount = static_cast<uint32_t>(_getDynamicPropertyCount()); \
   }
 
 // ============================================================================
@@ -625,37 +604,37 @@ public: \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STRINGW) \
       { \
-        return _Fog_PropertyBaseCall<Base>::getPropertyIndex(this, \
+        return _Fog_CoreObjBaseCall<Base>::getPropertyIndex(this, \
           *static_cast< const ::Fog::InternedStringW* >(name)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_INDEX_STUBW) \
       { \
-        return _Fog_PropertyBaseCall<Base>::getPropertyIndex(this, \
+        return _Fog_CoreObjBaseCall<Base>::getPropertyIndex(this, \
           static_cast< const ::Fog::CharW* >(name), arg); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_GET_INFO) \
       { \
-        return _Fog_PropertyBaseCall<Base>::getPropertyInfo(this, \
+        return _Fog_CoreObjBaseCall<Base>::getPropertyInfo(this, \
           arg, *static_cast< ::Fog::PropertyInfo* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_GET_STRINGW) \
       { \
-        return _Fog_PropertyBaseCall<Base>::getProperty(this, \
+        return _Fog_CoreObjBaseCall<Base>::getProperty(this, \
           arg, *static_cast< ::Fog::StringW* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_SET_STRINGW) \
       { \
-        return _Fog_PropertyBaseCall<Base>::setProperty(this, \
+        return _Fog_CoreObjBaseCall<Base>::setProperty(this, \
           arg, *static_cast< const ::Fog::StringW* >(value)); \
       } \
       \
       if (CommandT == ::Fog::PROPERTY_HANDLER_RESET) \
       { \
-        return _Fog_PropertyBaseCall<Base>::resetProperty(this, \
+        return _Fog_CoreObjBaseCall<Base>::resetProperty(this, \
           arg); \
       } \
     } \

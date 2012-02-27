@@ -1390,7 +1390,14 @@ enum DOM_NODE_FLAG
   // --------------------------------------------------------------------------
 
   //! @brief @ref DomText contains only whitespace content.
-  DOM_CHARACTER_DATA_FLAG_WHITESPACE_CONTENT = 0x80
+  DOM_NODE_FLAG_WHITESPACE_CONTENT = 0x20,
+
+  // --------------------------------------------------------------------------
+  // [SvgElement / SvgDocument]
+  // --------------------------------------------------------------------------
+
+  //! @brief Whether the @ref DomElement or @ref DomDocument is SVG.
+  DOM_NODE_FLAG_IS_SVG = 0x40
 };
 
 // ============================================================================
@@ -1453,32 +1460,14 @@ enum DOM_NODE_TYPE
 };
 
 // ============================================================================
-// [Fog::DOM_OBJECT_MODEL]
-// ============================================================================
-
-//! @brief DOM object model.
-enum DOM_OBJECT_MODEL
-{
-  //! @brief XML-DOM object (default).
-  DOM_OBJECT_MODEL_XML = 0,
-  //! @brief SVG-DOM object, see built-in @ref SvgDocument and @ref SvgElement.
-  DOM_OBJECT_MODEL_SVG = 1,
-
-  //! @brief User defined object.
-  DOM_OBJECT_MODEL_USER = 100
-};
-
-// ============================================================================
 // [Fog::DOM_OBJECT_TYPE]
 // ============================================================================
 
 //! @brief DOM object class.
 enum DOM_OBJECT_TYPE
 {
-  //! @brief Unknown object class.
-  //!
-  //! Generally shouldn't be returned by @ref DomNode::getObjectClass().
-  DOM_OBJECT_TYPE_UNKNOWN = 0
+  //! @brief Pure XML object.
+  DOM_OBJECT_TYPE_XML = 0
 };
 
 // ============================================================================

@@ -3100,6 +3100,10 @@ _Ret:
   else
     *dst = rv.d;
 
+  // We can't return ERR_OK in case that no number was parsed.
+  if ((size_t)(s - sBegin) == 0 && err == ERR_OK)
+    err = ERR_STRING_INVALID_INPUT;
+
   return err;
 }
 

@@ -438,36 +438,42 @@ err_t parsePoints(PathF& dst, const StringW& src, bool closePath)
     // Skip spaces.
     while (srcCur->isSpace())
     {
-      if (++srcCur == srcEnd) goto _Bail;
+      if (++srcCur == srcEnd)
+        goto _Bail;
     }
 
     // Parse number.
     size_t numEnd;
     err = StringUtil::parseReal(&coords[position], srcCur, (size_t)(srcEnd - srcCur), CharW('.'), &numEnd);
-    if (FOG_IS_ERROR(err)) goto _Bail;
+    if (FOG_IS_ERROR(err))
+      goto _Bail;
 
     if (++position == 2)
     {
       if (first)
       {
         err = dst.moveTo(PointF(coords[0], coords[1]));
-        if (FOG_IS_ERROR(err)) goto _Bail;
+        if (FOG_IS_ERROR(err))
+          goto _Bail;
         first = false;
       }
       else
       {
         err = dst.lineTo(PointF(coords[0], coords[1]));
-        if (FOG_IS_ERROR(err)) goto _Bail;
+        if (FOG_IS_ERROR(err))
+          goto _Bail;
       }
       position = 0;
     }
 
     srcCur += numEnd;
-    if (srcCur == srcEnd) break;
+    if (srcCur == srcEnd)
+      break;
 
     if (*srcCur == CharW(','))
     {
-      if (++srcCur == srcEnd) break;
+      if (++srcCur == srcEnd)
+        break;
     }
   }
 

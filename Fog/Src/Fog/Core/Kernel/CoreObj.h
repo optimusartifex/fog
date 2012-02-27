@@ -254,7 +254,7 @@ public: \
 //! @brief End of property list definition.
 #define FOG_PROPERTY_END() \
   enum { _PROPERTY_COUNT = (__COUNTER__ - _PROPERTY_COUNTER_BASE) }; \
-  enum { _PROPERTY_TOTAL = _PROPERTY_COUNT };
+  enum { _PROPERTY_TOTAL = _PROPERTY_INDEX + _PROPERTY_COUNT };
 
 // ============================================================================
 // [...]

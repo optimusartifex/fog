@@ -2513,32 +2513,20 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_DTOR(font_dtor)(Font* self);
 
   FOG_CAPI_METHOD(err_t, font_detach)(Font* self);
-  FOG_CAPI_METHOD(err_t, font_setHeight)(Font* self, float height, uint32_t unit);
-  FOG_CAPI_METHOD(err_t, font_setLetterSpacing)(Font* self, float spacing, uint32_t spacingMode);
-  FOG_CAPI_METHOD(err_t, font_setWordSpacing)(Font* self, float spacing, uint32_t spacingMode);
-  FOG_CAPI_METHOD(err_t, font_setHints)(Font* self, const FontHints* hints);
-  FOG_CAPI_METHOD(err_t, font_setStyle)(Font* self, uint32_t style);
-  FOG_CAPI_METHOD(err_t, font_setWeight)(Font* self, uint32_t weight);
-  FOG_CAPI_METHOD(err_t, font_setVariant)(Font* self, uint32_t variant);
-  FOG_CAPI_METHOD(err_t, font_setDecoration)(Font* self, uint32_t decoration);
-  FOG_CAPI_METHOD(err_t, font_setKerning)(Font* self, uint32_t kerning);
-  FOG_CAPI_METHOD(err_t, font_setHinting)(Font* self, uint32_t hinting);
-  FOG_CAPI_METHOD(err_t, font_setAlignMode)(Font* self, uint32_t alignMode);
-  FOG_CAPI_METHOD(err_t, font_setTransform)(Font* self, const TransformF* transform);
-  FOG_CAPI_METHOD(err_t, font_setForceCaching)(Font* self, bool val);
+  FOG_CAPI_METHOD(err_t, font_getParam)(const Font* self, uint32_t id, void* dst);
+  FOG_CAPI_METHOD(err_t, font_setParam)(Font* self, uint32_t id, const void* src);
+  FOG_CAPI_METHOD(err_t, font_setSize)(Font* self, float size);
+  FOG_CAPI_METHOD(err_t, font_setFeatures)(Font* self, const FontFeatures* features);
+  FOG_CAPI_METHOD(err_t, font_setLetterSpacing)(Font* self, uint32_t mode, float value);
+  FOG_CAPI_METHOD(err_t, font_setWordSpacing)(Font* self, uint32_t mode, float value);
+  FOG_CAPI_METHOD(err_t, font_setMatrix)(Font* self, const FontMatrix* matrix);
   FOG_CAPI_METHOD(void, font_reset)(Font* self);
-  FOG_CAPI_METHOD(err_t, font_create)(Font* self, const StringW* family, float height, uint32_t unit);
-  FOG_CAPI_METHOD(err_t, font_createEx)(Font* self, const StringW* family, float height, uint32_t unit,
-    const FontHints* hints, const TransformF* transform);
-  FOG_CAPI_METHOD(err_t, font_fromFace)(Font* self, FontFace* face, float height, uint32_t unit);
+  FOG_CAPI_METHOD(err_t, font_create)(Font* self, const StringW* family, float size, const FontFeatures* features, const FontMatrix* matrix);
+  FOG_CAPI_METHOD(err_t, font_fromFace)(Font* self, FontFace* face, float size);
   FOG_CAPI_METHOD(err_t, font_getTextOutlineFStubW)(const Font* self, PathF* dst, uint32_t cntOp, const PointF* pt, const StubW* str);
   FOG_CAPI_METHOD(err_t, font_getTextOutlineFStringW)(const Font* self, PathF* dst, uint32_t cntOp, const PointF* pt, const StringW* str);
   FOG_CAPI_METHOD(err_t, font_getTextOutlineDStubW)(const Font* self, PathD* dst, uint32_t cntOp, const PointD* pt, const StubW* str);
   FOG_CAPI_METHOD(err_t, font_getTextOutlineDStringW)(const Font* self, PathD* dst, uint32_t cntOp, const PointD* pt, const StringW* str);
-  FOG_CAPI_METHOD(err_t, font_getTextExtentsFStubW)(const Font* self, TextExtentsF* extents, const StubW* str);
-  FOG_CAPI_METHOD(err_t, font_getTextExtentsFStringW)(const Font* self, TextExtentsF* extents, const StringW* str);
-  FOG_CAPI_METHOD(err_t, font_getTextExtentsDStubW)(const Font* self, TextExtentsD* extents, const StubW* str);
-  FOG_CAPI_METHOD(err_t, font_getTextExtentsDStringW)(const Font* self, TextExtentsD* extents, const StringW* str);
   FOG_CAPI_METHOD(err_t, font_copy)(Font* self, const Font* other);
 
   FOG_CAPI_STATIC(bool, font_eq)(const Font* a, const Font* b);

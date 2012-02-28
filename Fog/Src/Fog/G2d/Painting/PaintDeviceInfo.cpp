@@ -153,7 +153,6 @@ err_t PaintDeviceInfo::makePhysicalFont(Font& physical, const Font& src)
 
   if (hints.getKerning() == FONT_KERNING_DETECT) hints.setKerning(_d->fontKerning);
   if (hints.getHinting() == FONT_HINTING_DETECT) hints.setHinting(_d->fontHinting);
-  if (hints.getAlignMode() == FONT_ALIGN_MODE_DETECT) hints.setAlignMode(_d->fontAlignMode);
   if (hints.getQuality() == FONT_QUALITY_DETECT) hints.setQuality(_d->fontQuality);
 
   FOG_RETURN_ON_ERROR(physical.create(family, height, UNIT_PX, hints, transform));
@@ -186,7 +185,6 @@ FOG_NO_EXPORT void PaintDeviceInfo_init(void)
   d->paintDevice = PAINT_DEVICE_NULL;
   d->fontKerning = FONT_KERNING_ENABLED;
   d->fontHinting = FONT_HINTING_DISABLED;
-  d->fontAlignMode = FONT_ALIGN_MODE_NONE;
   d->fontQuality = FONT_QUALITY_GREY;
   d->lcdOrder = LCD_ORDER_NONE;
   d->scale.set(1.0f, 1.0f);

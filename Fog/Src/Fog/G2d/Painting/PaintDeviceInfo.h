@@ -38,10 +38,6 @@ struct FOG_NO_EXPORT PaintDeviceInfoData
   //! hinting type set to @c FONT_HINTING_DETECT.
   uint8_t fontHinting;
 
-  //! @brief Font align mode to substitute when creating physical-font that has
-  //! font-align-mode set to @c FONT_ALIGN_MODE_DETECT
-  uint8_t fontAlignMode;
-
   //! @brief Quality of rendered fonts, see @c FONT_QUALITY.
   uint8_t fontQuality;
 

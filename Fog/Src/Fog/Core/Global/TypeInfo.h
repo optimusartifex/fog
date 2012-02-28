@@ -510,21 +510,11 @@ _FOG_TYPE_DECLARE(Fog::RectangularGradientD    , C(MOVABLE)               | F(NO
 
 // [Fog/G2d/Text]
 _FOG_TYPE_DECLARE(Fog::Font                    , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
-_FOG_TYPE_DECLARE(Fog::FontKerningChars        , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::FontKerningPairI        , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::FontKerningPairF        , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::FontManager             , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::FontMetricsF            , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::FontProvider            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::GlyphBitmap             , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::GlyphOutline            , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextExtentsI            , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextExtentsF            , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextExtentsD            , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextLayout              , C(MOVABLE)               | F(NO_CMP ) | F(NO_EQ ))
-_FOG_TYPE_DECLARE(Fog::TextRectI               , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::TextRectF               , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
-_FOG_TYPE_DECLARE(Fog::TextRectD               , C(SIMPLE )               | F(NO_CMP ) | F(BIN_EQ))
+_FOG_TYPE_DECLARE(Fog::FontFeatures            , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontMatrix              , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontMetrics             , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::GlyphItem               , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::GlyphPosition           , C(SIMPLE )               | F(NO_CMP )            )
 
 // [Fog/G2d/Tools]
 _FOG_TYPE_DECLARE(Fog::Dpi                     , C(SIMPLE )               | F(NO_CMP )            )

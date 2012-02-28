@@ -995,45 +995,43 @@ enum FILL_RULE
 };
 
 // ============================================================================
-// [Fog::FONT_ALIGN_MODE]
+// [Fog::FONT_CAPS]
 // ============================================================================
 
-enum FONT_ALIGN_MODE
+//! @brief Font caps.
+enum FONT_CAPS
 {
-  FONT_ALIGN_MODE_NONE = 0x00,
-  FONT_ALIGN_MODE_X = 0x01,
-  FONT_ALIGN_MODE_Y = 0x02,
-  FONT_ALIGN_MODE_XY = 0x03,
-  FONT_ALIGN_MODE_HEIGHT = 0x04,
+  //! @brief Normal.
+  FONT_CAPS_NORMAL = 0,
 
-  FONT_ALIGN_MODE_DETECT = 0xFF
-};
-
-// ============================================================================
-// [Fog::FONT_DATA]
-// ============================================================================
-
-enum FONT_DATA
-{
-  //! @brief The font properties were resolved - the height is in pixels and
-  //! all properties were successfully detected (hinting).
+  //! @brief Enables display of small capitals (OpenType feature: smcp).
   //!
-  //! Physical font can be used by the layout manager and the result matches
-  //! the device pixels and other requirements to layout the font-glyphs
-  //! correctly (for example using quantized hinting and kerning).
-  FONT_DATA_IS_PHYSICAL = 0x01,
+  //! Small-caps glyphs typically use the form of uppercase letters but are 
+  //! reduced to the size of lowercase letters.
+  FONT_CAPS_SMALL = 1,
+  //! @brief Enables display of small capitals for both upper and lowercase
+  //! letters (OpenType features: c2sc, smcp).
+  FONT_CAPS_ALL_SMALL = 2,
 
-  //! @brief The size of font-face is aligned.
-  FONT_DATA_IS_ALIGNED = 0x02,
+  //! @brief Enables display of petite capitals (OpenType feature: pcap).
+  FONT_CAPS_PETITE = 3,
+  //! @brief Enables display of petite capitals for both upper and lowercase
+  //! letters (OpenType features: c2pc, pcap).
+  FONT_CAPS_ALL_PETITE = 4,
 
-  //! @brief The font properties contains custom letter-spacing.
-  FONT_DATA_HAS_LETTER_SPACING = 0x04,
+  //! Enables display of titling capitals (OpenType feature: titl).
+  //!
+  //! Uppercase letter glyphs are often designed for use with lowercase letters.
+  //! When used in all uppercase titling sequences they can appear too strong.
+  //! Titling capitals are designed specifically for this situation.
+  FONT_CAPS_TITLING = 5,
 
-  //! @brief The font properties contains custom word-spacing.
-  FONT_DATA_HAS_WORD_SPACING = 0x08,
+  //! @brief Enables display of mixture of small capitals for uppercase letters
+  //! with normal lowercase letters (OpenType feature: unic).
+  FONT_CAPS_UNICASE = 6,
 
-  //! @brief The font properties contains user transform.
-  FONT_DATA_HAS_TRANSFORM = 0x10
+  //! @brief Count of FONT_CAPS values.
+  FONT_CAPS_COUNT = 7
 };
 
 // ============================================================================
@@ -1044,33 +1042,35 @@ enum FONT_DECORATION
 {
   FONT_DECORATION_NONE = 0x00,
   FONT_DECORATION_UNDERLINE = 0x01,
-  FONT_DECORATION_STRIKE_THROUGH = 0x02
+  FONT_DECORATION_STRIKETHROUGH = 0x02
 };
 
 // ============================================================================
-// [Fog::FONT_FEATURE]
+// [Fog::FONT_EAST_ASIAN_VARIANT]
 // ============================================================================
 
-enum FONT_FEATURE
+enum FONT_EAST_ASIAN_VARIANT
 {
-  //! @brief Font contains raster-based glyphs.
-  //!
-  //! @note May be combined with @c FONT_FEATURE_OUTLINE.
-  FONT_FEATURE_RASTER = 0x00000001,
+  FONT_EAST_ASIAN_VARIANT_JIS78 = 0,
+  FONT_EAST_ASIAN_VARIANT_JIS83 = 1,
+  FONT_EAST_ASIAN_VARIANT_JIS90 = 2,
+  FONT_EAST_ASIAN_VARIANT_JIS04 = 3,
+  FONT_EAST_ASIAN_VARIANT_SIMPLIFIED = 4,
+  FONT_EAST_ASIAN_VARIANT_TRADITIONAL = 5,
 
-  //! @brief Font contains outlined glyphs.
-  //!
-  //! @note May be combined with @c FONT_FEATURE_RASTER.
-  FONT_FEATURE_OUTLINE = 0x00000002,
+  FONT_EAST_ASIAN_VARIANT_COUNT = 6
+};
 
-  //! @brief Font supports kerning.
-  FONT_FEATURE_KERNING = 0x00000004,
+// ============================================================================
+// [Fog::FONT_EAST_ASIAN_WIDTH]
+// ============================================================================
 
-  //! @brief Font supports hinting.
-  FONT_FEATURE_HINTING = 0x00000008,
+enum FONT_EAST_ASIAN_WIDTH
+{
+  FONT_EAST_ASIAN_WIDTH_FULL = 0,
+  FONT_EAST_ASIAN_WIDTH_PROPORTIONAL = 1,
 
-  //! @brief Font supports LCD quality of rendering.
-  FONT_FEATURE_LCD_QUALITY = 0x00000010
+  FONT_EAST_ASIAN_WIDTH_COUNT = 2
 };
 
 // ============================================================================
@@ -1100,6 +1100,9 @@ enum FONT_FACE
 //! @brief Standard font family IDs (defined by CSS).
 enum FONT_FAMILY
 {
+  //! @brief Unknown font (not categorized family).
+  FONT_FAMILY_UNKNOWN = 0,
+
   //! @brief "serif" font.
   //!
   //! Glyphs of serif fonts, as the term is used in CSS, tend to have finishing
@@ -1142,7 +1145,7 @@ enum FONT_FAMILY
   //!
   //! Arabic fonts
   //!   - Bitstream Cyberbit.
-  FONT_FAMILY_SERIF = 0,
+  FONT_FAMILY_SERIF = 1,
 
   //! @brief "sans-serif" font.
   //!
@@ -1191,7 +1194,7 @@ enum FONT_FAMILY
   //!
   //! Arabic fonts
   //!   - MS Tahoma.
-  FONT_FAMILY_SANS_SERIF = 1,
+  FONT_FAMILY_SANS_SERIF = 2,
 
   //! @brief "cursive" font.
   //!
@@ -1221,7 +1224,7 @@ enum FONT_FAMILY
   //! Arabic fonts:
   //!   - DecoType Naskh,
   //!   - Monotype Urdu 507.
-  FONT_FAMILY_CUSRIVE = 2,
+  FONT_FAMILY_CUSRIVE = 3,
 
   //! @brief "fantasy" font.
   //!
@@ -1235,7 +1238,7 @@ enum FONT_FAMILY
   //! - Cottonwood,
   //! - FB Reactor,
   //! - Studz.
-  FONT_FAMILY_FANTASY = 3,
+  FONT_FAMILY_FANTASY = 4,
 
   //! @brief "monospace" font.
   //!
@@ -1259,29 +1262,34 @@ enum FONT_FAMILY
   //!
   //! Japanese fonts:
   //!   - Osaka Monospaced.
-  FONT_FAMILY_MONOSPACE = 4,
+  FONT_FAMILY_MONOSPACE = 5,
 
   //! @brief Count of font-family IDs.
-  FONT_FAMILY_COUNT = 5,
-
-  //! @brief Unknown font (not categorized family).
-  FONT_FAMILY_UNKNOWN = 0xFF
+  FONT_FAMILY_COUNT = 6
 };
 
 // ============================================================================
-// [Fog::FONT_HINTING]
+// [Fog::FONT_FEATURE]
 // ============================================================================
 
-//! @brief Font-hinting mode.
-enum FONT_HINTING
+enum FONT_FEATURE
 {
-  //! @brief Font-hinting is disabled.
-  FONT_HINTING_DISABLED = 0,
-  //! @brief Font-hinting is enabled.
-  FONT_HINTING_ENABLED = 1,
+  //! @brief Font supports kerning.
+  FONT_FEATURE_KERNING = 0x00000001
+};
 
-  //! @brief Detect font-hinting.
-  FONT_HINTING_DETECT = 0xFF
+// ============================================================================
+// [Fog::FONT_FLAG]
+// ============================================================================
+
+enum FONT_FLAG
+{
+  //! @brief The font properties contains custom letter-spacing.
+  FONT_FLAG_HAS_LETTER_SPACING = 0x01,
+  //! @brief The font properties contains custom word-spacing.
+  FONT_FLAG_HAS_WORD_SPACING = 0x02,
+  //! @brief Whether the font transformation matrix is not identity.
+  FONT_FLAG_HAS_MATRIX = 0x04
 };
 
 // ============================================================================
@@ -1294,10 +1302,44 @@ enum FONT_KERNING
   //! @brief Disable the use of kerning.
   FONT_KERNING_DISABLED = 0,
   //! @brief Enable the use of kerning (default).
-  FONT_KERNING_ENABLED = 1,
+  FONT_KERNING_ENABLED = 1
+};
 
-  //! @brief Detect font-kerning.
-  FONT_KERNING_DETECT = 0xFF
+// ============================================================================
+// [Fog::FONT_NUMERIC_FIGURE]
+// ============================================================================
+
+enum FONT_NUMERIC_FIGURE
+{
+  FONT_NUMERIC_FIGURE_LINING = 0,
+  FONT_NUMERIC_FIGURE_OLD_STYLE = 1,
+
+  FONT_NUMERIC_FIGURE_COUNT = 2
+};
+
+// ============================================================================
+// [Fog::FONT_NUMERIC_FRACTION]
+// ============================================================================
+
+enum FONT_NUMERIC_FRACTION
+{
+  FONT_NUMERIC_FRACTION_NONE = 0,
+  FONT_NUMERIC_FRACTION_DIAGONAL = 1,
+  FONT_NUMERIC_FRACTION_STACKED = 2,
+
+  FONT_NUMERIC_FRACTION_COUNT = 3
+};
+
+// ============================================================================
+// [Fog::FONT_NUMERIC_SPACING]
+// ============================================================================
+
+enum FONT_NUMERIC_SPACING
+{
+  FONT_NUMERIC_SPACING_PROPORTIONAL = 0,
+  FONT_NUMERIC_SPACING_TABULAR = 1,
+
+  FONT_NUMERIC_SPACING_COUNT = 2
 };
 
 // ============================================================================
@@ -1317,6 +1359,37 @@ enum FONT_ORDER
 };
 
 // ============================================================================
+// [Fog::FONT_PARAM]
+// ============================================================================
+
+enum FONT_PARAM
+{
+  FONT_PARAM_SIZE = 0,
+  FONT_PARAM_SIZE_ADJUST,
+  FONT_PARAM_WEIGHT,
+  FONT_PARAM_STRETCH,
+  FONT_PARAM_DECORATION,
+  FONT_PARAM_STYLE,
+  FONT_PARAM_KERNING,
+  FONT_PARAM_COMMON_LIGATURES,
+  FONT_PARAM_DISCRETIONARY_LIGATURES,
+  FONT_PARAM_HISTORICAL_LIGATURES,
+  FONT_PARAM_CAPS,
+  FONT_PARAM_NUMERIC_FIGURE,
+  FONT_PARAM_NUMERIC_SPACING,
+  FONT_PARAM_NUMERIC_FRACTION,
+  FONT_PARAM_NUMERIC_SLASHED_ZERO,
+  FONT_PARAM_EAST_ASIAN_VARIANT,
+  FONT_PARAM_EAST_ASIAN_WIDTH,
+  FONT_PARAM_LETTER_SPACING_MODE,
+  FONT_PARAM_LETTER_SPACING_VALUE,
+  FONT_PARAM_WORD_SPACING_MODE,
+  FONT_PARAM_WORD_SPACING_VALUE,
+
+  FONT_PARAM_COUNT
+};
+
+// ============================================================================
 // [Fog::FONT_PROVIDER]
 // ============================================================================
 
@@ -1329,16 +1402,14 @@ enum FONT_PROVIDER
   FONT_PROVIDER_WINDOWS = 1,
   //! @brief Mac font-provider.
   FONT_PROVIDER_MAC = 2,
-  //! @brief Freetype font-provider which use fontconfig.
-  FONT_PROVIDER_FT_FONTCONFIG = 3,
-  //! @brief Freetype font-provider which use own, minimalist provider.
-  FONT_PROVIDER_FT_MINIMALIST = 4,
+  //! @brief Freetype font-provider.
+  FONT_PROVIDER_FT = 3,
   //! @brief Freetype font-provider (including fontconfig support if available).
   //! @brief Custom font-provider (SVG/CSS/Others...).
-  FONT_PROVIDER_CUSTOM = 5,
+  FONT_PROVIDER_CUSTOM = 4,
 
   //! @brief Count of font-providers.
-  FONT_PROVIDER_COUNT = 6
+  FONT_PROVIDER_COUNT = 5
 };
 
 // ============================================================================
@@ -1366,17 +1437,33 @@ enum FONT_QUALITY
 // ============================================================================
 
 //! @brief Font spacing mode.
-enum FONT_SPACING_MODE
+enum FONT_SPACING
 {
   //! @brief Spacing is percentage (in Fog 0.0 to 1.0, inclusive) of the glyph
   //! spacing.
-  FONT_SPACING_MODE_PERCENTAGE = 0,
-
+  FONT_SPACING_PERCENTAGE = 0,
   //! @brief Spacing is absolute, in font units.
-  FONT_SPACING_MODE_ABSOLUTE = 1,
+  FONT_SPACING_ABSOLUTE = 1,
 
   //! @brief Count of font spacing modes.
-  FONT_SPACING_MODE_COUNT = 2
+  FONT_SPACING_COUNT = 2
+};
+
+// ============================================================================
+// [Fog::FONT_STRETCH]
+// ============================================================================
+
+enum FONT_STRETCH
+{
+  FONT_STRETCH_ULTRA_CONDENSED = 10,
+  FONT_STRETCH_EXTRA_CONDENSED = 20,
+  FONT_STRETCH_CONDENSED = 30,
+  FONT_STRETCH_SEMI_CONDENSED = 40,
+  FONT_STRETCH_NORMAL = 50,
+  FONT_STRETCH_SEMI_EXPANDED = 60,
+  FONT_STRETCH_EXPANDED = 70,
+  FONT_STRETCH_EXTRA_EXPANDED = 80,
+  FONT_STRETCH_ULTRA_EXPANDED = 90
 };
 
 // ============================================================================
@@ -1407,35 +1494,20 @@ enum FONT_STYLE
 };
 
 // ============================================================================
-// [Fog::FONT_VARIANT]
-// ============================================================================
-
-//! @brief Font variant.
-enum FONT_VARIANT
-{
-  //! @brief Normal font-variant.
-  FONT_VARIANT_NORMAL = 0,
-  //! @brief Small letters are capitalized, but their size is lowered.
-  FONT_VARIANT_SMALL_CAPS = 1,
-
-  FONT_VARIANT_COUNT = 2
-};
-
-// ============================================================================
 // [Fog::FONT_WEIGHT]
 // ============================================================================
 
 enum FONT_WEIGHT
 {
-  FONT_WEIGHT_100 = 1,
-  FONT_WEIGHT_200 = 2,
-  FONT_WEIGHT_300 = 3,
-  FONT_WEIGHT_400 = 4,
-  FONT_WEIGHT_500 = 5,
-  FONT_WEIGHT_600 = 6,
-  FONT_WEIGHT_700 = 7,
-  FONT_WEIGHT_800 = 8,
-  FONT_WEIGHT_900 = 9,
+  FONT_WEIGHT_100 = 10,
+  FONT_WEIGHT_200 = 20,
+  FONT_WEIGHT_300 = 30,
+  FONT_WEIGHT_400 = 40,
+  FONT_WEIGHT_500 = 50,
+  FONT_WEIGHT_600 = 60,
+  FONT_WEIGHT_700 = 70,
+  FONT_WEIGHT_800 = 80,
+  FONT_WEIGHT_900 = 90,
 
   FONT_WEIGHT_THIN       = FONT_WEIGHT_100,
   FONT_WEIGHT_EXTRALIGHT = FONT_WEIGHT_200,

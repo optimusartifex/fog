@@ -350,6 +350,7 @@ struct FontFace;
 struct FontFeatures;
 struct FontMatrix;
 struct FontMetrics;
+struct FontSpacing;
 struct GlyphItem;
 struct GlyphPosition;
 struct GlyphRun;

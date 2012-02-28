@@ -195,17 +195,10 @@ FOG_NO_EXPORT void Region_init_win(void);
 FOG_NO_EXPORT void RegionUtil_init(void);
 
 // [Fog/G2d/Text]
-FOG_NO_EXPORT void GlyphBitmap_init(void);
-FOG_NO_EXPORT void GlyphBitmap_fini(void);
-
-FOG_NO_EXPORT void GlyphOutline_init(void);
-FOG_NO_EXPORT void GlyphOutline_fini(void);
-
 FOG_NO_EXPORT void Font_init(void);
 FOG_NO_EXPORT void Font_fini(void);
 
-FOG_NO_EXPORT void FontManager_init(void);
-FOG_NO_EXPORT void FontManager_fini(void);
+FOG_NO_EXPORT void OTCore_init(void);
 
 } // Fog namespace
 

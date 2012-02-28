@@ -1365,7 +1365,6 @@ enum FONT_ORDER
 enum FONT_PARAM
 {
   FONT_PARAM_SIZE = 0,
-  FONT_PARAM_SIZE_ADJUST,
   FONT_PARAM_WEIGHT,
   FONT_PARAM_STRETCH,
   FONT_PARAM_DECORATION,
@@ -1381,10 +1380,12 @@ enum FONT_PARAM
   FONT_PARAM_NUMERIC_SLASHED_ZERO,
   FONT_PARAM_EAST_ASIAN_VARIANT,
   FONT_PARAM_EAST_ASIAN_WIDTH,
-  FONT_PARAM_LETTER_SPACING_MODE,
-  FONT_PARAM_LETTER_SPACING_VALUE,
-  FONT_PARAM_WORD_SPACING_MODE,
-  FONT_PARAM_WORD_SPACING_VALUE,
+  FONT_PARAM_LETTER_SPACING,
+  FONT_PARAM_WORD_SPACING,
+  FONT_PARAM_SIZE_ADJUST,
+
+  FONT_PARAM_FEATURES,
+  FONT_PARAM_MATRIX,
 
   FONT_PARAM_COUNT
 };
@@ -1433,17 +1434,17 @@ enum FONT_QUALITY
 };
 
 // ============================================================================
-// [Fog::FONT_SPACING_MODE]
+// [Fog::FONT_SPACING]
 // ============================================================================
 
 //! @brief Font spacing mode.
 enum FONT_SPACING
 {
+  //! @brief Spacing is absolute.
+  FONT_SPACING_ABSOLUTE = 0,
   //! @brief Spacing is percentage (in Fog 0.0 to 1.0, inclusive) of the glyph
   //! spacing.
-  FONT_SPACING_PERCENTAGE = 0,
-  //! @brief Spacing is absolute, in font units.
-  FONT_SPACING_ABSOLUTE = 1,
+  FONT_SPACING_PERCENTAGE = 1,
 
   //! @brief Count of font spacing modes.
   FONT_SPACING_COUNT = 2

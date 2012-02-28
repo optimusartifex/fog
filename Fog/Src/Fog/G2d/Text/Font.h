@@ -22,9 +22,189 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::GlyphItem]
+// ============================================================================
+
+struct FOG_NO_EXPORT GlyphItem
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getGlyphIndex() const { return _glyphIndex; }
+  FOG_INLINE void setGlyphIndex(uint32_t index) { _glyphIndex = index; }
+
+  FOG_INLINE uint32_t getProperties() const { return _properties; }
+  FOG_INLINE void setProperties(uint32_t properties) { _properties = properties; }
+
+  FOG_INLINE uint32_t getCluster() const { return _cluster; }
+  FOG_INLINE void setCluster(uint32_t cluster) { _cluster = cluster; }
+
+  FOG_INLINE uint16_t getComponent() const { return _component; }
+  FOG_INLINE void setComponent(uint16_t component) { _component = component; }
+
+  FOG_INLINE uint16_t getLigatureId() const { return _ligatureId; }
+  FOG_INLINE void setLigatureId(uint32_t ligatureId) { _ligatureId = ligatureId; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero_t<GlyphItem>(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+  
+  uint32_t _glyphIndex;
+  uint32_t _properties;
+  uint32_t _cluster;
+  uint16_t _component;
+  uint16_t _ligatureId;
+};
+
+// ============================================================================
+// [Fog::GlyphPosition]
+// ============================================================================
+
+struct FOG_NO_EXPORT GlyphPosition
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const PointF& getPosition() const { return _position; }
+  FOG_INLINE void setPosition(const PointF& pos) { _position = pos; }
+
+  FOG_INLINE const PointF& getAdvance() const { return _advance; }
+  FOG_INLINE void setAdvance(const PointF& advance) { _advance = advance; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero_t<GlyphPosition>(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  PointF _position;
+  PointF _advance;
+
+  uint32_t _newAdvance : 1;
+  uint32_t _back : 15;
+  int32_t _cursiveChain : 16;
+};
+
+// ============================================================================
+// [Fog::GlyphRun]
+// ============================================================================
+
+struct FOG_NO_EXPORT GlyphRun
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getLength() const { return _itemList.getLength(); }
+
+  FOG_INLINE const List<GlyphItem>& getItemList() const { return _itemList; }
+  FOG_INLINE const List<GlyphPosition>& getPositionList() const { return _positionList; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  List<GlyphItem> _itemList;
+  List<GlyphPosition> _positionList;
+};
+
+// ============================================================================
+// [Fog::FontSpacing]
+// ============================================================================
+
+//! @brief Font spacing mode and value pair.
+struct FOG_NO_EXPORT FontSpacing
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontSpacing()
+  {
+    MemOps::zero_t<FontSpacing>(this);
+  }
+
+  explicit FOG_INLINE FontSpacing(_Uninitialized) {}
+
+  FOG_INLINE FontSpacing(const FontSpacing& other)
+  {
+    MemOps::copy_t<FontSpacing>(this, &other);
+  }
+
+  FOG_INLINE FontSpacing(uint32_t mode, float value) :
+    _mode(mode),
+    _value(value)
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getMode() const { return _mode; }
+  FOG_INLINE void setMode(uint32_t mode) { _mode = mode; }
+
+  FOG_INLINE float getValue() const { return _value; }
+  FOG_INLINE void setValue(float value) { _value = value; }
+
+  FOG_INLINE void setSpacing(uint32_t mode, float value)
+  {
+    _mode = mode;
+    _value = value;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero_t<FontSpacing>(this);
+  }  
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontSpacing& operator=(FontSpacing& other)
+  {
+    MemOps::copy_t<FontSpacing>(this, &other);
+    return *this;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint32_t _mode;
+  float _value;
+};
+
+// ============================================================================
 // [Fog::FontMetrics]
 // ============================================================================
 
+//! @brief Font metrics.
+//!
+//! Represents design or scaled font metrics.
 struct FOG_NO_EXPORT FontMetrics
 {
   // --------------------------------------------------------------------------
@@ -101,6 +281,11 @@ struct FOG_NO_EXPORT FontMetrics
 // [Fog::FontFeatures]
 // ============================================================================
 
+//! @brief Font features.
+//!
+//! Represents nearly all features which can be used together with @ref Font.
+//! The structure is designed for easy manipulation so you can get features
+//! from @ref Font, manipulate it, and set it back.
 struct FOG_NO_EXPORT FontFeatures
 {
   // --------------------------------------------------------------------------
@@ -155,6 +340,9 @@ struct FOG_NO_EXPORT FontFeatures
 
   FOG_INLINE uint32_t getEastAsianWidth() const { return _eastAsianWidth; }
   FOG_INLINE void setEastAsianWidth(uint32_t eastAsianWidth) { _eastAsianWidth = eastAsianWidth; }
+
+  FOG_INLINE FontSpacing getLetterSpacing() const { return FontSpacing(_letterSpacingMode, _letterSpacingValue); }
+  FOG_INLINE FontSpacing getWordSpacing() const { return FontSpacing(_wordSpacingMode, _wordSpacingValue); }
 
   FOG_INLINE uint32_t getLetterSpacingMode() const { return _letterSpacingMode; }
   FOG_INLINE void setLetterSpacingMode(uint32_t letterSpacingMode) { _letterSpacingMode = letterSpacingMode; }
@@ -263,7 +451,11 @@ struct FOG_NO_EXPORT FontFeatures
 // [Fog::FontMatrix]
 // ============================================================================
 
-//! @brief Transformation matrix used by @ref Font.
+//! @brief Font matrix used by @ref Font.
+//!
+//! Font matrix is much simpler than @ref TransformF or @ref TransformD. The
+//! purpose is to be compatible to the native APIs, whose do not allow to 
+//! assign perspective transformation matrix to fonts.
 struct FOG_NO_EXPORT FontMatrix
 {
   // --------------------------------------------------------------------------
@@ -316,95 +508,140 @@ struct FOG_NO_EXPORT FontMatrix
 };
 
 // ============================================================================
-// [Fog::GlyphItem]
+// [Fog::FontFaceVTable]
 // ============================================================================
 
-struct FOG_NO_EXPORT GlyphItem
+//! @brief Font-face virtual table.
+struct FOG_NO_EXPORT FontFaceVTable
+{
+  void (FOG_CDECL* destroy)(FontFace* self);
+
+  err_t (FOG_CDECL* getOutlineFromGlyphRunF)(const FontFace* self,
+    PathF* dst, uint32_t cntOp,
+    const void* itemList, size_t itemAdvance,
+    const PointF* positionList, size_t positionAdvance,
+    size_t length);
+
+  err_t (FOG_CDECL* getOutlineFromGlyphRunD)(const FontFace* self,
+    PathD* dst, uint32_t cntOp,
+    const void* itemList, size_t itemAdvance,
+    const PointF* positionList, size_t positionAdvance,
+    size_t length);
+};
+
+// ============================================================================
+// [Fog::FontFace]
+// ============================================================================
+
+//! @brief Font face.
+struct FOG_NO_EXPORT FontFace
 {
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Construction / Destruction]
   // --------------------------------------------------------------------------
+
+  FOG_INLINE FontFace(const FontFaceVTable* vtable_, const StringW& family_)
+  {
+    vtable = vtable_;
+
+    reference.init(1);
+    engineId = FONT_FACE_NULL;
+    features = NO_FLAGS;
+    family.initCustom1(family_);
+    designMetrics.reset();
+    designEm = 0.0f;
+  }
+
+  FOG_INLINE ~FontFace()
+  {
+    family.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontFace* addRef() const
+  {
+    reference.inc();
+    return const_cast<FontFace*>(this);
+  }
+
+  FOG_INLINE void deref()
+  {
+    if (reference.deref())
+      destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void destroy()
+  {
+    vtable->destroy(this);
+  }
+
+  FOG_INLINE err_t getOutlineFromGlyphRun(
+    PathF& dst, uint32_t cntOp,
+    const void* itemList, size_t itemAdvance,
+    const PointF* positionList, size_t positionAdvance,
+    size_t length)
+  {
+    return vtable->getOutlineFromGlyphRunF(this,
+      &dst, cntOp, itemList, itemAdvance, positionList, positionAdvance, length);
+  }
+
+  FOG_INLINE err_t getOutlineFromGlyphRun(
+    PathD& dst, uint32_t cntOp,
+    const void* itemList, size_t itemAdvance,
+    const PointF* positionList, size_t positionAdvance,
+    size_t length) const
+  {
+    return vtable->getOutlineFromGlyphRunD(this,
+      &dst, cntOp, itemList, itemAdvance, positionList, positionAdvance, length);
+  }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
-  
-  uint32_t _glyphIndex;
-  uint32_t _properties;
-  uint32_t _cluster;
-  uint16_t _component;
-  uint16_t _ligatureId;
+
+  //! @brief Font face vtable.
+  const FontFaceVTable* vtable;
+
+  //! @brief Reference count.
+  mutable Atomic<size_t> reference;
+
+  //! @brief Font-face engine-id.
+  uint32_t engineId;
+
+  //! @brief Font-face features.
+  uint32_t features;
+
+  //! @brief Font-face family.
+  Static<StringW> family;
+
+  //! @brief Design metrics.
+  //!
+  //! Ideally in integers, but can be scaled if the exact information can't be
+  //! fetched (happens under Windows).
+  FontMetrics designMetrics;
+
+  //! @brief Design EM square
+  //!
+  //! Ideally in integers, but can be scaled if the exact information can't be
+  //! fetched (Windows).
+  float designEm;
+
+private:
+  _FOG_NO_COPY(FontFace)
 };
-
-// ============================================================================
-// [Fog::GlyphPosition]
-// ============================================================================
-
-struct FOG_NO_EXPORT GlyphPosition
-{
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  PointF _position;
-  PointF _advance;
-
-  uint32_t _newAdvance : 1;
-  uint32_t _back : 15;
-  int32_t _cursiveChain : 16;
-};
-
-// ============================================================================
-// [Fog::GlyphRun]
-// ============================================================================
-
-struct FOG_NO_EXPORT GlyphRun
-{
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  List<GlyphItem> _glyphs;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [Fog::FontData]
 // ============================================================================
 
+//! @brief Font data.
 struct FOG_NO_EXPORT FontData
 {
   // --------------------------------------------------------------------------
@@ -453,14 +690,14 @@ struct FOG_NO_EXPORT FontData
   //! @brief Font flags.
   uint32_t flags;
 
-  //! @brief Font-face.
+  //! @brief Font face.
   FontFace* face;
-  //! @brief Custom transformation matrix to apply to glyphs.
-  FontMatrix matrix;
   //! @brief Scaled font metrics.
   FontMetrics metrics;
   //! @brief Font features.
   FontFeatures features;
+  //! @brief Custom transformation matrix to apply to glyphs.
+  FontMatrix matrix;
   //! @brief Scale constant to get the scaled metrics from the design-metrics.
   float scale;
 };
@@ -469,6 +706,7 @@ struct FOG_NO_EXPORT FontData
 // [Fog::Font]
 // ============================================================================
 
+//! @brief Font.
 struct FOG_NO_EXPORT Font
 {
   // --------------------------------------------------------------------------
@@ -510,7 +748,7 @@ struct FOG_NO_EXPORT Font
   FOG_INLINE err_t _detach() { return fog_api.font_detach(this); }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Font/Face]
+  // [Set]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t setFont(const Font& other)
@@ -518,134 +756,138 @@ struct FOG_NO_EXPORT Font
     return fog_api.font_copy(this, &other);
   }
 
+  // --------------------------------------------------------------------------
+  // [Accessors - Face]
+  // --------------------------------------------------------------------------
+
+  //! @brief Get Font face.
   FOG_INLINE FontFace* getFace() const { return _d->face; }
+  //! @brief Get font family.
   FOG_INLINE const StringW& getFamily() const { return _d->face->family; }
+  //! @brief Get font scale relative to the font design metrics.
+  FOG_INLINE float getScale() const { return _d->scale; }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Size]
+  // [Accessors - Param]
   // --------------------------------------------------------------------------
 
-  //! @brief Get font size.
-  FOG_INLINE float getSize() const { return _d->metrics._size; }
-  //! @brief Set font size to @a size.
-  FOG_INLINE err_t setSize(float size) { return fog_api.font_setSize(this, size); }
+  //! @brief Get font parameter, see @ref FONT_PARAM.
+  FOG_INLINE err_t getParam(uint32_t id, void* dst) const { return fog_api.font_getParam(this, id, dst); }
+  //! @brief Set font parameter, see @ref FONT_PARAM.
+  FOG_INLINE err_t setParam(uint32_t id, const void* src) { return fog_api.font_setParam(this, id, src); }
 
   // --------------------------------------------------------------------------
-  // [Accessors - Metrics]
+  // [Accessors - Features]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const FontMetrics& getMetrics() const { return _d->metrics; }
+  //! @brief Get font kerning.
+  FOG_INLINE uint32_t getKerning() const { return _d->features._kerning; }
+  //! @brief Set font kerning to @a val.
+  FOG_INLINE err_t setKerning(uint32_t val) { return setParam(FONT_PARAM_KERNING, &val); }
 
-  // --------------------------------------------------------------------------
-  // [Accessors - Spacing]
-  // --------------------------------------------------------------------------
+  //! @brief Get whether to use common ligatures.
+  FOG_INLINE uint32_t getCommonLigatures() const { return _d->features._commonLigatures; }
+  //! @brief Set whether to use common ligatures.
+  FOG_INLINE err_t setCommonLigatures(uint32_t val) { return setParam(FONT_PARAM_COMMON_LIGATURES, &val); }
 
-  FOG_INLINE bool hasLetterSpacing() const { return (_d->flags & FONT_FLAG_HAS_LETTER_SPACING) != 0; }
-  FOG_INLINE bool hasWordSpacing() const { return (_d->flags & FONT_FLAG_HAS_WORD_SPACING) != 0; }
+  //! @brief Get whether to use discretionary ligatures.
+  FOG_INLINE uint32_t getDiscretionaryLigatures() const { return _d->features._discretionaryLigatures; }
+  //! @brief Set whether to use discretionary ligatures.
+  FOG_INLINE err_t setDiscretionaryLigatures(uint32_t val) { return setParam(FONT_PARAM_DISCRETIONARY_LIGATURES, &val); }
 
+  //! @brief Get whether to use historical ligatures.
+  FOG_INLINE uint32_t getHistoricalLigatures() const { return _d->features._historicalLigatures; }
+  //! @brief set whether to use historical ligatures.
+  FOG_INLINE err_t setHistoricalLigatures(uint32_t val) { return setParam(FONT_PARAM_HISTORICAL_LIGATURES, &val); }
+
+  //! @brief Get caps variants, see @ref FONT_CAPS.
+  FOG_INLINE uint32_t getCaps() const { return _d->features._caps; }
+  //! @brief Set caps variants to @a val, see @ref FONT_CAPS
+  FOG_INLINE err_t setCaps(uint32_t val) { return setParam(FONT_PARAM_CAPS, &val); }
+
+  //! @brief Get numeric figure variant, see @ref FONT_NUMERIC_FIGURE.
+  FOG_INLINE uint32_t getNumericFigure() const { return _d->features._numericFigure; }
+  //! @brief Set numeric figure variant, see @ref FONT_NUMERIC_FIGURE.
+  FOG_INLINE err_t setNumericFigure(uint32_t val) { return setParam(FONT_PARAM_NUMERIC_FIGURE, &val); }
+
+  //! @brief Get numeric spacing variant, see @ref FONT_NUMERIC_SPACING.
+  FOG_INLINE uint32_t getNumericSpacing() const { return _d->features._numericSpacing; }
+  //! @brief Set numeric spacing variant, see @ref FONT_NUMERIC_SPACING.
+  FOG_INLINE err_t setNumericSpacing(uint32_t val) { return setParam(FONT_PARAM_NUMERIC_SPACING, &val); }
+
+  //! @brief Get numeric fraction variant, see @ref FONT_NUMERIC_FRACTION.
+  FOG_INLINE uint32_t getNumericFraction() const { return _d->features._numericFraction; }
+  //! @brief Set numeric fraction variant, see @ref FONT_NUMERIC_FRACTION.
+  FOG_INLINE err_t setNumericFraction(uint32_t val) { return setParam(FONT_PARAM_NUMERIC_FRACTION, &val); }
+
+  //! @brief Get whether to slash numeric zero.
+  FOG_INLINE uint32_t getNumericSlashedZero() const { return _d->features._numericSlashedZero; }
+  //! @brief Set whether to slash numeric zero.
+  FOG_INLINE err_t setNumericSlashedZero(uint32_t val) { return setParam(FONT_PARAM_NUMERIC_SLASHED_ZERO, &val); }
+
+  //! @brief Get east-asian variant, see @ref FONT_EAST_ASIAN_VARIANT.
+  FOG_INLINE uint32_t getEastAsianVariant() const { return _d->features._eastAsianVariant; }
+  //! @brief Set east-asian variant, see @ref FONT_EAST_ASIAN_VARIANT.
+  FOG_INLINE err_t setEastAsianVariant(uint32_t val) { return setParam(FONT_PARAM_EAST_ASIAN_VARIANT, &val); }
+
+  //! @brief Get east-asian width, see @ref FONT_EAST_ASIAN_WIDTH.
+  FOG_INLINE uint32_t getEastAsianWidth() const { return _d->features._eastAsianWidth; }
+  //! @brief Get east-asian width, see @ref FONT_EAST_ASIAN_WIDTH.
+  FOG_INLINE err_t setEastAsianWidth(uint32_t val) { return setParam(FONT_PARAM_EAST_ASIAN_WIDTH, &val); }
+
+  //! @brief Get letter spacing mode.
   FOG_INLINE uint32_t getLetterSpacingMode() const { return _d->features._letterSpacingMode; }
-  FOG_INLINE uint32_t getWordSpacingMode() const { return _d->features._wordSpacingMode; }
-
+  //! @brief Get letter spacing value.
   FOG_INLINE float getLetterSpacingValue() const { return _d->features._letterSpacingValue; }
+
+  //! @brief Get letter spacing mode/value.
+  FOG_INLINE FontSpacing getLetterSpacing() const { return FontSpacing(_d->features._letterSpacingMode, _d->features._letterSpacingValue); }
+  //! @brief Set letter spacing mode/value.
+  FOG_INLINE err_t setLetterSpacing(const FontSpacing& val) { return setParam(FONT_PARAM_LETTER_SPACING, &val); }
+
+  //! @brief Get word spacing mode.
+  FOG_INLINE uint32_t getWordSpacingMode() const { return _d->features._wordSpacingMode; }
+  //! @brief Get word spacing value.
   FOG_INLINE float getWordSpacingValue() const { return _d->features._wordSpacingValue; }
 
-  FOG_INLINE err_t setLetterSpacing(float spacing, uint32_t spacingMode)
-  {
-    return fog_api.font_setLetterSpacing(this, spacing, spacingMode);
-  }
+  //! @brief Get word spacing mode/value.
+  FOG_INLINE FontSpacing getWordSpacing() const { return FontSpacing(_d->features._wordSpacingMode, _d->features._wordSpacingValue); }
+  //! @brief Set word spacing mode/value.
+  FOG_INLINE err_t setWordSpacing(const FontSpacing& val) { return setParam(FONT_PARAM_WORD_SPACING, &val); }
 
-  FOG_INLINE err_t setWordSpacing(float spacing, uint32_t spacingMode)
-  {
-    return fog_api.font_setWordSpacing(this, spacing, spacingMode);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Accessors - Hints]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE const FontHints& getHints() const { return _d->hints; }
-  FOG_INLINE uint32_t getStyle() const { return _d->hints.getStyle(); }
-  FOG_INLINE uint32_t getWeight() const { return _d->hints.getWeight(); }
-  FOG_INLINE uint32_t getVariant() const { return _d->hints.getVariant(); }
-  FOG_INLINE uint32_t getDecoration() const { return _d->hints.getDecoration(); }
-  FOG_INLINE uint32_t getKerning() const { return _d->hints.getKerning(); }
-  FOG_INLINE uint32_t getHinting() const { return _d->hints.getHinting(); }
-  FOG_INLINE uint32_t getAlignMode() const { return _d->hints.getAlignMode(); }
-
-  FOG_INLINE err_t setHints(const FontHints& hints)
-  {
-    return fog_api.font_setHints(this, &hints);
-  }
-
-  FOG_INLINE err_t setStyle(uint32_t style)
-  {
-    return fog_api.font_setStyle(this, style);
-  }
-
-  FOG_INLINE err_t setWeight(uint32_t weight)
-  {
-    return fog_api.font_setWeight(this, weight);
-  }
-
-  FOG_INLINE err_t setVariant(uint32_t variant)
-  {
-    return fog_api.font_setVariant(this, variant);
-  }
-
-  FOG_INLINE err_t setDecoration(uint32_t decoration)
-  {
-    return fog_api.font_setDecoration(this, decoration);
-  }
-
-  FOG_INLINE err_t setKerning(uint32_t kerning)
-  {
-    return fog_api.font_setKerning(this, kerning);
-  }
-
-  FOG_INLINE err_t setHinting(uint32_t hinting)
-  {
-    return fog_api.font_setHinting(this, hinting);
-  }
-
-  FOG_INLINE err_t setAlignMode(uint32_t alignMode)
-  {
-    return fog_api.font_setAlignMode(this, alignMode);
-  }
-
+  //! @brief Get size adjust.
+  FOG_INLINE float getSizeAdjust() const { return _d->features._sizeAdjust; }
+  //! @brief Set size adjust.
+  FOG_INLINE err_t setSizeAdjust(float val) { return setParam(FONT_PARAM_SIZE_ADJUST, &val); }
+  
   // --------------------------------------------------------------------------
   // [Accessors - Matrix]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool hasMatrix() const { return (_d->flags & FONT_FLAG_HAS_MATRIX) != 0; }
+  //! @brief Get font matrix.
   FOG_INLINE const FontMatrix& getMatrix() const { return _d->matrix; }
-
-  FOG_INLINE err_t setTransform(const FontMatrix& matrix)
-  {
-    return fog_api.font_setMatrix(this, &matrix);
-  }
+  //! @brief Set font matrix to @a matrix.
+  FOG_INLINE err_t setMatrix(const FontMatrix& matrix) { return setParam(FONT_PARAM_MATRIX, &matrix); }
 
   // --------------------------------------------------------------------------
   // [Accessors - Metrics]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const FontMetricsF& getMetrics() const
-  {
-    return _d->metrics;
-  }
+  //! @brief Get font metrics.
+  FOG_INLINE const FontMetrics& getMetrics() const { return _d->metrics; }
+  //! @brief Get font size.
+  FOG_INLINE float getSize() const { return _d->metrics._size; }
+  //! @brief Get font ascent (positive).
+  FOG_INLINE float getAscent() const { return _d->metrics._ascent; }
+  //! @brief Get font descent (positive).
+  FOG_INLINE float getDescent() const { return _d->metrics._descent; }
+  //! @brief Get font capital letter height (positive).
+  FOG_INLINE float getCapHeight() const { return _d->metrics._capHeight; }
+  //! @brief Get font 'x' letter height (positive).
+  FOG_INLINE float getXHeight() const { return _d->metrics._xHeight; }
 
-  // --------------------------------------------------------------------------
-  // [Accessors - Caching]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool getForceCaching() const
-  {
-    return _d->forceCaching;
-  }
-
-  FOG_INLINE err_t setForceCaching(bool val)
-  {
-    return fog_api.font_setForceCaching(this, val);
-  }
+  //! @brief Set font size to @a size.
+  FOG_INLINE err_t setSize(float size) { return setParam(FONT_PARAM_SIZE, &size); }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -660,64 +902,83 @@ struct FOG_NO_EXPORT Font
   // [Create]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t create(const StringW& family, float height, uint32_t unit)
+  //! @brief Query for a requested font family and size using the default font 
+  //! features and identity matrix.
+  FOG_INLINE err_t create(const StringW& family, float size)
   {
-    return fog_api.font_create(this, &family, height, unit);
+    return fog_api.font_create(this, &family, size, NULL, NULL);
   }
 
-  FOG_INLINE err_t create(const StringW& family, float height, uint32_t unit,
-    const FontHints& hints, const TransformF& transform)
+  //! @brief Query for a requested font family and size using specified font 
+  //! features and identity matrix.
+  FOG_INLINE err_t create(const StringW& family, float size,
+    const FontFeatures& features);
   {
-    return fog_api.font_createEx(this, &family, height, unit, &hints, &transform);
+    return fog_api.font_create(this, &family, size, &features, &matrix);
   }
 
-  FOG_INLINE err_t _fromFace(FontFace* face, float height, uint32_t unit)
+  //! @brief Query for a requested font family and size using specified font 
+  //! features and matrix.
+  FOG_INLINE err_t create(const StringW& family, float size,
+    const FontFeatures& features, const FontMatrix& matrix);
   {
-    return fog_api.font_fromFace(this, face, height, unit);
+    return fog_api.font_create(this, &family, size, &features, &matrix);
+  }
+
+  //! @internal.
+  //!
+  //! @brief Low-level method to create font from existing @ref FontFace, 
+  //! typically retrieved by @ref FontEngine.
+  FOG_INLINE err_t _init(FontFace* face, float size,
+    const FontFeatures& features, const FontMatrix& matrix)
+  {
+    return fog_api.font_fromFace(this, face, size, &features, &matrix);
   }
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Glyphs]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t getTextOutline(PathF& dst, uint32_t cntOp, const PointF& pt, const StubW& str) const
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
+    const GlyphRun& glyphRun)
   {
-    return fog_api.font_getTextOutlineFStubW(this, &dst, cntOp, &pt, &str);
+    FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+    size_t length = glyphRun.getLength();
+
+    return fog_api.font_getOutlineFromGlyphRunF(&dst, cntOp,
+      &glyphRun._itemList.getData()->_glyphIndex, sizeof(GlyphItem),
+      &glyphRun._positionList.getData()->_position, sizeof(GlyphPosition),
+      length);
   }
 
-  FOG_INLINE err_t getTextOutline(PathF& dst, uint32_t cntOp, const PointF& pt, const StringW& str) const
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
+    const GlyphRun& glyphRun)
   {
-    return fog_api.font_getTextOutlineFStringW(this, &dst, cntOp, &pt, &str);
+    FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+    size_t length = glyphRun.getLength();
+
+    return fog_api.font_getOutlineFromGlyphRunD(&dst, cntOp,
+      &glyphRun._itemList.getData()->_glyphIndex, sizeof(GlyphItem),
+      &glyphRun._positionList.getData()->_position, sizeof(GlyphPosition),
+      length);
   }
 
-  FOG_INLINE err_t getTextOutline(PathD& dst, uint32_t cntOp, const PointD& pt, const StubW& str) const
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOps,
+    const uint32_t* glyphs, const PointF* positions, size_t length)
   {
-    return fog_api.font_getTextOutlineDStubW(this, &dst, cntOp, &pt, &str);
+    return fog_api.font.getOutlineFromGlyphRunF(&dst, cntOp,
+      glyphs, sizeof(uint32_t),
+      positions, sizeof(PointF),
+      length);
   }
 
-  FOG_INLINE err_t getTextOutline(PathD& dst, uint32_t cntOp, const PointD& pt, const StringW& str) const
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOps,
+    const uint32_t* glyphs, const PointF* positions, size_t length)
   {
-    return fog_api.font_getTextOutlineDStringW(this, &dst, cntOp, &pt, &str);
-  }
-
-  FOG_INLINE err_t getTextExtents(TextExtentsF& extents, const StubW& str) const
-  {
-    return fog_api.font_getTextExtentsFStubW(this, &extents, &str);
-  }
-
-  FOG_INLINE err_t getTextExtents(TextExtentsF& extents, const StringW& str) const
-  {
-    return fog_api.font_getTextExtentsFStringW(this, &extents, &str);
-  }
-
-  FOG_INLINE err_t getTextExtents(TextExtentsD& extents, const StubW& str) const
-  {
-    return fog_api.font_getTextExtentsDStubW(this, &extents, &str);
-  }
-
-  FOG_INLINE err_t getTextExtents(TextExtentsD& extents, const StringW& str) const
-  {
-    return fog_api.font_getTextExtentsDStringW(this, &extents, &str);
+    return fog_api.font.getOutlineFromGlyphRunD(&dst, cntOp,
+      glyphs, sizeof(uint32_t),
+      positions, sizeof(PointF),
+      length);
   }
 
   // --------------------------------------------------------------------------

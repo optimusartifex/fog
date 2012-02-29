@@ -2538,6 +2538,53 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(void, font_dFree)(FontData* d);
 
   // --------------------------------------------------------------------------
+  // [G2d/Text - FontCollection]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(fontcollection_ctor)(FontCollection* self);
+  FOG_CAPI_CTOR(fontcollection_ctorCopy)(FontCollection* self, const FontCollection* other);
+  FOG_CAPI_DTOR(fontcollection_dtor)(FontCollection* self);
+
+  FOG_CAPI_METHOD(err_t, fontcollection_detach)(FontCollection* self);
+  FOG_CAPI_METHOD(void, fontcollection_clear)(FontCollection* self);
+  FOG_CAPI_METHOD(void, fontcollection_reset)(FontCollection* self);
+
+  FOG_CAPI_METHOD(err_t, fontcollection_setList)(FontCollection* self, const List<FontInfo>* list);
+  FOG_CAPI_METHOD(err_t, fontcollection_addItem)(FontCollection* self, const FontInfo* item);
+
+  FOG_CAPI_METHOD(err_t, fontcollection_copy)(FontCollection* self, const FontCollection* other);
+  FOG_CAPI_STATIC(bool, fontcollection_eq)(const FontCollection* a, const FontCollection* b);
+
+  FOG_CAPI_STATIC(FontCollectionData*, fontcollection_dCreate)(void);
+  FOG_CAPI_STATIC(void, fontcollection_dFree)(FontCollectionData* d);
+
+  FontCollection* fontcollection_oNull;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Text - FontInfo]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(fontinfo_ctor)(FontInfo* self);
+  FOG_CAPI_CTOR(fontinfo_ctorCopy)(FontInfo* self, const FontInfo* other);
+  FOG_CAPI_DTOR(fontinfo_dtor)(FontInfo* self);
+
+  FOG_CAPI_METHOD(err_t, fontinfo_detach)(FontInfo* self);
+  FOG_CAPI_METHOD(void, fontinfo_reset)(FontInfo* self);
+
+  FOG_CAPI_METHOD(err_t, fontinfo_setDefs)(FontInfo* self, const FontDefs* defs);
+  FOG_CAPI_METHOD(err_t, fontinfo_setFamilyName)(FontInfo* self, const StringW* familyName);
+  FOG_CAPI_METHOD(err_t, fontinfo_setFileName)(FontInfo* self, const StringW* fileName);
+
+  FOG_CAPI_METHOD(err_t, fontinfo_copy)(FontInfo* self, const FontInfo* other);
+  FOG_CAPI_STATIC(bool, fontinfo_eq)(const FontInfo* a, const FontInfo* b);
+  FOG_CAPI_STATIC(int, fontinfo_compare)(const FontInfo* a, const FontInfo* b);
+
+  FOG_CAPI_STATIC(FontInfoData*, fontinfo_dCreate)(const StringW* familyName, const StringW* fileName);
+  FOG_CAPI_STATIC(void, fontinfo_dFree)(FontInfoData* d);
+
+  FontInfo* fontinfo_oNull;
+
+  // --------------------------------------------------------------------------
   // [G2d/Tools - Dpi]
   // --------------------------------------------------------------------------
 

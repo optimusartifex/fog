@@ -10,6 +10,8 @@
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/Char.h>
+#include <Fog/Core/Tools/Hash.h>
+#include <Fog/Core/Tools/List.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Geometry/Rect.h>
@@ -324,7 +326,7 @@ struct FOG_NO_EXPORT FontFeatures
   FOG_INLINE void setCaps(uint32_t caps) { _caps = caps; }
 
   FOG_INLINE uint32_t getNumericFigure() const { return _numericFigure; }
-  FOG_INLINE void setx(uint32_t numericFigure) { _numericFigure = numericFigure; }
+  FOG_INLINE void setNumericFigure(uint32_t numericFigure) { _numericFigure = numericFigure; }
 
   FOG_INLINE uint32_t getNumericSpacing() const { return _numericSpacing; }
   FOG_INLINE void setNumericSpacing(uint32_t numericSpacing) { _numericSpacing = numericSpacing; }
@@ -356,8 +358,32 @@ struct FOG_NO_EXPORT FontFeatures
   FOG_INLINE float getWordSpacingValue() const { return _wordSpacingValue; }
   FOG_INLINE void setWordSpacingValue(float val) { _wordSpacingValue = val; }
 
+  FOG_INLINE uint32_t getWeight() const { return _weight; }
+  FOG_INLINE void setWeight(uint32_t val) { _weight = val; }
+
+  FOG_INLINE uint32_t getStretch() const { return _stretch; }
+  FOG_INLINE void setStretch(uint32_t val) { _stretch = val; }
+
+  FOG_INLINE uint32_t getDecoration() const { return _decoration; }
+  FOG_INLINE void setDecoration(uint32_t val) { _decoration = val; }
+
+  FOG_INLINE uint32_t getStyle() const { return _style; }
+  FOG_INLINE void setStyle(uint32_t val) { _style = val; }
+
   FOG_INLINE float getSizeAdjust() const { return _sizeAdjust; }
   FOG_INLINE void setSizeAdjust(float val) { _sizeAdjust = val; }
+
+  FOG_INLINE bool hasLetterSpacing() const
+  {
+    return (_letterSpacingMode == FONT_SPACING_ABSOLUTE   && _letterSpacingValue == 0.0f) ||
+           (_letterSpacingMode == FONT_SPACING_PERCENTAGE && _letterSpacingValue == 1.0f) ;
+  }
+
+  FOG_INLINE bool hasWordSpacing() const
+  {
+    return (_wordSpacingMode == FONT_SPACING_ABSOLUTE   && _wordSpacingValue == 0.0f) ||
+           (_wordSpacingMode == FONT_SPACING_PERCENTAGE && _wordSpacingValue == 1.0f) ;
+  }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -373,6 +399,15 @@ struct FOG_NO_EXPORT FontFeatures
   }
 
   // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const FontFeatures& other) const
+  {
+    return MemOps::eq_t<FontFeatures>(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -381,6 +416,9 @@ struct FOG_NO_EXPORT FontFeatures
     MemOps::copy_t<FontFeatures>(this, &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const FontFeatures& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FontFeatures& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -448,6 +486,101 @@ struct FOG_NO_EXPORT FontFeatures
 };
 
 // ============================================================================
+// [Fog::FontDefs]
+// ============================================================================
+
+//! @brief Font per face definitions.
+//!
+//! These definitions should match single font file.
+struct FOG_NO_EXPORT FontDefs
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontDefs()
+  {
+    _packed = 0;
+  }
+
+  explicit FOG_INLINE FontDefs(_Uninitialized) {}
+
+  FOG_INLINE FontDefs(uint32_t weight, uint32_t stretch, bool italic)
+  {
+    _packed = 0;
+    _weight = weight;
+    _stretch = stretch;
+    _italic = italic;
+  }
+
+  FOG_INLINE FontDefs(const FontDefs& other)
+  {
+    _packed = other._packed;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getWeight() const { return _weight; }
+  FOG_INLINE void setWeight(uint32_t weight) { _weight = weight; }
+
+  FOG_INLINE uint32_t getStretch() const { return _stretch; }
+  FOG_INLINE void setStretch(uint32_t stretch) { _stretch = stretch; }
+
+  FOG_INLINE bool getItalic() const { return (bool)_italic; }
+  FOG_INLINE void setItalic(bool italic) { _italic = italic; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    _packed = 0;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const FontDefs& other) const
+  {
+    return _packed == other._packed;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontDefs& operator=(const FontDefs& other)
+  {
+    _packed = other._packed;
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const FontDefs& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FontDefs& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  union
+  {
+    struct
+    {
+      uint32_t _weight : 8;
+      uint32_t _stretch : 8;
+      uint32_t _italic : 1;
+      uint32_t _reserved : 15;
+    };
+
+    uint32_t _packed;
+  };
+};
+
+// ============================================================================
 // [Fog::FontMatrix]
 // ============================================================================
 
@@ -482,6 +615,35 @@ struct FOG_NO_EXPORT FontMatrix
   }
 
   // --------------------------------------------------------------------------
+  // [Flags]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool isIdentity() const
+  {
+    return _xx == 1.0f && _xy == 0.0f &&
+           _yx == 0.0f && _yy == 1.0f ;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    _xx = 1.0f; _xy = 0.0f;
+    _yx = 0.0f; _yy = 1.0f;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const FontMatrix& other) const
+  {
+    return MemOps::eq_t<FontMatrix>(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
@@ -490,6 +652,9 @@ struct FOG_NO_EXPORT FontMatrix
     MemOps::copy_t<FontMatrix>(this, &other);
     return *this;
   }
+
+  FOG_INLINE bool operator==(const FontMatrix& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FontMatrix& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -508,6 +673,370 @@ struct FOG_NO_EXPORT FontMatrix
 };
 
 // ============================================================================
+// [Fog::FontInfoData]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontInfoData
+{
+  // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontInfoData* addRef() const
+  {
+    reference.inc();
+    return const_cast<FontInfoData*>(this);
+  }
+
+  FOG_INLINE void release()
+  {
+    if (reference.deref())
+      fog_api.fontinfo_dFree(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Reference count.
+  mutable Atomic<size_t> reference;
+
+  //! @brief Variable type and flags.
+  uint32_t vType;
+
+  //! @brief Font definitions.
+  FontDefs defs;
+
+  //! @brief Font-family name.
+  Static<StringW> familyName;
+
+  //! @brief Font file-name, including path.
+  //!
+  //! @note This member is only filled in case that the font can be loaded
+  //! from disk and the font engine is able to get the path and file name from
+  //! the native API. In case the this font is a custom font, which needs to be
+  //! loaded from disk, fileName is always filled.
+  Static<StringW> fileName;
+};
+
+// ============================================================================
+// [Fog::FontInfo]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontInfo
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontInfo()
+  {
+    fog_api.fontinfo_ctor(this);
+  }
+
+  FOG_INLINE FontInfo(const FontInfo& other)
+  {
+    fog_api.fontinfo_ctorCopy(this, &other);
+  }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FontInfo(FontInfo&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  explicit FOG_INLINE FontInfo(FontInfoData* d) :
+    _d(d)
+  {
+  }
+
+  FOG_INLINE ~FontInfo()
+  {
+    fog_api.fontinfo_dtor(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
+  FOG_INLINE bool isDetached() const { return _d->reference.get() == 1; }
+
+  FOG_INLINE err_t detach() { return _d->reference.get() != 1 ? _detach() : (err_t)ERR_OK; }
+  FOG_INLINE err_t _detach() { return fog_api.fontinfo_detach(this); }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setFontInfo(const FontInfo& other) { return fog_api.fontinfo_copy(this, &other); }
+
+  FOG_INLINE bool hasFamilyName() const { return _d->familyName().getLength() != 0; }
+  FOG_INLINE bool hasFileName() const { return _d->fileName().getLength() != 0; }
+
+  FOG_INLINE FontDefs getDefs() const { return _d->defs; }
+  FOG_INLINE err_t setDefs(const FontDefs& defs) { return fog_api.fontinfo_setDefs(this, &defs); }
+
+  FOG_INLINE const StringW& getFamilyName() const { return _d->familyName; }
+  FOG_INLINE err_t setFamilyName(const StringW& familyName) { return fog_api.fontinfo_setFamilyName(this, &familyName); }
+
+  FOG_INLINE const StringW& getFileName() const { return _d->fileName; }
+  FOG_INLINE err_t setFileName(const StringW& fileName) { return fog_api.fontinfo_setFileName(this, &fileName); }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    fog_api.fontinfo_reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const FontInfo& other) const
+  {
+    return fog_api.fontinfo_eq(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Compare]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE int compare(const FontInfo& other) const
+  {
+    return fog_api.fontinfo_compare(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontInfo& operator=(const FontInfo& other)
+  {
+    fog_api.fontinfo_copy(this, &other);
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const FontInfo& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FontInfo& other) const { return !eq(other); }
+
+  FOG_INLINE bool operator<=(const FontInfo& other) const { return compare(other) <= 0; }
+  FOG_INLINE bool operator< (const FontInfo& other) const { return compare(other) <  0; }
+  FOG_INLINE bool operator>=(const FontInfo& other) const { return compare(other) >= 0; }
+  FOG_INLINE bool operator> (const FontInfo& other) const { return compare(other) >  0; }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Eq]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const FontInfo* a, const FontInfo* b)
+  {
+    return fog_api.fontinfo_eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)fog_api.fontinfo_eq;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Compare]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE int compare(const FontInfo* a, const FontInfo* b)
+  {
+    return fog_api.fontinfo_compare(a, b);
+  }
+
+  static FOG_INLINE CompareFunc getCompareFunc()
+  {
+    return (CompareFunc)fog_api.fontinfo_compare;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  _FOG_CLASS_D(FontInfoData)
+};
+
+// ============================================================================
+// [Fog::FontCollectionData]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontCollectionData
+{
+  // --------------------------------------------------------------------------
+  // [AddRef / Release]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontCollectionData* addRef() const
+  {
+    reference.inc();
+    return const_cast<FontCollectionData*>(this);
+  }
+
+  FOG_INLINE void release()
+  {
+    if (reference.deref())
+      fog_api.fontcollection_dFree(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Reference count.
+  mutable Atomic<size_t> reference;
+
+  //! @brief Variable type and flags.
+  uint32_t vType;
+  //! @brief Collection flags.
+  uint32_t flags;
+
+  //! @brief List of collected FontInfo instances.
+  Static< List<FontInfo> > fontList;
+  //! @brief Hash, contains font families and their count in fontList.
+  Static< Hash<StringW, size_t> > fontHash;
+};
+
+// ============================================================================
+// [Fog::FontCollection]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontCollection
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontCollection()
+  {
+    fog_api.fontcollection_ctor(this);
+  }
+
+  FOG_INLINE FontCollection(const FontCollection& other)
+  {
+    fog_api.fontcollection_ctorCopy(this, &other);
+  }
+
+#if defined(FOG_CC_HAS_RVALUE)
+  FOG_INLINE FontCollection(FontCollection&& other) : _d(other._d) { other._d = NULL; }
+#endif // FOG_CC_HAS_RVALUE
+
+  explicit FOG_INLINE FontCollection(FontCollectionData* d) :
+    _d(d)
+  {
+  }
+
+  FOG_INLINE ~FontCollection()
+  {
+    fog_api.fontcollection_dtor(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Sharing]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE size_t getReference() const { return _d->reference.get(); }
+  FOG_INLINE bool isDetached() const { return _d->reference.get() == 1; }
+
+  FOG_INLINE err_t detach() { return _d->reference.get() != 1 ? _detach() : (err_t)ERR_OK; }
+  FOG_INLINE err_t _detach() { return fog_api.fontcollection_detach(this); }
+
+  // --------------------------------------------------------------------------
+  // [Flags]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getFlags() const { return _d->flags; }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setCollection(const FontCollection& other)
+  {
+    return fog_api.fontcollection_copy(this, &other);
+  }
+
+  FOG_INLINE const List<FontInfo>& getList() const
+  {
+    return _d->fontList;
+  }
+
+  FOG_INLINE err_t setList(const List<FontInfo>& list)
+  {
+    return fog_api.fontcollection_setList(this, &list);
+  }
+
+  FOG_INLINE err_t addItem(const FontInfo& item)
+  {
+    return fog_api.fontcollection_addItem(this, &item);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Clear]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void clear()
+  {
+    fog_api.fontcollection_clear(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    fog_api.fontcollection_reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const FontCollection& other) const
+  {
+    return fog_api.fontcollection_eq(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontCollection& operator=(const FontCollection& other)
+  {
+    fog_api.fontcollection_copy(this, &other);
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const FontCollection& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FontCollection& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Statics - Eq]
+  // --------------------------------------------------------------------------
+
+  static FOG_INLINE bool eq(const FontCollection* a, const FontCollection* b)
+  {
+    return fog_api.fontcollection_eq(a, b);
+  }
+
+  static FOG_INLINE EqFunc getEqFunc()
+  {
+    return (EqFunc)fog_api.fontcollection_eq;
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  _FOG_CLASS_D(FontCollectionData)
+};
+
+// ============================================================================
 // [Fog::FontEngineVTable]
 // ============================================================================
 
@@ -516,7 +1045,9 @@ struct FOG_NO_EXPORT FontEngineVTable
 {
   void (FOG_CDECL* destroy)(FontEngine* self);
 
-  
+  err_t (FOG_CDECL* getAvailableFonts)(const FontEngine* self, List<FontInfo>* dst);
+  err_t (FOG_CDECL* getDefaultFamily)(const FontEngine* self, StringW* dst);
+  err_t (FOG_CDECL* getFontFace)(const FontEngine* self, FontFace** dst, const StringW* family, const FontDefs* defs);
 };
 
 // ============================================================================
@@ -526,12 +1057,48 @@ struct FOG_NO_EXPORT FontEngineVTable
 struct FOG_NO_EXPORT FontEngine
 {
   // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FontEngine()
+  {
+    vtable = NULL;
+    engineId = FONT_ENGINE_NULL;
+    reserved = 0;
+    fontCollection.init();
+  }
+
+  FOG_INLINE ~FontEngine()
+  {
+    fontCollection.destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Interface]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void destroy()
+  {
+    vtable->destroy(this);
+  }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Font engine virtual table.
   FontEngineVTable* vtable;
 
-  
+  //! @brief Font engine id.
+  uint32_t engineId;
+  //! @brief Reserved for future use.
+  uint32_t reserved;
+
+  //! @brief Font collection.
+  Static<FontCollection> fontCollection;
+
+private:
+  _FOG_NO_COPY(FontEngine)
 };
 
 // ============================================================================
@@ -582,7 +1149,7 @@ struct FOG_NO_EXPORT FontFace
     vtable = vtable_;
 
     reference.init(1);
-    engineId = FONT_FACE_NULL;
+    engineId = FONT_ENGINE_NULL;
     features = NO_FLAGS;
     family.initCustom1(family_);
     designMetrics.reset();
@@ -611,7 +1178,7 @@ struct FOG_NO_EXPORT FontFace
   }
 
   // --------------------------------------------------------------------------
-  // [Methods]
+  // [Interface]
   // --------------------------------------------------------------------------
 
   FOG_INLINE void destroy()
@@ -949,15 +1516,15 @@ struct FOG_NO_EXPORT Font
   //! @brief Query for a requested font family and size using specified font 
   //! features and identity matrix.
   FOG_INLINE err_t create(const StringW& family, float size,
-    const FontFeatures& features);
+    const FontFeatures& features)
   {
-    return fog_api.font_create(this, &family, size, &features, &matrix);
+    return fog_api.font_create(this, &family, size, &features, NULL);
   }
 
   //! @brief Query for a requested font family and size using specified font 
   //! features and matrix.
   FOG_INLINE err_t create(const StringW& family, float size,
-    const FontFeatures& features, const FontMatrix& matrix);
+    const FontFeatures& features, const FontMatrix& matrix)
   {
     return fog_api.font_create(this, &family, size, &features, &matrix);
   }
@@ -969,7 +1536,7 @@ struct FOG_NO_EXPORT Font
   FOG_INLINE err_t _init(FontFace* face, float size,
     const FontFeatures& features, const FontMatrix& matrix)
   {
-    return fog_api.font_fromFace(this, face, size, &features, &matrix);
+    return fog_api.font_init(this, face, size, &features, &matrix);
   }
 
   // --------------------------------------------------------------------------
@@ -977,7 +1544,7 @@ struct FOG_NO_EXPORT Font
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
-    const GlyphRun& glyphRun)
+    const GlyphRun& glyphRun) const
   {
     FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
 
@@ -985,12 +1552,12 @@ struct FOG_NO_EXPORT Font
     const GlyphPosition* positions = glyphRun._positionList.getData();
     size_t length = glyphRun.getLength();
 
-    return fog_api.font_getOutlineFromGlyphRunF(&dst, cntOp,
+    return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp,
       &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
   }
 
   FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
-    const GlyphRun& glyphRun)
+    const GlyphRun& glyphRun) const
   {
     FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
 
@@ -998,21 +1565,21 @@ struct FOG_NO_EXPORT Font
     const GlyphPosition* positions = glyphRun._positionList.getData();
     size_t length = glyphRun.getLength();
 
-    return fog_api.font_getOutlineFromGlyphRunD(&dst, cntOp,
+    return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp,
       &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
   }
 
-  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOps,
-    const uint32_t* glyphs, const PointF* positions, size_t length)
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
+    const uint32_t* glyphs, const PointF* positions, size_t length) const
   {
-    return fog_api.font.getOutlineFromGlyphRunF(&dst, cntOp,
+    return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp,
       glyphs, sizeof(uint32_t), positions, sizeof(PointF), length);
   }
 
-  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOps,
-    const uint32_t* glyphs, const PointF* positions, size_t length)
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
+    const uint32_t* glyphs, const PointF* positions, size_t length) const
   {
-    return fog_api.font.getOutlineFromGlyphRunD(&dst, cntOp,
+    return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp,
       glyphs, sizeof(uint32_t), positions, sizeof(PointF), length);
   }
 

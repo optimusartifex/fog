@@ -141,6 +141,8 @@ _FOG_VAR_DECLARE_ID(Fog::ImagePalette          , Fog::VAR_TYPE_IMAGE_PALETTE)
 _FOG_VAR_DECLARE_ID(Fog::ImageFilter           , Fog::VAR_TYPE_IMAGE_FILTER)
 
 _FOG_VAR_DECLARE_ID(Fog::Font                  , Fog::VAR_TYPE_FONT)
+_FOG_VAR_DECLARE_ID(Fog::FontInfo              , Fog::VAR_TYPE_FONT_INFO)
+_FOG_VAR_DECLARE_ID(Fog::FontCollection        , Fog::VAR_TYPE_FONT_COLLECTION)
 
 // [Guard]
 #endif // _FOG_CORE_TOOLS_VARID_H

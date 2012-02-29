@@ -199,10 +199,7 @@ FOG_CAPI_DECLARE void _fog_fini(void)
     return;
 
   // [G2d/Text]
-  FontManager_fini();
   Font_fini();
-  GlyphOutline_fini();
-  GlyphBitmap_fini();
 
   // [G2d/Imaging]
   ImageCodecProvider_fini();

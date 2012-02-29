@@ -2902,6 +2902,8 @@ enum VAR_TYPE
   VAR_TYPE_IMAGE_FILTER = 80,
 
   VAR_TYPE_FONT = 81,
+  VAR_TYPE_FONT_INFO = 82,
+  VAR_TYPE_FONT_COLLECTION = 83,
 
   // --------------------------------------------------------------------------
   // [Ref]

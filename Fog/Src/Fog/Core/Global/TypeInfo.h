@@ -510,7 +510,10 @@ _FOG_TYPE_DECLARE(Fog::RectangularGradientD    , C(MOVABLE)               | F(NO
 
 // [Fog/G2d/Text]
 _FOG_TYPE_DECLARE(Fog::Font                    , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))
+_FOG_TYPE_DECLARE(Fog::FontCollection          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontDefs                , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FontFeatures            , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FontInfo                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FontMatrix              , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FontMetrics             , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FontSpacing             , C(SIMPLE )               | F(NO_CMP )            )

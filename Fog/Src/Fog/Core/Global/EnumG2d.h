@@ -1042,7 +1042,9 @@ enum FONT_DECORATION
 {
   FONT_DECORATION_NONE = 0x00,
   FONT_DECORATION_UNDERLINE = 0x01,
-  FONT_DECORATION_STRIKETHROUGH = 0x02
+  FONT_DECORATION_STRIKETHROUGH = 0x02,
+
+  FONT_DECORATION_MAX = 0x03
 };
 
 // ============================================================================
@@ -1074,23 +1076,22 @@ enum FONT_EAST_ASIAN_WIDTH
 };
 
 // ============================================================================
-// [Fog::FONT_FACE]
+// [Fog::FONT_ENGINE]
 // ============================================================================
 
-//! @brief Type of font-face.
-enum FONT_FACE
+//! @brief Font-provider IDs.
+enum FONT_ENGINE
 {
-  //! @brief Null font-face (dummy face that is used if something failed or on-demand).
-  FONT_FACE_NULL = 0,
-  //! @brief Windows font-face (HFONT instance).
-  FONT_FACE_WINDOWS = 1,
-  //! @brief Mac font-face.
-  FONT_FACE_MAC = 2,
-  //! @brief Freetype font-face (FT_Face).
-  FONT_FACE_FREETYPE = 3,
-
-  //! @brief Count of font-faces.
-  FONT_FACE_COUNT = 4
+  //! @brief Null font engine.
+  //!
+  //! Created only if something failed.
+  FONT_ENGINE_NULL = 0,
+  //! @brief Windows font engine.
+  FONT_ENGINE_WINDOWS = 1,
+  //! @brief Mac font engine.
+  FONT_ENGINE_MAC = 2,
+  //! @brief Freetype font engine.
+  FONT_ENGINE_FREETYPE = 3
 };
 
 // ============================================================================
@@ -1284,12 +1285,14 @@ enum FONT_FEATURE
 
 enum FONT_FLAG
 {
-  //! @brief The font properties contains custom letter-spacing.
-  FONT_FLAG_HAS_LETTER_SPACING = 0x01,
-  //! @brief The font properties contains custom word-spacing.
-  FONT_FLAG_HAS_WORD_SPACING = 0x02,
+  //! @brief Whether the font-size is aligned to integer (pixel).
+  FONT_FLAG_IS_ALIGNED_SIZE = 0x01,
+  //! @brief Font properties contains custom letter-spacing.
+  FONT_FLAG_HAS_LETTER_SPACING = 0x02,
+  //! @brief Font properties contains custom word-spacing.
+  FONT_FLAG_HAS_WORD_SPACING = 0x04,
   //! @brief Whether the font transformation matrix is not identity.
-  FONT_FLAG_HAS_MATRIX = 0x04
+  FONT_FLAG_HAS_MATRIX = 0x08
 };
 
 // ============================================================================
@@ -1302,7 +1305,10 @@ enum FONT_KERNING
   //! @brief Disable the use of kerning.
   FONT_KERNING_DISABLED = 0,
   //! @brief Enable the use of kerning (default).
-  FONT_KERNING_ENABLED = 1
+  FONT_KERNING_ENABLED = 1,
+
+  //! @brief Count of FONT_KERNING options.
+  FONT_KERNING_COUNT = 2
 };
 
 // ============================================================================
@@ -1343,22 +1349,6 @@ enum FONT_NUMERIC_SPACING
 };
 
 // ============================================================================
-// [Fog::FONT_ORDER]
-// ============================================================================
-
-//! @brief Font-provider order.
-enum FONT_ORDER
-{
-  //! @brief Prepend the provider (add it as the first, taking the highest
-  //! relevance).
-  FONT_ORDER_FIRST = 0,
-
-  //! @brief Append the provider (add it as the last item, taking the lowest
-  //! relevance).
-  FONT_ORDER_LAST = 1
-};
-
-// ============================================================================
 // [Fog::FONT_PARAM]
 // ============================================================================
 
@@ -1388,29 +1378,6 @@ enum FONT_PARAM
   FONT_PARAM_MATRIX,
 
   FONT_PARAM_COUNT
-};
-
-// ============================================================================
-// [Fog::FONT_PROVIDER]
-// ============================================================================
-
-//! @brief Font-provider IDs.
-enum FONT_PROVIDER
-{
-  //! @brief Null font-provider (only for compatibility with @c FONT_FACE, never created).
-  FONT_PROVIDER_NULL = 0,
-  //! @brief Windows font-provider.
-  FONT_PROVIDER_WINDOWS = 1,
-  //! @brief Mac font-provider.
-  FONT_PROVIDER_MAC = 2,
-  //! @brief Freetype font-provider.
-  FONT_PROVIDER_FT = 3,
-  //! @brief Freetype font-provider (including fontconfig support if available).
-  //! @brief Custom font-provider (SVG/CSS/Others...).
-  FONT_PROVIDER_CUSTOM = 4,
-
-  //! @brief Count of font-providers.
-  FONT_PROVIDER_COUNT = 5
 };
 
 // ============================================================================
@@ -1464,7 +1431,9 @@ enum FONT_STRETCH
   FONT_STRETCH_SEMI_EXPANDED = 60,
   FONT_STRETCH_EXPANDED = 70,
   FONT_STRETCH_EXTRA_EXPANDED = 80,
-  FONT_STRETCH_ULTRA_EXPANDED = 90
+  FONT_STRETCH_ULTRA_EXPANDED = 90,
+
+  FONT_STRETCH_MAX = FONT_STRETCH_ULTRA_EXPANDED
 };
 
 // ============================================================================
@@ -1518,7 +1487,9 @@ enum FONT_WEIGHT
   FONT_WEIGHT_SEMIBOLD   = FONT_WEIGHT_600,
   FONT_WEIGHT_BOLD       = FONT_WEIGHT_700,
   FONT_WEIGHT_EXTRABOLD  = FONT_WEIGHT_800,
-  FONT_WEIGHT_BLACK      = FONT_WEIGHT_900
+  FONT_WEIGHT_BLACK      = FONT_WEIGHT_900,
+
+  FONT_WEIGHT_MAX = FONT_WEIGHT_900
 };
 
 // ============================================================================

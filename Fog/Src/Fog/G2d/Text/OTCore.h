@@ -102,14 +102,14 @@ struct FOG_NO_EXPORT OT_BYTE
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setValue(Type value) { _b[0] = value; }
   FOG_INLINE Type getValue() const { return _b[0]; }
+  FOG_INLINE void setValue(Type value) { _b[0] = value; }
 
   FOG_INLINE operator Type() const { return getValue(); }
   FOG_INLINE OT_BYTE& operator=(Type value) { setValue(value); return *this; }
 
-  FOG_INLINE bool operator==(const Type& other) { return _b[0] == other; }
-  FOG_INLINE bool operator!=(const Type& other) { return _b[0] != other; }
+  FOG_INLINE bool operator==(const Type& other) const { return _b[0] == other; }
+  FOG_INLINE bool operator!=(const Type& other) const { return _b[0] != other; }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -131,14 +131,14 @@ struct FOG_NO_EXPORT OT_CHAR
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setValue(Type value) { _b[0] = value; }
   FOG_INLINE Type getValue() const { return _b[0]; }
+  FOG_INLINE void setValue(Type value) { _b[0] = value; }
 
   FOG_INLINE operator Type() const { return getValue(); }
   FOG_INLINE OT_CHAR& operator=(Type value) { setValue(value); return *this; }
 
-  FOG_INLINE bool operator==(const Type& other) { return _b[0] == other; }
-  FOG_INLINE bool operator!=(const Type& other) { return _b[0] != other; }
+  FOG_INLINE bool operator==(const Type& other) const { return _b[0] == other; }
+  FOG_INLINE bool operator!=(const Type& other) const { return _b[0] != other; }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -159,22 +159,16 @@ struct FOG_NO_EXPORT OT_USHORT
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setValueA(Type value)
-  {
-    FOG_ASSERT_ALIGNED(_b, 2);
-    reinterpret_cast<uint16_t*>(_b)[0] = MemOps::bswap16be(value);
-  }
-
   FOG_INLINE Type getValueA() const
   {
     FOG_ASSERT_ALIGNED(_b, 2);
     return MemOps::bswap16be(reinterpret_cast<const uint16_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawA(Type value)
+  FOG_INLINE void setValueA(Type value)
   {
     FOG_ASSERT_ALIGNED(_b, 2);
-    reinterpret_cast<uint16_t*>(_b)[0] = value;
+    reinterpret_cast<uint16_t*>(_b)[0] = MemOps::bswap16be(value);
   }
 
   FOG_INLINE Type getRawA() const
@@ -183,52 +177,58 @@ struct FOG_NO_EXPORT OT_USHORT
     return reinterpret_cast<const uint16_t*>(_b)[0];
   }
 
-#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
-  FOG_INLINE void setValueU(Type value)
+  FOG_INLINE void setRawA(Type value)
   {
-    reinterpret_cast<uint16_t*>(_b)[0] = MemOps::bswap16be(value);
+    FOG_ASSERT_ALIGNED(_b, 2);
+    reinterpret_cast<uint16_t*>(_b)[0] = value;
   }
 
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
   FOG_INLINE Type getValueU() const
   {
     return MemOps::bswap16be(reinterpret_cast<const uint16_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    reinterpret_cast<uint16_t*>(_b)[0] = value;
+    reinterpret_cast<uint16_t*>(_b)[0] = MemOps::bswap16be(value);
   }
 
   FOG_INLINE Type getRawU() const
   {
     return reinterpret_cast<const uint16_t*>(_b)[0];
   }
+
+  FOG_INLINE void setRawU(Type value)
+  {
+    reinterpret_cast<uint16_t*>(_b)[0] = value;
+  }
 #else
+  FOG_INLINE Type getValueU() const
+  {
+    return (static_cast<uint16_t>(_b[0]) << 8) + static_cast<uint16_t>(_b[1]);
+  }
+
   FOG_INLINE void setValueU(Type value)
   {
     _b[0] = static_cast<uint8_t>(value << 8);
     _b[1] = static_cast<uint8_t>(value     );
   }
 
-  FOG_INLINE Type getValueU() const
+# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+  FOG_INLINE Type getRawU() const
   {
-    return (static_cast<uint16_t>(_b[0]) << 8) + static_cast<uint16_t>(_b[1]);
+    return static_cast<uint16_t>(_b[0]) + (static_cast<uint16_t>(_b[1]) << 8);
   }
 
-# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
   FOG_INLINE void setRawU(Type value)
   {
     _b[0] = static_cast<uint8_t>(value     );
     _b[1] = static_cast<uint8_t>(value << 8);
   }
-
-  FOG_INLINE Type getRawU() const
-  {
-    return static_cast<uint16_t>(_b[0]) + (static_cast<uint16_t>(_b[1]) << 8);
-  }
 # else
-  FOG_INLINE void setRawU(Type value) { setValueU(value); }
   FOG_INLINE Type getRawU() const { return getValueU(); }
+  FOG_INLINE void setRawU(Type value) { setValueU(value); }
 # endif
 #endif
 
@@ -254,22 +254,16 @@ struct FOG_NO_EXPORT OT_SHORT
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setValueA(Type value)
-  {
-    FOG_ASSERT_ALIGNED(_b, 2);
-    reinterpret_cast<int16_t*>(_b)[0] = MemOps::bswap16be(value);
-  }
-
   FOG_INLINE Type getValueA() const
   {
     FOG_ASSERT_ALIGNED(_b, 2);
     return MemOps::bswap16be(reinterpret_cast<const int16_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawA(Type value)
+  FOG_INLINE void setValueA(Type value)
   {
     FOG_ASSERT_ALIGNED(_b, 2);
-    reinterpret_cast<int16_t*>(_b)[0] = value;
+    reinterpret_cast<int16_t*>(_b)[0] = MemOps::bswap16be(value);
   }
 
   FOG_INLINE Type getRawA() const
@@ -277,55 +271,59 @@ struct FOG_NO_EXPORT OT_SHORT
     FOG_ASSERT_ALIGNED(_b, 2);
     return reinterpret_cast<const int16_t*>(_b)[0];
   }
-
-#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
-  FOG_INLINE void setValueU(Type value)
+  FOG_INLINE void setRawA(Type value)
   {
-    reinterpret_cast<int16_t*>(_b)[0] = MemOps::bswap16be(value);
+    FOG_ASSERT_ALIGNED(_b, 2);
+    reinterpret_cast<int16_t*>(_b)[0] = value;
   }
 
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
   FOG_INLINE Type getValueU() const
   {
     return MemOps::bswap16be(reinterpret_cast<const int16_t*>(_b)[0]);
   }
-
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    reinterpret_cast<int16_t*>(_b)[0] = value;
+    reinterpret_cast<int16_t*>(_b)[0] = MemOps::bswap16be(value);
   }
 
   FOG_INLINE Type getRawU() const
   {
     return reinterpret_cast<const int16_t*>(_b)[0];
   }
-#else
-  FOG_INLINE void setValueU(Type value)
-  {
-    _b[0] = static_cast<uint8_t>(static_cast<uint16_t>(value) << 8);
-    _b[1] = static_cast<uint8_t>(static_cast<uint16_t>(value)     );
-  }
 
+  FOG_INLINE void setRawU(Type value)
+  {
+    reinterpret_cast<int16_t*>(_b)[0] = value;
+  }
+#else
   FOG_INLINE Type getValueU() const
   {
     return static_cast<Type>(
       (static_cast<uint16_t>(_b[0]) << 8) + static_cast<uint16_t>(_b[1]));
   }
 
-# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    _b[0] = static_cast<uint8_t>(static_cast<uint16_t>(value)     );
-    _b[1] = static_cast<uint8_t>(static_cast<uint16_t>(value) << 8);
+    _b[0] = static_cast<uint8_t>(static_cast<uint16_t>(value) << 8);
+    _b[1] = static_cast<uint8_t>(static_cast<uint16_t>(value)     );
   }
 
+# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
   FOG_INLINE Type getRawU() const
   {
     return static_cast<Type>(
       static_cast<uint16_t>(_b[0]) + (static_cast<uint16_t>(_b[1]) << 8));
   }
+
+  FOG_INLINE void setRawU(Type value)
+  {
+    _b[0] = static_cast<uint8_t>(static_cast<uint16_t>(value)     );
+    _b[1] = static_cast<uint8_t>(static_cast<uint16_t>(value) << 8);
+  }
 # else
-  FOG_INLINE void setRawU(Type value) { setValueU(value); }
   FOG_INLINE Type getRawU() const { return getValueU(); }
+  FOG_INLINE void setRawU(Type value) { setValueU(value); }
 # endif
 #endif
 
@@ -351,22 +349,16 @@ struct FOG_NO_EXPORT OT_ULONG
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setValueA(Type value)
-  {
-    FOG_ASSERT_ALIGNED(_b, 4);
-    reinterpret_cast<uint32_t*>(_b)[0] = MemOps::bswap32be(value);
-  }
-
   FOG_INLINE Type getValueA() const
   {
     FOG_ASSERT_ALIGNED(_b, 4);
     return MemOps::bswap32be(reinterpret_cast<const uint32_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawA(Type value)
+  FOG_INLINE void setValueA(Type value)
   {
     FOG_ASSERT_ALIGNED(_b, 4);
-    reinterpret_cast<uint32_t*>(_b)[0] = value;
+    reinterpret_cast<uint32_t*>(_b)[0] = MemOps::bswap32be(value);
   }
 
   FOG_INLINE Type getRawA() const
@@ -375,35 +367,33 @@ struct FOG_NO_EXPORT OT_ULONG
     return reinterpret_cast<const uint32_t*>(_b)[0];
   }
 
-#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
-  FOG_INLINE void setValueU(Type value)
+  FOG_INLINE void setRawA(Type value)
   {
-    reinterpret_cast<uint32_t*>(_b)[0] = MemOps::bswap32be(value);
+    FOG_ASSERT_ALIGNED(_b, 4);
+    reinterpret_cast<uint32_t*>(_b)[0] = value;
   }
 
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
   FOG_INLINE Type getValueU() const
   {
     return MemOps::bswap32be(reinterpret_cast<const uint32_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    reinterpret_cast<uint32_t*>(_b)[0] = value;
+    reinterpret_cast<uint32_t*>(_b)[0] = MemOps::bswap32be(value);
   }
 
   FOG_INLINE Type getRawU() const
   {
     return reinterpret_cast<const uint32_t*>(_b)[0];
   }
-#else
-  FOG_INLINE void setValueU(Type value)
-  {
-    _b[0] = static_cast<uint8_t>(value << 24);
-    _b[1] = static_cast<uint8_t>(value << 16);
-    _b[2] = static_cast<uint8_t>(value <<  8);
-    _b[3] = static_cast<uint8_t>(value      );
-  }
 
+  FOG_INLINE void setRawU(Type value)
+  {
+    reinterpret_cast<uint32_t*>(_b)[0] = value;
+  }
+#else
   FOG_INLINE Type getValueU() const
   {
     return (static_cast<uint32_t>(_b[0]) << 24) + 
@@ -412,15 +402,15 @@ struct FOG_NO_EXPORT OT_ULONG
            (static_cast<uint32_t>(_b[3])      ) ;
   }
 
-# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    _b[0] = static_cast<uint8_t>(value      );
-    _b[1] = static_cast<uint8_t>(value <<  8);
-    _b[2] = static_cast<uint8_t>(value << 16);
-    _b[3] = static_cast<uint8_t>(value << 24);
+    _b[0] = static_cast<uint8_t>(value << 24);
+    _b[1] = static_cast<uint8_t>(value << 16);
+    _b[2] = static_cast<uint8_t>(value <<  8);
+    _b[3] = static_cast<uint8_t>(value      );
   }
 
+# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
   FOG_INLINE Type getRawU() const
   {
     return (static_cast<uint32_t>(_b[0])      ) + 
@@ -428,9 +418,16 @@ struct FOG_NO_EXPORT OT_ULONG
            (static_cast<uint32_t>(_b[2]) << 16) +
            (static_cast<uint32_t>(_b[3]) << 24) ;
   }
+  FOG_INLINE void setRawU(Type value)
+  {
+    _b[0] = static_cast<uint8_t>(value      );
+    _b[1] = static_cast<uint8_t>(value <<  8);
+    _b[2] = static_cast<uint8_t>(value << 16);
+    _b[3] = static_cast<uint8_t>(value << 24);
+  }
 # else
-  FOG_INLINE void setRawU(Type value) { setValueU(value); }
   FOG_INLINE Type getRawU() const { return getValueU(); }
+  FOG_INLINE void setRawU(Type value) { setValueU(value); }
 # endif
 #endif
 
@@ -456,22 +453,16 @@ struct FOG_NO_EXPORT OT_LONG
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void setValueA(Type value)
-  {
-    FOG_ASSERT_ALIGNED(_b, 4);
-    reinterpret_cast<int32_t*>(_b)[0] = MemOps::bswap32be(value);
-  }
-
   FOG_INLINE Type getValueA() const
   {
     FOG_ASSERT_ALIGNED(_b, 4);
     return MemOps::bswap32be(reinterpret_cast<const int32_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawA(Type value)
+  FOG_INLINE void setValueA(Type value)
   {
     FOG_ASSERT_ALIGNED(_b, 4);
-    reinterpret_cast<int32_t*>(_b)[0] = value;
+    reinterpret_cast<int32_t*>(_b)[0] = MemOps::bswap32be(value);
   }
 
   FOG_INLINE Type getRawA() const
@@ -480,35 +471,33 @@ struct FOG_NO_EXPORT OT_LONG
     return reinterpret_cast<const int32_t*>(_b)[0];
   }
 
-#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
-  FOG_INLINE void setValueU(Type value)
+  FOG_INLINE void setRawA(Type value)
   {
-    reinterpret_cast<int32_t*>(_b)[0] = MemOps::bswap32be(value);
+    FOG_ASSERT_ALIGNED(_b, 4);
+    reinterpret_cast<int32_t*>(_b)[0] = value;
   }
 
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_16)
   FOG_INLINE Type getValueU() const
   {
     return MemOps::bswap32be(reinterpret_cast<const int32_t*>(_b)[0]);
   }
 
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    reinterpret_cast<int32_t*>(_b)[0] = value;
+    reinterpret_cast<int32_t*>(_b)[0] = MemOps::bswap32be(value);
   }
 
   FOG_INLINE Type getRawU() const
   {
     return reinterpret_cast<const int32_t*>(_b)[0];
   }
-#else
-  FOG_INLINE void setValueU(Type value)
-  {
-    _b[0] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 24);
-    _b[1] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 16);
-    _b[2] = static_cast<uint8_t>(static_cast<uint32_t>(value) <<  8);
-    _b[3] = static_cast<uint8_t>(static_cast<uint32_t>(value)      );
-  }
 
+  FOG_INLINE void setRawU(Type value)
+  {
+    reinterpret_cast<int32_t*>(_b)[0] = value;
+  }
+#else
   FOG_INLINE Type getValueU() const
   {
     return static_cast<Type>(
@@ -518,15 +507,15 @@ struct FOG_NO_EXPORT OT_LONG
       (static_cast<uint32_t>(_b[3])      ) );
   }
 
-# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  FOG_INLINE void setRawU(Type value)
+  FOG_INLINE void setValueU(Type value)
   {
-    _b[0] = static_cast<uint8_t>(static_cast<uint32_t>(value)      );
-    _b[1] = static_cast<uint8_t>(static_cast<uint32_t>(value) <<  8);
-    _b[2] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 16);
-    _b[3] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 24);
+    _b[0] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 24);
+    _b[1] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 16);
+    _b[2] = static_cast<uint8_t>(static_cast<uint32_t>(value) <<  8);
+    _b[3] = static_cast<uint8_t>(static_cast<uint32_t>(value)      );
   }
 
+# if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
   FOG_INLINE Type getRawU() const
   {
     return static_cast<Type>(
@@ -535,9 +524,17 @@ struct FOG_NO_EXPORT OT_LONG
       (static_cast<uint32_t>(_b[2]) << 16) +
       (static_cast<uint32_t>(_b[3]) << 24) );
   }
+
+  FOG_INLINE void setRawU(Type value)
+  {
+    _b[0] = static_cast<uint8_t>(static_cast<uint32_t>(value)      );
+    _b[1] = static_cast<uint8_t>(static_cast<uint32_t>(value) <<  8);
+    _b[2] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 16);
+    _b[3] = static_cast<uint8_t>(static_cast<uint32_t>(value) << 24);
+  }
 # else
-  FOG_INLINE void setRawU(Type value) { setValueU(value); }
   FOG_INLINE Type getRawU() const { return getValueU(); }
+  FOG_INLINE void setRawU(Type value) { setValueU(value); }
 # endif
 #endif
 

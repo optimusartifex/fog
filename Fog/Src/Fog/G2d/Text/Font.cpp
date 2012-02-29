@@ -21,60 +21,440 @@
 namespace Fog {
 
 // ============================================================================
+// [Fog::FontInfo - Global]
+// ============================================================================
+
+static Static<FontInfoData> FontInfo_dNull;
+static Static<FontInfo> FontInfo_oNull;
+
+// ============================================================================
+// [Fog::FontInfo - Construction / Destruction]
+// ============================================================================
+
+static void FOG_CDECL FontInfo_ctor(FontInfo* self)
+{
+  self->_d = FontInfo_dNull->addRef();
+}
+
+static void FOG_CDECL FontInfo_ctorCopy(FontInfo* self, const FontInfo* other)
+{
+  self->_d = other->_d->addRef();
+}
+
+static void FOG_CDECL FontInfo_dtor(FontInfo* self)
+{
+  self->_d->release();
+}
+
+// ============================================================================
+// [Fog::FontInfo - Sharing]
+// ============================================================================
+
+static err_t FOG_CDECL FontInfo_detach(FontInfo* self)
+{
+  FontInfoData* d = self->_d;
+  if (d->reference.get() == 1)
+    return ERR_OK;
+
+  FontInfoData* newd = fog_api.fontinfo_dCreate(&d->familyName, &d->fileName);
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  atomicPtrXchg(&self->_d, newd)->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::FontInfo - Accessors]
+// ============================================================================
+
+static err_t FOG_CDECL FontInfo_setDefs(FontInfo* self, const FontDefs* defs)
+{
+  uint32_t defsPacked = defs->_packed;
+  if (self->_d->defs._packed == defsPacked)
+    return ERR_OK;
+
+  FOG_RETURN_ON_ERROR(self->detach());
+  FontInfoData* d = self->_d;
+
+  d->defs._packed = defsPacked;
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FontInfo_setFamilyName(FontInfo* self, const StringW* familyName)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+  FontInfoData* d = self->_d;
+
+  return d->familyName->set(*familyName);
+}
+
+static err_t FOG_CDECL FontInfo_setFileName(FontInfo* self, const StringW* fileName)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+  FontInfoData* d = self->_d;
+
+  return d->fileName->set(*fileName);
+}
+
+// ============================================================================
+// [Fog::FontInfo - Reset]
+// ============================================================================
+
+static void FOG_CDECL FontInfo_reset(FontInfo* self)
+{
+  if (self->_d == &FontInfo_dNull)
+    return;
+  atomicPtrXchg(&self->_d, FontInfo_dNull->addRef())->release();
+}
+
+// ============================================================================
+// [Fog::FontInfo - Copy]
+// ============================================================================
+
+static err_t FOG_CDECL FontInfo_copy(FontInfo* self, const FontInfo* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::FontInfo - Eq]
+// ============================================================================
+
+static bool FOG_CDECL FontInfo_eq(const FontInfo* a, const FontInfo* b)
+{
+  const FontInfoData* a_d = a->_d;
+  const FontInfoData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  if (a_d->familyName() == b_d->familyName())
+    return false;
+  if (a_d->fileName() != b_d->fileName())
+    return false;
+
+  return true;
+}
+
+// ============================================================================
+// [Fog::FontInfo - Compare]
+// ============================================================================
+
+static int FOG_CDECL FontInfo_compare(const FontInfo* a, const FontInfo* b)
+{
+  const FontInfoData* a_d = a->_d;
+  const FontInfoData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  int c;
+
+  c = a_d->familyName().compare(b_d->familyName());
+  if (c != 0)
+    return c;
+
+  c = a_d->fileName().compare(b_d->fileName());
+  if (c != 0)
+    return c;
+
+  return true;
+}
+
+// ============================================================================
+// [Fog::FontInfo - Data]
+// ============================================================================
+
+static FontInfoData* FOG_CDECL FontInfo_dCreate(const StringW* familyName, const StringW* fileName)
+{
+  FontInfoData* d = static_cast<FontInfoData*>(MemMgr::alloc(sizeof(FontInfoData)));
+
+  if (FOG_IS_NULL(d))
+    return NULL;
+
+  d->reference.init(1);
+  d->vType = VAR_TYPE_FONT_INFO | VAR_FLAG_NONE;
+  d->defs = FontDefs(FONT_WEIGHT_NORMAL, FONT_STRETCH_NORMAL, false);
+  d->familyName.initCustom1(*familyName);
+  d->fileName.initCustom1(*fileName);
+
+  return d;
+}
+
+static void FOG_CDECL FontInfo_dFree(FontInfoData* d)
+{
+  d->familyName.destroy();
+  d->fileName.destroy();
+
+  MemMgr::free(d);
+}
+
+// ============================================================================
+// [Fog::FontCollection - Global]
+// ============================================================================
+
+static Static<FontCollectionData> FontCollection_dNull;
+static Static<FontCollection> FontCollection_oNull;
+
+// ============================================================================
+// [Fog::FontCollection - Hash]
+// ============================================================================
+
+static err_t FOG_CDECL FontCollection_dUpdateHash(FontCollectionData* d)
+{
+  List<FontInfo>& list = d->fontList();
+  Hash<StringW, size_t>& hash = d->fontHash();
+
+  hash.clear();
+
+  ListIterator<FontInfo> it(list);
+  while (it.isValid())
+  {
+    size_t index = it.getIndex();
+    const StringW& familyName = it.getItem().getFamilyName();
+
+    if (hash.contains(familyName))
+    {
+      size_t* p = hash.usePtr(familyName);
+      p[0]++;
+    }
+    else
+    {
+      FOG_RETURN_ON_ERROR(hash.put(familyName, 1, true));
+    }
+
+    it.next();
+  }
+
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::FontCollection - Construction / Destruction]
+// ============================================================================
+
+static void FOG_CDECL FontCollection_ctor(FontCollection* self)
+{
+  self->_d = FontCollection_dNull->addRef();
+}
+
+static void FOG_CDECL FontCollection_ctorCopy(FontCollection* self, const FontCollection* other)
+{
+  self->_d = other->_d->addRef();
+}
+
+static void FOG_CDECL FontCollection_dtor(FontCollection* self)
+{
+  self->_d->release();
+}
+
+// ============================================================================
+// [Fog::FontCollection - Sharing]
+// ============================================================================
+
+static err_t FOG_CDECL FontCollection_detach(FontCollection* self)
+{
+  FontCollectionData* d = self->_d;
+  if (d->reference.get() == 1)
+    return ERR_OK;
+
+  FontCollectionData* newd = fog_api.fontcollection_dCreate();
+  if (FOG_IS_NULL(newd))
+    return ERR_RT_OUT_OF_MEMORY;
+
+  newd->fontList() = d->fontList();
+  newd->fontHash() = d->fontHash();
+
+  atomicPtrXchg(&self->_d, newd)->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::FontCollection - Accessors]
+// ============================================================================
+
+static err_t FOG_CDECL FontCollection_setList(FontCollection* self, const List<FontInfo>* list)
+{
+  if (self->_d->fontList->_d == list->_d)
+    return ERR_OK;
+
+  FOG_RETURN_ON_ERROR(self->detach());
+  FontCollectionData* d = self->_d;
+
+  d->fontList() = *list;
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FontCollection_addItem(FontCollection* self, const FontInfo* item)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+
+  FontCollectionData* d = self->_d;
+  size_t index;
+
+  const StringW& newFamily = item->getFamilyName();
+
+  {
+    ListIterator<FontInfo> it(d->fontList());
+    while (it.isValid())
+    {
+      const FontInfo& item = it.getItem();
+      const StringW& itemFamily = item.getFamilyName();
+
+      int cmp = itemFamily.compare(itemFamily);
+      if (cmp < 0)
+        break;
+
+      if (cmp == 0)
+      {
+        return ERR_RT_OBJECT_ALREADY_EXISTS;
+      }
+
+      it.next();
+    }
+
+    index = it.getIndex();
+  }
+
+  err_t err = d->fontList().insert(index, *item);
+  if (FOG_IS_ERROR(err))
+    return err;
+
+  if (d->fontHash().contains(newFamily))
+  {
+    size_t* p = d->fontHash().usePtr(newFamily);
+    if (FOG_IS_NULL(p))
+      err = ERR_RT_OUT_OF_MEMORY;
+    else
+      p[0]++;
+  }
+  else
+  {
+    err = d->fontHash().put(newFamily, 1, true);
+  }
+
+  if (FOG_IS_ERROR(err))
+    d->fontList().removeAt(index);
+  return err;
+}
+
+// ============================================================================
+// [Fog::FontCollection - Clear]
+// ============================================================================
+
+static void FOG_CDECL FontCollection_clear(FontCollection* self)
+{
+  FontCollectionData* d = self->_d;
+  if (d == &FontCollection_dNull)
+    return;
+  
+  if (d->reference.get() == 1)
+  {
+    d->fontList().clear();
+    d->fontHash().clear();
+  }
+  else
+  {
+    atomicPtrXchg(&self->_d, FontCollection_dNull->addRef())->release();
+  }
+}
+
+// ============================================================================
+// [Fog::FontCollection - Reset]
+// ============================================================================
+
+static void FOG_CDECL FontCollection_reset(FontCollection* self)
+{
+  if (self->_d == &FontCollection_dNull)
+    return;
+  atomicPtrXchg(&self->_d, FontCollection_dNull->addRef())->release();
+}
+
+// ============================================================================
+// [Fog::FontCollection - Copy]
+// ============================================================================
+
+static err_t FOG_CDECL FontCollection_copy(FontCollection* self, const FontCollection* other)
+{
+  atomicPtrXchg(&self->_d, other->_d->addRef())->release();
+  return ERR_OK;
+}
+
+// ============================================================================
+// [Fog::FontCollection - Eq]
+// ============================================================================
+
+static bool FOG_CDECL FontCollection_eq(const FontCollection* a, const FontCollection* b)
+{
+  const FontCollectionData* a_d = a->_d;
+  const FontCollectionData* b_d = b->_d;
+
+  if (a_d == b_d)
+    return true;
+
+  return (a_d->fontList() == b_d->fontList());
+}
+
+// ============================================================================
+// [Fog::FontCollection - Data]
+// ============================================================================
+
+static FontCollectionData* FOG_CDECL FontCollection_dCreate(void)
+{
+  FontCollectionData* d = static_cast<FontCollectionData*>(MemMgr::alloc(sizeof(FontCollectionData)));
+
+  if (FOG_IS_NULL(d))
+    return NULL;
+
+  d->reference.init(1);
+  d->vType = VAR_TYPE_FONT_COLLECTION | VAR_FLAG_NONE;
+  d->flags = NO_FLAGS;
+  d->fontList.init();
+  d->fontHash.init();
+
+  return d;
+}
+
+static void FOG_CDECL FontCollection_dFree(FontCollectionData* d)
+{
+  d->fontList.destroy();
+  d->fontHash.destroy();
+  MemMgr::free(d);
+}
+
+// ============================================================================
 // [Fog::Font - Helpers]
 // ============================================================================
 
-/*
-static void Font_initValues(FontData* d)
+static void Font_dInitDefaults(FontData* d)
 {
-  d->letterSpacingMode = FONT_SPACING_PERCENTAGE;
-  d->wordSpacingMode = FONT_SPACING_PERCENTAGE;
-  d->dataFlags = NO_FLAGS;
-
-  d->letterSpacing = 1.0f;
-  d->wordSpacing = 1.0f;
-
-  d->hints.reset();
-  d->transform.reset();
-  d->forceCaching = false;
+  d->flags = NO_FLAGS;
+  d->features.reset();
+  d->matrix.reset();
 }
 
-static void Font_updateMetrics(FontData* d, float height, uint32_t unit)
+static void Font_dScaleMetrics(FontData* d, float size)
 {
-  FOG_ASSERT(Font_isSupportedUnit(unit));
+  const FontMetrics& design = d->face->designMetrics;
 
-  d->unit = unit;
+  float scale = size / design._size;
+  uint32_t flags = d->flags & ~(FONT_FLAG_IS_ALIGNED_SIZE);
 
-  const FontMetricsF& dm = d->face->designMetrics;
-  float scale = height / dm._height;
+  d->metrics._size = size;
+  d->metrics._ascent = design._ascent * scale;
+  d->metrics._descent = design._descent * scale;
+  d->metrics._capHeight = design._capHeight * scale;
+  d->metrics._xHeight = design._xHeight * scale;
 
-  int alignedHeight;
-  uint32_t dataFlags = d->dataFlags & ~(FONT_DATA_IS_ALIGNED | FONT_DATA_IS_PHYSICAL);
+  int alignedSize;
+  if (Math::isFuzzyToInt(size, alignedSize))
+    flags |= FONT_FLAG_IS_ALIGNED_SIZE;
 
-  d->metrics._height = height;
-  d->metrics._ascent = dm._ascent * scale;
-  d->metrics._descent = dm._descent * scale;
-  d->metrics._averageWidth = dm._averageWidth * scale;
-  d->metrics._maximumWidth = dm._maximumWidth * scale;
-
-  if (Math::isFuzzyToInt(height, alignedHeight))
-  {
-    dataFlags |= FONT_DATA_IS_ALIGNED;
-  }
-
-  if (d->hints.getKerning() != FONT_KERNING_DETECT &&
-      d->hints.getHinting() != FONT_HINTING_DETECT &&
-      d->hints.getAlignMode() != FONT_ALIGN_MODE_DETECT &&
-      d->hints.getQuality() != FONT_QUALITY_DETECT )
-  {
-    dataFlags |= FONT_DATA_IS_PHYSICAL;
-  }
-
-  d->alignedHeight = (uint32_t)alignedHeight;
+  d->flags = flags;
   d->scale = scale;
-  d->dataFlags = dataFlags;
 }
-*/
 
 // ============================================================================
 // [Fog::Font - Construction / Destruction]
@@ -82,7 +462,7 @@ static void Font_updateMetrics(FontData* d, float height, uint32_t unit)
 
 static void FOG_CDECL Font_ctor(Font* self)
 {
-  self->_d = FontCollection::getGlobal()._d->defaultFont._d->addRef();
+  self->_d = FontEngine::getGlobal()._d->defaultFont._d->addRef();
 }
 
 static void FOG_CDECL Font_ctorCopy(Font* self, const Font* other)
@@ -132,261 +512,419 @@ static err_t FOG_CDECL Font_detach(Font* self)
 
 static err_t FOG_CDECL Font_getParam(const Font* self, uint32_t id, void* dst)
 {
+  FontData* d = self->_d;
+
+  switch (id)
+  {
+    case FONT_PARAM_SIZE:
+      static_cast<float*>(dst)[0] = d->metrics.getSize();
+      return ERR_OK;
+
+    case FONT_PARAM_WEIGHT:
+      static_cast<uint32_t*>(dst)[0] = d->features.getWeight();
+      return ERR_OK;
+
+    case FONT_PARAM_STRETCH:
+      static_cast<uint32_t*>(dst)[0] = d->features.getStretch();
+      return ERR_OK;
+
+    case FONT_PARAM_DECORATION:
+      static_cast<uint32_t*>(dst)[0] = d->features.getDecoration();
+      return ERR_OK;
+
+    case FONT_PARAM_STYLE:
+      static_cast<uint32_t*>(dst)[0] = d->features.getStyle();
+      return ERR_OK;
+
+    case FONT_PARAM_KERNING:
+      static_cast<uint32_t*>(dst)[0] = d->features.getKerning();
+      return ERR_OK;
+
+    case FONT_PARAM_COMMON_LIGATURES:
+      static_cast<uint32_t*>(dst)[0] = d->features.getCommonLigatures();
+      return ERR_OK;
+
+    case FONT_PARAM_DISCRETIONARY_LIGATURES:
+      static_cast<uint32_t*>(dst)[0] = d->features.getDiscretionaryLigatures();
+      return ERR_OK;
+
+    case FONT_PARAM_HISTORICAL_LIGATURES:
+      static_cast<uint32_t*>(dst)[0] = d->features.getHistoricalLigatures();
+      return ERR_OK;
+
+    case FONT_PARAM_CAPS:
+      static_cast<uint32_t*>(dst)[0] = d->features.getCaps();
+      return ERR_OK;
+
+    case FONT_PARAM_NUMERIC_FIGURE:
+      static_cast<uint32_t*>(dst)[0] = d->features.getNumericFigure();
+      return ERR_OK;
+
+    case FONT_PARAM_NUMERIC_SPACING:
+      static_cast<uint32_t*>(dst)[0] = d->features.getNumericSpacing();
+      return ERR_OK;
+
+    case FONT_PARAM_NUMERIC_FRACTION:
+      static_cast<uint32_t*>(dst)[0] = d->features.getNumericFraction();
+      return ERR_OK;
+
+    case FONT_PARAM_NUMERIC_SLASHED_ZERO:
+      static_cast<uint32_t*>(dst)[0] = d->features.getNumericSlashedZero();
+      return ERR_OK;
+
+    case FONT_PARAM_EAST_ASIAN_VARIANT:
+      static_cast<uint32_t*>(dst)[0] = d->features.getEastAsianVariant();
+      return ERR_OK;
+
+    case FONT_PARAM_EAST_ASIAN_WIDTH:
+      static_cast<uint32_t*>(dst)[0] = d->features.getEastAsianWidth();
+      return ERR_OK;
+
+    case FONT_PARAM_LETTER_SPACING:
+      static_cast<FontSpacing*>(dst)->setSpacing(
+        d->features.getLetterSpacingMode(), d->features.getLetterSpacingValue());
+      return ERR_OK;
+
+    case FONT_PARAM_WORD_SPACING:
+      static_cast<FontSpacing*>(dst)->setSpacing(
+        d->features.getWordSpacingMode(), d->features.getWordSpacingValue());
+      return ERR_OK;
+
+    case FONT_PARAM_SIZE_ADJUST:
+      static_cast<float*>(dst)[0] = d->features.getSizeAdjust();
+      return ERR_OK;
+
+    case FONT_PARAM_FEATURES:
+      static_cast<FontFeatures*>(dst)[0] = d->features;
+      return ERR_OK;
+
+    case FONT_PARAM_MATRIX:
+      static_cast<FontMatrix*>(dst)[0] = d->matrix;
+      return ERR_OK;
+
+    default:
+      return ERR_RT_INVALID_ARGUMENT;
+  }
 }
 
 static err_t FOG_CDECL Font_setParam(Font* self, uint32_t id, const void* src)
 {
-}
-
-/*
-static err_t FOG_CDECL Font_setSize(Font* self, float height, uint32_t unit)
-{
   FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
 
-  if (d->metrics.getHeight() == height && d->unit == unit)
-    return ERR_OK;
+  uint32_t uVal;
+  float fVal;
 
-  if (!Font_isSupportedUnit(unit))
-    return ERR_RT_INVALID_ARGUMENT;
+  // First compare the actual value with src. If the values are equal then
+  // nothing will happen. This switch() also contains special case path for
+  // parameters which require to change the font face (font-size, font-weight,
+  // font-stretch, and font-style).
+  switch (id)
+  {
+    case FONT_PARAM_SIZE:
+      fVal = static_cast<const float*>(src)[0];
+      if (d->metrics.getSize() == fVal)
+        return ERR_OK;
+      if (fVal <= 0.0f)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
 
+    case FONT_PARAM_WEIGHT:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getWeight() == uVal)
+        return ERR_OK;
+      if (uVal > FONT_WEIGHT_MAX)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_STRETCH:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getStretch() == uVal)
+        return ERR_OK;
+      if (uVal > FONT_STRETCH_MAX)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_DECORATION:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getDecoration() == uVal)
+        return ERR_OK;
+      if (uVal > FONT_DECORATION_MAX)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_STYLE:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getStyle() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_STYLE_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_KERNING:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getKerning() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_KERNING_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_COMMON_LIGATURES:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getCommonLigatures() == uVal)
+        return ERR_OK;
+      if (uVal >= 2)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_DISCRETIONARY_LIGATURES:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getDiscretionaryLigatures() == uVal)
+        return ERR_OK;
+      if (uVal >= 2)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_HISTORICAL_LIGATURES:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getHistoricalLigatures() == uVal)
+        return ERR_OK;
+      if (uVal >= 2)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_CAPS:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getCaps() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_CAPS_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_NUMERIC_FIGURE:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getNumericFigure() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_NUMERIC_FIGURE_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_NUMERIC_SPACING:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getNumericSpacing() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_NUMERIC_SPACING_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_NUMERIC_FRACTION:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getNumericFraction() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_NUMERIC_FRACTION_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_NUMERIC_SLASHED_ZERO:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getNumericSlashedZero() == uVal)
+        return ERR_OK;
+      if (uVal >= 2)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_EAST_ASIAN_VARIANT:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getEastAsianVariant() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_EAST_ASIAN_VARIANT_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_EAST_ASIAN_WIDTH:
+      uVal = static_cast<const uint32_t*>(src)[0];
+      if (d->features.getEastAsianWidth() == uVal)
+        return ERR_OK;
+      if (uVal >= FONT_EAST_ASIAN_WIDTH_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_LETTER_SPACING:
+      if (d->features.getLetterSpacingMode() == static_cast<const FontSpacing*>(src)->getMode() &&
+          d->features.getLetterSpacingValue() == static_cast<const FontSpacing*>(src)->getValue())
+      {
+        return ERR_OK;
+      }
+
+      if (static_cast<const FontSpacing*>(src)->getMode() >= FONT_SPACING_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_WORD_SPACING:
+      if (d->features.getWordSpacingMode() == static_cast<const FontSpacing*>(src)->getMode() &&
+          d->features.getWordSpacingValue() == static_cast<const FontSpacing*>(src)->getValue())
+      {
+        return ERR_OK;
+      }
+
+      if (static_cast<const FontSpacing*>(src)->getMode() >= FONT_SPACING_COUNT)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_SIZE_ADJUST:
+      fVal = static_cast<const float*>(src)[0];
+      if (d->features.getSizeAdjust() == fVal)
+        return ERR_OK;
+      if (fVal <= 0.0f)
+        return ERR_RT_INVALID_ARGUMENT;
+      break;
+
+    case FONT_PARAM_FEATURES:
+      if (d->features == static_cast<const FontFeatures*>(src)[0])
+        return ERR_OK;
+      break;
+
+    case FONT_PARAM_MATRIX:
+      if (d->matrix == static_cast<const FontMatrix*>(src)[0])
+        return ERR_OK;
+      break;
+
+    default:
+      return ERR_RT_INVALID_ARGUMENT;
+  }
+
+  // Okay, we need to change the value in FontData.
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
+    FOG_RETURN_ON_ERROR(self->_detach());
     d = self->_d;
   }
 
-  Font_updateMetrics(d, height, unit);
-  return ERR_OK;
-}
-
-static err_t FOG_CDECL Font_setLetterSpacing(Font* self, float spacing, uint32_t spacingMode)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (d->letterSpacing == spacing && d->letterSpacingMode == spacingMode)
-    return ERR_OK;
-
-  if (spacingMode >= FONT_SPACING_MODE_COUNT)
-    return ERR_RT_INVALID_ARGUMENT;
-
-  if (d->reference.get() != 1)
+  // Set the value.
+  switch (id)
   {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
-    d = self->_d;
-  }
+    case FONT_PARAM_SIZE:
+      Font_dScaleMetrics(d, fVal);
+      break;
 
-  d->dataFlags &= ~FONT_DATA_HAS_LETTER_SPACING;
-  d->letterSpacing = spacing;
-  d->letterSpacingMode = spacingMode;
+    case FONT_PARAM_WEIGHT:
+      d->features.setWeight(uVal);
+      break;
 
-  if (d->letterSpacing != 1.0f || spacingMode != FONT_SPACING_MODE_PERCENTAGE)
-    d->dataFlags |= FONT_DATA_HAS_LETTER_SPACING;
+    case FONT_PARAM_STRETCH:
+      d->features.setStretch(uVal);
+      break;
 
-  return ERR_OK;
-}
+    case FONT_PARAM_DECORATION:
+      d->features.setDecoration(uVal);
+      break;
 
-static err_t FOG_CDECL Font_setWordSpacing(Font* self, float spacing, uint32_t spacingMode)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+    case FONT_PARAM_STYLE:
+      d->features.setStyle(uVal);
+      break;
 
-  if (d->wordSpacing == spacing && d->wordSpacingMode == spacingMode)
-    return ERR_OK;
+    case FONT_PARAM_KERNING:
+      d->features.setKerning(uVal);
+      break;
 
-  if (d->reference.get() != 1)
-  {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
-    d = self->_d;
-  }
+    case FONT_PARAM_COMMON_LIGATURES:
+      d->features.setCommonLigatures(uVal);
+      break;
 
-  d->dataFlags &= ~FONT_DATA_HAS_WORD_SPACING;
-  d->wordSpacing = spacing;
-  d->wordSpacingMode = spacingMode;
+    case FONT_PARAM_DISCRETIONARY_LIGATURES:
+      d->features.setDiscretionaryLigatures(uVal);
+      break;
 
-  if (d->letterSpacing != 1.0f || spacingMode != FONT_SPACING_MODE_PERCENTAGE)
-    d->dataFlags |= FONT_DATA_HAS_WORD_SPACING;
+    case FONT_PARAM_HISTORICAL_LIGATURES:
+      d->features.setHistoricalLigatures(uVal);
+      break;
 
-  return ERR_OK;
-}
-*/
-/*
-static err_t FOG_CDECL Font_setHints(Font* self, const FontHints* hints)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+    case FONT_PARAM_CAPS:
+      d->features.setCaps(uVal);
+      break;
 
-  if (d->hints == *hints)
-    return ERR_OK;
+    case FONT_PARAM_NUMERIC_FIGURE:
+      d->features.setNumericFigure(uVal);
+      break;
 
-  if (d->reference.get() != 1)
-  {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
-    d = self->_d;
-  }
+    case FONT_PARAM_NUMERIC_SPACING:
+      d->features.setNumericSpacing(uVal);
+      break;
 
-  d->hints = *hints;
-  return ERR_OK;
-}
+    case FONT_PARAM_NUMERIC_FRACTION:
+      d->features.setNumericFraction(uVal);
+      break;
 
-static err_t FOG_CDECL Font_setStyle(Font* self, uint32_t style)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+    case FONT_PARAM_NUMERIC_SLASHED_ZERO:
+      d->features.setNumericSlashedZero(uVal);
+      break;
 
-  if (d->hints.getStyle() == style)
-    return ERR_OK;
+    case FONT_PARAM_EAST_ASIAN_VARIANT:
+      d->features.setEastAsianVariant(uVal);
+      break;
 
-  FontHints newHints(d->hints);
-  newHints.setStyle(style);
+    case FONT_PARAM_EAST_ASIAN_WIDTH:
+      d->features.setEastAsianWidth(uVal);
+      break;
 
-  return self->setHints(newHints);
-}
+    case FONT_PARAM_LETTER_SPACING:
+      d->features.setLetterSpacingMode(static_cast<const FontSpacing*>(src)->getMode());
+      d->features.setLetterSpacingValue(static_cast<const FontSpacing*>(src)->getValue());
 
-static err_t FOG_CDECL Font_setWeight(Font* self, uint32_t weight)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+      if (d->features.hasLetterSpacing())
+        d->flags |= FONT_FLAG_HAS_LETTER_SPACING;
+      else
+        d->flags &= ~FONT_FLAG_HAS_LETTER_SPACING;
+      break;
 
-  if (d->hints.getWeight() == weight)
-    return ERR_OK;
+    case FONT_PARAM_WORD_SPACING:
+      d->features.setWordSpacingMode(static_cast<const FontSpacing*>(src)->getMode());
+      d->features.setWordSpacingValue(static_cast<const FontSpacing*>(src)->getValue());
 
-  FontHints newHints(d->hints);
-  newHints.setWeight(weight);
+      if (d->features.hasWordSpacing())
+        d->flags |= FONT_FLAG_HAS_WORD_SPACING;
+      else
+        d->flags &= ~FONT_FLAG_HAS_WORD_SPACING;
+      break;
 
-  return self->setHints(newHints);
-}
+    case FONT_PARAM_SIZE_ADJUST:
+      fVal = static_cast<const float*>(src)[0];
+      if (d->features.getSizeAdjust() == fVal)
+        return ERR_OK;
+      break;
 
-static err_t FOG_CDECL Font_setVariant(Font* self, uint32_t variant)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+    case FONT_PARAM_FEATURES:
+      d->features = static_cast<const FontFeatures*>(src)[0];
+      uVal = d->flags & ~(FONT_FLAG_HAS_LETTER_SPACING | FONT_FLAG_HAS_WORD_SPACING | FONT_FLAG_HAS_MATRIX);
 
-  if (d->hints.getVariant() == variant)
-    return ERR_OK;
+      if (d->features.hasLetterSpacing())
+        uVal |= FONT_FLAG_HAS_LETTER_SPACING;
 
-  FontHints newHints(d->hints);
-  newHints.setVariant(variant);
+      if (d->features.hasWordSpacing())
+        uVal |= FONT_FLAG_HAS_WORD_SPACING;
 
-  return self->setHints(newHints);
-}
+      if (d->matrix.isIdentity())
+        uVal |= FONT_FLAG_HAS_MATRIX;
 
-static err_t FOG_CDECL Font_setDecoration(Font* self, uint32_t decoration)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+      d->flags = uVal;
+      break;
 
-  if (d->hints.getDecoration() == decoration)
-    return ERR_OK;
+    case FONT_PARAM_MATRIX:
+      if (d->matrix == static_cast<const FontMatrix*>(src)[0])
+        return ERR_OK;
+      
+      if (d->matrix.isIdentity())
+        d->flags |= FONT_FLAG_HAS_MATRIX;
+      else
+        d->flags &= ~FONT_FLAG_HAS_MATRIX;
+      break;
 
-  FontHints newHints(d->hints);
-  newHints.setDecoration(decoration);
-
-  return self->setHints(newHints);
-}
-
-static err_t FOG_CDECL Font_setKerning(Font* self, uint32_t kerning)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (d->hints.getKerning() == kerning)
-    return ERR_OK;
-
-  FontHints newHints(d->hints);
-  newHints.setKerning(kerning);
-
-  return self->setHints(newHints);
-}
-
-static err_t FOG_CDECL Font_setHinting(Font* self, uint32_t hinting)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (d->hints.getHinting() == hinting)
-    return ERR_OK;
-
-  FontHints newHints(d->hints);
-  newHints.setHinting(hinting);
-
-  return self->setHints(newHints);
-}
-
-static err_t FOG_CDECL Font_setAlignMode(Font* self, uint32_t alignMode)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (d->hints.getAlignMode() == alignMode)
-    return ERR_OK;
-
-  FontHints newHints(d->hints);
-  newHints.setAlignMode(alignMode);
-
-  return self->setHints(newHints);
-}
-
-static err_t FOG_CDECL Font_setTransform(Font* self, const TransformF* transform)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (d->transform == *transform)
-    return ERR_OK;
-
-  uint32_t transformType = transform->getType();
-  if (transformType == TRANSFORM_TYPE_DEGENERATE)
-    return ERR_GEOMETRY_DEGENERATE;
-
-  if (d->reference.get() != 1)
-  {
-    FOG_RETURN_ON_ERROR(self->detach());
-    d = self->_d;
-  }
-
-  d->dataFlags &= ~FONT_DATA_HAS_TRANSFORM;
-  d->transform = *transform;
-
-  if (transformType != TRANSFORM_TYPE_IDENTITY)
-    d->dataFlags |= FONT_DATA_HAS_TRANSFORM;
-
-  return ERR_OK;
-}
-
-static err_t FOG_CDECL Font_setForceCaching(Font* self, bool val)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (d->forceCaching == val)
-    return ERR_OK;
-
-  if (d->reference.get() != 1)
-  {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
-    d = self->_d;
-  }
-
-  if (val)
-  {
-    // Force caching on.
-    d->forceCaching = true;
-
-    // TODO: Font caching.
-  }
-  else
-  {
-    // Force caching off.
-    d->forceCaching = false;
-
-    // TODO: Font caching.
+    default:
+      FOG_ASSERT_NOT_REACHED();
   }
 
   return ERR_OK;
 }
-*/
+
 // ============================================================================
 // [Fog::Font - Reset]
 // ============================================================================
@@ -394,20 +932,20 @@ static err_t FOG_CDECL Font_setForceCaching(Font* self, bool val)
 static void FOG_CDECL Font_reset(Font* self)
 {
   FOG_ASSERT(self->_d != NULL);
-  atomicPtrXchg(&self->_d, FontCollection::getGlobal()._d->defaultFont._d->addRef())->release();
+
+  FontData* newd = FontEngine::getGlobal()._d->defaultFont._d;
+  atomicPtrXchg(&self->_d, newd->addRef())->release();
 }
 
 // ============================================================================
 // [Fog::Font - Create]
 // ============================================================================
 
-static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float height, uint32_t unit)
+static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float size,
+  const FontFeatures* features, const FontMatrix* matrix)
 {
   FontData* d = self->_d;
   FOG_ASSERT(d != NULL);
-
-  if (!Font_isSupportedUnit(unit))
-    return ERR_RT_INVALID_ARGUMENT;
 
   if (d->reference.get() != 1)
   {
@@ -418,7 +956,7 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float heig
   // Try to optimize font-face creation using the current font-face.
   if (d->face->family != *family)
   {
-    FontFace* face = FontManager::getGlobal().getFontFace(*family);
+    FontFace* face = FontEngine::getGlobal()->getFontFace(*family);
     if (FOG_IS_NULL(face))
       return ERR_FONT_NOT_MATCHED;
 
@@ -427,60 +965,19 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float heig
   }
 
   Font_initValues(d);
-  Font_updateMetrics(d, height, unit);
+  Font_dScaleMetrics(d, size);
   return ERR_OK;
 }
 
-static err_t FOG_CDECL Font_createEx(Font* self, const StringW* family, float height, uint32_t unit,
-  const FontHints* hints, const TransformF* transform)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (!Font_isSupportedUnit(unit))
-    return ERR_RT_INVALID_ARGUMENT;
-
-  uint32_t transformType = transform->getType();
-  if (transformType == TRANSFORM_TYPE_DEGENERATE)
-    return ERR_GEOMETRY_DEGENERATE;
-
-  if (d->reference.get() != 1)
-  {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
-    d = self->_d;
-  }
-
-  // Try to optimize font-face creation using the current font-face.
-  if (d->face->family != *family)
-  {
-    FontFace* face = FontManager::getGlobal().getFontFace(*family);
-    if (FOG_IS_NULL(face)) return ERR_FONT_NOT_MATCHED;
-
-    face = atomicPtrXchg(&d->face, face);
-    if (face != NULL) face->deref();
-  }
-
-  Font_initValues(d);
-
-  d->hints = *hints;
-  if (transformType != TRANSFORM_TYPE_IDENTITY)
-  {
-    d->transform = *transform;
-    d->dataFlags |= FONT_DATA_HAS_TRANSFORM;
-  }
-
-  Font_updateMetrics(d, height, unit);
-  return ERR_OK;
-}
-
-static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float size, const FontFeatures* features, const FontMatrix* matrix)
+static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float size,
+  const FontFeatures* features, const FontMatrix* matrix)
 {
   FontData* d = self->_d;
   FOG_ASSERT(d != NULL);
 
   if (d->reference.get() != 1)
   {
-    FOG_RETURN_ON_ERROR(fog_api.font_detach(self));
+    FOG_RETURN_ON_ERROR(self->detach());
     d = self->_d;
   }
 
@@ -488,8 +985,10 @@ static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float size, const F
   if (face != NULL)
     face->deref();
 
-  Font_initValues(d);
-  Font_updateMetrics(d, height, unit);
+  d->features = *features;
+  d->matrix = *matrix;
+  Font_dScaleMetrics(d, size);
+
   return ERR_OK;
 }
 
@@ -504,6 +1003,7 @@ static err_t Font_getOutlineFromGlyphRunF(const Font* self,
   size_t length)
 {
   FontFace* face = self->_d->face;
+
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
 
@@ -517,6 +1017,7 @@ static err_t Font_getOutlineFromGlyphRunD(const Font* self,
   size_t length)
 {
   FontFace* face = self->_d->face;
+
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
 
@@ -550,34 +1051,13 @@ static bool FOG_CDECL Font_eq(const Font* a, const Font* b)
   if (a_d->face != b_d->face)
     return false;
 
-  if (a_d->unit != b_d->unit)
+  if (a_d->features != b_d->features)
     return false;
 
-  if (a_d->letterSpacingMode != b_d->letterSpacingMode)
-    return false;
-
-  if (a_d->wordSpacingMode != b_d->wordSpacingMode)
-    return false;
-
-  if (a_d->dataFlags != b_d->dataFlags)
-    return false;
-
-  if (a_d->alignedHeight != b_d->alignedHeight)
+  if (a_d->matrix != b_d->matrix)
     return false;
 
   if (a_d->scale != b_d->scale)
-    return false;
-
-  if (a_d->letterSpacing != b_d->letterSpacing)
-    return false;
-
-  if (a_d->wordSpacing != b_d->wordSpacing)
-    return false;
-
-  if (a_d->hints != b_d->hints)
-    return false;
-
-  if (a_d->transform != b_d->transform)
     return false;
 
   return true;
@@ -614,7 +1094,69 @@ static void Font_dFree(FontData* d)
 FOG_NO_EXPORT void Font_init(void)
 {
   // --------------------------------------------------------------------------
-  // [Funcs]
+  // [FontInfo]
+  // --------------------------------------------------------------------------
+
+  fog_api.fontinfo_ctor = FontInfo_ctor;
+  fog_api.fontinfo_ctorCopy = FontInfo_ctorCopy;
+  fog_api.fontinfo_dtor = FontInfo_dtor;
+
+  fog_api.fontinfo_detach = FontInfo_detach;
+  fog_api.fontinfo_setDefs = FontInfo_setDefs;
+  fog_api.fontinfo_setFamilyName = FontInfo_setFamilyName;
+  fog_api.fontinfo_setFileName = FontInfo_setFileName;
+  fog_api.fontinfo_reset = FontInfo_reset;
+  fog_api.fontinfo_copy = FontInfo_copy;
+  fog_api.fontinfo_eq = FontInfo_eq;
+  fog_api.fontinfo_compare = FontInfo_compare;
+
+  fog_api.fontinfo_dCreate = FontInfo_dCreate;
+  fog_api.fontinfo_dFree = FontInfo_dFree;
+
+  {
+    FontInfoData* d = &FontInfo_dNull;
+
+    d->reference.init(1);
+    d->vType = VAR_TYPE_FONT_INFO | VAR_FLAG_NONE;
+    d->defs.setWeight(FONT_WEIGHT_NORMAL);
+    d->defs.setStretch(FONT_STRETCH_NORMAL);
+    d->familyName->_d = fog_api.stringw_oEmpty->_d;
+    d->fileName->_d = fog_api.stringw_oEmpty->_d;
+
+    fog_api.fontinfo_oNull = FontInfo_oNull.initCustom1(d);
+  }
+
+  // --------------------------------------------------------------------------
+  // [FontCollection]
+  // --------------------------------------------------------------------------
+
+  fog_api.fontcollection_ctor = FontCollection_ctor;
+  fog_api.fontcollection_ctorCopy = FontCollection_ctorCopy;
+  fog_api.fontcollection_dtor = FontCollection_dtor;
+
+  fog_api.fontcollection_detach = FontCollection_detach;
+  fog_api.fontcollection_setList = FontCollection_setList;
+  fog_api.fontcollection_clear = FontCollection_clear;
+  fog_api.fontcollection_reset = FontCollection_reset;
+  fog_api.fontcollection_copy = FontCollection_copy;
+  fog_api.fontcollection_eq = FontCollection_eq;
+
+  fog_api.fontcollection_dCreate = FontCollection_dCreate;
+  fog_api.fontcollection_dFree = FontCollection_dFree;
+
+  {
+    FontCollectionData* d = &FontCollection_dNull;
+
+    d->reference.init(1);
+    d->vType = VAR_TYPE_FONT_COLLECTION | VAR_FLAG_NONE;
+    d->fontList->_d = fog_api.list_untyped_oEmpty->_d;
+    d->fontHash->_d = fog_api.hash_unknown_unknown_oEmpty->_d;
+
+    fog_api.fontcollection_oNull = FontCollection_oNull.initCustom1(d);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Font]
   // --------------------------------------------------------------------------
 
   fog_api.font_ctor = Font_ctor;

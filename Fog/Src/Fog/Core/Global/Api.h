@@ -2522,12 +2522,12 @@ struct FOG_NO_EXPORT Api
 
   FOG_CAPI_METHOD(err_t, font_getOutlineFromGlyphRunF)(const Font* self,
     PathF* dst, uint32_t cntOp,
-    const void* itemList, size_t itemAdvance,
+    const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
   FOG_CAPI_METHOD(err_t, font_getOutlineFromGlyphRunD)(const Font* self,
     PathD* dst, uint32_t cntOp,
-    const void* itemList, size_t itemAdvance,
+    const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
 

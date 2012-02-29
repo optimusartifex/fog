@@ -508,6 +508,43 @@ struct FOG_NO_EXPORT FontMatrix
 };
 
 // ============================================================================
+// [Fog::FontEngineVTable]
+// ============================================================================
+
+//! @brief Font-engine virtual table.
+struct FOG_NO_EXPORT FontEngineVTable
+{
+  void (FOG_CDECL* destroy)(FontEngine* self);
+
+  
+};
+
+// ============================================================================
+// [Fog::FontEngine]
+// ============================================================================
+
+struct FOG_NO_EXPORT FontEngine
+{
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  FontEngineVTable* vtable;
+
+  
+};
+
+// ============================================================================
+// [Fog::FontEngine]
+// ============================================================================
+
+/*
+struct FOG_NO_EXPORT FontEngine
+{
+};
+*/
+
+// ============================================================================
 // [Fog::FontFaceVTable]
 // ============================================================================
 
@@ -518,13 +555,13 @@ struct FOG_NO_EXPORT FontFaceVTable
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunF)(const FontFace* self,
     PathF* dst, uint32_t cntOp,
-    const void* itemList, size_t itemAdvance,
+    const uint32_t* glyphList, size_t itemAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunD)(const FontFace* self,
     PathD* dst, uint32_t cntOp,
-    const void* itemList, size_t itemAdvance,
+    const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
 };
@@ -584,22 +621,22 @@ struct FOG_NO_EXPORT FontFace
 
   FOG_INLINE err_t getOutlineFromGlyphRun(
     PathF& dst, uint32_t cntOp,
-    const void* itemList, size_t itemAdvance,
+    const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length)
   {
     return vtable->getOutlineFromGlyphRunF(this,
-      &dst, cntOp, itemList, itemAdvance, positionList, positionAdvance, length);
+      &dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
   }
 
   FOG_INLINE err_t getOutlineFromGlyphRun(
     PathD& dst, uint32_t cntOp,
-    const void* itemList, size_t itemAdvance,
+    const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length) const
   {
     return vtable->getOutlineFromGlyphRunD(this,
-      &dst, cntOp, itemList, itemAdvance, positionList, positionAdvance, length);
+      &dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
   }
 
   // --------------------------------------------------------------------------
@@ -943,42 +980,40 @@ struct FOG_NO_EXPORT Font
     const GlyphRun& glyphRun)
   {
     FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+
+    const GlyphItem* glyphs = glyphRun._itemList.getData();
+    const GlyphPosition* positions = glyphRun._positionList.getData();
     size_t length = glyphRun.getLength();
 
     return fog_api.font_getOutlineFromGlyphRunF(&dst, cntOp,
-      &glyphRun._itemList.getData()->_glyphIndex, sizeof(GlyphItem),
-      &glyphRun._positionList.getData()->_position, sizeof(GlyphPosition),
-      length);
+      &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
   }
 
   FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
     const GlyphRun& glyphRun)
   {
     FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+
+    const GlyphItem* glyphs = glyphRun._itemList.getData();
+    const GlyphPosition* positions = glyphRun._positionList.getData();
     size_t length = glyphRun.getLength();
 
     return fog_api.font_getOutlineFromGlyphRunD(&dst, cntOp,
-      &glyphRun._itemList.getData()->_glyphIndex, sizeof(GlyphItem),
-      &glyphRun._positionList.getData()->_position, sizeof(GlyphPosition),
-      length);
+      &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
   }
 
   FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOps,
     const uint32_t* glyphs, const PointF* positions, size_t length)
   {
     return fog_api.font.getOutlineFromGlyphRunF(&dst, cntOp,
-      glyphs, sizeof(uint32_t),
-      positions, sizeof(PointF),
-      length);
+      glyphs, sizeof(uint32_t), positions, sizeof(PointF), length);
   }
 
   FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOps,
     const uint32_t* glyphs, const PointF* positions, size_t length)
   {
     return fog_api.font.getOutlineFromGlyphRunD(&dst, cntOp,
-      glyphs, sizeof(uint32_t),
-      positions, sizeof(PointF),
-      length);
+      glyphs, sizeof(uint32_t), positions, sizeof(PointF), length);
   }
 
   // --------------------------------------------------------------------------

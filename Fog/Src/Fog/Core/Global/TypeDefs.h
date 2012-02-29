@@ -346,7 +346,10 @@ struct SvgViewElement;
 // Fog/G2d/Text.
 struct Font;
 struct FontData;
+struct FontEngine;
+struct FontEngineVTable;
 struct FontFace;
+struct FontFaceVTable;
 struct FontFeatures;
 struct FontMatrix;
 struct FontMetrics;

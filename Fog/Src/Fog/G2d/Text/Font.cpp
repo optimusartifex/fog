@@ -473,13 +473,10 @@ static err_t FOG_CDECL Font_createEx(Font* self, const StringW* family, float he
   return ERR_OK;
 }
 
-static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float height, uint32_t unit)
+static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float size, const FontFeatures* features, const FontMatrix* matrix)
 {
   FontData* d = self->_d;
   FOG_ASSERT(d != NULL);
-
-  if (!Font_isSupportedUnit(unit))
-    return ERR_RT_INVALID_ARGUMENT;
 
   if (d->reference.get() != 1)
   {
@@ -488,7 +485,8 @@ static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float height, uint3
   }
 
   face = atomicPtrXchg(&d->face, face);
-  if (face != NULL) face->deref();
+  if (face != NULL)
+    face->deref();
 
   Font_initValues(d);
   Font_updateMetrics(d, height, unit);
@@ -496,83 +494,33 @@ static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float height, uint3
 }
 
 // ============================================================================
-// [Fog::Font - Methods]
+// [Fog::Font - Glyphs]
 // ============================================================================
 
-static err_t FOG_CDECL Font_getTextOutlineFStubW(const Font* self, PathF* dst, uint32_t cntOp, const PointF* pt, const StubW* str)
+static err_t Font_getOutlineFromGlyphRunF(const Font* self,
+  PathF* dst, uint32_t cntOp,
+  const uint32_t* glyphList, size_t glyphAdvance,
+  const PointF* positionList, size_t positionAdvance,
+  size_t length)
 {
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+  FontFace* face = self->_d->face;
+  if (FOG_IS_NULL(face))
+    return ERR_FONT_INVALID_FACE;
 
-  if (cntOp == CONTAINER_OP_REPLACE)
-    dst->clear();
-
-  return d->face->getTextOutline(*dst, d, *pt, *str);
+  return face->getOutlineFromGlyphRun(*dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
-static err_t FOG_CDECL Font_getTextOutlineFStringW(const Font* self, PathF* dst, uint32_t cntOp, const PointF* pt, const StringW* str)
+static err_t Font_getOutlineFromGlyphRunD(const Font* self,
+  PathD* dst, uint32_t cntOp,
+  const uint32_t* glyphList, size_t glyphAdvance,
+  const PointF* positionList, size_t positionAdvance,
+  size_t length)
 {
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
+  FontFace* face = self->_d->face;
+  if (FOG_IS_NULL(face))
+    return ERR_FONT_INVALID_FACE;
 
-  if (cntOp == CONTAINER_OP_REPLACE)
-    dst->clear();
-
-  return d->face->getTextOutline(*dst, d, *pt, StubW(str->getData(), str->getLength()));
-}
-
-static err_t FOG_CDECL Font_getTextOutlineDStubW(const Font* self, PathD* dst, uint32_t cntOp, const PointD* pt, const StubW* str)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (cntOp == CONTAINER_OP_REPLACE)
-    dst->clear();
-
-  return d->face->getTextOutline(*dst, d, *pt, *str);
-}
-
-static err_t FOG_CDECL Font_getTextOutlineDStringW(const Font* self, PathD* dst, uint32_t cntOp, const PointD* pt, const StringW* str)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  if (cntOp == CONTAINER_OP_REPLACE)
-    dst->clear();
-
-  return d->face->getTextOutline(*dst, d, *pt, StubW(str->getData(), str->getLength()));
-}
-
-static err_t FOG_CDECL Font_getTextExtentsFStubW(const Font* self, TextExtentsF* extents, const StubW* str)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  return d->face->getTextExtents(*extents, d, *str);
-}
-
-static err_t FOG_CDECL Font_getTextExtentsFStringW(const Font* self, TextExtentsF* extents, const StringW* str)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  return d->face->getTextExtents(*extents, d, StubW(str->getData(), str->getLength()));
-}
-
-static err_t FOG_CDECL Font_getTextExtentsDStubW(const Font* self, TextExtentsD* extents, const StubW* str)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  return d->face->getTextExtents(*extents, d, *str);
-}
-
-static err_t FOG_CDECL Font_getTextExtentsDStringW(const Font* self, TextExtentsD* extents, const StringW* str)
-{
-  FontData* d = self->_d;
-  FOG_ASSERT(d != NULL);
-
-  return d->face->getTextExtents(*extents, d, StubW(str->getData(), str->getLength()));
+  return face->getOutlineFromGlyphRun(*dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 // ============================================================================

@@ -1083,7 +1083,7 @@ struct FOG_NO_EXPORT Face
 
     reference.init(1);
     engineId = FONT_ENGINE_NULL;
-    features = NO_FLAGS;
+    features.reset();
     family.initCustom1(family_);
     designMetrics.reset();
     designEm = 0.0f;
@@ -1153,7 +1153,7 @@ struct FOG_NO_EXPORT Face
   uint32_t engineId;
 
   //! @brief Font-face features.
-  uint32_t features;
+  FaceFeatures features;
 
   //! @brief Font-face family.
   Static<StringW> family;
@@ -1172,6 +1172,70 @@ struct FOG_NO_EXPORT Face
 
 private:
   _FOG_NO_COPY(Face)
+};
+
+// ============================================================================
+// [Fog::FaceCache]
+// ============================================================================
+
+//! @brief Face cache.
+struct FOG_NO_EXPORT FaceCache
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FaceCache()
+  {
+    fog_api.facecache_ctor(this);
+  }
+
+  FOG_INLINE ~FaceCache()
+  {
+    fog_api.facecache_dtor(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    fog_api.facecache_reset(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Methods]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE Face* getExactFace(const StringW& name, const FaceFeatures& features)
+  {
+    return fog_api.facecache_getExactFace(this, &name, &features);
+  }
+
+  FOG_INLINE err_t getAllFaces(const StringW& name, List<Face*>& dst)
+  {
+    return fog_api.facecache_getAllFaces(this, &name, &dst);
+  }
+
+  FOG_INLINE err_t put(const StringW& name, const FaceFeatures& features, Face* face)
+  {
+    return fog_api.facecache_put(this, &name, &features, face);
+  }
+
+  FOG_INLINE err_t remove(const StringW& name, const FaceFeatures& features, Face* face)
+  {
+    return fog_api.facecache_remove(this, &name, &features, face);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  Static< Hash< StringW, List<Face*> > > data;
+
+private:
+  _FOG_NO_COPY(FaceCache)
 };
 
 // ============================================================================

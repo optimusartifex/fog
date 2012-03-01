@@ -12,10 +12,6 @@
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Threading/Lock.h>
-#include <Fog/Core/Tools/Hash.h>
-#include <Fog/Core/Tools/String.h>
-#include <Fog/G2d/Geometry/Path.h>
-#include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Text/Font.h>
 
 namespace Fog {
@@ -217,7 +213,7 @@ static err_t FOG_CDECL FaceCollection_dUpdateHash(FaceCollectionData* d)
 
     if (hash.contains(familyName))
     {
-      size_t* p = hash.usePtr(familyName);
+      size_t* p = hash.usePtr(familyName, NULL);
       p[0]++;
     }
     else
@@ -324,7 +320,7 @@ static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceIn
 
   if (d->fontHash().contains(newFamily))
   {
-    size_t* p = d->fontHash().usePtr(newFamily);
+    size_t* p = d->fontHash().usePtr(newFamily, NULL);
     if (FOG_IS_NULL(p))
       err = ERR_RT_OUT_OF_MEMORY;
     else
@@ -422,6 +418,139 @@ static void FOG_CDECL FaceCollection_dFree(FaceCollectionData* d)
   d->fontList.destroy();
   d->fontHash.destroy();
   MemMgr::free(d);
+}
+
+// ============================================================================
+// [Fog::FaceCache - Construction / Destruction]
+// ============================================================================
+
+static void FOG_CDECL FaceCache_ctor(FaceCache* self)
+{
+  self->data.init();
+}
+
+static void FOG_CDECL FaceCache_dtor(FaceCache* self)
+{
+  self->reset();
+  self->data.destroy();
+}
+
+// ============================================================================
+// [Fog::FaceCache - Reset]
+// ============================================================================
+
+static void FOG_CDECL FaceCache_reset(FaceCache* self)
+{
+  Hash< StringW, List<Face*> > copy;
+  swap(copy, self->data());
+
+  HashIterator< StringW, List<Face*> > cacheIterator(copy);
+  while (cacheIterator.isValid())
+  {
+    const List<Face*>& faceList = cacheIterator.getItem();
+    ListIterator<Face*> faceIterator(faceList);
+
+    while (faceIterator.isValid())
+    {
+      faceIterator.getItem()->deref();
+      faceIterator.next();
+    }
+
+    cacheIterator.next();
+  }
+}
+
+// ============================================================================
+// [Fog::FaceCache - Methods]
+// ============================================================================
+
+static Face* FOG_CDECL FaceCache_getExactFace(const FaceCache* self, const StringW* family, const FaceFeatures* features)
+{
+  const List<Face*>* faceList = self->data().getPtr(*family, NULL);
+  if (FOG_IS_NULL(faceList))
+    return NULL;
+
+  ListIterator<Face*> faceIterator(*faceList);
+  uint32_t featuresPacked = features->_packed;
+
+  while (faceIterator.isValid())
+  {
+    Face* face = faceIterator.getItem();
+
+    if (face->features._packed == featuresPacked)
+      return face->addRef();
+
+    faceIterator.next();
+  }
+
+  return NULL;
+}
+
+static err_t FOG_CDECL FaceCache_getAllFaces(const FaceCache* self, const StringW* family, List<Face*>* dst)
+{
+  const List<Face*>* faceList = self->data().getPtr(*family, NULL);
+
+  if (faceList != NULL)
+    return dst->setList(*faceList);
+
+  dst->clear();
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FaceCache_put(FaceCache* self, const StringW* family, const FaceFeatures* features, Face* face)
+{
+  Hash< StringW, List<Face*> >& data = self->data();
+  List<Face*>* list = data.usePtr(*family, NULL);
+
+  if (list != NULL)
+  {
+    FOG_RETURN_ON_ERROR(list->append(face));
+  }
+  else
+  {
+    List<Face*> list;
+    FOG_RETURN_ON_ERROR(list.append(face));
+    FOG_RETURN_ON_ERROR(data.put(*family, list, false));
+  }
+
+  face->reference.inc();
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL FaceCache_remove(FaceCache* self, const StringW* family, const FaceFeatures* features, Face* face)
+{
+  Hash< StringW, List<Face*> >& data = self->data();
+  List<Face*>* list = data.usePtr(*family, NULL);
+
+  if (list != NULL)
+  {
+    ListIterator<Face*> listIterator(*list);
+    size_t index = INVALID_INDEX;
+
+    while (listIterator.isValid())
+    {
+      if (listIterator.getItem() == face)
+      {
+        index = listIterator.getIndex();
+        break;
+      }
+      listIterator.next();
+    }
+
+    if (index == INVALID_INDEX)
+      return ERR_RT_OBJECT_NOT_FOUND;
+
+    FOG_RETURN_ON_ERROR(list->removeAt(index));
+    if (list->getLength() == 0)
+      data.remove(*family);
+
+    face->deref();
+    return ERR_OK;
+  }
+  else
+  {
+    return ERR_RT_OBJECT_NOT_FOUND;
+  }
 }
 
 // ============================================================================
@@ -1140,7 +1269,7 @@ static void Font_dFree(FontData* d)
 // [Fog::NullFace]
 // ============================================================================
 
-static Static<Face> NullFace_singleton;
+static Static<Face> NullFace_oInstance;
 static FaceVTable NullFace_vtable;
 
 static void FOG_CDECL NullFace_create(Face* self)
@@ -1175,7 +1304,7 @@ static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunD(const Face* self,
 // [Fog::NullFontEngine]
 // ============================================================================
 
-static Static<FontEngine> NullFontEngine_singleton;
+static Static<FontEngine> NullFontEngine_oInstance;
 static FontEngineVTable NullFontEngine_vtable;
 
 static void NullFontEngine_create(FontEngine* self)
@@ -1220,6 +1349,18 @@ static err_t FOG_CDECL NullFontEngine_getDefaultFace(const FontEngine* self,
 // ============================================================================
 // [Init / Fini]
 // ============================================================================
+
+#if defined(FOG_FONT_WINDOWS)
+FOG_NO_EXPORT void init_font_win(void);
+#endif // FOG_FONT_WINDOWS
+
+#if defined(FOG_FONT_MAC)
+FOG_NO_EXPORT void init_font_mac(void);
+#endif // FOG_FONT_MAC
+
+#if defined(FOG_FONT_FREETYPE)
+FOG_NO_EXPORT void init_font_ft(void);
+#endif // FOG_FONT_FREETYPE
 
 FOG_NO_EXPORT void Font_init(void)
 {
@@ -1286,6 +1427,19 @@ FOG_NO_EXPORT void Font_init(void)
   }
 
   // --------------------------------------------------------------------------
+  // [FaceCache]
+  // --------------------------------------------------------------------------
+
+  fog_api.facecache_ctor = FaceCache_ctor;
+  fog_api.facecache_dtor = FaceCache_dtor;
+
+  fog_api.facecache_reset = FaceCache_reset;
+  fog_api.facecache_getExactFace = FaceCache_getExactFace;
+  fog_api.facecache_getAllFaces = FaceCache_getAllFaces;
+  fog_api.facecache_put = FaceCache_put;
+  fog_api.facecache_remove = FaceCache_remove;
+
+  // --------------------------------------------------------------------------
   // [Font]
   // --------------------------------------------------------------------------
 
@@ -1316,7 +1470,7 @@ FOG_NO_EXPORT void Font_init(void)
     d->reference.init(1);
     d->vType = VAR_TYPE_FONT;
     d->flags = NO_FLAGS;
-    d->face = &NullFace_singleton;
+    d->face = &NullFace_oInstance;
     d->metrics.reset();
     d->features.reset();
     d->matrix.reset();
@@ -1332,13 +1486,29 @@ FOG_NO_EXPORT void Font_init(void)
   NullFace_vtable.destroy = NullFace_destroy;
   NullFace_vtable.getOutlineFromGlyphRunF = NullFace_getOutlineFromGlyphRunF;
   NullFace_vtable.getOutlineFromGlyphRunD = NullFace_getOutlineFromGlyphRunD;
-  NullFace_create(&NullFace_singleton);
+  NullFace_create(&NullFace_oInstance);
 
   NullFontEngine_vtable.destroy = NullFontEngine_destroy;
   NullFontEngine_vtable.getAvailableFaces = NullFontEngine_getAvailableFaces;
   NullFontEngine_vtable.getDefaultFace = NullFontEngine_getDefaultFace;
   NullFontEngine_vtable.queryFace = NullFontEngine_queryFace;
-  NullFontEngine_create(&NullFontEngine_singleton);
+  NullFontEngine_create(&NullFontEngine_oInstance);
+
+  // --------------------------------------------------------------------------
+  // [Initialize Native FontEngine]
+  // --------------------------------------------------------------------------
+
+#if defined(FOG_FONT_WINDOWS)
+  init_font_win();
+#endif // FOG_FONT_WINDOWS
+
+#if defined(FOG_FONT_MAC)
+  init_font_mac();
+#endif // FOG_FONT_MAC
+
+#if defined(FOG_FONT_FREETYPE)
+  init_font_ft();
+#endif // FOG_FONT_FREETYPE
 }
 
 FOG_NO_EXPORT void Font_fini(void)

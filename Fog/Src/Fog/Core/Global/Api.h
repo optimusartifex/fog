@@ -2529,6 +2529,44 @@ struct FOG_NO_EXPORT Api
   FaceInfo* faceinfo_oNull;
 
   // --------------------------------------------------------------------------
+  // [G2d/Text - FaceCollection]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(facecollection_ctor)(FaceCollection* self);
+  FOG_CAPI_CTOR(facecollection_ctorCopy)(FaceCollection* self, const FaceCollection* other);
+  FOG_CAPI_DTOR(facecollection_dtor)(FaceCollection* self);
+
+  FOG_CAPI_METHOD(err_t, facecollection_detach)(FaceCollection* self);
+  FOG_CAPI_METHOD(void, facecollection_clear)(FaceCollection* self);
+  FOG_CAPI_METHOD(void, facecollection_reset)(FaceCollection* self);
+
+  FOG_CAPI_METHOD(err_t, facecollection_setList)(FaceCollection* self, const List<FaceInfo>* list);
+  FOG_CAPI_METHOD(err_t, facecollection_addItem)(FaceCollection* self, const FaceInfo* item);
+
+  FOG_CAPI_METHOD(err_t, facecollection_copy)(FaceCollection* self, const FaceCollection* other);
+  FOG_CAPI_STATIC(bool, facecollection_eq)(const FaceCollection* a, const FaceCollection* b);
+
+  FOG_CAPI_STATIC(FaceCollectionData*, facecollection_dCreate)(void);
+  FOG_CAPI_STATIC(void, facecollection_dFree)(FaceCollectionData* d);
+
+  FaceCollection* facecollection_oNull;
+
+  // --------------------------------------------------------------------------
+  // [G2d/Text - FaceCache]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(facecache_ctor)(FaceCache* self);
+  FOG_CAPI_DTOR(facecache_dtor)(FaceCache* self);
+  
+  FOG_CAPI_METHOD(void, facecache_reset)(FaceCache* self);
+
+  FOG_CAPI_METHOD(Face*, facecache_getExactFace)(const FaceCache* self, const StringW* name, const FaceFeatures* features);
+  FOG_CAPI_METHOD(err_t, facecache_getAllFaces)(const FaceCache* self, const StringW* name, List<Face*>* dst);
+
+  FOG_CAPI_METHOD(err_t, facecache_put)(FaceCache* self, const StringW* name, const FaceFeatures* features, Face* face);
+  FOG_CAPI_METHOD(err_t, facecache_remove)(FaceCache* self, const StringW* name, const FaceFeatures* features, Face* face);
+
+  // --------------------------------------------------------------------------
   // [G2d/Text - Font]
   // --------------------------------------------------------------------------
 
@@ -2566,29 +2604,6 @@ struct FOG_NO_EXPORT Api
   // --------------------------------------------------------------------------
 
   FontEngine* fontengine_oGlobal;
-
-  // --------------------------------------------------------------------------
-  // [G2d/Text - FaceCollection]
-  // --------------------------------------------------------------------------
-
-  FOG_CAPI_CTOR(facecollection_ctor)(FaceCollection* self);
-  FOG_CAPI_CTOR(facecollection_ctorCopy)(FaceCollection* self, const FaceCollection* other);
-  FOG_CAPI_DTOR(facecollection_dtor)(FaceCollection* self);
-
-  FOG_CAPI_METHOD(err_t, facecollection_detach)(FaceCollection* self);
-  FOG_CAPI_METHOD(void, facecollection_clear)(FaceCollection* self);
-  FOG_CAPI_METHOD(void, facecollection_reset)(FaceCollection* self);
-
-  FOG_CAPI_METHOD(err_t, facecollection_setList)(FaceCollection* self, const List<FaceInfo>* list);
-  FOG_CAPI_METHOD(err_t, facecollection_addItem)(FaceCollection* self, const FaceInfo* item);
-
-  FOG_CAPI_METHOD(err_t, facecollection_copy)(FaceCollection* self, const FaceCollection* other);
-  FOG_CAPI_STATIC(bool, facecollection_eq)(const FaceCollection* a, const FaceCollection* b);
-
-  FOG_CAPI_STATIC(FaceCollectionData*, facecollection_dCreate)(void);
-  FOG_CAPI_STATIC(void, facecollection_dFree)(FaceCollectionData* d);
-
-  FaceCollection* facecollection_oNull;
 
   // --------------------------------------------------------------------------
   // [G2d/Tools - Dpi]

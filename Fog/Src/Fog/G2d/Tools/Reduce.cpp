@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Hash.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -114,7 +114,7 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
           { \
             uint32_t c; \
             _Load_(c, p); \
-            Face::p32And(c, c, mask); \
+            Acc::p32And(c, c, mask); \
             \
             /* Increase the count of 'c' if it is already in the hash-table. */ \
             if (hash.contains(c)) \
@@ -130,11 +130,11 @@ bool Reduce::analyze(const Image& image, bool discardAlphaChannel)
       FOG_MACRO_END
 
       if (depth == 16)
-        _FOG_REDUCE_LOOP(2, Face::p32Load2a);
+        _FOG_REDUCE_LOOP(2, Acc::p32Load2a);
       else if (depth == 24)
-        _FOG_REDUCE_LOOP(3, Face::p32Load3b);
+        _FOG_REDUCE_LOOP(3, Acc::p32Load3b);
       else if (depth == 32)
-        _FOG_REDUCE_LOOP(4, Face::p32Load4a);
+        _FOG_REDUCE_LOOP(4, Acc::p32Load4a);
 
       // If we are here, the color reduction is possible.
       i = 0;

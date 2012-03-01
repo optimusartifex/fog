@@ -112,7 +112,7 @@ struct FOG_NO_EXPORT PTextureBase
 _Has8BPC:
         if (tileMode == TEXTURE_TILE_CLAMP)
         {
-          Face::p32PRGB32FromARGB32(ctx->_d.texture.base.clamp.prgb32.u32, clampColor->getArgb32().u32);
+          Acc::p32PRGB32FromARGB32(ctx->_d.texture.base.clamp.prgb32.u32, clampColor->getArgb32().u32);
         }
         break;
 
@@ -141,7 +141,7 @@ _Has8BPC:
 _Has16BPC:
         if (tileMode == TEXTURE_TILE_CLAMP)
         {
-          Face::p64PRGB64FromARGB64(ctx->_d.texture.base.clamp.prgb64.p64, clampColor->getArgb64().p64);
+          Acc::p64PRGB64FromARGB64(ctx->_d.texture.base.clamp.prgb64.p64, clampColor->getArgb64().p64);
         }
         break;
 
@@ -492,7 +492,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_Base
   typedef uint32_t Pixel;
   enum { DST_BPP = 4 };
 
-  FOG_INLINE void fetchNorm(Pixel& dst, const uint8_t* src) { Face::p32Load4a(dst, src); }
+  FOG_INLINE void fetchNorm(Pixel& dst, const uint8_t* src) { Acc::p32Load4a(dst, src); }
   FOG_INLINE void fetchSolid(Pixel& dst, const RasterSolid& solid) { dst = solid.prgb32.u32; }
 
   FOG_INLINE void interpolateNorm_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
@@ -505,12 +505,12 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_Base
     P_INTERPOLATE_C_32_4(dst, c0, w0, c1, w1, c2, w2, c3, w3);
   }
 
-  FOG_INLINE void store(uint8_t* dst, const Pixel& src) { Face::p32Store4a(dst, src); }
+  FOG_INLINE void store(uint8_t* dst, const Pixel& src) { Acc::p32Store4a(dst, src); }
   FOG_INLINE uint8_t* fill(uint8_t* dst, const Pixel& src, int w) { return Helpers::p_fill_prgb32(dst, src, w); }
   FOG_INLINE uint8_t* repeat(uint8_t* dst, int baseW, int repeatW) { return Helpers::p_repeat_prgb32(dst, baseW, repeatW); }
 
-  FOG_INLINE void _cmul(Pixel& dst, const Pixel& c0, uint u0) { Face::p32MulDiv256PBB_SBW(dst, c0, u0); }
-  FOG_INLINE void _cadd(Pixel& dst, const Pixel& c0, const Pixel& c1) { Face::p32Add(dst, c0, c1); }
+  FOG_INLINE void _cmul(Pixel& dst, const Pixel& c0, uint u0) { Acc::p32MulDiv256PBB_SBW(dst, c0, u0); }
+  FOG_INLINE void _cadd(Pixel& dst, const Pixel& c0, const Pixel& c1) { Acc::p32Add(dst, c0, c1); }
 };
 
 // ============================================================================
@@ -523,7 +523,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_PRGB32 : public PTextureAccess
 
   FOG_INLINE PTextureAccessor_PRGB32_From_PRGB32(const RasterPattern* ctx) {}
 
-  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Face::p32Load4a(dst, src); }
+  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Acc::p32Load4a(dst, src); }
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }
@@ -544,7 +544,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_XRGB32 : public PTextureAccess
 
   FOG_INLINE PTextureAccessor_PRGB32_From_XRGB32(const RasterPattern* ctx) {}
 
-  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Face::p32Load4a(dst, src); }
+  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Acc::p32Load4a(dst, src); }
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }
@@ -552,7 +552,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_XRGB32 : public PTextureAccess
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { P_INTERPOLATE_C_32_4(dst, c0, w0, c1, w1, c2, w2, c3, w3); }
 
-  FOG_INLINE void normalize(Pixel& dst, const Pixel& src) { Face::p32FillPBB3(dst, dst); }
+  FOG_INLINE void normalize(Pixel& dst, const Pixel& src) { Acc::p32FillPBB3(dst, dst); }
 };
 
 // ============================================================================
@@ -565,7 +565,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_RGB24 : public PTextureAccesso
 
   FOG_INLINE PTextureAccessor_PRGB32_From_RGB24(const RasterPattern* ctx) {}
 
-  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Face::p32Load3b(dst, src); }
+  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Acc::p32Load3b(dst, src); }
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }
@@ -573,7 +573,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_RGB24 : public PTextureAccesso
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { P_INTERPOLATE_C_32_4(dst, c0, w0, c1, w1, c2, w2, c3, w3); }
 
-  FOG_INLINE void normalize(Pixel& dst, const Pixel& src) { Face::p32FillPBB3(dst, dst); }
+  FOG_INLINE void normalize(Pixel& dst, const Pixel& src) { Acc::p32FillPBB3(dst, dst); }
 };
 
 // ============================================================================
@@ -586,7 +586,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_A8 : public PTextureAccessor_P
 
   FOG_INLINE PTextureAccessor_PRGB32_From_A8(const RasterPattern* ctx) {}
 
-  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* p) { Face::p32Load1b(dst, p); }
+  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* p) { Acc::p32Load1b(dst, p); }
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { dst = (c0 * w0 + c1 * w1) >> 8; }
@@ -594,7 +594,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_A8 : public PTextureAccessor_P
   FOG_INLINE void interpolateRaw_4(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1, const Pixel& c2, uint w2, const Pixel& c3, uint w3)
   { dst = (c0 * w0 + c1 * w1 + c2 * w2 + c3 * w3) >> 8; }
 
-  FOG_INLINE void normalize(Pixel& dst, const Pixel& src) { Face::p32ExtendPBBFromSBB(dst, src); }
+  FOG_INLINE void normalize(Pixel& dst, const Pixel& src) { Acc::p32ExtendPBBFromSBB(dst, src); }
 };
 
 // ============================================================================
@@ -607,7 +607,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_I8 : public PTextureAccessor_P
 
   FOG_INLINE PTextureAccessor_PRGB32_From_I8(const RasterPattern* ctx) : pal(ctx->_d.texture.base.pal) {}
 
-  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Face::p32Load4a(dst, pal + src[0]); }
+  FOG_INLINE void fetchRaw(Pixel& dst, const uint8_t* src) { Acc::p32Load4a(dst, pal + src[0]); }
 
   FOG_INLINE void interpolateRaw_2(Pixel& dst, const Pixel& c0, uint w0, const Pixel& c1, uint w1)
   { P_INTERPOLATE_C_32_2(dst, c0, w0, c1, w1); }

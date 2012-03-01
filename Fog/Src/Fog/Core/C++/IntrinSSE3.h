@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinSSE2.h>
+#include <Fog/Core/C++/IntrinSse2.h>
 
 #if defined(_MSC_VER)
 # include <intrin.h>

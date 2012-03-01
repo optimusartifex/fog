@@ -4,15 +4,14 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACEMMX_H
-#define _FOG_CORE_FACE_FACEMMX_H
+#ifndef _FOG_CORE_ACC_ACCMMX_H
+#define _FOG_CORE_ACC_ACCMMX_H
 
 // [Dependencies]
-#include <Fog/Core/C++/IntrinMMX.h>
-#include <Fog/Core/Face/Features.h>
+#include <Fog/Core/C++/IntrinMmx.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
@@ -20,17 +19,17 @@ namespace Face {
 # pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
-//! @addtogroup Fog_Face_MMX
+//! @addtogroup Fog_Acc_MMX
 //! @{
 
 // ============================================================================
-// [Fog::Face - MMX - Constants]
+// [Fog::Acc - MMX - Constants]
 // ============================================================================
 
 
 
 // ============================================================================
-// [Fog::Face - MMX - Load/Store]
+// [Fog::Acc - MMX - Load/Store]
 // ============================================================================
 
 template<typename T>
@@ -64,23 +63,23 @@ static FOG_INLINE void m64iStore8(T* dstp, const __m64& src0)
 # pragma warning(pop)
 #endif // FOG_CC_MSC
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // MMX+SSE extensions require both, FaceMMX.h, and FaceSSE.h headers.
-#if defined(_FOG_CORE_FACE_FACESSE_H)
-# include <Fog/Core/Face/FaceMMXSSE.h>
-#endif // _FOG_CORE_FACE_FACESSE_H
+#if defined(_FOG_CORE_ACC_ACCSSE_H)
+# include <Fog/Core/Acc/AccMmxSse.h>
+#endif // _FOG_CORE_ACC_ACCSSE_H
 
 // MMX+SSE2 extensions require both, FaceMMX.h, and FaceSSE2.h headers.
-#if defined(_FOG_CORE_FACE_FACESSE2_H)
-# include <Fog/Core/Face/FaceMMXSSE2.h>
-#endif // _FOG_CORE_FACE_FACESSE2_H
+#if defined(_FOG_CORE_ACC_ACCSSE2_H)
+# include <Fog/Core/Acc/AccMmxSse2.h>
+#endif // _FOG_CORE_ACC_ACCSSE2_H
 
 // MMX+SSSE3 extensions require both, FaceMMX.h, and FaceSSSE3.h headers.
-#if defined(_FOG_CORE_FACE_FACESSSE3_H)
-# include <Fog/Core/Face/FaceMMXSSSE3.h>
-#endif // _FOG_CORE_FACE_FACESSSE3_H
+#if defined(_FOG_CORE_ACC_ACCSSSE3_H)
+# include <Fog/Core/Acc/AccMmxSsse3.h>
+#endif // _FOG_CORE_ACC_ACCSSSE3_H
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACEMMX_H
+#endif // _FOG_CORE_ACC_ACCMMX_H

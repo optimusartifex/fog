@@ -4,24 +4,24 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACESSE3_H
-#define _FOG_CORE_FACE_FACESSE3_H
+#ifndef _FOG_CORE_ACC_ACCSSE3_H
+#define _FOG_CORE_ACC_ACCSSE3_H
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinSSE3.h>
+#include <Fog/Core/C++/IntrinSse3.h>
 
-#include <Fog/Core/Face/FaceSSE.h>
-#include <Fog/Core/Face/FaceSSE2.h>
+#include <Fog/Core/Acc/AccSse.h>
+#include <Fog/Core/Acc/AccSse2.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
-//! @addtogroup Fog_Face_SSE3
+//! @addtogroup Fog_Acc_SSE3
 //! @{
 
 // ============================================================================
-// [Fog::Face - SSE3 - Load]
+// [Fog::Acc - SSE3 - Load]
 // ============================================================================
 
 template<typename SrcT>
@@ -37,7 +37,7 @@ static FOG_INLINE void m128dLoad16dqu(__m128i& dst0, const SrcT* srcp)
 }
 
 // ============================================================================
-// [Fog::Face - SSE3 - Move]
+// [Fog::Acc - SSE3 - Move]
 // ============================================================================
 
 //! @brief Duplicate the second and fourth 32-bit values.
@@ -78,7 +78,7 @@ static FOG_INLINE void m128dMoveLDup(
 }
 
 // ============================================================================
-// [Fog::Face - SSE3 - HAdd]
+// [Fog::Acc - SSE3 - HAdd]
 // ============================================================================
 
 static FOG_INLINE void m128dHAddPS(
@@ -94,7 +94,7 @@ static FOG_INLINE void m128dHAddPD(
 }
 
 // ============================================================================
-// [Fog::Face - SSE3 - HSub]
+// [Fog::Acc - SSE3 - HSub]
 // ============================================================================
 
 static FOG_INLINE void m128dHSubPS(
@@ -110,7 +110,7 @@ static FOG_INLINE void m128dHSubPD(
 }
 
 // ============================================================================
-// [Fog::Face - SSE3 - AddSub]
+// [Fog::Acc - SSE3 - AddSub]
 // ============================================================================
 
 static FOG_INLINE void m128dAddSubPS(
@@ -127,8 +127,8 @@ static FOG_INLINE void m128dAddSubPD(
 
 //! @}
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACESSE3_H
+#endif // _FOG_CORE_ACC_ACCSSE3_H

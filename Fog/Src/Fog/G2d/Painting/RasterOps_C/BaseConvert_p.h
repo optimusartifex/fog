@@ -862,21 +862,21 @@ struct FOG_NO_EXPORT Convert
 
     while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
-      Face::p32Store1b(dst, p0);
+      Acc::p32Store1b(dst, p0);
       dst += 1;
       if (--w == 0) return;
     }
 
     while ((w -= 32) >= 0)
     {
-      Face::p32Store4a(dst +  0, p0);
-      Face::p32Store4a(dst +  4, p0);
-      Face::p32Store4a(dst +  8, p0);
-      Face::p32Store4a(dst + 12, p0);
-      Face::p32Store4a(dst + 16, p0);
-      Face::p32Store4a(dst + 20, p0);
-      Face::p32Store4a(dst + 24, p0);
-      Face::p32Store4a(dst + 28, p0);
+      Acc::p32Store4a(dst +  0, p0);
+      Acc::p32Store4a(dst +  4, p0);
+      Acc::p32Store4a(dst +  8, p0);
+      Acc::p32Store4a(dst + 12, p0);
+      Acc::p32Store4a(dst + 16, p0);
+      Acc::p32Store4a(dst + 20, p0);
+      Acc::p32Store4a(dst + 24, p0);
+      Acc::p32Store4a(dst + 28, p0);
       dst += 32;
     }
 
@@ -884,7 +884,7 @@ struct FOG_NO_EXPORT Convert
 
     while ((w -= 4) >= 0)
     {
-      Face::p32Store4a(dst, p0);
+      Acc::p32Store4a(dst, p0);
       dst += 4;
     }
 
@@ -897,9 +897,9 @@ struct FOG_NO_EXPORT Convert
 
     switch (w)
     {
-      case 3: Face::p32Store1b(dst - 3, p0);
-      case 2: Face::p32Store1b(dst - 2, p0);
-      case 1: Face::p32Store1b(dst - 1, p0);
+      case 3: Acc::p32Store1b(dst - 3, p0);
+      case 2: Acc::p32Store1b(dst - 2, p0);
+      case 1: Acc::p32Store1b(dst - 1, p0);
         break;
 
       default:
@@ -918,21 +918,21 @@ struct FOG_NO_EXPORT Convert
 
     while ( ((size_t)dst & (sizeof(size_t) - 1)) )
     {
-      Face::p32Store2a(dst, p0);
+      Acc::p32Store2a(dst, p0);
       dst += 2;
       if (--w == 0) return;
     }
 
     while ((w -= 16) >= 0)
     {
-      Face::p32Store4a(dst +  0, p0);
-      Face::p32Store4a(dst +  4, p0);
-      Face::p32Store4a(dst +  8, p0);
-      Face::p32Store4a(dst + 12, p0);
-      Face::p32Store4a(dst + 16, p0);
-      Face::p32Store4a(dst + 20, p0);
-      Face::p32Store4a(dst + 24, p0);
-      Face::p32Store4a(dst + 28, p0);
+      Acc::p32Store4a(dst +  0, p0);
+      Acc::p32Store4a(dst +  4, p0);
+      Acc::p32Store4a(dst +  8, p0);
+      Acc::p32Store4a(dst + 12, p0);
+      Acc::p32Store4a(dst + 16, p0);
+      Acc::p32Store4a(dst + 20, p0);
+      Acc::p32Store4a(dst + 24, p0);
+      Acc::p32Store4a(dst + 28, p0);
       dst += 32;
     }
 
@@ -940,8 +940,8 @@ struct FOG_NO_EXPORT Convert
 
     while ((w -= 4) >= 0)
     {
-      Face::p32Store4a(dst + 0, p0);
-      Face::p32Store4a(dst + 4, p0);
+      Acc::p32Store4a(dst + 0, p0);
+      Acc::p32Store4a(dst + 4, p0);
       dst += 8;
     }
 
@@ -953,9 +953,9 @@ struct FOG_NO_EXPORT Convert
 
     switch (w)
     {
-      case 3: Face::p32Store2a(dst - 6, p0);
-      case 2: Face::p32Store2a(dst - 4, p0);
-      case 1: Face::p32Store2a(dst - 2, p0);
+      case 3: Acc::p32Store2a(dst - 6, p0);
+      case 2: Acc::p32Store2a(dst - 4, p0);
+      case 1: Acc::p32Store2a(dst - 2, p0);
         break;
 
       default:
@@ -1072,9 +1072,9 @@ struct FOG_NO_EXPORT Convert
   {
     do {
       uint32_t c0;
-      Face::p32Load4a(c0, src);
-      Face::p32PRGB32FromARGB32(c0, c0);
-      Face::p32Store4a(dst, c0);
+      Acc::p32Load4a(c0, src);
+      Acc::p32PRGB32FromARGB32(c0, c0);
+      Acc::p32Store4a(dst, c0);
 
       dst += 4;
       src += 4;
@@ -1086,9 +1086,9 @@ struct FOG_NO_EXPORT Convert
   {
     do {
       uint32_t c0;
-      Face::p32Load4a(c0, src);
-      Face::p32ARGB32FromPRGB32(c0, c0);
-      Face::p32Store4a(dst, c0);
+      Acc::p32Load4a(c0, src);
+      Acc::p32ARGB32FromPRGB32(c0, c0);
+      Acc::p32Store4a(dst, c0);
 
       dst += 4;
       src += 4;
@@ -1100,9 +1100,9 @@ struct FOG_NO_EXPORT Convert
   {
     do {
       __p64 c0;
-      Face::p64Load8a(c0, src);
-      Face::p64PRGB64FromARGB64(c0, c0);
-      Face::p64Store8a(dst, c0);
+      Acc::p64Load8a(c0, src);
+      Acc::p64PRGB64FromARGB64(c0, c0);
+      Acc::p64Store8a(dst, c0);
 
       dst += 8;
       src += 8;
@@ -1114,9 +1114,9 @@ struct FOG_NO_EXPORT Convert
   {
     do {
       __p64 c0;
-      Face::p64Load8a(c0, src);
-      Face::p64ARGB64FromPRGB64(c0, c0);
-      Face::p64Store8a(dst, c0);
+      Acc::p64Load8a(c0, src);
+      Acc::p64ARGB64FromPRGB64(c0, c0);
+      Acc::p64Store8a(dst, c0);
 
       dst += 8;
       src += 8;
@@ -1133,9 +1133,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load2a(pix0p, src);
-      Face::p32FRGB32FromRGB16_555(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load2a(pix0p, src);
+      Acc::p32FRGB32FromRGB16_555(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 2;
@@ -1148,9 +1148,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load2aBSwap(pix0p, src);
-      Face::p32FRGB32FromRGB16_555(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load2aBSwap(pix0p, src);
+      Acc::p32FRGB32FromRGB16_555(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 2;
@@ -1163,9 +1163,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load2a(pix0p, src);
-      Face::p32FRGB32FromRGB16_565(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load2a(pix0p, src);
+      Acc::p32FRGB32FromRGB16_565(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 2;
@@ -1178,9 +1178,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load2aBSwap(pix0p, src);
-      Face::p32FRGB32FromRGB16_565(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load2aBSwap(pix0p, src);
+      Acc::p32FRGB32FromRGB16_565(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 2;
@@ -1193,9 +1193,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load2a(pix0p, src);
-      Face::p32ARGB32FromARGB16_4444(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load2a(pix0p, src);
+      Acc::p32ARGB32FromARGB16_4444(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 2;
@@ -1208,9 +1208,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load2a(pix0p, src);
-      Face::p32ARGB32FromARGB16_4444_bs(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load2a(pix0p, src);
+      Acc::p32ARGB32FromARGB16_4444_bs(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 2;
@@ -1226,12 +1226,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load2a(pix0p, src);
+      Acc::p32Load2a(pix0p, src);
       pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
       pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
       pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
       pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 2;
@@ -1247,12 +1247,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load2aBSwap(pix0p, src);
+      Acc::p32Load2aBSwap(pix0p, src);
       pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
       pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
       pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
       pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 2;
@@ -1265,9 +1265,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load3bBSwap(pix0p, src);
-      Face::p32FillPBB3(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load3bBSwap(pix0p, src);
+      Acc::p32FillPBB3(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 3;
@@ -1283,12 +1283,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load3b(pix0p, src);
+      Acc::p32Load3b(pix0p, src);
       pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
       pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
       pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
       pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 3;
@@ -1305,12 +1305,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load3bBSwap(pix0p, src);
+      Acc::p32Load3bBSwap(pix0p, src);
       pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
       pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
       pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
       pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 3;
@@ -1323,9 +1323,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4aBSwap(pix0p, src);
-      Face::p32FillPBB3(pix0p, pix0p);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load4aBSwap(pix0p, src);
+      Acc::p32FillPBB3(pix0p, pix0p);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 4;
@@ -1340,9 +1340,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4aBSwap(pix0p, src);
-      Face::p32Or(pix0p, pix0p, fill);
-      Face::p32Store4a(dst, pix0p);
+      Acc::p32Load4aBSwap(pix0p, src);
+      Acc::p32Or(pix0p, pix0p, fill);
+      Acc::p32Store4a(dst, pix0p);
 
       dst += 4;
       src += 4;
@@ -1359,12 +1359,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
       pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
       pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
       pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 4;
@@ -1381,12 +1381,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load4aBSwap(pix0p, src);
+      Acc::p32Load4aBSwap(pix0p, src);
       pix0a = (scalePixel(pix0p, d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
       pix0r = (scalePixel(pix0p, d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
       pix0g = (scalePixel(pix0p, d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
       pix0b = (scalePixel(pix0p, d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 4;
@@ -1400,16 +1400,16 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g, pix0b;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-      Face::p32Load2a(pix0r, src + 0);
-      Face::p32Load2a(pix0g, src + 2);
-      Face::p32Load2a(pix0b, src + 4);
+      Acc::p32Load2a(pix0r, src + 0);
+      Acc::p32Load2a(pix0g, src + 2);
+      Acc::p32Load2a(pix0b, src + 4);
 #else
-      Face::p32Load2a(pix0b, src + 0);
-      Face::p32Load2a(pix0g, src + 2);
-      Face::p32Load2a(pix0r, src + 4);
+      Acc::p32Load2a(pix0b, src + 0);
+      Acc::p32Load2a(pix0g, src + 2);
+      Acc::p32Load2a(pix0r, src + 4);
 #endif // FOG_BYTE_ORDER
 
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_3((pix0r << 16) | 0xFF000000, (pix0g & 0xFF) << 8, (pix0b & 0xFF)));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_3((pix0r << 16) | 0xFF000000, (pix0g & 0xFF) << 8, (pix0b & 0xFF)));
 
       dst += 4;
       src += 6;
@@ -1425,11 +1425,11 @@ struct FOG_NO_EXPORT Convert
       __p64 pix0p;
       uint32_t pix0r, pix0g, pix0b;
 
-      Face::p64Load6a(pix0p, dst);
-      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
+      Acc::p64Load6a(pix0p, dst);
+      pix0r = (scalePixel(Acc::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Acc::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Acc::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
 
       dst += 4;
       src += 6;
@@ -1445,11 +1445,11 @@ struct FOG_NO_EXPORT Convert
       __p64 pix0p;
       uint32_t pix0r, pix0g, pix0b;
 
-      Face::p64Load6aBSwap(pix0p, dst);
-      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
+      Acc::p64Load6aBSwap(pix0p, dst);
+      pix0r = (scalePixel(Acc::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Acc::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Acc::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_4(0xFF000000, pix0r, pix0g, pix0b));
 
       dst += 4;
       src += 6;
@@ -1466,12 +1466,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load6a(pix0p, src);
-      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p64Load6a(pix0p, src);
+      pix0a = (scalePixel(Acc::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Acc::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Acc::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Acc::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 6;
@@ -1488,12 +1488,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load6aBSwap(pix0p, src);
-      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p64Load6aBSwap(pix0p, src);
+      pix0a = (scalePixel(Acc::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Acc::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Acc::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Acc::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 6;
@@ -1509,10 +1509,10 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p_10;
       uint32_t pix0p_32;
 
-      Face::p32Load8a(pix0p_10, pix0p_32, src);
-      Face::p32ARGB32FromARGB64_1032(pix0p_10, pix0p_10, pix0p_32);
-      Face::p32Or(pix0p_10, pix0p_10, fill);
-      Face::p32Store4a(dst, pix0p_10);
+      Acc::p32Load8a(pix0p_10, pix0p_32, src);
+      Acc::p32ARGB32FromARGB64_1032(pix0p_10, pix0p_10, pix0p_32);
+      Acc::p32Or(pix0p_10, pix0p_10, fill);
+      Acc::p32Store4a(dst, pix0p_10);
 
       dst += 4;
       src += 8;
@@ -1529,12 +1529,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load8a(pix0p, src);
-      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p64Load8a(pix0p, src);
+      pix0a = (scalePixel(Acc::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Acc::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Acc::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Acc::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 8;
@@ -1551,12 +1551,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load8aBSwap(pix0p, src);
-      pix0a = (scalePixel(Face::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
-      pix0r = (scalePixel(Face::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
-      pix0g = (scalePixel(Face::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
-      pix0b = (scalePixel(Face::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p64Load8aBSwap(pix0p, src);
+      pix0a = (scalePixel(Acc::u64FromP64(pix0p), d->aSrcShift, d->aSrcMask, d->aScale) <<  8) & 0xFF000000;
+      pix0r = (scalePixel(Acc::u64FromP64(pix0p), d->rSrcShift, d->rSrcMask, d->rScale)      ) & 0x00FF0000;
+      pix0g = (scalePixel(Acc::u64FromP64(pix0p), d->gSrcShift, d->gSrcMask, d->gScale) >>  8) & 0x0000FF00;
+      pix0b = (scalePixel(Acc::u64FromP64(pix0p), d->bSrcShift, d->bSrcMask, d->bScale) >> 16);
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 8;
@@ -1573,9 +1573,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32RGB16_555FromXRGB32(pix0p, pix0p);
-      Face::p32Store2a(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32RGB16_555FromXRGB32(pix0p, pix0p);
+      Acc::p32Store2a(dst, pix0p);
 
       dst += 2;
       src += 4;
@@ -1588,9 +1588,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32RGB16_555FromXRGB32(pix0p, pix0p);
-      Face::p32Store2aBSwap(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32RGB16_555FromXRGB32(pix0p, pix0p);
+      Acc::p32Store2aBSwap(dst, pix0p);
 
       dst += 2;
       src += 4;
@@ -1603,9 +1603,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32RGB16_565FromXRGB32(pix0p, pix0p);
-      Face::p32Store2a(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32RGB16_565FromXRGB32(pix0p, pix0p);
+      Acc::p32Store2a(dst, pix0p);
 
       dst += 2;
       src += 4;
@@ -1618,9 +1618,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32RGB16_565FromXRGB32(pix0p, pix0p);
-      Face::p32Store2aBSwap(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32RGB16_565FromXRGB32(pix0p, pix0p);
+      Acc::p32Store2aBSwap(dst, pix0p);
 
       dst += 2;
       src += 4;
@@ -1633,9 +1633,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32ARGB16_4444FromARGB32(pix0p, pix0p);
-      Face::p32Store2a(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32ARGB16_4444FromARGB32(pix0p, pix0p);
+      Acc::p32Store2a(dst, pix0p);
 
       dst += 2;
       src += 4;
@@ -1648,9 +1648,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32ARGB16_4444_bsFromARGB32(pix0p, pix0p);
-      Face::p32Store2a(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32ARGB16_4444_bsFromARGB32(pix0p, pix0p);
+      Acc::p32Store2a(dst, pix0p);
 
       dst += 2;
       src += 4;
@@ -1666,12 +1666,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
       pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
       pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
       pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
-      Face::p32Store2a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store2a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 2;
       src += 4;
@@ -1687,12 +1687,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
       pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
       pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
       pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
-      Face::p32Store2aBSwap(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store2aBSwap(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 2;
       src += 4;
@@ -1705,8 +1705,8 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32Store3bBSwap(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32Store3bBSwap(dst, pix0p);
 
       dst += 3;
       src += 4;
@@ -1722,12 +1722,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
       pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
       pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
       pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
-      Face::p32Store3b(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store3b(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 3;
       src += 4;
@@ -1744,12 +1744,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
       pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
       pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
       pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
-      Face::p32Store3bBSwap(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store3bBSwap(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 3;
       src += 4;
@@ -1764,9 +1764,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32Or(pix0p, pix0p, (uint32_t)d->fill);
-      Face::p32Store4aBSwap(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32Or(pix0p, pix0p, (uint32_t)d->fill);
+      Acc::p32Store4aBSwap(dst, pix0p);
 
       dst += 4;
       src += 4;
@@ -1781,8 +1781,8 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32Store4aBSwap(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32Store4aBSwap(dst, pix0p);
 
       dst += 4;
       src += 4;
@@ -1798,12 +1798,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
       pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
       pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
       pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
-      Face::p32Store4a(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4a(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 4;
@@ -1819,12 +1819,12 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
       pix0a = (scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift;
       pix0r = (scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift;
       pix0g = (scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift;
       pix0b = (scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift;
-      Face::p32Store4aBSwap(dst, _FOG_FACE_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
+      Acc::p32Store4aBSwap(dst, _FOG_ACC_COMBINE_5(pix0a, pix0r, pix0g, pix0b, (uint32_t)d->fill));
 
       dst += 4;
       src += 4;
@@ -1837,8 +1837,8 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32RGB48StoreBSwapFromXRGB32(dst, pix0p);
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32RGB48StoreBSwapFromXRGB32(dst, pix0p);
 
       dst += 6;
       src += 4;
@@ -1854,16 +1854,16 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       __p64 pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
-      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
-      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
-      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+      Acc::p32Load4a(pix0p, src);
+      pix0r = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
 
-      Face::p64Combine(pix0r, pix0r, pix0g);
-      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
-      Face::p64Combine(pix0r, pix0r, pix0b);
+      Acc::p64Combine(pix0r, pix0r, pix0g);
+      Acc::p64Combine(pix0b, pix0b, Acc::p64FromU64(d->fill));
+      Acc::p64Combine(pix0r, pix0r, pix0b);
 
-      Face::p64Store6a(dst, pix0r);
+      Acc::p64Store6a(dst, pix0r);
 
       dst += 6;
       src += 4;
@@ -1879,16 +1879,16 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       __p64 pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
-      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
-      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
-      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+      Acc::p32Load4a(pix0p, src);
+      pix0r = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
 
-      Face::p64Combine(pix0r, pix0r, pix0g);
-      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
-      Face::p64Combine(pix0r, pix0r, pix0b);
+      Acc::p64Combine(pix0r, pix0r, pix0g);
+      Acc::p64Combine(pix0b, pix0b, Acc::p64FromU64(d->fill));
+      Acc::p64Combine(pix0r, pix0r, pix0b);
 
-      Face::p64Store6aBSwap(dst, pix0r);
+      Acc::p64Store6aBSwap(dst, pix0r);
 
       dst += 6;
       src += 4;
@@ -1904,18 +1904,18 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       __p64 pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
-      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
-      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
-      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
-      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+      Acc::p32Load4a(pix0p, src);
+      pix0a = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
 
-      Face::p64Combine(pix0r, pix0r, pix0g);
-      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
-      Face::p64Combine(pix0r, pix0r, pix0a);
-      Face::p64Combine(pix0r, pix0r, pix0b);
+      Acc::p64Combine(pix0r, pix0r, pix0g);
+      Acc::p64Combine(pix0b, pix0b, Acc::p64FromU64(d->fill));
+      Acc::p64Combine(pix0r, pix0r, pix0a);
+      Acc::p64Combine(pix0r, pix0r, pix0b);
 
-      Face::p64Store6a(dst, pix0r);
+      Acc::p64Store6a(dst, pix0r);
 
       dst += 6;
       src += 4;
@@ -1931,18 +1931,18 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       __p64 pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
-      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
-      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
-      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
-      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+      Acc::p32Load4a(pix0p, src);
+      pix0a = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
 
-      Face::p64Combine(pix0r, pix0r, pix0g);
-      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
-      Face::p64Combine(pix0r, pix0r, pix0a);
-      Face::p64Combine(pix0r, pix0r, pix0b);
+      Acc::p64Combine(pix0r, pix0r, pix0g);
+      Acc::p64Combine(pix0b, pix0b, Acc::p64FromU64(d->fill));
+      Acc::p64Combine(pix0r, pix0r, pix0a);
+      Acc::p64Combine(pix0r, pix0r, pix0b);
 
-      Face::p64Store6aBSwap(dst, pix0r);
+      Acc::p64Store6aBSwap(dst, pix0r);
 
       dst += 6;
       src += 4;
@@ -1958,9 +1958,9 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load4a(pix0p, src);
-      Face::p32PRGB64FromPRGB32(pix0p_10, pix0p_32, pix0p);
-      Face::p32Store8a(dst, MemOps::bswap32(pix0p_32), MemOps::bswap32(pix0p_10));
+      Acc::p32Load4a(pix0p, src);
+      Acc::p32PRGB64FromPRGB32(pix0p_10, pix0p_32, pix0p);
+      Acc::p32Store8a(dst, MemOps::bswap32(pix0p_32), MemOps::bswap32(pix0p_10));
 
       dst += 8;
       src += 4;
@@ -1976,18 +1976,18 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       __p64 pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
-      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
-      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
-      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
-      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+      Acc::p32Load4a(pix0p, src);
+      pix0a = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
 
-      Face::p64Combine(pix0r, pix0r, pix0g);
-      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
-      Face::p64Combine(pix0r, pix0r, pix0a);
-      Face::p64Combine(pix0r, pix0r, pix0b);
+      Acc::p64Combine(pix0r, pix0r, pix0g);
+      Acc::p64Combine(pix0b, pix0b, Acc::p64FromU64(d->fill));
+      Acc::p64Combine(pix0r, pix0r, pix0a);
+      Acc::p64Combine(pix0r, pix0r, pix0b);
 
-      Face::p64Store8a(dst, pix0r);
+      Acc::p64Store8a(dst, pix0r);
 
       dst += 8;
       src += 4;
@@ -2003,18 +2003,18 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p;
       __p64 pix0a, pix0r, pix0g, pix0b;
 
-      Face::p32Load4a(pix0p, src);
-      pix0a = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
-      pix0r = Face::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
-      pix0g = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
-      pix0b = Face::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
+      Acc::p32Load4a(pix0p, src);
+      pix0a = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 24, 0xFF, d->aScale) >> 16) << d->aDstShift);
+      pix0r = Acc::p64FromU64((uint64_t)(scalePixel(pix0p, 16, 0xFF, d->rScale) >> 16) << d->rDstShift);
+      pix0g = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  8, 0xFF, d->gScale) >> 16) << d->gDstShift);
+      pix0b = Acc::p64FromU64((uint64_t)(scalePixel(pix0p,  0, 0xFF, d->bScale) >> 16) << d->bDstShift);
 
-      Face::p64Combine(pix0r, pix0r, pix0g);
-      Face::p64Combine(pix0b, pix0b, Face::p64FromU64(d->fill));
-      Face::p64Combine(pix0r, pix0r, pix0a);
-      Face::p64Combine(pix0r, pix0r, pix0b);
+      Acc::p64Combine(pix0r, pix0r, pix0g);
+      Acc::p64Combine(pix0b, pix0b, Acc::p64FromU64(d->fill));
+      Acc::p64Combine(pix0r, pix0r, pix0a);
+      Acc::p64Combine(pix0r, pix0r, pix0b);
 
-      Face::p64Store8aBSwap(dst, pix0r);
+      Acc::p64Store8aBSwap(dst, pix0r);
 
       dst += 8;
       src += 4;
@@ -2031,9 +2031,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load2a(pix0p_10, src);
-      Face::p32FRGB64FromRGB16_555(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load2a(pix0p_10, src);
+      Acc::p32FRGB64FromRGB16_555(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2046,9 +2046,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load2aBSwap(pix0p_10, src);
-      Face::p32FRGB64FromRGB16_555(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load2aBSwap(pix0p_10, src);
+      Acc::p32FRGB64FromRGB16_555(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2061,9 +2061,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load2a(pix0p_10, src);
-      Face::p32FRGB64FromRGB16_565(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load2a(pix0p_10, src);
+      Acc::p32FRGB64FromRGB16_565(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2076,9 +2076,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load2aBSwap(pix0p_10, src);
-      Face::p32FRGB64FromRGB16_565(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load2aBSwap(pix0p_10, src);
+      Acc::p32FRGB64FromRGB16_565(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2091,9 +2091,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load2a(pix0p_10, src);
-      Face::p32ARGB64FromARGB16_4444(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load2a(pix0p_10, src);
+      Acc::p32ARGB64FromARGB16_4444(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2106,9 +2106,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load2a(pix0p_10, src);
-      Face::p32ARGB64FromARGB16_4444_bs(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load2a(pix0p_10, src);
+      Acc::p32ARGB64FromARGB16_4444_bs(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2127,17 +2127,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load2a(pix0p, src);
+      Acc::p32Load2a(pix0p, src);
 
       pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
       pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
       pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
       pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2156,17 +2156,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load2aBSwap(pix0p, src);
+      Acc::p32Load2aBSwap(pix0p, src);
 
       pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
       pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
       pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
       pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 2;
@@ -2181,23 +2181,23 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p_t0;
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-      Face::p32Load1b(pix0p_32, src + 0);
-      Face::p32Load1b(pix0p_t0, src + 1);
-      Face::p32Load1b(pix0p_10, src + 2);
+      Acc::p32Load1b(pix0p_32, src + 0);
+      Acc::p32Load1b(pix0p_t0, src + 1);
+      Acc::p32Load1b(pix0p_10, src + 2);
 #else
-      Face::p32Load1b(pix0p_10, src + 0);
-      Face::p32Load1b(pix0p_t0, src + 1);
-      Face::p32Load1b(pix0p_32, src + 2);
+      Acc::p32Load1b(pix0p_10, src + 0);
+      Acc::p32Load1b(pix0p_t0, src + 1);
+      Acc::p32Load1b(pix0p_32, src + 2);
 #endif // FOG_BYTE_ORDER
 
-      Face::p32LShift(pix0p_t0, pix0p_t0, 16);
-      Face::p32Combine(pix0p_10, pix0p_10, pix0p_t0);
+      Acc::p32LShift(pix0p_t0, pix0p_t0, 16);
+      Acc::p32Combine(pix0p_10, pix0p_10, pix0p_t0);
 
-      Face::p32Mul(pix0p_10, pix0p_10, 257);
-      Face::p32Mul(pix0p_32, pix0p_32, 257);
-      Face::p32FillPWW1(pix0p_32, pix0p_32);
+      Acc::p32Mul(pix0p_10, pix0p_10, 257);
+      Acc::p32Mul(pix0p_32, pix0p_32, 257);
+      Acc::p32FillPWW1(pix0p_32, pix0p_32);
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 3;
@@ -2216,17 +2216,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load3b(pix0p, src);
+      Acc::p32Load3b(pix0p, src);
 
       pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
       pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
       pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
       pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 3;
@@ -2245,17 +2245,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load3bBSwap(pix0p, src);
+      Acc::p32Load3bBSwap(pix0p, src);
 
       pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
       pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
       pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
       pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 3;
@@ -2268,9 +2268,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load4aBSwap(pix0p_10, src);
-      Face::p32FRGB64FromXRGB32(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load4aBSwap(pix0p_10, src);
+      Acc::p32FRGB64FromXRGB32(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 4;
@@ -2283,9 +2283,9 @@ struct FOG_NO_EXPORT Convert
     do {
       uint32_t pix0p_10, pix0p_32;
 
-      Face::p32Load4aBSwap(pix0p_10, src);
-      Face::p32ARGB64FromARGB32(pix0p_10, pix0p_32, pix0p_10);
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Load4aBSwap(pix0p_10, src);
+      Acc::p32ARGB64FromARGB32(pix0p_10, pix0p_32, pix0p_10);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 4;
@@ -2304,17 +2304,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load4a(pix0p, src);
+      Acc::p32Load4a(pix0p, src);
 
       pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
       pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
       pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
       pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 4;
@@ -2333,17 +2333,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p32Load4aBSwap(pix0p, src);
+      Acc::p32Load4aBSwap(pix0p, src);
 
       pix0a = (((pix0p >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
       pix0r = (((pix0p >> d->rSrcShift) * d->rScale ) >> 16);
       pix0g = (((pix0p >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
       pix0b = (((pix0p >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 4;
@@ -2356,9 +2356,9 @@ struct FOG_NO_EXPORT Convert
     do {
       __p64 pix0p;
 
-      Face::p64Load6aBSwap(pix0p, src);
-      Face::p64FillPWW3(pix0p, pix0p);
-      Face::p64Store8a(dst, pix0p);
+      Acc::p64Load6aBSwap(pix0p, src);
+      Acc::p64FillPWW3(pix0p, pix0p);
+      Acc::p64Store8a(dst, pix0p);
 
       dst += 8;
       src += 6;
@@ -2375,14 +2375,14 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p_10;
       uint32_t pix0p_32;
 
-      Face::p64Load6a(pix0p, src);
+      Acc::p64Load6a(pix0p, src);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) & d->gSrcMask) * d->gScale) & 0xFFFF0000,
-                                      (((uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) & d->bSrcMask) * d->bScale) >> 16 );
-      pix0p_32 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) & d->rSrcMask) * d->rScale) >> 16,
+      pix0p_10 = _FOG_ACC_COMBINE_2( (((uint32_t)(Acc::u64FromP64(pix0p) >> d->gSrcShift) & d->gSrcMask) * d->gScale) & 0xFFFF0000,
+                                      (((uint32_t)(Acc::u64FromP64(pix0p) >> d->bSrcShift) & d->bSrcMask) * d->bScale) >> 16 );
+      pix0p_32 = _FOG_ACC_COMBINE_2( (((uint32_t)(Acc::u64FromP64(pix0p) >> d->rSrcShift) & d->rSrcMask) * d->rScale) >> 16,
                                       0xFFFF0000);
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 6;
@@ -2399,14 +2399,14 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0p_10;
       uint32_t pix0p_32;
 
-      Face::p64Load6aBSwap(pix0p, src);
+      Acc::p64Load6aBSwap(pix0p, src);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) & d->gSrcMask) * d->gScale) & 0xFFFF0000,
-                                      (((uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) & d->bSrcMask) * d->bScale) >> 16 );
-      pix0p_32 = _FOG_FACE_COMBINE_2( (((uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) & d->rSrcMask) * d->rScale) >> 16,
+      pix0p_10 = _FOG_ACC_COMBINE_2( (((uint32_t)(Acc::u64FromP64(pix0p) >> d->gSrcShift) & d->gSrcMask) * d->gScale) & 0xFFFF0000,
+                                      (((uint32_t)(Acc::u64FromP64(pix0p) >> d->bSrcShift) & d->bSrcMask) * d->bScale) >> 16 );
+      pix0p_32 = _FOG_ACC_COMBINE_2( (((uint32_t)(Acc::u64FromP64(pix0p) >> d->rSrcShift) & d->rSrcMask) * d->rScale) >> 16,
                                       0xFFFF0000);
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 6;
@@ -2425,17 +2425,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load6a(pix0p, src);
+      Acc::p64Load6a(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 6;
@@ -2454,17 +2454,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load6aBSwap(pix0p, src);
+      Acc::p64Load6aBSwap(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 6;
@@ -2477,8 +2477,8 @@ struct FOG_NO_EXPORT Convert
     do {
       __p64 pix0p;
 
-      Face::p64Load8aBSwap(pix0p, src);
-      Face::p64Store8a(dst, pix0p);
+      Acc::p64Load8aBSwap(pix0p, src);
+      Acc::p64Store8a(dst, pix0p);
 
       dst += 8;
       src += 8;
@@ -2497,17 +2497,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load8a(pix0p, src);
+      Acc::p64Load8a(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 8;
@@ -2526,17 +2526,17 @@ struct FOG_NO_EXPORT Convert
       uint32_t pix0r, pix0g;
       uint32_t pix0b, pix0a;
 
-      Face::p64Load8aBSwap(pix0p, src);
+      Acc::p64Load8aBSwap(pix0p, src);
 
-      pix0a = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
-      pix0r = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
-      pix0g = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
-      pix0b = (( (uint32_t)(Face::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
+      pix0a = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->aSrcShift) * d->aScale )      ) & 0xFFFF0000;
+      pix0r = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->rSrcShift) * d->rScale ) >> 16);
+      pix0g = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->gSrcShift) * d->gScale )      ) & 0xFFFF0000;
+      pix0b = (( (uint32_t)(Acc::u64FromP64(pix0p) >> d->bSrcShift) * d->bScale ) >> 16);
 
-      pix0p_10 = _FOG_FACE_COMBINE_2(pix0g, pix0b);
-      pix0p_32 = _FOG_FACE_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
+      pix0p_10 = _FOG_ACC_COMBINE_2(pix0g, pix0b);
+      pix0p_32 = _FOG_ACC_COMBINE_3(pix0a, pix0r, (uint32_t)(d->fill >> 32));
 
-      Face::p32Store8a(dst, pix0p_10, pix0p_32);
+      Acc::p32Store8a(dst, pix0p_10, pix0p_32);
 
       dst += 8;
       src += 8;
@@ -3343,7 +3343,7 @@ struct FOG_NO_EXPORT DibC
       {
         uint32_t pix0 = pixels[x1];
 
-        if (!Face::p32ARGB32IsAlphaFF(pix0))
+        if (!Acc::p32ARGB32IsAlphaFF(pix0))
           pixels[x1] = ColorUtil::premultiply(pix0);
         x1++;
       }
@@ -3391,7 +3391,7 @@ struct FOG_NO_EXPORT DibC
           g = ((g * recip) >>  8) & 0x0000FF00U;
           b = ((b * recip) >> 16) & 0x000000FFU;
 
-          pixels[x0] = const_out = _FOG_FACE_COMBINE_4(r, g, b, a << 24);
+          pixels[x0] = const_out = _FOG_ACC_COMBINE_4(r, g, b, a << 24);
         }
 
         if (++x0 == x1) break;
@@ -3413,7 +3413,7 @@ struct FOG_NO_EXPORT DibC
           g = ((g * recip) >>  8) & 0x0000FF00U;
           b = ((b * recip) >> 16) & 0x000000FFU;
 
-          pixels[x1] = _FOG_FACE_COMBINE_4(r, g, b, a << 24);
+          pixels[x1] = _FOG_ACC_COMBINE_4(r, g, b, a << 24);
         }
 
         if (++x0 == x1) break;

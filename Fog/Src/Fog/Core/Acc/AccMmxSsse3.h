@@ -4,16 +4,15 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACEMMXSSSE3_H
-#define _FOG_CORE_FACE_FACEMMXSSSE3_H
+#ifndef _FOG_CORE_ACC_ACCMMXSSSE3_H
+#define _FOG_CORE_ACC_ACCMMXSSSE3_H
 
 // [Dependencies]
-#include <Fog/Core/C++/IntrinMMX.h>
-#include <Fog/Core/C++/IntrinSSSE3.h>
-#include <Fog/Core/Face/Features.h>
+#include <Fog/Core/C++/IntrinMmx.h>
+#include <Fog/Core/C++/IntrinSsse3.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
@@ -21,12 +20,12 @@ namespace Face {
 # pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
-//! @addtogroup Fog_Face_MMX
-//! @addtogroup Fog_Face_SSSE3
+//! @addtogroup Fog_Acc_MMX
+//! @addtogroup Fog_Acc_SSSE3
 //! @{
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - Alignr]
+// [Fog::Acc - MMX_SSSE3 - Alignr]
 // ============================================================================
 
 template<int BYTES>
@@ -37,7 +36,7 @@ static FOG_INLINE void iAlignrPI8(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - Shuffle]
+// [Fog::Acc - MMX_SSSE3 - Shuffle]
 // ============================================================================
 
 static FOG_INLINE void iShufflePI8(
@@ -47,7 +46,7 @@ static FOG_INLINE void iShufflePI8(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - HAdd]
+// [Fog::Acc - MMX_SSSE3 - HAdd]
 // ============================================================================
 
 static FOG_INLINE void iHAddPI16(
@@ -63,7 +62,7 @@ static FOG_INLINE void iHAddPI32(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - HAdd-Saturate]
+// [Fog::Acc - MMX_SSSE3 - HAdd-Saturate]
 // ============================================================================
 
 static FOG_INLINE void iHAddsPI16(
@@ -73,7 +72,7 @@ static FOG_INLINE void iHAddsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - HSub]
+// [Fog::Acc - MMX_SSSE3 - HSub]
 // ============================================================================
 
 static FOG_INLINE void iHSubPI16(
@@ -89,7 +88,7 @@ static FOG_INLINE void iHSubPI32(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - HSub-Saturate]
+// [Fog::Acc - MMX_SSSE3 - HSub-Saturate]
 // ============================================================================
 
 static FOG_INLINE void iHSubsPI16(
@@ -99,7 +98,7 @@ static FOG_INLINE void iHSubsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - Mul-HRS]
+// [Fog::Acc - MMX_SSSE3 - Mul-HRS]
 // ============================================================================
 
 //! @verbatim
@@ -112,7 +111,7 @@ static FOG_INLINE void iMulhrsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - MAdd-Saturate]
+// [Fog::Acc - MMX_SSSE3 - MAdd-Saturate]
 // ============================================================================
 
 static FOG_INLINE void iMAddubsPI16(
@@ -122,7 +121,7 @@ static FOG_INLINE void iMAddubsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - Abs]
+// [Fog::Acc - MMX_SSSE3 - Abs]
 // ============================================================================
 
 static FOG_INLINE void iAbsPI8(
@@ -144,7 +143,7 @@ static FOG_INLINE void iAbsPI32(
 }
 
 // ============================================================================
-// [Fog::Face - MMX_SSSE3 - Sign]
+// [Fog::Acc - MMX_SSSE3 - Sign]
 // ============================================================================
 
 static FOG_INLINE void iSignPI8(
@@ -173,4 +172,4 @@ static FOG_INLINE void iSignPI32(
 #endif // FOG_CC_MSC
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACEMMXSSSE3_H
+#endif // _FOG_CORE_ACC_ACCMMXSSSE3_H

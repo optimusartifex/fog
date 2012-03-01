@@ -17,16 +17,17 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-typedef struct OT_BYTE;
-typedef struct OT_CHAR;
-typedef struct OT_USHORT;
-typedef struct OT_SHORT;
-typedef struct OT_ULONG;
-typedef struct OT_LONG;
-typedef struct OT_Index;
+struct OT_BYTE;
+struct OT_CHAR;
+struct OT_USHORT;
+struct OT_SHORT;
+struct OT_ULONG;
+struct OT_LONG;
+struct OT_Index;
 
-typedef struct OT_Font;
-typedef struct OT_CMap;
+struct OT_Font;
+struct OT_CMap;
+struct OT_Table;
 
 // ============================================================================
 // [TypeDefs]
@@ -44,6 +45,8 @@ typedef OT_ULONG OT_LOffset;
 typedef OT_USHORT OT_GlyphID;
 typedef OT_ULONG OT_FixedVersion;
 typedef OT_ULONG OT_Tag;
+
+typedef void (FOG_CDECL* OT_Table_FreeFunc)(void* ctx, uint8_t* data);
 
 // ============================================================================
 // [FOG_OT_TAG]
@@ -590,6 +593,21 @@ struct FOG_NO_EXPORT OT_DateTime
 
   LONG hi;
   ULONG lo;
+};
+
+// ============================================================================
+// [Fog::OT_Table]
+// ============================================================================
+
+struct FOG_NO_EXPORT OT_Table
+{
+  uint8_t* data;
+  void* ctx;
+
+  uint32_t length;
+  uint32_t flags;
+
+  OT_Table_FreeFunc freeFunc;
 };
 
 //! @}

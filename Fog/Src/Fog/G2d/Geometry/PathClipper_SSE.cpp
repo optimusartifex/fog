@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceSSE.h>
+#include <Fog/Core/Acc/AccSse.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
@@ -32,9 +32,9 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
   __m128f xmmClipMin;
   __m128f xmmClipMax;
 
-  Face::m128fLoad16u(xmmClipBox, &self->_clipBox);
-  Face::m128fShuffle<1, 0, 1, 0>(xmmClipMin, xmmClipBox);
-  Face::m128fShuffle<3, 2, 3, 2>(xmmClipMax, xmmClipBox);
+  Acc::m128fLoad16u(xmmClipBox, &self->_clipBox);
+  Acc::m128fShuffle<1, 0, 1, 0>(xmmClipMin, xmmClipBox);
+  Acc::m128fShuffle<3, 2, 3, 2>(xmmClipMax, xmmClipBox);
 
   // If path bounding box is not dirty then we can simply use it instead of
   // performing the calculation.
@@ -44,14 +44,14 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
     __m128f xmm1;
     int msk;
 
-    Face::m128fLoad16u(xmm0,  &src->_d->boundingBox);
-    Face::m128fCopy(xmm1, xmm0);
+    Acc::m128fLoad16u(xmm0,  &src->_d->boundingBox);
+    Acc::m128fCopy(xmm1, xmm0);
 
-    Face::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
-    Face::m128fCmpLePS(xmm1, xmm1, xmmClipMax);
+    Acc::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
+    Acc::m128fCmpLePS(xmm1, xmm1, xmmClipMax);
 
-    Face::m128fAnd(xmm0, xmm0, xmm1);
-    Face::m128fMoveMask(msk, xmm0);
+    Acc::m128fAnd(xmm0, xmm0, xmm1);
+    Acc::m128fMoveMask(msk, xmm0);
 
     if (msk == 0xF)
     {
@@ -60,7 +60,7 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
     }
   }
 
-  Face::m128fXor(xmmClipBox, xmmClipBox, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
+  Acc::m128fXor(xmmClipBox, xmmClipBox, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
 
   size_t i = src->getLength();
   const uint8_t* cmd = src->getCommands();
@@ -72,8 +72,8 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
   {
     __m128f xmm0;
 
-    Face::m128fZero(xmm0);
-    Face::m128fLoad8Lo(xmm0, pts);
+    Acc::m128fZero(xmm0);
+    Acc::m128fLoad8Lo(xmm0, pts);
 
     int msk;
 
@@ -84,7 +84,7 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
       // ----------------------------------------------------------------------
 
       case PATH_CMD_MOVE_TO:
-        Face::m128fStore8Lo(&self->_lastMoveTo, xmm0);
+        Acc::m128fStore8Lo(&self->_lastMoveTo, xmm0);
         hasInitial = true;
 
       // ----------------------------------------------------------------------
@@ -96,11 +96,11 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
         if (FOG_UNLIKELY(!hasInitial))
           goto _Invalid;
 
-        Face::m128fShuffle<1, 0, 1, 0>(xmm0, xmm0, xmm0);
-        Face::m128fXor(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
-        Face::m128fCmpLePS(xmm0, xmm0, xmmClipBox);
+        Acc::m128fShuffle<1, 0, 1, 0>(xmm0, xmm0, xmm0);
+        Acc::m128fXor(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
+        Acc::m128fCmpLePS(xmm0, xmm0, xmmClipBox);
 
-        Face::m128fMoveMask(msk, xmm0);
+        Acc::m128fMoveMask(msk, xmm0);
         if (msk != 0xF) goto _Unbounded;
 
         i--;
@@ -121,15 +121,15 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
         if (FOG_UNLIKELY(!hasInitial))
           goto _Invalid;
 
-        Face::m128fLoad8Hi(xmm0, pts + 1);
+        Acc::m128fLoad8Hi(xmm0, pts + 1);
 
-        Face::m128fCopy(xmm1, xmm0);
-        Face::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
-        Face::m128fCmpLePS(xmm1, xmm1, xmmClipMax);
+        Acc::m128fCopy(xmm1, xmm0);
+        Acc::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
+        Acc::m128fCmpLePS(xmm1, xmm1, xmmClipMax);
 
-        Face::m128fAnd(xmm0, xmm0, xmm1);
+        Acc::m128fAnd(xmm0, xmm0, xmm1);
 
-        Face::m128fMoveMask(msk, xmm0);
+        Acc::m128fMoveMask(msk, xmm0);
         if (msk != 0xF)
           goto _Unbounded;
 
@@ -151,22 +151,22 @@ static uint32_t FOG_CDECL PathClipperF_measurePath_SSE(PathClipperF* self, const
         if (FOG_UNLIKELY(!hasInitial))
           goto _Invalid;
 
-        Face::m128fZero(xmm2);
-        Face::m128fLoad8Hi(xmm0, pts + 1);
-        Face::m128fLoad8Lo(xmm2, pts + 2);
+        Acc::m128fZero(xmm2);
+        Acc::m128fLoad8Hi(xmm0, pts + 1);
+        Acc::m128fLoad8Lo(xmm2, pts + 2);
 
-        Face::m128fShuffle<1, 0, 1, 0>(xmm2, xmm2, xmm2);
-        Face::m128fXor(xmm2, xmm2, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
+        Acc::m128fShuffle<1, 0, 1, 0>(xmm2, xmm2, xmm2);
+        Acc::m128fXor(xmm2, xmm2, FOG_XMM_GET_CONST_PS(m128f_p0_p0_sn_sn));
 
-        Face::m128fCopy(xmm1, xmm0);
-        Face::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
-        Face::m128fCmpLePS(xmm1, xmm1, xmmClipMax);
-        Face::m128fCmpLePS(xmm2, xmm2, xmmClipBox);
+        Acc::m128fCopy(xmm1, xmm0);
+        Acc::m128fCmpGePS(xmm0, xmm0, xmmClipMin);
+        Acc::m128fCmpLePS(xmm1, xmm1, xmmClipMax);
+        Acc::m128fCmpLePS(xmm2, xmm2, xmmClipBox);
 
-        Face::m128fAnd(xmm0, xmm0, xmm1);
-        Face::m128fAnd(xmm0, xmm0, xmm2);
+        Acc::m128fAnd(xmm0, xmm0, xmm1);
+        Acc::m128fAnd(xmm0, xmm0, xmm2);
 
-        Face::m128fMoveMask(msk, xmm0);
+        Acc::m128fMoveMask(msk, xmm0);
         if (msk != 0xF)
           goto _Unbounded;
 

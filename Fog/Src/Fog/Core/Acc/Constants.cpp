@@ -4,10 +4,10 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/Core/Face/Constants.h>
+#include <Fog/Core/Acc/Constants.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // ============================================================================
 // [Fog::Raster - Data - Demultiply]
@@ -611,5 +611,5 @@ const uint8_t _u8_sqrt_table_b[256] =
   247, 248, 248, 249, 249, 250, 250, 251, 251, 252, 252, 253, 253, 254, 254, 255 
 };
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace

@@ -4,16 +4,15 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACEMMXSSE2_H
-#define _FOG_CORE_FACE_FACEMMXSSE2_H
+#ifndef _FOG_CORE_ACC_ACCMMXSSE2_H
+#define _FOG_CORE_ACC_ACCMMXSSE2_H
 
 // [Dependencies]
-#include <Fog/Core/C++/IntrinMMX.h>
-#include <Fog/Core/C++/IntrinSSE.h>
-#include <Fog/Core/Face/Features.h>
+#include <Fog/Core/C++/IntrinMmx.h>
+#include <Fog/Core/C++/IntrinSse.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
@@ -21,12 +20,12 @@ namespace Face {
 # pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
-//! @addtogroup Fog_Face_MMX
-//! @addtogroup Fog_Face_SSE2
+//! @addtogroup Fog_Acc_MMX
+//! @addtogroup Fog_Acc_SSE2
 //! @{
 
 // ============================================================================
-// [Fog::Face - MMX_SSE - Move]
+// [Fog::Acc - MMX_SSE - Move]
 // ============================================================================
 
 static FOG_INLINE void m64iFromM128i(__m64& dst, const __m128i& src)
@@ -47,4 +46,4 @@ static FOG_INLINE void m128iFromM64i(__m128i& dst, const __m64& src)
 #endif // FOG_CC_MSC
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACEMMXSSE2_H
+#endif // _FOG_CORE_ACC_ACCMMXSSE2_H

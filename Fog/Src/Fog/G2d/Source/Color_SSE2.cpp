@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceSSE.h>
-#include <Fog/Core/Face/FaceSSE2.h>
+#include <Fog/Core/Acc/AccSse.h>
+#include <Fog/Core/Acc/AccSse2.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Tools/Char.h>
 #include <Fog/Core/Tools/String.h>
@@ -30,30 +30,30 @@ static err_t FOG_CDECL Color_setData_SSE2(Color* self, uint32_t modelExtended, c
   __m128i xmmI;
   __m128i xmmT;
 
-  Face::m128fZero(xmm0);
-  Face::m128fZero(xmm1);
+  Acc::m128fZero(xmm0);
+  Acc::m128fZero(xmm1);
 
   switch (modelExtended)
   {
     case COLOR_MODEL_NONE:
     {
-      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) +  0, xmm0);
-      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) +  8, xmm0);
-      Face::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) + 16, xmm1);
-      Face::m128fStore4  (reinterpret_cast<uint8_t*>(self) + 24, xmm1);
+      Acc::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) +  0, xmm0);
+      Acc::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) +  8, xmm0);
+      Acc::m128fStore8Lo(reinterpret_cast<uint8_t*>(self) + 16, xmm1);
+      Acc::m128fStore4  (reinterpret_cast<uint8_t*>(self) + 24, xmm1);
       return ERR_OK;
     }
 
     case COLOR_MODEL_ACMYK:
-      Face::m128fLoad4(xmm1, reinterpret_cast<const uint8_t*>(modelData) + 16);
+      Acc::m128fLoad4(xmm1, reinterpret_cast<const uint8_t*>(modelData) + 16);
       // ... Fall through ...
 
     case COLOR_MODEL_AHSV:
     case COLOR_MODEL_AHSL:
-      Face::m128fLoad16uLoHi(xmm0, modelData);
+      Acc::m128fLoad16uLoHi(xmm0, modelData);
 
-      Face::m128fStore16uLoHi(&self->_data[0], xmm0);
-      Face::m128fStore4(&self->_data[4], xmm1);
+      Acc::m128fStore16uLoHi(&self->_data[0], xmm0);
+      Acc::m128fStore4(&self->_data[4], xmm1);
 
       self->_model = modelExtended;
       self->_hints = NO_FLAGS;
@@ -62,42 +62,42 @@ static err_t FOG_CDECL Color_setData_SSE2(Color* self, uint32_t modelExtended, c
       return ERR_OK;
 
     case COLOR_MODEL_ARGB:
-      Face::m128fLoad16uLoHi(xmm0, modelData);
-      Face::m128fStore4(&self->_data[4], xmm1);
-      Face::m128fStore16uLoHi(&self->_data[0], xmm0);
+      Acc::m128fLoad16uLoHi(xmm0, modelData);
+      Acc::m128fStore4(&self->_data[4], xmm1);
+      Acc::m128fStore16uLoHi(&self->_data[0], xmm0);
 
-      Face::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_255));
-      Face::m128iCvtPI32FromPS(xmmI, xmm0);
+      Acc::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_255));
+      Acc::m128iCvtPI32FromPS(xmmI, xmm0);
 
-      Face::m128iSwapPI32(xmmI, xmmI);
-      Face::m128iPackPU8FromPI32(xmmI, xmmI);
+      Acc::m128iSwapPI32(xmmI, xmmI);
+      Acc::m128iPackPU8FromPI32(xmmI, xmmI);
 
       self->_model = COLOR_MODEL_ARGB;
       self->_hints = NO_FLAGS;
-      Face::m128iStore4(&self->_argb32, xmmI);
+      Acc::m128iStore4(&self->_argb32, xmmI);
       return ERR_OK;
 
     case _COLOR_MODEL_ARGB32:
-      Face::m128iLoad4(xmmI, modelData);
-      Face::m128iUnpackPI32FromPI8Lo(xmmT, xmmI);
-      Face::m128fCvtPSFromPI32(xmm0, xmmT);
-      Face::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_255));
+      Acc::m128iLoad4(xmmI, modelData);
+      Acc::m128iUnpackPI32FromPI8Lo(xmmT, xmmI);
+      Acc::m128fCvtPSFromPI32(xmm0, xmmT);
+      Acc::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_255));
       goto _SetARGB;
 
     case _COLOR_MODEL_ARGB64:
-      Face::m128iLoad8(xmmI, modelData);
-      Face::m128iUnpackPI32FromPI16Lo(xmmT, xmmI);
-      Face::m128iRShiftPU32<8>(xmmI, xmmI);
-      Face::m128fCvtPSFromPI32(xmm0, xmmT);
-      Face::m128iPackPU8FromPU16(xmmI, xmmI);
-      Face::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_65535));
+      Acc::m128iLoad8(xmmI, modelData);
+      Acc::m128iUnpackPI32FromPI16Lo(xmmT, xmmI);
+      Acc::m128iRShiftPU32<8>(xmmI, xmmI);
+      Acc::m128fCvtPSFromPI32(xmm0, xmmT);
+      Acc::m128iPackPU8FromPU16(xmmI, xmmI);
+      Acc::m128fMulPS(xmm0, xmm0, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_65535));
 _SetARGB:
-      Face::m128fShuffle<0, 1, 2, 3>(xmm0, xmm0);
-      Face::m128fStore16uLoHi(&self->_data[0], xmm0);
-      Face::m128fStore4(&self->_data[4], xmm1);
+      Acc::m128fShuffle<0, 1, 2, 3>(xmm0, xmm0);
+      Acc::m128fStore16uLoHi(&self->_data[0], xmm0);
+      Acc::m128fStore4(&self->_data[4], xmm1);
       self->_model = COLOR_MODEL_ARGB;
       self->_hints = NO_FLAGS;
-      Face::m128iStore4(&self->_argb32, xmmI);
+      Acc::m128iStore4(&self->_argb32, xmmI);
       return ERR_OK;
 
     default:

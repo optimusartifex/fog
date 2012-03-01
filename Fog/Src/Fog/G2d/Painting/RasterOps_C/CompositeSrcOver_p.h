@@ -49,12 +49,12 @@ struct FOG_NO_EXPORT CompositeSrcOver
     bool pack = false)
   {
     uint32_t saInv;
-    Face::p32ExtractPBW1(saInv, b0p_31);
-    Face::p32Negate255SBW(saInv, saInv);
+    Acc::p32ExtractPBW1(saInv, b0p_31);
+    Acc::p32Negate255SBW(saInv, saInv);
 
-    Face::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, saInv, dst0p_31, a0p_31, saInv);
-    Face::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, saInv, dst0p_31, a0p_31, saInv);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_2031(
@@ -122,19 +122,19 @@ struct FOG_NO_EXPORT CompositeSrcOver
     bool pack = false)
   {
     uint32_t saInv;
-    Face::p32Negate255SBW(saInv, b0p_a8);
+    Acc::p32Negate255SBW(saInv, b0p_a8);
 
     if (pack)
     {
-      Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, a0p_20, saInv, a0p_31, saInv);
-      Face::p32ExtendPBBFromSBB(saInv, b0p_a8);
-      Face::p32Add(dst0p_20, dst0p_20, saInv);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, a0p_20, saInv, a0p_31, saInv);
+      Acc::p32ExtendPBBFromSBB(saInv, b0p_a8);
+      Acc::p32Add(dst0p_20, dst0p_20, saInv);
     }
     else
     {
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, saInv, dst0p_31, a0p_31, saInv);
-      Face::p32ExtendPBWFromSBW(saInv, b0p_a8);
-      Face::p32Add_2x(dst0p_20, dst0p_20, saInv, dst0p_31, dst0p_31, saInv);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, saInv, dst0p_31, a0p_31, saInv);
+      Acc::p32ExtendPBWFromSBW(saInv, b0p_a8);
+      Acc::p32Add_2x(dst0p_20, dst0p_20, saInv, dst0p_31, dst0p_31, saInv);
     }
   }
 
@@ -145,23 +145,23 @@ struct FOG_NO_EXPORT CompositeSrcOver
     bool pack = false)
   {
     uint32_t saInv;
-    Face::p32Negate255SBW(saInv, b0p_a8);
+    Acc::p32Negate255SBW(saInv, b0p_a8);
 
     if (pack)
     {
-      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, a0p_20, saInv, dst0p_31, saInv);
-      Face::p32ExtendPBBFromSBB_Z210(saInv, b0p_a8);
-      Face::p32Add(dst0p_20, dst0p_20, saInv);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, a0p_20, saInv, dst0p_31, saInv);
+      Acc::p32ExtendPBBFromSBB_Z210(saInv, b0p_a8);
+      Acc::p32Add(dst0p_20, dst0p_20, saInv);
     }
     else
     {
-      Face::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, saInv);
-      Face::p32ZeroPBW1(dst0p_31, a0p_31);
-      Face::p32MulDiv255SBW(dst0p_31, dst0p_31, saInv);
+      Acc::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, saInv);
+      Acc::p32ZeroPBW1(dst0p_31, a0p_31);
+      Acc::p32MulDiv255SBW(dst0p_31, dst0p_31, saInv);
 
-      Face::p32Add(dst0p_31, dst0p_31, b0p_a8);
-      Face::p32ExtendPBWFromSBW(saInv, b0p_a8);
-      Face::p32Add(dst0p_20, dst0p_20, saInv);
+      Acc::p32Add(dst0p_31, dst0p_31, b0p_a8);
+      Acc::p32ExtendPBWFromSBW(saInv, b0p_a8);
+      Acc::p32Add(dst0p_20, dst0p_20, saInv);
     }
   }
 
@@ -172,7 +172,7 @@ struct FOG_NO_EXPORT CompositeSrcOver
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 
   // ==========================================================================
@@ -187,17 +187,17 @@ struct FOG_NO_EXPORT CompositeSrcOver
     uint32_t sro0p;
     uint32_t sra0p;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32ExtractPBB3(sra0p, sro0p);
-    Face::p32Negate255SBW(sra0p, sra0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32ExtractPBB3(sra0p, sro0p);
+    Acc::p32Negate255SBW(sra0p, sra0p);
 
     BLIT_LOOP_32x1_BEGIN(C_Opaque)
       uint32_t dst0p;
 
-      Face::p32Load4a(dst0p, dst);
-      Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-      Face::p32Add(dst0p, dst0p, sro0p);
-      Face::p32Store4a(dst, dst0p);
+      Acc::p32Load4a(dst0p, dst);
+      Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+      Acc::p32Add(dst0p, dst0p, sro0p);
+      Acc::p32Store4a(dst, dst0p);
 
       dst += 4;
     BLIT_LOOP_32x1_END(C_Opaque)
@@ -213,11 +213,11 @@ struct FOG_NO_EXPORT CompositeSrcOver
     uint32_t sro0p, sro0p_20, sro0p_31;
     uint32_t inv0p;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
-    Face::p32ExtractPBB3(inv0p, sro0p);
-    Face::p32Negate255SBW(inv0p, inv0p);
+    Acc::p32ExtractPBB3(inv0p, sro0p);
+    Acc::p32Negate255SBW(inv0p, inv0p);
 
     C_BLIT_SPAN8_BEGIN(4)
 
@@ -232,24 +232,24 @@ struct FOG_NO_EXPORT CompositeSrcOver
       uint32_t src0p;
       uint32_t sra0p;
 
-      Face::p32Copy(src0p, sro0p);
-      Face::p32Copy(sra0p, inv0p);
+      Acc::p32Copy(src0p, sro0p);
+      Acc::p32Copy(sra0p, inv0p);
 
       if (msk0 != 0x100)
       {
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0, sro0p_31, msk0);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0, sro0p_31, msk0);
 
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32Negate255SBW(sra0p, sra0p);
       }
 
       BLIT_LOOP_32x1_BEGIN(C_Any)
         uint32_t dst0p;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32MulDiv256PBB_SBW(dst0p, dst0p, sra0p);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, sra0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
       BLIT_LOOP_32x1_END(C_Any)
@@ -268,15 +268,15 @@ struct FOG_NO_EXPORT CompositeSrcOver
         uint32_t src0p;
         uint32_t msk0p;
 
-        Face::p32Load1b(msk0p, msk);
+        Acc::p32Load1b(msk0p, msk);
         if (msk0p == 0x00) goto _A8_Glyph_Skip;
 
-        Face::p32Load4a(dst0p, dst);
+        Acc::p32Load4a(dst0p, dst);
         if (msk0p != 0xFF) goto _A8_Glyph_Mask;
 
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, inv0p);
-        Face::p32Add(dst0p, dst0p, sro0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, inv0p);
+        Acc::p32Add(dst0p, dst0p, sro0p);
+        Acc::p32Store4a(dst, dst0p);
 
 _A8_Glyph_Skip:
         dst += 4;
@@ -284,14 +284,14 @@ _A8_Glyph_Skip:
         continue;
 
 _A8_Glyph_Mask:
-        Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
 
-        Face::p32ExtractPBB3(msk0p, src0p);
-        Face::p32Negate255SBW(msk0p, msk0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, msk0p);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32ExtractPBB3(msk0p, src0p);
+        Acc::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, msk0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 1;
@@ -311,15 +311,15 @@ _A8_Glyph_Mask:
         uint32_t src0p;
         uint32_t msk0p;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32Load2a(msk0p, msk);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32Load2a(msk0p, msk);
 
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
-        Face::p32ExtractPBB3(msk0p, src0p);
-        Face::p32Negate255SBW(msk0p, msk0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, msk0p);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
+        Acc::p32ExtractPBB3(msk0p, src0p);
+        Acc::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, msk0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 2;
@@ -340,15 +340,15 @@ _A8_Glyph_Mask:
         uint32_t sra0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000) goto _VARGBGlyphSkip;
 
-        Face::p32Load4a(dst0p, dst);
+        Acc::p32Load4a(dst0p, dst);
         if (msk0p_20 != 0xFFFFFFFF) goto _VARGBGlyphMask;
 
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, inv0p);
-        Face::p32Add(dst0p, dst0p, sro0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, inv0p);
+        Acc::p32Add(dst0p, dst0p, sro0p);
+        Acc::p32Store4a(dst, dst0p);
 
 _VARGBGlyphSkip:
         dst += 4;
@@ -356,17 +356,17 @@ _VARGBGlyphSkip:
         continue;
 
 _VARGBGlyphMask:
-        Face::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
 
-        Face::p32MulDiv256PBW_2x_Pack_2031(src0p, sro0p_20, msk0p_20, sro0p_31, msk0p_31);
-        Face::p32ExtractPBB3(sra0p, sro0p);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(src0p, sro0p_20, msk0p_20, sro0p_31, msk0p_31);
+        Acc::p32ExtractPBB3(sra0p, sro0p);
 
-        Face::p32MulDiv256PBW_SBW_2x(msk0p_20, msk0p_20, sra0p, msk0p_31, msk0p_31, sra0p);
-        Face::p32Negate255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv255PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32MulDiv256PBW_SBW_2x(msk0p_20, msk0p_20, sra0p, msk0p_31, msk0p_31, sra0p);
+        Acc::p32Negate255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv255PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 4;
@@ -402,21 +402,21 @@ _VARGBGlyphMask:
       uint32_t src0p;
       uint32_t sra0p;
 
-      Face::p32Load4a(src0p, src);
+      Acc::p32Load4a(src0p, src);
 
-      if (Face::p32PRGB32IsAlpha00(src0p))
+      if (Acc::p32PRGB32IsAlpha00(src0p))
         goto _C_Opaque_Skip;
-      if (Face::p32PRGB32IsAlphaFF(src0p))
+      if (Acc::p32PRGB32IsAlphaFF(src0p))
         goto _C_Opaque_Fill;
 
-      Face::p32Load4a(dst0p, dst);
-      Face::p32ExtractPBB3(sra0p, src0p);
-      Face::p32Negate255SBW(sra0p, sra0p);
-      Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-      Face::p32Add(src0p, src0p, dst0p);
+      Acc::p32Load4a(dst0p, dst);
+      Acc::p32ExtractPBB3(sra0p, src0p);
+      Acc::p32Negate255SBW(sra0p, sra0p);
+      Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+      Acc::p32Add(src0p, src0p, dst0p);
 
 _C_Opaque_Fill:
-      Face::p32Store4a(dst, src0p);
+      Acc::p32Store4a(dst, src0p);
 
 _C_Opaque_Skip:
       dst += 4;
@@ -446,18 +446,18 @@ _C_Opaque_Skip:
         uint32_t src0p;
         uint32_t sra0p;
 
-        Face::p32Load4a(src0p, src);
-        if (Face::p32PRGB32IsAlphaFF(src0p)) goto _C_Opaque_Fill;
-        if (Face::p32PRGB32IsAlpha00(src0p)) goto _C_Opaque_Skip;
+        Acc::p32Load4a(src0p, src);
+        if (Acc::p32PRGB32IsAlphaFF(src0p)) goto _C_Opaque_Fill;
+        if (Acc::p32PRGB32IsAlpha00(src0p)) goto _C_Opaque_Skip;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32Negate255SBW(sra0p, sra0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-        Face::p32Add(src0p, src0p, dst0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+        Acc::p32Add(src0p, src0p, dst0p);
 
 _C_Opaque_Fill:
-        Face::p32Store4a(dst, src0p);
+        Acc::p32Store4a(dst, src0p);
 
 _C_Opaque_Skip:
         dst += 4;
@@ -474,24 +474,24 @@ _C_Opaque_Skip:
       BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
-      Face::p32Copy(msk0p, msk0);
+      Acc::p32Copy(msk0p, msk0);
 
       BLIT_LOOP_32x1_BEGIN(C_Mask)
         uint32_t dst0p;
         uint32_t src0p;
         uint32_t sra0p;
 
-        Face::p32Load4a(src0p, src);
-        if (Face::p32PRGB32IsAlpha00(src0p)) goto _C_Mask_Skip;
+        Acc::p32Load4a(src0p, src);
+        if (Acc::p32PRGB32IsAlpha00(src0p)) goto _C_Mask_Skip;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32MulDiv256PBB_SBW(src0p, src0p, msk0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32MulDiv256PBB_SBW(src0p, src0p, msk0p);
 
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32Negate255SBW(sra0p, sra0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-        Face::p32Add(src0p, src0p, dst0p);
-        Face::p32Store4a(dst, src0p);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+        Acc::p32Add(src0p, src0p, dst0p);
+        Acc::p32Store4a(dst, src0p);
 
 _C_Mask_Skip:
         dst += 4;
@@ -513,25 +513,25 @@ _C_Mask_Skip:
         uint32_t sra0p;
         uint32_t msk0p;
 
-        Face::p32Load4a(src0p, src);
-        Face::p32Load1b(msk0p, msk);
+        Acc::p32Load4a(src0p, src);
+        Acc::p32Load1b(msk0p, msk);
 
-        Face::p32MulDiv256PBB_3Z1Z_(sra0p, src0p, msk0p);
-        if (Face::p32PRGB32IsAlpha00(sra0p)) goto _A8_Glyph_Skip;
-        if (Face::p32PRGB32IsAlphaFF(sra0p)) goto _A8_Glyph_Fill;
+        Acc::p32MulDiv256PBB_3Z1Z_(sra0p, src0p, msk0p);
+        if (Acc::p32PRGB32IsAlpha00(sra0p)) goto _A8_Glyph_Skip;
+        if (Acc::p32PRGB32IsAlphaFF(sra0p)) goto _A8_Glyph_Fill;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-        Face::p32MulDiv256PBB_Z2Z0_(src0p, src0p, msk0p);
-        Face::p32Combine(src0p, src0p, sra0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32MulDiv256PBB_Z2Z0_(src0p, src0p, msk0p);
+        Acc::p32Combine(src0p, src0p, sra0p);
 
-        Face::p32RShift(sra0p, sra0p, 16);
-        Face::p32Negate255SBW(sra0p, sra0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-        Face::p32Add(src0p, src0p, dst0p);
+        Acc::p32RShift(sra0p, sra0p, 16);
+        Acc::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+        Acc::p32Add(src0p, src0p, dst0p);
 
 _A8_Glyph_Fill:
-        Face::p32Store4a(dst, src0p);
+        Acc::p32Store4a(dst, src0p);
 
 _A8_Glyph_Skip:
         dst += 4;
@@ -554,18 +554,18 @@ _A8_Glyph_Skip:
         uint32_t sra0p;
         uint32_t msk0p;
 
-        Face::p32Load4a(src0p, src);
-        Face::p32Load2a(msk0p, msk);
-        if (Face::p32PRGB32IsAlpha00(src0p)) goto _VAExtendedSkip;
+        Acc::p32Load4a(src0p, src);
+        Acc::p32Load2a(msk0p, msk);
+        if (Acc::p32PRGB32IsAlpha00(src0p)) goto _VAExtendedSkip;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32MulDiv256PBB_SBW(src0p, src0p, msk0p);
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32Negate255SBW(sra0p, sra0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-        Face::p32Add(src0p, src0p, dst0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32MulDiv256PBB_SBW(src0p, src0p, msk0p);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+        Acc::p32Add(src0p, src0p, dst0p);
 
-        Face::p32Store4a(dst, src0p);
+        Acc::p32Store4a(dst, src0p);
 
 _VAExtendedSkip:
         dst += 4;
@@ -588,21 +588,21 @@ _VAExtendedSkip:
         uint32_t sra0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(src0p, src);
-        Face::p32Load4a(msk0p_20, msk);
-        if (msk0p_20 == 0x00000000 || Face::p32PRGB32IsAlpha00(src0p)) goto _VARGBGlyphSkip;
+        Acc::p32Load4a(src0p, src);
+        Acc::p32Load4a(msk0p_20, msk);
+        if (msk0p_20 == 0x00000000 || Acc::p32PRGB32IsAlpha00(src0p)) goto _VARGBGlyphSkip;
 
-        Face::p32Load4a(dst0p, dst);
+        Acc::p32Load4a(dst0p, dst);
         if (msk0p_20 != 0xFFFFFFFF) goto _VARGBGlyphMask;
-        if (Face::p32PRGB32IsAlphaFF(src0p)) goto _VARGBGlyphFill;
+        if (Acc::p32PRGB32IsAlphaFF(src0p)) goto _VARGBGlyphFill;
 
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32Negate255SBW(sra0p, sra0p);
-        Face::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
-        Face::p32Add(src0p, src0p, dst0p);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, sra0p);
+        Acc::p32Add(src0p, src0p, dst0p);
 
 _VARGBGlyphFill:
-        Face::p32Store4a(dst, src0p);
+        Acc::p32Store4a(dst, src0p);
 
 _VARGBGlyphSkip:
         dst += 4;
@@ -611,16 +611,16 @@ _VARGBGlyphSkip:
         BLIT_LOOP_32x1_CONTINUE(ARGB32_Glyph)
 
 _VARGBGlyphMask:
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBB_PBW_2031(src0p, src0p, msk0p_20, msk0p_31);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBB_PBW_2031(src0p, src0p, msk0p_20, msk0p_31);
 
-        Face::p32MulDiv256PBW_SBW_2x(msk0p_20, msk0p_20, sra0p, msk0p_31, msk0p_31, sra0p);
-        Face::p32Negate255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv255PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
-        Face::p32Add(src0p, src0p, dst0p);
-        Face::p32Store4a(dst, src0p);
+        Acc::p32MulDiv256PBW_SBW_2x(msk0p_20, msk0p_20, sra0p, msk0p_31, msk0p_31, sra0p);
+        Acc::p32Negate255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv255PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
+        Acc::p32Add(src0p, src0p, dst0p);
+        Acc::p32Store4a(dst, src0p);
 
         dst += 4;
         src += 4;
@@ -657,8 +657,8 @@ _VARGBGlyphMask:
     BLIT_LOOP_32x1_BEGIN(C_Src)
       uint32_t src0p;
 
-      Face::p32Load4a(src0p, pal + src[0]);
-      Face::p32Store4a(dst, src0p);
+      Acc::p32Load4a(src0p, pal + src[0]);
+      Acc::p32Store4a(dst, src0p);
 
       dst += 4;
       src += 1;
@@ -683,18 +683,18 @@ _VARGBGlyphMask:
     uint32_t sro0p;
     uint32_t sra0p;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32ExtractPBB3(sra0p, sro0p);
-    Face::p32Negate255SBW(sra0p, sra0p);
-    Face::p32FillPBB3(sro0p, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32ExtractPBB3(sra0p, sro0p);
+    Acc::p32Negate255SBW(sra0p, sra0p);
+    Acc::p32FillPBB3(sro0p, sro0p);
 
     BLIT_LOOP_32x1_BEGIN(C_Opaque)
       uint32_t dst0p;
 
-      Face::p32Load4a(dst0p, dst);
-      Face::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, sra0p);
-      Face::p32Add(dst0p, dst0p, sro0p);
-      Face::p32Store4a(dst, dst0p);
+      Acc::p32Load4a(dst0p, dst);
+      Acc::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, sra0p);
+      Acc::p32Add(dst0p, dst0p, sro0p);
+      Acc::p32Store4a(dst, dst0p);
 
       dst += 4;
     BLIT_LOOP_32x1_END(C_Opaque)
@@ -711,14 +711,14 @@ _VARGBGlyphMask:
     uint32_t srf0p;
     uint32_t inv0p;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
-    Face::p32ExtractPBB3(inv0p, sro0p);
-    Face::p32Negate255SBW(inv0p, inv0p);
+    Acc::p32ExtractPBB3(inv0p, sro0p);
+    Acc::p32Negate255SBW(inv0p, inv0p);
 
-    Face::p32Copy(srf0p, sro0p);
-    Face::p32FillPBB3(srf0p, srf0p);
+    Acc::p32Copy(srf0p, sro0p);
+    Acc::p32FillPBB3(srf0p, srf0p);
 
     C_BLIT_SPAN8_BEGIN(4)
 
@@ -733,25 +733,25 @@ _VARGBGlyphMask:
       uint32_t src0p;
       uint32_t sra0p;
 
-      Face::p32Copy(src0p, srf0p);
-      Face::p32Copy(sra0p, inv0p);
+      Acc::p32Copy(src0p, srf0p);
+      Acc::p32Copy(sra0p, inv0p);
 
       if (msk0 != 0x100)
       {
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0, sro0p_31, msk0);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0, sro0p_31, msk0);
 
-        Face::p32ExtractPBB3(sra0p, src0p);
-        Face::p32FillPBB3(src0p, src0p);
-        Face::p32Negate255SBW(sra0p, sra0p);
+        Acc::p32ExtractPBB3(sra0p, src0p);
+        Acc::p32FillPBB3(src0p, src0p);
+        Acc::p32Negate255SBW(sra0p, sra0p);
       }
 
       BLIT_LOOP_32x1_BEGIN(C_Any)
         uint32_t dst0p;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, sra0p);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, sra0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
       BLIT_LOOP_32x1_END(C_Any)
@@ -770,32 +770,32 @@ _VARGBGlyphMask:
         uint32_t src0p;
         uint32_t msk0p;
 
-        Face::p32Load1b(msk0p, msk);
+        Acc::p32Load1b(msk0p, msk);
         if (msk0p == 0x00) goto _A8_Glyph_Skip;
 
-        Face::p32Load4a(dst0p, dst);
+        Acc::p32Load4a(dst0p, dst);
         if (msk0p != 0xFF) goto _A8_Glyph_Mask;
 
 _A8_Glyph_Skip:
-        Face::p32Load4a(dst0p, dst);
-        Face::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, inv0p);
-        Face::p32Add(dst0p, dst0p, srf0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, inv0p);
+        Acc::p32Add(dst0p, dst0p, srf0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 1;
         BLIT_LOOP_32x1_CONTINUE(A8_Glyph)
 
 _A8_Glyph_Mask:
-        Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
 
-        Face::p32ExtractPBB3(msk0p, src0p);
-        Face::p32FillPBB3(src0p, src0p);
-        Face::p32Negate255SBW(msk0p, msk0p);
-        Face::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, msk0p);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32ExtractPBB3(msk0p, src0p);
+        Acc::p32FillPBB3(src0p, src0p);
+        Acc::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, msk0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 1;
@@ -815,16 +815,16 @@ _A8_Glyph_Mask:
         uint32_t src0p;
         uint32_t msk0p;
 
-        Face::p32Load4a(dst0p, dst);
-        Face::p32Load2a(msk0p, msk);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32Load2a(msk0p, msk);
 
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
-        Face::p32ExtractPBB3(msk0p, src0p);
-        Face::p32FillPBB3(src0p, src0p);
-        Face::p32Negate255SBW(msk0p, msk0p);
-        Face::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, msk0p);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
+        Acc::p32ExtractPBB3(msk0p, src0p);
+        Acc::p32FillPBB3(src0p, src0p);
+        Acc::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32MulDiv255PBB_SBW_Z210(dst0p, dst0p, msk0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 2;
@@ -845,34 +845,34 @@ _A8_Glyph_Mask:
         uint32_t sra0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load1b(msk0p_20, msk);
+        Acc::p32Load1b(msk0p_20, msk);
         if (msk0p_20 == 0x00000000) goto _VARGBGlyphSkip;
 
-        Face::p32Load4a(dst0p, dst);
+        Acc::p32Load4a(dst0p, dst);
         if (msk0p_20 != 0xFFFFFFFF) goto _VARGBGlyphMask;
 
 _VARGBGlyphSkip:
-        Face::p32Load4a(dst0p, dst);
-        Face::p32MulDiv256PBB_SBW_Z210(dst0p, dst0p, inv0p);
-        Face::p32Add(dst0p, dst0p, srf0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32MulDiv256PBB_SBW_Z210(dst0p, dst0p, inv0p);
+        Acc::p32Add(dst0p, dst0p, srf0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 4;
         BLIT_LOOP_32x1_CONTINUE(ARGB32_Glyph)
 
 _VARGBGlyphMask:
-        Face::p32Load4a(dst0p, dst);
-        Face::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_20F1(src0p, sro0p_20, msk0p_20, sro0p_31, msk0p_31);
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_20F1(src0p, sro0p_20, msk0p_20, sro0p_31, msk0p_31);
 
-        Face::p32ExtractPBB3(sra0p, sro0p);
-        Face::p32MulDiv256PBW_SBW_2x(msk0p_20, msk0p_20, sra0p, msk0p_31, msk0p_31, sra0p);
-        Face::p32Negate255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv255PBB_PBW_20Z1(dst0p, dst0p, msk0p_20, msk0p_31);
-        Face::p32Add(dst0p, dst0p, src0p);
-        Face::p32Store4a(dst, dst0p);
+        Acc::p32ExtractPBB3(sra0p, sro0p);
+        Acc::p32MulDiv256PBW_SBW_2x(msk0p_20, msk0p_20, sra0p, msk0p_31, msk0p_31, sra0p);
+        Acc::p32Negate255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv255PBB_PBW_20Z1(dst0p, dst0p, msk0p_20, msk0p_31);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store4a(dst, dst0p);
 
         dst += 4;
         msk += 4;
@@ -924,8 +924,8 @@ _VARGBGlyphMask:
     do {
       uint32_t src0p;
 
-      Face::p32Load4a(src0p, pal + src[0]);
-      Face::p32Store4a(dst, src0p);
+      Acc::p32Load4a(src0p, pal + src[0]);
+      Acc::p32Store4a(dst, src0p);
 
       dst += 4;
       src += 1;

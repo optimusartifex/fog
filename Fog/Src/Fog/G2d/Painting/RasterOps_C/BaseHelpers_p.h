@@ -140,14 +140,14 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_A8:
       case IMAGE_FORMAT_I8:
         solid.prgb32.u32 = color->getArgb32().u32;
-        Face::p32PRGB32FromARGB32(solid.prgb32.u32, solid.prgb32.u32);
+        Acc::p32PRGB32FromARGB32(solid.prgb32.u32, solid.prgb32.u32);
         break;
 
       case IMAGE_FORMAT_PRGB64:
       case IMAGE_FORMAT_RGB48:
       case IMAGE_FORMAT_A16:
         solid.prgb64.p64 = color->getArgb64().p64;
-        Face::p64PRGB64FromARGB64(solid.prgb64.p64, solid.prgb64.p64);
+        Acc::p64PRGB64FromARGB64(solid.prgb64.p64, solid.prgb64.p64);
         break;
     }
     //! ${IMAGE_FORMAT:END}
@@ -168,7 +168,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_XRGB32:
       case IMAGE_FORMAT_RGB24:
       {
-        if (Face::p32PRGB32IsAlphaFF(solid->prgb32.u32))
+        if (Acc::p32PRGB32IsAlphaFF(solid->prgb32.u32))
         {
           ctx->_srcFormat = IMAGE_FORMAT_XRGB32;
           ctx->_srcBPP = 4;
@@ -194,7 +194,7 @@ struct FOG_NO_EXPORT Helpers
       case IMAGE_FORMAT_PRGB64:
       case IMAGE_FORMAT_RGB48:
       {
-        if (Face::p64PRGB64IsAlphaFFFF(solid->prgb64.p64))
+        if (Acc::p64PRGB64IsAlphaFFFF(solid->prgb64.p64))
         {
           ctx->_srcFormat = IMAGE_FORMAT_RGB48;
           ctx->_srcBPP = 6;

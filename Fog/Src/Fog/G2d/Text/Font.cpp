@@ -21,42 +21,42 @@
 namespace Fog {
 
 // ============================================================================
-// [Fog::FontInfo - Global]
+// [Fog::FaceInfo - Global]
 // ============================================================================
 
-static Static<FontInfoData> FontInfo_dNull;
-static Static<FontInfo> FontInfo_oNull;
+static Static<FaceInfoData> FaceInfo_dNull;
+static Static<FaceInfo> FaceInfo_oNull;
 
 // ============================================================================
-// [Fog::FontInfo - Construction / Destruction]
+// [Fog::FaceInfo - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL FontInfo_ctor(FontInfo* self)
+static void FOG_CDECL FaceInfo_ctor(FaceInfo* self)
 {
-  self->_d = FontInfo_dNull->addRef();
+  self->_d = FaceInfo_dNull->addRef();
 }
 
-static void FOG_CDECL FontInfo_ctorCopy(FontInfo* self, const FontInfo* other)
+static void FOG_CDECL FaceInfo_ctorCopy(FaceInfo* self, const FaceInfo* other)
 {
   self->_d = other->_d->addRef();
 }
 
-static void FOG_CDECL FontInfo_dtor(FontInfo* self)
+static void FOG_CDECL FaceInfo_dtor(FaceInfo* self)
 {
   self->_d->release();
 }
 
 // ============================================================================
-// [Fog::FontInfo - Sharing]
+// [Fog::FaceInfo - Sharing]
 // ============================================================================
 
-static err_t FOG_CDECL FontInfo_detach(FontInfo* self)
+static err_t FOG_CDECL FaceInfo_detach(FaceInfo* self)
 {
-  FontInfoData* d = self->_d;
+  FaceInfoData* d = self->_d;
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  FontInfoData* newd = fog_api.fontinfo_dCreate(&d->familyName, &d->fileName);
+  FaceInfoData* newd = fog_api.faceinfo_dCreate(&d->familyName, &d->fileName);
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -65,67 +65,67 @@ static err_t FOG_CDECL FontInfo_detach(FontInfo* self)
 }
 
 // ============================================================================
-// [Fog::FontInfo - Accessors]
+// [Fog::FaceInfo - Accessors]
 // ============================================================================
 
-static err_t FOG_CDECL FontInfo_setDefs(FontInfo* self, const FontDefs* defs)
+static err_t FOG_CDECL FaceInfo_setFeatures(FaceInfo* self, const FaceFeatures* features)
 {
-  uint32_t defsPacked = defs->_packed;
-  if (self->_d->defs._packed == defsPacked)
+  uint32_t featuresPacked = features->_packed;
+  if (self->_d->features._packed == featuresPacked)
     return ERR_OK;
 
   FOG_RETURN_ON_ERROR(self->detach());
-  FontInfoData* d = self->_d;
+  FaceInfoData* d = self->_d;
 
-  d->defs._packed = defsPacked;
+  d->features._packed = featuresPacked;
   return ERR_OK;
 }
 
-static err_t FOG_CDECL FontInfo_setFamilyName(FontInfo* self, const StringW* familyName)
+static err_t FOG_CDECL FaceInfo_setFamilyName(FaceInfo* self, const StringW* familyName)
 {
   FOG_RETURN_ON_ERROR(self->detach());
-  FontInfoData* d = self->_d;
+  FaceInfoData* d = self->_d;
 
   return d->familyName->set(*familyName);
 }
 
-static err_t FOG_CDECL FontInfo_setFileName(FontInfo* self, const StringW* fileName)
+static err_t FOG_CDECL FaceInfo_setFileName(FaceInfo* self, const StringW* fileName)
 {
   FOG_RETURN_ON_ERROR(self->detach());
-  FontInfoData* d = self->_d;
+  FaceInfoData* d = self->_d;
 
   return d->fileName->set(*fileName);
 }
 
 // ============================================================================
-// [Fog::FontInfo - Reset]
+// [Fog::FaceInfo - Reset]
 // ============================================================================
 
-static void FOG_CDECL FontInfo_reset(FontInfo* self)
+static void FOG_CDECL FaceInfo_reset(FaceInfo* self)
 {
-  if (self->_d == &FontInfo_dNull)
+  if (self->_d == &FaceInfo_dNull)
     return;
-  atomicPtrXchg(&self->_d, FontInfo_dNull->addRef())->release();
+  atomicPtrXchg(&self->_d, FaceInfo_dNull->addRef())->release();
 }
 
 // ============================================================================
-// [Fog::FontInfo - Copy]
+// [Fog::FaceInfo - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL FontInfo_copy(FontInfo* self, const FontInfo* other)
+static err_t FOG_CDECL FaceInfo_copy(FaceInfo* self, const FaceInfo* other)
 {
   atomicPtrXchg(&self->_d, other->_d->addRef())->release();
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::FontInfo - Eq]
+// [Fog::FaceInfo - Eq]
 // ============================================================================
 
-static bool FOG_CDECL FontInfo_eq(const FontInfo* a, const FontInfo* b)
+static bool FOG_CDECL FaceInfo_eq(const FaceInfo* a, const FaceInfo* b)
 {
-  const FontInfoData* a_d = a->_d;
-  const FontInfoData* b_d = b->_d;
+  const FaceInfoData* a_d = a->_d;
+  const FaceInfoData* b_d = b->_d;
 
   if (a_d == b_d)
     return true;
@@ -139,13 +139,13 @@ static bool FOG_CDECL FontInfo_eq(const FontInfo* a, const FontInfo* b)
 }
 
 // ============================================================================
-// [Fog::FontInfo - Compare]
+// [Fog::FaceInfo - Compare]
 // ============================================================================
 
-static int FOG_CDECL FontInfo_compare(const FontInfo* a, const FontInfo* b)
+static int FOG_CDECL FaceInfo_compare(const FaceInfo* a, const FaceInfo* b)
 {
-  const FontInfoData* a_d = a->_d;
-  const FontInfoData* b_d = b->_d;
+  const FaceInfoData* a_d = a->_d;
+  const FaceInfoData* b_d = b->_d;
 
   if (a_d == b_d)
     return true;
@@ -164,26 +164,26 @@ static int FOG_CDECL FontInfo_compare(const FontInfo* a, const FontInfo* b)
 }
 
 // ============================================================================
-// [Fog::FontInfo - Data]
+// [Fog::FaceInfo - Data]
 // ============================================================================
 
-static FontInfoData* FOG_CDECL FontInfo_dCreate(const StringW* familyName, const StringW* fileName)
+static FaceInfoData* FOG_CDECL FaceInfo_dCreate(const StringW* familyName, const StringW* fileName)
 {
-  FontInfoData* d = static_cast<FontInfoData*>(MemMgr::alloc(sizeof(FontInfoData)));
+  FaceInfoData* d = static_cast<FaceInfoData*>(MemMgr::alloc(sizeof(FaceInfoData)));
 
   if (FOG_IS_NULL(d))
     return NULL;
 
   d->reference.init(1);
-  d->vType = VAR_TYPE_FONT_INFO | VAR_FLAG_NONE;
-  d->defs = FontDefs(FONT_WEIGHT_NORMAL, FONT_STRETCH_NORMAL, false);
+  d->vType = VAR_TYPE_FACE_INFO | VAR_FLAG_NONE;
+  d->features = FaceFeatures(FONT_WEIGHT_NORMAL, FONT_STRETCH_NORMAL, false);
   d->familyName.initCustom1(*familyName);
   d->fileName.initCustom1(*fileName);
 
   return d;
 }
 
-static void FOG_CDECL FontInfo_dFree(FontInfoData* d)
+static void FOG_CDECL FaceInfo_dFree(FaceInfoData* d)
 {
   d->familyName.destroy();
   d->fileName.destroy();
@@ -192,24 +192,24 @@ static void FOG_CDECL FontInfo_dFree(FontInfoData* d)
 }
 
 // ============================================================================
-// [Fog::FontCollection - Global]
+// [Fog::FaceCollection - Global]
 // ============================================================================
 
-static Static<FontCollectionData> FontCollection_dNull;
-static Static<FontCollection> FontCollection_oNull;
+static Static<FaceCollectionData> FaceCollection_dNull;
+static Static<FaceCollection> FaceCollection_oNull;
 
 // ============================================================================
-// [Fog::FontCollection - Hash]
+// [Fog::FaceCollection - Hash]
 // ============================================================================
 
-static err_t FOG_CDECL FontCollection_dUpdateHash(FontCollectionData* d)
+static err_t FOG_CDECL FaceCollection_dUpdateHash(FaceCollectionData* d)
 {
-  List<FontInfo>& list = d->fontList();
+  List<FaceInfo>& list = d->fontList();
   Hash<StringW, size_t>& hash = d->fontHash();
 
   hash.clear();
 
-  ListIterator<FontInfo> it(list);
+  ListIterator<FaceInfo> it(list);
   while (it.isValid())
   {
     size_t index = it.getIndex();
@@ -232,35 +232,35 @@ static err_t FOG_CDECL FontCollection_dUpdateHash(FontCollectionData* d)
 }
 
 // ============================================================================
-// [Fog::FontCollection - Construction / Destruction]
+// [Fog::FaceCollection - Construction / Destruction]
 // ============================================================================
 
-static void FOG_CDECL FontCollection_ctor(FontCollection* self)
+static void FOG_CDECL FaceCollection_ctor(FaceCollection* self)
 {
-  self->_d = FontCollection_dNull->addRef();
+  self->_d = FaceCollection_dNull->addRef();
 }
 
-static void FOG_CDECL FontCollection_ctorCopy(FontCollection* self, const FontCollection* other)
+static void FOG_CDECL FaceCollection_ctorCopy(FaceCollection* self, const FaceCollection* other)
 {
   self->_d = other->_d->addRef();
 }
 
-static void FOG_CDECL FontCollection_dtor(FontCollection* self)
+static void FOG_CDECL FaceCollection_dtor(FaceCollection* self)
 {
   self->_d->release();
 }
 
 // ============================================================================
-// [Fog::FontCollection - Sharing]
+// [Fog::FaceCollection - Sharing]
 // ============================================================================
 
-static err_t FOG_CDECL FontCollection_detach(FontCollection* self)
+static err_t FOG_CDECL FaceCollection_detach(FaceCollection* self)
 {
-  FontCollectionData* d = self->_d;
+  FaceCollectionData* d = self->_d;
   if (d->reference.get() == 1)
     return ERR_OK;
 
-  FontCollectionData* newd = fog_api.fontcollection_dCreate();
+  FaceCollectionData* newd = fog_api.facecollection_dCreate();
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
@@ -272,35 +272,35 @@ static err_t FOG_CDECL FontCollection_detach(FontCollection* self)
 }
 
 // ============================================================================
-// [Fog::FontCollection - Accessors]
+// [Fog::FaceCollection - Accessors]
 // ============================================================================
 
-static err_t FOG_CDECL FontCollection_setList(FontCollection* self, const List<FontInfo>* list)
+static err_t FOG_CDECL FaceCollection_setList(FaceCollection* self, const List<FaceInfo>* list)
 {
   if (self->_d->fontList->_d == list->_d)
     return ERR_OK;
 
   FOG_RETURN_ON_ERROR(self->detach());
-  FontCollectionData* d = self->_d;
+  FaceCollectionData* d = self->_d;
 
   d->fontList() = *list;
   return ERR_OK;
 }
 
-static err_t FOG_CDECL FontCollection_addItem(FontCollection* self, const FontInfo* item)
+static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceInfo* item)
 {
   FOG_RETURN_ON_ERROR(self->detach());
 
-  FontCollectionData* d = self->_d;
+  FaceCollectionData* d = self->_d;
   size_t index;
 
   const StringW& newFamily = item->getFamilyName();
 
   {
-    ListIterator<FontInfo> it(d->fontList());
+    ListIterator<FaceInfo> it(d->fontList());
     while (it.isValid())
     {
-      const FontInfo& item = it.getItem();
+      const FaceInfo& item = it.getItem();
       const StringW& itemFamily = item.getFamilyName();
 
       int cmp = itemFamily.compare(itemFamily);
@@ -341,13 +341,13 @@ static err_t FOG_CDECL FontCollection_addItem(FontCollection* self, const FontIn
 }
 
 // ============================================================================
-// [Fog::FontCollection - Clear]
+// [Fog::FaceCollection - Clear]
 // ============================================================================
 
-static void FOG_CDECL FontCollection_clear(FontCollection* self)
+static void FOG_CDECL FaceCollection_clear(FaceCollection* self)
 {
-  FontCollectionData* d = self->_d;
-  if (d == &FontCollection_dNull)
+  FaceCollectionData* d = self->_d;
+  if (d == &FaceCollection_dNull)
     return;
   
   if (d->reference.get() == 1)
@@ -357,39 +357,39 @@ static void FOG_CDECL FontCollection_clear(FontCollection* self)
   }
   else
   {
-    atomicPtrXchg(&self->_d, FontCollection_dNull->addRef())->release();
+    atomicPtrXchg(&self->_d, FaceCollection_dNull->addRef())->release();
   }
 }
 
 // ============================================================================
-// [Fog::FontCollection - Reset]
+// [Fog::FaceCollection - Reset]
 // ============================================================================
 
-static void FOG_CDECL FontCollection_reset(FontCollection* self)
+static void FOG_CDECL FaceCollection_reset(FaceCollection* self)
 {
-  if (self->_d == &FontCollection_dNull)
+  if (self->_d == &FaceCollection_dNull)
     return;
-  atomicPtrXchg(&self->_d, FontCollection_dNull->addRef())->release();
+  atomicPtrXchg(&self->_d, FaceCollection_dNull->addRef())->release();
 }
 
 // ============================================================================
-// [Fog::FontCollection - Copy]
+// [Fog::FaceCollection - Copy]
 // ============================================================================
 
-static err_t FOG_CDECL FontCollection_copy(FontCollection* self, const FontCollection* other)
+static err_t FOG_CDECL FaceCollection_copy(FaceCollection* self, const FaceCollection* other)
 {
   atomicPtrXchg(&self->_d, other->_d->addRef())->release();
   return ERR_OK;
 }
 
 // ============================================================================
-// [Fog::FontCollection - Eq]
+// [Fog::FaceCollection - Eq]
 // ============================================================================
 
-static bool FOG_CDECL FontCollection_eq(const FontCollection* a, const FontCollection* b)
+static bool FOG_CDECL FaceCollection_eq(const FaceCollection* a, const FaceCollection* b)
 {
-  const FontCollectionData* a_d = a->_d;
-  const FontCollectionData* b_d = b->_d;
+  const FaceCollectionData* a_d = a->_d;
+  const FaceCollectionData* b_d = b->_d;
 
   if (a_d == b_d)
     return true;
@@ -398,18 +398,18 @@ static bool FOG_CDECL FontCollection_eq(const FontCollection* a, const FontColle
 }
 
 // ============================================================================
-// [Fog::FontCollection - Data]
+// [Fog::FaceCollection - Data]
 // ============================================================================
 
-static FontCollectionData* FOG_CDECL FontCollection_dCreate(void)
+static FaceCollectionData* FOG_CDECL FaceCollection_dCreate(void)
 {
-  FontCollectionData* d = static_cast<FontCollectionData*>(MemMgr::alloc(sizeof(FontCollectionData)));
+  FaceCollectionData* d = static_cast<FaceCollectionData*>(MemMgr::alloc(sizeof(FaceCollectionData)));
 
   if (FOG_IS_NULL(d))
     return NULL;
 
   d->reference.init(1);
-  d->vType = VAR_TYPE_FONT_COLLECTION | VAR_FLAG_NONE;
+  d->vType = VAR_TYPE_FACE_COLLECTION | VAR_FLAG_NONE;
   d->flags = NO_FLAGS;
   d->fontList.init();
   d->fontHash.init();
@@ -417,7 +417,7 @@ static FontCollectionData* FOG_CDECL FontCollection_dCreate(void)
   return d;
 }
 
-static void FOG_CDECL FontCollection_dFree(FontCollectionData* d)
+static void FOG_CDECL FaceCollection_dFree(FaceCollectionData* d)
 {
   d->fontList.destroy();
   d->fontHash.destroy();
@@ -462,7 +462,11 @@ static void Font_dScaleMetrics(FontData* d, float size)
 
 static void FOG_CDECL Font_ctor(Font* self)
 {
-  self->_d = FontEngine::getGlobal()._d->defaultFont._d->addRef();
+  const Font& defaultFont = FontEngine::getGlobal()->defaultFont();
+  FOG_ASSERT_X(defaultFont._d != NULL, 
+    "Fog::Font() - No default font in global FontEngine.");
+
+  self->_d = defaultFont._d->addRef();
 }
 
 static void FOG_CDECL Font_ctorCopy(Font* self, const Font* other)
@@ -493,9 +497,9 @@ static err_t FOG_CDECL Font_detach(Font* self)
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  FontFace* face = d->face;
+  Face* face = d->face;
   newd->flags = d->flags;
-  newd->face = face != NULL ? face->addRef() : (FontFace*)NULL;
+  newd->face = face != NULL ? face->addRef() : (Face*)NULL;
 
   newd->metrics = d->metrics;
   newd->features = d->features;
@@ -931,10 +935,14 @@ static err_t FOG_CDECL Font_setParam(Font* self, uint32_t id, const void* src)
 
 static void FOG_CDECL Font_reset(Font* self)
 {
-  FOG_ASSERT(self->_d != NULL);
+  const Font& defaultFont = FontEngine::getGlobal()->defaultFont();
 
-  FontData* newd = FontEngine::getGlobal()._d->defaultFont._d;
-  atomicPtrXchg(&self->_d, newd->addRef())->release();
+  FOG_ASSERT_X(self->_d != NULL,
+    "Fog::Font::reset() - Called on not-initialized instance.");
+  FOG_ASSERT_X(defaultFont._d != NULL, 
+    "Fog::Font::reset() - No default font in global FontEngine.");
+
+  atomicPtrXchg(&self->_d, defaultFont._d->addRef())->release();
 }
 
 // ============================================================================
@@ -953,23 +961,57 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float size
     d = self->_d;
   }
 
-  // Try to optimize font-face creation using the current font-face.
-  if (d->face->family != *family)
-  {
-    FontFace* face = FontEngine::getGlobal()->getFontFace(*family);
-    if (FOG_IS_NULL(face))
-      return ERR_FONT_NOT_MATCHED;
+  // If these are not given then we fake them using default values.
+  Static<FontFeatures> staticFeatures;
+  Static<FontMatrix> staticMatrix;
 
-    face = atomicPtrXchg(&d->face, face);
-    if (face != NULL) face->deref();
+  if (features == NULL)
+  {
+    staticFeatures->reset();
+    features = &staticFeatures;
   }
 
+  if (matrix == NULL)
+  {
+    staticMatrix->reset();
+    matrix = &staticMatrix;
+  }
+
+  // It is expensive to query font-face, so we try to do it only if it's really
+  // necessary. In case that the family is the same, there is high probability
+  // that we don't do query at all, just compare requested features.
+  bool doFaceQuery = d->face->family != *family;
+
+  // Font family is the same -> compare weight, stretch, and style. If these
+  // are the same then we don't need to do a real query.
+  if (doFaceQuery == false)
+  {
+    doFaceQuery = (d->features.getWeight()  != features->getWeight() ) ||
+                  (d->features.getStretch() != features->getStretch()) ||
+                  (d->features.getStyle()   != features->getStyle()  ) ;
+  }
+
+  if (doFaceQuery)
+  {
+    Face* face;
+    FaceFeatures faceFeatures(features->getWeight(), features->getStretch(), features->getStyle() == FONT_STYLE_ITALIC);
+    err_t err = FontEngine::getGlobal()->queryFace(&face, *family, faceFeatures);
+
+    if (FOG_IS_ERROR(err))
+      return err;
+
+    face = atomicPtrXchg(&d->face, face);
+    if (face != NULL)
+      face->deref();
+  }
+
+  
   Font_initValues(d);
   Font_dScaleMetrics(d, size);
   return ERR_OK;
 }
 
-static err_t FOG_CDECL Font_init(Font* self, FontFace* face, float size,
+static err_t FOG_CDECL Font_init(Font* self, Face* face, float size,
   const FontFeatures* features, const FontMatrix* matrix)
 {
   FontData* d = self->_d;
@@ -1002,7 +1044,7 @@ static err_t Font_getOutlineFromGlyphRunF(const Font* self,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
 {
-  FontFace* face = self->_d->face;
+  Face* face = self->_d->face;
 
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
@@ -1016,7 +1058,7 @@ static err_t Font_getOutlineFromGlyphRunD(const Font* self,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
 {
-  FontFace* face = self->_d->face;
+  Face* face = self->_d->face;
 
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
@@ -1094,65 +1136,65 @@ static void Font_dFree(FontData* d)
 FOG_NO_EXPORT void Font_init(void)
 {
   // --------------------------------------------------------------------------
-  // [FontInfo]
+  // [FaceInfo]
   // --------------------------------------------------------------------------
 
-  fog_api.fontinfo_ctor = FontInfo_ctor;
-  fog_api.fontinfo_ctorCopy = FontInfo_ctorCopy;
-  fog_api.fontinfo_dtor = FontInfo_dtor;
+  fog_api.faceinfo_ctor = FaceInfo_ctor;
+  fog_api.faceinfo_ctorCopy = FaceInfo_ctorCopy;
+  fog_api.faceinfo_dtor = FaceInfo_dtor;
 
-  fog_api.fontinfo_detach = FontInfo_detach;
-  fog_api.fontinfo_setDefs = FontInfo_setDefs;
-  fog_api.fontinfo_setFamilyName = FontInfo_setFamilyName;
-  fog_api.fontinfo_setFileName = FontInfo_setFileName;
-  fog_api.fontinfo_reset = FontInfo_reset;
-  fog_api.fontinfo_copy = FontInfo_copy;
-  fog_api.fontinfo_eq = FontInfo_eq;
-  fog_api.fontinfo_compare = FontInfo_compare;
+  fog_api.faceinfo_detach = FaceInfo_detach;
+  fog_api.faceinfo_setFeatures = FaceInfo_setFeatures;
+  fog_api.faceinfo_setFamilyName = FaceInfo_setFamilyName;
+  fog_api.faceinfo_setFileName = FaceInfo_setFileName;
+  fog_api.faceinfo_reset = FaceInfo_reset;
+  fog_api.faceinfo_copy = FaceInfo_copy;
+  fog_api.faceinfo_eq = FaceInfo_eq;
+  fog_api.faceinfo_compare = FaceInfo_compare;
 
-  fog_api.fontinfo_dCreate = FontInfo_dCreate;
-  fog_api.fontinfo_dFree = FontInfo_dFree;
+  fog_api.faceinfo_dCreate = FaceInfo_dCreate;
+  fog_api.faceinfo_dFree = FaceInfo_dFree;
 
   {
-    FontInfoData* d = &FontInfo_dNull;
+    FaceInfoData* d = &FaceInfo_dNull;
 
     d->reference.init(1);
-    d->vType = VAR_TYPE_FONT_INFO | VAR_FLAG_NONE;
-    d->defs.setWeight(FONT_WEIGHT_NORMAL);
-    d->defs.setStretch(FONT_STRETCH_NORMAL);
+    d->vType = VAR_TYPE_FACE_INFO | VAR_FLAG_NONE;
+    d->features.setWeight(FONT_WEIGHT_NORMAL);
+    d->features.setStretch(FONT_STRETCH_NORMAL);
     d->familyName->_d = fog_api.stringw_oEmpty->_d;
     d->fileName->_d = fog_api.stringw_oEmpty->_d;
 
-    fog_api.fontinfo_oNull = FontInfo_oNull.initCustom1(d);
+    fog_api.faceinfo_oNull = FaceInfo_oNull.initCustom1(d);
   }
 
   // --------------------------------------------------------------------------
-  // [FontCollection]
+  // [FaceCollection]
   // --------------------------------------------------------------------------
 
-  fog_api.fontcollection_ctor = FontCollection_ctor;
-  fog_api.fontcollection_ctorCopy = FontCollection_ctorCopy;
-  fog_api.fontcollection_dtor = FontCollection_dtor;
+  fog_api.facecollection_ctor = FaceCollection_ctor;
+  fog_api.facecollection_ctorCopy = FaceCollection_ctorCopy;
+  fog_api.facecollection_dtor = FaceCollection_dtor;
 
-  fog_api.fontcollection_detach = FontCollection_detach;
-  fog_api.fontcollection_setList = FontCollection_setList;
-  fog_api.fontcollection_clear = FontCollection_clear;
-  fog_api.fontcollection_reset = FontCollection_reset;
-  fog_api.fontcollection_copy = FontCollection_copy;
-  fog_api.fontcollection_eq = FontCollection_eq;
+  fog_api.facecollection_detach = FaceCollection_detach;
+  fog_api.facecollection_setList = FaceCollection_setList;
+  fog_api.facecollection_clear = FaceCollection_clear;
+  fog_api.facecollection_reset = FaceCollection_reset;
+  fog_api.facecollection_copy = FaceCollection_copy;
+  fog_api.facecollection_eq = FaceCollection_eq;
 
-  fog_api.fontcollection_dCreate = FontCollection_dCreate;
-  fog_api.fontcollection_dFree = FontCollection_dFree;
+  fog_api.facecollection_dCreate = FaceCollection_dCreate;
+  fog_api.facecollection_dFree = FaceCollection_dFree;
 
   {
-    FontCollectionData* d = &FontCollection_dNull;
+    FaceCollectionData* d = &FaceCollection_dNull;
 
     d->reference.init(1);
-    d->vType = VAR_TYPE_FONT_COLLECTION | VAR_FLAG_NONE;
+    d->vType = VAR_TYPE_FACE_COLLECTION | VAR_FLAG_NONE;
     d->fontList->_d = fog_api.list_untyped_oEmpty->_d;
     d->fontHash->_d = fog_api.hash_unknown_unknown_oEmpty->_d;
 
-    fog_api.fontcollection_oNull = FontCollection_oNull.initCustom1(d);
+    fog_api.facecollection_oNull = FaceCollection_oNull.initCustom1(d);
   }
 
   // --------------------------------------------------------------------------

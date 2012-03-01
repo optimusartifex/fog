@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
@@ -257,7 +257,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillRasterizedShape8(RasterPaintEn
   if (RasterUtil::isSolidContext(engine->ctx.pc) || compositingOperator == COMPOSITE_CLEAR)
   {
 _Solid:
-    bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
+    bool isSrcOpaque = Acc::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
 
     filler._prepare = (RasterFiller::PrepareFunc)RasterPaintFiller_prepare_solid_st;
     filler._process = (RasterFiller::ProcessFunc)RasterPaintFiller_process_solid;
@@ -335,7 +335,7 @@ static err_t FOG_FASTCALL RasterPaintDoRender_fillNormalizedBoxI(
         if (RasterUtil::isSolidContext(engine->ctx.pc) || compositingOperator == COMPOSITE_CLEAR)
         {
 _Solid:
-          bool isSrcOpaque = Face::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
+          bool isSrcOpaque = Acc::p32PRGB32IsAlphaFF(engine->ctx.solid.prgb32.u32);
           RasterCBlitLineFunc blitLine = _api_raster.getCBlitLine(dstFormat, compositingOperator, isSrcOpaque);
 
           dstPixels += box->x0 * engine->ctx.target.bpp;

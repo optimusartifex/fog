@@ -8,7 +8,7 @@
 #define _FOG_G2D_SOURCE_ARGB_H
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemOps.h>
@@ -16,7 +16,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/G2d/Source/ColorBase.h>
 #include <Fog/G2d/Source/ColorUtil.h>
-#include <Fog/G2d/Face/Face_Raster_C.h>
+#include <Fog/G2d/Acc/AccC.h>
 
 namespace Fog {
 
@@ -164,7 +164,7 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   //! @brief Set all values to @a argb64.
   FOG_INLINE void setArgb64(const ArgbBase64& argb64)
   {
-    Face::p64ARGB32FromARGB64(u32, argb64.p64);
+    Acc::p64ARGB32FromARGB64(u32, argb64.p64);
   }
 
   //! @brief Set all values to @a a, @a r, @a g, @a b.

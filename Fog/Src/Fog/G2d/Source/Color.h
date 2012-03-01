@@ -14,7 +14,7 @@
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/Stub.h>
-#include <Fog/G2d/Face/Face_Raster_C.h>
+#include <Fog/G2d/Acc/AccC.h>
 #include <Fog/G2d/Source/Acmyk.h>
 #include <Fog/G2d/Source/Ahsl.h>
 #include <Fog/G2d/Source/Ahsv.h>
@@ -81,7 +81,7 @@ struct FOG_NO_EXPORT Color : public ColorBase
 
   FOG_INLINE bool isOpaqueARGB32() const
   {
-    return Face::p32ARGB32IsAlphaFF(_argb32.u32);
+    return Acc::p32ARGB32IsAlphaFF(_argb32.u32);
   }
 
   // --------------------------------------------------------------------------

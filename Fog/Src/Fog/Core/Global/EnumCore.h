@@ -2901,9 +2901,9 @@ enum VAR_TYPE
   VAR_TYPE_IMAGE_PALETTE = 79,
   VAR_TYPE_IMAGE_FILTER = 80,
 
-  VAR_TYPE_FONT = 81,
-  VAR_TYPE_FONT_INFO = 82,
-  VAR_TYPE_FONT_COLLECTION = 83,
+  VAR_TYPE_FACE_INFO = 81,
+  VAR_TYPE_FACE_COLLECTION = 82,
+  VAR_TYPE_FONT = 83,
 
   // --------------------------------------------------------------------------
   // [Ref]

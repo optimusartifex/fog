@@ -218,9 +218,9 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE bool isImagePalette() const { return getVarType() == VAR_TYPE_IMAGE_PALETTE; }
   FOG_INLINE bool isImageFilter() const { return getVarType() == VAR_TYPE_IMAGE_FILTER; }
 
+  FOG_INLINE bool isFaceInfo() const { return getVarType() == VAR_TYPE_FACE_INFO; }
+  FOG_INLINE bool isFaceCollection() const { return getVarType() == VAR_TYPE_FACE_COLLECTION; }
   FOG_INLINE bool isFont() const { return getVarType() == VAR_TYPE_FONT; }
-  FOG_INLINE bool isFontInfo() const { return getVarType() == VAR_TYPE_FONT_INFO; }
-  FOG_INLINE bool isFontCollection() const { return getVarType() == VAR_TYPE_FONT_COLLECTION; }
 
   FOG_INLINE bool isObjectRef() const { return getVarType() == VAR_TYPE_OBJECT_REF; }
 
@@ -516,25 +516,25 @@ struct FOG_NO_EXPORT Var
   FOG_INLINE err_t setImageFilter(const ImageFilter& src) { return fog_api.var_setType(this, VAR_TYPE_IMAGE_FILTER, &src); }
 
   // --------------------------------------------------------------------------
+  // [Accessors - FaceInfo]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getFaceInfo(FaceInfo& dst) const { return fog_api.var_getType(this, VAR_TYPE_FACE_INFO, &dst); }
+  FOG_INLINE err_t setFaceInfo(const FaceInfo& src) { return fog_api.var_setType(this, VAR_TYPE_FACE_INFO, &src); }
+
+  // --------------------------------------------------------------------------
+  // [Accessors - FaceCollection]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t getFaceCollection(FaceCollection& dst) const { return fog_api.var_getType(this, VAR_TYPE_FACE_COLLECTION, &dst); }
+  FOG_INLINE err_t setFaceCollection(const FaceCollection& src) { return fog_api.var_setType(this, VAR_TYPE_FACE_COLLECTION, &src); }
+
+  // --------------------------------------------------------------------------
   // [Accessors - Font]
   // --------------------------------------------------------------------------
 
   FOG_INLINE err_t getFont(Font& dst) const { return fog_api.var_getType(this, VAR_TYPE_FONT, &dst); }
   FOG_INLINE err_t setFont(const Font& src) { return fog_api.var_setType(this, VAR_TYPE_FONT, &src); }
-
-  // --------------------------------------------------------------------------
-  // [Accessors - FontInfo]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t getFontInfo(FontInfo& dst) const { return fog_api.var_getType(this, VAR_TYPE_FONT_INFO, &dst); }
-  FOG_INLINE err_t setFontInfo(const FontInfo& src) { return fog_api.var_setType(this, VAR_TYPE_FONT_INFO, &src); }
-
-  // --------------------------------------------------------------------------
-  // [Accessors - FontCollection]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t getFontCollection(FontInfo& dst) const { return fog_api.var_getType(this, VAR_TYPE_FONT_COLLECTION, &dst); }
-  FOG_INLINE err_t setFontCollection(const FontInfo& src) { return fog_api.var_setType(this, VAR_TYPE_FONT_COLLECTION, &src); }
 
   // --------------------------------------------------------------------------
   // [Accessors - Var]

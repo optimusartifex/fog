@@ -61,7 +61,7 @@ struct FOG_NO_EXPORT PGradientBase
         if (c0 == c1)
         {
           uint32_t cp;
-          Face::p32PRGB32FromARGB32(cp, c0);
+          Acc::p32PRGB32FromARGB32(cp, c0);
 
           for (i = 0; i < len; i++) dst[i] = cp;
         }
@@ -93,13 +93,13 @@ struct FOG_NO_EXPORT PGradientBase
           aPos += 0x800000; rPos += 0x800000;
           gPos += 0x800000; bPos += 0x800000;
 
-          if (aInc == 0 && Face::p32ARGB32IsAlphaFF(c1))
+          if (aInc == 0 && Acc::p32ARGB32IsAlphaFF(c1))
           {
             mask |= 0xFF000000;
 
             for (i = 0; i <= len; i++)
             {
-              uint32_t cp = _FOG_FACE_COMBINE_3((rPos & 0xFF000000) >>  8,
+              uint32_t cp = _FOG_ACC_COMBINE_3((rPos & 0xFF000000) >>  8,
                                                  (gPos & 0xFF000000) >> 16,
                                                  (bPos             ) >> 24) ^ mask;
               dst[i] = cp;
@@ -113,11 +113,11 @@ struct FOG_NO_EXPORT PGradientBase
           {
             for (i = 0; i <= len; i++)
             {
-              uint32_t cp = _FOG_FACE_COMBINE_4((aPos & 0xFF000000)      ,
+              uint32_t cp = _FOG_ACC_COMBINE_4((aPos & 0xFF000000)      ,
                                                  (rPos & 0xFF000000) >>  8,
                                                  (gPos & 0xFF000000) >> 16,
                                                  (bPos             ) >> 24) ^ mask;
-              Face::p32PRGB32FromARGB32(cp, cp);
+              Acc::p32PRGB32FromARGB32(cp, cp);
               dst[i] = cp;
 
               aPos += aInc;
@@ -131,7 +131,7 @@ struct FOG_NO_EXPORT PGradientBase
       else
       {
         uint32_t cp;
-        Face::p32PRGB32FromARGB32(cp, c1);
+        Acc::p32PRGB32FromARGB32(cp, c1);
 
         dst[0] = cp;
       }
@@ -144,7 +144,7 @@ struct FOG_NO_EXPORT PGradientBase
     if (p1 < (uint)_w)
     {
       uint32_t cp;
-      Face::p32PRGB32FromARGB32(cp, c1);
+      Acc::p32PRGB32FromARGB32(cp, c1);
 
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
       uint i, len = (uint)_w - p1 + 1;
@@ -285,7 +285,7 @@ struct FOG_NO_EXPORT PGradientAccessor_PRGB32_Base
     _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)) {}
 
   FOG_INLINE void fetchRaw(Pixel& dst, int position) { dst = _table[position]; }
-  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Face::p32Store4a(dst, src); }
+  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Acc::p32Store4a(dst, src); }
 
   FOG_INLINE void storeRaw(uint8_t* dst, int position)
   {
@@ -315,13 +315,13 @@ struct FOG_NO_EXPORT PGradientAccessor_A8_Base
     _table(reinterpret_cast<const uint8_t*>(ctx->_d.gradient.base.table) + PIXEL_ARGB32_POS_A) {}
 
   FOG_INLINE void fetchRaw(Pixel& dst, int position) { dst = _table[position * 4]; }
-  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Face::p32Store1b(dst, src); }
+  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Acc::p32Store1b(dst, src); }
 #else
   FOG_INLINE PGradientAccessor_A8_Base(const RasterPattern* ctx) :
     _table(reinterpret_cast<const uint32_t*>(ctx->_d.gradient.base.table)) {}
 
   FOG_INLINE void fetchRaw(Pixel& dst, int position) { dst = (uint8_t)(_table[position] >> 24); }
-  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Face::p32Store1b(dst, src); }
+  FOG_INLINE void storePix(uint8_t* dst, const Pixel& src) { Acc::p32Store1b(dst, src); }
 #endif // FOG_ARCH_...
 
   FOG_INLINE void storeRaw(uint8_t* dst, int position)

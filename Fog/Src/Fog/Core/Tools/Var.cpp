@@ -197,9 +197,9 @@ static const uint8_t Var_dataSize[] =
   /* 0078: VAR_TYPE_IMAGE                  */ 0, // Implicit.
   /* 0079: VAR_TYPE_IMAGE_PALETTE          */ 0, // Implicit.
   /* 0080: VAR_TYPE_IMAGE_FILTER           */ 0, // Implicit.
-  /* 0081: VAR_TYPE_FONT                   */ 0, // Implicit.
-  /* 0082: VAR_TYPE_FONT_INFO              */ 0, // Implicit.
-  /* 0082: VAR_TYPE_FONT_COLLECTION        */ 0  // Implicit.
+  /* 0081: VAR_TYPE_FACE_INFO              */ 0, // Implicit.
+  /* 0082: VAR_TYPE_FACE_COLLECTION        */ 0, // Implicit.
+  /* 0083: VAR_TYPE_FONT                   */ 0  // Implicit.
 };
 // ${VAR_TYPE:END}
 
@@ -332,9 +332,9 @@ _CreateImplicit:
     case VAR_TYPE_IMAGE_FILTER:
       goto _CreateImplicit;
 
+    case VAR_TYPE_FACE_INFO:
+    case VAR_TYPE_FACE_COLLECTION:
     case VAR_TYPE_FONT:
-    case VAR_TYPE_FONT_INFO:
-    case VAR_TYPE_FONT_COLLECTION:
       goto _CreateImplicit;
 
     default:
@@ -1311,9 +1311,9 @@ _SetImplicit:
       case VAR_TYPE_IMAGE_FILTER:
         goto _SetImplicit;
 
+      case VAR_TYPE_FACE_INFO:
+      case VAR_TYPE_FACE_COLLECTION:
       case VAR_TYPE_FONT:
-      case VAR_TYPE_FONT_INFO:
-      case VAR_TYPE_FONT_COLLECTION:
         goto _SetImplicit;
         
       // TODO: Var::getType() - Support other types as well.
@@ -1455,9 +1455,9 @@ _SetImplicit:
     case VAR_TYPE_IMAGE_FILTER:
       goto _SetImplicit;
 
+    case VAR_TYPE_FACE_INFO:
+    case VAR_TYPE_FACE_COLLECTION:
     case VAR_TYPE_FONT:
-    case VAR_TYPE_FONT_INFO:
-    case VAR_TYPE_FONT_COLLECTION:
       goto _SetImplicit;
 
     // TODO: Var::setType() - Support other types as well.
@@ -1809,14 +1809,14 @@ static bool FOG_CDECL Var_eq(const Var* a, const Var* b)
       case VAR_TYPE_IMAGE_FILTER:
         return *reinterpret_cast<const ImageFilter*>(a) == *reinterpret_cast<const ImageFilter*>(b);
 
+      case VAR_TYPE_FACE_INFO:
+        return *reinterpret_cast<const FaceInfo*>(a) == *reinterpret_cast<const FaceInfo*>(b);
+
+      case VAR_TYPE_FACE_COLLECTION:
+        return *reinterpret_cast<const FaceCollection*>(a) == *reinterpret_cast<const FaceCollection*>(b);
+
       case VAR_TYPE_FONT:
         return *reinterpret_cast<const Font*>(a) == *reinterpret_cast<const Font*>(b);
-
-      case VAR_TYPE_FONT_INFO:
-        return *reinterpret_cast<const FontInfo*>(a) == *reinterpret_cast<const FontInfo*>(b);
-
-      case VAR_TYPE_FONT_COLLECTION:
-        return *reinterpret_cast<const FontCollection*>(a) == *reinterpret_cast<const FontCollection*>(b);
 
       default:
         FOG_ASSERT_NOT_REACHED();
@@ -2187,16 +2187,16 @@ static void FOG_CDECL Var_dRelease(VarData* d)
       reinterpret_cast<ImageFilterData*>(d)->release();
       return;
 
+    case VAR_TYPE_FACE_INFO:
+      reinterpret_cast<FaceInfoData*>(d)->release();
+      return;
+
+    case VAR_TYPE_FACE_COLLECTION:
+      reinterpret_cast<FaceCollectionData*>(d)->release();
+      return;
+
     case VAR_TYPE_FONT:
       reinterpret_cast<FontData*>(d)->release();
-      return;
-
-    case VAR_TYPE_FONT_INFO:
-      reinterpret_cast<FontInfoData*>(d)->release();
-      return;
-
-    case VAR_TYPE_FONT_COLLECTION:
-      reinterpret_cast<FontInfoData*>(d)->release();
       return;
 
     default:

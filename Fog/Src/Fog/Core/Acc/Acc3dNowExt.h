@@ -4,14 +4,14 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACE3DNOWEXT_H
-#define _FOG_CORE_FACE_FACE3DNOWEXT_H
+#ifndef _FOG_CORE_ACC_ACC3DNOWEXT_H
+#define _FOG_CORE_ACC_ACC3DNOWEXT_H
 
 // [Dependencies]
-#include <Fog/Core/Face/Face3dNow.h>
+#include <Fog/Core/Acc/Acc3dNow.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
@@ -19,11 +19,11 @@ namespace Face {
 # pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
-//! @addtogroup Fog_Face_3dNow
+//! @addtogroup Fog_Acc_3dNow
 //! @{
 
 // ============================================================================
-// [Fog::Face - 3dNow - Convert]
+// [Fog::Acc - 3dNow - Convert]
 // ============================================================================
 
 static FOG_INLINE void m64fFromM64I16(__m64& dst, const __m64& a)
@@ -37,7 +37,7 @@ static FOG_INLINE void m64fToM64I16(__m64& dst, const __m64& a)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Sub]
+// [Fog::Acc - 3dNow - Sub]
 // ============================================================================
 
 //! @brief Horizontal Subtraction (3dNow Negative Accumulation).
@@ -52,7 +52,7 @@ static FOG_INLINE void m64fHSub(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - AddSub]
+// [Fog::Acc - 3dNow - AddSub]
 // ============================================================================
 
 //! @brief Horizontal Addition and Subtraction (3dNow Positive/Negative Accumulation).
@@ -73,8 +73,8 @@ static FOG_INLINE void m64fHAddSub(__m64& dst, const __m64& a, const __m64& b)
 # pragma warning(pop)
 #endif // FOG_CC_MSC
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACE3DNOWEXT_H
+#endif // _FOG_CORE_ACC_ACC3DNOWEXT_H

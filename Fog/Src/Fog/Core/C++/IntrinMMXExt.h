@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinMMX.h>
+#include <Fog/Core/C++/IntrinMmx.h>
 
 // ============================================================================
 // [MMX-Extended]

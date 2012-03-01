@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Acc/AccSse2.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Face/FaceSSE2.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
@@ -74,7 +74,7 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
         if ((j -= 4) >= 0)
         {
           __m128i xmmAcc1;
-          Face::m128iZero(xmmAcc1);
+          Acc::m128iZero(xmmAcc1);
 
           do {
             __m128i xmmPixel0;
@@ -83,26 +83,26 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixel0, sp + 0);
-            Face::m128iLoad8(xmmPixel1, sp + 8);
+            Acc::m128iLoad8(xmmPixel0, sp + 0);
+            Acc::m128iLoad8(xmmPixel1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad8(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad8(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
 
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
 
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
-            Face::m128iAddPI16(xmmAcc1, xmmAcc1, xmmPixel1);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iAddPI16(xmmAcc1, xmmAcc1, xmmPixel1);
 
             sp += 16;
             wp += 4;
@@ -111,12 +111,12 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
           __m128i xmmTmp0;
           __m128i xmmTmp1;
 
-          Face::m128iShufflePI32<1, 0, 3, 2>(xmmTmp0, xmmAcc0);
-          Face::m128iShufflePI32<1, 0, 3, 2>(xmmTmp1, xmmAcc1);
+          Acc::m128iShufflePI32<1, 0, 3, 2>(xmmTmp0, xmmAcc0);
+          Acc::m128iShufflePI32<1, 0, 3, 2>(xmmTmp1, xmmAcc1);
 
-          Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmTmp0);
-          Face::m128iAddPI16(xmmAcc1, xmmAcc1, xmmTmp1);
-          Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmAcc1);
+          Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmTmp0);
+          Acc::m128iAddPI16(xmmAcc1, xmmAcc1, xmmTmp1);
+          Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmAcc1);
         }
 
         switch (j + 4)
@@ -129,26 +129,26 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixel0, sp + 0);
-            Face::m128iLoad4(xmmPixel1, sp + 8);
+            Acc::m128iLoad8(xmmPixel0, sp + 0);
+            Acc::m128iLoad4(xmmPixel1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad4(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad4(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
 
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
-            Face::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel1);
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel1);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
             break;
           }
 
@@ -157,18 +157,18 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmPixel0;
             __m128i xmmWeight0;
 
-            Face::m128iLoad8(xmmPixel0, sp + 0);
-            Face::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad8(xmmPixel0, sp + 0);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
 
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
-            Face::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
             break;
           }
 
@@ -177,14 +177,14 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmPixel0;
             __m128i xmmWeight0;
 
-            Face::m128iLoad4(xmmWeight0, wp);
-            Face::m128iLoad4(xmmPixel0, sp);
+            Acc::m128iLoad4(xmmWeight0, wp);
+            Acc::m128iLoad4(xmmPixel0, sp);
 
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
-            Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
             break;
           }
 
@@ -195,9 +195,9 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             FOG_ASSERT_NOT_REACHED();
         }
 
-        Face::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
-        Face::m128iStore4(tp, xmmAcc0);
+        Acc::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
+        Acc::m128iStore4(tp, xmmAcc0);
 
         recordList += 1;
         weightList += kernelSize;
@@ -238,43 +238,43 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixelLo0, sp + 0);
-            Face::m128iLoad8(xmmPixelLo1, sp + 8);
+            Acc::m128iLoad8(xmmPixelLo0, sp + 0);
+            Acc::m128iLoad8(xmmPixelLo1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad8(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad8(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
 
-            Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-            Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+            Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+            Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
 
-            Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
 
-            Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
+            Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
 
-            Face::m128iCopy(xmmWeight0, xmmPixelLo0);
-            Face::m128iCopy(xmmWeight1, xmmPixelLo1);
+            Acc::m128iCopy(xmmWeight0, xmmPixelLo0);
+            Acc::m128iCopy(xmmWeight1, xmmPixelLo1);
 
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
 
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
-            Face::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight1, xmmWeight1, xmmPixelHi1);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
+            Acc::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight1, xmmWeight1, xmmPixelHi1);
 
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
-            Face::m128iAddPI32(xmmWeight0, xmmWeight0, xmmWeight1);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+            Acc::m128iAddPI32(xmmWeight0, xmmWeight0, xmmWeight1);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
 
             sp += 16;
             wp += 4;
@@ -292,38 +292,38 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixelLo0, sp + 0);
-            Face::m128iLoad4(xmmPixelLo1, sp + 8);
+            Acc::m128iLoad8(xmmPixelLo0, sp + 0);
+            Acc::m128iLoad4(xmmPixelLo1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad4(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad4(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
 
-            Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-            Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+            Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+            Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
 
-            Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
+            Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
 
-            Face::m128iCopy(xmmWeight0, xmmPixelLo0);
+            Acc::m128iCopy(xmmWeight0, xmmPixelLo0);
 
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
 
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
-            Face::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
+            Acc::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
             break;
           }
 
@@ -333,23 +333,23 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmPixelHi;
             __m128i xmmWeight0;
 
-            Face::m128iLoad8(xmmPixelLo, sp);
-            Face::m128iLoad8(xmmWeight0, wp);
+            Acc::m128iLoad8(xmmPixelLo, sp);
+            Acc::m128iLoad8(xmmWeight0, wp);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iCopy(xmmPixelHi, xmmPixelLo);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iCopy(xmmPixelHi, xmmPixelLo);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
 
-            Face::m128iCopy(xmmWeight0, xmmPixelLo);
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi);
+            Acc::m128iCopy(xmmWeight0, xmmPixelLo);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi);
 
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
             break;
           }
 
@@ -359,18 +359,18 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
             __m128i xmmPixelHi;
             __m128i xmmWeight0;
 
-            Face::m128iLoad4(xmmPixelLo, sp);
-            Face::m128iLoad4(xmmWeight0, wp);
+            Acc::m128iLoad4(xmmPixelLo, sp);
+            Acc::m128iLoad4(xmmWeight0, wp);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iCopy(xmmPixelHi, xmmPixelLo);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iCopy(xmmPixelHi, xmmPixelLo);
 
-            Face::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
 
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
             break;
           }
 
@@ -384,13 +384,13 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32_SSE2(ImageResizeCon
         {
           __m128i xmmTmp0 = _mm_setzero_si128();
 
-          Face::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
-          Face::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0);
-          Face::m128iMaxPI16(xmmAcc0, xmmAcc0, xmmTmp0);
-          Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmTmp0, xmmAcc0);
-          Face::m128iMinPI16(xmmAcc0, xmmAcc0, xmmTmp0);
-          Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
-          Face::m128iStore4(tp, xmmAcc0);
+          Acc::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
+          Acc::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0);
+          Acc::m128iMaxPI16(xmmAcc0, xmmAcc0, xmmTmp0);
+          Acc::m128iShufflePI16Lo<3, 3, 3, 3>(xmmTmp0, xmmAcc0);
+          Acc::m128iMinPI16(xmmAcc0, xmmAcc0, xmmTmp0);
+          Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
+          Acc::m128iStore4(tp, xmmAcc0);
         }
 
         recordList += 1;
@@ -444,7 +444,7 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
         if ((j -= 4) >= 0)
         {
           __m128i xmmAcc1;
-          Face::m128iZero(xmmAcc1);
+          Acc::m128iZero(xmmAcc1);
 
           do {
             __m128i xmmPixel0;
@@ -453,26 +453,26 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixel0, sp + 0);
-            Face::m128iLoad8(xmmPixel1, sp + 8);
+            Acc::m128iLoad8(xmmPixel0, sp + 0);
+            Acc::m128iLoad8(xmmPixel1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad8(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad8(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
 
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
 
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
-            Face::m128iAddusPU16(xmmAcc1, xmmAcc1, xmmPixel1);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iAddusPU16(xmmAcc1, xmmAcc1, xmmPixel1);
 
             sp += 16;
             wp += 4;
@@ -481,12 +481,12 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
           __m128i xmmTmp0;
           __m128i xmmTmp1;
 
-          Face::m128iShufflePI32<1, 0, 3, 2>(xmmTmp0, xmmAcc0);
-          Face::m128iShufflePI32<1, 0, 3, 2>(xmmTmp1, xmmAcc1);
+          Acc::m128iShufflePI32<1, 0, 3, 2>(xmmTmp0, xmmAcc0);
+          Acc::m128iShufflePI32<1, 0, 3, 2>(xmmTmp1, xmmAcc1);
 
-          Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmTmp0);
-          Face::m128iAddusPU16(xmmAcc1, xmmAcc1, xmmTmp1);
-          Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmAcc1);
+          Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmTmp0);
+          Acc::m128iAddusPU16(xmmAcc1, xmmAcc1, xmmTmp1);
+          Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmAcc1);
         }
 
         switch (j + 4)
@@ -499,26 +499,26 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixel0, sp + 0);
-            Face::m128iLoad4(xmmPixel1, sp + 8);
+            Acc::m128iLoad8(xmmPixel0, sp + 0);
+            Acc::m128iLoad4(xmmPixel1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad4(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad4(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight1);
 
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
-            Face::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel1);
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel1);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
             break;
           }
 
@@ -527,18 +527,18 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmPixel0;
             __m128i xmmWeight0;
 
-            Face::m128iLoad8(xmmPixel0, sp + 0);
-            Face::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad8(xmmPixel0, sp + 0);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
 
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
-            Face::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iShufflePI32<1, 0, 3, 2>(xmmPixel0, xmmPixel0);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
             break;
           }
 
@@ -547,14 +547,14 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmPixel0;
             __m128i xmmWeight0;
 
-            Face::m128iLoad4(xmmWeight0, wp);
-            Face::m128iLoad4(xmmPixel0, sp);
+            Acc::m128iLoad4(xmmWeight0, wp);
+            Acc::m128iLoad4(xmmPixel0, sp);
 
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
 
-            Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
-            Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+            Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight0);
+            Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
             break;
           }
 
@@ -565,9 +565,9 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             FOG_ASSERT_NOT_REACHED();
         }
 
-        Face::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
-        Face::m128iStore4(tp, xmmAcc0);
+        Acc::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
+        Acc::m128iStore4(tp, xmmAcc0);
 
         recordList += 1;
         weightList += kernelSize;
@@ -608,43 +608,43 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixelLo0, sp + 0);
-            Face::m128iLoad8(xmmPixelLo1, sp + 8);
+            Acc::m128iLoad8(xmmPixelLo0, sp + 0);
+            Acc::m128iLoad8(xmmPixelLo1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad8(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad8(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight1, xmmWeight1);
 
-            Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-            Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+            Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+            Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight1, xmmWeight1);
 
-            Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
 
-            Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
+            Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
 
-            Face::m128iCopy(xmmWeight0, xmmPixelLo0);
-            Face::m128iCopy(xmmWeight1, xmmPixelLo1);
+            Acc::m128iCopy(xmmWeight0, xmmPixelLo0);
+            Acc::m128iCopy(xmmWeight1, xmmPixelLo1);
 
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
 
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
-            Face::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight1, xmmWeight1, xmmPixelHi1);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
+            Acc::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight1, xmmWeight1, xmmPixelHi1);
 
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
-            Face::m128iAddPI32(xmmWeight0, xmmWeight0, xmmWeight1);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+            Acc::m128iAddPI32(xmmWeight0, xmmWeight0, xmmWeight1);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
 
             sp += 16;
             wp += 4;
@@ -662,38 +662,38 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmWeight0;
             __m128i xmmWeight1;
 
-            Face::m128iLoad8(xmmPixelLo0, sp + 0);
-            Face::m128iLoad4(xmmPixelLo1, sp + 8);
+            Acc::m128iLoad8(xmmPixelLo0, sp + 0);
+            Acc::m128iLoad4(xmmPixelLo1, sp + 8);
 
-            Face::m128iLoad8(xmmWeight0, wp + 0);
-            Face::m128iLoad4(xmmWeight1, wp + 2);
+            Acc::m128iLoad8(xmmWeight0, wp + 0);
+            Acc::m128iLoad4(xmmWeight1, wp + 2);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight1, xmmWeight1);
 
-            Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-            Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+            Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+            Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
-            Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
+            Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight1);
 
-            Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
+            Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight1);
 
-            Face::m128iCopy(xmmWeight0, xmmPixelLo0);
+            Acc::m128iCopy(xmmWeight0, xmmPixelLo0);
 
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
 
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
-            Face::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi0);
+            Acc::m128iAddPI32(xmmPixelLo0, xmmPixelLo0, xmmPixelLo1);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
             break;
           }
 
@@ -703,23 +703,23 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmPixelHi;
             __m128i xmmWeight0;
 
-            Face::m128iLoad8(xmmPixelLo, sp);
-            Face::m128iLoad8(xmmWeight0, wp);
+            Acc::m128iLoad8(xmmPixelLo, sp);
+            Acc::m128iLoad8(xmmWeight0, wp);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
-            Face::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iCopy(xmmPixelHi, xmmPixelLo);
-            Face::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
+            Acc::m128iShufflePI16Lo<2, 2, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iCopy(xmmPixelHi, xmmPixelLo);
+            Acc::m128iShufflePI32<0, 0, 1, 1>(xmmWeight0, xmmWeight0);
 
-            Face::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
 
-            Face::m128iCopy(xmmWeight0, xmmPixelLo);
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
-            Face::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi);
+            Acc::m128iCopy(xmmWeight0, xmmPixelLo);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
+            Acc::m128iUnpackPI32FromPI16Hi(xmmWeight0, xmmWeight0, xmmPixelHi);
 
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmWeight0);
             break;
           }
 
@@ -729,18 +729,18 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             __m128i xmmPixelHi;
             __m128i xmmWeight0;
 
-            Face::m128iLoad4(xmmPixelLo, sp);
-            Face::m128iLoad4(xmmWeight0, wp);
+            Acc::m128iLoad4(xmmPixelLo, sp);
+            Acc::m128iLoad4(xmmWeight0, wp);
 
-            Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
-            Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
-            Face::m128iCopy(xmmPixelHi, xmmPixelLo);
+            Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo, xmmPixelLo);
+            Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight0, xmmWeight0);
+            Acc::m128iCopy(xmmPixelHi, xmmPixelLo);
 
-            Face::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
-            Face::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
+            Acc::m128iMulLoPI16(xmmPixelLo, xmmPixelLo, xmmWeight0);
+            Acc::m128iMulHiPI16(xmmPixelHi, xmmPixelHi, xmmWeight0);
 
-            Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
-            Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
+            Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo, xmmPixelLo, xmmPixelHi);
+            Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo);
             break;
           }
 
@@ -751,11 +751,11 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32_SSE2(ImageResizeCon
             FOG_ASSERT_NOT_REACHED();
         }
 
-        Face::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
-        Face::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0);
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
-        Face::m128iOr(xmmAcc0, xmmAcc0, FOG_XMM_GET_CONST_PI(0000000000000000_00000000FF000000));
-        Face::m128iStore4(tp, xmmAcc0);
+        Acc::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
+        Acc::m128iOr(xmmAcc0, xmmAcc0, FOG_XMM_GET_CONST_PI(0000000000000000_00000000FF000000));
+        Acc::m128iStore4(tp, xmmAcc0);
 
         recordList += 1;
         weightList += kernelSize;
@@ -826,7 +826,7 @@ _BoundSmall:
           tp += tStride;
         }
 
-        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_FACE_COMBINE_2(ca_cg & 0xFF00FF00, (cr_cb & 0xFF00FF00) >> 8);
+        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_ACC_COMBINE_2(ca_cg & 0xFF00FF00, (cr_cb & 0xFF00FF00) >> 8);
 
         dp += 4;
         tData += 4;
@@ -849,49 +849,49 @@ _BoundLarge:
           __m128i xmmPixel1;
 
           __m128i xmmWeight;
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixel0, tp + 0);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixel0, tp + 0);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iLoad8(xmmPixel1, tp + 8);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixel1, tp + 8);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
 
-          Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
-          Face::m128iAddPI16(xmmAcc1, xmmAcc1, xmmPixel1);
+          Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+          Acc::m128iAddPI16(xmmAcc1, xmmAcc1, xmmPixel1);
 
-          Face::m128iLoad8(xmmPixel0, tp + 16);
-          Face::m128iLoad8(xmmPixel1, tp + 24);
+          Acc::m128iLoad8(xmmPixel0, tp + 16);
+          Acc::m128iLoad8(xmmPixel1, tp + 24);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
 
-          Face::m128iAddPI16(xmmAcc2, xmmAcc2, xmmPixel0);
-          Face::m128iAddPI16(xmmAcc3, xmmAcc3, xmmPixel1);
+          Acc::m128iAddPI16(xmmAcc2, xmmAcc2, xmmPixel0);
+          Acc::m128iAddPI16(xmmAcc3, xmmAcc3, xmmPixel1);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPU16<8>(xmmAcc1, xmmAcc1);
-        Face::m128iRShiftPU16<8>(xmmAcc2, xmmAcc2);
-        Face::m128iRShiftPU16<8>(xmmAcc3, xmmAcc3);
+        Acc::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPU16<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPU16<8>(xmmAcc2, xmmAcc2);
+        Acc::m128iRShiftPU16<8>(xmmAcc3, xmmAcc3);
 
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPU8FromPU16(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPU8FromPU16(xmmAcc2, xmmAcc2, xmmAcc3);
 
-        Face::m128iStore16a(dp +  0, xmmAcc0);
-        Face::m128iStore16a(dp + 16, xmmAcc2);
+        Acc::m128iStore16a(dp +  0, xmmAcc0);
+        Acc::m128iStore16a(dp + 16, xmmAcc2);
 
         dp += 32;
         tData += 32;
@@ -982,60 +982,60 @@ _UnboundLarge:
 
           __m128i xmmWeight;
 
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixelLo0, tp + 0);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo0, tp + 0);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iLoad8(xmmPixelLo1, tp + 8);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo1, tp + 8);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-          Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-          Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+          Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+          Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-          Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight);
 
-          Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
-          Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo0);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo0);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
 
-          Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
-          Face::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+          Acc::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo1);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi1);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo1);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi1);
 
-          Face::m128iAddPI32(xmmAcc2, xmmAcc2, xmmPixelLo1);
-          Face::m128iAddPI32(xmmAcc3, xmmAcc3, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc2, xmmAcc2, xmmPixelLo1);
+          Acc::m128iAddPI32(xmmAcc3, xmmAcc3, xmmWeight);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
-        Face::m128iRShiftPI32<8>(xmmAcc2, xmmAcc2);
-        Face::m128iRShiftPI32<8>(xmmAcc3, xmmAcc3);
+        Acc::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPI32<8>(xmmAcc2, xmmAcc2);
+        Acc::m128iRShiftPI32<8>(xmmAcc3, xmmAcc3);
           
-        Face::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPI16FromPI32(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPI16FromPI32(xmmAcc2, xmmAcc2, xmmAcc3);
 
-        Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc1, xmmAcc0);
-        Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc3, xmmAcc2);
+        Acc::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc1, xmmAcc0);
+        Acc::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc3, xmmAcc2);
           
-        Face::m128iMinPI16(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iMinPI16(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iMinPI16(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iMinPI16(xmmAcc2, xmmAcc2, xmmAcc3);
           
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc2);
-        Face::m128iStore16a(dp, xmmAcc0);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc2);
+        Acc::m128iStore16a(dp, xmmAcc0);
 
         dp += 16;
         tData += 16;
@@ -1112,7 +1112,7 @@ _BoundSmall:
           tp += tStride;
         }
 
-        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_FACE_COMBINE_2(0xFF000000, ((cx_cg & 0x00FF0000) | (cr_cb & 0xFF00FF00)) >> 8);
+        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_ACC_COMBINE_2(0xFF000000, ((cx_cg & 0x00FF0000) | (cr_cb & 0xFF00FF00)) >> 8);
 
         dp += 4;
         tData += 4;
@@ -1135,49 +1135,49 @@ _BoundLarge:
           __m128i xmmPixel1;
 
           __m128i xmmWeight;
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixel0, tp + 0);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixel0, tp + 0);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iLoad8(xmmPixel1, tp + 8);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixel1, tp + 8);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
 
-          Face::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
-          Face::m128iAddusPU16(xmmAcc1, xmmAcc1, xmmPixel1);
+          Acc::m128iAddusPU16(xmmAcc0, xmmAcc0, xmmPixel0);
+          Acc::m128iAddusPU16(xmmAcc1, xmmAcc1, xmmPixel1);
 
-          Face::m128iLoad8(xmmPixel0, tp + 16);
-          Face::m128iLoad8(xmmPixel1, tp + 24);
+          Acc::m128iLoad8(xmmPixel0, tp + 16);
+          Acc::m128iLoad8(xmmPixel1, tp + 24);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
 
-          Face::m128iAddusPU16(xmmAcc2, xmmAcc2, xmmPixel0);
-          Face::m128iAddusPU16(xmmAcc3, xmmAcc3, xmmPixel1);
+          Acc::m128iAddusPU16(xmmAcc2, xmmAcc2, xmmPixel0);
+          Acc::m128iAddusPU16(xmmAcc3, xmmAcc3, xmmPixel1);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPU16<8>(xmmAcc1, xmmAcc1);
-        Face::m128iRShiftPU16<8>(xmmAcc2, xmmAcc2);
-        Face::m128iRShiftPU16<8>(xmmAcc3, xmmAcc3);
+        Acc::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPU16<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPU16<8>(xmmAcc2, xmmAcc2);
+        Acc::m128iRShiftPU16<8>(xmmAcc3, xmmAcc3);
 
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPU8FromPU16(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPU8FromPU16(xmmAcc2, xmmAcc2, xmmAcc3);
 
-        Face::m128iStore16a(dp +  0, xmmAcc0);
-        Face::m128iStore16a(dp + 16, xmmAcc2);
+        Acc::m128iStore16a(dp +  0, xmmAcc0);
+        Acc::m128iStore16a(dp + 16, xmmAcc2);
 
         dp += 32;
         tData += 32;
@@ -1265,61 +1265,61 @@ _UnboundLarge:
 
           __m128i xmmWeight;
 
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixelLo0, tp + 0);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo0, tp + 0);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iLoad8(xmmPixelLo1, tp + 8);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo1, tp + 8);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-          Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-          Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+          Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+          Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-          Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight);
 
-          Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
-          Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo0);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo0);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
 
-          Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
-          Face::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+          Acc::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo1);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi1);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo1);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi1);
 
-          Face::m128iAddPI32(xmmAcc2, xmmAcc2, xmmPixelLo1);
-          Face::m128iAddPI32(xmmAcc3, xmmAcc3, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc2, xmmAcc2, xmmPixelLo1);
+          Acc::m128iAddPI32(xmmAcc3, xmmAcc3, xmmWeight);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
-        Face::m128iRShiftPI32<8>(xmmAcc2, xmmAcc2);
-        Face::m128iRShiftPI32<8>(xmmAcc3, xmmAcc3);
+        Acc::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPI32<8>(xmmAcc2, xmmAcc2);
+        Acc::m128iRShiftPI32<8>(xmmAcc3, xmmAcc3);
           
-        Face::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPI16FromPI32(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPI16FromPI32(xmmAcc2, xmmAcc2, xmmAcc3);
 
-        Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc1, xmmAcc0);
-        Face::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc3, xmmAcc2);
+        Acc::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc1, xmmAcc0);
+        Acc::m128iShufflePI16Lo<3, 3, 3, 3>(xmmAcc3, xmmAcc2);
           
-        Face::m128iMinPI16(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iMinPI16(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iMinPI16(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iMinPI16(xmmAcc2, xmmAcc2, xmmAcc3);
           
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc2);
-        Face::m128iOr(xmmAcc0, xmmAcc0, FOG_XMM_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
-        Face::m128iStore16a(dp, xmmAcc0);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc2);
+        Acc::m128iOr(xmmAcc0, xmmAcc0, FOG_XMM_GET_CONST_PI(FF000000FF000000_FF000000FF000000));
+        Acc::m128iStore16a(dp, xmmAcc0);
 
         dp += 16;
         tData += 16;
@@ -1417,49 +1417,49 @@ _BoundLarge:
           __m128i xmmPixel1;
 
           __m128i xmmWeight;
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixel0, tp + 0);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixel0, tp + 0);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iLoad8(xmmPixel1, tp + 8);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixel1, tp + 8);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
 
-          Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
-          Face::m128iAddPI16(xmmAcc1, xmmAcc1, xmmPixel1);
+          Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+          Acc::m128iAddPI16(xmmAcc1, xmmAcc1, xmmPixel1);
 
-          Face::m128iLoad8(xmmPixel0, tp + 16);
-          Face::m128iLoad8(xmmPixel1, tp + 24);
+          Acc::m128iLoad8(xmmPixel0, tp + 16);
+          Acc::m128iLoad8(xmmPixel1, tp + 24);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel1, xmmPixel1);
 
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixel1, xmmPixel1, xmmWeight);
 
-          Face::m128iAddPI16(xmmAcc2, xmmAcc2, xmmPixel0);
-          Face::m128iAddPI16(xmmAcc3, xmmAcc3, xmmPixel1);
+          Acc::m128iAddPI16(xmmAcc2, xmmAcc2, xmmPixel0);
+          Acc::m128iAddPI16(xmmAcc3, xmmAcc3, xmmPixel1);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPU16<8>(xmmAcc1, xmmAcc1);
-        Face::m128iRShiftPU16<8>(xmmAcc2, xmmAcc2);
-        Face::m128iRShiftPU16<8>(xmmAcc3, xmmAcc3);
+        Acc::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPU16<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPU16<8>(xmmAcc2, xmmAcc2);
+        Acc::m128iRShiftPU16<8>(xmmAcc3, xmmAcc3);
 
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPU8FromPU16(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPU8FromPU16(xmmAcc2, xmmAcc2, xmmAcc3);
 
-        Face::m128iStore16a(dp +  0, xmmAcc0);
-        Face::m128iStore16a(dp + 16, xmmAcc2);
+        Acc::m128iStore16a(dp +  0, xmmAcc0);
+        Acc::m128iStore16a(dp + 16, xmmAcc2);
 
         dp += 32;
         tData += 32;
@@ -1479,23 +1479,23 @@ _BoundLarge:
           __m128i xmmPixel0;
           __m128i xmmWeight;
 
-          Face::m128iLoad4(xmmWeight, wp);
-          Face::m128iLoad8(xmmPixel0, tp);
+          Acc::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad8(xmmPixel0, tp);
 
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
-          Face::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
-          Face::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixel0, xmmPixel0);
+          Acc::m128iMulLoPI16(xmmPixel0, xmmPixel0, xmmWeight);
+          Acc::m128iAddPI16(xmmAcc0, xmmAcc0, xmmPixel0);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
-        Face::m128iStore8(dp, xmmAcc0);
+        Acc::m128iRShiftPU16<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
+        Acc::m128iStore8(dp, xmmAcc0);
 
         dp += 8;
         tData += 8;
@@ -1576,53 +1576,53 @@ _UnboundLarge:
 
           __m128i xmmWeight;
 
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixelLo0, tp + 0);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo0, tp + 0);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iLoad8(xmmPixelLo1, tp + 8);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo1, tp + 8);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo1, xmmPixelLo1);
 
-          Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
-          Face::m128iCopy(xmmPixelHi1, xmmPixelLo1);
+          Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+          Acc::m128iCopy(xmmPixelHi1, xmmPixelLo1);
 
-          Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
-          Face::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo1, xmmPixelLo1, xmmWeight);
 
-          Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
-          Face::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi1, xmmPixelHi1, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo0);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo0);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
 
-          Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
-          Face::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+          Acc::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo1);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi1);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo1);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo1, xmmPixelLo1, xmmPixelHi1);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi1);
 
-          Face::m128iAddPI32(xmmAcc2, xmmAcc2, xmmPixelLo1);
-          Face::m128iAddPI32(xmmAcc3, xmmAcc3, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc2, xmmAcc2, xmmPixelLo1);
+          Acc::m128iAddPI32(xmmAcc3, xmmAcc3, xmmWeight);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
-        Face::m128iRShiftPI32<8>(xmmAcc2, xmmAcc2);
-        Face::m128iRShiftPI32<8>(xmmAcc3, xmmAcc3);
+        Acc::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPI32<8>(xmmAcc2, xmmAcc2);
+        Acc::m128iRShiftPI32<8>(xmmAcc3, xmmAcc3);
 
-        Face::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPI16FromPI32(xmmAcc2, xmmAcc2, xmmAcc3);
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc2);
-        Face::m128iStore16a(dp, xmmAcc0);
+        Acc::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPI16FromPI32(xmmAcc2, xmmAcc2, xmmAcc3);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0, xmmAcc2);
+        Acc::m128iStore16a(dp, xmmAcc0);
 
         dp += 16;
         tData += 16;
@@ -1645,35 +1645,35 @@ _UnboundLarge:
 
           __m128i xmmWeight;
 
-          Face::m128iLoad4(xmmWeight, wp);
+          Acc::m128iLoad4(xmmWeight, wp);
 
-          Face::m128iLoad8(xmmPixelLo0, tp);
-          Face::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iLoad8(xmmPixelLo0, tp);
+          Acc::m128iShufflePI16Lo<0, 0, 0, 0>(xmmWeight, xmmWeight);
 
-          Face::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
-          Face::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
-          Face::m128iCopy(xmmPixelHi0, xmmPixelLo0);
+          Acc::m128iUnpackPI16FromPI8Lo(xmmPixelLo0, xmmPixelLo0);
+          Acc::m128iShufflePI32<0, 0, 0, 0>(xmmWeight, xmmWeight);
+          Acc::m128iCopy(xmmPixelHi0, xmmPixelLo0);
 
-          Face::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
-          Face::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
+          Acc::m128iMulLoPI16(xmmPixelLo0, xmmPixelLo0, xmmWeight);
+          Acc::m128iMulHiPI16(xmmPixelHi0, xmmPixelHi0, xmmWeight);
 
-          Face::m128iCopy(xmmWeight, xmmPixelLo0);
-          Face::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
-          Face::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
+          Acc::m128iCopy(xmmWeight, xmmPixelLo0);
+          Acc::m128iUnpackPI32FromPI16Lo(xmmPixelLo0, xmmPixelLo0, xmmPixelHi0);
+          Acc::m128iUnpackPI32FromPI16Hi(xmmWeight, xmmWeight, xmmPixelHi0);
 
-          Face::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
-          Face::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
+          Acc::m128iAddPI32(xmmAcc0, xmmAcc0, xmmPixelLo0);
+          Acc::m128iAddPI32(xmmAcc1, xmmAcc1, xmmWeight);
 
           tp += tStride;
           wp += 1;
         }
 
-        Face::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
-        Face::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
+        Acc::m128iRShiftPI32<8>(xmmAcc0, xmmAcc0);
+        Acc::m128iRShiftPI32<8>(xmmAcc1, xmmAcc1);
 
-        Face::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
-        Face::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
-        Face::m128iStore8(dp, xmmAcc0);
+        Acc::m128iPackPI16FromPI32(xmmAcc0, xmmAcc0, xmmAcc1);
+        Acc::m128iPackPU8FromPU16(xmmAcc0, xmmAcc0);
+        Acc::m128iStore8(dp, xmmAcc0);
 
         dp += 8;
         tData += 8;

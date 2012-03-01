@@ -9,10 +9,10 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
-#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Kernel/Application.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
@@ -25,7 +25,7 @@
 #include <Fog/Core/Tools/Logger.h>
 #include <Fog/Core/Tools/Stream.h>
 #include <Fog/Core/Tools/StringTmp_p.h>
-#include <Fog/G2d/Face/Face_Raster_C.h>
+#include <Fog/G2d/Acc/AccC.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/Imaging/ImageBits.h>
 #include <Fog/G2d/Imaging/ImageCodec.h>
@@ -703,8 +703,8 @@ static err_t FOG_CDECL Image_convertTo8BitDepth(Image* self)
           {
             uint32_t pix0p;
 
-            Face::p32Load4a(pix0p, sPtr);
-            Face::p32And(pix0p, pix0p, mask);
+            Acc::p32Load4a(pix0p, sPtr);
+            Acc::p32And(pix0p, pix0p, mask);
             dPtr[0] = reduce.traslate(pix0p);
           }
           break;
@@ -714,8 +714,8 @@ static err_t FOG_CDECL Image_convertTo8BitDepth(Image* self)
           {
             uint32_t pix0p;
 
-            Face::p32Load3b(pix0p, sPtr);
-            Face::p32And(pix0p, pix0p, mask);
+            Acc::p32Load3b(pix0p, sPtr);
+            Acc::p32And(pix0p, pix0p, mask);
             dPtr[0] = reduce.traslate(pix0p);
           }
           break;
@@ -792,11 +792,11 @@ static err_t FOG_CDECL Image_convertTo8BitDepthPalette(Image* self, const ImageP
         for (x = 0; x < w; x++, dPtr += 1, sPtr += 4)
         {
           uint32_t pix0p;
-          Face::p32Load4a(pix0p, sPtr);
+          Acc::p32Load4a(pix0p, sPtr);
 
-          dPtr[0] = palette->findRgb(Face::p32PBB2AsU32(pix0p),
-                                     Face::p32PBB1AsU32(pix0p),
-                                     Face::p32PBB0AsU32(pix0p));
+          dPtr[0] = palette->findRgb(Acc::p32PBB2AsU32(pix0p),
+                                     Acc::p32PBB1AsU32(pix0p),
+                                     Acc::p32PBB0AsU32(pix0p));
         }
       }
       break;
@@ -1040,27 +1040,27 @@ static err_t FOG_CDECL Image_fillRectArgb32(Image* self, const RectI* r, const A
     case IMAGE_PRECISION_BYTE:
     {
       uint32_t pix0 = c0->u32;
-      Face::p32PRGB32FromARGB32(solid.prgb32.u32, pix0);
+      Acc::p32PRGB32FromARGB32(solid.prgb32.u32, pix0);
 
       uint32_t opacity_8 = Math::uroundToByte256(opacity);
       if (opacity_8 == 0) return ERR_OK;
 
       spanOpacity = opacity_8 < 0x100 ? opacity_8 : 0xFFFFFFFF;
-      isPRGBPixel = Face::p32PRGB32IsAlphaFF(pix0);
+      isPRGBPixel = Acc::p32PRGB32IsAlphaFF(pix0);
       break;
     }
 
     case IMAGE_PRECISION_WORD:
     {
       __p64 pix0;
-      Face::p64ARGB64FromARGB32(solid.prgb64.p64, c0->u32);
-      Face::p64PRGB64FromARGB64(solid.prgb64.p64, pix0);
+      Acc::p64ARGB64FromARGB32(solid.prgb64.p64, c0->u32);
+      Acc::p64PRGB64FromARGB64(solid.prgb64.p64, pix0);
 
       uint32_t opacity_16 = Math::uroundToWord65536(opacity);
       if (opacity_16 == 0) return ERR_OK;
 
       spanOpacity = opacity_16 < 0x10000 ? opacity_16 : 0xFFFFFFFF;
-      isPRGBPixel = Face::p64PRGB64IsAlphaFFFF(pix0);
+      isPRGBPixel = Acc::p64PRGB64IsAlphaFFFF(pix0);
       break;
     }
 
@@ -1101,26 +1101,26 @@ static err_t FOG_CDECL Image_fillRectColor(Image* self, const RectI* r, const Co
     case IMAGE_PRECISION_BYTE:
     {
       uint32_t pix0 = c0->getArgb32();
-      Face::p32PRGB32FromARGB32(solid.prgb32.u32, pix0);
+      Acc::p32PRGB32FromARGB32(solid.prgb32.u32, pix0);
 
       uint32_t opacity_8 = Math::uroundToByte256(opacity);
       if (opacity_8 == 0) return ERR_OK;
 
       spanOpacity = opacity_8 < 0x100 ? opacity_8 : 0xFFFFFFFF;
-      isPRGBPixel = Face::p32PRGB32IsAlphaFF(pix0);
+      isPRGBPixel = Acc::p32PRGB32IsAlphaFF(pix0);
       break;
     }
 
     case IMAGE_PRECISION_WORD:
     {
-      __p64 pix0 = Face::p64FromU64(c0->getArgb64());
-      Face::p64PRGB64FromARGB64(solid.prgb64.p64, pix0);
+      __p64 pix0 = Acc::p64FromU64(c0->getArgb64());
+      Acc::p64PRGB64FromARGB64(solid.prgb64.p64, pix0);
 
       uint32_t opacity_16 = Math::uroundToWord65536(opacity);
       if (opacity_16 == 0) return ERR_OK;
 
       spanOpacity = opacity_16 < 0x10000 ? opacity_16 : 0xFFFFFFFF;
-      isPRGBPixel = Face::p64PRGB64IsAlphaFFFF(pix0);
+      isPRGBPixel = Acc::p64PRGB64IsAlphaFFFF(pix0);
       break;
     }
 
@@ -2034,10 +2034,10 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
     {
       uint32_t mask = 0;
 
-      if (channels & COLOR_CHANNEL_ALPHA) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
-      if (channels & COLOR_CHANNEL_RED  ) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
-      if (channels & COLOR_CHANNEL_GREEN) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
-      if (channels & COLOR_CHANNEL_BLUE ) Face::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_ALPHA) Acc::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_RED  ) Acc::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_GREEN) Acc::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
+      if (channels & COLOR_CHANNEL_BLUE ) Acc::p32Or(mask, mask, PIXEL_ARGB32_MASK_A);
 
       if (format != IMAGE_FORMAT_PRGB32)
       {
@@ -2047,9 +2047,9 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
           {
             uint32_t pix0p;
 
-            Face::p32Load4a(pix0p, sPixels);
-            Face::p32Xor(pix0p, pix0p, mask);
-            Face::p32Store4a(dPixels, pix0p);
+            Acc::p32Load4a(pix0p, sPixels);
+            Acc::p32Xor(pix0p, pix0p, mask);
+            Acc::p32Store4a(dPixels, pix0p);
           }
         }
 
@@ -2068,13 +2068,13 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
             uint32_t pix0p;
             uint32_t pix0a;
 
-            Face::p32Load4a(pix0p, sPixels);
-            Face::p32ExpandPBBFromPBB3(pix0a, pix0p);
-            Face::p32Sub(pix0a, pix0a, pix0p);
-            Face::p32And(pix0p, pix0p, ~mask);
-            Face::p32And(pix0a, pix0a, mask);
-            Face::p32Or(pix0p, pix0p, pix0a);
-            Face::p32Store4a(dPixels, pix0p);
+            Acc::p32Load4a(pix0p, sPixels);
+            Acc::p32ExpandPBBFromPBB3(pix0a, pix0p);
+            Acc::p32Sub(pix0a, pix0a, pix0p);
+            Acc::p32And(pix0p, pix0p, ~mask);
+            Acc::p32And(pix0a, pix0a, mask);
+            Acc::p32Or(pix0p, pix0p, pix0a);
+            Acc::p32Store4a(dPixels, pix0p);
           }
         }
       }
@@ -2087,11 +2087,11 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
           {
             uint32_t pix0p;
 
-            Face::p32Load4a(pix0p, sPixels);
-            Face::p32ARGB32FromPRGB32(pix0p, pix0p);
-            Face::p32Xor(pix0p, pix0p, mask);
-            Face::p32PRGB32FromARGB32(pix0p, pix0p);
-            Face::p32Store4a(dPixels, pix0p);
+            Acc::p32Load4a(pix0p, sPixels);
+            Acc::p32ARGB32FromPRGB32(pix0p, pix0p);
+            Acc::p32Xor(pix0p, pix0p, mask);
+            Acc::p32PRGB32FromARGB32(pix0p, pix0p);
+            Acc::p32Store4a(dPixels, pix0p);
           }
         }
       }
@@ -2139,18 +2139,18 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
     case IMAGE_FORMAT_PRGB64:
     {
       __p64 mask;
-      Face::p64Zero(mask);
+      Acc::p64Zero(mask);
 
-      if (channels & COLOR_CHANNEL_ALPHA) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_A));
-      if (channels & COLOR_CHANNEL_RED  ) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_R));
-      if (channels & COLOR_CHANNEL_GREEN) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_G));
-      if (channels & COLOR_CHANNEL_BLUE ) Face::p64Or(mask, mask, Face::p64FromU64(PIXEL_ARGB64_MASK_B));
+      if (channels & COLOR_CHANNEL_ALPHA) Acc::p64Or(mask, mask, Acc::p64FromU64(PIXEL_ARGB64_MASK_A));
+      if (channels & COLOR_CHANNEL_RED  ) Acc::p64Or(mask, mask, Acc::p64FromU64(PIXEL_ARGB64_MASK_R));
+      if (channels & COLOR_CHANNEL_GREEN) Acc::p64Or(mask, mask, Acc::p64FromU64(PIXEL_ARGB64_MASK_G));
+      if (channels & COLOR_CHANNEL_BLUE ) Acc::p64Or(mask, mask, Acc::p64FromU64(PIXEL_ARGB64_MASK_B));
 
       if ((channels & COLOR_CHANNEL_ALPHA) == 0)
       {
         // If alpha is not inverted, the fast-path formula might be used.
         __p64 maski;
-        Face::p64Neg(maski, mask);
+        Acc::p64Neg(maski, mask);
 
         for (y = 0; y < h; y++, dPixels += dStride, sPixels += sStride)
         {
@@ -2159,14 +2159,14 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
             __p64 pix0p;
             __p64 pix0a;
 
-            Face::p64Load8a(pix0p, sPixels);
-            Face::p64ExpandPWWFromPWW3(pix0p, pix0p);
+            Acc::p64Load8a(pix0p, sPixels);
+            Acc::p64ExpandPWWFromPWW3(pix0p, pix0p);
 
-            Face::p64Sub(pix0a, pix0a, pix0p);
-            Face::p64And(pix0p, pix0p, maski);
-            Face::p64And(pix0a, pix0a, mask);
-            Face::p64Or(pix0p, pix0p, pix0a);
-            Face::p64Store8a(dPixels, pix0p);
+            Acc::p64Sub(pix0a, pix0a, pix0p);
+            Acc::p64And(pix0p, pix0p, maski);
+            Acc::p64And(pix0a, pix0a, mask);
+            Acc::p64Or(pix0p, pix0p, pix0a);
+            Acc::p64Store8a(dPixels, pix0p);
           }
         }
       }
@@ -2179,11 +2179,11 @@ static err_t FOG_CDECL Image_invert(Image* dst, const Image* src, const RectI* a
           {
             __p64 pix0p;
 
-            Face::p64Load8a(pix0p, sPixels);
-            Face::p64ARGB64FromPRGB64(pix0p, pix0p);
-            Face::p64Xor(pix0p, pix0p, mask);
-            Face::p64PRGB64FromARGB64(pix0p, pix0p);
-            Face::p64Store8a(dPixels, pix0p);
+            Acc::p64Load8a(pix0p, sPixels);
+            Acc::p64ARGB64FromPRGB64(pix0p, pix0p);
+            Acc::p64Xor(pix0p, pix0p, mask);
+            Acc::p64PRGB64FromARGB64(pix0p, pix0p);
+            Acc::p64Store8a(dPixels, pix0p);
           }
         }
       }

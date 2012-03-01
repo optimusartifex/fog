@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
@@ -2579,7 +2579,7 @@ _Continue:
         cover += cell->cover;
         alpha  = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - (cell->area >> A8_SHIFT_2));
 
-        Face::p32Store2a(mask, alpha);
+        Acc::p32Store2a(mask, alpha);
         mask += 2;
 
         cell++;
@@ -2614,18 +2614,18 @@ _Continue:
           FOG_ASSERT(RASTER_SPAN_C_THRESHOLD <= 4);
 
 #if FOG_ARCH_BITS >= 64 && defined(FOG_ARCH_UNALIGNED_ACCESS_64)
-          Face::p64Store8u(mask,
+          Acc::p64Store8u(mask,
             (uint64_t)alpha * FOG_UINT64_C(0x0001000100010001));
           mask += len * 2;
 #elif FOG_ARCH_BITS >= 32 && defined(FOG_ARCH_UNALIGNED_ACCESS_32)
           alpha *= 0x00010001;
-          Face::p32Store4u(mask + 0, alpha);
-          Face::p32Store4u(mask + 4, alpha);
+          Acc::p32Store4u(mask + 0, alpha);
+          Acc::p32Store4u(mask + 4, alpha);
           mask += len * 2;
 #else
           // Unoptimized case.
           do {
-            Face::p32Store2a(mask, alpha);
+            Acc::p32Store2a(mask, alpha);
             mask += 2;
           } while (--len);
 #endif
@@ -2910,7 +2910,7 @@ _ContinueSpan:
       cover += cell->cover;
       alpha = PathRasterizer8_calculateAlpha<_RULE, _USE_ALPHA>(self, cover - (cell->area >> A8_SHIFT_2));
       
-      Face::p16Store2a(mask, static_cast<uint16_t>(alpha));
+      Acc::p16Store2a(mask, static_cast<uint16_t>(alpha));
       mask += 2;
 
       cell++;
@@ -2979,18 +2979,18 @@ _AdvanceClipAlphaNonZero:
           span->setX1(xc);
 
 #if FOG_ARCH_BITS >= 64 && defined(FOG_ARCH_UNALIGNED_ACCESS_64)
-          Face::p64Store8u(mask,
+          Acc::p64Store8u(mask,
             (uint64_t)alpha * FOG_UINT64_C(0x0001000100010001));
           mask += len * 2;
 #elif FOG_ARCH_BITS >= 32 && defined(FOG_ARCH_UNALIGNED_ACCESS_32)
           alpha *= 0x00010001;
-          Face::p32Store4u(mask + 0, alpha);
-          Face::p32Store4u(mask + 4, alpha);
+          Acc::p32Store4u(mask + 0, alpha);
+          Acc::p32Store4u(mask + 4, alpha);
           mask += len * 2;
 #else
           // Unoptimized case.
           do {
-            Face::p32Store2a(mask, alpha);
+            Acc::p32Store2a(mask, alpha);
             mask += 2;
           } while (--len);
 #endif

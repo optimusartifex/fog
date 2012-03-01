@@ -4,25 +4,25 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACESSSE3_H
-#define _FOG_CORE_FACE_FACESSSE3_H
+#ifndef _FOG_CORE_ACC_ACCSSSE3_H
+#define _FOG_CORE_ACC_ACCSSSE3_H
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinSSSE3.h>
+#include <Fog/Core/C++/IntrinSsse3.h>
 
-#include <Fog/Core/Face/FaceSSE.h>
-#include <Fog/Core/Face/FaceSSE2.h>
-#include <Fog/Core/Face/FaceSSE3.h>
+#include <Fog/Core/Acc/AccSse.h>
+#include <Fog/Core/Acc/AccSse2.h>
+#include <Fog/Core/Acc/AccSse3.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
-//! @addtogroup Fog_Face_SSSE3
+//! @addtogroup Fog_Acc_SSSE3
 //! @{
 
 // ============================================================================
-// [Fog::Face - SSSE3 - Alignr]
+// [Fog::Acc - SSSE3 - Alignr]
 // ============================================================================
 
 template<int BYTES>
@@ -33,7 +33,7 @@ static FOG_INLINE void m128iAlignrPI8(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - Shuffle]
+// [Fog::Acc - SSSE3 - Shuffle]
 // ============================================================================
 
 static FOG_INLINE void m128iShufflePI8(
@@ -43,7 +43,7 @@ static FOG_INLINE void m128iShufflePI8(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - HAdd]
+// [Fog::Acc - SSSE3 - HAdd]
 // ============================================================================
 
 static FOG_INLINE void m128iHAddPI16(
@@ -59,7 +59,7 @@ static FOG_INLINE void m128iHAddPI32(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - HAdd-Saturate]
+// [Fog::Acc - SSSE3 - HAdd-Saturate]
 // ============================================================================
 
 static FOG_INLINE void m128iHAddsPI16(
@@ -69,7 +69,7 @@ static FOG_INLINE void m128iHAddsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - HSub]
+// [Fog::Acc - SSSE3 - HSub]
 // ============================================================================
 
 static FOG_INLINE void m128iHSubPI16(
@@ -85,7 +85,7 @@ static FOG_INLINE void m128iHSubPI32(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - HSub-Saturate]
+// [Fog::Acc - SSSE3 - HSub-Saturate]
 // ============================================================================
 
 static FOG_INLINE void m128iHSubsPI16(
@@ -95,7 +95,7 @@ static FOG_INLINE void m128iHSubsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - Mul-HRS]
+// [Fog::Acc - SSSE3 - Mul-HRS]
 // ============================================================================
 
 //! @verbatim
@@ -108,7 +108,7 @@ static FOG_INLINE void m128iMulhrsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - MAdd-Saturate]
+// [Fog::Acc - SSSE3 - MAdd-Saturate]
 // ============================================================================
 
 static FOG_INLINE void m128iMAddubsPI16(
@@ -118,7 +118,7 @@ static FOG_INLINE void m128iMAddubsPI16(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - Abs]
+// [Fog::Acc - SSSE3 - Abs]
 // ============================================================================
 
 static FOG_INLINE void m128iAbsPI8(
@@ -140,7 +140,7 @@ static FOG_INLINE void m128iAbsPI32(
 }
 
 // ============================================================================
-// [Fog::Face - SSSE3 - Sign]
+// [Fog::Acc - SSSE3 - Sign]
 // ============================================================================
 
 static FOG_INLINE void m128iSignPI8(
@@ -163,13 +163,13 @@ static FOG_INLINE void m128iSignPI32(
 
 //! @}
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // MMX+SSE2 extensions require both, Face_MMX.h, and Face_SSE2.h headers.
-#if defined(_FOG_CORE_FACE_FACEMMX_H)
-# include <Fog/Core/Face/FaceMMXSSSE3.h>
-#endif // _FOG_CORE_FACE_FACEMMX_H
+#if defined(_FOG_CORE_ACC_ACCMMX_H)
+# include <Fog/Core/Acc/AccMmxSsse3.h>
+#endif // _FOG_CORE_ACC_ACCMMX_H
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACESSSE3_H
+#endif // _FOG_CORE_ACC_ACCSSSE3_H

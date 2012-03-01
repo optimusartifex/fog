@@ -4,14 +4,14 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_CONSTANTS_H
-#define _FOG_CORE_FACE_CONSTANTS_H
+#ifndef _FOG_CORE_ACC_CONSTANTS_H
+#define _FOG_CORE_ACC_CONSTANTS_H
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // ============================================================================
 // [Constants]
@@ -53,7 +53,7 @@ namespace Face {
 //!     uint32_t g = (rgba >>  8) & 0xFF;
 //!     uint32_t b = (rgba      ) & 0xFF;
 //!
-//!     uint32_t recip = Face::_u8_divide_table_d[a];
+//!     uint32_t recip = Acc::_u8_divide_table_d[a];
 //!
 //!     r = ((r * recip)      ) & 0x00FF0000;
 //!     g = ((g * recip) >>  8) & 0x0000FF00;
@@ -83,8 +83,8 @@ extern FOG_API const float _u8_divide_table_f[256];
 //! @brief Square root table with can be used to do "isqrt(x * 0xFF)".
 extern FOG_API const uint8_t _u8_sqrt_table_b[256];
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_FACE_CONSTANTS_H
+#endif // _FOG_CORE_ACC_CONSTANTS_H

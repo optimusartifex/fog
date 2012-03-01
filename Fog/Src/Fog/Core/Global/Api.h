@@ -2505,6 +2505,30 @@ struct FOG_NO_EXPORT Api
   Pattern* pattern_oNull;
 
   // --------------------------------------------------------------------------
+  // [G2d/Text - FaceInfo]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_CTOR(faceinfo_ctor)(FaceInfo* self);
+  FOG_CAPI_CTOR(faceinfo_ctorCopy)(FaceInfo* self, const FaceInfo* other);
+  FOG_CAPI_DTOR(faceinfo_dtor)(FaceInfo* self);
+
+  FOG_CAPI_METHOD(err_t, faceinfo_detach)(FaceInfo* self);
+  FOG_CAPI_METHOD(void, faceinfo_reset)(FaceInfo* self);
+
+  FOG_CAPI_METHOD(err_t, faceinfo_setFeatures)(FaceInfo* self, const FaceFeatures* defs);
+  FOG_CAPI_METHOD(err_t, faceinfo_setFamilyName)(FaceInfo* self, const StringW* familyName);
+  FOG_CAPI_METHOD(err_t, faceinfo_setFileName)(FaceInfo* self, const StringW* fileName);
+
+  FOG_CAPI_METHOD(err_t, faceinfo_copy)(FaceInfo* self, const FaceInfo* other);
+  FOG_CAPI_STATIC(bool, faceinfo_eq)(const FaceInfo* a, const FaceInfo* b);
+  FOG_CAPI_STATIC(int, faceinfo_compare)(const FaceInfo* a, const FaceInfo* b);
+
+  FOG_CAPI_STATIC(FaceInfoData*, faceinfo_dCreate)(const StringW* familyName, const StringW* fileName);
+  FOG_CAPI_STATIC(void, faceinfo_dFree)(FaceInfoData* d);
+
+  FaceInfo* faceinfo_oNull;
+
+  // --------------------------------------------------------------------------
   // [G2d/Text - Font]
   // --------------------------------------------------------------------------
 
@@ -2518,7 +2542,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(void, font_reset)(Font* self);
 
   FOG_CAPI_METHOD(err_t, font_create)(Font* self, const StringW* family, float size, const FontFeatures* features, const FontMatrix* matrix);
-  FOG_CAPI_METHOD(err_t, font_init)(Font* self, FontFace* face, float size, const FontFeatures* features, const FontMatrix* matrix);
+  FOG_CAPI_METHOD(err_t, font_init)(Font* self, Face* face, float size, const FontFeatures* features, const FontMatrix* matrix);
 
   FOG_CAPI_METHOD(err_t, font_getOutlineFromGlyphRunF)(const Font* self,
     PathF* dst, uint32_t cntOp,
@@ -2538,51 +2562,33 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(void, font_dFree)(FontData* d);
 
   // --------------------------------------------------------------------------
-  // [G2d/Text - FontCollection]
+  // [G2d/Text - FontEngine]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(fontcollection_ctor)(FontCollection* self);
-  FOG_CAPI_CTOR(fontcollection_ctorCopy)(FontCollection* self, const FontCollection* other);
-  FOG_CAPI_DTOR(fontcollection_dtor)(FontCollection* self);
-
-  FOG_CAPI_METHOD(err_t, fontcollection_detach)(FontCollection* self);
-  FOG_CAPI_METHOD(void, fontcollection_clear)(FontCollection* self);
-  FOG_CAPI_METHOD(void, fontcollection_reset)(FontCollection* self);
-
-  FOG_CAPI_METHOD(err_t, fontcollection_setList)(FontCollection* self, const List<FontInfo>* list);
-  FOG_CAPI_METHOD(err_t, fontcollection_addItem)(FontCollection* self, const FontInfo* item);
-
-  FOG_CAPI_METHOD(err_t, fontcollection_copy)(FontCollection* self, const FontCollection* other);
-  FOG_CAPI_STATIC(bool, fontcollection_eq)(const FontCollection* a, const FontCollection* b);
-
-  FOG_CAPI_STATIC(FontCollectionData*, fontcollection_dCreate)(void);
-  FOG_CAPI_STATIC(void, fontcollection_dFree)(FontCollectionData* d);
-
-  FontCollection* fontcollection_oNull;
+  FontEngine* fontengine_oGlobal;
 
   // --------------------------------------------------------------------------
-  // [G2d/Text - FontInfo]
+  // [G2d/Text - FaceCollection]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_CTOR(fontinfo_ctor)(FontInfo* self);
-  FOG_CAPI_CTOR(fontinfo_ctorCopy)(FontInfo* self, const FontInfo* other);
-  FOG_CAPI_DTOR(fontinfo_dtor)(FontInfo* self);
+  FOG_CAPI_CTOR(facecollection_ctor)(FaceCollection* self);
+  FOG_CAPI_CTOR(facecollection_ctorCopy)(FaceCollection* self, const FaceCollection* other);
+  FOG_CAPI_DTOR(facecollection_dtor)(FaceCollection* self);
 
-  FOG_CAPI_METHOD(err_t, fontinfo_detach)(FontInfo* self);
-  FOG_CAPI_METHOD(void, fontinfo_reset)(FontInfo* self);
+  FOG_CAPI_METHOD(err_t, facecollection_detach)(FaceCollection* self);
+  FOG_CAPI_METHOD(void, facecollection_clear)(FaceCollection* self);
+  FOG_CAPI_METHOD(void, facecollection_reset)(FaceCollection* self);
 
-  FOG_CAPI_METHOD(err_t, fontinfo_setDefs)(FontInfo* self, const FontDefs* defs);
-  FOG_CAPI_METHOD(err_t, fontinfo_setFamilyName)(FontInfo* self, const StringW* familyName);
-  FOG_CAPI_METHOD(err_t, fontinfo_setFileName)(FontInfo* self, const StringW* fileName);
+  FOG_CAPI_METHOD(err_t, facecollection_setList)(FaceCollection* self, const List<FaceInfo>* list);
+  FOG_CAPI_METHOD(err_t, facecollection_addItem)(FaceCollection* self, const FaceInfo* item);
 
-  FOG_CAPI_METHOD(err_t, fontinfo_copy)(FontInfo* self, const FontInfo* other);
-  FOG_CAPI_STATIC(bool, fontinfo_eq)(const FontInfo* a, const FontInfo* b);
-  FOG_CAPI_STATIC(int, fontinfo_compare)(const FontInfo* a, const FontInfo* b);
+  FOG_CAPI_METHOD(err_t, facecollection_copy)(FaceCollection* self, const FaceCollection* other);
+  FOG_CAPI_STATIC(bool, facecollection_eq)(const FaceCollection* a, const FaceCollection* b);
 
-  FOG_CAPI_STATIC(FontInfoData*, fontinfo_dCreate)(const StringW* familyName, const StringW* fileName);
-  FOG_CAPI_STATIC(void, fontinfo_dFree)(FontInfoData* d);
+  FOG_CAPI_STATIC(FaceCollectionData*, facecollection_dCreate)(void);
+  FOG_CAPI_STATIC(void, facecollection_dFree)(FaceCollectionData* d);
 
-  FontInfo* fontinfo_oNull;
+  FaceCollection* facecollection_oNull;
 
   // --------------------------------------------------------------------------
   // [G2d/Tools - Dpi]

@@ -4,23 +4,23 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_FACE_FACE_RASTER_C_H
-#define _FOG_G2D_FACE_FACE_RASTER_C_H
+#ifndef _FOG_G2D_ACC_ACCC_H
+#define _FOG_G2D_ACC_ACCC_H
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Fuzzy.h>
 #include <Fog/Core/Math/Math.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
-//! @addtogroup Fog_Face_C
+//! @addtogroup Fog_Acc_C
 //! @{
 
 // ============================================================================
-// [Fog::Face - Raster - Documentation]
+// [Fog::Acc - Raster - Documentation]
 // ============================================================================
 
 // RGB16_555:
@@ -45,7 +45,7 @@ namespace Face {
 //   [01111100] [00011111] [00000011] [11100000] -> 0x7C1F03E0
 
 // ============================================================================
-// [Fog::Face - Raster - Helpers]
+// [Fog::Acc - Raster - Helpers]
 // ============================================================================
 
 static FOG_INLINE void p32UnpackPBW256FromPBB255_2031(uint32_t& dst0_20, uint32_t& dst0_31, const uint32_t& x0)
@@ -79,7 +79,7 @@ static FOG_INLINE void p32OpOverA8(uint32_t& dst0, const uint32_t& x0, const uin
 }
 
 // ============================================================================
-// [Fog::Face - XRGB32 - From - RGB24]
+// [Fog::Acc - XRGB32 - From - RGB24]
 // ============================================================================
 
 static FOG_INLINE void p32XRGB32QuadFromRGB24Quad(
@@ -145,7 +145,7 @@ static FOG_INLINE void p32FRGB32QuadFromRGB24Quad(
 }
 
 // ============================================================================
-// [Fog::Face - XRGB32 - From - RGB16_555]
+// [Fog::Acc - XRGB32 - From - RGB16_555]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB32FromRGB16_555(uint32_t& dst0, const uint32_t& x0)
@@ -166,7 +166,7 @@ static FOG_INLINE void p32ZRGB32FromRGB16_555(uint32_t& dst0, const uint32_t& x0
   t1 = t1 & 0x0000FF00U;             // [00000000] [00000000] [GGGGGGGG] [00000000]
   t2 = t2 & 0x00FF0000U;             // [00000000] [RRRRRRRR] [00000000] [00000000]
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2);
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2);
 }
 
 static FOG_INLINE void p32FRGB32FromRGB16_555(uint32_t& dst0, const uint32_t& x0)
@@ -197,16 +197,16 @@ static FOG_INLINE void p32ZRGB32QuadFromRGB16_555Quad(uint32_t& dst0, uint32_t& 
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
   // [1][0][3][2]
-  dst0 = _FOG_FACE_COMBINE_3((t0 >>  2) & 0x000000FFU, (t0 <<  4) & 0x0000FF00U, (t1 << 6) & 0x00FF0000U);
-  dst1 = _FOG_FACE_COMBINE_3((t1 >> 11) & 0x000000FFU, (t0 >> 15) & 0x0000FF00U, (t1 >> 7) & 0x00FF0000U);
-  dst2 = _FOG_FACE_COMBINE_3((t2 >>  2) & 0x000000FFU, (t2 <<  4) & 0x0000FF00U, (t3 << 6) & 0x00FF0000U);
-  dst3 = _FOG_FACE_COMBINE_3((t3 >> 11) & 0x000000FFU, (t2 >> 15) & 0x0000FF00U, (t3 >> 7) & 0x00FF0000U);
+  dst0 = _FOG_ACC_COMBINE_3((t0 >>  2) & 0x000000FFU, (t0 <<  4) & 0x0000FF00U, (t1 << 6) & 0x00FF0000U);
+  dst1 = _FOG_ACC_COMBINE_3((t1 >> 11) & 0x000000FFU, (t0 >> 15) & 0x0000FF00U, (t1 >> 7) & 0x00FF0000U);
+  dst2 = _FOG_ACC_COMBINE_3((t2 >>  2) & 0x000000FFU, (t2 <<  4) & 0x0000FF00U, (t3 << 6) & 0x00FF0000U);
+  dst3 = _FOG_ACC_COMBINE_3((t3 >> 11) & 0x000000FFU, (t2 >> 15) & 0x0000FF00U, (t3 >> 7) & 0x00FF0000U);
 #else
   // [0][1][2][3]
-  dst0 = _FOG_FACE_COMBINE_3((t1 >>  2) & 0x000000FFU, (t1 <<  4) & 0x0000FF00U, (t0 << 6) & 0x00FF0000U);
-  dst1 = _FOG_FACE_COMBINE_3((t0 >> 11) & 0x000000FFU, (t1 >> 15) & 0x0000FF00U, (t0 >> 7) & 0x00FF0000U);
-  dst2 = _FOG_FACE_COMBINE_3((t3 >>  2) & 0x000000FFU, (t3 <<  4) & 0x0000FF00U, (t2 << 6) & 0x00FF0000U);
-  dst3 = _FOG_FACE_COMBINE_3((t2 >> 11) & 0x000000FFU, (t3 >> 15) & 0x0000FF00U, (t2 >> 7) & 0x00FF0000U);
+  dst0 = _FOG_ACC_COMBINE_3((t1 >>  2) & 0x000000FFU, (t1 <<  4) & 0x0000FF00U, (t0 << 6) & 0x00FF0000U);
+  dst1 = _FOG_ACC_COMBINE_3((t0 >> 11) & 0x000000FFU, (t1 >> 15) & 0x0000FF00U, (t0 >> 7) & 0x00FF0000U);
+  dst2 = _FOG_ACC_COMBINE_3((t3 >>  2) & 0x000000FFU, (t3 <<  4) & 0x0000FF00U, (t2 << 6) & 0x00FF0000U);
+  dst3 = _FOG_ACC_COMBINE_3((t2 >> 11) & 0x000000FFU, (t3 >> 15) & 0x0000FF00U, (t2 >> 7) & 0x00FF0000U);
 #endif // FOG_BYTE_ORDER
 }
 
@@ -220,7 +220,7 @@ static FOG_INLINE void p32FRGB32QuadFromRGB16_555Quad(uint32_t& dst0, uint32_t& 
 }
 
 // ============================================================================
-// [Fog::Face - XRGB32 - From - RGB16_565]
+// [Fog::Acc - XRGB32 - From - RGB16_565]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB32FromRGB16_565(uint32_t& dst0, const uint32_t& x0)
@@ -244,7 +244,7 @@ static FOG_INLINE void p32ZRGB32FromRGB16_565(uint32_t& dst0, const uint32_t& x0
   t1 = t1 & 0x0000FF00U;             // [00000000] [00000000] [GGGGGGGG] [00000000]
   t2 = t2 & 0x00FF0000U;             // [00000000] [RRRRRRRR] [00000000] [00000000]
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2);
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2);
 }
 
 static FOG_INLINE void p32FRGB32FromRGB16_565(uint32_t& dst0, const uint32_t& x0)
@@ -285,7 +285,7 @@ static FOG_INLINE void p32FRGB32QuadFromRGB16_565Quad(uint32_t& dst0, uint32_t& 
 }
 
 // ============================================================================
-// [Fog::Face - XRGB32 - From - ARGB64]
+// [Fog::Acc - XRGB32 - From - ARGB64]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB32FromARGB64_1032(
@@ -301,7 +301,7 @@ static FOG_INLINE void p32ZRGB32FromARGB64_1032(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0 = _FOG_FACE_COMBINE_3((t1 >> 16) & 0x0000FF00U, (t2 >>  8) & 0x00FF0000U, (t0 >> 24));
+  dst0 = _FOG_ACC_COMBINE_3((t1 >> 16) & 0x0000FF00U, (t2 >>  8) & 0x00FF0000U, (t0 >> 24));
 }
 
 static FOG_INLINE void p32ZRGB32FromARGB64_2031(
@@ -317,17 +317,17 @@ static FOG_INLINE void p32ZRGB32FromARGB64_2031(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0 = _FOG_FACE_COMBINE_3((t1 >> 16) & 0x0000FF00U, (t2 >>  8) & 0x00FF0000U, (t0 >> 24));
+  dst0 = _FOG_ACC_COMBINE_3((t1 >> 16) & 0x0000FF00U, (t2 >>  8) & 0x00FF0000U, (t0 >> 24));
 }
 
 // ============================================================================
-// [Fog::Face - XRGB32 - From - PRGB64]
+// [Fog::Acc - XRGB32 - From - PRGB64]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB32FromPRGB64_1032(
   uint32_t& dst0, const uint32_t& x0_10, const uint32_t& x0_32)
 {
-  dst0 = _FOG_FACE_COMBINE_3((x0_10 >>  8) & 0x000000FFU,
+  dst0 = _FOG_ACC_COMBINE_3((x0_10 >>  8) & 0x000000FFU,
                              (x0_10 >> 16) & 0x0000FF00U,
                              (x0_32 <<  8) & 0x00FF0000U);
 }
@@ -335,28 +335,28 @@ static FOG_INLINE void p32ZRGB32FromPRGB64_1032(
 static FOG_INLINE void p32ZRGB32FromPRGB64_2031(
   uint32_t& dst0, const uint32_t& x0_20, const uint32_t& x0_31)
 {
-  dst0 = _FOG_FACE_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
+  dst0 = _FOG_ACC_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
                              (x0_31      ) & 0x0000FF00U);
 }
 
 // ============================================================================
-// [Fog::Face - XRGB32 - From - RGB48]
+// [Fog::Acc - XRGB32 - From - RGB48]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB32FromRGB48(
   uint32_t& dst0, const uint32_t& x0_r, const uint32_t& x0_g, const uint32_t& x0_b)
 {
-  dst0 = _FOG_FACE_COMBINE_2(_FOG_FACE_COMBINE_2(x0_r << 8, x0_b >> 8) & 0x00FF00FFU, x0_g & 0x0000FF00U);
+  dst0 = _FOG_ACC_COMBINE_2(_FOG_ACC_COMBINE_2(x0_r << 8, x0_b >> 8) & 0x00FF00FFU, x0_g & 0x0000FF00U);
 }
 
 static FOG_INLINE void p32FRGB32FromRGB48(
   uint32_t& dst0, const uint32_t& x0_r, const uint32_t& x0_g, const uint32_t& x0_b)
 {
-  dst0 = (_FOG_FACE_COMBINE_2(x0_r << 8, x0_b >> 8) | 0xFF00FF00U) & (x0_g | 0xFFFF00FF);
+  dst0 = (_FOG_ACC_COMBINE_2(x0_r << 8, x0_b >> 8) | 0xFF00FF00U) & (x0_g | 0xFFFF00FF);
 }
 
 // ============================================================================
-// [Fog::Face - ARGB32 - IsAlphaXX]
+// [Fog::Acc - ARGB32 - IsAlphaXX]
 // ============================================================================
 
 //! @brief Get whether the ARGB32 pixel @a c0 has alpha set to 0xFF (255 in decimal).
@@ -366,7 +366,7 @@ static FOG_INLINE bool p32ARGB32IsAlphaFF(const uint32_t& c0) { return (c0 >= 0x
 static FOG_INLINE bool p32ARGB32IsAlpha00(const uint32_t& c0) { return (c0 <= 0x00FFFFFF); }
 
 // ============================================================================
-// [Fog::Face - ARGB32 - From - PRGB32]
+// [Fog::Acc - ARGB32 - From - PRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB32FromPRGB32_1032(
@@ -381,8 +381,8 @@ static FOG_INLINE void p32ARGB32FromPRGB32_1032(
 
   xa <<= 16;
 
-  dst0_10 = _FOG_FACE_COMBINE_2(xg, xb);
-  dst0_32 = _FOG_FACE_COMBINE_2(xa, xr);
+  dst0_10 = _FOG_ACC_COMBINE_2(xg, xb);
+  dst0_32 = _FOG_ACC_COMBINE_2(xa, xr);
 }
 
 static FOG_INLINE void p32ARGB32FromPRGB32_2031(
@@ -397,8 +397,8 @@ static FOG_INLINE void p32ARGB32FromPRGB32_2031(
 
   xa <<= 16;
 
-  dst0_20 = _FOG_FACE_COMBINE_2(xr, xb);
-  dst0_31 = _FOG_FACE_COMBINE_2(xa, xg);
+  dst0_20 = _FOG_ACC_COMBINE_2(xr, xb);
+  dst0_31 = _FOG_ACC_COMBINE_2(xa, xg);
 }
 
 static FOG_INLINE void p32ARGB32FromPRGB32(
@@ -411,11 +411,11 @@ static FOG_INLINE void p32ARGB32FromPRGB32(
   uint32_t xg = ( (((x0 >>  8) & 0xFF) * recip) >>  8) & 0x0000FF00;
   uint32_t xb = ( (((x0      ) & 0xFF) * recip) >> 16);
 
-  dst0 = _FOG_FACE_COMBINE_4(xa << 24, xr, xg, xb);
+  dst0 = _FOG_ACC_COMBINE_4(xa << 24, xr, xg, xb);
 }
 
 // ============================================================================
-// [Fog::Face - ARGB32 - From - ARGB16_4444]
+// [Fog::Acc - ARGB32 - From - ARGB16_4444]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB32FromARGB16_4444(
@@ -465,13 +465,13 @@ static FOG_INLINE void p32ARGB32FromARGB16_4444_bs(
 }
 
 // ============================================================================
-// [Fog::Face - ARGB32 - From - ARGB64]
+// [Fog::Acc - ARGB32 - From - ARGB64]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB32FromARGB64_1032(
   uint32_t& dst0, const uint32_t& x0_10, const uint32_t& x0_32)
 {
-  dst0 = _FOG_FACE_COMBINE_4((x0_10 >>  8) & 0x000000FFU,
+  dst0 = _FOG_ACC_COMBINE_4((x0_10 >>  8) & 0x000000FFU,
                              (x0_10 >> 16) & 0x0000FF00U,
                              (x0_32 <<  8) & 0x00FF0000U,
                              (x0_32      ) & 0xFF000000U);
@@ -480,7 +480,7 @@ static FOG_INLINE void p32ARGB32FromARGB64_1032(
 static FOG_INLINE void p32ARGB32FromARGB64_2031(
   uint32_t& dst0, const uint32_t& x0_20, const uint32_t& x0_31)
 {
-  dst0 = _FOG_FACE_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
+  dst0 = _FOG_ACC_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
                              (x0_31      ) & 0xFF00FF00U);
 }
 
@@ -488,7 +488,7 @@ static FOG_INLINE void p64ARGB32FromARGB64(
   uint32_t& dst0, const __p64& x0)
 {
 #if defined(FOG_ARCH_NATIVE_P64)
-  dst0 = _FOG_FACE_COMBINE_4((uint32_t)(x0 >>  8) & 0x000000FFU,
+  dst0 = _FOG_ACC_COMBINE_4((uint32_t)(x0 >>  8) & 0x000000FFU,
                              (uint32_t)(x0 >> 16) & 0x0000FF00U,
                              (uint32_t)(x0 >> 24) & 0x00FF0000U,
                              (uint32_t)(x0 >> 32) & 0xFF000000U);
@@ -498,7 +498,7 @@ static FOG_INLINE void p64ARGB32FromARGB64(
 }
 
 // ============================================================================
-// [Fog::Face - ARGB32 - From - PRGB64]
+// [Fog::Acc - ARGB32 - From - PRGB64]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB32FromPRGB64_1032(
@@ -511,7 +511,7 @@ static FOG_INLINE void p32ARGB32FromPRGB64_1032(
   uint32_t xg = (x0_10    >> 16) * recip;
   uint32_t xb = (x0_10 & 0xFFFF) * recip;
 
-  dst0 = _FOG_FACE_COMBINE_4((xa << 24),
+  dst0 = _FOG_ACC_COMBINE_4((xa << 24),
                              (xr >>  8) & 0x00FF0000U,
                              (xg >> 16) & 0x0000FF00U,
                              (xb >> 24));
@@ -527,14 +527,14 @@ static FOG_INLINE void p32ARGB32FromPRGB64_2031(
   uint32_t xg = (x0_31 & 0xFFFF) * recip;
   uint32_t xb = (x0_20 & 0xFFFF) * recip;
 
-  dst0 = _FOG_FACE_COMBINE_4((xa << 24),
+  dst0 = _FOG_ACC_COMBINE_4((xa << 24),
                              (xr >>  8) & 0x00FF0000U,
                              (xg >> 16) & 0x0000FF00U,
                              (xb >> 24));
 }
 
 // ============================================================================
-// [Fog::Face - PRGB32 - IsAlphaXX]
+// [Fog::Acc - PRGB32 - IsAlphaXX]
 // ============================================================================
 
 //! @brief Get whether the PRGB32 pixel @a c0 has alpha set to 0xFF (255 in decimal).
@@ -544,7 +544,7 @@ static FOG_INLINE bool p32PRGB32IsAlphaFF(const uint32_t& c0) { return (c0 >= 0x
 static FOG_INLINE bool p32PRGB32IsAlpha00(const uint32_t& c0) { return (c0 == 0x00000000); }
 
 // ============================================================================
-// [Fog::Face - PRGB32 - From - ARGB32]
+// [Fog::Acc - PRGB32 - From - ARGB32]
 // ============================================================================
 
 static FOG_INLINE void p32PRGB32FromARGB32(
@@ -557,7 +557,7 @@ static FOG_INLINE void p32PRGB32FromARGB32(
   t0 *= u0;
   t0 = ((t0 + ((t0 >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF)) + FOG_UINT64_C(0x0080008000800080)) >> 8) & FOG_UINT64_C(0x00FF00FF00FF00FF);
 
-  dst0 = (uint32_t)_FOG_FACE_COMBINE_2(t0, t0 >> 24);
+  dst0 = (uint32_t)_FOG_ACC_COMBINE_2(t0, t0 >> 24);
 #else
   uint32_t t0 = (x0     ) & 0x00FF00FFU;
   uint32_t t1 = (x0 >> 8) & 0x00FF00FFU;
@@ -570,7 +570,7 @@ static FOG_INLINE void p32PRGB32FromARGB32(
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
   t1 = ((t1 + ((t1 >> 8) & 0x00FF00FFU) + 0x00800080U)     ) & 0xFF00FF00U;
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1);
 #endif // FOG_ARCH_BITS
 }
 
@@ -591,7 +591,7 @@ static FOG_INLINE void p32ZRGB32FromARGB32(
   t0 *= u0;
   t0 = ((t0 + ((t0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0x0000008000800080)) >> 8) & FOG_UINT64_C(0x000000FF00FF00FF);
 
-  dst0 = (uint32_t)_FOG_FACE_COMBINE_2(t0, t0 >> 24);
+  dst0 = (uint32_t)_FOG_ACC_COMBINE_2(t0, t0 >> 24);
 #else
   uint32_t t0 = (x0     ) & 0x00FF00FFU;
   uint32_t t1 = (x0 >> 8) & 0x000000FFU;
@@ -602,7 +602,7 @@ static FOG_INLINE void p32ZRGB32FromARGB32(
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
   t1 = ((t1 + ((t1 >> 8)              ) + 0x00000080U)     ) & 0x0000FF00U;
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1);
 #endif // FOG_ARCH_BITS
 }
 
@@ -623,7 +623,7 @@ static FOG_INLINE void p32FRGB32FromARGB32(
   t0 *= u0;
   t0 = ((t0 + ((t0 >> 8) & FOG_UINT64_C(0x000000FF00FF00FF)) + FOG_UINT64_C(0xFF00008000800080)) >> 8) & FOG_UINT64_C(0xFF00FF00FF00FF00);
 
-  dst0 = (uint32_t)_FOG_FACE_COMBINE_2(t0 >> 8, t0 >> 32);
+  dst0 = (uint32_t)_FOG_ACC_COMBINE_2(t0 >> 8, t0 >> 32);
 #else
   uint32_t t0 = (x0     ) & 0x00FF00FFU;
   uint32_t t1 = (x0 >> 8) & 0x000000FFU;
@@ -634,7 +634,7 @@ static FOG_INLINE void p32FRGB32FromARGB32(
   t0 = ((t0 + ((t0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
   t1 = ((t1 + ((t1 >> 8)              ) + 0xFF000080U)     ) & 0xFF00FF00U;
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1);
 #endif // FOG_ARCH_BITS
 }
 
@@ -684,7 +684,7 @@ static FOG_INLINE void p32PRGB32FromARGB32_1032(
 }
 
 // ============================================================================
-// [Fog::Face - PRGB32 - From - ARGB64]
+// [Fog::Acc - PRGB32 - From - ARGB64]
 // ============================================================================
 
 static FOG_INLINE void p32PRGB32FromARGB64_1032(
@@ -700,11 +700,11 @@ static FOG_INLINE void p32PRGB32FromARGB64_1032(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0 = _FOG_FACE_COMBINE_3((_FOG_FACE_COMBINE_2((xa << 16), (t1 >> 16)) & 0xFF00FF00U), (t2 >>  8) & 0x00FF0000U, (t0 >> 24));
+  dst0 = _FOG_ACC_COMBINE_3((_FOG_ACC_COMBINE_2((xa << 16), (t1 >> 16)) & 0xFF00FF00U), (t2 >>  8) & 0x00FF0000U, (t0 >> 24));
 }
 
 // ============================================================================
-// [Fog::Face - PRGB32 - From - PRGB64]
+// [Fog::Acc - PRGB32 - From - PRGB64]
 // ============================================================================
 
 static FOG_INLINE void p32PRGB32FromPRGB64_1032(
@@ -720,7 +720,7 @@ static FOG_INLINE void p64PRGB32FromPRGB64(
 }
 
 // ============================================================================
-// [Fog::Face - RGB24 - From - XRGB32]
+// [Fog::Acc - RGB24 - From - XRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32RGB24QuadFromXRGB32Solid(
@@ -737,9 +737,9 @@ static FOG_INLINE void p32RGB24QuadFromXRGB32Solid(
   // [BGRB][GRBG][RBGR] - Memory
   // [BRGB][GBRG][RGBR] - CPU
 
-  dst0 = _FOG_FACE_COMBINE_2(t0      , t0 << 24);
-  dst1 = _FOG_FACE_COMBINE_2(t0 << 16, t0 >>  8);
-  dst2 = _FOG_FACE_COMBINE_2(t0 <<  8, t0 >> 16);
+  dst0 = _FOG_ACC_COMBINE_2(t0      , t0 << 24);
+  dst1 = _FOG_ACC_COMBINE_2(t0 << 16, t0 >>  8);
+  dst2 = _FOG_ACC_COMBINE_2(t0 <<  8, t0 >> 16);
 
 #else
 
@@ -749,9 +749,9 @@ static FOG_INLINE void p32RGB24QuadFromXRGB32Solid(
   // [RGBR][GBRG][BRGB] - Memory
   // [RGBR][GBRG][BRGB] - CPU
 
-  dst0 = _FOG_FACE_COMBINE_2(t0 <<  8, t0 >> 16);
-  dst1 = _FOG_FACE_COMBINE_2(t0 << 16, t0 >>  8);
-  dst2 = _FOG_FACE_COMBINE_2(t0      , t0 << 24);
+  dst0 = _FOG_ACC_COMBINE_2(t0 <<  8, t0 >> 16);
+  dst1 = _FOG_ACC_COMBINE_2(t0 << 16, t0 >>  8);
+  dst2 = _FOG_ACC_COMBINE_2(t0      , t0 << 24);
 
 #endif // FOG_BYTE_ORDER
 }
@@ -772,9 +772,9 @@ static FOG_INLINE void p32RGB24QuadFromXRGB32Quad(
   // [B0 G0 R0 B1] [G1 R1 B2 G2] [R2 B3 G3 R3]               - Memory
   // [B1 R0 G0 B0] [G2 B2 R1 G1] [R3 G3 B3 R2]               - CPU
 
-  dst0 = _FOG_FACE_COMBINE_2((t0      ) & 0x00FFFFFFU, t1 << 24);
-  dst1 = _FOG_FACE_COMBINE_2((t1 >>  8) & 0x0000FFFFU, t2 << 16);
-  dst2 = _FOG_FACE_COMBINE_2((t2 >> 16) & 0x000000FFU, t3 <<  8);
+  dst0 = _FOG_ACC_COMBINE_2((t0      ) & 0x00FFFFFFU, t1 << 24);
+  dst1 = _FOG_ACC_COMBINE_2((t1 >>  8) & 0x0000FFFFU, t2 << 16);
+  dst2 = _FOG_ACC_COMBINE_2((t2 >> 16) & 0x000000FFU, t3 <<  8);
 #else
   // [X0 R0 G0 B0] [X1 R1 G1 B1] [X2 R2 G2 B2] [X3 R3 G3 B3] - Memory
   // [X0 R0 G0 B0] [X1 R1 G1 B1] [X2 R2 G2 B2] [X3 R3 G3 B3] - CPU
@@ -782,14 +782,14 @@ static FOG_INLINE void p32RGB24QuadFromXRGB32Quad(
   // [R0 G0 B0 R1] [G1 B1 R2 G2] [B2 R3 G3 B3]               - Memory
   // [R0 G0 B0 R1] [G1 B1 R2 G2] [B2 R3 G3 B3]               - CPU
 
-  dst0 = _FOG_FACE_COMBINE_2((t0 <<  8), (t1 >> 16) & 0x000000FFU);
-  dst1 = _FOG_FACE_COMBINE_2((t1 << 16), (t2 >>  8) & 0x0000FFFFU);
-  dst2 = _FOG_FACE_COMBINE_2((t2 << 24), (t3      ) & 0x00FFFFFFU);
+  dst0 = _FOG_ACC_COMBINE_2((t0 <<  8), (t1 >> 16) & 0x000000FFU);
+  dst1 = _FOG_ACC_COMBINE_2((t1 << 16), (t2 >>  8) & 0x0000FFFFU);
+  dst2 = _FOG_ACC_COMBINE_2((t2 << 24), (t3      ) & 0x00FFFFFFU);
 #endif // FOG_BYTE_ORDER
 }
 
 // ============================================================================
-// [Fog::Face - RGB24 - Lerp]
+// [Fog::Acc - RGB24 - Lerp]
 // ============================================================================
 
 template<int M_INDEX>
@@ -840,27 +840,27 @@ static FOG_INLINE void p32RGB24LerpTriadSolid_PBW256_T(
   m0 = 256 - m0;
   t0 = (t0 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
   t1 = (t1 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
-  t0 = _FOG_FACE_COMBINE_2(t0, t1) >> 8;
+  t0 = _FOG_ACC_COMBINE_2(t0, t1) >> 8;
 
   m0 = p32ARGB32ExtractMaskT<M_1>(msk0_0, msk0_1);
-  xx = _FOG_FACE_COMBINE_2(xx >> 24, x1 << 8);
+  xx = _FOG_ACC_COMBINE_2(xx >> 24, x1 << 8);
   t1 = (xx & 0x00FF00FFU) * m0;
   t2 = (xx & 0x0000FF00U) * m0;
 
   m0 = 256 - m0;
   t1 = (t1 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
   t2 = (t2 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
-  t1 = _FOG_FACE_COMBINE_2(t1, t2) >> 8;
+  t1 = _FOG_ACC_COMBINE_2(t1, t2) >> 8;
 
   m0 = p32ARGB32ExtractMaskT<M_2>(msk0_0, msk0_1);
-  xx = _FOG_FACE_COMBINE_2((x1 >> 16), (x2 >> 8) & 0x00FF0000);
+  xx = _FOG_ACC_COMBINE_2((x1 >> 16), (x2 >> 8) & 0x00FF0000);
   t2 = (xx & 0x00FF00FFU) * m0;
   t3 = (xx & 0x0000FF00U) * m0;
 
   m0 = 256 - m0;
   t2 = (t2 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
   t3 = (t3 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
-  t2 = _FOG_FACE_COMBINE_2(t2, t3) >> 8;
+  t2 = _FOG_ACC_COMBINE_2(t2, t3) >> 8;
 
   m0 = p32ARGB32ExtractMaskT<M_3>(msk0_0, msk0_1);
   xx = x2 >> 8;
@@ -870,11 +870,11 @@ static FOG_INLINE void p32RGB24LerpTriadSolid_PBW256_T(
   m0 = 256 - m0;
   t3 = (t3 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
   t4 = (t4 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
-  t3 = _FOG_FACE_COMBINE_2(t3, t4) >> 8;
+  t3 = _FOG_ACC_COMBINE_2(t3, t4) >> 8;
 
-  dst0 = _FOG_FACE_COMBINE_2(t0      , t1 << 24);
-  dst1 = _FOG_FACE_COMBINE_2(t1 >>  8, t2 << 16);
-  dst2 = _FOG_FACE_COMBINE_2(t2 >> 16, t2 <<  8);
+  dst0 = _FOG_ACC_COMBINE_2(t0      , t1 << 24);
+  dst1 = _FOG_ACC_COMBINE_2(t1 >>  8, t2 << 16);
+  dst2 = _FOG_ACC_COMBINE_2(t2 >> 16, t2 <<  8);
 
 #else
 
@@ -954,7 +954,7 @@ static FOG_INLINE void p32RGB24LerpTriadSolid_PBW256_PMAE(
 }
 
 // ============================================================================
-// [Fog::Face - RGB16_555 - From - XRGB32]
+// [Fog::Acc - RGB16_555 - From - XRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32RGB16_555FromXRGB32(uint32_t& dst0, const uint32_t& x0)
@@ -968,11 +968,11 @@ static FOG_INLINE void p32RGB16_555FromXRGB32(uint32_t& dst0, const uint32_t& x0
   t1 = (x0 >> 6) & 0x000003E0U;      // [00000000] [00000000] [000000GG] [GGG00000]
   t2 = (x0 >> 3) & 0x0000001FU;      // [00000000] [00000000] [00000000] [000BBBBB]
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2);
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2);
 }
 
 // ============================================================================
-// [Fog::Face - RGB16_555 - MulDiv]
+// [Fog::Acc - RGB16_555 - MulDiv]
 // ============================================================================
 
 static FOG_INLINE void p32RGB16_000_555_MulDiv_SBW_5b(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0_5b)
@@ -983,7 +983,7 @@ static FOG_INLINE void p32RGB16_000_555_MulDiv_SBW_5b(uint32_t& dst0, const uint
   t0 >>= 5;
   t1 >>= 21;
 
-  dst0 = _FOG_FACE_COMBINE_2(t0 & 0x00007C1FU, t1 & 0x000003E0U);
+  dst0 = _FOG_ACC_COMBINE_2(t0 & 0x00007C1FU, t1 & 0x000003E0U);
 }
 
 static FOG_INLINE void p32RGB16_000_555_MulDiv_SBW_8b(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0_8b)
@@ -1002,7 +1002,7 @@ static FOG_INLINE void p32RGB16_555_555_MulDiv_SBW_5b(uint32_t& dst0, const uint
   t0 = ((t0 * u0_5b) >> 5) & 0x03E07C1FU;
   t1 = ((t1 * u0_5b)     ) & 0x7C1F03E0U;
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1);
 }
 
 static FOG_INLINE void p32RGB16_555_555_MulDiv_SBW_8b(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0_8b)
@@ -1023,7 +1023,7 @@ static FOG_INLINE void p32RGB16_000_555_MulDiv_PBW_1032(uint32_t& dst0, const ui
   t1 &= 0x000003E0U << 8;
   t2 &= 0x00007C00U << 8;
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2) >> 8;
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2) >> 8;
 }
 
 static FOG_INLINE void p32RGB16_000_555_MulDiv_PBW_2031(uint32_t& dst0, const uint32_t& x0, const uint32_t& y0_20, const uint32_t& y0_31)
@@ -1036,11 +1036,11 @@ static FOG_INLINE void p32RGB16_000_555_MulDiv_PBW_2031(uint32_t& dst0, const ui
   t1 &= 0x000003E0U << 8;
   t2 &= 0x00007C00U << 8;
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2) >> 8;
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2) >> 8;
 }
 
 // ============================================================================
-// [Fog::Face - RGB16_565 - From - XRGB32]
+// [Fog::Acc - RGB16_565 - From - XRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32RGB16_565FromXRGB32(uint32_t& dst0, const uint32_t& x0)
@@ -1054,11 +1054,11 @@ static FOG_INLINE void p32RGB16_565FromXRGB32(uint32_t& dst0, const uint32_t& x0
   t1 = (x0 >> 5) & 0x000007E0U;      // [00000000] [00000000] [00000GGG] [GGG00000]
   t2 = (x0 >> 3) & 0x0000001FU;      // [00000000] [00000000] [00000000] [000BBBBB]
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2);
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2);
 }
 
 // ============================================================================
-// [Fog::Face - RGB16_565 - MulDiv]
+// [Fog::Acc - RGB16_565 - MulDiv]
 // ============================================================================
 
 static FOG_INLINE void p32RGB16_000_565_MulDiv_SBW_6b(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0_6b)
@@ -1069,7 +1069,7 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_SBW_6b(uint32_t& dst0, const uint
   t0 = ((t0 * u0_6b) >> 6) & 0x0000F81FU; // 0000000000000000 1111100000011111.
   t1 = ((t1 * u0_6b) >> 6) & 0x000007E0U; // 0000000000000000 0000011111100000.
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1);
 }
 
 static FOG_INLINE void p32RGB16_000_565_MulDiv_SBW_8b(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0_8b)
@@ -1090,7 +1090,7 @@ static FOG_INLINE void p32RGB16_565_565_MulDiv_SBW_6b(uint32_t& dst0, const uint
   t1 = ((t1 * u0_6b) >> 1) & 0x07E007E0U; // 0000011111100000 0000011111100000.
   t2 = ((t2 * u0_6b)     ) & 0xF800F800U; // 1111100000000000 1111100000000000.
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2);
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2);
 }
 
 static FOG_INLINE void p32RGB16_565_565_MulDiv_SBW_8b(uint32_t& dst0, const uint32_t& x0, const uint32_t& u0_8b)
@@ -1111,7 +1111,7 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_PBW_1032(uint32_t& dst0, const ui
   t1 &= 0x000007E0U << 8;
   t2 &= 0x0000F800U << 8;
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2) >> 8;
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2) >> 8;
 }
 
 static FOG_INLINE void p32RGB16_000_565_MulDiv_PBW_2031(uint32_t& dst0, const uint32_t& x0, const uint32_t& y0_20, const uint32_t& y0_31)
@@ -1124,11 +1124,11 @@ static FOG_INLINE void p32RGB16_000_565_MulDiv_PBW_2031(uint32_t& dst0, const ui
   t1 &= 0x000003E0U << 8;
   t2 &= 0x00007C00U << 8;
 
-  dst0 = _FOG_FACE_COMBINE_3(t0, t1, t2) >> 8;
+  dst0 = _FOG_ACC_COMBINE_3(t0, t1, t2) >> 8;
 }
 
 // ============================================================================
-// [Fog::Face - ARGB16_4444 - From - ARGB32]
+// [Fog::Acc - ARGB16_4444 - From - ARGB32]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB16_4444FromARGB32(uint32_t& dst0, const uint32_t& x0)
@@ -1140,7 +1140,7 @@ static FOG_INLINE void p32ARGB16_4444FromARGB32(uint32_t& dst0, const uint32_t& 
   uint32_t t2 = (x0 >> 12) & 0x0F00U;// [00000000] [00000000] [0000RRRR] [00000000]
   uint32_t t3 = (x0 >> 16) & 0xF000U;// [00000000] [00000000] [AAAA0000] [00000000]
 
-  dst0 = _FOG_FACE_COMBINE_4(t0, t1, t2, t3);
+  dst0 = _FOG_ACC_COMBINE_4(t0, t1, t2, t3);
 }
 
 static FOG_INLINE void p32ARGB16_4444_bsFromARGB32(uint32_t& dst0, const uint32_t& x0)
@@ -1152,11 +1152,11 @@ static FOG_INLINE void p32ARGB16_4444_bsFromARGB32(uint32_t& dst0, const uint32_
   uint32_t t2 = (x0 >> 16) & 0x00F0U;// [00000000] [00000000] [00000000] [RRRR0000]
   uint32_t t3 = (x0 >> 28) & 0x000FU;// [00000000] [00000000] [00000000] [0000AAAA]
 
-  dst0 = _FOG_FACE_COMBINE_4(t0, t1, t2, t3);
+  dst0 = _FOG_ACC_COMBINE_4(t0, t1, t2, t3);
 }
 
 // ============================================================================
-// [Fog::Face - RGB48 - Load / Store]
+// [Fog::Acc - RGB48 - Load / Store]
 // ============================================================================
 
 static FOG_INLINE void p32RGB48Load(
@@ -1303,7 +1303,7 @@ static FOG_INLINE void p32RGB48StoreBSwapFromXRGB32(
 #endif
 }
 // ============================================================================
-// [Fog::Face - XRGB64 - From - RGB16_555]
+// [Fog::Acc - XRGB64 - From - RGB16_555]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB64FromRGB16_555(
@@ -1322,7 +1322,7 @@ static FOG_INLINE void p32ZRGB64FromRGB16_555(
   t1 = (t1 & 0xFFFF0000);                 // [GGGGGGGG] [GGGGGGGG] [00000000] [00000000]
   t2 = (t2 >> 14);                        // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0, t1);  // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, t1);  // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
   dst0_32 = t2;                           // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 }
 
@@ -1334,7 +1334,7 @@ static FOG_INLINE void p32FRGB64FromRGB16_555(
 }
 
 // ============================================================================
-// [Fog::Face - XRGB64 - From - RGB16_565]
+// [Fog::Acc - XRGB64 - From - RGB16_565]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB64FromRGB16_565(
@@ -1353,7 +1353,7 @@ static FOG_INLINE void p32ZRGB64FromRGB16_565(
   t1 = (t1 & 0xFFFF0000);                 // [GGGGGGGG] [GGGGGGGG] [00000000] [00000000]
   t2 = (t2 >> 15);                        // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0, t1);  // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, t1);  // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
   dst0_32 = t2;                           // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 }
 
@@ -1365,7 +1365,7 @@ static FOG_INLINE void p32FRGB64FromRGB16_565(
 }
 
 // ============================================================================
-// [Fog::Face - XRGB64 - From - ZRGB32]
+// [Fog::Acc - XRGB64 - From - ZRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB64FromZRGB32(
@@ -1375,7 +1375,7 @@ static FOG_INLINE void p32ZRGB64FromZRGB32(
   uint32_t t1 = (x0 >> 16)       ; // [000R]
   FOG_ASSERT(t1 <= 0xFF);
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
   dst0_32 = t1;
 
   dst0_10 = dst0_10 * 0x101;
@@ -1390,7 +1390,7 @@ static FOG_INLINE void p32FRGB64FromZRGB32(
 }
 
 // ============================================================================
-// [Fog::Face - XRGB64 - From - XRGB32]
+// [Fog::Acc - XRGB64 - From - XRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB64FromXRGB32(
@@ -1399,7 +1399,7 @@ static FOG_INLINE void p32ZRGB64FromXRGB32(
   uint32_t t0 = (x0      ) & 0xFF; // [000B]
   uint32_t t1 = (x0 >> 16) & 0xFF; // [000R]
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
   dst0_32 = t1;
 
   dst0_10 = dst0_10 * 0x101;
@@ -1414,7 +1414,7 @@ static FOG_INLINE void p32FRGB64FromXRGB32(
 }
 
 // ============================================================================
-// [Fog::Face - XRGB64 - From - ARGB64]
+// [Fog::Acc - XRGB64 - From - ARGB64]
 // ============================================================================
 
 static FOG_INLINE void p32ZRGB64FromARGB64_1032(
@@ -1430,7 +1430,7 @@ static FOG_INLINE void p32ZRGB64FromARGB64_1032(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
+  dst0_10 = _FOG_ACC_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
   dst0_32 = t2 >> 16;
 }
 
@@ -1447,12 +1447,12 @@ static FOG_INLINE void p32ZRGB64FromARGB64_2031(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0_20 = _FOG_FACE_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
+  dst0_20 = _FOG_ACC_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
   dst0_31 = t2 >> 16;
 }
 
 // ============================================================================
-// [Fog::Face - ARGB64 - IsAlphaXX]
+// [Fog::Acc - ARGB64 - IsAlphaXX]
 // ============================================================================
 
 //! @brief Get whether the ARGB64 pixel @a c0 has alpha set to 0xFFFF (65535 in decimal).
@@ -1500,7 +1500,7 @@ static FOG_INLINE bool p64ARGB64IsAlpha0000(const __p64& c0)
 }
 
 // ============================================================================
-// [Fog::Face - ARGB64 - From - ARGB32]
+// [Fog::Acc - ARGB64 - From - ARGB32]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB64FromARGB32(
@@ -1509,8 +1509,8 @@ static FOG_INLINE void p32ARGB64FromARGB32(
   uint32_t t0 = (x0      ) & 0xFF;             // [000B]
   uint32_t t1 = (x0 >> 16) & 0xFF;             // [000R]
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
-  dst0_32 = _FOG_FACE_COMBINE_2(t1, (x0 >> 8) & 0x00FF0000U);
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, (x0 << 8) & 0x00FF0000U);
+  dst0_32 = _FOG_ACC_COMBINE_2(t1, (x0 >> 8) & 0x00FF0000U);
 
   dst0_10 = dst0_10 * 0x0101;
   dst0_32 = dst0_32 * 0x0101;
@@ -1520,7 +1520,7 @@ static FOG_INLINE void p64ARGB64FromARGB32(
   __p64& dst0, const uint32_t& x0)
 {
 #if defined(FOG_ARCH_NATIVE_P64)
-  dst0 = _FOG_FACE_COMBINE_4((uint64_t)(x0 & 0x000000FFU)      ,
+  dst0 = _FOG_ACC_COMBINE_4((uint64_t)(x0 & 0x000000FFU)      ,
                              (uint64_t)(x0 & 0x0000FF00U) <<  8,
                              (uint64_t)(x0 & 0x00FF0000U) << 16,
                              (uint64_t)(x0 & 0xFF000000U) << 24);
@@ -1531,7 +1531,7 @@ static FOG_INLINE void p64ARGB64FromARGB32(
 }
 
 // ============================================================================
-// [Fog::Face - ARGB64 - From - ARGB16_4444]
+// [Fog::Acc - ARGB64 - From - ARGB16_4444]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB64FromARGB16_4444(
@@ -1539,8 +1539,8 @@ static FOG_INLINE void p32ARGB64FromARGB16_4444(
 {
   uint32_t t0 = x0;
 
-  dst0_10 = _FOG_FACE_COMBINE_2((t0     ) & 0x0000000F, (t0 << 12) & 0x000F0000);
-  dst0_32 = _FOG_FACE_COMBINE_2((t0 >> 8) & 0x0000000F, (t0 <<  4) & 0x000F0000);
+  dst0_10 = _FOG_ACC_COMBINE_2((t0     ) & 0x0000000F, (t0 << 12) & 0x000F0000);
+  dst0_32 = _FOG_ACC_COMBINE_2((t0 >> 8) & 0x0000000F, (t0 <<  4) & 0x000F0000);
 
   p32Mul(dst0_10, dst0_10, 0x1111);
   p32Mul(dst0_32, dst0_32, 0x1111);
@@ -1551,15 +1551,15 @@ static FOG_INLINE void p32ARGB64FromARGB16_4444_bs(
 {
   uint32_t t0 = x0;
 
-  dst0_10 = _FOG_FACE_COMBINE_2((t0 >> 8) & 0x0000000F, (t0 <<  4) & 0x000F0000);
-  dst0_32 = _FOG_FACE_COMBINE_2((t0     ) & 0x0000000F, (t0 << 12) & 0x000F0000);
+  dst0_10 = _FOG_ACC_COMBINE_2((t0 >> 8) & 0x0000000F, (t0 <<  4) & 0x000F0000);
+  dst0_32 = _FOG_ACC_COMBINE_2((t0     ) & 0x0000000F, (t0 << 12) & 0x000F0000);
 
   p32Mul(dst0_10, dst0_10, 0x1111);
   p32Mul(dst0_32, dst0_32, 0x1111);
 }
 
 // ============================================================================
-// [Fog::Face - ARGB64 - From - PRGB64]
+// [Fog::Acc - ARGB64 - From - PRGB64]
 // ============================================================================
 
 static FOG_INLINE void p32ARGB64FromPRGB64_2031(uint32_t& dst0_20, uint32_t& dst0_31, const uint32_t& x0_20, const uint32_t& x0_31)
@@ -1575,8 +1575,8 @@ static FOG_INLINE void p32ARGB64FromPRGB64_2031(uint32_t& dst0_20, uint32_t& dst
     return;
   }
 
-  dst0_20 = _FOG_FACE_COMBINE_2(((t0 >> 16) / xa) << 16, (t0 & 0xFFFF) / xa);
-  dst0_31 = _FOG_FACE_COMBINE_2(xa << 16               , (t1 & 0xFFFF) / xa);
+  dst0_20 = _FOG_ACC_COMBINE_2(((t0 >> 16) / xa) << 16, (t0 & 0xFFFF) / xa);
+  dst0_31 = _FOG_ACC_COMBINE_2(xa << 16               , (t1 & 0xFFFF) / xa);
 }
 
 static FOG_INLINE void p32ARGB64FromPRGB64_1032(uint32_t& dst0_10, uint32_t& dst0_32, const uint32_t& x0_10, const uint32_t& x0_32)
@@ -1592,7 +1592,7 @@ static FOG_INLINE void p64ARGB64FromPRGB64(__p64& dst0, const __p64& x0)
   __p64 xa = dst0 >> 48;
   if (xa == 0) return;
 
-  dst0 = _FOG_FACE_COMBINE_4(
+  dst0 = _FOG_ACC_COMBINE_4(
     ((dst0 & FOG_UINT64_C(0x0000FFFF00000000)) / xa) & FOG_UINT64_C(0x0000FFFF00000000),
     ((dst0 & FOG_UINT64_C(0x00000000FFFF0000)) / xa) & FOG_UINT64_C(0x00000000FFFF0000),
     ((dst0 & FOG_UINT64_C(0x000000000000FFFF)) / xa), xa << 48);
@@ -1605,10 +1605,10 @@ static FOG_INLINE void p64ARGB64FromPRGB64_2031(__p64& dst0_20, __p64& dst0_31, 
 {
 #if defined(FOG_ARCH_NATIVE_P64)
   __p64 xa = x0_31 >> 32;
-  __p64 t0 = _FOG_FACE_COMBINE_2(
+  __p64 t0 = _FOG_ACC_COMBINE_2(
     ((x0_20 & FOG_UINT64_C(0xFFFFFFFF00000000)) / xa) & FOG_UINT64_C(0xFFFFFFFF00000000),
     ((x0_20 & FOG_UINT64_C(0x00000000FFFFFFFF)) / xa));
-  __p64 t1 = _FOG_FACE_COMBINE_2(
+  __p64 t1 = _FOG_ACC_COMBINE_2(
     ((x0_20 & FOG_UINT64_C(0x00000000FFFFFFFF)) / xa), xa << 32);
   dst0_20 = t0;
   dst0_31 = t1;
@@ -1631,7 +1631,7 @@ static FOG_INLINE void p64ARGB64FromPRGB64_1032(__p64& dst0_10, __p64& dst0_32, 
 }
 
 // ============================================================================
-// [Fog::Face - PRGB64 - IsAlphaXX]
+// [Fog::Acc - PRGB64 - IsAlphaXX]
 // ============================================================================
 
 //! @brief Get whether the PRGB64 pixel @a c0 has alpha set to 0xFFFF (65535 in decimal).
@@ -1679,7 +1679,7 @@ static FOG_INLINE bool p64PRGB64IsAlpha0000(const __p64& c0)
 }
 
 // ============================================================================
-// [Fog::Face - PRGB64 - From - PRGB32]
+// [Fog::Acc - PRGB64 - From - PRGB32]
 // ============================================================================
 
 static FOG_INLINE void p32PRGB64FromPRGB32(
@@ -1695,7 +1695,7 @@ static FOG_INLINE void p64PRGB64FromPRGB32(
 }
 
 // ============================================================================
-// [Fog::Face - PRGB64 - From - PRGB16_4444]
+// [Fog::Acc - PRGB64 - From - PRGB16_4444]
 // ============================================================================
 
 static FOG_INLINE void p32PRGB64FromPRGB16_4444(
@@ -1705,7 +1705,7 @@ static FOG_INLINE void p32PRGB64FromPRGB16_4444(
 }
 
 // ============================================================================
-// [Fog::Face - PRGB64 - From - ARGB64]
+// [Fog::Acc - PRGB64 - From - ARGB64]
 // ============================================================================
 
 static FOG_INLINE void p32PRGB64FromARGB64_1032(
@@ -1721,8 +1721,8 @@ static FOG_INLINE void p32PRGB64FromARGB64_1032(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0_10 = _FOG_FACE_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
-  dst0_32 = _FOG_FACE_COMBINE_2(t2 >> 16, xa << 16);
+  dst0_10 = _FOG_ACC_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
+  dst0_32 = _FOG_ACC_COMBINE_2(t2 >> 16, xa << 16);
 }
 
 static FOG_INLINE void p32PRGB64FromARGB64_2031(
@@ -1738,8 +1738,8 @@ static FOG_INLINE void p32PRGB64FromARGB64_2031(
   t1 = (t1 + (t1 >> 16) + 0x8000U);
   t2 = (t2 + (t2 >> 16) + 0x8000U);
 
-  dst0_20 = _FOG_FACE_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
-  dst0_31 = _FOG_FACE_COMBINE_2(t2 >> 16, xa << 16);
+  dst0_20 = _FOG_ACC_COMBINE_2(t0 >> 16, t1 & 0xFFFF0000);
+  dst0_31 = _FOG_ACC_COMBINE_2(t2 >> 16, xa << 16);
 }
 
 static FOG_INLINE void p64PRGB64FromARGB64(
@@ -1758,7 +1758,7 @@ static FOG_INLINE void p64PRGB64FromARGB64(
   t0 = ((t0 + ((t0 >> 16) & FOG_UINT64_C(0x0000FFFF0000FFFF)) + FOG_UINT64_C(0x0000800000008000)) >> 16) & FOG_UINT64_C(0x0000FFFF0000FFFF);
   t1 = ((t1 + ((t1 >> 16) & FOG_UINT64_C(0x0000FFFF0000FFFF)) + FOG_UINT64_C(0x0000800000008000))      ) & FOG_UINT64_C(0xFFFF0000FFFF0000);
 
-  dst0 = _FOG_FACE_COMBINE_2(t0, t1);
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1);
 #else
   p32PRGB64FromARGB64_1032(dst0.u32Lo, dst0.u32Hi, x0.u32Lo, x0.u32Hi);
 #endif // FOG_ARCH_NATIVE_P64
@@ -1802,8 +1802,8 @@ static FOG_INLINE void p64PRGB64FromARGB64_1032(
 
 //! @}
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_FACE_FACE_RASTER_C_H
+#endif // _FOG_G2D_ACC_ACCC_H

@@ -1258,7 +1258,7 @@ err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state
         state->saveFont();
 
       StringW family = context->_font.getFamily();
-      float size = context->_font.getHeight();
+      float size = context->_font.getSize();
 
       if (styleMask & (1 << SVG_STYLE_FONT_FAMILY))
       {
@@ -1271,7 +1271,7 @@ err_t SvgStylableElement::onPrepare(SvgContext* context, SvgContextGState* state
           _style._d.fontSizeValue, _style._d.fontSizeUnit);
       }
 
-      context->_font.create(family, size, UNIT_NONE);
+      context->_font.create(family, size);
     }
 
     // Setup fill parameters.

@@ -4,22 +4,22 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACESSE_H
-#define _FOG_CORE_FACE_FACESSE_H
+#ifndef _FOG_CORE_ACC_ACCSSE_H
+#define _FOG_CORE_ACC_ACCSSE_H
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinSSE.h>
+#include <Fog/Core/C++/IntrinSse.h>
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/C++/IntrinSSE2.h>
+# include <Fog/Core/C++/IntrinSse2.h>
 #endif // FOG_HARDCODE_SSE2
 
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 
 // ============================================================================
-// [Fog::Face - SSE - Constants]
+// [Fog::Acc - SSE - Constants]
 // ============================================================================
 
 FOG_XMM_DECLARE_CONST_PI32_VAR(m128f_sn_sn_sn_sn    , 0x80000000, 0x80000000, 0x80000000, 0x80000000);
@@ -39,13 +39,13 @@ FOG_XMM_DECLARE_CONST_PS_SET  (m128f_4x_255         , 255.0f);
 FOG_XMM_DECLARE_CONST_PS_SET  (m128f_4x_65535       , 65535.0f);
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
-//! @addtogroup Fog_Face_SSE
+//! @addtogroup Fog_Acc_SSE
 //! @{
 
 // ============================================================================
-// [Fog::Face - SSE - Zero]
+// [Fog::Acc - SSE - Zero]
 // ============================================================================
 
 //! @brief Clear content of @a dst0.
@@ -62,7 +62,7 @@ static FOG_INLINE void m128fZero(__m128f& dst0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Load/Store]
+// [Fog::Acc - SSE - Load/Store]
 // ============================================================================
 
 //! @brief Load scalar SP-FP value from @a srcp to @a dst.
@@ -227,7 +227,7 @@ static FOG_INLINE void m128fStore16nta(DstT* dstp, const __m128f& src0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Copy]
+// [Fog::Acc - SSE - Copy]
 // ============================================================================
 
 static FOG_INLINE void m128fCopy(__m128f& dst, const __m128f& src)
@@ -236,7 +236,7 @@ static FOG_INLINE void m128fCopy(__m128f& dst, const __m128f& src)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Shuffle]
+// [Fog::Acc - SSE - Shuffle]
 // ============================================================================
 
 //! @brief Shuffle SP-FP values from @a to @a dst.
@@ -350,7 +350,7 @@ static FOG_INLINE void m128fMoveHL(__m128f& dst, const __m128f& a, const __m128f
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Add]
+// [Fog::Acc - SSE - Add]
 // ============================================================================
 
 //! @brief Add scalar SP-FP value of @b to @a and store the result into @a dst.
@@ -380,7 +380,7 @@ static FOG_INLINE void m128fAddPS(__m128f& dst, const __m128f& a, const __m128f&
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Sub]
+// [Fog::Acc - SSE - Sub]
 // ============================================================================
 
 static FOG_INLINE void m128fSubSS(__m128f& dst, const __m128f& a, const __m128f& b)
@@ -394,7 +394,7 @@ static FOG_INLINE void m128fSubPS(__m128f& dst, const __m128f& a, const __m128f&
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Mul]
+// [Fog::Acc - SSE - Mul]
 // ============================================================================
 
 static FOG_INLINE void m128fMulSS(__m128f& dst, const __m128f& a, const __m128f& b)
@@ -408,7 +408,7 @@ static FOG_INLINE void m128fMulPS(__m128f& dst, const __m128f& a, const __m128f&
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Div]
+// [Fog::Acc - SSE - Div]
 // ============================================================================
 
 static FOG_INLINE void m128fDivSS(__m128f& dst, const __m128f& a, const __m128f& b)
@@ -422,7 +422,7 @@ static FOG_INLINE void m128fDivPS(__m128f& dst, const __m128f& a, const __m128f&
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Sqrt]
+// [Fog::Acc - SSE - Sqrt]
 // ============================================================================
 
 static FOG_INLINE void m128fSqrtSS(__m128f& dst, const __m128f& a)
@@ -436,7 +436,7 @@ static FOG_INLINE void m128fSqrtPS(__m128f& dst, const __m128f& a)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Reciprocal]
+// [Fog::Acc - SSE - Reciprocal]
 // ============================================================================
 
 static FOG_INLINE void m128fRcpSS(__m128f& dst, const __m128f& a)
@@ -450,7 +450,7 @@ static FOG_INLINE void m128fRcpPS(__m128f& dst, const __m128f& a)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Sqrt-Reciprocal]
+// [Fog::Acc - SSE - Sqrt-Reciprocal]
 // ============================================================================
 
 static FOG_INLINE void m128fSqrtRcpSS(__m128f& dst, const __m128f& a)
@@ -464,7 +464,7 @@ static FOG_INLINE void m128fSqrtRcpPS(__m128f& dst, const __m128f& a)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Min/Max]
+// [Fog::Acc - SSE - Min/Max]
 // ============================================================================
 
 static FOG_INLINE void m128fMinSS(__m128f& dst, const __m128f& a, const __m128f& b)
@@ -488,7 +488,7 @@ static FOG_INLINE void m128fMaxPS(__m128f& dst, const __m128f& a, const __m128f&
 }
 
 // ============================================================================
-// [Fog::Face - SSE - BitOps]
+// [Fog::Acc - SSE - BitOps]
 // ============================================================================
 
 //! @brief Perform a bitwise logical AND between @a and @a b and store result
@@ -548,7 +548,7 @@ static FOG_INLINE void m128fXor(__m128f& dst, const __m128f& a, const __m128f& b
 }
 
 // ============================================================================
-// [Fog::Face - SSE - Compare]
+// [Fog::Acc - SSE - Compare]
 // ============================================================================
 
 static FOG_INLINE void m128fCmpEqSS(__m128f& dst, __m128f& a, __m128f& b) { dst = _mm_cmpeq_ss(a, b); }
@@ -588,7 +588,7 @@ static FOG_INLINE void m128fCmpUnorderedSS(__m128f& dst, __m128f& a, __m128f& b)
 static FOG_INLINE void m128fCmpUnorderedPS(__m128f& dst, __m128f& a, __m128f& b) { dst = _mm_cmpunord_ps(a, b); }
 
 // ============================================================================
-// [Fog::Face - SSE - Epsilon]
+// [Fog::Acc - SSE - Epsilon]
 // ============================================================================
 
 //! @brief Make sure that scalar SP-FP value in a[0] is larger than epsilon
@@ -634,7 +634,7 @@ static FOG_INLINE void m128fEpsilonPS(__m128f& dst, const __m128f& a)
 }
 
 // ============================================================================
-// [Fog::Face - SSE - MoveMask]
+// [Fog::Acc - SSE - MoveMask]
 // ============================================================================
 
 //! @brief Create a 4-bit mask from the most significant bits of the four SP-FP values.
@@ -652,13 +652,13 @@ static FOG_INLINE void m128fMoveMask(int& dst, const __m128f& a)
 
 //! @}
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // MMX+SSE2 extensions require both, Face_MMX.h, and Face_SSE.h headers.
-#if defined(_FOG_CORE_FACE_FACEMMX_H)
-# include <Fog/Core/Face/FaceMMXSSE.h>
-#endif // _FOG_CORE_FACE_FACEMMX_H
+#if defined(_FOG_CORE_ACC_ACCMMX_H)
+# include <Fog/Core/Acc/AccMmxSse.h>
+#endif // _FOG_CORE_ACC_ACCMMX_H
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACESSE_H
+#endif // _FOG_CORE_ACC_ACCSSE_H

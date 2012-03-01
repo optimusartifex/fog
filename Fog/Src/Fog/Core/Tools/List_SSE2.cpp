@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceSSE2.h>
+#include <Fog/Core/Acc/AccSse2.h>
 #include <Fog/Core/Global/Private.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
@@ -53,8 +53,8 @@ static size_t FOG_CDECL List_indexOf_4B_SSE2(const ListUntyped* self, const Rang
     const ssize_t loadOffset = (Direction == 1) ? 0 : -16 + 4;
 
     __m128i xmmItem;
-    Face::m128iCvtSI128FromSI(xmmItem, item0);
-    Face::m128iExpandPI32FromSI32(xmmItem, xmmItem);
+    Acc::m128iCvtSI128FromSI(xmmItem, item0);
+    Acc::m128iExpandPI32FromSI32(xmmItem, xmmItem);
 
     // Align.
     while (((ssize_t)p & 0x15) != alignConst)
@@ -71,31 +71,31 @@ static size_t FOG_CDECL List_indexOf_4B_SSE2(const ListUntyped* self, const Rang
       __m128i xmm0, xmm1;
       __m128i xmm2, xmm3;
 
-      Face::m128iLoad16a(xmm0, p + Direction *  0 + loadOffset);
-      Face::m128iLoad16a(xmm1, p + Direction * 16 + loadOffset);
+      Acc::m128iLoad16a(xmm0, p + Direction *  0 + loadOffset);
+      Acc::m128iLoad16a(xmm1, p + Direction * 16 + loadOffset);
 
-      Face::m128iCmpEqPI32(xmm0, xmm0, xmmItem);
-      Face::m128iCmpEqPI32(xmm1, xmm1, xmmItem);
+      Acc::m128iCmpEqPI32(xmm0, xmm0, xmmItem);
+      Acc::m128iCmpEqPI32(xmm1, xmm1, xmmItem);
 
-      Face::m128iMoveMaskPI32(msk, xmm0);
-      Face::m128iLoad16a(xmm2, p + Direction * 32 + loadOffset);
+      Acc::m128iMoveMaskPI32(msk, xmm0);
+      Acc::m128iLoad16a(xmm2, p + Direction * 32 + loadOffset);
       if (msk != 0) goto _Near;
 
-      Face::m128iLoad16a(xmm3, p + Direction * 48 + loadOffset);
-      Face::m128iMoveMaskPI32(msk, xmm1);
+      Acc::m128iLoad16a(xmm3, p + Direction * 48 + loadOffset);
+      Acc::m128iMoveMaskPI32(msk, xmm1);
 
       p += Direction * 16;
       if (msk != 0) goto _Near;
 
-      Face::m128iCmpEqPI32(xmm2, xmm2, xmmItem);
-      Face::m128iCmpEqPI32(xmm3, xmm3, xmmItem);
+      Acc::m128iCmpEqPI32(xmm2, xmm2, xmmItem);
+      Acc::m128iCmpEqPI32(xmm3, xmm3, xmmItem);
 
-      Face::m128iMoveMaskPI32(msk, xmm2);
+      Acc::m128iMoveMaskPI32(msk, xmm2);
 
       p += Direction * 16;
       if (msk != 0) goto _Near;
 
-      Face::m128iMoveMaskPI32(msk, xmm3);
+      Acc::m128iMoveMaskPI32(msk, xmm3);
 
       p += Direction * 16;
       if (msk != 0) goto _Near;
@@ -159,7 +159,7 @@ static size_t FOG_CDECL List_indexOf_16B_SSE2(const ListUntyped* self, const Ran
   p += (Direction == 1) ? rStart * 16 : rEnd * 16 - 16;
 
   __m128i xmmItem;
-  Face::m128iLoad16u(xmmItem, item);
+  Acc::m128iLoad16u(xmmItem, item);
 
   size_t i = rEnd - rStart;
 
@@ -170,28 +170,28 @@ static size_t FOG_CDECL List_indexOf_16B_SSE2(const ListUntyped* self, const Ran
       __m128i xmm0, xmm1;
       int msk0, msk1;
 
-      Face::m128iLoad16a(xmm0, p + Direction *  0);
-      Face::m128iLoad16a(xmm1, p + Direction * 16);
+      Acc::m128iLoad16a(xmm0, p + Direction *  0);
+      Acc::m128iLoad16a(xmm1, p + Direction * 16);
 
-      Face::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
-      Face::m128iCmpEqPI8(xmm1, xmm1, xmmItem);
+      Acc::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
+      Acc::m128iCmpEqPI8(xmm1, xmm1, xmmItem);
 
-      Face::m128iMoveMaskPI8(msk0, xmm0);
-      Face::m128iMoveMaskPI8(msk1, xmm1);
+      Acc::m128iMoveMaskPI8(msk0, xmm0);
+      Acc::m128iMoveMaskPI8(msk1, xmm1);
 
-      Face::m128iLoad16a(xmm0, p + Direction * 32);
+      Acc::m128iLoad16a(xmm0, p + Direction * 32);
       if (msk0 == 0xFFFF) goto _Match0;
 
-      Face::m128iLoad16a(xmm1, p + Direction * 48);
+      Acc::m128iLoad16a(xmm1, p + Direction * 48);
       if (msk1 == 0xFFFF) goto _Match1;
 
-      Face::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
-      Face::m128iCmpEqPI8(xmm1, xmm1, xmmItem);
+      Acc::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
+      Acc::m128iCmpEqPI8(xmm1, xmm1, xmmItem);
 
       p += Direction * 32;
 
-      Face::m128iMoveMaskPI8(msk0, xmm0);
-      Face::m128iMoveMaskPI8(msk1, xmm1);
+      Acc::m128iMoveMaskPI8(msk0, xmm0);
+      Acc::m128iMoveMaskPI8(msk1, xmm1);
 
       if (msk0 == 0xFFFF) goto _Match0;
       if (msk1 == 0xFFFF) goto _Match1;
@@ -205,9 +205,9 @@ static size_t FOG_CDECL List_indexOf_16B_SSE2(const ListUntyped* self, const Ran
       __m128i xmm0;
       int msk0;
 
-      Face::m128iLoad16a(xmm0, p + Direction *  0);
-      Face::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
-      Face::m128iMoveMaskPI8(msk0, xmm0);
+      Acc::m128iLoad16a(xmm0, p + Direction *  0);
+      Acc::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
+      Acc::m128iMoveMaskPI8(msk0, xmm0);
       if (msk0 == 0xFFFF) goto _Match0;
 
       p += Direction * 16;
@@ -221,28 +221,28 @@ static size_t FOG_CDECL List_indexOf_16B_SSE2(const ListUntyped* self, const Ran
       __m128i xmm0, xmm1, xmm2, xmm3;
       int msk0, msk1;
 
-      Face::m128iLoad16u(xmm0, p + Direction *  0);
-      Face::m128iLoad16u(xmm1, p + Direction * 16);
+      Acc::m128iLoad16u(xmm0, p + Direction *  0);
+      Acc::m128iLoad16u(xmm1, p + Direction * 16);
 
-      Face::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
-      Face::m128iCmpEqPI8(xmm1, xmm1, xmmItem);
+      Acc::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
+      Acc::m128iCmpEqPI8(xmm1, xmm1, xmmItem);
 
-      Face::m128iLoad16u(xmm2, p + Direction * 32);
-      Face::m128iLoad16u(xmm3, p + Direction * 48);
+      Acc::m128iLoad16u(xmm2, p + Direction * 32);
+      Acc::m128iLoad16u(xmm3, p + Direction * 48);
 
-      Face::m128iMoveMaskPI8(msk0, xmm0);
-      Face::m128iMoveMaskPI8(msk1, xmm1);
+      Acc::m128iMoveMaskPI8(msk0, xmm0);
+      Acc::m128iMoveMaskPI8(msk1, xmm1);
 
       if (msk0 == 0xFFFF) goto _Match0;
       if (msk1 == 0xFFFF) goto _Match1;
 
-      Face::m128iCmpEqPI8(xmm2, xmm2, xmmItem);
-      Face::m128iCmpEqPI8(xmm3, xmm3, xmmItem);
+      Acc::m128iCmpEqPI8(xmm2, xmm2, xmmItem);
+      Acc::m128iCmpEqPI8(xmm3, xmm3, xmmItem);
 
       p += Direction * 32;
 
-      Face::m128iMoveMaskPI8(msk0, xmm2);
-      Face::m128iMoveMaskPI8(msk1, xmm3);
+      Acc::m128iMoveMaskPI8(msk0, xmm2);
+      Acc::m128iMoveMaskPI8(msk1, xmm3);
 
       if (msk0 == 0xFFFF) goto _Match0;
       if (msk1 == 0xFFFF) goto _Match1;
@@ -256,9 +256,9 @@ static size_t FOG_CDECL List_indexOf_16B_SSE2(const ListUntyped* self, const Ran
       __m128i xmm0;
       int msk0;
 
-      Face::m128iLoad16u(xmm0, p);
-      Face::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
-      Face::m128iMoveMaskPI8(msk0, xmm0);
+      Acc::m128iLoad16u(xmm0, p);
+      Acc::m128iCmpEqPI8(xmm0, xmm0, xmmItem);
+      Acc::m128iMoveMaskPI8(msk0, xmm0);
       if (msk0 == 0xFFFF) goto _Match0;
 
       p += Direction * 16;

@@ -1296,6 +1296,18 @@ enum FONT_FLAG
 };
 
 // ============================================================================
+// [Fog::FONT_HINTING]
+// ============================================================================
+
+enum FONT_HINTING
+{
+  FONT_HINTING_DISABLED = 0x0,
+  FONT_HINTING_VERTICAL = 0x1,
+  FONT_HINTING_BOTH = 0x2,
+  FONT_HINTING_AUTO = 0xF
+};
+
+// ============================================================================
 // [Fog::FONT_KERNING]
 // ============================================================================
 
@@ -1433,7 +1445,7 @@ enum FONT_STRETCH
   FONT_STRETCH_EXTRA_EXPANDED = 80,
   FONT_STRETCH_ULTRA_EXPANDED = 90,
 
-  FONT_STRETCH_MAX = FONT_STRETCH_ULTRA_EXPANDED
+  FONT_STRETCH_MAX = 100
 };
 
 // ============================================================================
@@ -1489,7 +1501,7 @@ enum FONT_WEIGHT
   FONT_WEIGHT_EXTRABOLD  = FONT_WEIGHT_800,
   FONT_WEIGHT_BLACK      = FONT_WEIGHT_900,
 
-  FONT_WEIGHT_MAX = FONT_WEIGHT_900
+  FONT_WEIGHT_MAX = 100
 };
 
 // ============================================================================

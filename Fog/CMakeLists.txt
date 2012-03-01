@@ -558,6 +558,28 @@ Set(FOG_CORE_LIB_HEADERS
   Src/Fog/Core.h
 )
 
+# [Fog/Core/Acc]
+Set(FOG_CORE_ACC_SOURCES
+  Src/Fog/Core/Acc/Constants.cpp
+)
+
+Set(FOG_CORE_ACC_HEADERS
+  Src/Fog/Core/Acc/Acc3dNow.h
+  Src/Fog/Core/Acc/Acc3dNowExt.h
+  Src/Fog/Core/Acc/AccC.h
+  Src/Fog/Core/Acc/AccMmx.h
+  Src/Fog/Core/Acc/AccMmxExt.h
+  Src/Fog/Core/Acc/AccMmxSse.h
+  Src/Fog/Core/Acc/AccMmxSse2.h
+  Src/Fog/Core/Acc/AccMmxSsse3.h
+  Src/Fog/Core/Acc/AccSse.h
+  Src/Fog/Core/Acc/AccSse2.h
+  Src/Fog/Core/Acc/AccSse3.h
+  Src/Fog/Core/Acc/AccSsse3.h
+  Src/Fog/Core/Acc/Constants.h
+)
+
+
 # [Fog/Core/C++]
 Set(FOG_CORE_CPP_SOURCES
 )
@@ -572,12 +594,12 @@ Set(FOG_CORE_CPP_HEADERS
   Src/Fog/Core/C++/CompilerMsc.h
   Src/Fog/Core/C++/ConfigCMake.h
   Src/Fog/Core/C++/Intrin3dNow.h
-  Src/Fog/Core/C++/IntrinMMX.h
-  Src/Fog/Core/C++/IntrinMMXExt.h
-  Src/Fog/Core/C++/IntrinSSE.h
-  Src/Fog/Core/C++/IntrinSSE2.h
-  Src/Fog/Core/C++/IntrinSSE3.h
-  Src/Fog/Core/C++/IntrinSSSE3.h
+  Src/Fog/Core/C++/IntrinMmx.h
+  Src/Fog/Core/C++/IntrinMmxExt.h
+  Src/Fog/Core/C++/IntrinSse.h
+  Src/Fog/Core/C++/IntrinSse2.h
+  Src/Fog/Core/C++/IntrinSse3.h
+  Src/Fog/Core/C++/IntrinSsse3.h
   Src/Fog/Core/C++/PackByte.h
   Src/Fog/Core/C++/PackWord.h
   Src/Fog/Core/C++/PackDWord.h
@@ -600,27 +622,6 @@ Set(FOG_CORE_DOM_SOURCES
 Set(FOG_CORE_DOM_HEADERS
   Src/Fog/Core/Dom/Dom.h
   Src/Fog/Core/Dom/DomResourceManager.h
-)
-
-# [Fog/Core/Face]
-Set(FOG_CORE_FACE_SOURCES
-  Src/Fog/Core/Face/Constants.cpp
-)
-
-Set(FOG_CORE_FACE_HEADERS
-  Src/Fog/Core/Face/Constants.h
-  Src/Fog/Core/Face/Face3dNow.h
-  Src/Fog/Core/Face/Face3dNowExt.h
-  Src/Fog/Core/Face/FaceC.h
-  Src/Fog/Core/Face/FaceMMX.h
-  Src/Fog/Core/Face/FaceMMXExt.h
-  Src/Fog/Core/Face/FaceMMXSSE.h
-  Src/Fog/Core/Face/FaceMMXSSE2.h
-  Src/Fog/Core/Face/FaceMMXSSSE3.h
-  Src/Fog/Core/Face/FaceSSE.h
-  Src/Fog/Core/Face/FaceSSE2.h
-  Src/Fog/Core/Face/FaceSSE3.h
-  Src/Fog/Core/Face/FaceSSSE3.h
 )
 
 # [Fog/Core/Global]
@@ -906,9 +907,9 @@ FogAddOptimizedSources(FOG_CORE_TOOLS_SOURCES SSE2
 
 # Source groups.
 FogAddSourceGroup("Fog/Core"                 ${FOG_CORE_LIB_SOURCES}             ${FOG_CORE_LIB_HEADERS}            )
+FogAddSourceGroup("Fog/Core/Acc"             ${FOG_CORE_ACC_SOURCES}             ${FOG_CORE_ACC_HEADERS}            )
 FogAddSourceGroup("Fog/Core/C++"             ${FOG_CORE_CPP_SOURCES}             ${FOG_CORE_CPP_HEADERS}            )
 FogAddSourceGroup("Fog/Core/Dom"             ${FOG_CORE_DOM_SOURCES}             ${FOG_CORE_DOM_HEADERS}            )
-FogAddSourceGroup("Fog/Core/Face"            ${FOG_CORE_FACE_SOURCES}            ${FOG_CORE_FACE_HEADERS}           )
 FogAddSourceGroup("Fog/Core/Global"          ${FOG_CORE_GLOBAL_SOURCES}          ${FOG_CORE_GLOBAL_HEADERS}         )
 FogAddSourceGroup("Fog/Core/Kernel"          ${FOG_CORE_KERNEL_SOURCES}          ${FOG_CORE_KERNEL_HEADERS}         )
 FogAddSourceGroup("Fog/Core/Math"            ${FOG_CORE_MATH_SOURCES}            ${FOG_CORE_MATH_HEADERS}           )
@@ -935,18 +936,18 @@ Set(FOG_G2D_LIB_HEADERS
   Src/Fog/G2d.h
 )
 
-# [Fog/G2d/Face]
-Set(FOG_G2D_FACE_SOURCES
+# [Fog/G2d/Acc]
+Set(FOG_G2D_ACC_SOURCES
 )
 
-Set(FOG_G2D_FACE_HEADERS
-  Src/Fog/G2d/Face/Face_Raster_C.h
-  Src/Fog/G2d/Face/Face_Raster_MMX.h
-  Src/Fog/G2d/Face/Face_Raster_MMX_Ext.h
-  Src/Fog/G2d/Face/Face_Raster_SSE.h
-  Src/Fog/G2d/Face/Face_Raster_SSE2.h
-  Src/Fog/G2d/Face/Face_Raster_SSE3.h
-  Src/Fog/G2d/Face/Face_Raster_SSSE3.h
+Set(FOG_G2D_ACC_HEADERS
+  Src/Fog/G2d/Acc/AccC.h
+  Src/Fog/G2d/Acc/AccMmx.h
+  Src/Fog/G2d/Acc/AccMmxExt.h
+  Src/Fog/G2d/Acc/AccSse.h
+  Src/Fog/G2d/Acc/AccSse2.h
+  Src/Fog/G2d/Acc/AccSse3.h
+  Src/Fog/G2d/Acc/AccSsse3.h
 )
 
 # [Fog/G2d/Geometry]
@@ -1305,6 +1306,7 @@ Set(FOG_G2D_TEXT_SOURCES
   Src/Fog/G2d/Text/OTCMap.cpp
   Src/Fog/G2d/Text/OTCore.cpp
   Src/Fog/G2d/Text/OTFont.cpp
+  Src/Fog/G2d/Text/TextLayout.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS
@@ -1312,6 +1314,7 @@ Set(FOG_G2D_TEXT_HEADERS
   Src/Fog/G2d/Text/OTCMap.h
   Src/Fog/G2d/Text/OTCore.h
   Src/Fog/G2d/Text/OTFont.h
+  Src/Fog/G2d/Text/TextLayout.h
 )
 
 # [Fog/G2d/Text - Windows]
@@ -1393,7 +1396,7 @@ FogAddOptimizedSources(FOG_G2D_TOOLS_SOURCES SSE2
 
 # Source groups.
 FogAddSourceGroup("Fog/G2d"                  ${FOG_G2D_LIB_SOURCES}              ${FOG_G2D_LIB_HEADERS}             )
-FogAddSourceGroup("Fog/G2d/Face"             ${FOG_G2D_FACE_SOURCES}             ${FOG_G2D_FACE_HEADERS}            )
+FogAddSourceGroup("Fog/G2d/Acc"              ${FOG_G2D_ACC_SOURCES}              ${FOG_G2D_ACC_HEADERS}             )
 FogAddSourceGroup("Fog/G2d/Geometry"         ${FOG_G2D_GEOMETRY_SOURCES}         ${FOG_G2D_GEOMETRY_HEADERS}        )
 FogAddSourceGroup("Fog/G2d/Imaging"          ${FOG_G2D_IMAGING_SOURCES}          ${FOG_G2D_IMAGING_HEADERS}         )
 FogAddSourceGroup("Fog/G2d/Imaging/Codecs"   ${FOG_G2D_IMAGING_CODECS_SOURCES}   ${FOG_G2D_IMAGING_CODECS_HEADERS}  )
@@ -1512,9 +1515,9 @@ EndIf(FOG_BUILD_UI)
 Set(FOG_ALL_SOURCES
   # Fog/Core.
   ${FOG_CORE_LIB_SOURCES}
+  ${FOG_CORE_ACC_SOURCES}
   ${FOG_CORE_CPP_SOURCES}
   ${FOG_CORE_DOM_SOURCES}
-  ${FOG_CORE_FACE_SOURCES}
   ${FOG_CORE_GLOBAL_SOURCES}
   ${FOG_CORE_KERNEL_SOURCES}
   ${FOG_CORE_MATH_SOURCES}
@@ -1524,7 +1527,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_CORE_TOOLS_SOURCES}
   # Fog/G2d.
   ${FOG_G2D_LIB_SOURCES}
-  ${FOG_G2D_FACE_SOURCES}
+  ${FOG_G2D_ACC_SOURCES}
   ${FOG_G2D_GEOMETRY_SOURCES}
   ${FOG_G2D_IMAGING_SOURCES}
   ${FOG_G2D_IMAGING_CODECS_SOURCES}
@@ -1541,9 +1544,9 @@ Set(FOG_ALL_SOURCES
 Set(FOG_ALL_HEADERS
   # Fog/Core.
   ${FOG_CORE_LIB_HEADERS}
+  ${FOG_CORE_ACC_HEADERS}
   ${FOG_CORE_CPP_HEADERS}
   ${FOG_CORE_DOM_HEADERS}
-  ${FOG_CORE_FACE_HEADERS}
   ${FOG_CORE_GLOBAL_HEADERS}
   ${FOG_CORE_KERNEL_HEADERS}
   ${FOG_CORE_MATH_HEADERS}
@@ -1553,7 +1556,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_CORE_TOOLS_HEADERS}
   # Fog/G2d.
   ${FOG_G2D_LIB_HEADERS}
-  ${FOG_G2D_FACE_HEADERS}
+  ${FOG_G2D_ACC_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
   ${FOG_G2D_IMAGING_HEADERS}
   ${FOG_G2D_IMAGING_CODECS_HEADERS}

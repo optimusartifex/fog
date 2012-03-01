@@ -12,11 +12,11 @@
 #include <Fog/Core/Math/Constants.h>
 
 #if defined(FOG_HARDCODE_SSE)
-# include <Fog/Core/C++/IntrinSSE.h>
+# include <Fog/Core/C++/IntrinSse.h>
 #endif // FOG_HARDCODE_SSE
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/C++/IntrinSSE2.h>
+# include <Fog/Core/C++/IntrinSse2.h>
 #endif // FOG_HARDCODE_SSE2
 
 // [Dependencies - C]

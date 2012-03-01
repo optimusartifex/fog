@@ -4,19 +4,19 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACESSE2_H
-#define _FOG_CORE_FACE_FACESSE2_H
+#ifndef _FOG_CORE_ACC_ACCSSE2_H
+#define _FOG_CORE_ACC_ACCSSE2_H
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinSSE2.h>
+#include <Fog/Core/C++/IntrinSse2.h>
 
-#include <Fog/Core/Face/FaceSSE.h>
+#include <Fog/Core/Acc/AccSse.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 
 // ============================================================================
-// [Fog::Face - SSE2 - Constants]
+// [Fog::Acc - SSE2 - Constants]
 // ============================================================================
 
 FOG_XMM_DECLARE_CONST_PI16_VAR(0000000000000000_00000000FF000000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xFF00, 0x0000);
@@ -75,13 +75,13 @@ FOG_XMM_DECLARE_CONST_PD_SET  (m128d_1d65535_1d65535, Fog::MATH_1_DIV_65535);
 FOG_XMM_DECLARE_CONST_PD_SET  (m128d_1d65536_1d65536, Fog::MATH_1_DIV_65536);
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
-//! @addtogroup Fog_Face_SSE2
+//! @addtogroup Fog_Acc_SSE2
 //! @{
 
 // ============================================================================
-// [Fog::Face - SSE2 - Prefetch]
+// [Fog::Acc - SSE2 - Prefetch]
 // ============================================================================
 
 template<typename DstT>
@@ -109,7 +109,7 @@ static FOG_INLINE void prefetchNTA(const DstT* dstp)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Load]
+// [Fog::Acc - SSE2 - Load]
 // ============================================================================
 
 template<typename SrcT>
@@ -193,7 +193,7 @@ static FOG_INLINE void m128dLoad16u(__m128d& dst0, const SrcT* srcp)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Store]
+// [Fog::Acc - SSE2 - Store]
 // ============================================================================
 
 template<typename DstT>
@@ -278,7 +278,7 @@ static FOG_INLINE void m128dStore16nta(DstT* dstp, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Copy]
+// [Fog::Acc - SSE2 - Copy]
 // ============================================================================
 
 static FOG_INLINE void m128iCopy(
@@ -296,7 +296,7 @@ static FOG_INLINE void m128iCopy_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Convert]
+// [Fog::Acc - SSE2 - Convert]
 // ============================================================================
 
 static FOG_INLINE void m128iCvtSI128FromSI(__m128i& dst0, int x0)
@@ -340,7 +340,7 @@ static FOG_INLINE void m128iCvtPI32FromPD(__m128i& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Cvt256From255]
+// [Fog::Acc - SSE2 - Cvt256From255]
 // ============================================================================
 
 static FOG_INLINE void m128iCvt256From255PI16(
@@ -362,7 +362,7 @@ static FOG_INLINE void m128iCvt256From255PI16_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Trunc]
+// [Fog::Acc - SSE2 - Trunc]
 // ============================================================================
 
 static FOG_INLINE void m128iTruncPI32FromSS(int& dst0, const __m128f& x0)
@@ -386,7 +386,7 @@ static FOG_INLINE void m128iTruncPI32FromPD(__m128i& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Unpack]
+// [Fog::Acc - SSE2 - Unpack]
 // ============================================================================
 
 static FOG_INLINE void m128iUnpackPI16FromPI8Lo(__m128i& dst0, const __m128i& x0)
@@ -486,7 +486,7 @@ static FOG_INLINE void m128dUnpackHiPD(__m128d& dst0, const __m128d& x0, const _
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Pack]
+// [Fog::Acc - SSE2 - Pack]
 // ============================================================================
 
 static FOG_INLINE void m128iPackPI8FromPI16(__m128i& dst0, const __m128i& x0)
@@ -556,7 +556,7 @@ static FOG_INLINE void m128iPackPU16FromPI32(__m128i& dst0, const __m128i& x0, c
 }
 
 // ============================================================================
-// [Fog::Face - P32 - Zero / Fill]
+// [Fog::Acc - P32 - Zero / Fill]
 // ============================================================================
 
 static FOG_INLINE void m128iZero(__m128i& dst0)
@@ -654,7 +654,7 @@ static FOG_INLINE void m128iFillPI32i(__m128i& dst0, const __m128i& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Shuffle]
+// [Fog::Acc - SSE2 - Shuffle]
 // ============================================================================
 
 template<int W, int X, int Y, int Z>
@@ -683,7 +683,7 @@ static FOG_INLINE void m128iShufflePI32(__m128i& dst0, const __m128i& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Swap]
+// [Fog::Acc - SSE2 - Swap]
 // ============================================================================
 
 static FOG_INLINE void m128iSwapPI16(__m128i& dst0, const __m128i& x0)
@@ -713,7 +713,7 @@ static FOG_INLINE void m128dSwapPD(__m128d& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Extend]
+// [Fog::Acc - SSE2 - Extend]
 // ============================================================================
 
 template<typename SrcT>
@@ -734,7 +734,7 @@ static FOG_INLINE void m128dExtendHi(__m128d& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Add]
+// [Fog::Acc - SSE2 - Add]
 // ============================================================================
 
 static FOG_INLINE void m128iAddPI8(
@@ -822,7 +822,7 @@ static FOG_INLINE void m128dAddPD_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Add-Saturate]
+// [Fog::Acc - SSE2 - Add-Saturate]
 // ============================================================================
 
 static FOG_INLINE void m128iAddsPI8(
@@ -882,7 +882,7 @@ static FOG_INLINE void m128iAddusPU16_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Sub]
+// [Fog::Acc - SSE2 - Sub]
 // ============================================================================
 
 static FOG_INLINE void m128iSubPI8(
@@ -970,7 +970,7 @@ static FOG_INLINE void m128dSubPD_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Sub-Saturate]
+// [Fog::Acc - SSE2 - Sub-Saturate]
 // ============================================================================
 
 static FOG_INLINE void m128iSubsPI8(
@@ -1030,7 +1030,7 @@ static FOG_INLINE void m128iSubusPU16_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Mul]
+// [Fog::Acc - SSE2 - Mul]
 // ============================================================================
 
 static FOG_INLINE void m128iMulLoPI16(
@@ -1117,7 +1117,7 @@ static FOG_INLINE void m128dMulPD_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - EMul]
+// [Fog::Acc - SSE2 - EMul]
 // ============================================================================
 
 static FOG_INLINE void m128iEMulPU32(
@@ -1135,7 +1135,7 @@ static FOG_INLINE void m128iEMulPU32_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - MAdd]
+// [Fog::Acc - SSE2 - MAdd]
 // ============================================================================
 
 static FOG_INLINE void m128iMAddPI16(
@@ -1153,7 +1153,7 @@ static FOG_INLINE void m128iMAddPI16_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Div]
+// [Fog::Acc - SSE2 - Div]
 // ============================================================================
 
 static FOG_INLINE void m128dDivSD(
@@ -1185,7 +1185,7 @@ static FOG_INLINE void m128dDivPD_2x(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Sqrt]
+// [Fog::Acc - SSE2 - Sqrt]
 // ============================================================================
 
 //! @brief Calculate square-root of @a a.
@@ -1222,7 +1222,7 @@ static FOG_INLINE void m128dSqrtPD(__m128d& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Reciprocal]
+// [Fog::Acc - SSE2 - Reciprocal]
 // ============================================================================
 
 static FOG_INLINE void m128dRcpSD(__m128d& dst0, const __m128d& x0)
@@ -1236,7 +1236,7 @@ static FOG_INLINE void m128dRcpPD(__m128d& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Min/Max]
+// [Fog::Acc - SSE2 - Min/Max]
 // ============================================================================
 
 static FOG_INLINE void m128iMinPU8(__m128i& dst0, const __m128i& x0, const __m128i& y0)
@@ -1280,7 +1280,7 @@ static FOG_INLINE void m128dMaxPD(__m128d& dst0, const __m128d& x0, const __m128
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Avg]
+// [Fog::Acc - SSE2 - Avg]
 // ============================================================================
 
 static FOG_INLINE void m128iAvgPU8(__m128i& dst0, const __m128i& x0, const __m128i& y0)
@@ -1294,7 +1294,7 @@ static FOG_INLINE void m128iAvgPU16(__m128i& dst0, const __m128i& x0, const __m1
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - BitOps]
+// [Fog::Acc - SSE2 - BitOps]
 // ============================================================================
 
 static FOG_INLINE void m128iAnd(__m128i& dst0, const __m128i& x0, const __m128i& y0)
@@ -1338,7 +1338,7 @@ static FOG_INLINE void m128dXor(__m128d& dst0, const __m128d& x0, const __m128d&
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Extend]
+// [Fog::Acc - SSE2 - Extend]
 // ============================================================================
 
 static FOG_INLINE void m128iExtendPI8FromSI8(
@@ -1374,7 +1374,7 @@ static FOG_INLINE void m128iExtendPI32FromSI32(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Expand]
+// [Fog::Acc - SSE2 - Expand]
 // ============================================================================
 
 static FOG_INLINE void m128iExpandPI8FromSI8(
@@ -1430,7 +1430,7 @@ static FOG_INLINE void m128iExpandPI32FromSI32Hi(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - LShift / RShift]
+// [Fog::Acc - SSE2 - LShift / RShift]
 // ============================================================================
 
 template<int COUNT_BITS>
@@ -1496,7 +1496,7 @@ static FOG_INLINE void m128iRShiftPI32(__m128i& dst0, const __m128i& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Negate255/256]
+// [Fog::Acc - SSE2 - Negate255/256]
 // ============================================================================
 
 static FOG_INLINE void m128iNegate255PI8(__m128i& dst0, const __m128i& x0)
@@ -1530,7 +1530,7 @@ static FOG_INLINE void m128iNegate65536PI32(__m128i& dst0, const __m128i& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Compare]
+// [Fog::Acc - SSE2 - Compare]
 // ============================================================================
 
 static FOG_INLINE void m128iCmpEqPI8(__m128i& dst0, const __m128i& x0, const __m128i& y0) { dst0 = _mm_cmpeq_epi8(x0, y0); }
@@ -1582,7 +1582,7 @@ static FOG_INLINE void m128dCmpNgtSD(__m128d& dst0, const __m128d& x0, const __m
 static FOG_INLINE void m128dCmpNgtPD(__m128d& dst0, const __m128d& x0, const __m128d& y0) { dst0 = _mm_cmpngt_pd(x0, y0); }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Epsilon]
+// [Fog::Acc - SSE2 - Epsilon]
 // ============================================================================
 
 static FOG_INLINE void m128dEpsilonSD(__m128d& dst0, const __m128d& x0)
@@ -1608,7 +1608,7 @@ static FOG_INLINE void m128dEpsilonPD(__m128d& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - MoveMask]
+// [Fog::Acc - SSE2 - MoveMask]
 // ============================================================================
 
 //! @brief Create x0 16-bit mask from the most significant bits of the 16 signed
@@ -1640,7 +1640,7 @@ static FOG_INLINE void m128dMoveMaskPD(int& dst0, const __m128d& x0)
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - MulDiv255/256]
+// [Fog::Acc - SSE2 - MulDiv255/256]
 // ============================================================================
 
 static FOG_INLINE void m128iMulDiv255PI16(
@@ -1684,7 +1684,7 @@ static FOG_INLINE void m128iMulDiv256PI16(
 }
 
 // ============================================================================
-// [Fog::Face - SSE2 - Misc]
+// [Fog::Acc - SSE2 - Misc]
 // ============================================================================
 
 template<int INDEX_W>
@@ -1703,13 +1703,13 @@ static FOG_INLINE void m128iExtractPI16(
 
 //! @}
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // MMX+SSE2 extensions require both, Face_MMX.h, and Face_SSE2.h headers.
-#if defined(_FOG_CORE_FACE_FACEMMX_H)
-# include <Fog/Core/Face/FaceMMXSSE2.h>
-#endif // _FOG_CORE_FACE_FACEMMX_H
+#if defined(_FOG_CORE_ACC_ACCMMX_H)
+# include <Fog/Core/Acc/AccMmxSse2.h>
+#endif // _FOG_CORE_ACC_ACCMMX_H
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACESSE2_H
+#endif // _FOG_CORE_ACC_ACCSSE2_H

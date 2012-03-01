@@ -98,16 +98,9 @@ struct FOG_API PaintDeviceInfo
     uint32_t fontKerning,
     uint32_t fontHinting,
     uint32_t fontQuality,
-    uint32_t fontAlignMode,
     uint32_t lcdOrder,
     float dpi,
     const PointF& scale);
-
-  // --------------------------------------------------------------------------
-  // [Methods]
-  // --------------------------------------------------------------------------
-
-  err_t makePhysicalFont(Font& physical, const Font& src);
 
   // --------------------------------------------------------------------------
   // [Operator Overload]

@@ -13,7 +13,6 @@
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/G2d/Painting/PaintDeviceInfo.h>
 #include <Fog/G2d/Text/Font.h>
-#include <Fog/G2d/Text/FontHints.h>
 
 namespace Fog {
 
@@ -52,7 +51,6 @@ static FOG_INLINE err_t PaintDeviceInfo_detach(PaintDeviceInfo* self)
     newd->paintDevice = d->paintDevice;
     newd->fontKerning = d->fontKerning;
     newd->fontHinting = d->fontHinting;
-    newd->fontAlignMode = d->fontAlignMode;
     newd->fontQuality = d->fontQuality;
     newd->lcdOrder    = d->lcdOrder;
     newd->dpiInfo     = d->dpiInfo;
@@ -98,7 +96,6 @@ void PaintDeviceInfo::reset()
 err_t PaintDeviceInfo::create(uint32_t paintDevice,
   uint32_t fontKerning,
   uint32_t fontHinting,
-  uint32_t fontAlignMode,
   uint32_t fontQuality,
   uint32_t lcdOrder,
   float dpi,
@@ -120,7 +117,6 @@ err_t PaintDeviceInfo::create(uint32_t paintDevice,
   _d->paintDevice = paintDevice;
   _d->fontKerning = fontKerning;
   _d->fontHinting = fontHinting;
-  _d->fontAlignMode = fontAlignMode;
   _d->fontQuality = fontQuality;
   _d->lcdOrder = lcdOrder;
 
@@ -128,35 +124,6 @@ err_t PaintDeviceInfo::create(uint32_t paintDevice,
   _d->scale = scale;
   _d->aspectRatio.x = scale.x / scale.y;
   _d->aspectRatio.y = scale.y / scale.x;
-
-  return ERR_OK;
-}
-
-// ============================================================================
-// [Fog::PaintDeviceInfo - Methods]
-// ============================================================================
-
-err_t PaintDeviceInfo::makePhysicalFont(Font& physical, const Font& src)
-{
-  if (src.isPhysical())
-  {
-    physical = src;
-    return ERR_OK;
-  }
-
-  FontData* sd = src._d;
-
-  StringW family = src.getFamily();
-  float height = _d->dpiInfo.toDeviceSpace(sd->metrics.getHeight(), sd->unit);
-  FontHints hints = sd->hints;
-  TransformF transform = sd->transform;
-
-  if (hints.getKerning() == FONT_KERNING_DETECT) hints.setKerning(_d->fontKerning);
-  if (hints.getHinting() == FONT_HINTING_DETECT) hints.setHinting(_d->fontHinting);
-  if (hints.getQuality() == FONT_QUALITY_DETECT) hints.setQuality(_d->fontQuality);
-
-  FOG_RETURN_ON_ERROR(physical.create(family, height, UNIT_PX, hints, transform));
-  FOG_ASSERT(physical.isPhysical() == true);
 
   return ERR_OK;
 }

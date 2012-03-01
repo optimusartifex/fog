@@ -8,7 +8,7 @@
 #include FOG_PRECOMP
 #endif // FOG_PRECOMP
 
-#include <Fog/Core/Face/FaceSSE2.h>
+#include <Fog/Core/Acc/AccSse2.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Point.h>
@@ -27,8 +27,8 @@ static void FOG_CDECL TransformD_mapPointD_SSE2(const TransformD* self, PointD* 
   __m128d m_20_21;
   __m128d src0;
 
-  Face::m128dLoad16u(m_20_21, &self->_20);
-  Face::m128dLoad16u(src0, src);
+  Acc::m128dLoad16u(m_20_21, &self->_20);
+  Acc::m128dLoad16u(src0, src);
 
   switch (selfType)
   {
@@ -46,15 +46,15 @@ static void FOG_CDECL TransformD_mapPointD_SSE2(const TransformD* self, PointD* 
 
     case TRANSFORM_TYPE_TRANSLATION:
     {
-      Face::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
       break;
     }
 
     case TRANSFORM_TYPE_SWAP:
     {
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dMulPD(src0, src0, _mm_setr_pd(self->_10, self->_01));
-      Face::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dMulPD(src0, src0, _mm_setr_pd(self->_10, self->_01));
+      Acc::m128dAddPD(src0, src0, m_20_21);
       break;
     }
 
@@ -65,12 +65,12 @@ static void FOG_CDECL TransformD_mapPointD_SSE2(const TransformD* self, PointD* 
       __m128d m_10_01 = _mm_setr_pd(self->_10, self->_01);
       __m128d rev0;
 
-      Face::m128dSwapPD(rev0, src0);
+      Acc::m128dSwapPD(rev0, src0);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(rev0, rev0, m_10_01);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src0, src0, rev0);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(rev0, rev0, m_10_01);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src0, src0, rev0);
       break;
     }
 
@@ -82,21 +82,21 @@ static void FOG_CDECL TransformD_mapPointD_SSE2(const TransformD* self, PointD* 
       __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
       __m128d inv0 = _mm_mul_pd(src0, _mm_setr_pd(self->_02, self->_12));
 
-      Face::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
-      Face::m128dAddSD(inv0, inv0, _mm_load_sd(&self->_22));
+      Acc::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
+      Acc::m128dAddSD(inv0, inv0, _mm_load_sd(&self->_22));
 
-      Face::m128dEpsilonSD(inv0, inv0);
-      Face::m128dRcpSD(inv0, inv0);
-      Face::m128dExtendLo(inv0, inv0);
+      Acc::m128dEpsilonSD(inv0, inv0);
+      Acc::m128dRcpSD(inv0, inv0);
+      Acc::m128dExtendLo(inv0, inv0);
 
       // src0.x = (x * _00 + y * _01 + _20)
       // src0.y = (x * _01 + y * _11 + _21)
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(rev0, rev0, m_10_01);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src0, src0, rev0);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(rev0, rev0, m_10_01);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src0, src0, rev0);
 
-      Face::m128dMulPD(src0, src0, inv0);
+      Acc::m128dMulPD(src0, src0, inv0);
       break;
     }
 
@@ -110,7 +110,7 @@ static void FOG_CDECL TransformD_mapPointD_SSE2(const TransformD* self, PointD* 
       FOG_ASSERT_NOT_REACHED();
   }
 
-  Face::m128dStore16u(dst, src0);
+  Acc::m128dStore16u(dst, src0);
 }
 
 static void FOG_CDECL TransformD_mapPointsF_Identity_SSE2(const TransformD* self, PointD* dst, const PointF* src, size_t length)
@@ -123,22 +123,22 @@ static void FOG_CDECL TransformD_mapPointsF_Identity_SSE2(const TransformD* self
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -147,8 +147,8 @@ static void FOG_CDECL TransformD_mapPointsF_Identity_SSE2(const TransformD* self
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -165,22 +165,22 @@ static void FOG_CDECL TransformD_mapPointsD_Identity_SSE2(const TransformD* self
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dLoad16a(src1, &src[1]);
-      Face::m128dLoad16a(src2, &src[2]);
-      Face::m128dLoad16a(src3, &src[3]);
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dLoad16a(src1, &src[1]);
+      Acc::m128dLoad16a(src2, &src[2]);
+      Acc::m128dLoad16a(src3, &src[3]);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -190,10 +190,10 @@ static void FOG_CDECL TransformD_mapPointsD_Identity_SSE2(const TransformD* self
       __m128i src0X;
       __m128i src0Y;
 
-      Face::m128iLoad8(src0X, &src[0].x);
-      Face::m128iLoad8(src0Y, &src[0].y);
-      Face::m128iStore8(&dst[0].x, src0X);
-      Face::m128iStore8(&dst[0].y, src0Y);
+      Acc::m128iLoad8(src0X, &src[0].x);
+      Acc::m128iLoad8(src0Y, &src[0].y);
+      Acc::m128iStore8(&dst[0].x, src0X);
+      Acc::m128iStore8(&dst[0].y, src0Y);
     }
   }
 }
@@ -210,29 +210,29 @@ static void FOG_CDECL TransformD_mapPointsF_Translation_SSE2(const TransformD* s
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -241,29 +241,29 @@ static void FOG_CDECL TransformD_mapPointsF_Translation_SSE2(const TransformD* s
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -280,29 +280,29 @@ static void FOG_CDECL TransformD_mapPointsD_Translation_SSE2(const TransformD* s
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dLoad16a(src1, &src[1]);
-      Face::m128dLoad16a(src2, &src[2]);
-      Face::m128dLoad16a(src3, &src[3]);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dLoad16a(src1, &src[1]);
+      Acc::m128dLoad16a(src2, &src[2]);
+      Acc::m128dLoad16a(src3, &src[3]);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -311,29 +311,29 @@ static void FOG_CDECL TransformD_mapPointsD_Translation_SSE2(const TransformD* s
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dLoad16u(src1, &src[1]);
-      Face::m128dLoad16u(src2, &src[2]);
-      Face::m128dLoad16u(src3, &src[3]);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dLoad16u(src1, &src[1]);
+      Acc::m128dLoad16u(src2, &src[2]);
+      Acc::m128dLoad16u(src3, &src[3]);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -351,35 +351,35 @@ static void FOG_CDECL TransformD_mapPointsF_Scaling_SSE2(const TransformD* self,
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -388,35 +388,35 @@ static void FOG_CDECL TransformD_mapPointsF_Scaling_SSE2(const TransformD* self,
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -434,35 +434,35 @@ static void FOG_CDECL TransformD_mapPointsD_Scaling_SSE2(const TransformD* self,
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dLoad16a(src1, &src[1]);
-      Face::m128dLoad16a(src2, &src[2]);
-      Face::m128dLoad16a(src3, &src[3]);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dLoad16a(src1, &src[1]);
+      Acc::m128dLoad16a(src2, &src[2]);
+      Acc::m128dLoad16a(src3, &src[3]);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -471,35 +471,35 @@ static void FOG_CDECL TransformD_mapPointsD_Scaling_SSE2(const TransformD* self,
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dLoad16u(src1, &src[1]);
-      Face::m128dLoad16u(src2, &src[2]);
-      Face::m128dLoad16u(src3, &src[3]);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dLoad16u(src1, &src[1]);
+      Acc::m128dLoad16u(src2, &src[2]);
+      Acc::m128dLoad16u(src3, &src[3]);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -517,41 +517,41 @@ static void FOG_CDECL TransformD_mapPointsF_Swap_SSE2(const TransformD* self, Po
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dSwapPD(src1, src1);
-      Face::m128dSwapPD(src2, src2);
-      Face::m128dSwapPD(src3, src3);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dSwapPD(src1, src1);
+      Acc::m128dSwapPD(src2, src2);
+      Acc::m128dSwapPD(src3, src3);
 
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dMulPD(src1, src1, m_01_10);
-      Face::m128dMulPD(src2, src2, m_01_10);
-      Face::m128dMulPD(src3, src3, m_01_10);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dMulPD(src1, src1, m_01_10);
+      Acc::m128dMulPD(src2, src2, m_01_10);
+      Acc::m128dMulPD(src3, src3, m_01_10);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -560,41 +560,41 @@ static void FOG_CDECL TransformD_mapPointsF_Swap_SSE2(const TransformD* self, Po
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dSwapPD(src1, src1);
-      Face::m128dSwapPD(src2, src2);
-      Face::m128dSwapPD(src3, src3);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dSwapPD(src1, src1);
+      Acc::m128dSwapPD(src2, src2);
+      Acc::m128dSwapPD(src3, src3);
 
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dMulPD(src1, src1, m_01_10);
-      Face::m128dMulPD(src2, src2, m_01_10);
-      Face::m128dMulPD(src3, src3, m_01_10);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dMulPD(src1, src1, m_01_10);
+      Acc::m128dMulPD(src2, src2, m_01_10);
+      Acc::m128dMulPD(src3, src3, m_01_10);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -612,41 +612,41 @@ static void FOG_CDECL TransformD_mapPointsD_Swap_SSE2(const TransformD* self, Po
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dLoad16a(src1, &src[1]);
-      Face::m128dLoad16a(src2, &src[2]);
-      Face::m128dLoad16a(src3, &src[3]);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dLoad16a(src1, &src[1]);
+      Acc::m128dLoad16a(src2, &src[2]);
+      Acc::m128dLoad16a(src3, &src[3]);
 
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dSwapPD(src1, src1);
-      Face::m128dSwapPD(src2, src2);
-      Face::m128dSwapPD(src3, src3);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dSwapPD(src1, src1);
+      Acc::m128dSwapPD(src2, src2);
+      Acc::m128dSwapPD(src3, src3);
 
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dMulPD(src1, src1, m_01_10);
-      Face::m128dMulPD(src2, src2, m_01_10);
-      Face::m128dMulPD(src3, src3, m_01_10);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dMulPD(src1, src1, m_01_10);
+      Acc::m128dMulPD(src2, src2, m_01_10);
+      Acc::m128dMulPD(src3, src3, m_01_10);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16a(&dst[0], src0);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16a(&dst[0], src0);
     }
   }
   else
@@ -655,41 +655,41 @@ static void FOG_CDECL TransformD_mapPointsD_Swap_SSE2(const TransformD* self, Po
     {
       __m128d src0, src1, src2, src3;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dLoad16u(src1, &src[1]);
-      Face::m128dLoad16u(src2, &src[2]);
-      Face::m128dLoad16u(src3, &src[3]);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dLoad16u(src1, &src[1]);
+      Acc::m128dLoad16u(src2, &src[2]);
+      Acc::m128dLoad16u(src3, &src[3]);
 
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dSwapPD(src1, src1);
-      Face::m128dSwapPD(src2, src2);
-      Face::m128dSwapPD(src3, src3);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dSwapPD(src1, src1);
+      Acc::m128dSwapPD(src2, src2);
+      Acc::m128dSwapPD(src3, src3);
 
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dMulPD(src1, src1, m_01_10);
-      Face::m128dMulPD(src2, src2, m_01_10);
-      Face::m128dMulPD(src3, src3, m_01_10);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dMulPD(src1, src1, m_01_10);
+      Acc::m128dMulPD(src2, src2, m_01_10);
+      Acc::m128dMulPD(src3, src3, m_01_10);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
 
     for (i = length & 3; i; i--, dst++, src++)
     {
       __m128d src0;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dSwapPD(src0, src0);
-      Face::m128dMulPD(src0, src0, m_01_10);
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dStore16u(&dst[0], src0);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dSwapPD(src0, src0);
+      Acc::m128dMulPD(src0, src0, m_01_10);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dStore16u(&dst[0], src0);
     }
   }
 }
@@ -709,41 +709,41 @@ static void FOG_CDECL TransformD_mapPointsF_Affine_SSE2(const TransformD* self, 
       __m128d src0, src1, src2, src3;
       __m128d rev0, rev1, rev2, rev3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dSwapPD(rev0, src0);
-      Face::m128dSwapPD(rev1, src1);
+      Acc::m128dSwapPD(rev0, src0);
+      Acc::m128dSwapPD(rev1, src1);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(rev0, rev0, m_10_01);
-      Face::m128dMulPD(rev1, rev1, m_10_01);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(rev0, rev0, m_10_01);
+      Acc::m128dMulPD(rev1, rev1, m_10_01);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src0, src0, rev0);
-      Face::m128dAddPD(src1, src1, rev1);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src0, src0, rev0);
+      Acc::m128dAddPD(src1, src1, rev1);
 
-      Face::m128dSwapPD(rev2, src2);
-      Face::m128dSwapPD(rev3, src3);
+      Acc::m128dSwapPD(rev2, src2);
+      Acc::m128dSwapPD(rev3, src3);
 
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
-      Face::m128dMulPD(rev2, rev2, m_10_01);
-      Face::m128dMulPD(rev3, rev3, m_10_01);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(rev2, rev2, m_10_01);
+      Acc::m128dMulPD(rev3, rev3, m_10_01);
 
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
-      Face::m128dAddPD(src2, src2, rev2);
-      Face::m128dAddPD(src3, src3, rev3);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src2, src2, rev2);
+      Acc::m128dAddPD(src3, src3, rev3);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
   }
   else
@@ -753,41 +753,41 @@ static void FOG_CDECL TransformD_mapPointsF_Affine_SSE2(const TransformD* self, 
       __m128d src0, src1, src2, src3;
       __m128d rev0, rev1, rev2, rev3;
 
-      Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-      Face::m128dLoad8CvtFrom2xPS(src1, &src[1]);
-      Face::m128dLoad8CvtFrom2xPS(src2, &src[2]);
-      Face::m128dLoad8CvtFrom2xPS(src3, &src[3]);
+      Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+      Acc::m128dLoad8CvtFrom2xPS(src1, &src[1]);
+      Acc::m128dLoad8CvtFrom2xPS(src2, &src[2]);
+      Acc::m128dLoad8CvtFrom2xPS(src3, &src[3]);
 
-      Face::m128dSwapPD(rev0, src0);
-      Face::m128dSwapPD(rev1, src1);
+      Acc::m128dSwapPD(rev0, src0);
+      Acc::m128dSwapPD(rev1, src1);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(rev0, rev0, m_10_01);
-      Face::m128dMulPD(rev1, rev1, m_10_01);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(rev0, rev0, m_10_01);
+      Acc::m128dMulPD(rev1, rev1, m_10_01);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src0, src0, rev0);
-      Face::m128dAddPD(src1, src1, rev1);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src0, src0, rev0);
+      Acc::m128dAddPD(src1, src1, rev1);
 
-      Face::m128dSwapPD(rev2, src2);
-      Face::m128dSwapPD(rev3, src3);
+      Acc::m128dSwapPD(rev2, src2);
+      Acc::m128dSwapPD(rev3, src3);
 
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
-      Face::m128dMulPD(rev2, rev2, m_10_01);
-      Face::m128dMulPD(rev3, rev3, m_10_01);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(rev2, rev2, m_10_01);
+      Acc::m128dMulPD(rev3, rev3, m_10_01);
 
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
-      Face::m128dAddPD(src2, src2, rev2);
-      Face::m128dAddPD(src3, src3, rev3);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src2, src2, rev2);
+      Acc::m128dAddPD(src3, src3, rev3);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
   }
 
@@ -795,15 +795,15 @@ static void FOG_CDECL TransformD_mapPointsF_Affine_SSE2(const TransformD* self, 
   {
     __m128d src0, rev0;
 
-    Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
-    Face::m128dSwapPD(rev0, src0);
+    Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+    Acc::m128dSwapPD(rev0, src0);
 
-    Face::m128dMulPD(src0, src0, m_00_11);
-    Face::m128dMulPD(rev0, rev0, m_10_01);
-    Face::m128dAddPD(src0, src0, m_20_21);
-    Face::m128dAddPD(src0, src0, rev0);
+    Acc::m128dMulPD(src0, src0, m_00_11);
+    Acc::m128dMulPD(rev0, rev0, m_10_01);
+    Acc::m128dAddPD(src0, src0, m_20_21);
+    Acc::m128dAddPD(src0, src0, rev0);
 
-    Face::m128dStore16u(&dst[0], src0);
+    Acc::m128dStore16u(&dst[0], src0);
   }
 }
 
@@ -822,41 +822,41 @@ static void FOG_CDECL TransformD_mapPointsD_Affine_SSE2(const TransformD* self, 
       __m128d src0, src1, src2, src3;
       __m128d rev0, rev1, rev2, rev3;
 
-      Face::m128dLoad16a(src0, &src[0]);
-      Face::m128dLoad16a(src1, &src[1]);
-      Face::m128dLoad16a(src2, &src[2]);
-      Face::m128dLoad16a(src3, &src[3]);
+      Acc::m128dLoad16a(src0, &src[0]);
+      Acc::m128dLoad16a(src1, &src[1]);
+      Acc::m128dLoad16a(src2, &src[2]);
+      Acc::m128dLoad16a(src3, &src[3]);
 
-      Face::m128dSwapPD(rev0, src0);
-      Face::m128dSwapPD(rev1, src1);
+      Acc::m128dSwapPD(rev0, src0);
+      Acc::m128dSwapPD(rev1, src1);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(rev0, rev0, m_10_01);
-      Face::m128dMulPD(rev1, rev1, m_10_01);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(rev0, rev0, m_10_01);
+      Acc::m128dMulPD(rev1, rev1, m_10_01);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src0, src0, rev0);
-      Face::m128dAddPD(src1, src1, rev1);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src0, src0, rev0);
+      Acc::m128dAddPD(src1, src1, rev1);
 
-      Face::m128dSwapPD(rev2, src2);
-      Face::m128dSwapPD(rev3, src3);
+      Acc::m128dSwapPD(rev2, src2);
+      Acc::m128dSwapPD(rev3, src3);
 
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
-      Face::m128dMulPD(rev2, rev2, m_10_01);
-      Face::m128dMulPD(rev3, rev3, m_10_01);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(rev2, rev2, m_10_01);
+      Acc::m128dMulPD(rev3, rev3, m_10_01);
 
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
-      Face::m128dAddPD(src2, src2, rev2);
-      Face::m128dAddPD(src3, src3, rev3);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src2, src2, rev2);
+      Acc::m128dAddPD(src3, src3, rev3);
 
-      Face::m128dStore16a(&dst[0], src0);
-      Face::m128dStore16a(&dst[1], src1);
-      Face::m128dStore16a(&dst[2], src2);
-      Face::m128dStore16a(&dst[3], src3);
+      Acc::m128dStore16a(&dst[0], src0);
+      Acc::m128dStore16a(&dst[1], src1);
+      Acc::m128dStore16a(&dst[2], src2);
+      Acc::m128dStore16a(&dst[3], src3);
     }
   }
   else
@@ -866,41 +866,41 @@ static void FOG_CDECL TransformD_mapPointsD_Affine_SSE2(const TransformD* self, 
       __m128d src0, src1, src2, src3;
       __m128d rev0, rev1, rev2, rev3;
 
-      Face::m128dLoad16u(src0, &src[0]);
-      Face::m128dLoad16u(src1, &src[1]);
-      Face::m128dLoad16u(src2, &src[2]);
-      Face::m128dLoad16u(src3, &src[3]);
+      Acc::m128dLoad16u(src0, &src[0]);
+      Acc::m128dLoad16u(src1, &src[1]);
+      Acc::m128dLoad16u(src2, &src[2]);
+      Acc::m128dLoad16u(src3, &src[3]);
 
-      Face::m128dSwapPD(rev0, src0);
-      Face::m128dSwapPD(rev1, src1);
+      Acc::m128dSwapPD(rev0, src0);
+      Acc::m128dSwapPD(rev1, src1);
 
-      Face::m128dMulPD(src0, src0, m_00_11);
-      Face::m128dMulPD(src1, src1, m_00_11);
-      Face::m128dMulPD(rev0, rev0, m_10_01);
-      Face::m128dMulPD(rev1, rev1, m_10_01);
+      Acc::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src1, src1, m_00_11);
+      Acc::m128dMulPD(rev0, rev0, m_10_01);
+      Acc::m128dMulPD(rev1, rev1, m_10_01);
 
-      Face::m128dAddPD(src0, src0, m_20_21);
-      Face::m128dAddPD(src1, src1, m_20_21);
-      Face::m128dAddPD(src0, src0, rev0);
-      Face::m128dAddPD(src1, src1, rev1);
+      Acc::m128dAddPD(src0, src0, m_20_21);
+      Acc::m128dAddPD(src1, src1, m_20_21);
+      Acc::m128dAddPD(src0, src0, rev0);
+      Acc::m128dAddPD(src1, src1, rev1);
 
-      Face::m128dSwapPD(rev2, src2);
-      Face::m128dSwapPD(rev3, src3);
+      Acc::m128dSwapPD(rev2, src2);
+      Acc::m128dSwapPD(rev3, src3);
 
-      Face::m128dMulPD(src2, src2, m_00_11);
-      Face::m128dMulPD(src3, src3, m_00_11);
-      Face::m128dMulPD(rev2, rev2, m_10_01);
-      Face::m128dMulPD(rev3, rev3, m_10_01);
+      Acc::m128dMulPD(src2, src2, m_00_11);
+      Acc::m128dMulPD(src3, src3, m_00_11);
+      Acc::m128dMulPD(rev2, rev2, m_10_01);
+      Acc::m128dMulPD(rev3, rev3, m_10_01);
 
-      Face::m128dAddPD(src2, src2, m_20_21);
-      Face::m128dAddPD(src3, src3, m_20_21);
-      Face::m128dAddPD(src2, src2, rev2);
-      Face::m128dAddPD(src3, src3, rev3);
+      Acc::m128dAddPD(src2, src2, m_20_21);
+      Acc::m128dAddPD(src3, src3, m_20_21);
+      Acc::m128dAddPD(src2, src2, rev2);
+      Acc::m128dAddPD(src3, src3, rev3);
 
-      Face::m128dStore16u(&dst[0], src0);
-      Face::m128dStore16u(&dst[1], src1);
-      Face::m128dStore16u(&dst[2], src2);
-      Face::m128dStore16u(&dst[3], src3);
+      Acc::m128dStore16u(&dst[0], src0);
+      Acc::m128dStore16u(&dst[1], src1);
+      Acc::m128dStore16u(&dst[2], src2);
+      Acc::m128dStore16u(&dst[3], src3);
     }
   }
 
@@ -908,15 +908,15 @@ static void FOG_CDECL TransformD_mapPointsD_Affine_SSE2(const TransformD* self, 
   {
     __m128d src0, rev0;
 
-    Face::m128dLoad16u(src0, &src[0]);
-    Face::m128dSwapPD(rev0, src0);
+    Acc::m128dLoad16u(src0, &src[0]);
+    Acc::m128dSwapPD(rev0, src0);
 
-    Face::m128dMulPD(src0, src0, m_00_11);
-    Face::m128dMulPD(rev0, rev0, m_10_01);
-    Face::m128dAddPD(src0, src0, m_20_21);
-    Face::m128dAddPD(src0, src0, rev0);
+    Acc::m128dMulPD(src0, src0, m_00_11);
+    Acc::m128dMulPD(rev0, rev0, m_10_01);
+    Acc::m128dAddPD(src0, src0, m_20_21);
+    Acc::m128dAddPD(src0, src0, rev0);
 
-    Face::m128dStore16u(&dst[0], src0);
+    Acc::m128dStore16u(&dst[0], src0);
   }
 }
 
@@ -930,17 +930,17 @@ static void FOG_CDECL TransformD_mapPointsF_Projection_SSE2(const TransformD* se
     __m128d m_10_10, m_11_11, m_12_12;
     __m128d m_20_20, m_21_21, m_22_22;
 
-    Face::m128dExtendLo(m_00_00, &self->_00);
-    Face::m128dExtendLo(m_01_01, &self->_01);
-    Face::m128dExtendLo(m_02_02, &self->_02);
+    Acc::m128dExtendLo(m_00_00, &self->_00);
+    Acc::m128dExtendLo(m_01_01, &self->_01);
+    Acc::m128dExtendLo(m_02_02, &self->_02);
 
-    Face::m128dExtendLo(m_10_10, &self->_10);
-    Face::m128dExtendLo(m_11_11, &self->_11);
-    Face::m128dExtendLo(m_12_12, &self->_12);
+    Acc::m128dExtendLo(m_10_10, &self->_10);
+    Acc::m128dExtendLo(m_11_11, &self->_11);
+    Acc::m128dExtendLo(m_12_12, &self->_12);
 
-    Face::m128dExtendLo(m_20_20, &self->_20);
-    Face::m128dExtendLo(m_21_21, &self->_21);
-    Face::m128dExtendLo(m_22_22, &self->_22);
+    Acc::m128dExtendLo(m_20_20, &self->_20);
+    Acc::m128dExtendLo(m_21_21, &self->_21);
+    Acc::m128dExtendLo(m_22_22, &self->_22);
 
     for (i = length >> 1; i; i--, dst += 2, src += 2)
     {
@@ -952,46 +952,46 @@ static void FOG_CDECL TransformD_mapPointsF_Projection_SSE2(const TransformD* se
       // src0xx = [x0, x1]
       // src0yy = [y0, y1]
       __m128f tmp0;
-      Face::m128fLoad16uLoHi(tmp0, src);
-      Face::m128dCvtPDFromPS(src0xx, _mm_shuffle_epi32_f(tmp0, _MM_SHUFFLE(3, 1, 2, 0)));
-      Face::m128dCvtPDFromPS(src0yy, _mm_shuffle_epi32_f(tmp0, _MM_SHUFFLE(2, 0, 3, 1)));
+      Acc::m128fLoad16uLoHi(tmp0, src);
+      Acc::m128dCvtPDFromPS(src0xx, _mm_shuffle_epi32_f(tmp0, _MM_SHUFFLE(3, 1, 2, 0)));
+      Acc::m128dCvtPDFromPS(src0yy, _mm_shuffle_epi32_f(tmp0, _MM_SHUFFLE(2, 0, 3, 1)));
 
       src1xx = src0xx;
       src1yy = src0yy;
 
       // rcp0 = 1.0 / (x * _02 + y * _12 + _22)
-      Face::m128dMulPD(src1xx, src1xx, m_02_02);
-      Face::m128dMulPD(src1yy, src1yy, m_12_12);
-      Face::m128dAddPD(src1xx, src1xx, m_22_22);
-      Face::m128dAddPD(src1xx, src1xx, src1yy);
+      Acc::m128dMulPD(src1xx, src1xx, m_02_02);
+      Acc::m128dMulPD(src1yy, src1yy, m_12_12);
+      Acc::m128dAddPD(src1xx, src1xx, m_22_22);
+      Acc::m128dAddPD(src1xx, src1xx, src1yy);
 
-      Face::m128dEpsilonPD(src1xx, src1xx);
-      Face::m128dRcpPD(rcp0, src1xx);
+      Acc::m128dEpsilonPD(src1xx, src1xx);
+      Acc::m128dRcpPD(rcp0, src1xx);
 
       // src0xx = (x * _00 + y * _10 + _20) * rcp0
       // src0yy = (x * _01 + y * _11 + _21) * rcp0
       src1xx = src0xx;
       src1yy = src0yy;
 
-      Face::m128dMulPD(src0xx, src0xx, m_00_00);
-      Face::m128dMulPD(src0yy, src0yy, m_11_11);
+      Acc::m128dMulPD(src0xx, src0xx, m_00_00);
+      Acc::m128dMulPD(src0yy, src0yy, m_11_11);
 
-      Face::m128dMulPD(src1xx, src1xx, m_01_01);
-      Face::m128dMulPD(src1yy, src1yy, m_10_10);
+      Acc::m128dMulPD(src1xx, src1xx, m_01_01);
+      Acc::m128dMulPD(src1yy, src1yy, m_10_10);
 
-      Face::m128dAddPD(src0xx, src0xx, m_20_20);
-      Face::m128dAddPD(src0yy, src0yy, m_21_21);
+      Acc::m128dAddPD(src0xx, src0xx, m_20_20);
+      Acc::m128dAddPD(src0yy, src0yy, m_21_21);
 
-      Face::m128dAddPD(src0xx, src0xx, src1yy);
-      Face::m128dAddPD(src0yy, src0yy, src1xx);
+      Acc::m128dAddPD(src0xx, src0xx, src1yy);
+      Acc::m128dAddPD(src0yy, src0yy, src1xx);
 
-      Face::m128dMulPD(src0xx, src0xx, rcp0);
-      Face::m128dMulPD(src0yy, src0yy, rcp0);
+      Acc::m128dMulPD(src0xx, src0xx, rcp0);
+      Acc::m128dMulPD(src0yy, src0yy, rcp0);
 
-      Face::m128dStore8Lo(&dst[0].x, src0xx);
-      Face::m128dStore8Lo(&dst[0].y, src0yy);
-      Face::m128dStore8Hi(&dst[1].x, src0xx);
-      Face::m128dStore8Hi(&dst[1].y, src0yy);
+      Acc::m128dStore8Lo(&dst[0].x, src0xx);
+      Acc::m128dStore8Lo(&dst[0].y, src0yy);
+      Acc::m128dStore8Hi(&dst[1].x, src0xx);
+      Acc::m128dStore8Hi(&dst[1].y, src0yy);
     }
   }
 
@@ -1002,27 +1002,27 @@ static void FOG_CDECL TransformD_mapPointsF_Projection_SSE2(const TransformD* se
     __m128d m_20_21 = _mm_loadu_pd(&self->_20);
 
     __m128d src0;
-    Face::m128dLoad8CvtFrom2xPS(src0, &src[0]);
+    Acc::m128dLoad8CvtFrom2xPS(src0, &src[0]);
 
     __m128d rev0 = _mm_shuffle_pd(src0, src0, _MM_SHUFFLE2(0, 1));
     __m128d inv0 = _mm_mul_pd(src0, _mm_setr_pd(self->_02, self->_12));
 
     // src0.x = (x * _00 + y * _10 + _20)
     // src0.y = (x * _01 + y * _11 + _21)
-    Face::m128dMulPD(src0, src0, m_00_11);
-    Face::m128dMulPD(rev0, rev0, m_10_01);
-    Face::m128dAddPD(src0, src0, m_20_21);
-    Face::m128dAddPD(src0, src0, rev0);
+    Acc::m128dMulPD(src0, src0, m_00_11);
+    Acc::m128dMulPD(rev0, rev0, m_10_01);
+    Acc::m128dAddPD(src0, src0, m_20_21);
+    Acc::m128dAddPD(src0, src0, rev0);
 
-    Face::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
-    Face::m128dAddSD(inv0, inv0, _mm_load_sd(&self->_22));
+    Acc::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
+    Acc::m128dAddSD(inv0, inv0, _mm_load_sd(&self->_22));
 
-    Face::m128dEpsilonSD(inv0, inv0);
-    Face::m128dRcpSD(inv0, inv0);
-    Face::m128dExtendLo(inv0, inv0);
+    Acc::m128dEpsilonSD(inv0, inv0);
+    Acc::m128dRcpSD(inv0, inv0);
+    Acc::m128dExtendLo(inv0, inv0);
 
-    Face::m128dMulPD(src0, src0, inv0);
-    Face::m128dStore16u(dst, src0);
+    Acc::m128dMulPD(src0, src0, inv0);
+    Acc::m128dStore16u(dst, src0);
   }
 }
 
@@ -1036,17 +1036,17 @@ static void FOG_CDECL TransformD_mapPointsD_Projection_SSE2(const TransformD* se
     __m128d m_10_10, m_11_11, m_12_12;
     __m128d m_20_20, m_21_21, m_22_22;
 
-    Face::m128dExtendLo(m_00_00, &self->_00);
-    Face::m128dExtendLo(m_01_01, &self->_01);
-    Face::m128dExtendLo(m_02_02, &self->_02);
+    Acc::m128dExtendLo(m_00_00, &self->_00);
+    Acc::m128dExtendLo(m_01_01, &self->_01);
+    Acc::m128dExtendLo(m_02_02, &self->_02);
 
-    Face::m128dExtendLo(m_10_10, &self->_10);
-    Face::m128dExtendLo(m_11_11, &self->_11);
-    Face::m128dExtendLo(m_12_12, &self->_12);
+    Acc::m128dExtendLo(m_10_10, &self->_10);
+    Acc::m128dExtendLo(m_11_11, &self->_11);
+    Acc::m128dExtendLo(m_12_12, &self->_12);
 
-    Face::m128dExtendLo(m_20_20, &self->_20);
-    Face::m128dExtendLo(m_21_21, &self->_21);
-    Face::m128dExtendLo(m_22_22, &self->_22);
+    Acc::m128dExtendLo(m_20_20, &self->_20);
+    Acc::m128dExtendLo(m_21_21, &self->_21);
+    Acc::m128dExtendLo(m_22_22, &self->_22);
 
     for (i = length >> 1; i; i--, dst += 2, src += 2)
     {
@@ -1057,48 +1057,48 @@ static void FOG_CDECL TransformD_mapPointsD_Projection_SSE2(const TransformD* se
 
       // src0xx = [x0, x1]
       // src0yy = [y0, y1]
-      Face::m128dLoad8(src0xx, &src[0].x);
-      Face::m128dLoad8(src0yy, &src[0].y);
+      Acc::m128dLoad8(src0xx, &src[0].x);
+      Acc::m128dLoad8(src0yy, &src[0].y);
 
-      Face::m128dLoad8Hi(src0xx, &src[1].x);
-      Face::m128dLoad8Hi(src0yy, &src[1].y);
+      Acc::m128dLoad8Hi(src0xx, &src[1].x);
+      Acc::m128dLoad8Hi(src0yy, &src[1].y);
 
       src1xx = src0xx;
       src1yy = src0yy;
 
       // rcp0 = 1.0 / (x * _02 + y * _12 + _22)
-      Face::m128dMulPD(src1xx, src1xx, m_02_02);
-      Face::m128dMulPD(src1yy, src1yy, m_12_12);
-      Face::m128dAddPD(src1xx, src1xx, m_22_22);
-      Face::m128dAddPD(src1xx, src1xx, src1yy);
+      Acc::m128dMulPD(src1xx, src1xx, m_02_02);
+      Acc::m128dMulPD(src1yy, src1yy, m_12_12);
+      Acc::m128dAddPD(src1xx, src1xx, m_22_22);
+      Acc::m128dAddPD(src1xx, src1xx, src1yy);
 
-      Face::m128dEpsilonPD(src1xx, src1xx);
-      Face::m128dRcpPD(rcp0, src1xx);
+      Acc::m128dEpsilonPD(src1xx, src1xx);
+      Acc::m128dRcpPD(rcp0, src1xx);
 
       // src0xx = (x * _00 + y * _10 + _20) * rcp0
       // src0yy = (x * _01 + y * _11 + _21) * rcp0
       src1xx = src0xx;
       src1yy = src0yy;
 
-      Face::m128dMulPD(src0xx, src0xx, m_00_00);
-      Face::m128dMulPD(src0yy, src0yy, m_11_11);
+      Acc::m128dMulPD(src0xx, src0xx, m_00_00);
+      Acc::m128dMulPD(src0yy, src0yy, m_11_11);
 
-      Face::m128dMulPD(src1xx, src1xx, m_01_01);
-      Face::m128dMulPD(src1yy, src1yy, m_10_10);
+      Acc::m128dMulPD(src1xx, src1xx, m_01_01);
+      Acc::m128dMulPD(src1yy, src1yy, m_10_10);
 
-      Face::m128dAddPD(src0xx, src0xx, m_20_20);
-      Face::m128dAddPD(src0yy, src0yy, m_21_21);
+      Acc::m128dAddPD(src0xx, src0xx, m_20_20);
+      Acc::m128dAddPD(src0yy, src0yy, m_21_21);
 
-      Face::m128dAddPD(src0xx, src0xx, src1yy);
-      Face::m128dAddPD(src0yy, src0yy, src1xx);
+      Acc::m128dAddPD(src0xx, src0xx, src1yy);
+      Acc::m128dAddPD(src0yy, src0yy, src1xx);
 
-      Face::m128dMulPD(src0xx, src0xx, rcp0);
-      Face::m128dMulPD(src0yy, src0yy, rcp0);
+      Acc::m128dMulPD(src0xx, src0xx, rcp0);
+      Acc::m128dMulPD(src0yy, src0yy, rcp0);
 
-      Face::m128dStore8Lo(&dst[0].x, src0xx);
-      Face::m128dStore8Lo(&dst[0].y, src0yy);
-      Face::m128dStore8Hi(&dst[1].x, src0xx);
-      Face::m128dStore8Hi(&dst[1].y, src0yy);
+      Acc::m128dStore8Lo(&dst[0].x, src0xx);
+      Acc::m128dStore8Lo(&dst[0].y, src0yy);
+      Acc::m128dStore8Hi(&dst[1].x, src0xx);
+      Acc::m128dStore8Hi(&dst[1].y, src0yy);
     }
   }
 
@@ -1114,20 +1114,20 @@ static void FOG_CDECL TransformD_mapPointsD_Projection_SSE2(const TransformD* se
 
     // src0.x = (x * _00 + y * _10 + _20)
     // src0.y = (x * _01 + y * _11 + _21)
-    Face::m128dMulPD(src0, src0, m_00_11);
-    Face::m128dMulPD(rev0, rev0, m_10_01);
-    Face::m128dAddPD(src0, src0, m_20_21);
-    Face::m128dAddPD(src0, src0, rev0);
+    Acc::m128dMulPD(src0, src0, m_00_11);
+    Acc::m128dMulPD(rev0, rev0, m_10_01);
+    Acc::m128dAddPD(src0, src0, m_20_21);
+    Acc::m128dAddPD(src0, src0, rev0);
 
-    Face::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
-    Face::m128dAddSD(inv0, inv0, _mm_load_sd(&self->_22));
+    Acc::m128dAddPD(inv0, inv0, _mm_shuffle_pd(inv0, inv0, _MM_SHUFFLE2(0, 1)));
+    Acc::m128dAddSD(inv0, inv0, _mm_load_sd(&self->_22));
 
-    Face::m128dEpsilonSD(inv0, inv0);
-    Face::m128dRcpSD(inv0, inv0);
-    Face::m128dExtendLo(inv0, inv0);
+    Acc::m128dEpsilonSD(inv0, inv0);
+    Acc::m128dRcpSD(inv0, inv0);
+    Acc::m128dExtendLo(inv0, inv0);
 
-    Face::m128dMulPD(src0, src0, inv0);
-    Face::m128dStore16u(dst, src0);
+    Acc::m128dMulPD(src0, src0, inv0);
+    Acc::m128dStore16u(dst, src0);
   }
 }
 
@@ -1140,15 +1140,15 @@ static void FOG_CDECL TransformD_mapPointsT_Degenerate_SSE2(const TransformD* se
   {
     for (i = length; i; i--, dst += 1)
     {
-      Face::m128dStore16a(dst, zero);
+      Acc::m128dStore16a(dst, zero);
     }
   }
   else
   {
     for (i = length; i; i--, dst += 1)
     {
-      Face::m128dStore8Lo(&dst[0].x, zero);
-      Face::m128dStore8Lo(&dst[0].y, zero);
+      Acc::m128dStore8Lo(&dst[0].x, zero);
+      Acc::m128dStore8Lo(&dst[0].y, zero);
     }
   }
 }
@@ -1175,13 +1175,13 @@ static void FOG_CDECL TransformD_mapVectorD_SSE2(const TransformD* self, PointD*
 
     case TRANSFORM_TYPE_SCALING:
     {
-      Face::m128dMulPD(src0, src0, m_00_11);
+      Acc::m128dMulPD(src0, src0, m_00_11);
       break;
     }
 
     case TRANSFORM_TYPE_SWAP:
     {
-      Face::m128dMulPD(src0, rev0, m_10_01);
+      Acc::m128dMulPD(src0, rev0, m_10_01);
       break;
     }
 
@@ -1235,7 +1235,7 @@ static void FOG_CDECL TransformD_mapVectorD_SSE2(const TransformD* self, PointD*
       FOG_ASSERT_NOT_REACHED();
   }
 
-  Face::m128dStore16u(dst, src0);
+  Acc::m128dStore16u(dst, src0);
 }
 
 // ============================================================================

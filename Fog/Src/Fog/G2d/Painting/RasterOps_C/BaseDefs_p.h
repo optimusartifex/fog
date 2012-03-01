@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTEROPS_C_BASEDEFS_P_H
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBuffer.h>
@@ -17,7 +17,7 @@
 #include <Fog/Core/Memory/MemOps.h>
 #include <Fog/Core/Tools/Logger.h>
 #include <Fog/Core/Tools/Swap.h>
-#include <Fog/G2d/Face/Face_Raster_C.h>
+#include <Fog/G2d/Acc/AccC.h>
 #include <Fog/G2d/Geometry/Math2d.h>
 #include <Fog/G2d/Geometry/Point.h>
 #include <Fog/G2d/Imaging/Image.h>
@@ -1411,26 +1411,26 @@ _##_Group_##_End: \
   __p64 _PixT0; \
   __p64 _PixT1; \
   \
-  Face::p64UnpackPBWFromPBB2031(_PixT0, (_Src0_)); \
-  Face::p64UnpackPBWFromPBB2031(_PixT1, (_Src1_)); \
+  Acc::p64UnpackPBWFromPBB2031(_PixT0, (_Src0_)); \
+  Acc::p64UnpackPBWFromPBB2031(_PixT1, (_Src1_)); \
   \
-  Face::p64Mul(_PixT0, _PixT0, _Weight0_); \
-  Face::p64Mul(_PixT1, _PixT1, _Weight1_); \
-  Face::p64Add(_PixT0, _PixT0, _PixT1); \
-  Face::p64And(_PixT0, _PixT0, Face::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
+  Acc::p64Mul(_PixT0, _PixT0, _Weight0_); \
+  Acc::p64Mul(_PixT1, _PixT1, _Weight1_); \
+  Acc::p64Add(_PixT0, _PixT0, _PixT1); \
+  Acc::p64And(_PixT0, _PixT0, Acc::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
   \
-  Face::p64Pack2031_RShift8(_Dst_, _PixT0); \
+  Acc::p64Pack2031_RShift8(_Dst_, _PixT0); \
 }
 
 #define P_INTERPOLATE_C_32_2_WITH_ZERO(_Dst_, _Src0_, _Weight0_) \
 { \
   __p64 _PixT0; \
   \
-  Face::u64_1x4bUnpack0213(_PixT0, (_Src0_)); \
-  Face::p64Mul(_PixT0, _PixT0, _Weight0_); \
-  Face::p64And(_PixT0, _PixT0, Face::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
+  Acc::u64_1x4bUnpack0213(_PixT0, (_Src0_)); \
+  Acc::p64Mul(_PixT0, _PixT0, _Weight0_); \
+  Acc::p64And(_PixT0, _PixT0, Acc::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
   \
-  Face::p64Pack2031_RShift8(_Dst_, _PixT0); \
+  Acc::p64Pack2031_RShift8(_Dst_, _PixT0); \
 }
 
 #define P_INTERPOLATE_C_32_4(_Dst_, _Src0_, _Weight0_, _Src1_, _Weight1_, _Src2_, _Weight2_, _Src3_, _Weight3_) \
@@ -1439,24 +1439,24 @@ _##_Group_##_End: \
   __p64 _PixT1; \
   __p64 _PixT2; \
   \
-  Face::p64UnpackPBWFromPBB2031(_PixT0, (_Src0_)); \
-  Face::p64UnpackPBWFromPBB2031(_PixT1, (_Src1_)); \
+  Acc::p64UnpackPBWFromPBB2031(_PixT0, (_Src0_)); \
+  Acc::p64UnpackPBWFromPBB2031(_PixT1, (_Src1_)); \
   \
-  Face::p64Mul(_PixT0, _PixT0, Face::p64FromU64(_Weight0_)); \
-  Face::p64Mul(_PixT1, _PixT1, Face::p64FromU64(_Weight1_)); \
-  Face::p64Add(_PixT0, _PixT0, _PixT1); \
+  Acc::p64Mul(_PixT0, _PixT0, Acc::p64FromU64(_Weight0_)); \
+  Acc::p64Mul(_PixT1, _PixT1, Acc::p64FromU64(_Weight1_)); \
+  Acc::p64Add(_PixT0, _PixT0, _PixT1); \
   \
-  Face::p64UnpackPBWFromPBB2031(_PixT1, (_Src2_)); \
-  Face::p64UnpackPBWFromPBB2031(_PixT2, (_Src3_)); \
+  Acc::p64UnpackPBWFromPBB2031(_PixT1, (_Src2_)); \
+  Acc::p64UnpackPBWFromPBB2031(_PixT2, (_Src3_)); \
   \
-  Face::p64Mul(_PixT1, _PixT1, Face::p64FromU64(_Weight2_)); \
-  Face::p64Mul(_PixT2, _PixT2, Face::p64FromU64(_Weight3_)); \
-  Face::p64Add(_PixT0, _PixT0, _PixT1); \
-  Face::p64Add(_PixT0, _PixT0, _PixT2); \
+  Acc::p64Mul(_PixT1, _PixT1, Acc::p64FromU64(_Weight2_)); \
+  Acc::p64Mul(_PixT2, _PixT2, Acc::p64FromU64(_Weight3_)); \
+  Acc::p64Add(_PixT0, _PixT0, _PixT1); \
+  Acc::p64Add(_PixT0, _PixT0, _PixT2); \
   \
-  Face::p64And(_PixT0, _PixT0, Face::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
+  Acc::p64And(_PixT0, _PixT0, Acc::p64FromU64(FOG_UINT64_C(0xFF00FF00FF00FF00))); \
   \
-  Face::p64Pack2031_RShift8(_Dst_, _PixT0); \
+  Acc::p64Pack2031_RShift8(_Dst_, _PixT0); \
 }
 
 #else
@@ -1467,8 +1467,8 @@ _##_Group_##_End: \
   uint32_t _PixT1_0, _PixT1_1; \
   uint32_t _Weight; \
   \
-  Face::p32UnpackPBWFromPBB_2031(_PixT0_0, _PixT0_1, (_Src0_)); \
-  Face::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src1_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT0_0, _PixT0_1, (_Src0_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src1_)); \
   \
   _Weight = _Weight0_; \
   _PixT0_0 *= _Weight; \
@@ -1484,7 +1484,7 @@ _##_Group_##_End: \
   _PixT0_0 = (_PixT0_0 >> 8) & 0x00FF00FF; \
   _PixT0_1 = (_PixT0_1     ) & 0xFF00FF00; \
   \
-  _Dst_ = _FOG_FACE_COMBINE_2(_PixT0_0, _PixT0_1); \
+  _Dst_ = _FOG_ACC_COMBINE_2(_PixT0_0, _PixT0_1); \
 }
 
 #define P_INTERPOLATE_C_32_2_WITH_ZERO(_Dst_, _Src0_, _Weight0_) \
@@ -1492,7 +1492,7 @@ _##_Group_##_End: \
   uint32_t _PixT0_0, _PixT0_1; \
   uint32_t _Weight; \
   \
-  Face::p32UnpackPBWFromPBB_2031(_PixT0_0, _PixT0_1, (_Src0_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT0_0, _PixT0_1, (_Src0_)); \
   \
   _Weight = _Weight0_; \
   _PixT0_0 *= _Weight; \
@@ -1501,7 +1501,7 @@ _##_Group_##_End: \
   _PixT0_0 = (_PixT0_0 >> 8) & 0x00FF00FF; \
   _PixT0_1 = (_PixT0_1     ) & 0xFF00FF00; \
   \
-  _Dst_ = _FOG_FACE_COMBINE_2(_PixT0_0, _PixT0_1); \
+  _Dst_ = _FOG_ACC_COMBINE_2(_PixT0_0, _PixT0_1); \
 }
 
 #define P_INTERPOLATE_C_32_4(_Dst_, _Src0_, _Weight0_, _Src1_, _Weight1_, _Src2_, _Weight2_, _Src3_, _Weight3_) \
@@ -1510,8 +1510,8 @@ _##_Group_##_End: \
   uint32_t _PixT1_0, _PixT1_1; \
   uint32_t _Weight; \
   \
-  Face::p32UnpackPBWFromPBB_2031(_PixT0_0, _PixT0_1, (_Src0_)); \
-  Face::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src1_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT0_0, _PixT0_1, (_Src0_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src1_)); \
   \
   _Weight = (_Weight0_); \
   _PixT0_0 *= _Weight; \
@@ -1524,7 +1524,7 @@ _##_Group_##_End: \
   _PixT0_0 += _PixT1_0; \
   _PixT0_1 += _PixT1_1; \
   \
-  Face::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src2_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src2_)); \
   \
   _Weight = (_Weight2_); \
   _PixT1_0 *= _Weight; \
@@ -1533,7 +1533,7 @@ _##_Group_##_End: \
   _PixT0_0 += _PixT1_0; \
   _PixT0_1 += _PixT1_1; \
   \
-  Face::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src3_)); \
+  Acc::p32UnpackPBWFromPBB_2031(_PixT1_0, _PixT1_1, (_Src3_)); \
   \
   _Weight = (_Weight3_); \
   _PixT1_0 *= _Weight; \
@@ -1545,7 +1545,7 @@ _##_Group_##_End: \
   _PixT0_0 = (_PixT0_0 >> 8) & 0x00FF00FF; \
   _PixT0_1 = (_PixT0_1     ) & 0xFF00FF00; \
   \
-  _Dst_ = _FOG_FACE_COMBINE_2(_PixT0_0, _PixT0_1); \
+  _Dst_ = _FOG_ACC_COMBINE_2(_PixT0_0, _PixT0_1); \
 }
 
 #endif // FOG_ARCH_BITS

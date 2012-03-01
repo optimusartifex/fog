@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Global/Private.h>
@@ -18,7 +18,7 @@
 #include <Fog/Core/Tools/Cpu.h>
 #include <Fog/Core/Tools/String.h>
 #include <Fog/Core/Tools/StringUtil.h>
-#include <Fog/G2d/Face/Face_Raster_C.h>
+#include <Fog/G2d/Acc/AccC.h>
 #include <Fog/G2d/Source/Color.h>
 
 namespace Fog {

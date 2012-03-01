@@ -49,22 +49,22 @@ struct FOG_NO_EXPORT FBaseAccessor_PRGB32
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)
   {
-    Face::p32Load4a(dst, src);
+    Acc::p32Load4a(dst, src);
   }
   
   static FOG_INLINE void fetchPixelT(Pixel& dst, const uint8_t* src)
   {
-    Face::p32Load4a(dst, src);
+    Acc::p32Load4a(dst, src);
   }
 
   static FOG_INLINE void storePixelM(uint8_t* dst, const Pixel& src)
   {
-    Face::p32Store4a(dst, src);
+    Acc::p32Store4a(dst, src);
   }
 
   static FOG_INLINE void storePixelT(uint8_t* dst, const Pixel& src)
   {
-    Face::p32Store4a(dst, src);
+    Acc::p32Store4a(dst, src);
   }
 };
 
@@ -94,22 +94,22 @@ struct FOG_NO_EXPORT FBaseAccessor_XRGB32
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)
   {
-    Face::p32Load4a(dst, src);
+    Acc::p32Load4a(dst, src);
   }
 
   static FOG_INLINE void fetchPixelT(Pixel& dst, const uint8_t* src)
   {
-    Face::p32Load4a(dst, src);
+    Acc::p32Load4a(dst, src);
   }
 
   static FOG_INLINE void storePixelM(uint8_t* dst, const Pixel& src)
   {
-    Face::p32Store4a(dst, src);
+    Acc::p32Store4a(dst, src);
   }
   
   static FOG_INLINE void storePixelT(uint8_t* dst, const Pixel& src)
   {
-    Face::p32Store4a(dst, src);
+    Acc::p32Store4a(dst, src);
   }
 };
 
@@ -139,22 +139,22 @@ struct FOG_NO_EXPORT FBaseAccessor_RGB24
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)
   {
-    Face::p32Load3b(dst, src);
+    Acc::p32Load3b(dst, src);
   }
 
   static FOG_INLINE void fetchPixelT(Pixel& dst, const uint8_t* src)
   {
-    Face::p32Load4a(dst, src);
+    Acc::p32Load4a(dst, src);
   }
 
   static FOG_INLINE void storePixelM(uint8_t* dst, const Pixel& src)
   {
-    Face::p32Store3b(dst, src);
+    Acc::p32Store3b(dst, src);
   }
   
   static FOG_INLINE void storePixelT(uint8_t* dst, const Pixel& src)
   {
-    Face::p32Store4a(dst, src);
+    Acc::p32Store4a(dst, src);
   }
 };
 
@@ -184,22 +184,22 @@ struct FOG_NO_EXPORT FBaseAccessor_A8
 
   static FOG_INLINE void fetchPixelM(Pixel& dst, const uint8_t* src)
   {
-    Face::p8Load1b(dst, src);
+    Acc::p8Load1b(dst, src);
   }
 
   static FOG_INLINE void fetchPixelT(Pixel& dst, const uint8_t* src)
   {
-    Face::p8Load1b(dst, src);
+    Acc::p8Load1b(dst, src);
   }
 
   static FOG_INLINE void storePixelM(uint8_t* dst, const Pixel& src)
   {
-    Face::p8Store1b(dst, src);
+    Acc::p8Store1b(dst, src);
   }
   
   static FOG_INLINE void storePixelT(uint8_t* dst, const Pixel& src)
   {
-    Face::p8Store1b(dst, src);
+    Acc::p8Store1b(dst, src);
   }
 };
 

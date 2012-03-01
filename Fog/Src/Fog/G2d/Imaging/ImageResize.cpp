@@ -9,9 +9,9 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Global/Init_p.h>
-#include <Fog/Core/Face/FaceC.h>
 #include <Fog/Core/Math/Function.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
@@ -716,7 +716,7 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_PRGB32(ImageResizeContext*
           wp += 1;
         }
 
-        reinterpret_cast<uint32_t*>(tp)[0] = _FOG_FACE_COMBINE_2(ca_cg & 0xFF00FF00, (cr_cb & 0xFF00FF00) >> 8);
+        reinterpret_cast<uint32_t*>(tp)[0] = _FOG_ACC_COMBINE_2(ca_cg & 0xFF00FF00, (cr_cb & 0xFF00FF00) >> 8);
 
         recordList += 1;
         weightList += kernelSize;
@@ -825,7 +825,7 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_XRGB32(ImageResizeContext*
           wp += 1;
         }
 
-        reinterpret_cast<uint32_t*>(tp)[0] = _FOG_FACE_COMBINE_2(0xFF000000, ((cx_cg & 0x00FF0000) | (cr_cb & 0xFF00FF00)) >> 8);
+        reinterpret_cast<uint32_t*>(tp)[0] = _FOG_ACC_COMBINE_2(0xFF000000, ((cx_cg & 0x00FF0000) | (cr_cb & 0xFF00FF00)) >> 8);
 
         recordList += 1;
         weightList += kernelSize;
@@ -1136,7 +1136,7 @@ static void FOG_CDECL ImageResizeContext_doVertical_PRGB32(ImageResizeContext* c
           wp += 1;
         }
 
-        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_FACE_COMBINE_2(ca_cg & 0xFF00FF00, (cr_cb & 0xFF00FF00) >> 8);
+        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_ACC_COMBINE_2(ca_cg & 0xFF00FF00, (cr_cb & 0xFF00FF00) >> 8);
 
         dp += 4;
         tData += 4;
@@ -1245,7 +1245,7 @@ static void FOG_CDECL ImageResizeContext_doVertical_XRGB32(ImageResizeContext* c
           wp += 1;
         }
 
-        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_FACE_COMBINE_2(0xFF000000, ((cx_cg & 0x00FF0000) | (cr_cb & 0xFF00FF00)) >> 8);
+        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_ACC_COMBINE_2(0xFF000000, ((cx_cg & 0x00FF0000) | (cr_cb & 0xFF00FF00)) >> 8);
 
         dp += 4;
         tData += 4;
@@ -1389,8 +1389,8 @@ _BoundLarge:
           wp += 1;
         }
 
-        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_FACE_COMBINE_2((c0 & 0xFF00FF00) >> 8, c1 & 0xFF00FF00);
-        reinterpret_cast<uint32_t*>(dp)[1] = _FOG_FACE_COMBINE_2((c2 & 0xFF00FF00) >> 8, c3 & 0xFF00FF00);
+        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_ACC_COMBINE_2((c0 & 0xFF00FF00) >> 8, c1 & 0xFF00FF00);
+        reinterpret_cast<uint32_t*>(dp)[1] = _FOG_ACC_COMBINE_2((c2 & 0xFF00FF00) >> 8, c3 & 0xFF00FF00);
 
         dp += 8;
         tData += 8;
@@ -1473,7 +1473,7 @@ _UnboundLarge:
           wp += 1;
         }
 
-        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_FACE_COMBINE_4(
+        reinterpret_cast<uint32_t*>(dp)[0] = _FOG_ACC_COMBINE_4(
           Math::bound<int32_t>(c0 >> 8, 0, 255)      ,
           Math::bound<int32_t>(c1 >> 8, 0, 255) <<  8,
           Math::bound<int32_t>(c2 >> 8, 0, 255) << 16,

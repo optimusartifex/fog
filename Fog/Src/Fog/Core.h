@@ -231,23 +231,23 @@
 #include <Fog/Core/C++/Base.h>
 
 // ============================================================================
-// [Fog/Core/Dom]
+// [Fog/Core/Acc]
 // ============================================================================
 
-#include <Fog/Core/Dom/Dom.h>
-#include <Fog/Core/Dom/DomResourceManager.h>
-
-// ============================================================================
-// [Fog/Core/Face]
-// ============================================================================
-
-//! @defgroup Fog_Face Fog::Face (Fog Accelerated C++ Extensions)
+//! @defgroup Fog_Acc Fog::Acc (Accelerated Extensions)
 //!
 //! Public classes and functions related to Fog::Face framework. Fog::Face was
 //! created to simplify the development of low-level multimedia functions used
 //! for digital signal processing (computer graphics, audio, video, ...).
 
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
+
+// ============================================================================
+// [Fog/Core/Dom]
+// ============================================================================
+
+#include <Fog/Core/Dom/Dom.h>
+#include <Fog/Core/Dom/DomResourceManager.h>
 
 // ============================================================================
 // [Fog/Core/Global]

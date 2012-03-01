@@ -9,8 +9,8 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceSSE.h>
-#include <Fog/Core/Face/FaceSSE2.h>
+#include <Fog/Core/Acc/AccSse.h>
+#include <Fog/Core/Acc/AccSse2.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Geometry/Box.h>
 #include <Fog/G2d/Geometry/Internals_p.h>
@@ -32,8 +32,8 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
   __m128d xmmClipBoxMin;
   __m128d xmmClipBoxMax;
 
-  Face::m128dLoad16u(xmmClipBoxMin, &self->_clipBox.x0);
-  Face::m128dLoad16u(xmmClipBoxMax, &self->_clipBox.x1);
+  Acc::m128dLoad16u(xmmClipBoxMin, &self->_clipBox.x0);
+  Acc::m128dLoad16u(xmmClipBoxMax, &self->_clipBox.x1);
 
   // If path bounding box is not dirty then we can simply use it instead of
   // performing the calculation.
@@ -42,15 +42,15 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
     __m128d xmmX0Y0;
     __m128d xmmX1Y1;
 
-    Face::m128dLoad16u(xmmX0Y0,  &src->_d->boundingBox.x0);
-    Face::m128dLoad16u(xmmX1Y1,  &src->_d->boundingBox.x1);
+    Acc::m128dLoad16u(xmmX0Y0,  &src->_d->boundingBox.x0);
+    Acc::m128dLoad16u(xmmX1Y1,  &src->_d->boundingBox.x1);
 
-    Face::m128dCmpGePD(xmmX0Y0, xmmX0Y0, xmmClipBoxMin);
-    Face::m128dCmpLePD(xmmX1Y1, xmmX1Y1, xmmClipBoxMax);
+    Acc::m128dCmpGePD(xmmX0Y0, xmmX0Y0, xmmClipBoxMin);
+    Acc::m128dCmpLePD(xmmX1Y1, xmmX1Y1, xmmClipBoxMax);
 
     int msk;
-    Face::m128dAnd(xmmX0Y0, xmmX0Y0, xmmX1Y1);
-    Face::m128dMoveMaskPD(msk, xmmX0Y0);
+    Acc::m128dAnd(xmmX0Y0, xmmX0Y0, xmmX1Y1);
+    Acc::m128dMoveMaskPD(msk, xmmX0Y0);
 
     if (msk == 0x3)
     {
@@ -73,7 +73,7 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
       __m128d xmmSrc0a;
       __m128d xmmSrc0b;
 
-      Face::m128dLoad16a(xmmSrc0a, pts);
+      Acc::m128dLoad16a(xmmSrc0a, pts);
       int msk;
 
       switch (cmd[0])
@@ -96,11 +96,11 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
             goto _Invalid;
 
           xmmSrc0b = xmmSrc0a;
-          Face::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
 
-          Face::m128dMoveMaskPD(msk, xmmSrc0a);
+          Acc::m128dMoveMaskPD(msk, xmmSrc0a);
           if (msk != 0x3)
             goto _Unbounded;
 
@@ -123,20 +123,20 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
           if (FOG_UNLIKELY(!hasInitial))
             goto _Invalid;
 
-          Face::m128dLoad16a(xmmSrc1a, pts + 1);
+          Acc::m128dLoad16a(xmmSrc1a, pts + 1);
           xmmSrc0b = xmmSrc0a;
           xmmSrc1b = xmmSrc1a;
 
-          Face::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
 
-          Face::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
-          Face::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
+          Acc::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
 
-          Face::m128dMoveMaskPD(msk, xmmSrc0a);
+          Acc::m128dMoveMaskPD(msk, xmmSrc0a);
           if (msk != 0x3)
             goto _Unbounded;
 
@@ -160,28 +160,28 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
           if (FOG_UNLIKELY(!hasInitial))
             goto _Invalid;
 
-          Face::m128dLoad16a(xmmSrc1a, pts + 1);
-          Face::m128dLoad16a(xmmSrc2a, pts + 2);
+          Acc::m128dLoad16a(xmmSrc1a, pts + 1);
+          Acc::m128dLoad16a(xmmSrc2a, pts + 2);
           xmmSrc0b = xmmSrc0a;
           xmmSrc1b = xmmSrc1a;
 
-          Face::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
 
-          Face::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
-          Face::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
+          Acc::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
 
           xmmSrc0b = xmmSrc2a;
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
 
-          Face::m128dCmpGePD(xmmSrc2a, xmmSrc2a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc2a);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpGePD(xmmSrc2a, xmmSrc2a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc2a);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
 
-          Face::m128dMoveMaskPD(msk, xmmSrc0a);
+          Acc::m128dMoveMaskPD(msk, xmmSrc0a);
           if (msk != 0x3)
             goto _Unbounded;
 
@@ -215,7 +215,7 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
       __m128d xmmSrc0a;
       __m128d xmmSrc0b;
 
-      Face::m128dLoad16u(xmmSrc0a, pts);
+      Acc::m128dLoad16u(xmmSrc0a, pts);
       int msk;
 
       switch (cmd[0])
@@ -238,11 +238,11 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
             goto _Invalid;
 
           xmmSrc0b = xmmSrc0a;
-          Face::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
 
-          Face::m128dMoveMaskPD(msk, xmmSrc0a);
+          Acc::m128dMoveMaskPD(msk, xmmSrc0a);
           if (msk != 0x3)
             goto _Unbounded;
 
@@ -265,20 +265,20 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
           if (FOG_UNLIKELY(!hasInitial))
             goto _Invalid;
 
-          Face::m128dLoad16u(xmmSrc1a, pts + 1);
+          Acc::m128dLoad16u(xmmSrc1a, pts + 1);
           xmmSrc0b = xmmSrc0a;
           xmmSrc1b = xmmSrc1a;
 
-          Face::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
 
-          Face::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
-          Face::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
+          Acc::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
 
-          Face::m128dMoveMaskPD(msk, xmmSrc0a);
+          Acc::m128dMoveMaskPD(msk, xmmSrc0a);
           if (msk != 0x3)
             goto _Unbounded;
 
@@ -302,28 +302,28 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
           if (FOG_UNLIKELY(!hasInitial))
             goto _Invalid;
 
-          Face::m128dLoad16u(xmmSrc1a, pts + 1);
-          Face::m128dLoad16u(xmmSrc2a, pts + 2);
+          Acc::m128dLoad16u(xmmSrc1a, pts + 1);
+          Acc::m128dLoad16u(xmmSrc2a, pts + 2);
           xmmSrc0b = xmmSrc0a;
           xmmSrc1b = xmmSrc1a;
 
-          Face::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
 
-          Face::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
-          Face::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
+          Acc::m128dCmpGePD(xmmSrc1a, xmmSrc1a, xmmClipBoxMin);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpLePD(xmmSrc1b, xmmSrc1b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1a);
 
           xmmSrc0b = xmmSrc2a;
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc1b);
 
-          Face::m128dCmpGePD(xmmSrc2a, xmmSrc2a, xmmClipBoxMin);
-          Face::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc2a);
-          Face::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
+          Acc::m128dCmpGePD(xmmSrc2a, xmmSrc2a, xmmClipBoxMin);
+          Acc::m128dCmpLePD(xmmSrc0b, xmmSrc0b, xmmClipBoxMax);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc2a);
+          Acc::m128dAnd(xmmSrc0a, xmmSrc0a, xmmSrc0b);
 
-          Face::m128dMoveMaskPD(msk, xmmSrc0a);
+          Acc::m128dMoveMaskPD(msk, xmmSrc0a);
           if (msk != 0x3)
             goto _Unbounded;
 
@@ -353,12 +353,12 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
   return PATH_CLIPPER_MEASURE_BOUNDED;
 
 _Unbounded:
-  Face::m128dStore16u(&self->_lastMoveTo, xmmLastMoveTo);
+  Acc::m128dStore16u(&self->_lastMoveTo, xmmLastMoveTo);
   self->_lastIndex = (size_t)(cmd - src->getCommands());
   return PATH_CLIPPER_MEASURE_UNBOUNDED;
 
 _Invalid:
-  Face::m128dStore16u(&self->_lastMoveTo, xmmLastMoveTo);
+  Acc::m128dStore16u(&self->_lastMoveTo, xmmLastMoveTo);
   return PATH_CLIPPER_MEASURE_INVALID;
 }
 

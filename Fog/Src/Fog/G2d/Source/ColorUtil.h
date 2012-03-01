@@ -8,17 +8,17 @@
 #define _FOG_G2D_SOURCE_COLORUTIL_H
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/G2d/Source/ColorBase.h>
 
 #if defined(FOG_HARDCODE_SSE)
-# include <Fog/Core/Face/FaceSSE.h>
+# include <Fog/Core/Acc/AccSse.h>
 #endif // FOG_HARDCODE
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/Face/FaceSSE2.h>
+# include <Fog/Core/Acc/AccSse2.h>
 #endif // FOG_HARDCODE
 
 namespace Fog {
@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT ColorUtil
 #if defined(FOG_HARDCODE_SSE2)
     // SSE2 Implementation.
     __m128i xmm0;
-    Face::m128iLoad8(xmm0, &argb64);
+    Acc::m128iLoad8(xmm0, &argb64);
     xmm0 = _mm_srli_epi16(xmm0, 8);
     xmm0 = _mm_packus_epi16(xmm0, xmm0);
     argb32.u32 = _mm_cvtsi128_si32(xmm0);
@@ -70,12 +70,12 @@ struct FOG_NO_EXPORT ColorUtil
     __m128i xmm0;
     __m128f xmmf;
 
-    Face::m128fLoad16u(xmmf, argbf);
-    Face::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_255));
-    Face::m128iCvtPI32FromPS(xmm0, xmmf);
-    Face::m128iSwapPI32(xmm0, xmm0);
-    Face::m128iPackPU8FromPI32(xmm0, xmm0);
-    Face::m128iStore4(&argb32.u32, xmm0);
+    Acc::m128fLoad16u(xmmf, argbf);
+    Acc::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_255));
+    Acc::m128iCvtPI32FromPS(xmm0, xmmf);
+    Acc::m128iSwapPI32(xmm0, xmm0);
+    Acc::m128iPackPU8FromPI32(xmm0, xmm0);
+    Acc::m128iStore4(&argb32.u32, xmm0);
 #else
     argb32.u32 = (Math::uroundToByte255(argbf[0]) << PIXEL_ARGB32_SHIFT_A) |
                  (Math::uroundToByte255(argbf[1]) << PIXEL_ARGB32_SHIFT_R) |
@@ -89,12 +89,12 @@ struct FOG_NO_EXPORT ColorUtil
 #if defined(FOG_HARDCODE_SSE2)
     // SSE2 Implementation.
     __m128i xmm0;
-    Face::m128iLoad4(xmm0, &argb32);
-    Face::m128iUnpackPI16FromPI8Lo(xmm0, xmm0, xmm0);
+    Acc::m128iLoad4(xmm0, &argb32);
+    Acc::m128iUnpackPI16FromPI8Lo(xmm0, xmm0, xmm0);
 #if defined(FOG_ARCH_X86_64)
     argb64.p64 = _mm_cvtsi128_si64(xmm0);
 #else
-    Face::m128iStore8(&argb64.p64, xmm0);
+    Acc::m128iStore8(&argb64.p64, xmm0);
 #endif
 #elif FOG_ARGB_BITS >= 64
     // C (64-bit) Implementation.
@@ -126,13 +126,13 @@ struct FOG_NO_EXPORT ColorUtil
     __m128i xmm0;
     __m128f xmmf;
 
-    Face::m128fLoad16u(xmmf, argbf);
-    Face::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_65535));
-    Face::m128iCvtPI32FromPS(xmm0, xmmf);
-    Face::m128iSwapPI32(xmm0, xmm0);
-    Face::m128iPackPU16FromPI32(xmm0, xmm0);
+    Acc::m128fLoad16u(xmmf, argbf);
+    Acc::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_65535));
+    Acc::m128iCvtPI32FromPS(xmm0, xmmf);
+    Acc::m128iSwapPI32(xmm0, xmm0);
+    Acc::m128iPackPU16FromPI32(xmm0, xmm0);
 
-    Face::m128iStore8(&argb64.p64, xmm0);
+    Acc::m128iStore8(&argb64.p64, xmm0);
 #else
     argb64.u64 = ((uint64_t)Math::uroundToWord65535(argbf[0]) << PIXEL_ARGB64_SHIFT_A) |
                  ((uint64_t)Math::uroundToWord65535(argbf[1]) << PIXEL_ARGB64_SHIFT_R) |
@@ -147,13 +147,13 @@ struct FOG_NO_EXPORT ColorUtil
     __m128i xmm0;
     __m128f xmmf;
 
-    Face::m128iLoad4(xmm0, &argb32.u32);
-    Face::m128iUnpackPI32FromPI8Lo(xmm0, xmm0);
-    Face::m128iSwapPI32(xmm0, xmm0);
-    Face::m128fCvtPSFromPI32(xmmf, xmm0);
-    Face::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_255));
+    Acc::m128iLoad4(xmm0, &argb32.u32);
+    Acc::m128iUnpackPI32FromPI8Lo(xmm0, xmm0);
+    Acc::m128iSwapPI32(xmm0, xmm0);
+    Acc::m128fCvtPSFromPI32(xmmf, xmm0);
+    Acc::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_255));
 
-    Face::m128fStore16u(dst, xmmf);
+    Acc::m128fStore16u(dst, xmmf);
 #else
     uint32_t c0 = argb32.u32;
 
@@ -170,13 +170,13 @@ struct FOG_NO_EXPORT ColorUtil
     __m128i xmm0;
     __m128f xmmf;
 
-    Face::m128iLoad8(xmm0, &argb64.p64);
-    Face::m128iUnpackPI32FromPI16Lo(xmm0, xmm0);
-    Face::m128iSwapPI32(xmm0, xmm0);
-    Face::m128fCvtPSFromPI32(xmmf, xmm0);
-    Face::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_65535));
+    Acc::m128iLoad8(xmm0, &argb64.p64);
+    Acc::m128iUnpackPI32FromPI16Lo(xmm0, xmm0);
+    Acc::m128iSwapPI32(xmm0, xmm0);
+    Acc::m128fCvtPSFromPI32(xmmf, xmm0);
+    Acc::m128fMulPS(xmmf, xmmf, FOG_XMM_GET_CONST_PS(m128f_4x_1_div_65535));
 
-    Face::m128fStore16u(dst, xmmf);
+    Acc::m128fStore16u(dst, xmmf);
 #else
     dst[0] = (float)(argb64.a) * float(MATH_1_DIV_65535);
     dst[1] = (float)(argb64.r) * float(MATH_1_DIV_65535);

@@ -32,23 +32,23 @@
 #endif // FOG_HAVE_STDARG_H
 
 #if defined(FOG_HARDCODE_MMX)
-# include <Fog/Core/C++/IntrinMMX.h>
+# include <Fog/Core/C++/IntrinMmx.h>
 #endif // FOG_HARDCODE_MMX
 
 #if defined(FOG_HARDCODE_SSE)
-# include <Fog/Core/C++/IntrinSSE.h>
+# include <Fog/Core/C++/IntrinSse.h>
 #endif // FOG_HARDCODE_SSE
 
 #if defined(FOG_HARDCODE_SSE2)
-# include <Fog/Core/C++/IntrinSSE2.h>
+# include <Fog/Core/C++/IntrinSse2.h>
 #endif // FOG_HARDCODE_SSE2
 
 #if defined(FOG_HARDCODE_SSE3)
-# include <Fog/Core/C++/IntrinSSE3.h>
+# include <Fog/Core/C++/IntrinSse3.h>
 #endif // FOG_HARDCODE_SSE3
 
 #if defined(FOG_HARDCODE_SSSE3)
-# include <Fog/Core/C++/IntrinSSSE3.h>
+# include <Fog/Core/C++/IntrinSsse3.h>
 #endif // FOG_HARDCODE_SSSE3
 
 #endif // _FOG_CORE_CPP_STDHEADERS_H

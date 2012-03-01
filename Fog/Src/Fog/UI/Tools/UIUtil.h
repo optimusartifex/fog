@@ -8,8 +8,8 @@
 #define _FOG_UI_TOOLS_KEYUTIL_H
 
 // [Dependencies]
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
-#include <Fog/Core/Face/FaceC.h>
 
 namespace Fog {
 
@@ -39,7 +39,7 @@ struct FOG_NO_EXPORT UIUtil
     FOG_ASSERT(button != 0);
 
     uint32_t result;
-    Face::p32CTZ(result, button);
+    Acc::p32CTZ(result, button);
     return result;
   }
 

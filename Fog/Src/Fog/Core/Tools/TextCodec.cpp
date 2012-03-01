@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/BSwap.h>
@@ -800,13 +800,13 @@ static err_t FOG_CDECL TextCodec_UTF16_encode_native(const TextCodecData* d,
     {
       _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(false)
 
-      Face::p32Store2a(dstCur + 0, uc);
-      Face::p32Store2a(dstCur + 2, ucSurrogate);
+      Acc::p32Store2a(dstCur + 0, uc);
+      Acc::p32Store2a(dstCur + 2, ucSurrogate);
       dstCur += 4;
     }
     else
     {
-      Face::p32Store2a(dstCur + 0, uc);
+      Acc::p32Store2a(dstCur + 0, uc);
       dstCur += 2;
     }
   }
@@ -830,13 +830,13 @@ static err_t FOG_CDECL TextCodec_UTF16_encode_swapped(const TextCodecData* d,
     {
       _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(false)
 
-      Face::p32Store2aBSwap(dstCur + 0, uc);
-      Face::p32Store2aBSwap(dstCur + 0, ucSurrogate);
+      Acc::p32Store2aBSwap(dstCur + 0, uc);
+      Acc::p32Store2aBSwap(dstCur + 0, ucSurrogate);
       dstCur += 4;
     }
     else
     {
-      Face::p32Store2aBSwap(dstCur + 0, uc);
+      Acc::p32Store2aBSwap(dstCur + 0, uc);
       dstCur += 2;
     }
   }
@@ -1054,7 +1054,7 @@ static err_t FOG_CDECL TextCodec_UCS2_encode_native(const TextCodecData* d,
     }
     else
     {
-      Face::p32Store2a(dstCur, uc);
+      Acc::p32Store2a(dstCur, uc);
       dstCur += 2;
     }
   }
@@ -1099,7 +1099,7 @@ static err_t FOG_CDECL TextCodec_UCS2_encode_swapped(const TextCodecData* d,
     }
     else
     {
-      Face::p32Store2aBSwap(dstCur, uc);
+      Acc::p32Store2aBSwap(dstCur, uc);
       dstCur += 2;
     }
   }
@@ -1256,7 +1256,7 @@ static err_t FOG_CDECL TextCodec_UTF32_encode_native(const TextCodecData* d,
       _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
     }
 
-    Face::p32Store4a(dstCur, uc);
+    Acc::p32Store4a(dstCur, uc);
     dstCur += 4;
   }
 
@@ -1280,7 +1280,7 @@ static err_t FOG_CDECL TextCodec_UTF32_encode_swapped(const TextCodecData* d,
       _FOG_TEXTCODEC_ENCODE_DO_SURROGATE(true)
     }
 
-    Face::p32Store4aBSwap(dstCur, uc);
+    Acc::p32Store4aBSwap(dstCur, uc);
     dstCur += 4;
   }
 

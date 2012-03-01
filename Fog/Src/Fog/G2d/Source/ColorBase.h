@@ -8,7 +8,7 @@
 #define _FOG_G2D_SOURCE_COLORBASE_H
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Math/Fuzzy.h>

@@ -9,7 +9,7 @@
 
 // [Dependencies]
 #include <Fog/Core/C++/Base.h>
-#include <Fog/Core/C++/IntrinSSE.h>
+#include <Fog/Core/C++/IntrinSse.h>
 
 #include <emmintrin.h>
 

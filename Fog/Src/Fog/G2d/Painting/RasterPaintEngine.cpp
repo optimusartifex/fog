@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemMgr.h>
 #include <Fog/Core/Memory/MemOps.h>
@@ -1923,7 +1923,7 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32(Painter* self, uint32_t
       }
 
       engine->source.color->_argb32.u32 = argb32;
-      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, argb32);
+      Acc::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, argb32);
       break;
     }
 
@@ -1943,8 +1943,8 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb32(Painter* self, uint32_t
       }
 
       engine->source.color.initCustom1(Argb32(argb32));
-      Face::p32PRGB32FromARGB32(prgb32, argb32);
-      Face::p64PRGB64FromPRGB32(engine->ctx.solid.prgb64.p64, prgb32);
+      Acc::p32PRGB32FromARGB32(prgb32, argb32);
+      Acc::p64PRGB64FromPRGB32(engine->ctx.solid.prgb64.p64, prgb32);
       break;
     }
 
@@ -1977,12 +1977,12 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceArgb64(Painter* self, const Ar
   {
     case IMAGE_PRECISION_BYTE:
       engine->source.color.initCustom1(*argb64);
-      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, engine->source.color->_argb32.u32);
+      Acc::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, engine->source.color->_argb32.u32);
       break;
 
     case IMAGE_PRECISION_WORD:
       engine->source.color.initCustom1(*argb64);
-      Face::p64PRGB64FromARGB64(engine->ctx.solid.prgb64.p64, argb64->p64);
+      Acc::p64PRGB64FromARGB64(engine->ctx.solid.prgb64.p64, argb64->p64);
       break;
 
     default:
@@ -2016,12 +2016,12 @@ static err_t FOG_CDECL RasterPaintEngine_setSourceColor(Painter* self, const Col
   {
     case IMAGE_PRECISION_BYTE:
       engine->source.color.initCustom1(*color);
-      Face::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, color->_argb32.u32);
+      Acc::p32PRGB32FromARGB32(engine->ctx.solid.prgb32.u32, color->_argb32.u32);
       break;
 
     case IMAGE_PRECISION_WORD:
       engine->source.color.initCustom1(*color);
-      Face::p64PRGB64FromARGB64(engine->ctx.solid.prgb64.p64, color->getArgb64().p64);
+      Acc::p64PRGB64FromARGB64(engine->ctx.solid.prgb64.p64, color->getArgb64().p64);
       break;
 
     default:
@@ -3111,7 +3111,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextAtD(Painter* self, const PointD
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
+static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextLayoutRectI* r, const StringW* text, const Font* font, const RectI* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3120,7 +3120,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextRe
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillTextInF(Painter* self, const TextRectF* r, const StringW* text, const Font* font, const RectF* clip)
+static err_t FOG_CDECL RasterPaintEngine_fillTextInF(Painter* self, const TextLayoutRectF* r, const StringW* text, const Font* font, const RectF* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3129,7 +3129,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextInF(Painter* self, const TextRe
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillTextInD(Painter* self, const TextRectD* r, const StringW* text, const Font* font, const RectD* clip)
+static err_t FOG_CDECL RasterPaintEngine_fillTextInD(Painter* self, const TextLayoutRectD* r, const StringW* text, const Font* font, const RectD* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -4729,7 +4729,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipTextAtD(Painter* self, uint32_t cli
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
+static err_t FOG_CDECL RasterPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextLayoutRectI* r, const StringW* text, const Font* font, const RectI* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 
@@ -4737,7 +4737,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipTextInI(Painter* self, uint32_t cli
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextRectF* r, const StringW* text, const Font* font, const RectF* clip)
+static err_t FOG_CDECL RasterPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextLayoutRectF* r, const StringW* text, const Font* font, const RectF* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 
@@ -4745,7 +4745,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipTextInF(Painter* self, uint32_t cli
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextRectD* r, const StringW* text, const Font* font, const RectD* clip)
+static err_t FOG_CDECL RasterPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextLayoutRectD* r, const StringW* text, const Font* font, const RectD* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 

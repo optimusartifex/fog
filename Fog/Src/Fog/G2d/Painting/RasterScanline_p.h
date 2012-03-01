@@ -8,7 +8,7 @@
 #define _FOG_G2D_PAINTING_RASTERSCANLINE_P_H
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceC.h>
+#include <Fog/Core/Acc/AccC.h>
 #include <Fog/Core/Global/Global.h>
 #include <Fog/Core/Memory/MemZoneAllocator.h>
 #include <Fog/G2d/Painting/RasterSpan_p.h>

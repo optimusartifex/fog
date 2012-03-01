@@ -9,7 +9,7 @@
 #endif // FOG_PRECOMP
 
 // [Dependencies]
-#include <Fog/Core/Face/FaceSSE2.h>
+#include <Fog/Core/Acc/AccSse2.h>
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/Math/Math.h>
 #include <Fog/Core/Memory/MemBuffer.h>
@@ -73,14 +73,14 @@ static err_t FOG_CDECL Region_translate_SSE2(Region* dst, const Region* src, con
   __m128i xmm0;
   __m128i xmmt;
 
-  Face::m128iLoad8(xmmt, pt);
-  Face::m128iLoad16uLoHi(xmm0, &src_d->boundingBox);
-  Face::m128iShufflePI32<1, 0, 1, 0>(xmmt, xmmt);
+  Acc::m128iLoad8(xmmt, pt);
+  Acc::m128iLoad16uLoHi(xmm0, &src_d->boundingBox);
+  Acc::m128iShufflePI32<1, 0, 1, 0>(xmmt, xmmt);
 
   d->length = length;
 
-  Face::m128iAddPI32(xmm0, xmm0, xmmt);
-  Face::m128iStore16uLoHi(&d->boundingBox, xmm0);
+  Acc::m128iAddPI32(xmm0, xmm0, xmmt);
+  Acc::m128iStore16uLoHi(&d->boundingBox, xmm0);
 
   size_t i;
 
@@ -90,27 +90,27 @@ static err_t FOG_CDECL Region_translate_SSE2(Region* dst, const Region* src, con
     {
       __m128i xmm1, xmm2, xmm3;
 
-      Face::m128iLoad16a(xmm0, &sCur[0]);
-      Face::m128iLoad16a(xmm1, &sCur[1]);
-      Face::m128iLoad16a(xmm2, &sCur[2]);
-      Face::m128iLoad16a(xmm3, &sCur[3]);
+      Acc::m128iLoad16a(xmm0, &sCur[0]);
+      Acc::m128iLoad16a(xmm1, &sCur[1]);
+      Acc::m128iLoad16a(xmm2, &sCur[2]);
+      Acc::m128iLoad16a(xmm3, &sCur[3]);
 
-      Face::m128iAddPI32(xmm0, xmm0, xmmt);
-      Face::m128iAddPI32(xmm1, xmm1, xmmt);
-      Face::m128iAddPI32(xmm2, xmm2, xmmt);
-      Face::m128iAddPI32(xmm3, xmm3, xmmt);
+      Acc::m128iAddPI32(xmm0, xmm0, xmmt);
+      Acc::m128iAddPI32(xmm1, xmm1, xmmt);
+      Acc::m128iAddPI32(xmm2, xmm2, xmmt);
+      Acc::m128iAddPI32(xmm3, xmm3, xmmt);
 
-      Face::m128iStore16a(&dCur[0], xmm0);
-      Face::m128iStore16a(&dCur[1], xmm1);
-      Face::m128iStore16a(&dCur[2], xmm2);
-      Face::m128iStore16a(&dCur[3], xmm3);
+      Acc::m128iStore16a(&dCur[0], xmm0);
+      Acc::m128iStore16a(&dCur[1], xmm1);
+      Acc::m128iStore16a(&dCur[2], xmm2);
+      Acc::m128iStore16a(&dCur[3], xmm3);
     }
 
     for (i = length & 3; i; i--, dCur++, sCur++)
     {
-      Face::m128iLoad16a(xmm0, &sCur[0]);
-      Face::m128iAddPI32(xmm0, xmm0, xmmt);
-      Face::m128iStore16a(&dCur[0], xmm0);
+      Acc::m128iLoad16a(xmm0, &sCur[0]);
+      Acc::m128iAddPI32(xmm0, xmm0, xmmt);
+      Acc::m128iStore16a(&dCur[0], xmm0);
     }
   }
   else
@@ -119,27 +119,27 @@ static err_t FOG_CDECL Region_translate_SSE2(Region* dst, const Region* src, con
     {
       __m128i xmm1, xmm2, xmm3;
 
-      Face::m128iLoad16uLoHi(xmm0, &sCur[0]);
-      Face::m128iLoad16uLoHi(xmm1, &sCur[1]);
-      Face::m128iLoad16uLoHi(xmm2, &sCur[2]);
-      Face::m128iLoad16uLoHi(xmm3, &sCur[3]);
+      Acc::m128iLoad16uLoHi(xmm0, &sCur[0]);
+      Acc::m128iLoad16uLoHi(xmm1, &sCur[1]);
+      Acc::m128iLoad16uLoHi(xmm2, &sCur[2]);
+      Acc::m128iLoad16uLoHi(xmm3, &sCur[3]);
 
-      Face::m128iAddPI32(xmm0, xmm0, xmmt);
-      Face::m128iAddPI32(xmm1, xmm1, xmmt);
-      Face::m128iAddPI32(xmm2, xmm2, xmmt);
-      Face::m128iAddPI32(xmm3, xmm3, xmmt);
+      Acc::m128iAddPI32(xmm0, xmm0, xmmt);
+      Acc::m128iAddPI32(xmm1, xmm1, xmmt);
+      Acc::m128iAddPI32(xmm2, xmm2, xmmt);
+      Acc::m128iAddPI32(xmm3, xmm3, xmmt);
 
-      Face::m128iStore16uLoHi(&dCur[0], xmm0);
-      Face::m128iStore16uLoHi(&dCur[1], xmm1);
-      Face::m128iStore16uLoHi(&dCur[2], xmm2);
-      Face::m128iStore16uLoHi(&dCur[3], xmm3);
+      Acc::m128iStore16uLoHi(&dCur[0], xmm0);
+      Acc::m128iStore16uLoHi(&dCur[1], xmm1);
+      Acc::m128iStore16uLoHi(&dCur[2], xmm2);
+      Acc::m128iStore16uLoHi(&dCur[3], xmm3);
     }
 
     for (i = length & 3; i; i--, dCur++, sCur++)
     {
-      Face::m128iLoad16uLoHi(xmm0, &sCur[0]);
-      Face::m128iAddPI32(xmm0, xmm0, xmmt);
-      Face::m128iStore16uLoHi(&dCur[0], xmm0);
+      Acc::m128iLoad16uLoHi(xmm0, &sCur[0]);
+      Acc::m128iAddPI32(xmm0, xmm0, xmmt);
+      Acc::m128iStore16uLoHi(&dCur[0], xmm0);
     }
   }
 
@@ -173,11 +173,11 @@ static bool FOG_CDECL Region_eq_SSE2(const Region* a, const Region* b)
   __m128i xmm_am;
   __m128i xmm_b0;
 
-  Face::m128iLoad16uLoHi(xmm_am, &a_d->boundingBox);
-  Face::m128iLoad16uLoHi(xmm_b0, &b_d->boundingBox);
+  Acc::m128iLoad16uLoHi(xmm_am, &a_d->boundingBox);
+  Acc::m128iLoad16uLoHi(xmm_b0, &b_d->boundingBox);
 
-  Face::m128iCmpEqPI32(xmm_am, xmm_am, xmm_b0);
-  Face::m128iMoveMaskPI8(mask, xmm_am);
+  Acc::m128iCmpEqPI32(xmm_am, xmm_am, xmm_b0);
+  Acc::m128iMoveMaskPI8(mask, xmm_am);
   if (mask != 0xFFFF)
     return false;
 
@@ -190,29 +190,29 @@ static bool FOG_CDECL Region_eq_SSE2(const Region* a, const Region* b)
       __m128i xmm_a1, xmm_a2, xmm_a3;
       __m128i xmm_b1, xmm_b2, xmm_b3;
 
-      Face::m128iLoad16a(xmm_am, &a_data[0]);
-      Face::m128iLoad16a(xmm_a1, &a_data[1]);
-      Face::m128iLoad16a(xmm_b0, &b_data[0]);
-      Face::m128iLoad16a(xmm_b1, &b_data[1]);
+      Acc::m128iLoad16a(xmm_am, &a_data[0]);
+      Acc::m128iLoad16a(xmm_a1, &a_data[1]);
+      Acc::m128iLoad16a(xmm_b0, &b_data[0]);
+      Acc::m128iLoad16a(xmm_b1, &b_data[1]);
 
-      Face::m128iCmpEqPI32(xmm_am, xmm_am, xmm_b0);
-      Face::m128iCmpEqPI32(xmm_a1, xmm_a1, xmm_b1);
+      Acc::m128iCmpEqPI32(xmm_am, xmm_am, xmm_b0);
+      Acc::m128iCmpEqPI32(xmm_a1, xmm_a1, xmm_b1);
 
-      Face::m128iLoad16a(xmm_a2, &a_data[2]);
-      Face::m128iLoad16a(xmm_a3, &a_data[3]);
+      Acc::m128iLoad16a(xmm_a2, &a_data[2]);
+      Acc::m128iLoad16a(xmm_a3, &a_data[3]);
 
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a1);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a1);
 
-      Face::m128iLoad16a(xmm_b2, &b_data[2]);
-      Face::m128iLoad16a(xmm_b3, &b_data[3]);
+      Acc::m128iLoad16a(xmm_b2, &b_data[2]);
+      Acc::m128iLoad16a(xmm_b3, &b_data[3]);
 
-      Face::m128iCmpEqPI32(xmm_a2, xmm_a2, xmm_b2);
-      Face::m128iCmpEqPI32(xmm_a3, xmm_a3, xmm_b3);
+      Acc::m128iCmpEqPI32(xmm_a2, xmm_a2, xmm_b2);
+      Acc::m128iCmpEqPI32(xmm_a3, xmm_a3, xmm_b3);
 
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a2);
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a3);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a2);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a3);
 
-      Face::m128iMoveMaskPI8(mask, xmm_am);
+      Acc::m128iMoveMaskPI8(mask, xmm_am);
       if (mask != 0xFFFF)
         return false;
     }
@@ -221,11 +221,11 @@ static bool FOG_CDECL Region_eq_SSE2(const Region* a, const Region* b)
     {
       __m128i xmm_a0;
 
-      Face::m128iLoad16a(xmm_a0, &a_data[0]);
-      Face::m128iLoad16a(xmm_b0, &b_data[0]);
+      Acc::m128iLoad16a(xmm_a0, &a_data[0]);
+      Acc::m128iLoad16a(xmm_b0, &b_data[0]);
 
-      Face::m128iCmpEqPI32(xmm_a0, xmm_a0, xmm_b0);
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a0);
+      Acc::m128iCmpEqPI32(xmm_a0, xmm_a0, xmm_b0);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a0);
     }
   }
   else
@@ -235,29 +235,29 @@ static bool FOG_CDECL Region_eq_SSE2(const Region* a, const Region* b)
       __m128i xmm_a1, xmm_a2, xmm_a3;
       __m128i xmm_b1, xmm_b2, xmm_b3;
 
-      Face::m128iLoad16uLoHi(xmm_am, &a_data[0]);
-      Face::m128iLoad16uLoHi(xmm_a1, &a_data[1]);
-      Face::m128iLoad16uLoHi(xmm_b0, &b_data[0]);
-      Face::m128iLoad16uLoHi(xmm_b1, &b_data[1]);
+      Acc::m128iLoad16uLoHi(xmm_am, &a_data[0]);
+      Acc::m128iLoad16uLoHi(xmm_a1, &a_data[1]);
+      Acc::m128iLoad16uLoHi(xmm_b0, &b_data[0]);
+      Acc::m128iLoad16uLoHi(xmm_b1, &b_data[1]);
 
-      Face::m128iCmpEqPI32(xmm_am, xmm_am, xmm_b0);
-      Face::m128iCmpEqPI32(xmm_a1, xmm_a1, xmm_b1);
+      Acc::m128iCmpEqPI32(xmm_am, xmm_am, xmm_b0);
+      Acc::m128iCmpEqPI32(xmm_a1, xmm_a1, xmm_b1);
 
-      Face::m128iLoad16uLoHi(xmm_a2, &a_data[2]);
-      Face::m128iLoad16uLoHi(xmm_a3, &a_data[3]);
+      Acc::m128iLoad16uLoHi(xmm_a2, &a_data[2]);
+      Acc::m128iLoad16uLoHi(xmm_a3, &a_data[3]);
 
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a1);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a1);
 
-      Face::m128iLoad16uLoHi(xmm_b2, &b_data[2]);
-      Face::m128iLoad16uLoHi(xmm_b3, &b_data[3]);
+      Acc::m128iLoad16uLoHi(xmm_b2, &b_data[2]);
+      Acc::m128iLoad16uLoHi(xmm_b3, &b_data[3]);
 
-      Face::m128iCmpEqPI32(xmm_a2, xmm_a2, xmm_b2);
-      Face::m128iCmpEqPI32(xmm_a3, xmm_a3, xmm_b3);
+      Acc::m128iCmpEqPI32(xmm_a2, xmm_a2, xmm_b2);
+      Acc::m128iCmpEqPI32(xmm_a3, xmm_a3, xmm_b3);
 
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a2);
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a3);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a2);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a3);
 
-      Face::m128iMoveMaskPI8(mask, xmm_am);
+      Acc::m128iMoveMaskPI8(mask, xmm_am);
       if (mask != 0xFFFF)
         return false;
     }
@@ -266,15 +266,15 @@ static bool FOG_CDECL Region_eq_SSE2(const Region* a, const Region* b)
     {
       __m128i xmm_a0;
 
-      Face::m128iLoad16uLoHi(xmm_a0, &a_data[0]);
-      Face::m128iLoad16uLoHi(xmm_b0, &b_data[0]);
+      Acc::m128iLoad16uLoHi(xmm_a0, &a_data[0]);
+      Acc::m128iLoad16uLoHi(xmm_b0, &b_data[0]);
 
-      Face::m128iCmpEqPI32(xmm_a0, xmm_a0, xmm_b0);
-      Face::m128iAnd(xmm_am, xmm_am, xmm_a0);
+      Acc::m128iCmpEqPI32(xmm_a0, xmm_a0, xmm_b0);
+      Acc::m128iAnd(xmm_am, xmm_am, xmm_a0);
     }
   }
 
-  Face::m128iMoveMaskPI8(mask, xmm_am);
+  Acc::m128iMoveMaskPI8(mask, xmm_am);
   return mask == 0xFFFF;
 }
 

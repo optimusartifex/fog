@@ -431,7 +431,7 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_PRGB32 : public FBaseAccessor_PRGB32
   static FOG_INLINE void fetchRunM(Run& run, const uint8_t* src)
   {
     uint32_t pix;
-    Face::p32Load4a(pix, src);
+    Acc::p32Load4a(pix, src);
     run.set(pix);
   }
 
@@ -442,12 +442,12 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_PRGB32 : public FBaseAccessor_PRGB32
 
   static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    uint32_t pix = _FOG_FACE_COMBINE_4(
+    uint32_t pix = _FOG_ACC_COMBINE_4(
       static_cast<uint32_t>((run.a * scale) >> shift) << 24,
       static_cast<uint32_t>((run.r * scale) >> shift) << 16,
       static_cast<uint32_t>((run.g * scale) >> shift) <<  8,
       static_cast<uint32_t>((run.b * scale) >> shift)      );
-    Face::p32Store4a(dst, pix);
+    Acc::p32Store4a(dst, pix);
   }
 
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
@@ -472,7 +472,7 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_XRGB32 : public FBaseAccessor_XRGB32
   static FOG_INLINE void fetchRunM(Run& run, const uint8_t* src)
   {
     uint32_t pix;
-    Face::p32Load4a(pix, src);
+    Acc::p32Load4a(pix, src);
     run.set(pix);
   }
 
@@ -483,12 +483,12 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_XRGB32 : public FBaseAccessor_XRGB32
 
   static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    uint32_t pix = _FOG_FACE_COMBINE_4(
+    uint32_t pix = _FOG_ACC_COMBINE_4(
       0xFF000000,
       static_cast<uint32_t>((run.r * scale) >> shift) << 16,
       static_cast<uint32_t>((run.g * scale) >> shift) <<  8,
       static_cast<uint32_t>((run.b * scale) >> shift)      );
-    Face::p32Store4a(dst, pix);
+    Acc::p32Store4a(dst, pix);
   }
 
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
@@ -520,7 +520,7 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_RGB24 : public FBaseAccessor_RGB24
   static FOG_INLINE void fetchRunT(Run& run, const uint8_t* src)
   {
     uint32_t pix;
-    Face::p32Load4a(pix, src);
+    Acc::p32Load4a(pix, src);
     run.set(pix);
   }
 
@@ -533,11 +533,11 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_RGB24 : public FBaseAccessor_RGB24
 
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    uint32_t pix = _FOG_FACE_COMBINE_3(
+    uint32_t pix = _FOG_ACC_COMBINE_3(
       static_cast<uint32_t>((run.r * scale) >> shift) << 16,
       static_cast<uint32_t>((run.g * scale) >> shift) <<  8,
       static_cast<uint32_t>((run.b * scale) >> shift)      );
-    Face::p32Store4a(dst, pix);
+    Acc::p32Store4a(dst, pix);
   }
 };
 
@@ -618,7 +618,7 @@ struct FOG_NO_EXPORT FBlurExpAccessor_PRGB32 : public FBlurBaseAccessor_PRGB32<i
   static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
   {
     uint32_t pix;
-    Face::p32Load4a(pix, src);
+    Acc::p32Load4a(pix, src);
     blurPixel(run, pix, aValue);
   }
 
@@ -629,12 +629,12 @@ struct FOG_NO_EXPORT FBlurExpAccessor_PRGB32 : public FBlurBaseAccessor_PRGB32<i
   
   static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
   {
-    uint32_t pix = _FOG_FACE_COMBINE_4(
+    uint32_t pix = _FOG_ACC_COMBINE_4(
       (run.a >> BLUR_ZPREC) << 24,
       (run.r >> BLUR_ZPREC) << 16,
       (run.g >> BLUR_ZPREC) <<  8,
       (run.b >> BLUR_ZPREC) <<  0);
-    Face::p32Store4a(dst, pix);
+    Acc::p32Store4a(dst, pix);
   }
 
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
@@ -662,7 +662,7 @@ struct FOG_NO_EXPORT FBlurExpAccessor_XRGB32 : public FBlurBaseAccessor_XRGB32<i
   static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
   {
     uint32_t pix;
-    Face::p32Load4a(pix, src);
+    Acc::p32Load4a(pix, src);
     blurPixel(run, pix, aValue);
   }
 
@@ -673,12 +673,12 @@ struct FOG_NO_EXPORT FBlurExpAccessor_XRGB32 : public FBlurBaseAccessor_XRGB32<i
   
   static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
   {
-    uint32_t pix = _FOG_FACE_COMBINE_4(
+    uint32_t pix = _FOG_ACC_COMBINE_4(
       0xFF000000,
       (run.r >> BLUR_ZPREC) << 16,
       (run.g >> BLUR_ZPREC) <<  8,
       (run.b >> BLUR_ZPREC) <<  0);
-    Face::p32Store4a(dst, pix);
+    Acc::p32Store4a(dst, pix);
   }
 
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
@@ -713,7 +713,7 @@ struct FOG_NO_EXPORT FBlurExpAccessor_RGB24 : public FBlurBaseAccessor_RGB24<int
   static FOG_INLINE void blurRunT(Run& run, const uint8_t* src, int32_t aValue)
   {
     uint32_t pix;
-    Face::p32Load4a(pix, src);
+    Acc::p32Load4a(pix, src);
     blurPixel(run, pix, aValue);
   }
 
@@ -726,11 +726,11 @@ struct FOG_NO_EXPORT FBlurExpAccessor_RGB24 : public FBlurBaseAccessor_RGB24<int
   
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)
   {
-    uint32_t pix = _FOG_FACE_COMBINE_3(
+    uint32_t pix = _FOG_ACC_COMBINE_3(
       (run.r >> BLUR_ZPREC) << 16,
       (run.g >> BLUR_ZPREC) <<  8,
       (run.b >> BLUR_ZPREC) <<  0);
-    Face::p32Store4a(dst, pix);
+    Acc::p32Store4a(dst, pix);
   }
 };
 
@@ -815,12 +815,12 @@ struct FOG_NO_EXPORT FBlur
       if (ImageFormatDescription::getByFormat(dstFormat).is16Bpc())
       {
         Argb64 argb64 = feData->_extendColor().getArgb64();
-        Face::p64PRGB64FromARGB64(ctx->blur.extendColor.prgb64.p64, argb64.p64);
+        Acc::p64PRGB64FromARGB64(ctx->blur.extendColor.prgb64.p64, argb64.p64);
       }
       else
       {
         Argb32 argb32 = feData->_extendColor().getArgb32();
-        Face::p32PRGB32FromARGB32(ctx->blur.extendColor.prgb32.u32, argb32.u32);
+        Acc::p32PRGB32FromARGB32(ctx->blur.extendColor.prgb32.u32, argb32.u32);
       }
     }
 

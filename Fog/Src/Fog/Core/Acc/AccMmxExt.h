@@ -4,16 +4,15 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACEMMXEXT_H
-#define _FOG_CORE_FACE_FACEMMXEXT_H
+#ifndef _FOG_CORE_ACC_ACCMMXEXT_H
+#define _FOG_CORE_ACC_ACCMMXEXT_H
 
 // [Dependencies]
-#include <Fog/Core/C++/IntrinMMXExt.h>
-#include <Fog/Core/Face/Features.h>
-#include <Fog/Core/Face/FaceMMX.h>
+#include <Fog/Core/C++/IntrinMmxExt.h>
+#include <Fog/Core/Acc/AccMmx.h>
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
 // [Warnings]
 #if defined(FOG_CC_MSC)
@@ -21,11 +20,11 @@ namespace Face {
 # pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
-//! @addtogroup Fog_Face_MMXExt
+//! @addtogroup Fog_Acc_MmxExt
 //! @{
 
 // ============================================================================
-// [Fog::Face - MMX_Ext - MoveMask]
+// [Fog::Acc - MmxExt - MoveMask]
 // ============================================================================
 
 // @brief Create a 8-bit mask from the most significant bits of the 8 signed
@@ -43,8 +42,8 @@ namespace Face {
 # pragma warning(pop)
 #endif // FOG_CC_MSC
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACEMMXEXT_H
+#endif // _FOG_CORE_ACC_ACCMMXEXT_H

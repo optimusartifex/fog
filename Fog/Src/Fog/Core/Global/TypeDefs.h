@@ -344,24 +344,27 @@ struct SvgUseElement;
 struct SvgViewElement;
 
 // Fog/G2d/Text.
+struct Face;
+struct FaceFeatures;
+struct FaceInfo;
+struct FaceInfoData;
+struct FaceVTable;
 struct Font;
-struct FontCollection;
-struct FontCollectionData;
+struct FaceCollection;
+struct FaceCollectionData;
 struct FontData;
-struct FontDefs;
 struct FontEngine;
 struct FontEngineVTable;
-struct FontFace;
-struct FontFaceVTable;
 struct FontFeatures;
-struct FontInfo;
-struct FontInfoData;
 struct FontMatrix;
 struct FontMetrics;
 struct FontSpacing;
 struct GlyphItem;
 struct GlyphPosition;
 struct GlyphRun;
+struct TextLayoutRectI;
+struct TextLayoutRectF;
+struct TextLayoutRectD;
 
 // Fog/G2d/Tools.
 struct Dpi;
@@ -420,7 +423,7 @@ typedef bool (FOG_CDECL *EqFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareFunc)(const void* a, const void* b);
 typedef int (FOG_CDECL *CompareExFunc)(const void* a, const void* b, const void* data);
 
-typedef EventLoopImpl* (*EventLoopConstructor)();
+typedef EventLoopImpl* (*EventLoopConstructor)(void);
 
 // ============================================================================
 // [TypeDefs - Functions - Fog/G2d]

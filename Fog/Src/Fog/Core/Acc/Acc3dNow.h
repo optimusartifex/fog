@@ -4,12 +4,12 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_CORE_FACE_FACE3DNOW_H
-#define _FOG_CORE_FACE_FACE3DNOW_H
+#ifndef _FOG_CORE_ACC_ACC3DNOW_H
+#define _FOG_CORE_ACC_ACC3DNOW_H
 
 // [Dependencies]
 #include <Fog/Core/C++/Intrin3dNow.h>
-#include <Fog/Core/Face/FaceMMX.h>
+#include <Fog/Core/Acc/AccMmx.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
 
@@ -20,7 +20,7 @@
 #endif // FOG_CC_MSC
 
 // ============================================================================
-// [Fog::Face - 3dNow - Constants]
+// [Fog::Acc - 3dNow - Constants]
 // ============================================================================
 
 FOG_MMX_DECLARE_CONST_PI32_SET(m64f_sgn_mask, 0x80000000);
@@ -29,13 +29,13 @@ FOG_MMX_DECLARE_CONST_PF_SET  (m64f_one     , 1.0f      );
 FOG_MMX_DECLARE_CONST_PF_SET  (m64f_epsilon , Fog::MATH_EPSILON_F);
 
 namespace Fog {
-namespace Face {
+namespace Acc {
 
-//! @addtogroup Fog_Face_3dNow
+//! @addtogroup Fog_Acc_3dNow
 //! @{
 
 // ============================================================================
-// [Fog::Face - 3dNow - Load/Store]
+// [Fog::Acc - 3dNow - Load/Store]
 // ============================================================================
 
 template<typename T>
@@ -70,7 +70,7 @@ static FOG_INLINE void m64fStore8(T* dstp, const __m64& src0)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Convert]
+// [Fog::Acc - 3dNow - Convert]
 // ============================================================================
 
 static FOG_INLINE void m64fFromM64I32(__m64& dst, const __m64& a)
@@ -84,7 +84,7 @@ static FOG_INLINE void m64fToM64I32(__m64& dst, const __m64& a)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Shuffle]
+// [Fog::Acc - 3dNow - Shuffle]
 // ============================================================================
 
 static FOG_INLINE void m64fSwapXY(__m64& dst, const __m64& a)
@@ -103,7 +103,7 @@ static FOG_INLINE void m64fExtendHi(__m64& dst, const __m64& a)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Add]
+// [Fog::Acc - 3dNow - Add]
 // ============================================================================
 
 static FOG_INLINE void m64fAdd(__m64& dst, const __m64& a, const __m64& b)
@@ -123,7 +123,7 @@ static FOG_INLINE void m64fHAdd(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Sub]
+// [Fog::Acc - 3dNow - Sub]
 // ============================================================================
 
 static FOG_INLINE void m64fSub(__m64& dst, const __m64& a, const __m64& b)
@@ -137,7 +137,7 @@ static FOG_INLINE void m64fSubRev(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Mul]
+// [Fog::Acc - 3dNow - Mul]
 // ============================================================================
 
 static FOG_INLINE void m64fMul(__m64& dst, const __m64& a, const __m64& b)
@@ -146,7 +146,7 @@ static FOG_INLINE void m64fMul(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Min/Max]
+// [Fog::Acc - 3dNow - Min/Max]
 // ============================================================================
 
 static FOG_INLINE void m64fMin(__m64& dst, const __m64& a, const __m64& b)
@@ -160,7 +160,7 @@ static FOG_INLINE void m64fMax(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Reciprocal]
+// [Fog::Acc - 3dNow - Reciprocal]
 // ============================================================================
 
 //! @brief Performs reciprocal approximation (high precision).
@@ -196,7 +196,7 @@ static FOG_INLINE void m64fRcpLoStep2(__m64& dst, const __m64& a, const __m64& b
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Square-Root Reciprocal]
+// [Fog::Acc - 3dNow - Square-Root Reciprocal]
 // ============================================================================
 
 //! @brief Performs square root reciprocal approximation (high precision).
@@ -230,7 +230,7 @@ static FOG_INLINE void m64fSqrtRcpLoStep2(__m64& dst, const __m64& a, const __m6
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Div]
+// [Fog::Acc - 3dNow - Div]
 // ============================================================================
 
 //! @brief Divide a[0, 1] by b[0, 0]
@@ -252,7 +252,7 @@ static FOG_INLINE void m64fDivByLo(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - Compare]
+// [Fog::Acc - 3dNow - Compare]
 // ============================================================================
 
 static FOG_INLINE void m64fCmpEQ(__m64& dst, const __m64& a, const __m64& b)
@@ -281,7 +281,7 @@ static FOG_INLINE void m64fCmpLT(__m64& dst, const __m64& a, const __m64& b)
 }
 
 // ============================================================================
-// [Fog::Face - 3dNow - EMMS]
+// [Fog::Acc - 3dNow - EMMS]
 // ============================================================================
 
 static FOG_INLINE void m64fEMMS()
@@ -291,7 +291,7 @@ static FOG_INLINE void m64fEMMS()
 
 //! @}
 
-} // Face namespace
+} // Acc namespace
 } // Fog namespace
 
 // [Warnings]
@@ -300,4 +300,4 @@ static FOG_INLINE void m64fEMMS()
 #endif // FOG_CC_MSC
 
 // [Guard]
-#endif // _FOG_CORE_FACE_FACE3DNOW_H
+#endif // _FOG_CORE_ACC_ACC3DNOW_H

@@ -30,8 +30,8 @@ namespace RasterOps_C {
     else \
       t0p_31 = (sa + da - Math::udiv255(saDa)) << 16; \
     \
-    Face::p32ExtractPBW1(dca, a0p_20); \
-    Face::p32ExtractPBW1(sca, b0p_20); \
+    Acc::p32ExtractPBW1(dca, a0p_20); \
+    Acc::p32ExtractPBW1(sca, b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
@@ -41,8 +41,8 @@ namespace RasterOps_C {
     else \
       t0p_20 = dca << 16; \
     \
-    Face::p32ExtractPBW0(dca, a0p_31); \
-    Face::p32ExtractPBW0(sca, b0p_31); \
+    Acc::p32ExtractPBW0(dca, a0p_31); \
+    Acc::p32ExtractPBW0(sca, b0p_31); \
     \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
@@ -52,8 +52,8 @@ namespace RasterOps_C {
     else \
       t0p_31 += dca; \
     \
-    Face::p32ExtractPBW0(dca, a0p_20); \
-    Face::p32ExtractPBW0(sca, b0p_20); \
+    Acc::p32ExtractPBW0(dca, a0p_20); \
+    Acc::p32ExtractPBW0(sca, b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
@@ -61,9 +61,9 @@ namespace RasterOps_C {
     t0p_20 += dca; \
     \
     if (pack) \
-      Face::p32Copy(dst0p_20, t0p_20); \
+      Acc::p32Copy(dst0p_20, t0p_20); \
     else \
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+      Acc::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
   FOG_MACRO_END
 
 #define FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(_Equation_) \
@@ -76,8 +76,8 @@ namespace RasterOps_C {
     else \
       t0p_31 = 0x00FF0000; \
     \
-    Face::p32ExtractPBW1(dca, a0p_20); \
-    Face::p32ExtractPBW1(sc , b0p_20); \
+    Acc::p32ExtractPBW1(dca, a0p_20); \
+    Acc::p32ExtractPBW1(sc , b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
@@ -87,8 +87,8 @@ namespace RasterOps_C {
     else \
       t0p_20 = dca << 16; \
     \
-    Face::p32ExtractPBW0(dca, a0p_31); \
-    Face::p32ExtractPBW0(sc , b0p_31); \
+    Acc::p32ExtractPBW0(dca, a0p_31); \
+    Acc::p32ExtractPBW0(sc , b0p_31); \
     \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
@@ -98,8 +98,8 @@ namespace RasterOps_C {
     else \
       t0p_31 += dca; \
     \
-    Face::p32ExtractPBW0(dca, a0p_20); \
-    Face::p32ExtractPBW0(sc , b0p_20); \
+    Acc::p32ExtractPBW0(dca, a0p_20); \
+    Acc::p32ExtractPBW0(sc , b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
@@ -107,9 +107,9 @@ namespace RasterOps_C {
     t0p_20 += dca; \
     \
     if (pack) \
-      Face::p32Copy(dst0p_20, t0p_20); \
+      Acc::p32Copy(dst0p_20, t0p_20); \
     else \
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+      Acc::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
   FOG_MACRO_END
 
 #define FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(_Equation_) \
@@ -122,8 +122,8 @@ namespace RasterOps_C {
     else \
       t0p_31 = 0x00FF0000; \
     \
-    Face::p32ExtractPBW1(dc , a0p_20); \
-    Face::p32ExtractPBW1(sca, b0p_20); \
+    Acc::p32ExtractPBW1(dc , a0p_20); \
+    Acc::p32ExtractPBW1(sca, b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
@@ -133,8 +133,8 @@ namespace RasterOps_C {
     else \
       t0p_20 = dc << 16; \
     \
-    Face::p32ExtractPBW0(dc , a0p_31); \
-    Face::p32ExtractPBW0(sca, b0p_31); \
+    Acc::p32ExtractPBW0(dc , a0p_31); \
+    Acc::p32ExtractPBW0(sca, b0p_31); \
     \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
@@ -144,8 +144,8 @@ namespace RasterOps_C {
     else \
       t0p_31 += dc; \
     \
-    Face::p32ExtractPBW0(dc , a0p_20); \
-    Face::p32ExtractPBW0(sca, b0p_20); \
+    Acc::p32ExtractPBW0(dc , a0p_20); \
+    Acc::p32ExtractPBW0(sca, b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
@@ -153,9 +153,9 @@ namespace RasterOps_C {
     t0p_20 += dc; \
     \
     if (pack) \
-      Face::p32Copy(dst0p_20, t0p_20); \
+      Acc::p32Copy(dst0p_20, t0p_20); \
     else \
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+      Acc::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
   FOG_MACRO_END
 
 #define FOG_COMPOSITE_SEPARABLE_XRGB32_OP_XRGB32(_Equation_) \
@@ -168,8 +168,8 @@ namespace RasterOps_C {
     else \
       t0p_31 = 0x00FF0000; \
     \
-    Face::p32ExtractPBW1(dc , a0p_20); \
-    Face::p32ExtractPBW1(sc , b0p_20); \
+    Acc::p32ExtractPBW1(dc , a0p_20); \
+    Acc::p32ExtractPBW1(sc , b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
@@ -179,8 +179,8 @@ namespace RasterOps_C {
     else \
       t0p_20 = dc << 16; \
     \
-    Face::p32ExtractPBW0(dc , a0p_31); \
-    Face::p32ExtractPBW0(sc , b0p_31); \
+    Acc::p32ExtractPBW0(dc , a0p_31); \
+    Acc::p32ExtractPBW0(sc , b0p_31); \
     \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
@@ -190,8 +190,8 @@ namespace RasterOps_C {
     else \
       t0p_31 += dc; \
     \
-    Face::p32ExtractPBW0(dc , a0p_20); \
-    Face::p32ExtractPBW0(sc , b0p_20); \
+    Acc::p32ExtractPBW0(dc , a0p_20); \
+    Acc::p32ExtractPBW0(sc , b0p_20); \
     \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
@@ -199,9 +199,9 @@ namespace RasterOps_C {
     t0p_20 += dc; \
     \
     if (pack) \
-      Face::p32Copy(dst0p_20, t0p_20); \
+      Acc::p32Copy(dst0p_20, t0p_20); \
     else \
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+      Acc::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
   FOG_MACRO_END
 
 #define FOG_COMPOSITE_SEPARABLE_PRGB32_OP_A8(_Equation_) \
@@ -214,7 +214,7 @@ namespace RasterOps_C {
     else \
       t0p_31 = (sa + da - Math::udiv255(saDa)) << 16; \
     \
-    Face::p32ExtractPBW1(dca, a0p_20); \
+    Acc::p32ExtractPBW1(dca, a0p_20); \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
     \
@@ -223,7 +223,7 @@ namespace RasterOps_C {
     else \
       t0p_20 = dca << 16; \
     \
-    Face::p32ExtractPBW0(dca, a0p_31); \
+    Acc::p32ExtractPBW0(dca, a0p_31); \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
     \
@@ -232,16 +232,16 @@ namespace RasterOps_C {
     else \
       t0p_31 += dca; \
     \
-    Face::p32ExtractPBW0(dca, a0p_20); \
+    Acc::p32ExtractPBW0(dca, a0p_20); \
     _Equation_ \
     FOG_ASSERT(dca <= 0xFF); \
     \
     t0p_20 += dca; \
     \
     if (pack) \
-      Face::p32Copy(dst0p_20, t0p_20); \
+      Acc::p32Copy(dst0p_20, t0p_20); \
     else \
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+      Acc::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
   FOG_MACRO_END
 
 #define FOG_COMPOSITE_SEPARABLE_XRGB32_OP_A8(_Equation_) \
@@ -254,7 +254,7 @@ namespace RasterOps_C {
     else \
       t0p_31 = 0x00FF0000; \
     \
-    Face::p32ExtractPBW1(dc, a0p_20); \
+    Acc::p32ExtractPBW1(dc, a0p_20); \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
     \
@@ -263,7 +263,7 @@ namespace RasterOps_C {
     else \
       t0p_20 = dc << 16; \
     \
-    Face::p32ExtractPBW0(dc, a0p_31); \
+    Acc::p32ExtractPBW0(dc, a0p_31); \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
     \
@@ -272,16 +272,16 @@ namespace RasterOps_C {
     else \
       t0p_31 += dc; \
     \
-    Face::p32ExtractPBW0(dc, a0p_20); \
+    Acc::p32ExtractPBW0(dc, a0p_20); \
     _Equation_ \
     FOG_ASSERT(dc <= 0xFF); \
     \
     t0p_20 += dc; \
     \
     if (pack) \
-      Face::p32Copy(dst0p_20, t0p_20); \
+      Acc::p32Copy(dst0p_20, t0p_20); \
     else \
-      Face::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
+      Acc::p32Copy_2x(dst0p_20, t0p_20, dst0p_31, t0p_31); \
   FOG_MACRO_END
 
 // ============================================================================
@@ -298,9 +298,9 @@ struct CompositeExtCondition
   static FOG_INLINE bool p32ProcessDstPixel32(const uint32_t& c0)
   {
     if (CombineFlags & RASTER_COMBINE_NOP_IF_DA_ZERO)
-      return !Face::p32PRGB32IsAlpha00(c0);
+      return !Acc::p32PRGB32IsAlpha00(c0);
     else if (CombineFlags & RASTER_COMBINE_NOP_IF_DA_FULL)
-      return !Face::p32PRGB32IsAlphaFF(c0);
+      return !Acc::p32PRGB32IsAlphaFF(c0);
     else
       return true;
   }
@@ -308,9 +308,9 @@ struct CompositeExtCondition
   static FOG_INLINE bool p32ProcessSrcPixel32(const uint32_t& c0)
   {
     if (CombineFlags & RASTER_COMBINE_NOP_IF_SA_ZERO)
-      return !Face::p32PRGB32IsAlpha00(c0);
+      return !Acc::p32PRGB32IsAlpha00(c0);
     else if (CombineFlags & RASTER_COMBINE_NOP_IF_SA_FULL)
-      return !Face::p32PRGB32IsAlphaFF(c0);
+      return !Acc::p32PRGB32IsAlphaFF(c0);
     else
       return true;
   }
@@ -336,9 +336,9 @@ struct CompositeExtCondition
   static FOG_INLINE bool p64ProcessDstPixel64(const __p64& c0)
   {
     if (CombineFlags & RASTER_COMBINE_NOP_IF_DA_ZERO)
-      return !Face::p64PRGB64IsAlpha0000(c0);
+      return !Acc::p64PRGB64IsAlpha0000(c0);
     else if (CombineFlags & RASTER_COMBINE_NOP_IF_DA_FULL)
-      return !Face::p64PRGB64IsAlphaFFFF(c0);
+      return !Acc::p64PRGB64IsAlphaFFFF(c0);
     else
       return true;
   }
@@ -346,9 +346,9 @@ struct CompositeExtCondition
   static FOG_INLINE bool p64ProcessSrcPixel64(const __p64& c0)
   {
     if (CombineFlags & RASTER_COMBINE_NOP_IF_SA_ZERO)
-      return !Face::p64PRGB64IsAlpha0000(c0);
+      return !Acc::p64PRGB64IsAlpha0000(c0);
     else if (CombineFlags & RASTER_COMBINE_NOP_IF_SA_FULL)
-      return !Face::p64PRGB64IsAlphaFFFF(c0);
+      return !Acc::p64PRGB64IsAlphaFFFF(c0);
     else
       return true;
   }
@@ -393,9 +393,9 @@ struct CompositeExtGeneric
     if (DstF::HAS_ALPHA && !SrcF::HAS_ALPHA && PrepareNeeded)
     {
       if (PrepareToFRGB)
-        Face::p32FillPBB3(dst0p, src0p);
+        Acc::p32FillPBB3(dst0p, src0p);
       else 
-        Face::p32ZeroPBB3(dst0p, src0p);
+        Acc::p32ZeroPBB3(dst0p, src0p);
     }
   }
 
@@ -404,18 +404,18 @@ struct CompositeExtGeneric
     uint32_t& dst0p_20, const uint32_t& src0p_20,
     uint32_t& dst0p_31, const uint32_t& src0p_31)
   { 
-    Face::p32Copy(dst0p_20, src0p_20);
+    Acc::p32Copy(dst0p_20, src0p_20);
 
     if (DstF::HAS_ALPHA && !SrcF::HAS_ALPHA && PrepareNeeded)
     {
       if (PrepareToFRGB)
-        Face::p32FillPBW1(dst0p_31, src0p_31);
+        Acc::p32FillPBW1(dst0p_31, src0p_31);
       else 
-        Face::p32ZeroPBW1(dst0p_31, src0p_31);
+        Acc::p32ZeroPBW1(dst0p_31, src0p_31);
     }
     else
     {
-      Face::p32Copy(dst0p_31, src0p_31);
+      Acc::p32Copy(dst0p_31, src0p_31);
     }
   }
 
@@ -477,8 +477,8 @@ struct CompositeExtGeneric
 
     uint32_t sro0p, sro0p_20, sro0p_31;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
       uint32_t dst0p_20, dst0p_31;
@@ -487,7 +487,7 @@ struct CompositeExtGeneric
       if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
         goto _C_Opaque_Skip;
       
-      Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+      Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
       pixel32_op_pixel32_2031<DstF, SrcF, true>(
         dst0p_20, dst0p_20, sro0p_20,
@@ -509,8 +509,8 @@ _C_Opaque_Skip:
   {
     uint32_t sro0p, sro0p_20, sro0p_31;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     C_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -528,7 +528,7 @@ _C_Opaque_Skip:
         DstF::p32LoadPixel32(dst0p_20, dst);
         if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
           goto _C_Opaque_Skip;
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
         pixel32_op_pixel32_2031<DstF, SrcF, true>(
           dst0p_20, dst0p_20, sro0p_20,
@@ -551,29 +551,29 @@ _C_Opaque_Skip:
       uint32_t msk0p;
       uint32_t minv0p;
 
-      Face::p32Copy(msk0p, msk0);
-      Face::p32Negate256SBW(minv0p, msk0p);
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0p);
 
       if (IsUnbound && IsUnboundMskIn)
       {
         BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_20, src0p_31;
-        Face::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
+        Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask_UnboundIn)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
             dst0p_31, dst0p_31, src0p_31);
 
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -588,16 +588,16 @@ _C_Opaque_Skip:
           uint32_t dinv0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, sro0p_20,
             dst0p_31, dst0p_31, sro0p_31);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -608,7 +608,7 @@ _C_Opaque_Skip:
         BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_20, src0p_31;
-        Face::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
+        Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask)
           uint32_t dst0p_20, dst0p_31;
@@ -617,7 +617,7 @@ _C_Opaque_Skip:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _C_Mask_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
@@ -646,12 +646,12 @@ _C_Mask_Skip:
           uint32_t msk0p;
           uint32_t minv0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Unbound_Skip;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
           if (msk0p != 0xFF)
             goto _A8_Glyph_Unbound_Mask;
@@ -667,17 +667,17 @@ _A8_Glyph_Unbound_Skip:
           continue;
 
 _A8_Glyph_Unbound_Mask:
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32Negate256SBW(minv0p, msk0p);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, sro0p_20,
             dst0p_31, dst0p_31, sro0p_31);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -693,7 +693,7 @@ _A8_Glyph_Unbound_Mask:
           uint32_t src0p_20, src0p_31;
           uint32_t msk0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Skip;
 
@@ -701,9 +701,9 @@ _A8_Glyph_Unbound_Mask:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _A8_Glyph_Skip;
 
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0p, src0p_31, sro0p_31, msk0p);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0p, src0p_31, sro0p_31, msk0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
@@ -734,21 +734,21 @@ _A8_Glyph_Skip:
           uint32_t minv0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
 
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _A8_Extra_Unbound_Skip;
 
-          Face::p32Negate256SBW(minv0p, msk0p);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, sro0p_20,
             dst0p_31, dst0p_31, sro0p_31);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Extra_Unbound_Skip:
@@ -766,13 +766,13 @@ _A8_Extra_Unbound_Skip:
           uint32_t msk0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
 
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _A8_Extra_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0p, src0p_31, sro0p_31, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0p, src0p_31, sro0p_31, msk0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
@@ -799,12 +799,12 @@ _A8_Extra_Skip:
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
@@ -820,20 +820,20 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32Negate255PBB(msk0p_20, msk0p_20);
-        Face::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Negate255PBB(msk0p_20, msk0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
 
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
         pixel32_op_pixel32_2031<DstF, SrcF, false>(
           dst0p_20, dst0p_20, sro0p_20,
           dst0p_31, dst0p_31, sro0p_31);
 
-        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
-        Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+        Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -865,8 +865,8 @@ _ARGB32_Mask:
       SrcF::p32LoadPixel32(src0p_20, src);
       pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-      Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-      Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+      Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+      Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
       pixel32_op_pixel32_2031<DstF, SrcF, true>(
         dst0p_20, dst0p_20, src0p_20,
@@ -910,8 +910,8 @@ _C_Opaque_Skip:
           goto _C_Opaque_Skip;
 
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
         pixel32_op_pixel32_2031<DstF, SrcF, true>(
           dst0p_20, dst0p_20, src0p_20,
@@ -933,14 +933,14 @@ _C_Opaque_Skip:
       BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
-      Face::p32Copy(msk0p, msk0);
+      Acc::p32Copy(msk0p, msk0);
 
       if (IsUnbound && IsUnboundMskIn)
       {
         BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
-        Face::p32Negate256SBW(minv0p, msk0p);
+        Acc::p32Negate256SBW(minv0p, msk0p);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound_MskIn)
           uint32_t dst0p_20, dst0p_31;
@@ -955,18 +955,18 @@ _C_Opaque_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixel32(src0p_20))
             goto _C_Mask_Unbound_MskIn_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
-          Face::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
             dst0p_31, dst0p_31, src0p_31);
 
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _C_Mask_Unbound_MskIn_Skip:
@@ -979,7 +979,7 @@ _C_Mask_Unbound_MskIn_Skip:
         BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
-        Face::p32Negate256SBW(minv0p, msk0p);
+        Acc::p32Negate256SBW(minv0p, msk0p);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
           uint32_t dst0p_20, dst0p_31;
@@ -994,17 +994,17 @@ _C_Mask_Unbound_MskIn_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixel32(src0p_20))
             goto _C_Mask_Unbound_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, src0p_20,
             dst0p_31, dst0p_31, src0p_31);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
 
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _C_Mask_Unbound_Skip:
@@ -1029,10 +1029,10 @@ _C_Mask_Unbound_Skip:
             goto _C_Mask_Skip;
 
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
-          Face::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
+          Acc::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
             dst0p_31, dst0p_31, src0p_31);
@@ -1063,7 +1063,7 @@ _C_Mask_Skip:
           uint32_t msk0p;
           uint32_t minv0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Unbound_Skip;
 
@@ -1071,8 +1071,8 @@ _C_Mask_Skip:
           SrcF::p32LoadPixel32(src0p_20, src);
 
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
           if (msk0p != 0xFF)
             goto _A8_Glyph_Unbound_Mask;
@@ -1089,16 +1089,16 @@ _A8_Glyph_Unbound_Skip:
           continue;
 
 _A8_Glyph_Unbound_Mask:
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32Negate256SBW(minv0p, msk0p);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, src0p_20,
             dst0p_31, dst0p_31, src0p_31);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -1115,7 +1115,7 @@ _A8_Glyph_Unbound_Mask:
           uint32_t src0p_20, src0p_31;
           uint32_t msk0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Skip;
 
@@ -1123,8 +1123,8 @@ _A8_Glyph_Unbound_Mask:
           SrcF::p32LoadPixel32(src0p_20, src);
 
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
           if (msk0p != 0xFF)
             goto _A8_Glyph_Mask;
@@ -1141,8 +1141,8 @@ _A8_Glyph_Skip:
           continue;
 
 _A8_Glyph_Mask:
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
@@ -1182,20 +1182,20 @@ _A8_Glyph_Mask:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixel32(src0p_20))
             goto _A8_Extra_Unbound_Skip;
 
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
-          Face::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32Negate256SBW(minv0p, msk0p);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           pixel32_op_pixel32_2031<DstF, SrcF, false>(
             dst0p_20, dst0p_20, src0p_20,
             dst0p_31, dst0p_31, src0p_31);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Extra_Unbound_Skip:
@@ -1221,12 +1221,12 @@ _A8_Extra_Unbound_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixel32(src0p_20))
             goto _A8_Extra_Skip;
 
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
           pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
-          Face::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x(src0p_20, src0p_20, msk0p, src0p_31, src0p_31, msk0p);
 
           pixel32_op_pixel32_2031<DstF, SrcF, true>(
             dst0p_20, dst0p_20, src0p_20,
@@ -1256,7 +1256,7 @@ _A8_Extra_Skip:
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
@@ -1264,8 +1264,8 @@ _A8_Extra_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
 
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
@@ -1282,18 +1282,18 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32Negate255PBB(msk0p_20, msk0p_20);
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate255PBB(msk0p_20, msk0p_20);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
         pixel32_op_pixel32_2031<DstF, SrcF, false>(
           dst0p_20, dst0p_20, src0p_20,
           dst0p_31, dst0p_31, src0p_31);
 
-        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
-        Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+        Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -1324,7 +1324,7 @@ _ARGB32_Mask:
       if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
         goto _C_Opaque_Skip;
       
-      Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+      Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
       pixel32_op_pixela8_2031<DstF, true>(
         dst0p_20, dst0p_20,
@@ -1363,7 +1363,7 @@ _C_Opaque_Skip:
         if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
           goto _C_Opaque_Skip;
         
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
         pixel32_op_pixela8_2031<DstF, true>(
           dst0p_20, dst0p_20,
@@ -1386,29 +1386,29 @@ _C_Opaque_Skip:
       uint32_t msk0p;
       uint32_t minv0p;
 
-      Face::p32Copy(msk0p, msk0);
-      Face::p32Negate256SBW(minv0p, msk0p);
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0p);
 
       if (IsUnbound && IsUnboundMskIn)
       {
         BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_a8;
-        Face::p32MulDiv256SBW(src0p_a8, sro0p_a8, msk0p);
+        Acc::p32MulDiv256SBW(src0p_a8, sro0p_a8, msk0p);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask_UnboundIn)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, src0p_a8);
 
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -1423,16 +1423,16 @@ _C_Opaque_Skip:
           uint32_t dinv0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
 
           pixel32_op_pixela8_2031<DstF, false>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, sro0p_a8);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -1443,7 +1443,7 @@ _C_Opaque_Skip:
         BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_a8;
-        Face::p32MulDiv256SBW(src0p_a8, sro0p_a8, msk0p);
+        Acc::p32MulDiv256SBW(src0p_a8, sro0p_a8, msk0p);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask)
           uint32_t dst0p_20, dst0p_31;
@@ -1452,7 +1452,7 @@ _C_Opaque_Skip:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _C_Mask_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
@@ -1481,12 +1481,12 @@ _C_Mask_Skip:
           uint32_t msk0p;
           uint32_t minv0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Unbound_Skip;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
           if (msk0p != 0xFF)
             goto _A8_Glyph_Unbound_Mask;
@@ -1502,17 +1502,17 @@ _A8_Glyph_Unbound_Skip:
           continue;
 
 _A8_Glyph_Unbound_Mask:
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32Negate256SBW(minv0p, msk0p);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           
           pixel32_op_pixela8_2031<DstF, false>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, sro0p_a8);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -1527,7 +1527,7 @@ _A8_Glyph_Unbound_Mask:
           uint32_t dst0p_20, dst0p_31;
           uint32_t msk0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Skip;
 
@@ -1535,9 +1535,9 @@ _A8_Glyph_Unbound_Mask:
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _A8_Glyph_Skip;
 
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32MulDiv256SBW(msk0p, msk0p, sro0p_a8);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32MulDiv256SBW(msk0p, msk0p, sro0p_a8);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
@@ -1568,21 +1568,21 @@ _A8_Glyph_Skip:
           uint32_t minv0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
 
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _A8_Extra_Unbound_Skip;
 
-          Face::p32Negate256SBW(minv0p, msk0p);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           
           pixel32_op_pixela8_2031<DstF, false>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, sro0p_a8);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Extra_Unbound_Skip:
@@ -1599,13 +1599,13 @@ _A8_Extra_Unbound_Skip:
           uint32_t msk0p;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
 
           if ((NopIfDaZero || NopIfDaFull) && !Cond::p32ProcessDstPixel32(dst0p_20))
             goto _A8_Extra_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256SBW(msk0p, msk0p, sro0p_a8);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256SBW(msk0p, msk0p, sro0p_a8);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
@@ -1632,12 +1632,12 @@ _A8_Extra_Skip:
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
         DstF::p32LoadPixelA8(dst0p_20, dst);
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
@@ -1653,20 +1653,20 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32Negate255PBB(msk0p_20, msk0p_20);
-        Face::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Negate255PBB(msk0p_20, msk0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
 
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
         pixel32_op_pixela8_2031<DstF, false>(
           dst0p_20, dst0p_20,
           dst0p_31, dst0p_31, sro0p_a8);
 
-        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
-        Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+        Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -1696,7 +1696,7 @@ _ARGB32_Mask:
         goto _C_Opaque_Skip;
       SrcF::p32LoadPixelA8(src0p_a8, src);
 
-      Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+      Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
       pixel32_op_pixela8_2031<DstF, true>(
         dst0p_20, dst0p_20,
         dst0p_31, dst0p_31, src0p_a8);
@@ -1735,7 +1735,7 @@ _C_Opaque_Skip:
           goto _C_Opaque_Skip;
         SrcF::p32LoadPixelA8(src0p_a8, src);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
         pixel32_op_pixela8_2031<DstF, true>(
           dst0p_20, dst0p_20,
           dst0p_31, dst0p_31, src0p_a8);
@@ -1756,14 +1756,14 @@ _C_Opaque_Skip:
       BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
-      Face::p32Copy(msk0p, msk0);
+      Acc::p32Copy(msk0p, msk0);
 
       if (IsUnbound && IsUnboundMskIn)
       {
         BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
-        Face::p32Negate256SBW(minv0p, msk0p);
+        Acc::p32Negate256SBW(minv0p, msk0p);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound_MskIn)
           uint32_t dst0p_20, dst0p_31;
@@ -1778,15 +1778,15 @@ _C_Opaque_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
             goto _C_Mask_Unbound_MskIn_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
-          Face::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, src0p_a8);
 
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _C_Mask_Unbound_MskIn_Skip:
@@ -1799,7 +1799,7 @@ _C_Mask_Unbound_MskIn_Skip:
         BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
-        Face::p32Negate256SBW(minv0p, msk0p);
+        Acc::p32Negate256SBW(minv0p, msk0p);
 
         BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
           uint32_t dst0p_20, dst0p_31;
@@ -1814,14 +1814,14 @@ _C_Mask_Unbound_MskIn_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
             goto _C_Mask_Unbound_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           pixel32_op_pixela8_2031<DstF, false>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, src0p_a8);
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
 
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _C_Mask_Unbound_Skip:
@@ -1845,8 +1845,8 @@ _C_Mask_Unbound_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
             goto _C_Mask_Skip;
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, src0p_a8);
@@ -1877,14 +1877,14 @@ _C_Mask_Skip:
           uint32_t msk0p;
           uint32_t minv0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Unbound_Skip;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
           SrcF::p32LoadPixelA8(src0p_a8, src);
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
           if (msk0p != 0xFF)
             goto _A8_Glyph_Unbound_Mask;
 
@@ -1900,16 +1900,16 @@ _A8_Glyph_Unbound_Skip:
           continue;
 
 _A8_Glyph_Unbound_Mask:
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32Negate256SBW(minv0p, msk0p);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           pixel32_op_pixela8_2031<DstF, false>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, src0p_a8);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
@@ -1926,16 +1926,16 @@ _A8_Glyph_Unbound_Mask:
           uint32_t src0p_a8;
           uint32_t msk0p;
 
-          Face::p32Load1b(msk0p, msk);
+          Acc::p32Load1b(msk0p, msk);
           if (msk0p == 0x00)
             goto _A8_Glyph_Skip;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
           SrcF::p32LoadPixelA8(src0p_a8, src);
 
-          Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-          Face::p32MulDiv256SBW(src0p_a8, src0p_a8,  msk0p);
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+          Acc::p32MulDiv256SBW(src0p_a8, src0p_a8,  msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
@@ -1976,18 +1976,18 @@ _A8_Glyph_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
             goto _A8_Extra_Unbound_Skip;
 
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32Negate256SBW(minv0p, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32Negate256SBW(minv0p, msk0p);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dinv0p, dst0p_20, minv0p, dst0p_31, minv0p);
           pixel32_op_pixela8_2031<DstF, false>(
             dst0p_20, dst0p_20,
             dst0p_31, dst0p_31, src0p_a8);
 
-          Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-          Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+          Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+          Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
           DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Extra_Unbound_Skip:
@@ -2013,10 +2013,10 @@ _A8_Extra_Unbound_Skip:
           if ((NopIfSaZero || NopIfSaFull) && !Cond::p32ProcessSrcPixelA8(src0p_a8))
             goto _A8_Extra_Skip;
 
-          Face::p32Load2a(msk0p, msk);
+          Acc::p32Load2a(msk0p, msk);
 
-          Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-          Face::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);
+          Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+          Acc::p32MulDiv256SBW(src0p_a8, src0p_a8, msk0p);
 
           pixel32_op_pixela8_2031<DstF, true>(
             dst0p_20, dst0p_20,
@@ -2046,13 +2046,13 @@ _A8_Extra_Skip:
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
         SrcF::p32LoadPixelA8(src0p_a8, src);
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
@@ -2069,18 +2069,18 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32Negate255PBB(msk0p_20, msk0p_20);
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate255PBB(msk0p_20, msk0p_20);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
         pixel32_op_pixela8_2031<DstF, false>(
           dst0p_20, dst0p_20,
           dst0p_31, dst0p_31, src0p_a8);
 
-        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
-        Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+        Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -2133,9 +2133,9 @@ struct CompositeExtSrcInSrcOut
     uint32_t& dst0p, const uint32_t& src0p)
   {
     if (!SrcF::HAS_ALPHA && !SrcF::HAS_F)
-      Face::p32FillPBB3(dst0p, src0p);
+      Acc::p32FillPBB3(dst0p, src0p);
     else
-      Face::p32Copy(dst0p, src0p);
+      Acc::p32Copy(dst0p, src0p);
   }
 
   template<typename DstF, typename SrcF>
@@ -2143,12 +2143,12 @@ struct CompositeExtSrcInSrcOut
     uint32_t& dst0p_20, const uint32_t& src0p_20,
     uint32_t& dst0p_31, const uint32_t& src0p_31)
   {
-    Face::p32Copy(dst0p_20, src0p_20);
+    Acc::p32Copy(dst0p_20, src0p_20);
 
     if (!SrcF::HAS_ALPHA && !SrcF::HAS_F)
-      Face::p32FillPBW1(dst0p_31, src0p_31);
+      Acc::p32FillPBW1(dst0p_31, src0p_31);
     else
-      Face::p32Copy(dst0p_31, src0p_31);
+      Acc::p32Copy(dst0p_31, src0p_31);
   }
 
   static FOG_INLINE bool pixel32_skip(const uint32_t& pix0)
@@ -2171,8 +2171,8 @@ struct CompositeExtSrcInSrcOut
 
     uint32_t sro0p, sro0p_20, sro0p_31;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
       uint32_t dst0p;
@@ -2180,9 +2180,9 @@ struct CompositeExtSrcInSrcOut
       DstF::p32LoadPixelA8(dst0p, dst);
       if (pixel32_skip(dst0p))
         goto _C_Opaque_Skip;
-      if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+      if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-      Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, sro0p_20, dst0p, sro0p_31, dst0p);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, sro0p_20, dst0p, sro0p_31, dst0p);
       DstF::p32StorePixel32(dst, dst0p);
 
 _C_Opaque_Skip:
@@ -2200,8 +2200,8 @@ _C_Opaque_Skip:
   {
     uint32_t sro0p, sro0p_20, sro0p_31;
 
-    Face::p32Copy(sro0p, src->prgb32.u32);
-    Face::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
+    Acc::p32Copy(sro0p, src->prgb32.u32);
+    Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
     C_BLIT_SPAN8_BEGIN(DstF::SIZE)
 
@@ -2219,9 +2219,9 @@ _C_Opaque_Skip:
         DstF::p32LoadPixelA8(dst0p, dst);
         if (pixel32_skip(dst0p))
           goto _C_Opaque_Skip;
-        if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+        if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-        Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, sro0p_20, dst0p, sro0p_31, dst0p);
+        Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, sro0p_20, dst0p, sro0p_31, dst0p);
         DstF::p32StorePixel32(dst, dst0p);
 
 _C_Opaque_Skip:
@@ -2240,8 +2240,8 @@ _C_Opaque_Skip:
       uint32_t src0p_20, src0p_31;
       uint32_t minv0p;
 
-      Face::p32Negate256SBW(minv0p, msk0);
-      Face::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0);
+      Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
 
       BLIT_LOOP_32x1_INIT()
 
@@ -2253,15 +2253,15 @@ _C_Opaque_Skip:
         if (pixel32_skip(dst0p_20))
           goto _C_Mask_Skip;
         DstF::p32LoadPixel32(dst0p_20, dst);
-        Face::p32ExtractPBB3(t0p_20, dst0p_31);
-        if (NegateDA) Face::p32Negate255SBW(t0p_20, t0p_20);
+        Acc::p32ExtractPBB3(t0p_20, dst0p_31);
+        if (NegateDA) Acc::p32Negate255SBW(t0p_20, t0p_20);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32Mul_2x(dst0p_20, dst0p_20, minv0p, dst0p_31, dst0p_31, minv0p);
-        Face::p32Mul_2x(t0p_20, src0p_20, t0p_20, t0p_31, src0p_31, t0p_20);
-        Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32Mul_2x(dst0p_20, dst0p_20, minv0p, dst0p_31, dst0p_31, minv0p);
+        Acc::p32Mul_2x(t0p_20, src0p_20, t0p_20, t0p_31, src0p_31, t0p_20);
+        Acc::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
-        Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+        Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
         DstF::p32StorePixel32(dst, dst0p_20);
 _C_Mask_Skip:
         dst += DstF::SIZE;
@@ -2281,23 +2281,23 @@ _C_Mask_Skip:
         uint32_t t0p_20, t0p_31;
         uint32_t msk0p;
 
-        Face::p32Load1b(msk0p, msk);
+        Acc::p32Load1b(msk0p, msk);
         if (msk0p == 0x00)
           goto _A8_Glyph_Skip;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        Face::p32ExtractPBB3(t0p_20, dst0p_31);
-        if (NegateDA) Face::p32Negate255SBW(t0p_20, t0p_20);
+        Acc::p32ExtractPBB3(t0p_20, dst0p_31);
+        if (NegateDA) Acc::p32Negate255SBW(t0p_20, t0p_20);
 
-        Face::p32MulDiv255SBW(t0p_20, t0p_20, msk0p);
-        Face::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32MulDiv255SBW(t0p_20, t0p_20, msk0p);
+        Acc::p32Negate255SBW(msk0p, msk0p);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
-        Face::p32Mul_2x(t0p_20, sro0p_20, t0p_20, t0p_31, sro0p_31, t0p_20);
-        Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
+        Acc::p32Mul_2x(t0p_20, sro0p_20, t0p_20, t0p_31, sro0p_31, t0p_20);
+        Acc::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
-        Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+        Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
         DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Glyph_Skip:
@@ -2323,17 +2323,17 @@ _A8_Glyph_Skip:
         if (pixel32_skip(dst0p_20))
           goto _A8_Extra_Skip;
 
-        Face::p32Load2a(msk0p, msk);
-        Face::p32ExtractPBB3(t0p, dst0p_20);
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+        Acc::p32Load2a(msk0p, msk);
+        Acc::p32ExtractPBB3(t0p, dst0p_20);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
 
-        Face::p32MulDiv255SBW(t0p, t0p, msk0p);
-        Face::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv255SBW(t0p, t0p, msk0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(t0p, sro0p_20, t0p, sro0p_31, t0p);
-        Face::p32Add(dst0p_20, dst0p_20, t0p);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p, dst0p_31, msk0p);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(t0p, sro0p_20, t0p, sro0p_31, t0p);
+        Acc::p32Add(dst0p_20, dst0p_20, t0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Extra_Skip:
@@ -2355,20 +2355,20 @@ _A8_Extra_Skip:
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
 
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
 
-        Face::p32RShift(dst0p_20, dst0p_20, 24);
-        if (NegateDA) Face::p32Negate255SBW(dst0p_20, dst0p_20);
+        Acc::p32RShift(dst0p_20, dst0p_20, 24);
+        if (NegateDA) Acc::p32Negate255SBW(dst0p_20, dst0p_20);
 
-        Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, sro0p_20, dst0p_20, sro0p_31, dst0p_20);
+        Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, sro0p_20, dst0p_20, sro0p_31, dst0p_20);
         DstF::p32StorePixel32(dst, dst0p_20);
 
 _ARGB32_Skip:
@@ -2377,17 +2377,17 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32Negate255PBB(msk0p_20, msk0p_20);
-        Face::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Negate255PBB(msk0p_20, msk0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(msk0p_20, msk0p_31, msk0p_20);
 
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dinv0p, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
-        Face::p32RShift(dst0p_20, dst0p_20, 24);
-        Face::p32MulDiv255PBW_SBW_2x(msk0p_20, msk0p_20, dst0p_20, msk0p_31, msk0p_31, dst0p_20);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, msk0p_20, sro0p_20, msk0p_31, sro0p_31);
+        Acc::p32RShift(dst0p_20, dst0p_20, 24);
+        Acc::p32MulDiv255PBW_SBW_2x(msk0p_20, msk0p_20, dst0p_20, msk0p_31, msk0p_31, dst0p_20);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, msk0p_20, sro0p_20, msk0p_31, sro0p_31);
 
-        Face::p32Add(dst0p_20, dst0p_20, dinv0p);
+        Acc::p32Add(dst0p_20, dst0p_20, dinv0p);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -2419,10 +2419,10 @@ _ARGB32_Mask:
       SrcF::p32LoadPixel32(src0p_20, src);
       pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-      Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
-      if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+      Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+      if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-      Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, src0p_20, dst0p, src0p_31, dst0p);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, src0p_20, dst0p, src0p_31, dst0p);
       DstF::p32StorePixel32(dst, dst0p);
 
 _C_Opaque_Skip:
@@ -2460,10 +2460,10 @@ _C_Opaque_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
-        if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-        Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, src0p_20, dst0p, src0p_31, dst0p);
+        Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p, src0p_20, dst0p, src0p_31, dst0p);
         DstF::p32StorePixel32(dst, dst0p);
 
 _C_Opaque_Skip:
@@ -2483,8 +2483,8 @@ _C_Opaque_Skip:
       uint32_t msk0p;
       uint32_t minv0p;
 
-      Face::p32Copy(msk0p, msk0);
-      Face::p32Negate256SBW(minv0p, msk0);
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0);
 
       BLIT_LOOP_32x1_INIT()
 
@@ -2497,18 +2497,18 @@ _C_Opaque_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32ExtractPBB3(t0p, dst0p_20);
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+        Acc::p32ExtractPBB3(t0p, dst0p_20);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
-        Face::p32MulDiv255SBW(t0p, t0p, msk0p);
-        Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
-        Face::p32Mul_2x(dst0p_20, dst0p_20, minv0p, dst0p_31, dst0p_31, minv0p);
+        Acc::p32MulDiv255SBW(t0p, t0p, msk0p);
+        Acc::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
+        Acc::p32Mul_2x(dst0p_20, dst0p_20, minv0p, dst0p_31, dst0p_31, minv0p);
 
-        Face::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
-        Face::p32Div256PBW_2x_Pack_2031(dst0p_20, dst0p_20, dst0p_31);
+        Acc::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
+        Acc::p32Div256PBW_2x_Pack_2031(dst0p_20, dst0p_20, dst0p_31);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -2531,7 +2531,7 @@ _C_Opaque_Skip:
         uint32_t t0p;
         uint32_t msk0p;
 
-        Face::p32Load1b(msk0p, msk);
+        Acc::p32Load1b(msk0p, msk);
         if (msk0p == 0x00)
           goto _A8_Glyph_Skip;
 
@@ -2539,20 +2539,20 @@ _C_Opaque_Skip:
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32ExtractPBB3(t0p, dst0p_20);
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+        Acc::p32ExtractPBB3(t0p, dst0p_20);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
 
-        Face::p32MulDiv255SBW(t0p, t0p, msk0p);
-        Face::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32MulDiv255SBW(t0p, t0p, msk0p);
+        Acc::p32Negate255SBW(msk0p, msk0p);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
-        Face::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
-        Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
-        Face::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
+        Acc::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
+        Acc::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
+        Acc::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
 
-        Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+        Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
         DstF::p32StorePixel32(dst, dst0p_20);
 
 _A8_Glyph_Skip:
@@ -2577,26 +2577,26 @@ _A8_Glyph_Skip:
         uint32_t t0p;
         uint32_t msk0p;
 
-        Face::p32Load2a(msk0p, msk);
+        Acc::p32Load2a(msk0p, msk);
 
         DstF::p32LoadPixel32(dst0p_20, dst);
         SrcF::p32LoadPixel32(src0p_20, src);
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
 
-        Face::p32ExtractPBB3(t0p, dst0p_20);
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+        Acc::p32ExtractPBB3(t0p, dst0p_20);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
 
-        Face::p32MulDiv255SBW(t0p, t0p, msk0p);
-        Face::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv255SBW(t0p, t0p, msk0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
 
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
-        Face::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
-        Face::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
-        Face::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
+        Acc::p32Mul_2x(dst0p_20, dst0p_20, msk0p, dst0p_31, dst0p_31, msk0p);
+        Acc::p32Mul_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
+        Acc::p32Add_2x(dst0p_20, dst0p_20, src0p_20, dst0p_31, dst0p_31, src0p_31);
 
-        Face::p32Div256PBW_2x_Pack_2031(dst0p_20, dst0p_20, dst0p_31);
+        Acc::p32Div256PBW_2x_Pack_2031(dst0p_20, dst0p_20, dst0p_31);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -2619,7 +2619,7 @@ _A8_Glyph_Skip:
         uint32_t t0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
@@ -2627,15 +2627,15 @@ _A8_Glyph_Skip:
         DstF::p32LoadPixel32(src0p_20, src);
 
         pixel32_prepare_pixel32<DstF, SrcF>(src0p_20, src0p_20);
-        Face::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+        Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
 
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
 
-        Face::p32RShift(dst0p_20, dst0p_20, 24);
-        if (NegateDA) Face::p32Negate255SBW(dst0p_20, dst0p_20);
+        Acc::p32RShift(dst0p_20, dst0p_20, 24);
+        if (NegateDA) Acc::p32Negate255SBW(dst0p_20, dst0p_20);
 
-        Face::p32MulDiv255PBW_SBW_2x_Pack_2031(src0p_20, src0p_20, dst0p_20, src0p_31, dst0p_20);
+        Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(src0p_20, src0p_20, dst0p_20, src0p_31, dst0p_20);
         DstF::p32StorePixel32(dst, src0p_20);
 
 _ARGB32_Skip:
@@ -2645,19 +2645,19 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
-        Face::p32ExtractPBW1(t0p, dst0p_20);
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+        Acc::p32UnpackPBWFromPBB_2031(dst0p_20, dst0p_31, dst0p_20);
+        Acc::p32ExtractPBW1(t0p, dst0p_20);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
 
-        Face::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32Cvt256PBWFrom255PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
 
-        Face::p32MulDiv255PBW_SBW_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
-        Face::p32MulDiv256PBW_2x_Pack_2031(src0p_20, src0p_20, msk0p_20, src0p_31, msk0p_31);
+        Acc::p32MulDiv255PBW_SBW_2x(src0p_20, src0p_20, t0p, src0p_31, src0p_31, t0p);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(src0p_20, src0p_20, msk0p_20, src0p_31, msk0p_31);
 
-        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
+        Acc::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(dst0p_20, dst0p_20, msk0p_20, dst0p_31, msk0p_31);
 
-        Face::p32Add(dst0p_20, dst0p_20, src0p_20);
+        Acc::p32Add(dst0p_20, dst0p_20, src0p_20);
         DstF::p32StorePixel32(dst, dst0p_20);
 
         dst += DstF::SIZE;
@@ -2688,11 +2688,11 @@ _ARGB32_Mask:
         goto _C_Opaque_Skip;
 
       SrcF::p32LoadPixelA8(src0p, src);
-      Face::p32RShift(dst0p, dst0p, 24);
-      if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+      Acc::p32RShift(dst0p, dst0p, 24);
+      if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-      Face::p32MulDiv255SBW(dst0p, dst0p, src0p);
-      Face::p32ExtendPBBFromSBB(dst0p, dst0p);
+      Acc::p32MulDiv255SBW(dst0p, dst0p, src0p);
+      Acc::p32ExtendPBBFromSBB(dst0p, dst0p);
 
       DstF::p32StorePixel32(dst, dst0p);
 
@@ -2729,11 +2729,11 @@ _C_Opaque_Skip:
           goto _C_Opaque_Skip;
 
         SrcF::p32LoadPixelA8(src0p, src);
-        Face::p32RShift(dst0p, dst0p, 24);
-        if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+        Acc::p32RShift(dst0p, dst0p, 24);
+        if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-        Face::p32MulDiv255SBW(dst0p, dst0p, src0p);
-        Face::p32ExtendPBBFromSBB(dst0p, dst0p);
+        Acc::p32MulDiv255SBW(dst0p, dst0p, src0p);
+        Acc::p32ExtendPBBFromSBB(dst0p, dst0p);
 
         DstF::p32StorePixel32(dst, dst0p);
 
@@ -2754,8 +2754,8 @@ _C_Opaque_Skip:
       uint32_t msk0p;
       uint32_t minv0p;
 
-      Face::p32Copy(msk0p, msk0);
-      Face::p32Negate256SBW(minv0p, msk0);
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0);
 
       BLIT_LOOP_32x1_INIT()
 
@@ -2769,14 +2769,14 @@ _C_Opaque_Skip:
           goto _C_Mask_Skip;
 
         SrcF::p32LoadPixelA8(src0p, src);
-        Face::p32ExtractPBB3(t0p, dst0p);
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
+        Acc::p32ExtractPBB3(t0p, dst0p);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
 
-        Face::p32MulDiv256PBB_SBW(dst0p, dst0p, minv0p);
-        Face::p32MulDiv256SBW(src0p, src0p, t0p);
-        Face::p32ExtendPBBFromSBB(src0p, src0p);
+        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, minv0p);
+        Acc::p32MulDiv256SBW(src0p, src0p, t0p);
+        Acc::p32ExtendPBBFromSBB(src0p, src0p);
 
-        Face::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
         DstF::p32StorePixel32(dst, dst0p);
 
 _C_Mask_Skip:
@@ -2799,25 +2799,25 @@ _C_Mask_Skip:
         uint32_t msk0p;
         uint32_t t0p;
 
-        Face::p32Load1b(msk0p, msk);
+        Acc::p32Load1b(msk0p, msk);
         DstF::p32LoadPixel32(dst0p, dst);
 
         if ((msk == 0x00) | pixel32_skip(dst0p))
           goto _A8_Glyph_Skip;
 
         SrcF::p32LoadPixelA8(src0p, src);
-        Face::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-        Face::p32ExtractPBB3(t0p, dst0p);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32ExtractPBB3(t0p, dst0p);
 
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
-        Face::p32MulDiv255SBW(src0p, src0p, t0p);
-        Face::p32MulDiv256SBW(src0p, src0p, msk0p);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
+        Acc::p32MulDiv255SBW(src0p, src0p, t0p);
+        Acc::p32MulDiv256SBW(src0p, src0p, msk0p);
 
-        Face::p32Negate256SBW(msk0p, msk0p);
-        Face::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
-        Face::p32ExtendPBBFromSBB(src0p, src0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
+        Acc::p32ExtendPBBFromSBB(src0p, src0p);
 
-        Face::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
         DstF::p32StorePixel32(dst, dst0p);
 
 _A8_Glyph_Skip:
@@ -2841,24 +2841,24 @@ _A8_Glyph_Skip:
         uint32_t msk0p;
         uint32_t t0p;
 
-        Face::p32Load2a(msk0p, msk);
+        Acc::p32Load2a(msk0p, msk);
         DstF::p32LoadPixel32(dst0p, dst);
 
         if (pixel32_skip(dst0p))
           goto _A8_Extra_Skip;
 
         SrcF::p32LoadPixelA8(src0p, src);
-        Face::p32ExtractPBB3(t0p, dst0p);
+        Acc::p32ExtractPBB3(t0p, dst0p);
 
-        if (NegateDA) Face::p32Negate255SBW(t0p, t0p);
-        Face::p32MulDiv255SBW(src0p, src0p, t0p);
-        Face::p32MulDiv256SBW(src0p, src0p, msk0p);
+        if (NegateDA) Acc::p32Negate255SBW(t0p, t0p);
+        Acc::p32MulDiv255SBW(src0p, src0p, t0p);
+        Acc::p32MulDiv256SBW(src0p, src0p, msk0p);
 
-        Face::p32Negate256SBW(msk0p, msk0p);
-        Face::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
-        Face::p32ExtendPBBFromSBB(src0p, src0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
+        Acc::p32ExtendPBBFromSBB(src0p, src0p);
 
-        Face::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
         DstF::p32StorePixel32(dst, dst0p);
 
 _A8_Extra_Skip:
@@ -2881,7 +2881,7 @@ _A8_Extra_Skip:
         uint32_t src0p;
         uint32_t msk0p_20, msk0p_31;
 
-        Face::p32Load4a(msk0p_20, msk);
+        Acc::p32Load4a(msk0p_20, msk);
         if (msk0p_20 == 0x00000000)
           goto _ARGB32_Skip;
 
@@ -2893,11 +2893,11 @@ _A8_Extra_Skip:
         if (msk0p_20 != 0xFFFFFFFF)
           goto _ARGB32_Mask;
 
-        Face::p32RShift(dst0p, dst0p, 24);
-        if (NegateDA) Face::p32Negate255SBW(dst0p, dst0p);
+        Acc::p32RShift(dst0p, dst0p, 24);
+        if (NegateDA) Acc::p32Negate255SBW(dst0p, dst0p);
 
-        Face::p32MulDiv255SBW(dst0p, dst0p, src0p);
-        Face::p32ExtendPBBFromSBB(dst0p, dst0p);
+        Acc::p32MulDiv255SBW(dst0p, dst0p, src0p);
+        Acc::p32ExtendPBBFromSBB(dst0p, dst0p);
         DstF::p32StorePixel32(dst, dst0p);
 
 _ARGB32_Skip:
@@ -2907,16 +2907,16 @@ _ARGB32_Skip:
         continue;
 
 _ARGB32_Mask:
-        Face::p32ExtractPBB3(msk0p_31, dst0p);
-        Face::p32MulDiv255SBW(src0p, src0p, msk0p_31);
+        Acc::p32ExtractPBB3(msk0p_31, dst0p);
+        Acc::p32MulDiv255SBW(src0p, src0p, msk0p_31);
         
-        Face::p32UnpackPBW256FromPBB255_2031(msk0p_20, msk0p_31, msk0p_20);
-        Face::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, msk0p_20, src0p, msk0p_31, src0p);
+        Acc::p32UnpackPBW256FromPBB255_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, msk0p_20, src0p, msk0p_31, src0p);
 
-        Face::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
-        Face::p32MulDiv256PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
+        Acc::p32Negate256PBW_2x(msk0p_20, msk0p_20, msk0p_31, msk0p_31);
+        Acc::p32MulDiv256PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
 
-        Face::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
         DstF::p32StorePixel32(dst, dst0p);
 
         dst += DstF::SIZE;
@@ -3467,23 +3467,23 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     uint32_t sainv;
     uint32_t t0p_20, t0p_31;
 
-    Face::p32ExtractPBW1(sainv, b0p_31);
-    Face::p32ExtractPBW1(t0p_20, a0p_31);
+    Acc::p32ExtractPBW1(sainv, b0p_31);
+    Acc::p32ExtractPBW1(t0p_20, a0p_31);
 
-    Face::p32Negate255SBW(sainv, sainv);
-    Face::p32Copy(t0p_31, t0p_20);
+    Acc::p32Negate255SBW(sainv, sainv);
+    Acc::p32Copy(t0p_31, t0p_20);
 
     // Sca.Da.
-    Face::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_31, b0p_31);
+    Acc::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_31, b0p_31);
     // Dca.(1 - Sa).
-    Face::p32Mul_2x(dst0p_20, a0p_20, sainv, dst0p_31, a0p_31, sainv);
+    Acc::p32Mul_2x(dst0p_20, a0p_20, sainv, dst0p_31, a0p_31, sainv);
     // Sca.Da + Dca.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_2031(
@@ -3493,12 +3493,12 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
   {
     // Same as SrcIn.
     uint32_t a0p_a8;
-    Face::p32ExtractPBW1(a0p_a8, a0p_31);
+    Acc::p32ExtractPBW1(a0p_a8, a0p_31);
 
     if (pack)
-      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, b0p_20, a0p_a8, b0p_31, a0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, b0p_20, a0p_a8, b0p_31, a0p_a8);
     else
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, b0p_20, a0p_a8, dst0p_31, b0p_31, a0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, b0p_20, a0p_a8, dst0p_31, b0p_31, a0p_a8);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -3555,14 +3555,14 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
   {
     uint32_t t0p_20, t0p_31;
     
-    Face::p32ExtractPBW1(t0p_20, a0p_31);
-    Face::p32ExtendPBWFromSBW(t0p_20, t0p_20);
-    Face::p32Copy(t0p_31, t0p_20);
-    Face::p32Sub_2x(t0p_20, t0p_20, a0p_20, t0p_31, t0p_31, a0p_31);
-    Face::p32MulDiv255PBW_SBW_2x(t0p_20, t0p_20, b0p_a8, t0p_31, t0p_31, b0p_a8);
-    Face::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    Acc::p32ExtractPBW1(t0p_20, a0p_31);
+    Acc::p32ExtendPBWFromSBW(t0p_20, t0p_20);
+    Acc::p32Copy(t0p_31, t0p_20);
+    Acc::p32Sub_2x(t0p_20, t0p_20, a0p_20, t0p_31, t0p_31, a0p_31);
+    Acc::p32MulDiv255PBW_SBW_2x(t0p_20, t0p_20, b0p_a8, t0p_31, t0p_31, b0p_a8);
+    Acc::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
     
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_a8_2031(
@@ -3582,7 +3582,7 @@ struct FOG_NO_EXPORT CompositeSrcAtop : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // NOP.
-    Face::p32Copy(dst0p, a0p);
+    Acc::p32Copy(dst0p, a0p);
   }
 };
 
@@ -3609,13 +3609,13 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Sca.(1 - Da).
-    Face::p32ExtractPBW1(t0p_20, a0p_31);
-    Face::p32Negate255SBW(t0p_20, t0p_20);
-    Face::p32MulDiv255PBW_SBW_2x(t0p_20, b0p_20, t0p_20, t0p_31, b0p_31, t0p_20);
+    Acc::p32ExtractPBW1(t0p_20, a0p_31);
+    Acc::p32Negate255SBW(t0p_20, t0p_20);
+    Acc::p32MulDiv255PBW_SBW_2x(t0p_20, b0p_20, t0p_20, t0p_31, b0p_31, t0p_20);
 
     // Dca + Sca.(1 - Da).
-    Face::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dca' = Dca + Sc.(1 - Da)
@@ -3628,18 +3628,18 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Sc.(1 - Da).
-    Face::p32ExtractPBW1(t0p_20, a0p_31);
-    Face::p32Negate255SBW(t0p_20, t0p_20);
+    Acc::p32ExtractPBW1(t0p_20, a0p_31);
+    Acc::p32Negate255SBW(t0p_20, t0p_20);
 
-    Face::p32ZeroPBW1(t0p_31, b0p_31);
-    Face::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
-    Face::p32MulDiv255PBW_SBW(t0p_20, b0p_20, t0p_20);
+    Acc::p32ZeroPBW1(t0p_31, b0p_31);
+    Acc::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
+    Acc::p32MulDiv255PBW_SBW(t0p_20, b0p_20, t0p_20);
 
     // Dca + Sc.(1 - Da).
-    Face::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -3665,9 +3665,9 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
   {
     // Same as Dst.
     if (pack)
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
     else
-      Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
+      Acc::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_2031(
@@ -3699,20 +3699,20 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
   {
     uint32_t t0p;
 
-    Face::p32ExtractPBW1(t0p, a0p_31);
-    Face::p32Negate255SBW(t0p, t0p);
-    Face::p32MulDiv255SBW(t0p, t0p, b0p_a8);
+    Acc::p32ExtractPBW1(t0p, a0p_31);
+    Acc::p32Negate255SBW(t0p, t0p);
+    Acc::p32MulDiv255SBW(t0p, t0p, b0p_a8);
 
     if (pack)
     {
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
-      Face::p32ExtendPBBFromSBB(t0p, t0p);
-      Face::p32Add(dst0p_20, dst0p_20, t0p);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32ExtendPBBFromSBB(t0p, t0p);
+      Acc::p32Add(dst0p_20, dst0p_20, t0p);
     }
     else
     {
-      Face::p32ExtendPBWFromSBW(t0p, t0p);
-      Face::p32Add_2x(dst0p_20, a0p_20, t0p, dst0p_31, a0p_31, t0p);
+      Acc::p32ExtendPBWFromSBW(t0p, t0p);
+      Acc::p32Add_2x(dst0p_20, a0p_20, t0p, dst0p_31, a0p_31, t0p);
     }
   }
 
@@ -3724,23 +3724,23 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
   {
     uint32_t t0p;
 
-    Face::p32ExtractPBW1(t0p, a0p_31);
-    Face::p32Negate255SBW(t0p, t0p);
-    Face::p32MulDiv255SBW(t0p, t0p, b0p_a8);
+    Acc::p32ExtractPBW1(t0p, a0p_31);
+    Acc::p32Negate255SBW(t0p, t0p);
+    Acc::p32MulDiv255SBW(t0p, t0p, b0p_a8);
 
     if (pack)
     {
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
-      Face::p32ExtendPBBFromSBB_Z210(t0p, t0p);
-      Face::p32Add(dst0p_20, dst0p_20, t0p);
-      Face::p32FillPBB3(dst0p_20, dst0p_20);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32ExtendPBBFromSBB_Z210(t0p, t0p);
+      Acc::p32Add(dst0p_20, dst0p_20, t0p);
+      Acc::p32FillPBB3(dst0p_20, dst0p_20);
     }
     else
     {
-      Face::p32Add(dst0p_31, a0p_31, t0p);
-      Face::p32ExtendPBWFromSBW(t0p, t0p);
-      Face::p32Add(dst0p_20, a0p_20, t0p);
-      Face::p32FillPBW1(dst0p_31, dst0p_31);
+      Acc::p32Add(dst0p_31, a0p_31, t0p);
+      Acc::p32ExtendPBWFromSBW(t0p, t0p);
+      Acc::p32Add(dst0p_20, a0p_20, t0p);
+      Acc::p32FillPBW1(dst0p_31, dst0p_31);
     }
   }
 
@@ -3752,7 +3752,7 @@ struct FOG_NO_EXPORT CompositeDstOver : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -3776,9 +3776,9 @@ struct FOG_NO_EXPORT CompositeDstIn : public CompositeExtPrgbVsA<
     bool pack = false)
   {
     if (pack)
-      Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, a0p_20, b0p_a8, a0p_31, b0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, a0p_20, b0p_a8, a0p_31, b0p_a8);
     else
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, b0p_a8, dst0p_31, a0p_31, b0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, b0p_a8, dst0p_31, a0p_31, b0p_a8);
   }
 
   // Dc' = Dc.Sa.
@@ -3789,14 +3789,14 @@ struct FOG_NO_EXPORT CompositeDstIn : public CompositeExtPrgbVsA<
   {
     if (pack)
     {
-      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, a0p_20, b0p_a8, a0p_31, b0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, a0p_20, b0p_a8, a0p_31, b0p_a8);
     }
     else
     {
-      Face::p32MulDiv255PBW(dst0p_20, a0p_20, b0p_a8);
-      Face::p32ZeroPBW1(dst0p_31, a0p_31);
-      Face::p32MulDiv255SBW(dst0p_31, a0p_31, b0p_a8);
-      Face::p32FillPBW1(dst0p_31, dst0p_31);
+      Acc::p32MulDiv255PBW(dst0p_20, a0p_20, b0p_a8);
+      Acc::p32ZeroPBW1(dst0p_31, a0p_31);
+      Acc::p32MulDiv255SBW(dst0p_31, a0p_31, b0p_a8);
+      Acc::p32FillPBW1(dst0p_31, dst0p_31);
     }
   }
 
@@ -3808,7 +3808,7 @@ struct FOG_NO_EXPORT CompositeDstIn : public CompositeExtPrgbVsA<
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
-    Face::p32MulDiv255SBW(dst0p, a0p, b0p);
+    Acc::p32MulDiv255SBW(dst0p, a0p, b0p);
   }
 };
 
@@ -3832,12 +3832,12 @@ struct FOG_NO_EXPORT CompositeDstOut : public CompositeExtPrgbVsA<
     bool pack = false)
   {
     uint32_t binv0p_a8;
-    Face::p32Negate255SBW(binv0p_a8, b0p_a8);
+    Acc::p32Negate255SBW(binv0p_a8, b0p_a8);
 
     if (pack)
-      Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, a0p_20, binv0p_a8, a0p_31, binv0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, a0p_20, binv0p_a8, a0p_31, binv0p_a8);
     else
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, binv0p_a8, dst0p_31, a0p_31, binv0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, a0p_20, binv0p_a8, dst0p_31, a0p_31, binv0p_a8);
   }
 
   // Dc' = Dc.(1 - Sa).
@@ -3847,18 +3847,18 @@ struct FOG_NO_EXPORT CompositeDstOut : public CompositeExtPrgbVsA<
     bool pack = false)
   {
     uint32_t binv0p_a8;
-    Face::p32Negate255SBW(binv0p_a8, b0p_a8);
+    Acc::p32Negate255SBW(binv0p_a8, b0p_a8);
 
     if (pack)
     {
-      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, a0p_20, binv0p_a8, a0p_31, binv0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, a0p_20, binv0p_a8, a0p_31, binv0p_a8);
     }
     else
     {
-      Face::p32MulDiv255PBW(dst0p_20, a0p_20, binv0p_a8);
-      Face::p32ZeroPBW1(dst0p_31, a0p_31);
-      Face::p32MulDiv255SBW(dst0p_31, a0p_31, binv0p_a8);
-      Face::p32FillPBW1(dst0p_31, dst0p_31);
+      Acc::p32MulDiv255PBW(dst0p_20, a0p_20, binv0p_a8);
+      Acc::p32ZeroPBW1(dst0p_31, a0p_31);
+      Acc::p32MulDiv255SBW(dst0p_31, a0p_31, binv0p_a8);
+      Acc::p32FillPBW1(dst0p_31, dst0p_31);
     }
   }
 
@@ -3871,8 +3871,8 @@ struct FOG_NO_EXPORT CompositeDstOut : public CompositeExtPrgbVsA<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     uint32_t binv0p;
-    Face::p32Negate255SBW(binv0p, b0p);
-    Face::p32MulDiv255SBW(dst0p, a0p, binv0p);
+    Acc::p32Negate255SBW(binv0p, b0p);
+    Acc::p32MulDiv255SBW(dst0p, a0p, binv0p);
   }
 };
 
@@ -3900,23 +3900,23 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
     uint32_t sa;
     uint32_t t0p_20, t0p_31;
 
-    Face::p32ExtractPBW1(t0p_20, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(t0p_20, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
-    Face::p32Negate255SBW(t0p_20, t0p_20);
-    Face::p32Copy(t0p_31, t0p_20);
+    Acc::p32Negate255SBW(t0p_20, t0p_20);
+    Acc::p32Copy(t0p_31, t0p_20);
 
     // Sca.(1 - Da)
-    Face::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_31, b0p_31);
+    Acc::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_31, b0p_31);
     // Dca.Sa.
-    Face::p32Mul_2x(dst0p_20, a0p_20, sa, dst0p_31, a0p_31, sa);
+    Acc::p32Mul_2x(dst0p_20, a0p_20, sa, dst0p_31, a0p_31, sa);
     // Dca.Sa + Sca.(1 - Da).
-    Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_2031(
@@ -3951,7 +3951,7 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
   {
     // Same as DstIn.
     uint32_t b0p_a8;
-    Face::p32ExtractPWW1(b0p_a8, b0p_31);
+    Acc::p32ExtractPWW1(b0p_a8, b0p_31);
     CompositeDstIn::xrgb32_op_a8_2031(dst0p_20, a0p_20, dst0p_31, a0p_31, b0p_a8, pack);
   }
 
@@ -3961,7 +3961,7 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as Dst.
-    Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
+    Acc::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -3985,16 +3985,16 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t da;
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtendPBWFromSBW(da, da);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtendPBWFromSBW(da, da);
 
-    Face::p32Add_2x(dst0p_20, a0p_20, 0xFF, dst0p_31, a0p_31, 0xFF);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, da, dst0p_31, dst0p_31, da);
+    Acc::p32Add_2x(dst0p_20, a0p_20, 0xFF, dst0p_31, a0p_31, 0xFF);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, da, dst0p_31, dst0p_31, da);
 
     if (pack)
-      Face::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, b0p_a8, dst0p_31, b0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_2031(dst0p_20, dst0p_20, b0p_a8, dst0p_31, b0p_a8);
     else
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, dst0p_20, b0p_a8, dst0p_31, dst0p_31, b0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, dst0p_20, b0p_a8, dst0p_31, dst0p_31, b0p_a8);
   }
 
   static FOG_INLINE void xrgb32_op_a8_2031(
@@ -4014,7 +4014,7 @@ struct FOG_NO_EXPORT CompositeDstAtop : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // NOP.
-    Face::p32Copy(dst0p, a0p);
+    Acc::p32Copy(dst0p, a0p);
   }
 };
 
@@ -4041,23 +4041,23 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
     uint32_t sa;
     
-    Face::p32ExtractPBW1(t0p_20, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(t0p_20, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
-    Face::p32Negate255SBW(t0p_20, t0p_20);
-    Face::p32Negate255SBW(sa, sa);
+    Acc::p32Negate255SBW(t0p_20, t0p_20);
+    Acc::p32Negate255SBW(sa, sa);
 
     // Sca.(1 - Da).
-    Face::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_20, b0p_31);
+    Acc::p32Mul_2x(t0p_20, t0p_20, b0p_20, t0p_31, t0p_20, b0p_31);
     // Dca.(1 - Sa).
-    Face::p32Mul_2x(dst0p_20, a0p_20, sa, dst0p_31, a0p_31, sa);
+    Acc::p32Mul_2x(dst0p_20, a0p_20, sa, dst0p_31, a0p_31, sa);
     // Sca.(1 - Da) + Dca.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_2031(
@@ -4067,13 +4067,13 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
   {
     // Same as SrcOut.
     uint32_t a0p_a8;
-    Face::p32ExtractPBW1(a0p_a8, a0p_31);
-    Face::p32Negate255SBW(a0p_a8, a0p_a8);
+    Acc::p32ExtractPBW1(a0p_a8, a0p_31);
+    Acc::p32Negate255SBW(a0p_a8, a0p_a8);
 
     if (pack)
-      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, b0p_20, a0p_a8, b0p_31, a0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, b0p_20, a0p_a8, b0p_31, a0p_a8);
     else
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, b0p_20, a0p_a8, dst0p_31, b0p_31, a0p_a8);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, b0p_20, a0p_a8, dst0p_31, b0p_31, a0p_a8);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -4100,7 +4100,7 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     // Same as DstOut.
     uint32_t b0p_a8;
 
-    Face::p32ExtractPBW1(b0p_a8, b0p_31);
+    Acc::p32ExtractPBW1(b0p_a8, b0p_31);
     xrgb32_op_a8_2031(dst0p_20, a0p_20, dst0p_31, a0p_31, b0p_a8);
   }
 
@@ -4110,8 +4110,8 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     // Same as Clear.
-    Face::p32Zero_2x(dst0p_20, dst0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Zero_2x(dst0p_20, dst0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -4137,23 +4137,23 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     uint32_t u0p;
 
     // Sa.(1 - Da).
-    Face::p32ExtractPBW1(t0p, a0p_31);
-    Face::p32Negate255SBW(t0p, t0p);
-    Face::p32Mul(t0p, t0p, b0p_a8);
+    Acc::p32ExtractPBW1(t0p, a0p_31);
+    Acc::p32Negate255SBW(t0p, t0p);
+    Acc::p32Mul(t0p, t0p, b0p_a8);
 
-    Face::p32ExtendPBWFromSBW(t0p, t0p);
+    Acc::p32ExtendPBWFromSBW(t0p, t0p);
 
     // Dca.(1 - Sa).
-    Face::p32Negate255SBW(u0p, b0p_a8);
-    Face::p32Mul_2x(dst0p_20, dst0p_20, u0p, dst0p_31, dst0p_31, u0p);
+    Acc::p32Negate255SBW(u0p, b0p_a8);
+    Acc::p32Mul_2x(dst0p_20, dst0p_20, u0p, dst0p_31, dst0p_31, u0p);
 
     // Sa.(1 - Da) + Dca.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, t0p, dst0p_31, dst0p_31, t0p);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, t0p, dst0p_31, dst0p_31, t0p);
     
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_a8_2031(
@@ -4175,14 +4175,14 @@ struct FOG_NO_EXPORT CompositeXor : public CompositeExtPrgbVsPrgb<
     uint32_t ainv0p;
     uint32_t binv0p;
 
-    Face::p32Negate255SBW(ainv0p, a0p);
-    Face::p32Negate255SBW(binv0p, b0p);
+    Acc::p32Negate255SBW(ainv0p, a0p);
+    Acc::p32Negate255SBW(binv0p, b0p);
 
-    Face::p32Mul(ainv0p, ainv0p, b0p);
-    Face::p32Mul(binv0p, binv0p, a0p);
+    Acc::p32Mul(ainv0p, ainv0p, b0p);
+    Acc::p32Mul(binv0p, binv0p, a0p);
 
-    Face::p32Add(dst0p, ainv0p, binv0p);
-    Face::p32Div255SBW(dst0p, dst0p);
+    Acc::p32Add(dst0p, ainv0p, binv0p);
+    Acc::p32Div255SBW(dst0p, dst0p);
   }
 };
 
@@ -4203,8 +4203,8 @@ struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_xrgb32_2031(
@@ -4212,9 +4212,9 @@ struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -4238,8 +4238,8 @@ struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_2031(
@@ -4247,8 +4247,8 @@ struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -4270,9 +4270,9 @@ struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
   {
     uint32_t b0p_a8_extended;
 
-    Face::p32ExtendPBWFromSBW(b0p_a8_extended, b0p_a8);
-    Face::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_a8_extended, dst0p_31, a0p_31, b0p_a8_extended);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32ExtendPBWFromSBW(b0p_a8_extended, b0p_a8);
+    Acc::p32Addus255PBW_2x(dst0p_20, a0p_20, b0p_a8_extended, dst0p_31, a0p_31, b0p_a8_extended);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_a8_2031(
@@ -4290,7 +4290,7 @@ struct FOG_NO_EXPORT CompositePlus : public CompositeExtPrgbVsPrgb<
   static FOG_INLINE void a8_op_a8(
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
-    Face::p32Addus255SBW(dst0p, a0p, b0p);
+    Acc::p32Addus255SBW(dst0p, a0p, b0p);
   }
 };
 
@@ -4316,25 +4316,25 @@ struct FOG_NO_EXPORT CompositeMinus : public CompositeExtPrgbVsPrgb<
     uint32_t dst0p_a0;
     uint32_t dst0p_b0;
 
-    Face::p32ExtractPBW1(dst0p_a0, a0p_31);
-    Face::p32ExtractPBW1(dst0p_b0, b0p_31);
-    Face::p32OpOverA8(dst0p_a0, dst0p_a0, dst0p_b0);
+    Acc::p32ExtractPBW1(dst0p_a0, a0p_31);
+    Acc::p32ExtractPBW1(dst0p_b0, b0p_31);
+    Acc::p32OpOverA8(dst0p_a0, dst0p_a0, dst0p_b0);
 
-    Face::p32Subus255PBW(dst0p_20, a0p_20, b0p_20);
-    Face::p32Subus255PBW_ZeroPBW1(dst0p_31, a0p_31, b0p_31);
+    Acc::p32Subus255PBW(dst0p_20, a0p_20, b0p_20);
+    Acc::p32Subus255PBW_ZeroPBW1(dst0p_31, a0p_31, b0p_31);
 
     if (pack)
     {
-      Face::p32LShift(dst0p_a0, dst0p_a0, 24);
-      Face::p32LShift(dst0p_31, dst0p_31,  8);
+      Acc::p32LShift(dst0p_a0, dst0p_a0, 24);
+      Acc::p32LShift(dst0p_31, dst0p_31,  8);
 
-      Face::p32Or(dst0p_20, dst0p_20, dst0p_a0);
-      Face::p32Or(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Or(dst0p_20, dst0p_20, dst0p_a0);
+      Acc::p32Or(dst0p_20, dst0p_20, dst0p_31);
     }
     else
     {
-      Face::p32LShift(dst0p_a0, dst0p_a0, 16);
-      Face::p32Or(dst0p_31, dst0p_31, dst0p_a0);
+      Acc::p32LShift(dst0p_a0, dst0p_a0, 16);
+      Acc::p32Or(dst0p_31, dst0p_31, dst0p_a0);
     }
   }
 
@@ -4345,9 +4345,9 @@ struct FOG_NO_EXPORT CompositeMinus : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32Subus255PBW(dst0p_20, a0p_20, b0p_20);
-    Face::p32Subus255PBW_FillPBW1(dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Subus255PBW(dst0p_20, a0p_20, b0p_20);
+    Acc::p32Subus255PBW_FillPBW1(dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -4404,29 +4404,29 @@ struct FOG_NO_EXPORT CompositeMinus : public CompositeExtPrgbVsPrgb<
     uint32_t dst0p_a0;
     uint32_t b0p_a8_extended;
 
-    Face::p32ExtendPBWFromSBW(b0p_a8_extended, b0p_a8);
+    Acc::p32ExtendPBWFromSBW(b0p_a8_extended, b0p_a8);
 
-    Face::p32ExtractPBW1(dst0p_a0, a0p_31);
-    Face::p32OpOverA8(dst0p_a0, dst0p_a0, b0p_a8);
+    Acc::p32ExtractPBW1(dst0p_a0, a0p_31);
+    Acc::p32OpOverA8(dst0p_a0, dst0p_a0, b0p_a8);
 
-    Face::p32Subus255PBW(dst0p_20, a0p_20, b0p_a8_extended);
-    Face::p32Subus255PBW_ZeroPBW1(dst0p_31, a0p_31, b0p_a8_extended);
+    Acc::p32Subus255PBW(dst0p_20, a0p_20, b0p_a8_extended);
+    Acc::p32Subus255PBW_ZeroPBW1(dst0p_31, a0p_31, b0p_a8_extended);
 
     if (pack)
     {
-      Face::p32LShift(dst0p_a0, dst0p_a0, 24);
-      Face::p32LShift(dst0p_31, dst0p_31,  8);
+      Acc::p32LShift(dst0p_a0, dst0p_a0, 24);
+      Acc::p32LShift(dst0p_31, dst0p_31,  8);
 
-      Face::p32Or(dst0p_20, dst0p_20, dst0p_a0);
-      Face::p32Or(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Or(dst0p_20, dst0p_20, dst0p_a0);
+      Acc::p32Or(dst0p_20, dst0p_20, dst0p_31);
     }
     else
     {
-      Face::p32LShift(dst0p_a0, dst0p_a0, 16);
-      Face::p32Or(dst0p_31, dst0p_31, dst0p_a0);
+      Acc::p32LShift(dst0p_a0, dst0p_a0, 16);
+      Acc::p32Or(dst0p_31, dst0p_31, dst0p_a0);
     }
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dca' = Dc - Sa.
@@ -4437,11 +4437,11 @@ struct FOG_NO_EXPORT CompositeMinus : public CompositeExtPrgbVsPrgb<
   {
     uint32_t b0p_a8_extended;
 
-    Face::p32ExtendPBWFromSBW(b0p_a8_extended, b0p_a8);
-    Face::p32Subus255PBW(dst0p_20, a0p_20, b0p_a8_extended);
-    Face::p32Subus255PBW_FillPBW1(dst0p_31, a0p_31, b0p_a8_extended);
+    Acc::p32ExtendPBWFromSBW(b0p_a8_extended, b0p_a8);
+    Acc::p32Subus255PBW(dst0p_20, a0p_20, b0p_a8_extended);
+    Acc::p32Subus255PBW_FillPBW1(dst0p_31, a0p_31, b0p_a8_extended);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // ==========================================================================
@@ -4452,7 +4452,7 @@ struct FOG_NO_EXPORT CompositeMinus : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -4481,27 +4481,27 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_31;
 
     // Da, Sa.
-    Face::p32ExtractPBW1(a0p_a8, a0p_31);
-    Face::p32ExtractPBW1(b0p_a8, b0p_31);
+    Acc::p32ExtractPBW1(a0p_a8, a0p_31);
+    Acc::p32ExtractPBW1(b0p_a8, b0p_31);
 
     // Sca + 1 - Sa.
-    Face::p32Add(t0p_20, b0p_20, 0x00FF00FF);
-    Face::p32Add(t0p_31, b0p_31, 0x00FF00FF);
-    Face::p32SubPBW_SBW_2x(t0p_20, t0p_20, t0p_31, t0p_31, b0p_a8);
+    Acc::p32Add(t0p_20, b0p_20, 0x00FF00FF);
+    Acc::p32Add(t0p_31, b0p_31, 0x00FF00FF);
+    Acc::p32SubPBW_SBW_2x(t0p_20, t0p_20, t0p_31, t0p_31, b0p_a8);
 
     // Dca.(Sca + 1 - Sa).
-    Face::p32MulPBW_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32MulPBW_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
     // Sca.(1 - Sa).
-    Face::p32Negate255SBW(a0p_a8, a0p_a8);
-    Face::p32MulPBW_SBW_2x(t0p_20, b0p_20, a0p_a8, t0p_31, b0p_31, a0p_a8);
+    Acc::p32Negate255SBW(a0p_a8, a0p_a8);
+    Acc::p32MulPBW_SBW_2x(t0p_20, b0p_20, a0p_a8, t0p_31, b0p_31, a0p_a8);
 
     // Dca.(Sca + 1 - Sa) + Sca.(1 - Da).
-    Face::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   // Dca' = Sc.(Dca + 1 - Da).
@@ -4514,22 +4514,22 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     uint32_t a0p_a8;
 
     // Da.
-    Face::p32ExtractPBW1(a0p_a8, a0p_31);
+    Acc::p32ExtractPBW1(a0p_a8, a0p_31);
 
     // Dca + 1 - Da.
-    Face::p32Add(dst0p_20, a0p_20, 0x00FF00FF);
-    Face::p32Add(dst0p_31, a0p_31, 0x00FF00FF);
-    Face::p32SubPBW_SBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31, a0p_a8);
+    Acc::p32Add(dst0p_20, a0p_20, 0x00FF00FF);
+    Acc::p32Add(dst0p_31, a0p_31, 0x00FF00FF);
+    Acc::p32SubPBW_SBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31, a0p_a8);
 
     // Sc.(Dca + 1 - Da).
     if (pack)
     {
-      Face::p32MulDiv255PBW_2x_Pack_20F1(dst0p_20, dst0p_20, b0p_20, dst0p_31, b0p_31);
+      Acc::p32MulDiv255PBW_2x_Pack_20F1(dst0p_20, dst0p_20, b0p_20, dst0p_31, b0p_31);
     }
     else
     {
-      Face::p32MulDiv255PBW(dst0p_20, dst0p_20, b0p_20);
-      Face::p32MulDiv255PBW_FillPBW1(dst0p_31, dst0p_31, b0p_31);
+      Acc::p32MulDiv255PBW(dst0p_20, dst0p_20, b0p_20);
+      Acc::p32MulDiv255PBW_FillPBW1(dst0p_31, dst0p_31, b0p_31);
     }
   }
 
@@ -4560,22 +4560,22 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_31;
 
     // Sa.
-    Face::p32ExtractPBW1(b0p_a8, b0p_31);
+    Acc::p32ExtractPBW1(b0p_a8, b0p_31);
 
     // Sca + 1 - Sa.
-    Face::p32Add(t0p_20, b0p_20, 0x00FF00FF);
-    Face::p32Add(t0p_31, b0p_31, 0x00FF00FF);
-    Face::p32SubPBW_SBW_2x(t0p_20, t0p_20, t0p_31, t0p_31, b0p_a8);
+    Acc::p32Add(t0p_20, b0p_20, 0x00FF00FF);
+    Acc::p32Add(t0p_31, b0p_31, 0x00FF00FF);
+    Acc::p32SubPBW_SBW_2x(t0p_20, t0p_20, t0p_31, t0p_31, b0p_a8);
 
     // Dc.(Sca + 1 - Sa).
     if (pack)
     {
-      Face::p32MulDiv255PBW_2x_Pack_20F1(dst0p_20, dst0p_20, t0p_20, dst0p_31, t0p_31);
+      Acc::p32MulDiv255PBW_2x_Pack_20F1(dst0p_20, dst0p_20, t0p_20, dst0p_31, t0p_31);
     }
     else
     {
-      Face::p32MulDiv255PBW(dst0p_20, dst0p_20, t0p_20);
-      Face::p32MulDiv255PBW_FillPBW1(dst0p_31, dst0p_31, t0p_31);
+      Acc::p32MulDiv255PBW(dst0p_20, dst0p_20, t0p_20);
+      Acc::p32MulDiv255PBW_FillPBW1(dst0p_31, dst0p_31, t0p_31);
     }
   }
 
@@ -4587,12 +4587,12 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
   {
     if (pack)
     {
-      Face::p32MulDiv255PBW_2x_Pack_20F1(dst0p_20, a0p_20, b0p_20, a0p_31, b0p_31);
+      Acc::p32MulDiv255PBW_2x_Pack_20F1(dst0p_20, a0p_20, b0p_20, a0p_31, b0p_31);
     }
     else
     {
-      Face::p32MulDiv255PBW(dst0p_20, dst0p_20, a0p_20);
-      Face::p32MulDiv255PBW_FillPBW1(dst0p_31, dst0p_31, b0p_31);
+      Acc::p32MulDiv255PBW(dst0p_20, dst0p_20, a0p_20);
+      Acc::p32MulDiv255PBW_FillPBW1(dst0p_31, dst0p_31, b0p_31);
     }
   }
 
@@ -4618,21 +4618,21 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     uint32_t a0p_a8;
     
     // Sa.(1 - Da).
-    Face::p32ExtractPBW1(a0p_a8, a0p_31);
-    Face::p32Negate255SBW(a0p_a8, a0p_a8);
-    Face::p32MulDiv255SBW(a0p_a8, a0p_a8, b0p_a8);
+    Acc::p32ExtractPBW1(a0p_a8, a0p_31);
+    Acc::p32Negate255SBW(a0p_a8, a0p_a8);
+    Acc::p32MulDiv255SBW(a0p_a8, a0p_a8, b0p_a8);
 
     // Dca + Sa.(1 - Da).
     if (pack)
     {
-      Face::p32ExtendPBBFromSBB(a0p_a8, a0p_a8);
-      Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
-      Face::p32Add(dst0p_20, a0p_20, a0p_a8);
+      Acc::p32ExtendPBBFromSBB(a0p_a8, a0p_a8);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Add(dst0p_20, a0p_20, a0p_a8);
     }
     else
     {
-      Face::p32ExtendPBWFromSBW(a0p_a8, a0p_a8);
-      Face::p32Add_2x(dst0p_20, a0p_20, a0p_a8, dst0p_31, a0p_31, a0p_a8);
+      Acc::p32ExtendPBWFromSBW(a0p_a8, a0p_a8);
+      Acc::p32Add_2x(dst0p_20, a0p_20, a0p_a8, dst0p_31, a0p_31, a0p_a8);
     }
   }
 
@@ -4643,9 +4643,9 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     if (pack)
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
     else
-      Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
+      Acc::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
   // ==========================================================================
@@ -4656,7 +4656,7 @@ struct FOG_NO_EXPORT CompositeMultiply : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -4683,12 +4683,12 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     uint32_t binv0p_31;
 
     // Dca.(1 - Sca).
-    Face::p32Negate255PBW_2x(binv0p_20, b0p_20, binv0p_31, b0p_31);
-    Face::p32MulDiv255PBW_2x(dst0p_20, a0p_20, binv0p_20, dst0p_31, a0p_31, binv0p_31);
+    Acc::p32Negate255PBW_2x(binv0p_20, b0p_20, binv0p_31, b0p_31);
+    Acc::p32MulDiv255PBW_2x(dst0p_20, a0p_20, binv0p_20, dst0p_31, a0p_31, binv0p_31);
 
     // Sca + Dca.(1 - Sca).
-    Face::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dca' = Sc + Dca.(1 - Sc).
@@ -4702,14 +4702,14 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     uint32_t binv0p_31;
 
     // Dca.(1 - Sc).
-    Face::p32Negate255PBW_2x(binv0p_20, b0p_20, binv0p_31, b0p_31);
-    Face::p32MulDiv255PBW(dst0p_20, a0p_20, binv0p_20);
-    Face::p32MulDiv255PBW_ZeroPBW1(dst0p_31, a0p_31, binv0p_31);
+    Acc::p32Negate255PBW_2x(binv0p_20, b0p_20, binv0p_31, b0p_31);
+    Acc::p32MulDiv255PBW(dst0p_20, a0p_20, binv0p_20);
+    Acc::p32MulDiv255PBW_ZeroPBW1(dst0p_31, a0p_31, binv0p_31);
 
     // Sc + Dca.(1 - Sc).
-    Face::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -4738,14 +4738,14 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     uint32_t binv0p_31;
 
     // Dc.(1 - Sca).
-    Face::p32Negate255PBW_2x(binv0p_20, b0p_20, binv0p_31, b0p_31);
-    Face::p32MulDiv255PBW(dst0p_20, dst0p_20, binv0p_20);
-    Face::p32MulDiv255PBW_ZeroPBW1(dst0p_31, dst0p_31, binv0p_31);
+    Acc::p32Negate255PBW_2x(binv0p_20, b0p_20, binv0p_31, b0p_31);
+    Acc::p32MulDiv255PBW(dst0p_20, dst0p_20, binv0p_20);
+    Acc::p32MulDiv255PBW_ZeroPBW1(dst0p_31, dst0p_31, binv0p_31);
 
     // Sca + Dc.(1 - Sca).
-    Face::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, b0p_20, dst0p_31, dst0p_31, b0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dc' = Sc + Dc(1 - Sc).
@@ -4779,21 +4779,21 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     uint32_t a0p_a8;
     
     // Dca.(1 - Sa).
-    Face::p32ExtractPBW1(a0p_a8, a0p_31);
-    Face::p32Negate255SBW(a0p_a8, a0p_a8);
-    Face::p32MulDiv255PBW_SBW_2x(dst0p_20, dst0p_20, a0p_a8, dst0p_31, dst0p_31, a0p_a8);
+    Acc::p32ExtractPBW1(a0p_a8, a0p_31);
+    Acc::p32Negate255SBW(a0p_a8, a0p_a8);
+    Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, dst0p_20, a0p_a8, dst0p_31, dst0p_31, a0p_a8);
 
     // Sa + Dca.(1 - Sa).
     if (pack)
     {
-      Face::p32ExtendPBBFromSBB(a0p_a8, a0p_a8);
-      Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
-      Face::p32Add(dst0p_20, dst0p_20, a0p_a8);
+      Acc::p32ExtendPBBFromSBB(a0p_a8, a0p_a8);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Add(dst0p_20, dst0p_20, a0p_a8);
     }
     else
     {
-      Face::p32ExtendPBWFromSBW(a0p_a8, a0p_a8);
-      Face::p32Add_2x(dst0p_20, dst0p_20, a0p_a8, dst0p_31, dst0p_31, a0p_a8);
+      Acc::p32ExtendPBWFromSBW(a0p_a8, a0p_a8);
+      Acc::p32Add_2x(dst0p_20, dst0p_20, a0p_a8, dst0p_31, dst0p_31, a0p_a8);
     }
   }
 
@@ -4804,9 +4804,9 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     if (pack)
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
     else
-      Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
+      Acc::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
   // ==========================================================================
@@ -4817,7 +4817,7 @@ struct FOG_NO_EXPORT CompositeScreen : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -4845,11 +4845,11 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
   {
     uint32_t da, daInv, sa, saInv, saDa;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Negate255SBW(daInv, da);
-    Face::p32Negate255SBW(saInv, sa);
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Negate255SBW(daInv, da);
+    Acc::p32Negate255SBW(saInv, sa);
+    Acc::p32Mul(saDa, da, sa);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_PRGB32(
     {
@@ -4871,7 +4871,7 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t da;
-    Face::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(da, a0p_31);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
@@ -4906,7 +4906,7 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa;
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
@@ -4953,12 +4953,12 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
   {
     uint32_t da, sa, saInv, saDaInv, saDa;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_a8);
-    Face::p32Negate255SBW(saDaInv, da);
-    Face::p32Mul(saDaInv, saDaInv, sa);
-    Face::p32Negate255SBW(saInv, sa);
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_a8);
+    Acc::p32Negate255SBW(saDaInv, da);
+    Acc::p32Mul(saDaInv, saDaInv, sa);
+    Acc::p32Negate255SBW(saInv, sa);
+    Acc::p32Mul(saDa, da, sa);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_A8(
     {
@@ -4976,8 +4976,8 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa, saInv;
-    Face::p32ExtractPBW1(sa, b0p_a8);
-    Face::p32Negate255SBW(saInv, sa);
+    Acc::p32ExtractPBW1(sa, b0p_a8);
+    Acc::p32Negate255SBW(saInv, sa);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_A8(
     {
@@ -4993,7 +4993,7 @@ struct FOG_NO_EXPORT CompositeOverlay : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -5020,44 +5020,44 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     uint32_t d0p_20, d0p_31;
     uint32_t s0p_20, s0p_31;
 
-    Face::p32ExtractPBW1(d0p_20, a0p_31);
-    Face::p32ExtractPBW1(s0p_20, b0p_31);
+    Acc::p32ExtractPBW1(d0p_20, a0p_31);
+    Acc::p32ExtractPBW1(s0p_20, b0p_31);
 
     // (1 - Da).
-    Face::p32Negate255SBW(d0p_20, d0p_20);
+    Acc::p32Negate255SBW(d0p_20, d0p_20);
     // (1 - Sa).
-    Face::p32Negate255SBW(s0p_20, s0p_20);
+    Acc::p32Negate255SBW(s0p_20, s0p_20);
 
-    Face::p32Copy(d0p_31, d0p_20);
-    Face::p32Copy(s0p_31, s0p_20);
+    Acc::p32Copy(d0p_31, d0p_20);
+    Acc::p32Copy(s0p_31, s0p_20);
 
     // Sca.(1 - Da).
-    Face::p32Mul_2x(d0p_20, b0p_20, d0p_20, d0p_31, b0p_31, d0p_31);
+    Acc::p32Mul_2x(d0p_20, b0p_20, d0p_20, d0p_31, b0p_31, d0p_31);
     // Dca.(1 - Sa).
-    Face::p32Mul_2x(s0p_20, a0p_20, s0p_20, s0p_31, a0p_31, s0p_31);
+    Acc::p32Mul_2x(s0p_20, a0p_20, s0p_20, s0p_31, a0p_31, s0p_31);
     // Dca.(1 - Sa) + Sca.(1 - Da).
-    Face::p32Add_2x(d0p_20, d0p_20, s0p_20, d0p_31, d0p_31, s0p_31);
+    Acc::p32Add_2x(d0p_20, d0p_20, s0p_20, d0p_31, d0p_31, s0p_31);
 
     // Da.
-    Face::p32ExtractPBW1(s0p_20, a0p_31);
+    Acc::p32ExtractPBW1(s0p_20, a0p_31);
     // Sa.
-    Face::p32ExtractPBW1(s0p_31, b0p_31);
+    Acc::p32ExtractPBW1(s0p_31, b0p_31);
 
     // Dca.Sa.
-    Face::p32Mul_2x(dst0p_20, a0p_20, s0p_31, dst0p_31, a0p_31, s0p_31);
+    Acc::p32Mul_2x(dst0p_20, a0p_20, s0p_31, dst0p_31, a0p_31, s0p_31);
     // Sca.Da.
-    Face::p32Mul_2x(s0p_20, b0p_20, s0p_20, s0p_31, b0p_31, s0p_20);
+    Acc::p32Mul_2x(s0p_20, b0p_20, s0p_20, s0p_31, b0p_31, s0p_20);
     
     // min(Sca.Da, Dca.Sa).
-    Face::p32MinPBW(dst0p_20, dst0p_20, s0p_20);
-    Face::p32Min(dst0p_31, dst0p_31, s0p_31);
+    Acc::p32MinPBW(dst0p_20, dst0p_20, s0p_20);
+    Acc::p32Min(dst0p_31, dst0p_31, s0p_31);
     // min(Sca.Da, Dca.Sa) + Sca.(1 - Da) + Dca.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
 
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   // Dca' = min(Sc.Da, Dca) + Sc.(1 - Da).
@@ -5071,26 +5071,26 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     uint32_t s0p_20, s0p_31;
 
     // Sc.Da.
-    Face::p32ExtractPBW1(d0p_20, a0p_31);
-    Face::p32MulDiv255PBW_SBW(s0p_20, b0p_20, d0p_20);
+    Acc::p32ExtractPBW1(d0p_20, a0p_31);
+    Acc::p32MulDiv255PBW_SBW(s0p_20, b0p_20, d0p_20);
   
-    Face::p32ExtractPBW0(s0p_31, b0p_31);
-    Face::p32MulDiv255SBW(s0p_31, s0p_31, d0p_20);
+    Acc::p32ExtractPBW0(s0p_31, b0p_31);
+    Acc::p32MulDiv255SBW(s0p_31, s0p_31, d0p_20);
   
     // Sc.(1 - Da).
-    Face::p32Negate255SBW(d0p_20, d0p_20);
-    Face::p32ExtractPBW0(d0p_31, b0p_31);
-    Face::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
-    Face::p32MulDiv255PBW_SBW(d0p_20, b0p_20, d0p_20);
+    Acc::p32Negate255SBW(d0p_20, d0p_20);
+    Acc::p32ExtractPBW0(d0p_31, b0p_31);
+    Acc::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
+    Acc::p32MulDiv255PBW_SBW(d0p_20, b0p_20, d0p_20);
     
     // min(Sc.Da, Dca).
-    Face::p32MinPBW(dst0p_20, a0p_20, s0p_20);
-    Face::p32Min(dst0p_31, a0p_31, s0p_31);
+    Acc::p32MinPBW(dst0p_20, a0p_20, s0p_20);
+    Acc::p32Min(dst0p_31, a0p_31, s0p_31);
     // min(Sc.Da, Dca) + Sc.(1 - Da).
-    Face::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -5119,28 +5119,28 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     uint32_t sa;
 
     // Dc.(1 - Sa).
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Negate255SBW(d0p_20, sa);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Negate255SBW(d0p_20, sa);
     
-    Face::p32ExtractPBW0(d0p_31, a0p_31);
-    Face::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
-    Face::p32MulDiv255PBW_SBW(d0p_20, a0p_20, d0p_20);
+    Acc::p32ExtractPBW0(d0p_31, a0p_31);
+    Acc::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
+    Acc::p32MulDiv255PBW_SBW(d0p_20, a0p_20, d0p_20);
 
     // Dc.Sa.
-    Face::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, sa);
-    Face::p32ExtractPBW0(dst0p_31, a0p_31);
-    Face::p32MulDiv255SBW(dst0p_31, dst0p_31, sa);
+    Acc::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, sa);
+    Acc::p32ExtractPBW0(dst0p_31, a0p_31);
+    Acc::p32MulDiv255SBW(dst0p_31, dst0p_31, sa);
 
     // min(Sca, Dc.Sa).
-    Face::p32ExtractPBW0(sa, b0p_31);
-    Face::p32MinPBW(dst0p_20, dst0p_20, b0p_20);
-    Face::p32Min(dst0p_31, dst0p_31, sa);
+    Acc::p32ExtractPBW0(sa, b0p_31);
+    Acc::p32MinPBW(dst0p_20, dst0p_20, b0p_20);
+    Acc::p32Min(dst0p_31, dst0p_31, sa);
 
     // min(Sca, Dc.Sa) + Dc.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dc' = min(Sc, Dc).
@@ -5149,9 +5149,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32MinPBW(dst0p_20, a0p_20, b0p_20);
-    Face::p32MinPBW_FillPBW1(dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32MinPBW(dst0p_20, a0p_20, b0p_20);
+    Acc::p32MinPBW_FillPBW1(dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -5159,9 +5159,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32MinPBW(dst0p_20, a0p_20, b0p_20);
-    Face::p32Min(dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32MinPBW(dst0p_20, a0p_20, b0p_20);
+    Acc::p32Min(dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // ==========================================================================
@@ -5186,9 +5186,9 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     if (pack)
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
     else
-      Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
+      Acc::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
   // ==========================================================================
@@ -5199,7 +5199,7 @@ struct FOG_NO_EXPORT CompositeDarken : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -5226,44 +5226,44 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     uint32_t d0p_20, d0p_31;
     uint32_t s0p_20, s0p_31;
 
-    Face::p32ExtractPBW1(d0p_20, a0p_31);
-    Face::p32ExtractPBW1(s0p_20, b0p_31);
+    Acc::p32ExtractPBW1(d0p_20, a0p_31);
+    Acc::p32ExtractPBW1(s0p_20, b0p_31);
 
     // (1 - Da).
-    Face::p32Negate255SBW(d0p_20, d0p_20);
+    Acc::p32Negate255SBW(d0p_20, d0p_20);
     // (1 - Sa).
-    Face::p32Negate255SBW(s0p_20, s0p_20);
+    Acc::p32Negate255SBW(s0p_20, s0p_20);
 
-    Face::p32Copy(d0p_31, d0p_20);
-    Face::p32Copy(s0p_31, s0p_20);
+    Acc::p32Copy(d0p_31, d0p_20);
+    Acc::p32Copy(s0p_31, s0p_20);
 
     // Sca.(1 - Da).
-    Face::p32Mul_2x(d0p_20, b0p_20, d0p_20, d0p_31, b0p_31, d0p_31);
+    Acc::p32Mul_2x(d0p_20, b0p_20, d0p_20, d0p_31, b0p_31, d0p_31);
     // Dca.(1 - Sa).
-    Face::p32Mul_2x(s0p_20, a0p_20, s0p_20, s0p_31, a0p_31, s0p_31);
+    Acc::p32Mul_2x(s0p_20, a0p_20, s0p_20, s0p_31, a0p_31, s0p_31);
     // Dca.(1 - Sa) + Sca.(1 - Da).
-    Face::p32Add_2x(d0p_20, d0p_20, s0p_20, d0p_31, d0p_31, s0p_31);
+    Acc::p32Add_2x(d0p_20, d0p_20, s0p_20, d0p_31, d0p_31, s0p_31);
 
     // Da.
-    Face::p32ExtractPBW1(s0p_20, a0p_31);
+    Acc::p32ExtractPBW1(s0p_20, a0p_31);
     // Sa.
-    Face::p32ExtractPBW1(s0p_31, b0p_31);
+    Acc::p32ExtractPBW1(s0p_31, b0p_31);
 
     // Dca.Sa.
-    Face::p32Mul_2x(dst0p_20, a0p_20, s0p_31, dst0p_31, a0p_31, s0p_31);
+    Acc::p32Mul_2x(dst0p_20, a0p_20, s0p_31, dst0p_31, a0p_31, s0p_31);
     // Sca.Da.
-    Face::p32Mul_2x(s0p_20, b0p_20, s0p_20, s0p_31, b0p_31, s0p_20);
+    Acc::p32Mul_2x(s0p_20, b0p_20, s0p_20, s0p_31, b0p_31, s0p_20);
     
     // max(Sca.Da, Dca.Sa).
-    Face::p32MaxPBW(dst0p_20, dst0p_20, s0p_20);
-    Face::p32Max(dst0p_31, dst0p_31, s0p_31);
+    Acc::p32MaxPBW(dst0p_20, dst0p_20, s0p_20);
+    Acc::p32Max(dst0p_31, dst0p_31, s0p_31);
     // max(Sca.Da, Dca.Sa) + Sca.(1 - Da) + Dca.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
 
     if (pack)
-      Face::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
+      Acc::p32Div255PBW_2x_Pack_0231(dst0p_20, dst0p_20, dst0p_31);
     else
-      Face::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
+      Acc::p32Div255PBW_2x(dst0p_20, dst0p_20, dst0p_31, dst0p_31);
   }
 
   // Dca' = max(Sc.Da, Dca) + Sc.(1 - Da).
@@ -5277,26 +5277,26 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     uint32_t s0p_20, s0p_31;
 
     // Sc.Da.
-    Face::p32ExtractPBW1(d0p_20, a0p_31);
-    Face::p32MulDiv255PBW_SBW(s0p_20, b0p_20, d0p_20);
+    Acc::p32ExtractPBW1(d0p_20, a0p_31);
+    Acc::p32MulDiv255PBW_SBW(s0p_20, b0p_20, d0p_20);
   
-    Face::p32ExtractPBW0(s0p_31, b0p_31);
-    Face::p32MulDiv255SBW(s0p_31, s0p_31, d0p_20);
+    Acc::p32ExtractPBW0(s0p_31, b0p_31);
+    Acc::p32MulDiv255SBW(s0p_31, s0p_31, d0p_20);
   
     // Sc.(1 - Da).
-    Face::p32Negate255SBW(d0p_20, d0p_20);
-    Face::p32ExtractPBW0(d0p_31, b0p_31);
-    Face::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
-    Face::p32MulDiv255PBW_SBW(d0p_20, b0p_20, d0p_20);
+    Acc::p32Negate255SBW(d0p_20, d0p_20);
+    Acc::p32ExtractPBW0(d0p_31, b0p_31);
+    Acc::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
+    Acc::p32MulDiv255PBW_SBW(d0p_20, b0p_20, d0p_20);
     
     // max(Sc.Da, Dca).
-    Face::p32MaxPBW(dst0p_20, a0p_20, s0p_20);
-    Face::p32Max(dst0p_31, a0p_31, s0p_31);
+    Acc::p32MaxPBW(dst0p_20, a0p_20, s0p_20);
+    Acc::p32Max(dst0p_31, a0p_31, s0p_31);
     // max(Sc.Da, Dca) + Sc.(1 - Da).
-    Face::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -5325,28 +5325,28 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     uint32_t sa;
 
     // Dc.(1 - Sa).
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Negate255SBW(d0p_20, sa);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Negate255SBW(d0p_20, sa);
     
-    Face::p32ExtractPBW0(d0p_31, a0p_31);
-    Face::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
-    Face::p32MulDiv255PBW_SBW(d0p_20, a0p_20, d0p_20);
+    Acc::p32ExtractPBW0(d0p_31, a0p_31);
+    Acc::p32MulDiv255SBW(d0p_31, d0p_31, d0p_20);
+    Acc::p32MulDiv255PBW_SBW(d0p_20, a0p_20, d0p_20);
 
     // Dc.Sa.
-    Face::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, sa);
-    Face::p32ExtractPBW0(dst0p_31, a0p_31);
-    Face::p32MulDiv255SBW(dst0p_31, dst0p_31, sa);
+    Acc::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, sa);
+    Acc::p32ExtractPBW0(dst0p_31, a0p_31);
+    Acc::p32MulDiv255SBW(dst0p_31, dst0p_31, sa);
 
     // max(Sca, Dc.Sa).
-    Face::p32ExtractPBW0(sa, b0p_31);
-    Face::p32MaxPBW(dst0p_20, dst0p_20, b0p_20);
-    Face::p32Max(dst0p_31, dst0p_31, sa);
+    Acc::p32ExtractPBW0(sa, b0p_31);
+    Acc::p32MaxPBW(dst0p_20, dst0p_20, b0p_20);
+    Acc::p32Max(dst0p_31, dst0p_31, sa);
 
     // max(Sca, Dc.Sa) + Dc.(1 - Sa).
-    Face::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, dst0p_20, d0p_20, dst0p_31, dst0p_31, d0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dc' = max(Sc, Dc).
@@ -5355,9 +5355,9 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32MaxPBW(dst0p_20, a0p_20, b0p_20);
-    Face::p32MaxPBW_FillPBW1(dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32MaxPBW(dst0p_20, a0p_20, b0p_20);
+    Acc::p32MaxPBW_FillPBW1(dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -5365,9 +5365,9 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
-    Face::p32MaxPBW(dst0p_20, a0p_20, b0p_20);
-    Face::p32Max(dst0p_31, a0p_31, b0p_31);
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    Acc::p32MaxPBW(dst0p_20, a0p_20, b0p_20);
+    Acc::p32Max(dst0p_31, a0p_31, b0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // ==========================================================================
@@ -5392,20 +5392,20 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t t0;
-    Face::p32Negate255SBW(t0, b0p_a8);
+    Acc::p32Negate255SBW(t0, b0p_a8);
 
     if (pack)
     {
-      Face::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, dst0p_20, t0, dst0p_31, t0);
-      Face::p32Mul(t0, b0p_a8, 0x00010101);
-      Face::p32Add(dst0p_20, dst0p_20, t0);
+      Acc::p32MulDiv255PBW_SBW_2x_Pack_20F1(dst0p_20, dst0p_20, t0, dst0p_31, t0);
+      Acc::p32Mul(t0, b0p_a8, 0x00010101);
+      Acc::p32Add(dst0p_20, dst0p_20, t0);
     }
     else
     {
-      Face::p32MulDiv255PBW_SBW_2x(dst0p_20, dst0p_20, t0, dst0p_31, dst0p_31, t0);
-      Face::p32Add(dst0p_31, dst0p_31, b0p_a8);
-      Face::p32ExtendPBWFromSBW(t0, b0p_a8);
-      Face::p32Add(dst0p_20, dst0p_20, t0);
+      Acc::p32MulDiv255PBW_SBW_2x(dst0p_20, dst0p_20, t0, dst0p_31, dst0p_31, t0);
+      Acc::p32Add(dst0p_31, dst0p_31, b0p_a8);
+      Acc::p32ExtendPBWFromSBW(t0, b0p_a8);
+      Acc::p32Add(dst0p_20, dst0p_20, t0);
     }
   }
 
@@ -5417,7 +5417,7 @@ struct FOG_NO_EXPORT CompositeLighten : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -5445,9 +5445,9 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
   {
     uint32_t da, sa, saDa;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Mul(saDa, da, sa);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_PRGB32(
     {
@@ -5469,7 +5469,7 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t da;
-    Face::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(da, a0p_31);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
@@ -5505,7 +5505,7 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa;
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
@@ -5575,7 +5575,7 @@ struct FOG_NO_EXPORT CompositeColorDodge : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -5603,9 +5603,9 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
   {
     uint32_t da, sa, saDa;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Mul(saDa, da, sa);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_PRGB32(
     {
@@ -5628,7 +5628,7 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t da;
-    Face::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(da, a0p_31);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
@@ -5663,7 +5663,7 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa;
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
@@ -5718,9 +5718,9 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
   {
     // Same as Dst.
     if (pack)
-      Face::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
+      Acc::p32PackPBB2031FromPBW(dst0p_20, a0p_20, a0p_31);
     else
-      Face::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
+      Acc::p32Copy_2x(dst0p_20, a0p_20, dst0p_31, a0p_31);
   }
 
   // ==========================================================================
@@ -5731,7 +5731,7 @@ struct FOG_NO_EXPORT CompositeColorBurn : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -5759,9 +5759,9 @@ struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
   {
     uint32_t da, sa, saDa;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Mul(saDa, da, sa);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_PRGB32(
     {
@@ -5781,7 +5781,7 @@ struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t da;
-    Face::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(da, a0p_31);
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
@@ -5816,7 +5816,7 @@ struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa;
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
@@ -5881,7 +5881,7 @@ struct FOG_NO_EXPORT CompositeHardLight : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -5905,7 +5905,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
   static FOG_INLINE uint32_t usqrt(uint32_t x)
   {
     FOG_ASSERT(x <= 0xFF);
-    return Face::_u8_sqrt_table_b[x];
+    return Acc::_u8_sqrt_table_b[x];
   }
 
   // ==========================================================================
@@ -5927,12 +5927,12 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
     uint32_t da, sa;
     uint32_t saDa, daInv;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
-    Face::p32Negate255SBW(daInv, da); daInv *= 0xFF;
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32Negate255SBW(daInv, da); daInv *= 0xFF;
+    Acc::p32Mul(saDa, da, sa);
 
-    uint32_t daRecip = Face::_u8_divide_table_d[da];
+    uint32_t daRecip = Acc::_u8_divide_table_d[da];
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_PRGB32(
     {
@@ -5962,10 +5962,10 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
   {
     uint32_t da, daInv;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32Negate255SBW(daInv, da); daInv *= 0xFF;
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32Negate255SBW(daInv, da); daInv *= 0xFF;
 
-    uint32_t daRecip = Face::_u8_divide_table_d[da];
+    uint32_t daRecip = Acc::_u8_divide_table_d[da];
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_XRGB32(
     {
@@ -6010,7 +6010,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa;
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_PRGB32(
     {
@@ -6074,12 +6074,12 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
     uint32_t da, sa;
     uint32_t saDa, daInv;
 
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_a8);
-    Face::p32Negate255SBW(daInv, da); daInv *= 0xFF;
-    Face::p32Mul(saDa, da, sa);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_a8);
+    Acc::p32Negate255SBW(daInv, da); daInv *= 0xFF;
+    Acc::p32Mul(saDa, da, sa);
 
-    uint32_t daRecip = Face::_u8_divide_table_d[da];
+    uint32_t daRecip = Acc::_u8_divide_table_d[da];
 
     FOG_COMPOSITE_SEPARABLE_PRGB32_OP_A8(
     {
@@ -6103,7 +6103,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
     bool pack = false)
   {
     uint32_t sa;
-    Face::p32ExtractPBW1(sa, b0p_a8);
+    Acc::p32ExtractPBW1(sa, b0p_a8);
 
     FOG_COMPOSITE_SEPARABLE_XRGB32_OP_A8(
     {
@@ -6124,7 +6124,7 @@ struct FOG_NO_EXPORT CompositeSoftLight : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -6153,28 +6153,28 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t da;
     uint32_t sa;
     
-    Face::p32ExtractPBW1(da, a0p_31);
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     // Dca.Sa.
-    Face::p32Mul_2x(t0p_20, a0p_20, sa, t0p_31, a0p_31, sa);
+    Acc::p32Mul_2x(t0p_20, a0p_20, sa, t0p_31, a0p_31, sa);
     // Sca.Da.
-    Face::p32Mul_2x(u0p_20, b0p_20, da, u0p_31, b0p_31, da);
+    Acc::p32Mul_2x(u0p_20, b0p_20, da, u0p_31, b0p_31, da);
 
     // Sa.Da.
-    Face::p32MulDiv255SBW(da, da, sa);
+    Acc::p32MulDiv255SBW(da, da, sa);
 
     // 2.Min(Dca.Da, Dca.Sa).
-    Face::p32MinPBW(t0p_20, t0p_20, u0p_20);
-    Face::p32Min(t0p_31, t0p_31, u0p_31);
-    Face::p32Div255PBW_LShift1(t0p_20, t0p_20);
-    Face::p32Div255PBW(t0p_31, t0p_31);
-    Face::p32LShiftBy1PBW0(t0p_31, t0p_31);
+    Acc::p32MinPBW(t0p_20, t0p_20, u0p_20);
+    Acc::p32Min(t0p_31, t0p_31, u0p_31);
+    Acc::p32Div255PBW_LShift1(t0p_20, t0p_20);
+    Acc::p32Div255PBW(t0p_31, t0p_31);
+    Acc::p32LShiftBy1PBW0(t0p_31, t0p_31);
 
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dca' = Dca + Sc - 2.min(Sc.Da, Dca).
@@ -6187,29 +6187,29 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t u0p_20, u0p_31;
     uint32_t da;
 
-    Face::p32ExtractPBW1(da, a0p_31);
+    Acc::p32ExtractPBW1(da, a0p_31);
 
     // Sc.Da.
-    Face::p32ExtractPBW0(u0p_31, b0p_31);
-    Face::p32MulDiv255PBW_SBW(u0p_20, b0p_20, da);
-    Face::p32MulDiv255SBW(u0p_31, u0p_31, da);
+    Acc::p32ExtractPBW0(u0p_31, b0p_31);
+    Acc::p32MulDiv255PBW_SBW(u0p_20, b0p_20, da);
+    Acc::p32MulDiv255SBW(u0p_31, u0p_31, da);
 
     // Min(Sc.Da, Dca).
-    Face::p32ExtractPBW0(da, a0p_31);
-    Face::p32MinPBW(u0p_20, u0p_20, a0p_20);
-    Face::p32Min(u0p_31, u0p_31, da);
+    Acc::p32ExtractPBW0(da, a0p_31);
+    Acc::p32MinPBW(u0p_20, u0p_20, a0p_20);
+    Acc::p32Min(u0p_31, u0p_31, da);
 
     // 2.Min(Sc.Da, Dca).
-    Face::p32LShiftBy1(u0p_20, u0p_20);
-    Face::p32LShiftBy1(u0p_31, u0p_31);
+    Acc::p32LShiftBy1(u0p_20, u0p_20);
+    Acc::p32LShiftBy1(u0p_31, u0p_31);
 
     // Dca + Sc - 2.min(Sc.Da, Dca).
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    Face::p32ZeroPWW1(dst0p_31, dst0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, u0p_20, dst0p_31, dst0p_31, u0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32ZeroPWW1(dst0p_31, dst0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, u0p_20, dst0p_31, dst0p_31, u0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -6237,29 +6237,29 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
     uint32_t sa;
 
-    Face::p32ExtractPBW1(sa, b0p_31);
+    Acc::p32ExtractPBW1(sa, b0p_31);
 
     // Dc.Sa.
-    Face::p32ExtractPBW0(t0p_31, a0p_31);
-    Face::p32MulDiv255PBW(t0p_20, a0p_20, sa);
-    Face::p32MulDiv255SBW(t0p_31, t0p_31, sa);
+    Acc::p32ExtractPBW0(t0p_31, a0p_31);
+    Acc::p32MulDiv255PBW(t0p_20, a0p_20, sa);
+    Acc::p32MulDiv255SBW(t0p_31, t0p_31, sa);
 
     // Min(Sca, Dc.Sa).
-    Face::p32ExtractPBW0(sa, b0p_31);
-    Face::p32MinPBW(t0p_20, t0p_20, b0p_20);
-    Face::p32Min(t0p_31, t0p_31, sa);
+    Acc::p32ExtractPBW0(sa, b0p_31);
+    Acc::p32MinPBW(t0p_20, t0p_20, b0p_20);
+    Acc::p32Min(t0p_31, t0p_31, sa);
 
     // 2.Min(Sca, Dc.Sa).
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
 
     // Dc + Sca - 2.min(Sca, Dc.Sa).
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    Face::p32ZeroPWW1(dst0p_31, dst0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32ZeroPWW1(dst0p_31, dst0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dc' = Dc + Sc - 2.min(Sc, Dc).
@@ -6272,23 +6272,23 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t u0p_31;
 
     // Min(Sc, Dc).
-    Face::p32ExtractPBW0(t0p_31, a0p_31);
-    Face::p32ExtractPBW0(u0p_31, b0p_31);
+    Acc::p32ExtractPBW0(t0p_31, a0p_31);
+    Acc::p32ExtractPBW0(u0p_31, b0p_31);
 
-    Face::p32Min(t0p_31, t0p_31, u0p_31);
-    Face::p32MinPBW(t0p_20, a0p_20, b0p_20);
+    Acc::p32Min(t0p_31, t0p_31, u0p_31);
+    Acc::p32MinPBW(t0p_20, a0p_20, b0p_20);
 
     // 2.Min(Sc, Dc).
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
 
     // Dc + Sc - 2.min(Sc, Dc).
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    Face::p32ZeroPWW1(dst0p_31, dst0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32ZeroPWW1(dst0p_31, dst0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -6299,18 +6299,18 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Min(Sc, Dc).
-    Face::p32MinPBW(t0p_20, a0p_20, b0p_20);
-    Face::p32Min(t0p_31, a0p_31, b0p_31);
+    Acc::p32MinPBW(t0p_20, a0p_20, b0p_20);
+    Acc::p32Min(t0p_31, a0p_31, b0p_31);
 
     // 2.Min(Sc, Dc).
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
 
     // Dc + Sc - 2.min(Sc, Dc).
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // ==========================================================================
@@ -6330,16 +6330,16 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t b0p;
 
     // 2.Dca.Sa || Sa.Da.
-    Face::p32MulDiv255PBW_SBW_2x(t0p_20, a0p_20, b0p_a8, t0p_31, a0p_31, b0p_a8);
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1PBW0(t0p_31, t0p_31);
+    Acc::p32MulDiv255PBW_SBW_2x(t0p_20, a0p_20, b0p_a8, t0p_31, a0p_31, b0p_a8);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1PBW0(t0p_31, t0p_31);
     
     // Dca + Sa - 2.Dca.Sa.
-    Face::p32ExtendPBWFromSBW(b0p, b0p_a8);
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p, dst0p_31, a0p_31, b0p);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    Acc::p32ExtendPBWFromSBW(b0p, b0p_a8);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p, dst0p_31, a0p_31, b0p);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dc' = Dc + Sa - 2.min(Sa, Dc.Sa)        || min(Sa, Dc.Sa) == Dc.
@@ -6353,20 +6353,20 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t b0p;
 
     // 2.Dc.Sa.
-    Face::p32MulDiv255PBW_SBW(t0p_20, a0p_20, b0p_a8);
-    Face::p32ExtractPBW0(t0p_31, a0p_31);
-    Face::p32MulDiv255SBW(t0p_31, t0p_31, b0p_a8);
+    Acc::p32MulDiv255PBW_SBW(t0p_20, a0p_20, b0p_a8);
+    Acc::p32ExtractPBW0(t0p_31, a0p_31);
+    Acc::p32MulDiv255SBW(t0p_31, t0p_31, b0p_a8);
 
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
 
     // Dc + Sa - 2.Dc.Sa.
-    Face::p32ExtendPBWFromSBW(b0p, b0p_a8);
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p, dst0p_31, a0p_31, b0p);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32ExtendPBWFromSBW(b0p, b0p_a8);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p, dst0p_31, a0p_31, b0p);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, a0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // ==========================================================================
@@ -6377,7 +6377,7 @@ struct FOG_NO_EXPORT CompositeDifference : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 
@@ -6403,15 +6403,15 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Dca.Sca.
-    Face::p32MulDiv255PBW_2x(t0p_20, a0p_20, b0p_20, t0p_31, a0p_31, b0p_31);
+    Acc::p32MulDiv255PBW_2x(t0p_20, a0p_20, b0p_20, t0p_31, a0p_31, b0p_31);
     // Dca + Sca.
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
     // Dca + Sca - 2.Sca.Dca.
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1PBW0(t0p_31, t0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1PBW0(t0p_31, t0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dca' = Dca + Sc - 2.Sc.Dca.
@@ -6424,21 +6424,21 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Dca.Sc.
-    Face::p32ExtractPBW0(t0p_20, a0p_31);
-    Face::p32ExtractPBW0(t0p_31, b0p_31);
+    Acc::p32ExtractPBW0(t0p_20, a0p_31);
+    Acc::p32ExtractPBW0(t0p_31, b0p_31);
 
-    Face::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
-    Face::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
+    Acc::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
+    Acc::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
 
     // Dca + Sc.
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
     // Dca + Sc - 2.Sc.Dca.
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void prgb32_op_frgb32_2031(
@@ -6466,21 +6466,21 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Dc.Sca.
-    Face::p32ExtractPBW0(t0p_20, a0p_31);
-    Face::p32ExtractPBW0(t0p_31, b0p_31);
+    Acc::p32ExtractPBW0(t0p_20, a0p_31);
+    Acc::p32ExtractPBW0(t0p_31, b0p_31);
 
-    Face::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
-    Face::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
+    Acc::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
+    Acc::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
 
     // Dc + Sca.
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
     // Dc + Sca - 2.Sca.Dc.
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // Dc' = Dc + Sc - 2.Sc.Dc.
@@ -6492,21 +6492,21 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Dc.Sc.
-    Face::p32ExtractPBW0(t0p_20, a0p_31);
-    Face::p32ExtractPBW0(t0p_31, b0p_31);
+    Acc::p32ExtractPBW0(t0p_20, a0p_31);
+    Acc::p32ExtractPBW0(t0p_31, b0p_31);
 
-    Face::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
-    Face::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
+    Acc::p32MulDiv255SBW(t0p_31, t0p_31, t0p_20);
+    Acc::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
 
     // Dc + Sc.
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
     // Dc + Sc - 2.Sc.Dc.
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
-    Face::p32FillPBW1(dst0p_31, dst0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void zrgb32_op_zrgb32_2031(
@@ -6517,17 +6517,17 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
     uint32_t t0p_20, t0p_31;
 
     // Dc.Sc.
-    Face::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
-    Face::p32MulDiv255SBW(t0p_31, a0p_31, b0p_20);
+    Acc::p32MulDiv255PBW(t0p_20, a0p_20, b0p_20);
+    Acc::p32MulDiv255SBW(t0p_31, a0p_31, b0p_20);
 
     // Dc + Sc.
-    Face::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
+    Acc::p32Add_2x(dst0p_20, a0p_20, b0p_20, dst0p_31, a0p_31, b0p_31);
     // Dc + Sc - 2.Sc.Dc.
-    Face::p32LShiftBy1(t0p_20, t0p_20);
-    Face::p32LShiftBy1(t0p_31, t0p_31);
-    Face::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
+    Acc::p32LShiftBy1(t0p_20, t0p_20);
+    Acc::p32LShiftBy1(t0p_31, t0p_31);
+    Acc::p32Sub_2x(dst0p_20, dst0p_20, t0p_20, dst0p_31, dst0p_31, t0p_31);
 
-    if (pack) Face::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   // ==========================================================================
@@ -6563,7 +6563,7 @@ struct FOG_NO_EXPORT CompositeExclusion : public CompositeExtPrgbVsPrgb<
     uint32_t& dst0p, const uint32_t& a0p, const uint32_t& b0p)
   {
     // Same as SrcOver.
-    Face::p32OpOverA8(dst0p, a0p, b0p);
+    Acc::p32OpOverA8(dst0p, a0p, b0p);
   }
 };
 

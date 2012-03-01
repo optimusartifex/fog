@@ -24,6 +24,12 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Forward Declarations]
+// ============================================================================
+
+struct OT_Table;
+
+// ============================================================================
 // [Fog::GlyphItem]
 // ============================================================================
 
@@ -1052,6 +1058,9 @@ struct FOG_NO_EXPORT FaceCollection
 struct FOG_NO_EXPORT FaceVTable
 {
   void (FOG_CDECL* destroy)(Face* self);
+
+  OT_Table* (FOG_CDECL* getTable)(const Face* self, uint32_t tag);
+  void (FOG_CDECL* releaseTable)(const Face* self, OT_Table* table);
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunF)(const Face* self,
     PathF* dst, uint32_t cntOp,

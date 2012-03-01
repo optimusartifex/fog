@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/G2d/Text/Font.h>
+#include <Fog/G2d/Text/OpenType/OTFace.h>
 
 namespace Fog {
 
@@ -21,14 +22,27 @@ namespace Fog {
 
 struct FOG_NO_EXPORT WinFace : public Face
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE WinFace(const FaceVTable* vtable_, const StringW& family_) :
     Face(vtable_, family_)
   {
+    ot.init();
   }
 
   FOG_INLINE ~WinFace()
   {
+    ot.destroy();
   }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  HFONT hFont;
+  Static<OT_Face> ot;
 
 private:
   _FOG_NO_COPY(WinFace)
@@ -40,18 +54,29 @@ private:
 
 struct FOG_NO_EXPORT WinFontEngine : public FontEngine
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
   FOG_INLINE WinFontEngine(FontEngineVTable* vtable_) :
     FontEngine(vtable_)
   {
-    faceCache.init();
+    lock.init();
+    cache.init();
   }
 
   FOG_INLINE ~WinFontEngine()
   {
-    faceCache.destroy();
+    cache.destroy();
+    lock.destroy();
   }
 
-  Static<FaceCache> faceCache;
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  mutable Static<Lock> lock;
+  mutable Static<FaceCache> cache;
 
 private:
   _FOG_NO_COPY(WinFontEngine)

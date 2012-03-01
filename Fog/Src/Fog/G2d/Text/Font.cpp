@@ -1282,6 +1282,16 @@ static void FOG_CDECL NullFace_destroy(Face* self)
   self->~Face();
 }
 
+static OT_Table* FOG_CDECL NullFace_getTable(const Face* self, uint32_t tag)
+{
+  return NULL;
+}
+
+static void FOG_CDECL NullFace_releaseTable(const Face* self, OT_Table* table)
+{
+  FOG_ASSERT_NOT_REACHED();
+}
+
 static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(const Face* self,
   PathF* dst, uint32_t cntOp,
   const uint32_t* glyphList, size_t itemAdvance,
@@ -1484,6 +1494,8 @@ FOG_NO_EXPORT void Font_init(void)
   // --------------------------------------------------------------------------
 
   NullFace_vtable.destroy = NullFace_destroy;
+  NullFace_vtable.getTable = NullFace_getTable;
+  NullFace_vtable.releaseTable = NullFace_releaseTable;
   NullFace_vtable.getOutlineFromGlyphRunF = NullFace_getOutlineFromGlyphRunF;
   NullFace_vtable.getOutlineFromGlyphRunD = NullFace_getOutlineFromGlyphRunD;
   NullFace_create(&NullFace_oInstance);

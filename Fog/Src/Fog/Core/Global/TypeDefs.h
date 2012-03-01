@@ -301,8 +301,9 @@ struct RectangularGradientF;
 struct RectangularGradientD;
 struct Texture;
 
-// These are not different types, but we like to mark whether the
-// color is premultiplied or not in the API, it's more clear.
+// These are not different types, the ideas is to mark places where 
+// premultiplied colors are required/expected, it's cleaner when browsing
+// the API.
 typedef Argb32 Prgb32;
 typedef ArgbBase32 Prgb32Base;
 typedef Argb64 Prgb64;

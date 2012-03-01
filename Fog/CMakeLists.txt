@@ -1303,17 +1303,11 @@ Set(FOG_G2D_SVG_HEADERS
 # [Fog/G2d/Text]
 Set(FOG_G2D_TEXT_SOURCES
   Src/Fog/G2d/Text/Font.cpp
-  Src/Fog/G2d/Text/OTCMap.cpp
-  Src/Fog/G2d/Text/OTCore.cpp
-  Src/Fog/G2d/Text/OTFont.cpp
   Src/Fog/G2d/Text/TextLayout.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS
   Src/Fog/G2d/Text/Font.h
-  Src/Fog/G2d/Text/OTCMap.h
-  Src/Fog/G2d/Text/OTCore.h
-  Src/Fog/G2d/Text/OTFont.h
   Src/Fog/G2d/Text/TextLayout.h
 )
 
@@ -1368,6 +1362,19 @@ Else()
   Set_Source_Files_Properties(${FOG_G2d_TEXT_SOURCES_FREETYPE} PROPERTIES COMPILE_FLAGS "${FREETYPE_CONFIG_OUT}")
 EndIf()
 
+# [Fog/G2d/Text/OpenType]
+Set(FOG_G2D_TEXT_OPENTYPE_SOURCES
+  Src/Fog/G2d/Text/OpenType/OTCMap.cpp
+  Src/Fog/G2d/Text/OpenType/OTCore.cpp
+  Src/Fog/G2d/Text/OpenType/OTFace.cpp
+)
+
+Set(FOG_G2D_TEXT_OPENTYPE_HEADERS
+  Src/Fog/G2d/Text/OpenType/OTCMap.h
+  Src/Fog/G2d/Text/OpenType/OTCore.h
+  Src/Fog/G2d/Text/OpenType/OTFace.h
+)
+
 # [Fog/G2d/Tools]
 Set(FOG_G2D_TOOLS_SOURCES
   Src/Fog/G2d/Tools/ColorAnalyzer.cpp
@@ -1406,6 +1413,7 @@ FogAddSourceGroup("Fog/G2d/Painting"         ${FOG_G2D_PAINTING_SOURCES}        
 FogAddSourceGroup("Fog/G2d/Source"           ${FOG_G2D_SOURCE_SOURCES}           ${FOG_G2D_SOURCE_HEADERS}          )
 FogAddSourceGroup("Fog/G2d/Svg"              ${FOG_G2D_SVG_SOURCES}              ${FOG_G2D_SVG_HEADERS}             )
 FogAddSourceGroup("Fog/G2d/Text"             ${FOG_G2D_TEXT_SOURCES}             ${FOG_G2D_TEXT_HEADERS}            )
+FogAddSourceGroup("Fog/G2d/Text/OpenType"    ${FOG_G2D_TEXT_OPENTYPE_SOURCES}    ${FOG_G2D_TEXT_OPENTYPE_HEADERS}   )
 FogAddSourceGroup("Fog/G2d/Tools"            ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
 
 FogAddSourceGroup("Fog/G2d/Painting/RasterOps_C"
@@ -1538,6 +1546,7 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_SOURCE_SOURCES}
   ${FOG_G2D_SVG_SOURCES}
   ${FOG_G2D_TEXT_SOURCES}
+  ${FOG_G2D_TEXT_OPENTYPE_SOURCES}
   ${FOG_G2D_TOOLS_SOURCES}
 )
 
@@ -1568,6 +1577,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_SOURCE_HEADERS}
   ${FOG_G2D_SVG_HEADERS}
   ${FOG_G2D_TEXT_HEADERS}
+  ${FOG_G2D_TEXT_OPENTYPE_HEADERS}
   ${FOG_G2D_TOOLS_HEADERS}
 )
 

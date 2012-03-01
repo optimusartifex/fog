@@ -15,52 +15,61 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Text/WinFont.h>
 
+// [Fix]
+#ifndef GGO_UNHINTED
+# define GGO_UNHINTED 0x0100
+#endif // GGO_UNHINTED
+
+#ifndef CLEARTYPE_QUALITY
+# define CLEARTYPE_QUALITY 5
+#endif // CLEARTYPE_QUALITY
+
+#ifndef TT_PRIM_CSPLINE
+# define TT_PRIM_CSPLINE 3
+#endif // TT_PRIM_CSPLINE
+
 namespace Fog {
 
 // ============================================================================
-// [Fog::WinAbstractEnumContext]
+// [Fog::WinHDC]
 // ============================================================================
 
-template<typename T>
-struct WinAbstractEnumContext
+struct FOG_NO_EXPORT WinHDC
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE WinAbstractEnumContext()
+  FOG_INLINE WinHDC()
   {
-    hdc = CreateCompatibleDC(NULL);
-    if (hdc != NULL) SetGraphicsMode(hdc, GM_ADVANCED);
+    hdc = NULL;
   }
 
-  FOG_INLINE ~WinAbstractEnumContext()
+  FOG_INLINE ~WinHDC()
   {
-    if (hdc != NULL) DeleteDC(hdc);
+    if (hdc != NULL)
+      ::DeleteDC(hdc);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool isValid() const
+  FOG_INLINE bool isInitialized() const
   {
     return hdc != NULL;
   }
 
-  FOG_INLINE int enumFontFamilies(LOGFONTW* lf)
+  FOG_INLINE bool init()
   {
-    return ::EnumFontFamiliesExW(hdc, lf, (FONTENUMPROCW)_OnEnumProc, (LPARAM)this, 0);
-  }
+    FOG_ASSERT(!isInitialized());
+    hdc = ::CreateCompatibleDC(NULL);
 
-  // --------------------------------------------------------------------------
-  // [Statics]
-  // --------------------------------------------------------------------------
+    if (hdc == NULL)
+      return false;
 
-  static int CALLBACK _OnEnumProc(const LOGFONTW* plf, const TEXTMETRICW* ptm, DWORD fontType, LPARAM lParam)
-  {
-    T* ctx = (T*)lParam;
-    return ctx->onEntry(plf, ptm, fontType);
+    ::SetGraphicsMode(hdc, GM_ADVANCED);
+    return true;
   }
 
   // --------------------------------------------------------------------------
@@ -70,159 +79,8 @@ struct WinAbstractEnumContext
   HDC hdc;
 
 private:
-  _FOG_NO_COPY(WinAbstractEnumContext)
+  _FOG_NO_COPY(WinHDC)
 };
-
-// ============================================================================
-// [Fog::WinFontEnumContext]
-// ============================================================================
-
-struct FOG_NO_EXPORT WinFontEnumContext : public WinAbstractEnumContext<WinFontEnumContext>
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE WinFontEnumContext(List<StringW>& fonts) :
-    fonts(fonts),
-    err(ERR_OK)
-  {
-  }
-
-  FOG_INLINE ~WinFontEnumContext()
-  {
-  }
-
-  // --------------------------------------------------------------------------
-  // [Events]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE int onEntry(const LOGFONTW* plf, const TEXTMETRICW* ptm, DWORD fontType)
-  {
-    const WCHAR* faceName = plf->lfFaceName;
-
-    // Accept only true-type fonts.
-    if ((fontType & TRUETYPE_FONTTYPE) == 0)
-      return 1;
-
-    // Reject '@'.
-    if (faceName[0] == L'@')
-      return 1;
-
-    // Windows sends more fonts that are needed, but equal fonts
-    // are usually sent together, so we will simply copy this
-    // font to buffer and compare it with previous. If this will
-    // match - reject it immediately to save CPU cycles.
-    curFaceName.setWChar(faceName);
-
-    if (curFaceName != lastFaceName)
-    {
-      if (fonts.contains(curFaceName))
-      {
-        swap(lastFaceName, curFaceName);
-      }
-      else
-      {
-        lastFaceName = curFaceName;
-        lastFaceName.squeeze();
-        fonts.append(lastFaceName);
-      }
-    }
-
-    // Return 1 to continue listing.
-    return 1;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  err_t err;
-
-  List<StringW>& fonts;
-  StringW curFaceName;
-  StringW lastFaceName;
-
-private:
-  _FOG_NO_COPY(WinFontEnumContext)
-};
-
-// ============================================================================
-// [Fog::WinFontInfoContext]
-// ============================================================================
-
-struct FOG_NO_EXPORT WinFontInfoContext : public WinAbstractEnumContext<WinFontInfoContext>
-{
-  FOG_INLINE WinFontInfoContext() :
-    acceptable(0),
-    designEmSquare(0)
-  {
-  }
-
-  // --------------------------------------------------------------------------
-  // [Events]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE int onEntry(const LOGFONTW* plf, const TEXTMETRICW* ptm, DWORD fontType)
-  {
-    // Accept only true-type fonts.
-    if ((fontType & TRUETYPE_FONTTYPE) == 0) return 1;
-
-    const NEWTEXTMETRICEXW* pntm = reinterpret_cast<const NEWTEXTMETRICEXW*>(ptm);
-    acceptable = true;
-    designEmSquare = pntm->ntmTm.ntmCellHeight;
-    MemOps::copy(&logFont, plf, sizeof(LOGFONTW));
-
-    return 0;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  uint32_t acceptable;
-  uint32_t designEmSquare;
-  LOGFONTW logFont;
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================================
 // [Fog::WinFace]
@@ -230,17 +88,78 @@ struct FOG_NO_EXPORT WinFontInfoContext : public WinAbstractEnumContext<WinFontI
 
 static FaceVTable WinFace_vtable;
 
+static void FOG_CDECL WinFace_freeTable(OT_Table* table)
+{
+  MemMgr::free(table->getData());
+}
+
 static void FOG_CDECL WinFace_create(WinFace* self)
 {
   fog_new_p(self) WinFace(&WinFace_vtable, StringW::getEmptyInstance());
+
+  self->ot->_freeTable = WinFace_freeTable;
 }
 
-static void FOG_CDECL WinFace_destroy(Face* self)
+static void FOG_CDECL WinFace_destroy(Face* self_)
 {
-  reinterpret_cast<WinFace*>(self)->~WinFace();
+  WinFace* self = static_cast<WinFace*>(self_);
+
+  self->~WinFace();
+  MemMgr::free(self);
 }
 
-static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunF(const Face* self,
+static OT_Table* FOG_CDECL WinFace_getTable(const Face* self_, uint32_t tag)
+{
+  const WinFace* self = static_cast<const WinFace*>(self_);
+
+  OT_Table* table = self->ot->getTable(tag);
+  if (table != NULL)
+    return table;
+
+  WinHDC scopedDC;
+  if (!scopedDC.init())
+    return NULL;
+
+  HGDIOBJ oldFont = ::SelectObject(scopedDC.hdc, (HGDIOBJ)self->hFont);
+  if (oldFont == (HGDIOBJ)GDI_ERROR)
+    return NULL;
+
+  uint8_t* mem;
+  DWORD length = ::GetFontData(scopedDC.hdc, MemOps::bswap32be(tag), 0, NULL, 0);
+
+  if (length == GDI_ERROR)
+    goto _End;
+
+  mem = static_cast<uint8_t*>(MemMgr::alloc(length));
+  if (FOG_IS_NULL(mem))
+    goto _End;
+
+  if (::GetFontData(scopedDC.hdc, MemOps::bswap32be(tag), 0, mem, length) != length)
+  {
+    MemMgr::free(mem);
+    goto _End;
+  }
+
+  table = const_cast<WinFace*>(self)->ot->addTable(tag, mem, length);
+  if (FOG_IS_NULL(table))
+  {
+    MemMgr::free(mem);
+    goto _End;
+  }
+
+_End:
+  ::SelectObject(scopedDC.hdc, oldFont);
+  return table;
+}
+
+static void FOG_CDECL WinFace_releaseTable(const Face* self_, OT_Table* table)
+{
+  // WinFace caches all tables, there is nothing to do.
+  FOG_UNUSED(self_);
+  FOG_UNUSED(table);
+}
+
+static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunF(const Face* self_,
   PathF* dst, uint32_t cntOp,
   const uint32_t* glyphList, size_t itemAdvance,
   const PointF* positionList, size_t positionAdvance,
@@ -250,7 +169,7 @@ static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunF(const Face* self,
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunD(const Face* self,
+static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunD(const Face* self_,
   PathD* dst, uint32_t cntOp,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
@@ -279,35 +198,46 @@ static void WinFontEngine_destroy(FontEngine* self)
   FOG_UNUSED(self);
 }
 
-static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self,
+static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   Face** dst, const StringW* family, const FaceFeatures* features)
 {
-  FOG_UNUSED(self);
-  FOG_UNUSED(dst);
-  FOG_UNUSED(family);
-  FOG_UNUSED(features);
+  const WinFontEngine* self = static_cast<const WinFontEngine*>(self_);
+  AutoLock locked(self->lock());
 
-  return ERR_RT_INVALID_STATE;
+  Face* face = self->cache->getExactFace(*family, *features);
+  if (face != NULL)
+  {
+    *dst = face;
+    return ERR_OK;
+  }
+
+  // TODO
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL WinFontEngine_getAvailableFaces(const FontEngine* self,
+static err_t FOG_CDECL WinFontEngine_getAvailableFaces(const FontEngine* self_,
   FaceCollection* dst)
 {
-  FOG_UNUSED(self);
+  const WinFontEngine* self = static_cast<const WinFontEngine*>(self_);
+  AutoLock locked(self->lock());
 
-  dst->clear();
-  return ERR_OK;
+  return dst->setCollection(self->faceCollection());
 }
 
-static err_t FOG_CDECL WinFontEngine_getDefaultFace(const FontEngine* self,
+static err_t FOG_CDECL WinFontEngine_getDefaultFace(const FontEngine* self_,
   FaceInfo* dst)
 {
-  
-  return ERR_OK;
+  const WinFontEngine* self = static_cast<const WinFontEngine*>(self_);
+  AutoLock locked(self->lock());
+
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 static err_t WinFontEngine_getLogFontW(LOGFONTW* lfDst, const StringW* family)
 {
+  // TODO:
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================
@@ -321,6 +251,8 @@ FOG_NO_EXPORT void Font_init_win(void)
   // --------------------------------------------------------------------------
 
   WinFace_vtable.destroy = WinFace_destroy;
+  WinFace_vtable.getTable = WinFace_getTable;
+  WinFace_vtable.releaseTable = WinFace_releaseTable;
   WinFace_vtable.getOutlineFromGlyphRunF = WinFace_getOutlineFromGlyphRunF;
   WinFace_vtable.getOutlineFromGlyphRunD = WinFace_getOutlineFromGlyphRunD;
 

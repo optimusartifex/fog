@@ -425,6 +425,13 @@ static void FOG_CDECL FaceCollection_dFree(FaceCollectionData* d)
 }
 
 // ============================================================================
+// [Fog::Font - Global]
+// ============================================================================
+
+static Static<FontData> Font_dNull;
+static Static<Font> Font_oNull;
+
+// ============================================================================
 // [Fog::Font - Helpers]
 // ============================================================================
 
@@ -995,8 +1002,8 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float size
   {
     Face* face;
     FaceFeatures faceFeatures(features->getWeight(), features->getStretch(), features->getStyle() == FONT_STYLE_ITALIC);
-    err_t err = FontEngine::getGlobal()->queryFace(&face, *family, faceFeatures);
 
+    err_t err = FontEngine::getGlobal()->queryFace(&face, *family, faceFeatures);
     if (FOG_IS_ERROR(err))
       return err;
 
@@ -1005,8 +1012,8 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float size
       face->deref();
   }
 
-  
-  Font_initValues(d);
+  d->features = *features;  
+  d->matrix = *matrix;
   Font_dScaleMetrics(d, size);
   return ERR_OK;
 }
@@ -1130,6 +1137,87 @@ static void Font_dFree(FontData* d)
 }
 
 // ============================================================================
+// [Fog::NullFace]
+// ============================================================================
+
+static Static<Face> NullFace_singleton;
+static FaceVTable NullFace_vtable;
+
+static void FOG_CDECL NullFace_create(Face* self)
+{
+  fog_new_p(self) Face(&NullFace_vtable, StringW::getEmptyInstance());
+}
+
+static void FOG_CDECL NullFace_destroy(Face* self)
+{
+  self->~Face();
+}
+
+static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(const Face* self,
+  PathF* dst, uint32_t cntOp,
+  const uint32_t* glyphList, size_t itemAdvance,
+  const PointF* positionList, size_t positionAdvance,
+  size_t length)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
+static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunD(const Face* self,
+  PathD* dst, uint32_t cntOp,
+  const uint32_t* glyphList, size_t glyphAdvance,
+  const PointF* positionList, size_t positionAdvance,
+  size_t length)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
+// ============================================================================
+// [Fog::NullFontEngine]
+// ============================================================================
+
+static Static<FontEngine> NullFontEngine_singleton;
+static FontEngineVTable NullFontEngine_vtable;
+
+static void NullFontEngine_create(FontEngine* self)
+{
+  fog_new_p(self) FontEngine(&NullFontEngine_vtable);
+  self->defaultFont->_d = Font_oNull->_d;
+}
+
+static void NullFontEngine_destroy(FontEngine* self)
+{
+  self->~FontEngine();
+  FOG_UNUSED(self);
+}
+
+static err_t FOG_CDECL NullFontEngine_queryFace(const FontEngine* self,
+  Face** dst, const StringW* family, const FaceFeatures* features)
+{
+  FOG_UNUSED(self);
+  FOG_UNUSED(dst);
+  FOG_UNUSED(family);
+  FOG_UNUSED(features);
+
+  return ERR_RT_INVALID_STATE;
+}
+
+static err_t FOG_CDECL NullFontEngine_getAvailableFaces(const FontEngine* self,
+  FaceCollection* dst)
+{
+  FOG_UNUSED(self);
+
+  dst->clear();
+  return ERR_OK;
+}
+
+static err_t FOG_CDECL NullFontEngine_getDefaultFace(const FontEngine* self,
+  FaceInfo* dst)
+{
+  
+  return ERR_OK;
+}
+
+// ============================================================================
 // [Init / Fini]
 // ============================================================================
 
@@ -1221,6 +1309,36 @@ FOG_NO_EXPORT void Font_init(void)
 
   fog_api.font_dCreate = Font_dCreate;
   fog_api.font_dFree = Font_dFree;
+
+  {
+    FontData* d = &Font_dNull;
+
+    d->reference.init(1);
+    d->vType = VAR_TYPE_FONT;
+    d->flags = NO_FLAGS;
+    d->face = &NullFace_singleton;
+    d->metrics.reset();
+    d->features.reset();
+    d->matrix.reset();
+    d->scale = 0.0f;
+
+    Font_oNull.initCustom1(d);
+  }
+
+  // --------------------------------------------------------------------------
+  // [NullFace / NullFontEngine]
+  // --------------------------------------------------------------------------
+
+  NullFace_vtable.destroy = NullFace_destroy;
+  NullFace_vtable.getOutlineFromGlyphRunF = NullFace_getOutlineFromGlyphRunF;
+  NullFace_vtable.getOutlineFromGlyphRunD = NullFace_getOutlineFromGlyphRunD;
+  NullFace_create(&NullFace_singleton);
+
+  NullFontEngine_vtable.destroy = NullFontEngine_destroy;
+  NullFontEngine_vtable.getAvailableFaces = NullFontEngine_getAvailableFaces;
+  NullFontEngine_vtable.getDefaultFace = NullFontEngine_getDefaultFace;
+  NullFontEngine_vtable.queryFace = NullFontEngine_queryFace;
+  NullFontEngine_create(&NullFontEngine_singleton);
 }
 
 FOG_NO_EXPORT void Font_fini(void)

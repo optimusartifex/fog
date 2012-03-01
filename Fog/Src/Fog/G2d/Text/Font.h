@@ -1583,9 +1583,9 @@ struct FOG_NO_EXPORT FontEngine
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FontEngine()
+  FOG_INLINE FontEngine(FontEngineVTable* vtable_)
   {
-    vtable = NULL;
+    vtable = vtable_;
     faceCollection.init();
 
     // Initialized to NULL, FontEngine have to select the default font-face

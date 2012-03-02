@@ -684,6 +684,89 @@ struct FOG_NO_EXPORT FaceFeatures
 };
 
 // ============================================================================
+// [Fog::FaceDesignMetrics]
+// ============================================================================
+
+struct FOG_NO_EXPORT FaceDesignMetrics
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FaceDesignMetrics()
+  {
+    reset();
+  }
+
+  explicit FOG_INLINE FaceDesignMetrics(_Uninitialized) {}
+
+  FOG_INLINE FaceDesignMetrics(uint32_t emSize, uint32_t emHeight)
+  {
+    reset();
+
+    _emSize = static_cast<uint16_t>(emSize);
+    _emHeight = static_cast<uint16_t>(emHeight);
+  }
+
+  FOG_INLINE FaceDesignMetrics(const FaceDesignMetrics& other)
+  {
+    MemOps::copy_t<FaceDesignMetrics>(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE uint32_t getEmSize() const { return _emSize; }
+  FOG_INLINE void setEmSize(uint32_t emSize) { _emSize = emSize; }
+
+  FOG_INLINE uint32_t getEmHeight() const { return _emHeight; }
+  FOG_INLINE void setEmHeight(uint32_t emHeight) { _emHeight = emHeight; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero_t<FaceDesignMetrics>(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Eq]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE bool eq(const FaceDesignMetrics& other) const
+  {
+    return MemOps::eq_t<FaceDesignMetrics>(this, &other);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE FaceDesignMetrics& operator=(const FaceDesignMetrics& other)
+  {
+    MemOps::copy_t<FaceDesignMetrics>(this, &other);
+    return *this;
+  }
+
+  FOG_INLINE bool operator==(const FaceDesignMetrics& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FaceDesignMetrics& other) const { return !eq(other); }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Design em-size.
+  uint16_t _emSize;
+  //! @brief Design em-height.
+  uint16_t _emHeight;
+  //! @brief Reserved for future use.
+  uint32_t _reserved_1;
+};
+
+// ============================================================================
 // [Fog::FaceInfoData]
 // ============================================================================
 
@@ -731,6 +814,9 @@ struct FOG_NO_EXPORT FaceInfoData
   //! the native API. In case the this font is a custom font, which needs to be
   //! loaded from disk, fileName is always filled.
   Static<StringW> fileName;
+
+  //! @brief Face design metrics.
+  FaceDesignMetrics designMetrics;
 };
 
 // ============================================================================
@@ -794,6 +880,9 @@ struct FOG_NO_EXPORT FaceInfo
 
   FOG_INLINE const StringW& getFileName() const { return _d->fileName; }
   FOG_INLINE err_t setFileName(const StringW& fileName) { return fog_api.faceinfo_setFileName(this, &fileName); }
+
+  FOG_INLINE const FaceDesignMetrics& getDesignMetrics() const { return _d->designMetrics; }
+  FOG_INLINE err_t setDesignMetrics(const FaceDesignMetrics& metrics) { return fog_api.faceinfo_setDesignMetrics(this, &metrics); }
 
   // --------------------------------------------------------------------------
   // [Reset]

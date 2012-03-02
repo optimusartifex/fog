@@ -2518,6 +2518,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, faceinfo_setFeatures)(FaceInfo* self, const FaceFeatures* features);
   FOG_CAPI_METHOD(err_t, faceinfo_setFamilyName)(FaceInfo* self, const StringW* familyName);
   FOG_CAPI_METHOD(err_t, faceinfo_setFileName)(FaceInfo* self, const StringW* fileName);
+  FOG_CAPI_METHOD(err_t, faceinfo_setDesignMetrics)(FaceInfo* self, const FaceDesignMetrics* metrics);
 
   FOG_CAPI_METHOD(err_t, faceinfo_copy)(FaceInfo* self, const FaceInfo* other);
   FOG_CAPI_STATIC(bool, faceinfo_eq)(const FaceInfo* a, const FaceInfo* b);

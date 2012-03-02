@@ -93,6 +93,15 @@ static err_t FOG_CDECL FaceInfo_setFileName(FaceInfo* self, const StringW* fileN
   return d->fileName->set(*fileName);
 }
 
+static err_t FOG_CDECL FaceInfo_setDesignMetrics(FaceInfo* self, const FaceDesignMetrics* metrics)
+{
+  FOG_RETURN_ON_ERROR(self->detach());
+  FaceInfoData* d = self->_d;
+
+  d->designMetrics = *metrics;
+  return ERR_OK;
+}
+
 // ============================================================================
 // [Fog::FaceInfo - Reset]
 // ============================================================================
@@ -175,6 +184,7 @@ static FaceInfoData* FOG_CDECL FaceInfo_dCreate(const StringW* familyName, const
   d->features = FaceFeatures(FONT_WEIGHT_NORMAL, FONT_STRETCH_NORMAL, false);
   d->familyName.initCustom1(*familyName);
   d->fileName.initCustom1(*fileName);
+  d->designMetrics.reset();
 
   return d;
 }
@@ -1572,6 +1582,7 @@ FOG_NO_EXPORT void Font_init(void)
   fog_api.faceinfo_setFeatures = FaceInfo_setFeatures;
   fog_api.faceinfo_setFamilyName = FaceInfo_setFamilyName;
   fog_api.faceinfo_setFileName = FaceInfo_setFileName;
+  fog_api.faceinfo_setDesignMetrics = FaceInfo_setDesignMetrics;
   fog_api.faceinfo_reset = FaceInfo_reset;
   fog_api.faceinfo_copy = FaceInfo_copy;
   fog_api.faceinfo_eq = FaceInfo_eq;

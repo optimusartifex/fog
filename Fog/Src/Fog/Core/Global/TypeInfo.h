@@ -511,6 +511,7 @@ _FOG_TYPE_DECLARE(Fog::RectangularGradientD    , C(MOVABLE)               | F(NO
 // [Fog/G2d/Text]
 _FOG_TYPE_DECLARE(Fog::FaceCache               , C(MOVABLE)               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FaceCollection          , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::FaceDesignMetrics       , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FaceFeatures            , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::FaceInfo                , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::Font                    , C(MOVABLE) | F(IMPLICIT) | F(NO_CMP ) | F(OWN_EQ))

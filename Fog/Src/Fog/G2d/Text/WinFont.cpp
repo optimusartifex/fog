@@ -704,8 +704,11 @@ static int CALLBACK WinFontEngine_updateAvailableFaces_onEnumProc(
     {
       // Font is not in collection, we need to add it there.
       FaceInfo item;
+
       item.setFamilyName(StringW(faceName));
       item.setFeatures(faceFeatures);
+      item.setDesignMetrics(
+        FaceDesignMetrics(pntm->ntmTm.ntmSizeEM, pntm->ntmTm.ntmCellHeight));
 
       if (collection->addItem(item, &index) == ERR_OK)
       {
@@ -769,7 +772,7 @@ static err_t FOG_CDECL WinFontEngine_updateAvailableFaces(WinFontEngine* self)
     WinFontEngine_updateAvailableFaces_onEnumProc, (LPARAM)&data, 0); 
 
   // Uncomment if something goes wrong.
-  // WinFontEngine_debugAvailableFaces(self);
+  WinFontEngine_debugAvailableFaces(self);
 
   return ERR_OK;
 }

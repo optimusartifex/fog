@@ -200,8 +200,8 @@ static Static<FaceCollection> FaceCollection_oNull;
 
 static err_t FOG_CDECL FaceCollection_dUpdateHash(FaceCollectionData* d)
 {
-  List<FaceInfo>& list = d->fontList();
-  Hash<StringW, size_t>& hash = d->fontHash();
+  List<FaceInfo>& list = d->faceList();
+  Hash<StringW, size_t>& hash = d->faceHash();
 
   hash.clear();
 
@@ -260,8 +260,8 @@ static err_t FOG_CDECL FaceCollection_detach(FaceCollection* self)
   if (FOG_IS_NULL(newd))
     return ERR_RT_OUT_OF_MEMORY;
 
-  newd->fontList() = d->fontList();
-  newd->fontHash() = d->fontHash();
+  newd->faceList() = d->faceList();
+  newd->faceHash() = d->faceHash();
 
   atomicPtrXchg(&self->_d, newd)->release();
   return ERR_OK;
@@ -273,17 +273,191 @@ static err_t FOG_CDECL FaceCollection_detach(FaceCollection* self)
 
 static err_t FOG_CDECL FaceCollection_setList(FaceCollection* self, const List<FaceInfo>* list)
 {
-  if (self->_d->fontList->_d == list->_d)
+  if (self->_d->faceList->_d == list->_d)
     return ERR_OK;
 
   FOG_RETURN_ON_ERROR(self->detach());
   FaceCollectionData* d = self->_d;
 
-  d->fontList() = *list;
+  d->faceList() = *list;
   return ERR_OK;
 }
 
-static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceInfo* item)
+// ============================================================================
+// [Fog::FaceCollection - GetFamilyRange]
+// ============================================================================
+
+static bool FaceCollection_getFamilyRangeStringW(const FaceCollection* self,
+  const StringW* family, Range* dst)
+{
+  const List<FaceInfo>& faceList = self->_d->faceList();
+
+  const FaceInfo* base = faceList.getData();
+  size_t length = faceList.getLength();
+
+  for (size_t lim = length; lim != 0; lim >>= 1)
+  {
+    const FaceInfo* cur = base + (lim >> 1);
+    int cmp = StringW::compare(&cur->_d->familyName, family);
+
+    // Right.
+    if (cmp > 0)
+    {
+      base = cur + 1;
+      lim--;
+      continue;
+    }
+
+    // Left.
+    if (cmp < 0)
+      continue;
+
+    // Expand range.
+    {
+      const FaceInfo* stop = faceList.getData();
+      const FaceInfo* p = cur;
+
+      // Left.
+      for (;;)
+      {
+        if (p == stop)
+          break;
+
+        if (p[-1].getFamilyName() != *family)
+          break;
+
+        p--;
+      }
+      dst->setStart((size_t)(p - stop));
+
+      // Right.
+      stop += length;
+      p = cur;
+
+      while (++p != stop)
+      {
+        if (p->getFamilyName() != *family)
+          break;
+      }
+      dst->setEnd((size_t)(p - faceList.getData()));
+    }
+    return true;
+  }
+
+  dst->setRange(INVALID_INDEX, INVALID_INDEX);
+  return false;
+}
+
+static bool FaceCollection_getFamilyRangeStubW(const FaceCollection* self,
+  const StubW* family_, Range* dst)
+{
+  const List<FaceInfo>& faceList = self->_d->faceList();
+  StubW family(family_->getData(), family_->getComputedLength());
+
+  const FaceInfo* base = faceList.getData();
+  size_t length = faceList.getLength();
+
+  for (size_t lim = length; lim != 0; lim >>= 1)
+  {
+    const FaceInfo* cur = base + (lim >> 1);
+    int cmp = cur->_d->familyName->compare(family);
+
+    // Right.
+    if (cmp > 0)
+    {
+      base = cur + 1;
+      lim--;
+      continue;
+    }
+
+    // Left.
+    if (cmp < 0)
+      continue;
+
+    // Expand range.
+    {
+      const FaceInfo* stop = faceList.getData();
+      const FaceInfo* p = cur;
+
+      // Left.
+      for (;;)
+      {
+        if (p == stop)
+          break;
+
+        if (p[-1].getFamilyName() != family)
+          break;
+
+        p--;
+      }
+      dst->setStart((size_t)(p - stop));
+
+      // Right.
+      stop += length;
+      p = cur;
+
+      while (++p != stop)
+      {
+        if (p->getFamilyName() != family)
+          break;
+      }
+      dst->setEnd((size_t)(p - faceList.getData()));
+    }
+    return true;
+  }
+
+  dst->setRange(INVALID_INDEX, INVALID_INDEX);
+  return false;
+}
+
+// ============================================================================
+// [Fog::FaceCollection - IndexOf]
+// ============================================================================
+
+static FOG_INLINE size_t FaceCollection_indexOfFeature(const FaceCollection* self, const Range* range, const FaceFeatures* features)
+{
+  const List<FaceInfo>& faceList = self->_d->faceList();
+
+  const FaceInfo* pBase = faceList.getData();
+  const FaceInfo* pCur = pBase;
+  const FaceInfo* pEnd = pBase;
+
+  pCur += range->getStart();
+  pEnd += range->getEnd();
+
+  uint32_t featuresPacked = features->_packed;
+
+  while (pCur != pEnd)
+  {
+    if (pCur->_d->features._packed == featuresPacked)
+      return (size_t)(pCur - pBase);
+    pCur++;
+  }
+
+  return INVALID_INDEX;
+}
+
+static size_t FOG_CDECL FaceCollection_indexOfStringW(const FaceCollection* self, const StringW* family, const FaceFeatures* features)
+{
+  Range range(UNINITIALIZED);
+  if (!fog_api.facecollection_getFamilyRangeStringW(self, family, &range))
+    return INVALID_INDEX;
+  return FaceCollection_indexOfFeature(self, &range, features);
+}
+
+static size_t FOG_CDECL FaceCollection_indexOfStubW(const FaceCollection* self, const StubW* family, const FaceFeatures* features)
+{
+  Range range(UNINITIALIZED);
+  if (!fog_api.facecollection_getFamilyRangeStubW(self, family, &range))
+    return INVALID_INDEX;
+  return FaceCollection_indexOfFeature(self, &range, features);
+}
+
+// ============================================================================
+// [Fog::FaceCollection - Manipulation]
+// ============================================================================
+
+static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceInfo* item, size_t* dstIndex)
 {
   FOG_RETURN_ON_ERROR(self->detach());
 
@@ -291,21 +465,30 @@ static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceIn
   size_t index;
 
   const StringW& newFamily = item->getFamilyName();
+  FaceFeatures newFeatures = item->getFeatures();
 
   {
-    ListIterator<FaceInfo> it(d->fontList());
+    ListIterator<FaceInfo> it(d->faceList());
     while (it.isValid())
     {
-      const FaceInfo& item = it.getItem();
-      const StringW& itemFamily = item.getFamilyName();
+      const FaceInfo& fi = it.getItem();
+      const StringW& fiFamily = fi.getFamilyName();
 
-      int cmp = itemFamily.compare(itemFamily);
+      int cmp = newFamily.compare(fiFamily);
       if (cmp < 0)
         break;
 
       if (cmp == 0)
       {
-        return ERR_RT_OBJECT_ALREADY_EXISTS;
+        if (newFeatures._packed < fi.getFeatures()._packed)
+          break;
+
+        if (newFeatures._packed == fi.getFeatures()._packed)
+        {
+          if (dstIndex != NULL)
+            *dstIndex = it.getIndex();
+          return ERR_RT_OBJECT_ALREADY_EXISTS;
+        }
       }
 
       it.next();
@@ -314,13 +497,13 @@ static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceIn
     index = it.getIndex();
   }
 
-  err_t err = d->fontList().insert(index, *item);
+  err_t err = d->faceList().insert(index, *item);
   if (FOG_IS_ERROR(err))
     return err;
 
-  if (d->fontHash().contains(newFamily))
+  if (d->faceHash().contains(newFamily))
   {
-    size_t* p = d->fontHash().usePtr(newFamily, NULL);
+    size_t* p = d->faceHash().usePtr(newFamily, NULL);
     if (FOG_IS_NULL(p))
       err = ERR_RT_OUT_OF_MEMORY;
     else
@@ -328,11 +511,14 @@ static err_t FOG_CDECL FaceCollection_addItem(FaceCollection* self, const FaceIn
   }
   else
   {
-    err = d->fontHash().put(newFamily, 1, true);
+    err = d->faceHash().put(newFamily, 1, true);
   }
 
   if (FOG_IS_ERROR(err))
-    d->fontList().removeAt(index);
+    d->faceList().removeAt(index);
+  else if (dstIndex != NULL)
+    *dstIndex = index;
+
   return err;
 }
 
@@ -348,8 +534,8 @@ static void FOG_CDECL FaceCollection_clear(FaceCollection* self)
   
   if (d->reference.get() == 1)
   {
-    d->fontList().clear();
-    d->fontHash().clear();
+    d->faceList().clear();
+    d->faceHash().clear();
   }
   else
   {
@@ -390,7 +576,7 @@ static bool FOG_CDECL FaceCollection_eq(const FaceCollection* a, const FaceColle
   if (a_d == b_d)
     return true;
 
-  return (a_d->fontList() == b_d->fontList());
+  return (a_d->faceList() == b_d->faceList());
 }
 
 // ============================================================================
@@ -407,16 +593,16 @@ static FaceCollectionData* FOG_CDECL FaceCollection_dCreate(void)
   d->reference.init(1);
   d->vType = VAR_TYPE_FACE_COLLECTION | VAR_FLAG_NONE;
   d->flags = NO_FLAGS;
-  d->fontList.init();
-  d->fontHash.init();
+  d->faceList.init();
+  d->faceHash.init();
 
   return d;
 }
 
 static void FOG_CDECL FaceCollection_dFree(FaceCollectionData* d)
 {
-  d->fontList.destroy();
-  d->fontHash.destroy();
+  d->faceList.destroy();
+  d->faceHash.destroy();
   MemMgr::free(d);
 }
 
@@ -452,7 +638,7 @@ static void FOG_CDECL FaceCache_reset(FaceCache* self)
 
     while (faceIterator.isValid())
     {
-      faceIterator.getItem()->deref();
+      faceIterator.getItem()->release();
       faceIterator.next();
     }
 
@@ -544,7 +730,7 @@ static err_t FOG_CDECL FaceCache_remove(FaceCache* self, const StringW* family, 
     if (list->getLength() == 0)
       data.remove(*family);
 
-    face->deref();
+    face->release();
     return ERR_OK;
   }
   else
@@ -1138,7 +1324,7 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float size
 
     face = atomicPtrXchg(&d->face, face);
     if (face != NULL)
-      face->deref();
+      face->release();
   }
 
   d->features = *features;  
@@ -1161,7 +1347,7 @@ static err_t FOG_CDECL Font_init(Font* self, Face* face, float size,
 
   face = atomicPtrXchg(&d->face, face);
   if (face != NULL)
-    face->deref();
+    face->release();
 
   d->features = *features;
   d->matrix = *matrix;
@@ -1185,7 +1371,7 @@ static err_t Font_getOutlineFromGlyphRunF(const Font* self,
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
 
-  return face->getOutlineFromGlyphRun(*dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
+  return face->vtable->getOutlineFromGlyphRunF(self->_d, dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 static err_t Font_getOutlineFromGlyphRunD(const Font* self,
@@ -1199,7 +1385,7 @@ static err_t Font_getOutlineFromGlyphRunD(const Font* self,
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
 
-  return face->getOutlineFromGlyphRun(*dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
+  return face->vtable->getOutlineFromGlyphRunD(self->_d, dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 // ============================================================================
@@ -1259,7 +1445,7 @@ static FontData* FOG_CDECL Font_dCreate(void)
 static void Font_dFree(FontData* d)
 {
   if (d->face)
-    d->face->deref();
+    d->face->release();
 
   if ((d->vType & VAR_FLAG_STATIC) == 0)
     MemMgr::free(d);
@@ -1292,7 +1478,7 @@ static void FOG_CDECL NullFace_releaseTable(const Face* self, OT_Table* table)
   FOG_ASSERT_NOT_REACHED();
 }
 
-static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(const Face* self,
+static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(FontData* d,
   PathF* dst, uint32_t cntOp,
   const uint32_t* glyphList, size_t itemAdvance,
   const PointF* positionList, size_t positionAdvance,
@@ -1301,7 +1487,7 @@ static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(const Face* self,
   return ERR_RT_INVALID_STATE;
 }
 
-static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunD(const Face* self,
+static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunD(FontData* d,
   PathD* dst, uint32_t cntOp,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
@@ -1361,15 +1547,15 @@ static err_t FOG_CDECL NullFontEngine_getDefaultFace(const FontEngine* self,
 // ============================================================================
 
 #if defined(FOG_FONT_WINDOWS)
-FOG_NO_EXPORT void init_font_win(void);
+FOG_NO_EXPORT void Font_init_win(void);
 #endif // FOG_FONT_WINDOWS
 
 #if defined(FOG_FONT_MAC)
-FOG_NO_EXPORT void init_font_mac(void);
+FOG_NO_EXPORT void Font_init_mac(void);
 #endif // FOG_FONT_MAC
 
 #if defined(FOG_FONT_FREETYPE)
-FOG_NO_EXPORT void init_font_ft(void);
+FOG_NO_EXPORT void Font_init_freetype(void);
 #endif // FOG_FONT_FREETYPE
 
 FOG_NO_EXPORT void Font_init(void)
@@ -1417,6 +1603,11 @@ FOG_NO_EXPORT void Font_init(void)
 
   fog_api.facecollection_detach = FaceCollection_detach;
   fog_api.facecollection_setList = FaceCollection_setList;
+  fog_api.facecollection_getFamilyRangeStringW = FaceCollection_getFamilyRangeStringW;
+  fog_api.facecollection_getFamilyRangeStubW = FaceCollection_getFamilyRangeStubW;
+  fog_api.facecollection_indexOfStringW = FaceCollection_indexOfStringW;
+  fog_api.facecollection_indexOfStubW = FaceCollection_indexOfStubW;
+  fog_api.facecollection_addItem = FaceCollection_addItem;
   fog_api.facecollection_clear = FaceCollection_clear;
   fog_api.facecollection_reset = FaceCollection_reset;
   fog_api.facecollection_copy = FaceCollection_copy;
@@ -1430,8 +1621,8 @@ FOG_NO_EXPORT void Font_init(void)
 
     d->reference.init(1);
     d->vType = VAR_TYPE_FACE_COLLECTION | VAR_FLAG_NONE;
-    d->fontList->_d = fog_api.list_untyped_oEmpty->_d;
-    d->fontHash->_d = fog_api.hash_unknown_unknown_oEmpty->_d;
+    d->faceList->_d = fog_api.list_untyped_oEmpty->_d;
+    d->faceHash->_d = fog_api.hash_unknown_unknown_oEmpty->_d;
 
     fog_api.facecollection_oNull = FaceCollection_oNull.initCustom1(d);
   }
@@ -1506,25 +1697,33 @@ FOG_NO_EXPORT void Font_init(void)
   NullFontEngine_vtable.queryFace = NullFontEngine_queryFace;
   NullFontEngine_create(&NullFontEngine_oInstance);
 
+  fog_api.fontengine_oGlobal = &NullFontEngine_oInstance;
+
   // --------------------------------------------------------------------------
   // [Initialize Native FontEngine]
   // --------------------------------------------------------------------------
 
 #if defined(FOG_FONT_WINDOWS)
-  init_font_win();
+  Font_init_win();
 #endif // FOG_FONT_WINDOWS
 
 #if defined(FOG_FONT_MAC)
-  init_font_mac();
+  Font_init_mac();
 #endif // FOG_FONT_MAC
 
 #if defined(FOG_FONT_FREETYPE)
-  init_font_ft();
+  Font_init_freetype();
 #endif // FOG_FONT_FREETYPE
 }
 
 FOG_NO_EXPORT void Font_fini(void)
 {
+  FontEngine* engine = fog_api.fontengine_oGlobal;
+  if (engine != &NullFontEngine_oInstance)
+  {
+    engine->destroy();
+    fog_api.fontengine_oGlobal = &NullFontEngine_oInstance;
+  }
 }
 
 } // Fog namespace

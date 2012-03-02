@@ -89,34 +89,51 @@ struct FOG_NO_EXPORT OT_Face
   // [Tables]
   // --------------------------------------------------------------------------
 
+  FOG_INLINE bool hasTable(uint32_t tag) const
+  {
+    return getTable(tag) != NULL;
+  }
+
+  FOG_INLINE bool hasTable(OT_Table* param) const
+  {
+    OT_LinkedTable* tab = AtomicCore<OT_LinkedTable*>::get(&_tableData);
+    while (tab != NULL)
+    {
+      if (tab == param)
+        return true;
+    }
+    return false;
+  }
+
   FOG_INLINE OT_Table* getTable(uint32_t tag) const
   {
-    OT_LinkedTable* table = _tableData;
-
-    while (table != NULL)
+    OT_LinkedTable* tab = AtomicCore<OT_LinkedTable*>::get(&_tableData);
+    while (tab != NULL)
     {
-      if (table->_tag == tag)
-        return table;
+      if (tab->_tag == tag)
+        return tab;
     }
-
     return NULL;
   }
 
   FOG_INLINE OT_Table* addTable(uint32_t tag, uint8_t* data, uint32_t length)
   {
-    OT_LinkedTable* table = static_cast<OT_LinkedTable*>(_allocator.alloc(sizeof(OT_LinkedTable)));
+    OT_LinkedTable* tab = static_cast<OT_LinkedTable*>(_allocator.alloc(sizeof(OT_LinkedTable)));
 
-    if (FOG_IS_NULL(table))
+    if (FOG_IS_NULL(tab))
       return NULL;
 
-    table->_data = data;
-    table->_tag = tag;
-    table->_length = length;
+    tab->_data = data;
+    tab->_tag = tag;
+    tab->_length = length;
 
-    table->_next = _tableData;
-    _tableData = table;
+    OT_LinkedTable* old;
+    do {
+      old = AtomicCore<OT_LinkedTable*>::get(&_tableData);
+      tab->_next = old;
+    } while (AtomicCore<OT_LinkedTable*>::cmpXchg(&_tableData, old, tab));
 
-    return table;
+    return tab;
   }
 
   // --------------------------------------------------------------------------

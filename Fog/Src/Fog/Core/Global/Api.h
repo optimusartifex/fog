@@ -2515,7 +2515,7 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(err_t, faceinfo_detach)(FaceInfo* self);
   FOG_CAPI_METHOD(void, faceinfo_reset)(FaceInfo* self);
 
-  FOG_CAPI_METHOD(err_t, faceinfo_setFeatures)(FaceInfo* self, const FaceFeatures* defs);
+  FOG_CAPI_METHOD(err_t, faceinfo_setFeatures)(FaceInfo* self, const FaceFeatures* features);
   FOG_CAPI_METHOD(err_t, faceinfo_setFamilyName)(FaceInfo* self, const StringW* familyName);
   FOG_CAPI_METHOD(err_t, faceinfo_setFileName)(FaceInfo* self, const StringW* fileName);
 
@@ -2541,7 +2541,14 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_METHOD(void, facecollection_reset)(FaceCollection* self);
 
   FOG_CAPI_METHOD(err_t, facecollection_setList)(FaceCollection* self, const List<FaceInfo>* list);
-  FOG_CAPI_METHOD(err_t, facecollection_addItem)(FaceCollection* self, const FaceInfo* item);
+  
+  FOG_CAPI_METHOD(bool, facecollection_getFamilyRangeStringW)(const FaceCollection* self, const StringW* family, Range* range);
+  FOG_CAPI_METHOD(bool, facecollection_getFamilyRangeStubW)(const FaceCollection* self, const StubW* family, Range* range);
+
+  FOG_CAPI_METHOD(size_t, facecollection_indexOfStringW)(const FaceCollection* self, const StringW* family, const FaceFeatures* features);
+  FOG_CAPI_METHOD(size_t, facecollection_indexOfStubW)(const FaceCollection* self, const StubW* family, const FaceFeatures* features);
+
+  FOG_CAPI_METHOD(err_t, facecollection_addItem)(FaceCollection* self, const FaceInfo* item, size_t* dstIndex);
 
   FOG_CAPI_METHOD(err_t, facecollection_copy)(FaceCollection* self, const FaceCollection* other);
   FOG_CAPI_STATIC(bool, facecollection_eq)(const FaceCollection* a, const FaceCollection* b);

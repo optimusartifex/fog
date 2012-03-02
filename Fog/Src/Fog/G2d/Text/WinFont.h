@@ -29,11 +29,14 @@ struct FOG_NO_EXPORT WinFace : public Face
   FOG_INLINE WinFace(const FaceVTable* vtable_, const StringW& family_) :
     Face(vtable_, family_)
   {
+    hFace = NULL;
     ot.init();
   }
 
   FOG_INLINE ~WinFace()
   {
+    if (hFace != NULL)
+      ::DeleteObject((HGDIOBJ)hFace);
     ot.destroy();
   }
 
@@ -41,7 +44,7 @@ struct FOG_NO_EXPORT WinFace : public Face
   // [Members]
   // --------------------------------------------------------------------------
 
-  HFONT hFont;
+  HFONT hFace;
   Static<OT_Face> ot;
 
 private:
@@ -63,10 +66,12 @@ struct FOG_NO_EXPORT WinFontEngine : public FontEngine
   {
     lock.init();
     cache.init();
+    defaultFaceName.init();
   }
 
   FOG_INLINE ~WinFontEngine()
   {
+    defaultFaceName.destroy();
     cache.destroy();
     lock.destroy();
   }
@@ -77,6 +82,8 @@ struct FOG_NO_EXPORT WinFontEngine : public FontEngine
 
   mutable Static<Lock> lock;
   mutable Static<FaceCache> cache;
+
+  Static<StringW> defaultFaceName;
 
 private:
   _FOG_NO_COPY(WinFontEngine)

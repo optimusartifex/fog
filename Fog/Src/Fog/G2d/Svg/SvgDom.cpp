@@ -4025,16 +4025,17 @@ err_t SvgTextElement::onProcess(SvgContext* context) const
 
     if (node->isText())
     {
-      StringW text = node->getTextContent();
-      text.simplify();
-
+      // TODO: SVG - Text support disabled due to new font engine.
+      // StringW text = node->getTextContent();
+      // text.simplify();
+      //
       // TODO: SVG - Not optimal, just initial support for text rendering.
-      PathF path;
-      context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
-
-      err = context->onShape((SvgElement*)this, ShapeF(&path));
-      if (FOG_IS_ERROR(err))
-        break;
+      // PathF path;
+      // context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
+      // 
+      // err = context->onShape((SvgElement*)this, ShapeF(&path));
+      // if (FOG_IS_ERROR(err))
+      //   break;
     }
   }
 
@@ -4094,12 +4095,15 @@ err_t SvgTSpanElement::onProcess(SvgContext* context) const
   // TODO: SVG - Not optimal, just initial support for text rendering.
   PathF path;
 
-  err = context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
-  if (FOG_IS_ERROR(err)) return err;
+  // TODO: SVG - Text support disabled due to new font engine.
+  // err = context->_font.getTextOutline(path, CONTAINER_OP_APPEND, PointF(x, y), text);
+  // if (FOG_IS_ERROR(err)) return err;
+  //
+  // err = context->onShape((SvgElement*)this, ShapeF(&path));
+  // context->_textCursor.set(x, y);
+  // return err;
 
-  err = context->onShape((SvgElement*)this, ShapeF(&path));
-  context->_textCursor.set(x, y);
-  return err;
+  return ERR_RT_NOT_IMPLEMENTED;
 }
 
 // ============================================================================

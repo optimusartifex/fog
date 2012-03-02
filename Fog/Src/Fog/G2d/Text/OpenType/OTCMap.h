@@ -8,7 +8,7 @@
 #define _FOG_G2D_TEXT_OTCMAP_H
 
 // [Dependencies]
-#include <Fog/G2d/Text/OTCore.h>
+#include <Fog/G2d/Text/OpenType/OTCore.h>
 
 namespace Fog {
 

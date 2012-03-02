@@ -787,7 +787,7 @@ struct FOG_NO_EXPORT FaceInfo
   FOG_INLINE bool hasFileName() const { return _d->fileName().getLength() != 0; }
 
   FOG_INLINE FaceFeatures getFeatures() const { return _d->features; }
-  FOG_INLINE err_t setFeatures(const FaceFeatures& defs) { return fog_api.faceinfo_setFeatures(this, &defs); }
+  FOG_INLINE err_t setFeatures(const FaceFeatures& features) { return fog_api.faceinfo_setFeatures(this, &features); }
 
   FOG_INLINE const StringW& getFamilyName() const { return _d->familyName; }
   FOG_INLINE err_t setFamilyName(const StringW& familyName) { return fog_api.faceinfo_setFamilyName(this, &familyName); }
@@ -910,9 +910,9 @@ struct FOG_NO_EXPORT FaceCollectionData
   uint32_t flags;
 
   //! @brief List of collected FaceInfo instances.
-  Static< List<FaceInfo> > fontList;
-  //! @brief Hash, contains font families and their count in fontList.
-  Static< Hash<StringW, size_t> > fontHash;
+  Static< List<FaceInfo> > faceList;
+  //! @brief Hash, contains font families and their count in faceList.
+  Static< Hash<StringW, size_t> > faceHash;
 };
 
 // ============================================================================
@@ -976,7 +976,7 @@ struct FOG_NO_EXPORT FaceCollection
 
   FOG_INLINE const List<FaceInfo>& getList() const
   {
-    return _d->fontList;
+    return _d->faceList;
   }
 
   FOG_INLINE err_t setList(const List<FaceInfo>& list)
@@ -984,9 +984,37 @@ struct FOG_NO_EXPORT FaceCollection
     return fog_api.facecollection_setList(this, &list);
   }
 
-  FOG_INLINE err_t addItem(const FaceInfo& item)
+  FOG_INLINE Range getFamilyRange(const StringW& family) const
   {
-    return fog_api.facecollection_addItem(this, &item);
+    Range result(UNINITIALIZED);
+    fog_api.facecollection_getFamilyRangeStringW(this, &family, &result);
+    return result;
+  }
+
+  FOG_INLINE Range getFamilyRange(const StubW& family) const
+  {
+    Range result(UNINITIALIZED);
+    fog_api.facecollection_getFamilyRangeStubW(this, &family, &result);
+    return result;
+  }
+
+  FOG_INLINE size_t indexOf(const StringW& family, const FaceFeatures& features) const
+  {
+    return fog_api.facecollection_indexOfStringW(this, &family, &features);
+  }
+
+  FOG_INLINE size_t indexOf(const StubW& family, const FaceFeatures& features) const
+  {
+    return fog_api.facecollection_indexOfStubW(this, &family, &features);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Manipulation]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t addItem(const FaceInfo& item, size_t* dstIndex = NULL)
+  {
+    return fog_api.facecollection_addItem(this, &item, dstIndex);
   }
 
   // --------------------------------------------------------------------------
@@ -1062,13 +1090,13 @@ struct FOG_NO_EXPORT FaceVTable
   OT_Table* (FOG_CDECL* getTable)(const Face* self, uint32_t tag);
   void (FOG_CDECL* releaseTable)(const Face* self, OT_Table* table);
 
-  err_t (FOG_CDECL* getOutlineFromGlyphRunF)(const Face* self,
+  err_t (FOG_CDECL* getOutlineFromGlyphRunF)(FontData* d,
     PathF* dst, uint32_t cntOp,
     const uint32_t* glyphList, size_t itemAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
 
-  err_t (FOG_CDECL* getOutlineFromGlyphRunD)(const Face* self,
+  err_t (FOG_CDECL* getOutlineFromGlyphRunD)(FontData* d,
     PathD* dst, uint32_t cntOp,
     const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
@@ -1113,7 +1141,7 @@ struct FOG_NO_EXPORT Face
     return const_cast<Face*>(this);
   }
 
-  FOG_INLINE void deref()
+  FOG_INLINE void release()
   {
     if (reference.deref())
       destroy();
@@ -1126,26 +1154,6 @@ struct FOG_NO_EXPORT Face
   FOG_INLINE void destroy()
   {
     vtable->destroy(this);
-  }
-
-  FOG_INLINE err_t getOutlineFromGlyphRun(
-    PathF& dst, uint32_t cntOp,
-    const uint32_t* glyphList, size_t glyphAdvance,
-    const PointF* positionList, size_t positionAdvance,
-    size_t length)
-  {
-    return vtable->getOutlineFromGlyphRunF(this,
-      &dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
-  }
-
-  FOG_INLINE err_t getOutlineFromGlyphRun(
-    PathD& dst, uint32_t cntOp,
-    const uint32_t* glyphList, size_t glyphAdvance,
-    const PointF* positionList, size_t positionAdvance,
-    size_t length) const
-  {
-    return vtable->getOutlineFromGlyphRunD(this,
-      &dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
   }
 
   // --------------------------------------------------------------------------

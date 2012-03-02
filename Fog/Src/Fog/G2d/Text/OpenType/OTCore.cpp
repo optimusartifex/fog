@@ -4,7 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/G2d/Text/OTCore.h>
+#include <Fog/G2d/Text/OpenType/OTCore.h>
 
 // ============================================================================
 // [fog_ot_api]
@@ -30,7 +30,7 @@ static uint32_t FOG_CDECL OT_CheckSum_calc(const OT_ULONG* pTable, uint32_t leng
   // Align length to 4-bytes.
   length = (length + 3) >> 2;
 
-  if ((uintptr_t)pTable & 0x3 == 0)
+  if (((uintptr_t)pTable & 0x3) == 0)
   {
     for (uint32_t i = 0; i < length; i++)
       sum += pTable[i].getValueA();

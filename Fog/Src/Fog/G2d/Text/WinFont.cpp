@@ -80,7 +80,7 @@ struct FOG_NO_EXPORT WinFontHDC
   FOG_INLINE bool init()
   {
     FOG_ASSERT(!isInitialized());
-    hdc = ::CreateCompatibleDC(NULL);
+    hdc = ::CreateDCW(L"DISPLAY", NULL, NULL, NULL);
 
     if (hdc == NULL)
       return false;
@@ -147,7 +147,7 @@ struct FOG_NO_EXPORT WinGetGlyphOutlineHDC
   FOG_INLINE err_t initHDC()
   {
     FOG_ASSERT(hdc == NULL);
-    hdc = ::CreateCompatibleDC(NULL);
+    hdc = ::CreateDCW(L"DISPLAY", NULL, NULL, NULL);
 
     if (hdc == NULL)
       return ERR_RT_OUT_OF_MEMORY;
@@ -277,6 +277,14 @@ static void FOG_CDECL WinFace_releaseTable(const Face* self_, OT_Table* table)
 
 static FOG_INLINE FIXED WinFace_Fixed0() { FIXED fx; fx.value = 0; fx.fract = 0; return fx; }
 static FOG_INLINE FIXED WinFace_Fixed1() { FIXED fx; fx.value = 1; fx.fract = 0; return fx; }
+
+static FOG_INLINE MAT2 WinFace_MAT2Identity()
+{
+  MAT2 mat;
+  mat.eM11 = WinFace_Fixed1(); mat.eM12 = WinFace_Fixed0();
+  mat.eM21 = WinFace_Fixed0(); mat.eM22 = WinFace_Fixed1();
+  return mat;
+}
 
 static FOG_INLINE FIXED WinFace_getFIXEDFrom16x16(uint32_t v16x16)
 {
@@ -453,11 +461,8 @@ static FOG_INLINE err_t WinFace_getOutlineFromGlyphRunT(FontData* d,
   FOG_RETURN_ON_ERROR(scopedDC.initHDC());
   FOG_RETURN_ON_ERROR(scopedDC.initHFONT(face->hFace));
 
-  MAT2 mat2;
+  MAT2 mat2 = WinFace_MAT2Identity();
   GLYPHMETRICS gm;
-
-  mat2.eM11 = WinFace_Fixed1(); mat2.eM12 = WinFace_Fixed0();
-  mat2.eM21 = WinFace_Fixed0(); mat2.eM22 = WinFace_Fixed1();
 
   for (i = 0; i < length; i++)
   {
@@ -524,7 +529,9 @@ static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunD(FontData* d,
 static void WinFontEngine_create(WinFontEngine* self)
 {
   fog_new_p(self) WinFontEngine(&WinFontEngine_vtable);
+
   self->defaultFaceName->setAscii8(Ascii8("Times New Roman"));
+  self->defaultFont->_d = fog_api.font_oNull->_d->addRef();
 }
 
 static void WinFontEngine_destroy(FontEngine* self_)
@@ -552,6 +559,8 @@ static FOG_INLINE uint32_t WinFontEngine_score(uint32_t a, uint32_t b)
 static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   Face** dst, const StringW* family, const FaceFeatures* features)
 {
+  *dst = NULL;
+
   const WinFontEngine* self = static_cast<const WinFontEngine*>(self_);
   AutoLock locked(self->lock());
 
@@ -614,17 +623,46 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
     return ERR_OK;
   }
 
+  err_t err;
   LOGFONTW lf;
+
   ZeroMemory(&lf, sizeof(LOGFONTW));
 
   MemOps::copy(lf.lfFaceName, family->getData(),
-    Math::min(family->getLength(), FOG_ARRAY_SIZE(lf.lfFaceName)));
+    Math::min(family->getLength(), FOG_ARRAY_SIZE(lf.lfFaceName)) * sizeof(WCHAR));
+
+  lf.lfHeight =-bestInfo->getDesignMetrics().getEmSize();
   lf.lfItalic = bestFeatures.getItalic();
   lf.lfWeight = bestFeatures.getWeight() * 10;
 
   HFONT hFace = ::CreateFontIndirectW(&lf);
   if (FOG_IS_NULL(hFace))
     return OSUtil::getErrFromOSLastError();
+
+  WinGetGlyphOutlineHDC scopedDC;
+
+  err = scopedDC.initHDC();
+  if (FOG_IS_ERROR(err))
+  {
+    ::DeleteObject(hFace);
+    return err;
+  }
+
+  uint32_t xxx = GetDeviceCaps(scopedDC, LOGPIXELSY);
+
+  err = scopedDC.initHFONT(hFace);
+  if (FOG_IS_ERROR(err))
+  {
+    ::DeleteObject(hFace);
+    return err;
+  }
+
+  OUTLINETEXTMETRICW otm;
+  if (!GetOutlineTextMetricsW(scopedDC, sizeof(OUTLINETEXTMETRICW), &otm))
+  {
+    ::DeleteObject(hFace);
+    return OSUtil::getErrFromOSLastError();
+  }
 
   face = static_cast<WinFace*>(MemMgr::alloc(sizeof(WinFace)));
   if (FOG_IS_NULL(face))
@@ -634,6 +672,48 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   }
 
   WinFace_create(face, hFace);
+  FontMetrics& fm = face->designMetrics;
+
+  fm._size        = float(bestInfo->getDesignMetrics().getEmSize());
+  fm._ascent      = float(otm.otmMacAscent);
+  fm._descent     = float(-otm.otmMacDescent);
+  fm._lineGap     = float(otm.otmMacLineGap);
+  fm._capHeight   = fm._ascent - float(otm.otmTextMetrics.tmInternalLeading);
+  fm._lineSpacing = fm._ascent + fm._descent + fm._lineGap;
+
+  // The following glyph metrics can be used to check whether we are correct:
+  //  
+  // "Arial"
+  //   - Can be also checked here: http://msdn.microsoft.com/en-us/library/xwf9s90b.aspx),
+  //     but don't look at the image, because the ascent/descent info there is wrong.
+  //   
+  //   - EmSquare    == 2048
+  //   - Ascent      == 1854
+  //   - Descent     ==  434
+  //   - LineGap     ==   67
+  //   - LineSpacing == 2355
+  //
+  // "Times New Roman"
+  //
+  //   - EmSquare    == 2048
+  //   - Ascent      == 1825
+  //   - Descent     ==  443
+  //   - LineGap     ==   87
+  //   - LineSpacing == 2355
+
+  GLYPHMETRICS gm;
+  ZeroMemory(&gm, sizeof(GLYPHMETRICS));
+
+  MAT2 mat2 = WinFace_MAT2Identity();
+
+  DWORD len = GetGlyphOutlineW(scopedDC, 'x', GGO_UNHINTED | GGO_METRICS, &gm, 0, 0, &mat2);
+  if (len != GDI_ERROR && gm.gmBlackBoxY > 0)
+    fm._xHeight = static_cast<float>(gm.gmBlackBoxY);
+  else
+    // Shouldn't happen, because we selected only TTF fonts. So make a guess
+    // in case that it really happened.
+    fm._xHeight = face->designMetrics._ascent * 0.56f;
+
   self->cache->put(*family, bestFeatures, face);
 
   *dst = face;
@@ -707,8 +787,9 @@ static int CALLBACK WinFontEngine_updateAvailableFaces_onEnumProc(
 
       item.setFamilyName(StringW(faceName));
       item.setFeatures(faceFeatures);
+
       item.setDesignMetrics(
-        FaceDesignMetrics(pntm->ntmTm.ntmSizeEM, pntm->ntmTm.ntmCellHeight));
+        FaceDesignMetrics(pntm->ntmTm.ntmSizeEM));
 
       if (collection->addItem(item, &index) == ERR_OK)
       {
@@ -772,7 +853,7 @@ static err_t FOG_CDECL WinFontEngine_updateAvailableFaces(WinFontEngine* self)
     WinFontEngine_updateAvailableFaces_onEnumProc, (LPARAM)&data, 0); 
 
   // Uncomment if something goes wrong.
-  WinFontEngine_debugAvailableFaces(self);
+  // WinFontEngine_debugAvailableFaces(self);
 
   return ERR_OK;
 }

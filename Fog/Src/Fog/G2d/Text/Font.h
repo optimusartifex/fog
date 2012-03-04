@@ -244,6 +244,12 @@ struct FOG_NO_EXPORT FontMetrics
   FOG_INLINE float getDescent() const { return _descent; }
   FOG_INLINE void setDescent(float descent) { _descent = descent; }
 
+  FOG_INLINE float getLineGap() const { return _lineGap; }
+  FOG_INLINE void setLineGap(float lineGap) { _lineGap = lineGap; }
+
+  FOG_INLINE float getLineSpacing() const { return _lineSpacing; }
+  FOG_INLINE void setLineSpacing(float lineSpacing) { _lineSpacing = lineSpacing; }
+
   FOG_INLINE float getCapHeight() const { return _capHeight; }
   FOG_INLINE void setCapHeight(float capHeight) { _capHeight = capHeight; }
 
@@ -279,6 +285,10 @@ struct FOG_NO_EXPORT FontMetrics
   float _ascent;
   //! @brief Font descent (positive).
   float _descent;
+  //! @brief Line-gap, sometimes called external-leading (positive).
+  float _lineGap;
+  //! @brief Line-spacing combines ascent, descent, and lineGap (positive).
+  float _lineSpacing;
   //! @brief Capital letter height (positive).
   float _capHeight;
   //! @brief Small 'x' letter height (positive).
@@ -700,12 +710,11 @@ struct FOG_NO_EXPORT FaceDesignMetrics
 
   explicit FOG_INLINE FaceDesignMetrics(_Uninitialized) {}
 
-  FOG_INLINE FaceDesignMetrics(uint32_t emSize, uint32_t emHeight)
+  FOG_INLINE FaceDesignMetrics(uint32_t emSize)
   {
     reset();
 
     _emSize = static_cast<uint16_t>(emSize);
-    _emHeight = static_cast<uint16_t>(emHeight);
   }
 
   FOG_INLINE FaceDesignMetrics(const FaceDesignMetrics& other)
@@ -719,9 +728,6 @@ struct FOG_NO_EXPORT FaceDesignMetrics
 
   FOG_INLINE uint32_t getEmSize() const { return _emSize; }
   FOG_INLINE void setEmSize(uint32_t emSize) { _emSize = emSize; }
-
-  FOG_INLINE uint32_t getEmHeight() const { return _emHeight; }
-  FOG_INLINE void setEmHeight(uint32_t emHeight) { _emHeight = emHeight; }
 
   // --------------------------------------------------------------------------
   // [Reset]
@@ -761,7 +767,7 @@ struct FOG_NO_EXPORT FaceDesignMetrics
   //! @brief Design em-size.
   uint16_t _emSize;
   //! @brief Design em-height.
-  uint16_t _emHeight;
+  uint16_t _reserved_0;
   //! @brief Reserved for future use.
   uint32_t _reserved_1;
 };

@@ -2607,6 +2607,8 @@ struct FOG_NO_EXPORT Api
   FOG_CAPI_STATIC(FontData*, font_dCreate)(void);
   FOG_CAPI_STATIC(void, font_dFree)(FontData* d);
 
+  Font* font_oNull;
+
   // --------------------------------------------------------------------------
   // [G2d/Text - FontEngine]
   // --------------------------------------------------------------------------

@@ -311,7 +311,7 @@ static bool FaceCollection_getFamilyRangeStringW(const FaceCollection* self,
     int cmp = StringW::compare(&cur->_d->familyName, family);
 
     // Right.
-    if (cmp > 0)
+    if (cmp < 0)
     {
       base = cur + 1;
       lim--;
@@ -319,7 +319,7 @@ static bool FaceCollection_getFamilyRangeStringW(const FaceCollection* self,
     }
 
     // Left.
-    if (cmp < 0)
+    if (cmp > 0)
       continue;
 
     // Expand range.
@@ -373,7 +373,7 @@ static bool FaceCollection_getFamilyRangeStubW(const FaceCollection* self,
     int cmp = cur->_d->familyName->compare(family);
 
     // Right.
-    if (cmp > 0)
+    if (cmp < 0)
     {
       base = cur + 1;
       lim--;
@@ -381,7 +381,7 @@ static bool FaceCollection_getFamilyRangeStubW(const FaceCollection* self,
     }
 
     // Left.
-    if (cmp < 0)
+    if (cmp > 0)
       continue;
 
     // Expand range.
@@ -777,6 +777,8 @@ static void Font_dScaleMetrics(FontData* d, float size)
   d->metrics._size = size;
   d->metrics._ascent = design._ascent * scale;
   d->metrics._descent = design._descent * scale;
+  d->metrics._lineGap = design._lineGap * scale;
+  d->metrics._lineSpacing = design._lineSpacing * scale;
   d->metrics._capHeight = design._capHeight * scale;
   d->metrics._xHeight = design._xHeight * scale;
 
@@ -1688,7 +1690,7 @@ FOG_NO_EXPORT void Font_init(void)
     d->matrix.reset();
     d->scale = 0.0f;
 
-    Font_oNull.initCustom1(d);
+    fog_api.font_oNull = Font_oNull.initCustom1(d);
   }
 
   // --------------------------------------------------------------------------

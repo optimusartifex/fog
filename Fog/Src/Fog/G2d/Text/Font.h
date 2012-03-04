@@ -279,7 +279,7 @@ struct FOG_NO_EXPORT FontMetrics
   // [Members]
   // --------------------------------------------------------------------------
 
-  //! @brief Font size (difference between two base-lines).
+  //! @brief Font size.
   float _size;
   //! @brief Font ascent (positive).
   float _ascent;
@@ -694,32 +694,32 @@ struct FOG_NO_EXPORT FaceFeatures
 };
 
 // ============================================================================
-// [Fog::FaceDesignMetrics]
+// [Fog::FaceInfoMetrics]
 // ============================================================================
 
-struct FOG_NO_EXPORT FaceDesignMetrics
+struct FOG_NO_EXPORT FaceInfoMetrics
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FaceDesignMetrics()
+  FOG_INLINE FaceInfoMetrics()
   {
     reset();
   }
 
-  explicit FOG_INLINE FaceDesignMetrics(_Uninitialized) {}
+  explicit FOG_INLINE FaceInfoMetrics(_Uninitialized) {}
 
-  FOG_INLINE FaceDesignMetrics(uint32_t emSize)
+  FOG_INLINE FaceInfoMetrics(uint32_t emSize)
   {
     reset();
 
     _emSize = static_cast<uint16_t>(emSize);
   }
 
-  FOG_INLINE FaceDesignMetrics(const FaceDesignMetrics& other)
+  FOG_INLINE FaceInfoMetrics(const FaceInfoMetrics& other)
   {
-    MemOps::copy_t<FaceDesignMetrics>(this, &other);
+    MemOps::copy_t<FaceInfoMetrics>(this, &other);
   }
 
   // --------------------------------------------------------------------------
@@ -735,30 +735,30 @@ struct FOG_NO_EXPORT FaceDesignMetrics
 
   FOG_INLINE void reset()
   {
-    MemOps::zero_t<FaceDesignMetrics>(this);
+    MemOps::zero_t<FaceInfoMetrics>(this);
   }
 
   // --------------------------------------------------------------------------
   // [Eq]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE bool eq(const FaceDesignMetrics& other) const
+  FOG_INLINE bool eq(const FaceInfoMetrics& other) const
   {
-    return MemOps::eq_t<FaceDesignMetrics>(this, &other);
+    return MemOps::eq_t<FaceInfoMetrics>(this, &other);
   }
 
   // --------------------------------------------------------------------------
   // [Operator Overload]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE FaceDesignMetrics& operator=(const FaceDesignMetrics& other)
+  FOG_INLINE FaceInfoMetrics& operator=(const FaceInfoMetrics& other)
   {
-    MemOps::copy_t<FaceDesignMetrics>(this, &other);
+    MemOps::copy_t<FaceInfoMetrics>(this, &other);
     return *this;
   }
 
-  FOG_INLINE bool operator==(const FaceDesignMetrics& other) const { return  eq(other); }
-  FOG_INLINE bool operator!=(const FaceDesignMetrics& other) const { return !eq(other); }
+  FOG_INLINE bool operator==(const FaceInfoMetrics& other) const { return  eq(other); }
+  FOG_INLINE bool operator!=(const FaceInfoMetrics& other) const { return !eq(other); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -821,8 +821,8 @@ struct FOG_NO_EXPORT FaceInfoData
   //! loaded from disk, fileName is always filled.
   Static<StringW> fileName;
 
-  //! @brief Face design metrics.
-  FaceDesignMetrics designMetrics;
+  //! @brief Face metrics.
+  FaceInfoMetrics metrics;
 };
 
 // ============================================================================
@@ -887,8 +887,8 @@ struct FOG_NO_EXPORT FaceInfo
   FOG_INLINE const StringW& getFileName() const { return _d->fileName; }
   FOG_INLINE err_t setFileName(const StringW& fileName) { return fog_api.faceinfo_setFileName(this, &fileName); }
 
-  FOG_INLINE const FaceDesignMetrics& getDesignMetrics() const { return _d->designMetrics; }
-  FOG_INLINE err_t setDesignMetrics(const FaceDesignMetrics& metrics) { return fog_api.faceinfo_setDesignMetrics(this, &metrics); }
+  FOG_INLINE const FaceInfoMetrics& getMetrics() const { return _d->metrics; }
+  FOG_INLINE err_t setMetrics(const FaceInfoMetrics& metrics) { return fog_api.faceinfo_setMetrics(this, &metrics); }
 
   // --------------------------------------------------------------------------
   // [Reset]

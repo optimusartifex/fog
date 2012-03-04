@@ -347,10 +347,10 @@ struct SvgViewElement;
 // Fog/G2d/Text.
 struct Face;
 struct FaceCache;
-struct FaceDesignMetrics;
 struct FaceFeatures;
 struct FaceInfo;
 struct FaceInfoData;
+struct FaceInfoMetrics;
 struct FaceVTable;
 struct Font;
 struct FaceCollection;

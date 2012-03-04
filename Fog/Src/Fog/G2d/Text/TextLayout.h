@@ -198,6 +198,15 @@ _FOG_NUM_I(TextLayoutRect)
 _FOG_NUM_F(TextLayoutRect)
 _FOG_NUM_D(TextLayoutRect)
 
+// ============================================================================
+// [Fog::TextLayout]
+// ============================================================================
+
+struct FOG_NO_EXPORT TextLayout
+{
+
+};
+
 //! @}
 
 } // Fog namespace

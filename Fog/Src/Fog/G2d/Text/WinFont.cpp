@@ -631,7 +631,7 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   MemOps::copy(lf.lfFaceName, family->getData(),
     Math::min(family->getLength(), FOG_ARRAY_SIZE(lf.lfFaceName)) * sizeof(WCHAR));
 
-  lf.lfHeight =-bestInfo->getDesignMetrics().getEmSize();
+  lf.lfHeight =-bestInfo->getMetrics().getEmSize();
   lf.lfItalic = bestFeatures.getItalic();
   lf.lfWeight = bestFeatures.getWeight() * 10;
 
@@ -674,11 +674,12 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   WinFace_create(face, hFace);
   FontMetrics& fm = face->designMetrics;
 
-  fm._size        = float(bestInfo->getDesignMetrics().getEmSize());
+  fm._size        = float(bestInfo->getMetrics().getEmSize());
   fm._ascent      = float(otm.otmMacAscent);
   fm._descent     = float(-otm.otmMacDescent);
   fm._lineGap     = float(otm.otmMacLineGap);
-  fm._capHeight   = fm._ascent - float(otm.otmTextMetrics.tmInternalLeading);
+  // TODO: Where to get capHeight?
+  fm._capHeight   = 0.0f;
   fm._lineSpacing = fm._ascent + fm._descent + fm._lineGap;
 
   // The following glyph metrics can be used to check whether we are correct:
@@ -788,8 +789,8 @@ static int CALLBACK WinFontEngine_updateAvailableFaces_onEnumProc(
       item.setFamilyName(StringW(faceName));
       item.setFeatures(faceFeatures);
 
-      item.setDesignMetrics(
-        FaceDesignMetrics(pntm->ntmTm.ntmSizeEM));
+      item.setMetrics(
+        FaceInfoMetrics(pntm->ntmTm.ntmSizeEM));
 
       if (collection->addItem(item, &index) == ERR_OK)
       {

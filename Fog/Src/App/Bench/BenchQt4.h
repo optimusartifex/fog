@@ -11,8 +11,8 @@
 #include "BenchApp.h"
 
 // [Dependencies - Qt4]
-#include <Qt/QtCore>
-#include <Qt/QtGui>
+#include <QtCore>
+#include <QtGui>
 
 // ============================================================================
 // [BenchQt4]

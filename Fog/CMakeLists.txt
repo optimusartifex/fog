@@ -1705,7 +1705,31 @@ If(NOT FOG_BUILD_NOTHING)
 EndIf()
 
 # =============================================================================
-# [Setup - App - FogBench]
+# [Setup - App - Samples]
+# =============================================================================
+
+If(NOT FOG_BUILD_NOTHING)
+  If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
+    Set(FOG_SAMPLE_SOURCES
+      FogBlend
+      FogTest
+      FogSvg
+    )
+
+    ForEach(file ${FOG_SAMPLE_SOURCES})
+      Add_Executable(${file} WIN32 MACOSX_BUNDLE
+        Src/App/Sample/${file}.cpp
+        Src/App/Sample/Resources.h)
+      Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
+    EndForEach(file)
+
+    Add_Executable(FogSizeOf Src/App/Sample/FogSizeOf.cpp)
+    Target_Link_Libraries(FogSizeOf Fog ${FOG_LIBRARIES})
+  EndIf()
+EndIf()
+
+# =============================================================================
+# [Setup - App - Bench]
 # =============================================================================
 
 If(NOT FOG_BUILD_NOTHING)
@@ -1713,16 +1737,20 @@ If(NOT FOG_BUILD_NOTHING)
     Set(FOG_BENCH_LIBRARIES "")
     Set(FOG_BENCH_INCLUDE "")
 
+    # Platform independent libraries to benchmark.
+    
+    # Set(FOG_BENCH_CAIRO True)
+    # Set(FOG_BENCH_QT4 True)
+
+    # Platform specific libraries to benchmark.
     If(FOG_OS_WINDOWS)
       # Set(FOG_BENCH_GDIPLUS True)
-    Else()
-      # Set(FOG_BENCH_CAIRO True)
-      # Set(FOG_BENCH_QT4 True)
     EndIf()
 
     If(FOG_OS_MAC)
       # Set(FOG_BENCH_CG True)
     EndIf(FOG_OS_MAC)
+
 
     Configure_File(
       ${CMAKE_CURRENT_LIST_DIR}/Src/App/Bench/BenchConfig.h.cmake
@@ -1750,36 +1778,12 @@ If(NOT FOG_BUILD_NOTHING)
     EndIf()
 
     If(FOG_BENCH_QT4)
-      Include_Directories(/usr/include/qt4)
-      Link_Directories(/usr/lib/qt4)
-      List(APPEND FOG_BENCH_LIBRARIES QtCore QtGui)
+      Find_Package(Qt4 REQUIRED)
+      Include(${QT_USE_FILE})
+      List(APPEND FOG_BENCH_LIBRARIES ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
     EndIf()
 
     Add_Executable(FogBench ${FOG_BENCH_FILES})
     Target_Link_Libraries(FogBench Fog ${FOG_LIBRARIES} ${FOG_BENCH_LIBRARIES})
-  EndIf()
-EndIf()
-
-# =============================================================================
-# [Setup - App - Samples]
-# =============================================================================
-
-If(NOT FOG_BUILD_NOTHING)
-  If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
-    Set(FOG_SAMPLE_SOURCES
-      FogBlend
-      FogTest
-      FogSvg
-    )
-
-    ForEach(file ${FOG_SAMPLE_SOURCES})
-      Add_Executable(${file} WIN32 MACOSX_BUNDLE
-        Src/App/Sample/${file}.cpp
-        Src/App/Sample/Resources.h)
-      Target_Link_Libraries(${file} Fog ${FOG_LIBRARIES})
-    EndForEach(file)
-
-    Add_Executable(FogSizeOf Src/App/Sample/FogSizeOf.cpp)
-    Target_Link_Libraries(FogSizeOf Fog ${FOG_LIBRARIES})
   EndIf()
 EndIf()

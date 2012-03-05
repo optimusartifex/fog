@@ -325,19 +325,19 @@ static err_t FOG_CDECL MyPaintEngine_fillTextAtD(Painter* self, const PointD* p,
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextInI(Painter* self, const TextLayoutRectI* r, const StringW* text, const Font* font, const RectI* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextInI(Painter* self, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextInF(Painter* self, const TextLayoutRectF* r, const StringW* text, const Font* font, const RectF* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextInF(Painter* self, const TextRectF* r, const StringW* text, const Font* font, const RectF* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_fillTextInD(Painter* self, const TextLayoutRectD* r, const StringW* text, const Font* font, const RectD* clip)
+static err_t FOG_CDECL MyPaintEngine_fillTextInD(Painter* self, const TextRectD* r, const StringW* text, const Font* font, const RectD* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
@@ -589,19 +589,19 @@ static err_t FOG_CDECL MyPaintEngine_clipTextAtD(Painter* self, uint32_t clipOp,
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextLayoutRectI* r, const StringW* text, const Font* font, const RectI* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextLayoutRectF* r, const StringW* text, const Font* font, const RectF* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextRectF* r, const StringW* text, const Font* font, const RectF* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL MyPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextLayoutRectD* r, const StringW* text, const Font* font, const RectD* clip)
+static err_t FOG_CDECL MyPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextRectD* r, const StringW* text, const Font* font, const RectD* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
   return ERR_RT_NOT_IMPLEMENTED;

@@ -30,111 +30,6 @@ namespace Fog {
 struct OT_Table;
 
 // ============================================================================
-// [Fog::GlyphItem]
-// ============================================================================
-
-struct FOG_NO_EXPORT GlyphItem
-{
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE uint32_t getGlyphIndex() const { return _glyphIndex; }
-  FOG_INLINE void setGlyphIndex(uint32_t index) { _glyphIndex = index; }
-
-  FOG_INLINE uint32_t getProperties() const { return _properties; }
-  FOG_INLINE void setProperties(uint32_t properties) { _properties = properties; }
-
-  FOG_INLINE uint32_t getCluster() const { return _cluster; }
-  FOG_INLINE void setCluster(uint32_t cluster) { _cluster = cluster; }
-
-  FOG_INLINE uint16_t getComponent() const { return _component; }
-  FOG_INLINE void setComponent(uint16_t component) { _component = component; }
-
-  FOG_INLINE uint16_t getLigatureId() const { return _ligatureId; }
-  FOG_INLINE void setLigatureId(uint32_t ligatureId) { _ligatureId = ligatureId; }
-
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset()
-  {
-    MemOps::zero_t<GlyphItem>(this);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-  
-  uint32_t _glyphIndex;
-  uint32_t _properties;
-  uint32_t _cluster;
-  uint16_t _component;
-  uint16_t _ligatureId;
-};
-
-// ============================================================================
-// [Fog::GlyphPosition]
-// ============================================================================
-
-struct FOG_NO_EXPORT GlyphPosition
-{
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE const PointF& getPosition() const { return _position; }
-  FOG_INLINE void setPosition(const PointF& pos) { _position = pos; }
-
-  FOG_INLINE const PointF& getAdvance() const { return _advance; }
-  FOG_INLINE void setAdvance(const PointF& advance) { _advance = advance; }
-
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset()
-  {
-    MemOps::zero_t<GlyphPosition>(this);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  PointF _position;
-  PointF _advance;
-
-  uint32_t _newAdvance : 1;
-  uint32_t _back : 15;
-  int32_t _cursiveChain : 16;
-};
-
-// ============================================================================
-// [Fog::GlyphRun]
-// ============================================================================
-
-struct FOG_NO_EXPORT GlyphRun
-{
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE size_t getLength() const { return _itemList.getLength(); }
-
-  FOG_INLINE const List<GlyphItem>& getItemList() const { return _itemList; }
-  FOG_INLINE const List<GlyphPosition>& getPositionList() const { return _positionList; }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  List<GlyphItem> _itemList;
-  List<GlyphPosition> _positionList;
-};
-
-// ============================================================================
 // [Fog::FontSpacing]
 // ============================================================================
 
@@ -1283,7 +1178,7 @@ struct FOG_NO_EXPORT Face
   float designEm;
 
 private:
-  _FOG_NO_COPY(Face)
+  FOG_NO_COPY(Face)
 };
 
 // ============================================================================
@@ -1347,7 +1242,7 @@ struct FOG_NO_EXPORT FaceCache
   Static< Hash< StringW, List<Face*> > > data;
 
 private:
-  _FOG_NO_COPY(FaceCache)
+  FOG_NO_COPY(FaceCache)
 };
 
 // ============================================================================
@@ -1652,31 +1547,13 @@ struct FOG_NO_EXPORT Font
   // [Glyphs]
   // --------------------------------------------------------------------------
 
+  // Implemented-Later.
   FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
-    const GlyphRun& glyphRun) const
-  {
-    FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+    const GlyphRun& glyphRun) const;
 
-    const GlyphItem* glyphs = glyphRun._itemList.getData();
-    const GlyphPosition* positions = glyphRun._positionList.getData();
-    size_t length = glyphRun.getLength();
-
-    return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp,
-      &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
-  }
-
+  // Implemented-Later.
   FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
-    const GlyphRun& glyphRun) const
-  {
-    FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
-
-    const GlyphItem* glyphs = glyphRun._itemList.getData();
-    const GlyphPosition* positions = glyphRun._positionList.getData();
-    size_t length = glyphRun.getLength();
-
-    return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp,
-      &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
-  }
+    const GlyphRun& glyphRun) const;
 
   FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
     const uint32_t* glyphs, const PointF* positions, size_t length) const
@@ -1836,7 +1713,7 @@ struct FOG_NO_EXPORT FontEngine
   Static<Font> defaultFont;
 
 private:
-  _FOG_NO_COPY(FontEngine)
+  FOG_NO_COPY(FontEngine)
 };
 
 //! @}

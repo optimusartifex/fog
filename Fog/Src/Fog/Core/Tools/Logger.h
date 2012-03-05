@@ -158,7 +158,7 @@ struct FOG_API Logger
   uint32_t _severity;
 
 private:
-  _FOG_NO_COPY(Logger)
+  FOG_NO_COPY(Logger)
 };
 
 // ============================================================================
@@ -187,7 +187,7 @@ struct FOG_API StreamLogger : public Logger
   Stream _stream;
 
 private:
-  _FOG_NO_COPY(StreamLogger)
+  FOG_NO_COPY(StreamLogger)
 };
 
 //! @}

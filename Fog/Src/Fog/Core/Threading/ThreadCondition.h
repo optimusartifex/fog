@@ -148,7 +148,7 @@ struct FOG_NO_EXPORT ThreadCondition
 #endif // FOG_OS_POSIX
 
 private:
-  _FOG_NO_COPY(ThreadCondition)
+  FOG_NO_COPY(ThreadCondition)
 };
 
 //! @}

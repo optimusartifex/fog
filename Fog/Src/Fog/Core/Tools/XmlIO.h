@@ -106,7 +106,7 @@ struct FOG_API XmlSaxHandler
   virtual err_t onFatal(const XmlSaxLocation& location, err_t errorCode) = 0;
 
 private:
-  _FOG_NO_COPY(XmlSaxHandler)
+  FOG_NO_COPY(XmlSaxHandler)
 };
 
 // ============================================================================
@@ -150,7 +150,7 @@ struct FOG_API XmlSaxParser
   XmlSaxHandler* _handler;
 
 private:
-  _FOG_NO_COPY(XmlSaxParser)
+  FOG_NO_COPY(XmlSaxParser)
 };
 
 //! @}

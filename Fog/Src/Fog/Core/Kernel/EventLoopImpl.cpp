@@ -59,7 +59,7 @@ struct FOG_NO_EXPORT ScopedEventLoopRunState
   EventLoopImpl* impl;
 
 private:
-  _FOG_NO_COPY(ScopedEventLoopRunState)
+  FOG_NO_COPY(ScopedEventLoopRunState)
 };
 
 // ============================================================================

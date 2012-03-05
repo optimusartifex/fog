@@ -137,7 +137,7 @@ struct FOG_NO_EXPORT DirIterator
   _FOG_CLASS_D(DirIteratorData)
 
 private:
-  _FOG_NO_COPY(DirIterator)
+  FOG_NO_COPY(DirIterator)
 };
 
 //! @}

@@ -102,7 +102,7 @@ struct FOG_NO_EXPORT WinFontHDC
   HDC hdc;
 
 private:
-  _FOG_NO_COPY(WinFontHDC)
+  FOG_NO_COPY(WinFontHDC)
 };
 
 // ============================================================================

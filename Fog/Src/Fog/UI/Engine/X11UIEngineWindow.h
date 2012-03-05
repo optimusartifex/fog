@@ -147,7 +147,7 @@ struct FOG_API X11UIEngineWindowImpl : public UIEngineWindowImpl
   uint32_t _mapRequest : 1;
 
 private:
-  _FOG_NO_COPY(X11UIEngineWindowImpl)
+  FOG_NO_COPY(X11UIEngineWindowImpl)
 };
 
 //! @}

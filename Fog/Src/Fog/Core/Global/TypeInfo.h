@@ -522,9 +522,9 @@ _FOG_TYPE_DECLARE(Fog::FontSpacing             , C(SIMPLE )               | F(NO
 _FOG_TYPE_DECLARE(Fog::GlyphItem               , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::GlyphPosition           , C(SIMPLE )               | F(NO_CMP )            )
 _FOG_TYPE_DECLARE(Fog::GlyphRun                , C(MOVABLE)               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextLayoutRectI         , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextLayoutRectF         , C(SIMPLE )               | F(NO_CMP )            )
-_FOG_TYPE_DECLARE(Fog::TextLayoutRectD         , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextRectI               , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextRectF               , C(SIMPLE )               | F(NO_CMP )            )
+_FOG_TYPE_DECLARE(Fog::TextRectD               , C(SIMPLE )               | F(NO_CMP )            )
 
 // [Fog/G2d/Tools]
 _FOG_TYPE_DECLARE(Fog::Dpi                     , C(SIMPLE )               | F(NO_CMP )            )

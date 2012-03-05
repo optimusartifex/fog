@@ -760,13 +760,6 @@ static Static<Font> Font_oNull;
 // [Fog::Font - Helpers]
 // ============================================================================
 
-static void Font_dInitDefaults(FontData* d)
-{
-  d->flags = NO_FLAGS;
-  d->features.reset();
-  d->matrix.reset();
-}
-
 static void Font_dScaleMetrics(FontData* d, float size)
 {
   const FontMetrics& design = d->face->designMetrics;

@@ -115,7 +115,7 @@ struct FOG_NO_EXPORT ThreadEvent
 #endif // FOG_OS_POSIX
 
 private:
-  _FOG_NO_COPY(ThreadEvent)
+  FOG_NO_COPY(ThreadEvent)
 };
 
 //! @}

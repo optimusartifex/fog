@@ -81,7 +81,7 @@ struct FOG_NO_EXPORT EventLoopObserverListBase
   mutable size_t _depth;
 
 private:
-  _FOG_NO_COPY(EventLoopObserverListBase)
+  FOG_NO_COPY(EventLoopObserverListBase)
 };
 
 // ============================================================================
@@ -149,7 +149,7 @@ struct EventLoopObserverList : public EventLoopObserverListBase
   }
 
 private:
-  _FOG_NO_COPY(EventLoopObserverList)
+  FOG_NO_COPY(EventLoopObserverList)
 };
 
 // ============================================================================

@@ -94,7 +94,7 @@ struct FOG_NO_EXPORT Lock
   Handle _handle;
 
 private:
-  _FOG_NO_COPY(Lock)
+  FOG_NO_COPY(Lock)
 };
 
 // ============================================================================
@@ -160,7 +160,7 @@ struct FOG_NO_EXPORT AutoLock
   Lock* _target;
 
 private:
-  _FOG_NO_COPY(AutoLock)
+  FOG_NO_COPY(AutoLock)
 };
 
 // ============================================================================
@@ -204,7 +204,7 @@ struct FOG_NO_EXPORT AutoUnlock
   Lock* _target;
 
 private:
-  _FOG_NO_COPY(AutoUnlock)
+  FOG_NO_COPY(AutoUnlock)
 };
 
 //! @}

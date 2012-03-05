@@ -137,7 +137,7 @@ struct FOG_API Application : public Object
 #endif // FOG_BUILD_UI
 
 private:
-  _FOG_NO_COPY(Application)
+  FOG_NO_COPY(Application)
 };
 
 //! @}

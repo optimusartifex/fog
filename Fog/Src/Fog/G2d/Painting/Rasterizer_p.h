@@ -674,7 +674,7 @@ struct FOG_NO_EXPORT PathRasterizer8 : public Rasterizer8
   Row* _rowsAdjusted;
 
 private:
-  _FOG_NO_COPY(PathRasterizer8)
+  FOG_NO_COPY(PathRasterizer8)
 };
 
 //! @}

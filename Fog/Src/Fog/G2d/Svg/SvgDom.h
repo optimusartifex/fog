@@ -143,7 +143,7 @@ struct FOG_API SvgStyleData
   StringW strokeUri;
 
 private:
-  _FOG_NO_COPY(SvgStyleData)
+  FOG_NO_COPY(SvgStyleData)
 };
 
 // ============================================================================

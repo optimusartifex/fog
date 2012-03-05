@@ -292,7 +292,7 @@ struct FOG_API WinGdiPlus
   ULONG_PTR _gdipToken;
 
 private:
-  _FOG_NO_COPY(WinGdiPlus)
+  FOG_NO_COPY(WinGdiPlus)
 };
 
 //! @}

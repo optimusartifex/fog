@@ -3111,7 +3111,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextAtD(Painter* self, const PointD
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextLayoutRectI* r, const StringW* text, const Font* font, const RectI* clip)
+static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3120,7 +3120,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextLa
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillTextInF(Painter* self, const TextLayoutRectF* r, const StringW* text, const Font* font, const RectF* clip)
+static err_t FOG_CDECL RasterPaintEngine_fillTextInF(Painter* self, const TextRectF* r, const StringW* text, const Font* font, const RectF* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -3129,7 +3129,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextInF(Painter* self, const TextLa
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_fillTextInD(Painter* self, const TextLayoutRectD* r, const StringW* text, const Font* font, const RectD* clip)
+static err_t FOG_CDECL RasterPaintEngine_fillTextInD(Painter* self, const TextRectD* r, const StringW* text, const Font* font, const RectD* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
@@ -4729,7 +4729,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipTextAtD(Painter* self, uint32_t cli
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextLayoutRectI* r, const StringW* text, const Font* font, const RectI* clip)
+static err_t FOG_CDECL RasterPaintEngine_clipTextInI(Painter* self, uint32_t clipOp, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 
@@ -4737,7 +4737,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipTextInI(Painter* self, uint32_t cli
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextLayoutRectF* r, const StringW* text, const Font* font, const RectF* clip)
+static err_t FOG_CDECL RasterPaintEngine_clipTextInF(Painter* self, uint32_t clipOp, const TextRectF* r, const StringW* text, const Font* font, const RectF* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 
@@ -4745,7 +4745,7 @@ static err_t FOG_CDECL RasterPaintEngine_clipTextInF(Painter* self, uint32_t cli
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
-static err_t FOG_CDECL RasterPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextLayoutRectD* r, const StringW* text, const Font* font, const RectD* clip)
+static err_t FOG_CDECL RasterPaintEngine_clipTextInD(Painter* self, uint32_t clipOp, const TextRectD* r, const StringW* text, const Font* font, const RectD* clip)
 {
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
 

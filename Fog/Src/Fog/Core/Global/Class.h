@@ -24,21 +24,21 @@
   _DType_* _d;
 
 // ============================================================================
-// [_FOG_NO_COPY]
+// [FOG_NO_COPY]
 // ============================================================================
 
-//! @def _FOG_NO_COPY
+//! @def FOG_NO_COPY
 //!
 //! @brief Use this macro to generate empty copy constructor and empty copy operator.
 //!
 //! Use in 'private' section.
 
 #if defined(FOG_CC_HAS_DELETE_FUNCTION)
-#define _FOG_NO_COPY(_SelfType_) \
+#define FOG_NO_COPY(_SelfType_) \
   _SelfType_(const _SelfType_& other) = delete; \
   _SelfType_& operator=(const _SelfType_& other) = delete;
 #else
-#define _FOG_NO_COPY(_SelfType_) \
+#define FOG_NO_COPY(_SelfType_) \
   FOG_INLINE _SelfType_(const _SelfType_& other); \
   FOG_INLINE _SelfType_& operator=(const _SelfType_& other);
 #endif // FOG_CC_HAS_DELETE_FUNCTION

@@ -127,7 +127,7 @@ struct FOG_NO_EXPORT MemPool
   Chunk* chunk;
 
 private:
-  _FOG_NO_COPY(MemPool)
+  FOG_NO_COPY(MemPool)
 };
 
 //! @}

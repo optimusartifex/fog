@@ -61,7 +61,7 @@ struct FOG_API FeCompositingFunctionData
   mutable Atomic<size_t> reference;
   
 private:
-  _FOG_NO_COPY(FeCompositingFunctionData)
+  FOG_NO_COPY(FeCompositingFunctionData)
 };
 
 // ============================================================================

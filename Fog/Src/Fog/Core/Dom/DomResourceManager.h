@@ -82,7 +82,7 @@ struct FOG_API DomResourceItem
   Var _data;
 
 private:
-  _FOG_NO_COPY(DomResourceItem)
+  FOG_NO_COPY(DomResourceItem)
 };
 
 // ============================================================================
@@ -146,7 +146,7 @@ struct FOG_API DomResourceManager
   List<DomResourceItem*> _queue;
 
 private:
-  _FOG_NO_COPY(DomResourceManager)
+  FOG_NO_COPY(DomResourceManager)
 };
 
 //! @}

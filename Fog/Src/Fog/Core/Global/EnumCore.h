@@ -1417,7 +1417,7 @@ enum DOM_NODE_TYPE
 
   //! @brief Text node (@ref DomText).
   //!
-  //! @note Part of DOM Level 1 (TEXT_NODE).
+  //! @note Part of DOM Level 1 (TEXT_OBJECT).
   DOM_NODE_TYPE_TEXT = 3,
 
   //! @brief CDATA section (@ref DomCDATA).

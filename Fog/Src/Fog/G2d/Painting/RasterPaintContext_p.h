@@ -175,7 +175,7 @@ struct FOG_NO_EXPORT RasterPaintContext
   PathD tmpPathD[3];
 
 private:
-  _FOG_NO_COPY(RasterPaintContext)
+  FOG_NO_COPY(RasterPaintContext)
 };
 
 //! @}

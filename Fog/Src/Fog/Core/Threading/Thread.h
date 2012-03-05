@@ -239,7 +239,7 @@ struct FOG_API Thread
   EventLoop _eventLoop;
 
 private:
-  _FOG_NO_COPY(Thread)
+  FOG_NO_COPY(Thread)
 };
 
 //! @}

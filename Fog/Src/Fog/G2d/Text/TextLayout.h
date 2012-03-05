@@ -9,6 +9,7 @@
 
 // [Dependencies]
 #include <Fog/G2d/Text/Font.h>
+#include <Fog/G2d/Text/TextRect.h>
 
 namespace Fog {
 
@@ -16,196 +17,196 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::TextLayoutRectI]
+// [Fog::GlyphItem]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextLayoutRectI : public RectI
+struct FOG_NO_EXPORT GlyphItem
 {
-  FOG_INLINE TextLayoutRectI() :
-    RectI(0, 0, 0, 0),
-    _alignment(NO_FLAGS)
-  {
-  }
-
-  FOG_INLINE TextLayoutRectI(int rx, int ry, int rw, int rh, uint32_t alignment) :
-    RectI(rx, ry, rw, rh),
-    _alignment(alignment)
-  {
-  }
-
-  FOG_INLINE TextLayoutRectI(const RectI& rect, uint32_t alignment) :
-    RectI(rect),
-    _alignment(alignment)
-  {
-  }
-
-  explicit FOG_INLINE TextLayoutRectI(_Uninitialized) : RectI(UNINITIALIZED) {}
-
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getAlignment() const { return _alignment; }
-  FOG_INLINE void setAlignment(uint32_t alignment) { _alignment = alignment; }
+  FOG_INLINE uint32_t getGlyphIndex() const { return _glyphIndex; }
+  FOG_INLINE void setGlyphIndex(uint32_t index) { _glyphIndex = index; }
+
+  FOG_INLINE uint32_t getProperties() const { return _properties; }
+  FOG_INLINE void setProperties(uint32_t properties) { _properties = properties; }
+
+  FOG_INLINE uint32_t getCluster() const { return _cluster; }
+  FOG_INLINE void setCluster(uint32_t cluster) { _cluster = cluster; }
+
+  FOG_INLINE uint16_t getComponent() const { return _component; }
+  FOG_INLINE void setComponent(uint16_t component) { _component = component; }
+
+  FOG_INLINE uint16_t getLigatureId() const { return _ligatureId; }
+  FOG_INLINE void setLigatureId(uint32_t ligatureId) { _ligatureId = ligatureId; }
 
   // --------------------------------------------------------------------------
   // [Reset]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void reset() { resetRect(); resetAlignment(); }
-  FOG_INLINE void resetRect() { RectI::reset(); }
-  FOG_INLINE void resetAlignment() { _alignment = NO_FLAGS; }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE TextLayoutRectI& operator=(const TextLayoutRectI& other)
+  FOG_INLINE void reset()
   {
-    MemOps::copy_t<TextLayoutRectI>(this, &other);
-    return *this;
+    MemOps::zero_t<GlyphItem>(this);
+  }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+  
+  uint32_t _glyphIndex;
+  uint32_t _properties;
+  uint32_t _cluster;
+  uint16_t _component;
+  uint16_t _ligatureId;
+};
+
+// ============================================================================
+// [Fog::GlyphPosition]
+// ============================================================================
+
+struct FOG_NO_EXPORT GlyphPosition
+{
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const PointF& getPosition() const { return _position; }
+  FOG_INLINE void setPosition(const PointF& pos) { _position = pos; }
+
+  FOG_INLINE const PointF& getAdvance() const { return _advance; }
+  FOG_INLINE void setAdvance(const PointF& advance) { _advance = advance; }
+
+  // --------------------------------------------------------------------------
+  // [Reset]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void reset()
+  {
+    MemOps::zero_t<GlyphPosition>(this);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t _alignment;
+  PointF _position;
+  PointF _advance;
+
+  uint32_t _newAdvance : 1;
+  uint32_t _back : 15;
+  int32_t _cursiveChain : 16;
 };
 
 // ============================================================================
-// [Fog::TextLayoutRectF]
+// [Fog::GlyphRun]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextLayoutRectF : public RectF
+struct FOG_NO_EXPORT GlyphRun
 {
-  FOG_INLINE TextLayoutRectF() :
-    RectF(0.0f, 0.0f, 0.0f, 0.0f),
-    _alignment(NO_FLAGS)
-  {
-  }
-
-  FOG_INLINE TextLayoutRectF(float rx, float ry, float rw, float rh, uint32_t alignment) :
-    RectF(rx, ry, rw, rh),
-    _alignment(alignment)
-  {
-  }
-
-  FOG_INLINE TextLayoutRectF(const RectF& rect, uint32_t alignment) :
-    RectF(rect),
-    _alignment(alignment)
-  {
-  }
-
-  explicit FOG_INLINE TextLayoutRectF(_Uninitialized) : RectF(UNINITIALIZED) {}
-
   // --------------------------------------------------------------------------
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getAlignment() const { return _alignment; }
-  FOG_INLINE void setAlignment(uint32_t alignment) { _alignment = alignment; }
+  FOG_INLINE size_t getLength() const { return _itemList.getLength(); }
 
-  // --------------------------------------------------------------------------
-  // [Reset]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset() { resetRect(); resetAlignment(); }
-  FOG_INLINE void resetRect() { RectF::reset(); }
-  FOG_INLINE void resetAlignment() { _alignment = NO_FLAGS; }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE TextLayoutRectF& operator=(const TextLayoutRectF& other)
-  {
-    MemOps::copy_t<TextLayoutRectF>(this, &other);
-    return *this;
-  }
+  FOG_INLINE const List<GlyphItem>& getItemList() const { return _itemList; }
+  FOG_INLINE const List<GlyphPosition>& getPositionList() const { return _positionList; }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t _alignment;
+  List<GlyphItem> _itemList;
+  List<GlyphPosition> _positionList;
 };
 
 // ============================================================================
-// [Fog::TextLayoutRectD]
+// [Fog::GlyphShaper]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextLayoutRectD : public RectD
+//! @brief Low level text shaper.
+//!
+//! Glyph layout is only useful to layout text which is contained in a font.
+//! 
+struct FOG_API GlyphShaper
 {
-  FOG_INLINE TextLayoutRectD() :
-    RectD(0.0, 0.0, 0.0, 0.0),
-    _alignment(NO_FLAGS)
-  {
-  }
-
-  FOG_INLINE TextLayoutRectD(double rx, double ry, double rw, double rh, uint32_t alignment) :
-    RectD(rx, ry, rw, rh),
-    _alignment(alignment)
-  {
-  }
-
-  FOG_INLINE TextLayoutRectD(const RectD& rect, uint32_t alignment) :
-    RectD(rect),
-    _alignment(alignment)
-  {
-  }
-
-  explicit FOG_INLINE TextLayoutRectD(_Uninitialized) : RectD(UNINITIALIZED) {}
-
   // --------------------------------------------------------------------------
-  // [Accessors]
+  // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE uint32_t getAlignment() const { return _alignment; }
-  FOG_INLINE void setAlignment(uint32_t alignment) { _alignment = alignment; }
+  GlyphShaper();
+  ~GlyphShaper();
 
   // --------------------------------------------------------------------------
-  // [Reset]
+  // [Interface]
   // --------------------------------------------------------------------------
-
-  FOG_INLINE void reset() { resetRect(); resetAlignment(); }
-  FOG_INLINE void resetRect() { RectD::reset(); }
-  FOG_INLINE void resetAlignment() { _alignment = NO_FLAGS; }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE TextLayoutRectD& operator=(const TextLayoutRectD& other)
-  {
-    MemOps::copy_t<TextLayoutRectD>(this, &other);
-    return *this;
-  }
+ 
+  err_t shape(const Font& font, const StringW& string);
+  err_t shape(const Font& font, const StubW& string);
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  uint32_t _alignment;
+  GlyphRun _glyphRun;
+
+private:
+  FOG_NO_COPY(GlyphShaper)
 };
-
-// ============================================================================
-// [Fog::TextLayoutRectT<>]
-// ============================================================================
-
-_FOG_NUM_T(TextLayoutRect)
-_FOG_NUM_I(TextLayoutRect)
-_FOG_NUM_F(TextLayoutRect)
-_FOG_NUM_D(TextLayoutRect)
 
 // ============================================================================
 // [Fog::TextLayout]
 // ============================================================================
 
-struct FOG_NO_EXPORT TextLayout
+struct FOG_API TextLayout
 {
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
 
+  TextLayout();
+  virtual ~TextLayout();
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  StringW _text;
+
+private:
+  FOG_NO_COPY(TextLayout)
 };
+
+// ============================================================================
+// [Implemented-Later]
+// ============================================================================
+
+FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
+  const GlyphRun& glyphRun) const
+{
+  FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+
+  const GlyphItem* glyphs = glyphRun._itemList.getData();
+  const GlyphPosition* positions = glyphRun._positionList.getData();
+  size_t length = glyphRun.getLength();
+
+  return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp,
+    &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
+}
+
+FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
+  const GlyphRun& glyphRun) const
+{
+  FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
+
+  const GlyphItem* glyphs = glyphRun._itemList.getData();
+  const GlyphPosition* positions = glyphRun._positionList.getData();
+  size_t length = glyphRun.getLength();
+
+  return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp,
+    &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
+}
 
 //! @}
 

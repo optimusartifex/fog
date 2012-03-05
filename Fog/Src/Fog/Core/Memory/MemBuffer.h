@@ -99,7 +99,7 @@ struct FOG_NO_EXPORT MemBuffer
   size_t _capacity;
 
 private:
-  _FOG_NO_COPY(MemBuffer)
+  FOG_NO_COPY(MemBuffer)
 };
 
 //! @}

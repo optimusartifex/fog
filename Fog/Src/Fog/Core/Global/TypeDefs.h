@@ -363,11 +363,18 @@ struct FontMatrix;
 struct FontMetrics;
 struct FontSpacing;
 struct GlyphItem;
+struct GlyphLayout;
 struct GlyphPosition;
 struct GlyphRun;
-struct TextLayoutRectI;
-struct TextLayoutRectF;
-struct TextLayoutRectD;
+struct TextContainer;
+struct TextDocument;
+struct TextDocumentData;
+struct TextLayout;
+struct TextObj;
+struct TextRectI;
+struct TextRectF;
+struct TextRectD;
+struct TextSpan;
 
 // Fog/G2d/Tools.
 struct Dpi;

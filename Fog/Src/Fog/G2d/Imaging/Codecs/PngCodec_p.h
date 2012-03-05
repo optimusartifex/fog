@@ -98,7 +98,7 @@ struct FOG_NO_EXPORT PngLibrary
   err_t err;
 
 private:
-  _FOG_NO_COPY(PngLibrary)
+  FOG_NO_COPY(PngLibrary)
 };
 
 // ============================================================================

@@ -86,7 +86,7 @@ protected:
   uint32_t _mask;
 
 private:
-  _FOG_NO_COPY(Reduce)
+  FOG_NO_COPY(Reduce)
 };
 
 //! @}

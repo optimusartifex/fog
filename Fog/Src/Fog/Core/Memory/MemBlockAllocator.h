@@ -143,7 +143,7 @@ struct FOG_NO_EXPORT MemBlockAllocator
   MemBlockNode* nodes;
 
 private:
-  _FOG_NO_COPY(MemBlockAllocator)
+  FOG_NO_COPY(MemBlockAllocator)
 };
 
 //! @}

@@ -111,7 +111,7 @@ struct FOG_API WinUIEngineWindowImpl : public UIEngineWindowImpl
   Image _bufferImage;
 
 private:
-  _FOG_NO_COPY(WinUIEngineWindowImpl)
+  FOG_NO_COPY(WinUIEngineWindowImpl)
 };
 
 //! @}

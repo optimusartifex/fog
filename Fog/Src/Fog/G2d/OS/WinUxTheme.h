@@ -99,7 +99,7 @@ struct FOG_API WinUxTheme
 private:
   err_t _init();
 
-  _FOG_NO_COPY(WinUxTheme)
+  FOG_NO_COPY(WinUxTheme)
 };
 
 //! @}

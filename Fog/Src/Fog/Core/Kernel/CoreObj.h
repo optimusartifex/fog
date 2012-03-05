@@ -179,7 +179,7 @@ struct FOG_API CoreObj
   FOG_INLINE err_t resetProperty(size_t index) { return _resetProperty(index); }
 
 private:
-  _FOG_NO_COPY(CoreObj)
+  FOG_NO_COPY(CoreObj)
 };
 
 // ============================================================================

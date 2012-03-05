@@ -324,7 +324,7 @@ struct FOG_NO_EXPORT ObjectExtra
   List<ObjectConnection*> _backwardConnection;
 
 private:
-  _FOG_NO_COPY(ObjectExtra)
+  FOG_NO_COPY(ObjectExtra)
 };
 
 // ============================================================================
@@ -688,7 +688,7 @@ struct FOG_API Object
   Event* _events;
 
 private:
-  _FOG_NO_COPY(Object)
+  FOG_NO_COPY(Object)
 };
 
 //! @}

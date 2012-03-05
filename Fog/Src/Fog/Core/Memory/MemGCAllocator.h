@@ -247,7 +247,7 @@ struct FOG_API MemGCAllocator
   const MemGCFuncs* _funcs;
 
 private:
-  _FOG_NO_COPY(MemGCAllocator)
+  FOG_NO_COPY(MemGCAllocator)
 };
 
 //! @}

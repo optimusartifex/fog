@@ -2993,28 +2993,45 @@ enum SVG_MISC
 //! @brief Text alignment
 enum TEXT_ALIGN
 {
-  TEXT_ALIGN_LEFT        = 0x01,
-  TEXT_ALIGN_RIGHT       = 0x02,
-  TEXT_ALIGN_HCENTER     = 0x03,
-  TEXT_ALIGN_HMASK       = 0x03,
+  TEXT_ALIGN_LEFT = 0x01,
+  TEXT_ALIGN_RIGHT = 0x02,
+  TEXT_ALIGN_HCENTER = 0x03,
+  TEXT_ALIGN_HMASK = 0x03,
 
-  TEXT_ALIGN_TOP         = 0x10,
-  TEXT_ALIGN_BOTTOM      = 0x20,
-  TEXT_ALIGN_VCENTER     = 0x30,
-  TEXT_ALIGN_VMASK       = 0x30,
+  TEXT_ALIGN_TOP = 0x10,
+  TEXT_ALIGN_BOTTOM = 0x20,
+  TEXT_ALIGN_VCENTER = 0x30,
+  TEXT_ALIGN_VMASK = 0x30,
 
-  TEXT_ALIGN_CENTER      = TEXT_ALIGN_VCENTER | TEXT_ALIGN_HCENTER
+  TEXT_ALIGN_CENTER = TEXT_ALIGN_VCENTER | TEXT_ALIGN_HCENTER
 };
 
 // ============================================================================
-// [Fog::TEXT_HINT]
+// [Fog::TEXT_OBJECT]
 // ============================================================================
 
-enum TEXT_HINT
+//! @brief @ref TextObj type.
+enum TEXT_OBJECT
 {
-  TEXT_HINT_PRECISE = 0,
-  TEXT_HINT_ALIGNED_VERTICAL = 1,
-  TEXT_HINT_ALIGNED_BOTH = 2
+  //! @brief Not used.
+  TEXT_OBJECT_NONE = 0,
+  //! @brief @ref TextSpan node.
+  TEXT_OBJECT_SPAN = 1,
+  //! @brief @ref TextDocument node.
+  TEXT_OBJECT_DOCUMENT = 2,
+  //! @brief @ref TextParagraph node.
+  TEXT_OBJECT_PARAGRAPH = 3
+};
+
+// ============================================================================
+// [Fog::TEXT_FLAG]
+// ============================================================================
+
+//! @brief Flags which applies to @ref TextObj.
+enum TEXT_FLAG
+{
+  TEXT_FLAG_DIRTY = 0x0001,
+  TEXT_FLAG_DIRTY_CHILDREN = 0x0002
 };
 
 // ============================================================================

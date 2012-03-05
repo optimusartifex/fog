@@ -381,7 +381,7 @@ struct FOG_API EventLoopImpl
   EventLoopObserverList<EventLoopObserver> _observerList;
 
 private:
-  _FOG_NO_COPY(EventLoopImpl)
+  FOG_NO_COPY(EventLoopImpl)
 };
 
 //! @}

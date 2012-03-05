@@ -144,7 +144,7 @@ struct FOG_API ImageCodecProvider
   List<StringW> _imageExtensions;
 
 private:
-  _FOG_NO_COPY(ImageCodecProvider)
+  FOG_NO_COPY(ImageCodecProvider)
 };
 
 //! @}

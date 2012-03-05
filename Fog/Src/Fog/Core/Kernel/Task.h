@@ -50,7 +50,7 @@ struct FOG_API Task
   bool _destroyOnFinish;
 
 private:
-  _FOG_NO_COPY(Task)
+  FOG_NO_COPY(Task)
 };
 
 // ============================================================================

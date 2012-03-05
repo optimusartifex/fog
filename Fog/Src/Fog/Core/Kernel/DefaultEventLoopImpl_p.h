@@ -57,7 +57,7 @@ struct FOG_NO_EXPORT DefaultEventLoopImpl : public EventLoopImpl
   Time _delayedWorkTime;
 
 private:
-  _FOG_NO_COPY(DefaultEventLoopImpl)
+  FOG_NO_COPY(DefaultEventLoopImpl)
 };
 
 //! @}

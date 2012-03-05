@@ -267,7 +267,7 @@ struct FOG_API UIEngineWindowImpl
   Region _blitRegion;
 
 private:
-  _FOG_NO_COPY(UIEngineWindowImpl)
+  FOG_NO_COPY(UIEngineWindowImpl)
 };
 
 // ============================================================================
@@ -439,7 +439,7 @@ struct FOG_API UIEngineWindow
   UIEngineWindowImpl* _d;
 
 private:
-  _FOG_NO_COPY(UIEngineWindow)
+  FOG_NO_COPY(UIEngineWindow)
 };
 
 //! @}

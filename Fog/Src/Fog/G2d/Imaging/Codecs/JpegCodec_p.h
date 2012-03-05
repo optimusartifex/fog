@@ -71,7 +71,7 @@ struct FOG_NO_EXPORT JpegLibrary
   volatile err_t err;
 
 private:
-  _FOG_NO_COPY(JpegLibrary)
+  FOG_NO_COPY(JpegLibrary)
 };
 
 // ===========================================================================

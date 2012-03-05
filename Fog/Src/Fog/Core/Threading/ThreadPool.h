@@ -156,7 +156,7 @@ struct FOG_NO_EXPORT ThreadPool
   int _numThreads;
 
 private:
-  _FOG_NO_COPY(ThreadPool)
+  FOG_NO_COPY(ThreadPool)
 };
 
 //! @}

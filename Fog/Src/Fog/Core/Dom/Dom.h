@@ -810,7 +810,7 @@ struct FOG_API DomDocumentIdHash
   DomElement* _bucketsBuffer[13];
   
 private:
-  _FOG_NO_COPY(DomDocumentIdHash)
+  FOG_NO_COPY(DomDocumentIdHash)
 };
 
 // ============================================================================
@@ -1056,7 +1056,7 @@ struct FOG_API DomSaxHandler : public XmlSaxHandler
   DomContainer* _currentContainer;
 
 private:
-  _FOG_NO_COPY(DomSaxHandler)
+  FOG_NO_COPY(DomSaxHandler)
 };
 
 // ============================================================================
@@ -1094,7 +1094,7 @@ struct FOG_NO_EXPORT DomAutoGC
   MemGCScope _scope;
 
 private:
-  _FOG_NO_COPY(DomAutoGC)
+  FOG_NO_COPY(DomAutoGC)
 };
 
 //! @}

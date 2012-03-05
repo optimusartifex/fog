@@ -250,7 +250,7 @@ struct FOG_NO_EXPORT MemZoneAllocator
   MemZoneNode _first;
 
 private:
-  _FOG_NO_COPY(MemZoneAllocator)
+  FOG_NO_COPY(MemZoneAllocator)
 };
 
 template<size_t N>

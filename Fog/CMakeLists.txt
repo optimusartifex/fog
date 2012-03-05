@@ -1303,12 +1303,15 @@ Set(FOG_G2D_SVG_HEADERS
 # [Fog/G2d/Text]
 Set(FOG_G2D_TEXT_SOURCES
   Src/Fog/G2d/Text/Font.cpp
+  Src/Fog/G2d/Text/TextDocument.cpp
   Src/Fog/G2d/Text/TextLayout.cpp
 )
 
 Set(FOG_G2D_TEXT_HEADERS
   Src/Fog/G2d/Text/Font.h
+  Src/Fog/G2d/Text/TextDocument.h
   Src/Fog/G2d/Text/TextLayout.h
+  Src/Fog/G2d/Text/TextRect.h
 )
 
 # [Fog/G2d/Text - Windows]

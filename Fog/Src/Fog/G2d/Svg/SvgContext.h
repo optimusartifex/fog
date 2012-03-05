@@ -296,7 +296,7 @@ struct FOG_API SvgContext
   Font _font;
 
 private:
-  _FOG_NO_COPY(SvgContext)
+  FOG_NO_COPY(SvgContext)
 };
 
 // ============================================================================
@@ -463,7 +463,7 @@ struct FOG_NO_EXPORT SvgContextGState
   PointF _cursor;
 
 private:
-  _FOG_NO_COPY(SvgContextGState)
+  FOG_NO_COPY(SvgContextGState)
 };
 
 // ============================================================================
@@ -488,7 +488,7 @@ struct FOG_API SvgContextExtension
   virtual void release() = 0;
 
 private:
-  _FOG_NO_COPY(SvgContextExtension)
+  FOG_NO_COPY(SvgContextExtension)
 };
 
 // ============================================================================
@@ -530,7 +530,7 @@ struct FOG_API SvgRenderContext : public SvgContext
   Pattern _patternTmp;
 
 private:
-  _FOG_NO_COPY(SvgRenderContext)
+  FOG_NO_COPY(SvgRenderContext)
 };
 
 // ============================================================================
@@ -593,7 +593,7 @@ struct FOG_API SvgMeasureContext : public SvgContext
   PathF _pathTmp;
 
 private:
-  _FOG_NO_COPY(SvgMeasureContext)
+  FOG_NO_COPY(SvgMeasureContext)
 };
 
 // ============================================================================
@@ -646,7 +646,7 @@ struct FOG_API SvgHitTestContext : public SvgContext
   PathF _pathTmp;
 
 private:
-  _FOG_NO_COPY(SvgHitTestContext)
+  FOG_NO_COPY(SvgHitTestContext)
 };
 
 //! @}

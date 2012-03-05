@@ -47,7 +47,7 @@ protected:
   double _baseLength;
 
 private:
-  _FOG_NO_COPY(PathOnPath)
+  FOG_NO_COPY(PathOnPath)
 };
 
 //! @}

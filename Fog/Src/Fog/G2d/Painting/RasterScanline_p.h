@@ -91,7 +91,7 @@ struct FOG_NO_EXPORT RasterScanline
   MemZoneAllocator _spanAllocator;
 
 private:
-  _FOG_NO_COPY(RasterScanline)
+  FOG_NO_COPY(RasterScanline)
 };
 
 // ============================================================================
@@ -162,7 +162,7 @@ struct FOG_NO_EXPORT RasterScanline8 : public RasterScanline
   }
 
 private:
-  _FOG_NO_COPY(RasterScanline8)
+  FOG_NO_COPY(RasterScanline8)
 };
 
 // ============================================================================

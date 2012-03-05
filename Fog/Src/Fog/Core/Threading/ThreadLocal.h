@@ -90,7 +90,7 @@ struct FOG_NO_EXPORT ThreadLocal
   uint32_t _slot;
 
 private:
-  _FOG_NO_COPY(ThreadLocal)
+  FOG_NO_COPY(ThreadLocal)
 };
 
 //! @}

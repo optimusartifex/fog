@@ -48,7 +48,7 @@ struct FOG_NO_EXPORT WinFace : public Face
   Static<OT_Face> ot;
 
 private:
-  _FOG_NO_COPY(WinFace)
+  FOG_NO_COPY(WinFace)
 };
 
 // ============================================================================
@@ -86,7 +86,7 @@ struct FOG_NO_EXPORT WinFontEngine : public FontEngine
   Static<StringW> defaultFaceName;
 
 private:
-  _FOG_NO_COPY(WinFontEngine)
+  FOG_NO_COPY(WinFontEngine)
 };
 
 //! @}

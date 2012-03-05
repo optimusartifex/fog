@@ -146,7 +146,7 @@ struct FOG_NO_EXPORT OT_Face
   OT_TableFreeFunc _freeTable;
 
 private:
-  _FOG_NO_COPY(OT_Face)
+  FOG_NO_COPY(OT_Face)
 };
 
 //! @}

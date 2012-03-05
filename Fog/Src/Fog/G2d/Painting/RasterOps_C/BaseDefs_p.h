@@ -257,7 +257,7 @@
 
 // ----------------------------------------------------------------------------
 
-//! @brief VBlit - RasterSpan8 - A8-Mask - Glyph.
+//! @brief VBlit - RasterSpan8 - A8-Glyph.
 #define V_BLIT_SPAN8_A8_GLYPH() \
         } \
         break; \
@@ -270,7 +270,7 @@
 
 // ----------------------------------------------------------------------------
 
-//! @brief VBlit - RasterSpan8 - A8-Mask - Extended.
+//! @brief VBlit - RasterSpan8 - A8-Extended.
 #define V_BLIT_SPAN8_A8_EXTRA() \
         break; \
       } \
@@ -652,7 +652,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 16x8 - 16-bits per pixel, 4 pixels in a main loop]
+// [BLIT_LOOP - 16x8 - 16-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
 #define BLIT_LOOP_16x8_INIT() \
@@ -771,7 +771,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 24x8 - 24-bits per pixel, 4 pixels in a main loop]
+// [BLIT_LOOP - 24x8 - 24-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
 #define BLIT_LOOP_24x8_INIT() \

@@ -12,6 +12,7 @@
 
 #include <Fog/Core/Global/Api.h>
 #include <Fog/Core/Global/Assert.h>
+#include <Fog/Core/Global/BuildInfo.h>
 #include <Fog/Core/Global/Class.h>
 #include <Fog/Core/Global/Enum.h>
 #include <Fog/Core/Global/Init.h>

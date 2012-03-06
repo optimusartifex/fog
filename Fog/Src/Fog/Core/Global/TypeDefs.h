@@ -37,6 +37,9 @@ struct DomResourceItem;
 struct DomResourceManager;
 struct DomText;
 
+// Fog/Core/Global.
+struct BuildInfo;
+
 // Fog/Core/Kernel.
 struct Application;
 struct CoreObj;

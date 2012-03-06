@@ -14,7 +14,7 @@
 #include <Fog/Core/Kernel/Application.h>
 
 // ============================================================================
-// [Fog::All - Library Initializers]
+// [Fog::Init - Global Init/Fini]
 // ============================================================================
 
 static size_t _fog_init_counter;
@@ -65,7 +65,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
   TextCodec_init();
   Locale_init();
-  InternedString_init();          // Depends on String and Lock.
+  InternedString_init();         // Depends on String and Lock.
 
   Time_init();                   // Depends on Lock.
   Date_init();

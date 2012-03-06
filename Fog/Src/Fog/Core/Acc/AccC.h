@@ -3010,6 +3010,28 @@ static FOG_INLINE void p32MulDiv255PBW_SBW(
   dst0 = ((dst0 + ((dst0 >> 8) & 0x00FF00FFU) + 0x00800080U) >> 8) & 0x00FF00FFU;
 }
 
+//! @verbatim
+//! dst0.u16[0] = (x0.u16[0] * y0.u32[0]) / 255
+//! dst0.u16[1] = 0x00
+//! @endverbatim
+static FOG_INLINE void p32MulDiv255PBW_SBW_ZeroPBW1(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
+{
+  dst0 = ((x0 & 0xFF) * y0);
+  dst0 = ((dst0 + (dst0 >> 8) + 0x80U) >> 8);
+}
+
+//! @verbatim
+//! dst0.u16[0] = (x0.u16[0] * y0.u32[0]) / 255
+//! dst0.u16[1] = 0x00
+//! @endverbatim
+static FOG_INLINE void p32MulDiv255PBW_SBW_FillPBW1(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0)
+{
+  dst0 = ((x0 & 0xFF) * y0);
+  dst0 = ((dst0 + (dst0 >> 8) + 0xFF000080U) >> 8);
+}
+
 //! @brief Packed<-Scalar multiply and divide by 255 (2x).
 //!
 //! @verbatim
@@ -3710,6 +3732,42 @@ static FOG_INLINE void p32Lerp256PBB_SBW(
   t1 = (t1 & 0xFF00FF00U);
 
   dst0 = _FOG_ACC_COMBINE_2(t0, t1);
+}
+
+//! @verbatim
+//! dst0.u8[0] = (x0.u8[0] * z0.u32[0] + y0.u8[0] * w0.u32[0]) / 256
+//! dst0.u8[1] = (x0.u8[1] * z0.u32[0] + y0.u8[1] * w0.u32[0]) / 256
+//! dst0.u8[2] = (x0.u8[2] * z0.u32[0] + y0.u8[2] * w0.u32[0]) / 256
+//! dst0.u8[3] = 0x00
+//! @endverbatim
+static FOG_INLINE void p32Lerp256PBB_SBW_ZeroPBB3(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0, const uint32_t& z0, const uint32_t& w0)
+{
+  uint32_t t0 = (x0 & 0x00FF00FFU) * z0 + (y0 & 0x00FF00FFU) * w0;
+  uint32_t t1 = (x0 & 0x0000FF00U) * z0 + (y0 & 0x0000FF00U) * w0;
+
+  t0 &= 0xFF00FF00U;
+  t1 &= 0x00FF0000U;
+
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1) >> 8;
+}
+
+//! @verbatim
+//! dst0.u8[0] = (x0.u8[0] * z0.u32[0] + y0.u8[0] * w0.u32[0]) / 256
+//! dst0.u8[1] = (x0.u8[1] * z0.u32[0] + y0.u8[1] * w0.u32[0]) / 256
+//! dst0.u8[2] = (x0.u8[2] * z0.u32[0] + y0.u8[2] * w0.u32[0]) / 256
+//! dst0.u8[3] = 0xFF
+//! @endverbatim
+static FOG_INLINE void p32Lerp256PBB_SBW_FillPBB3(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0, const uint32_t& z0, const uint32_t& w0)
+{
+  uint32_t t0 = (x0 & 0x00FF00FFU) * z0 + (y0 & 0x00FF00FFU) * w0;
+  uint32_t t1 = (x0 & 0x0000FF00U) * z0 + (y0 & 0x0000FF00U) * w0;
+
+  t0 &= 0xFF00FF00U;
+  t1 &= 0x00FF0000U;
+
+  dst0 = (_FOG_ACC_COMBINE_2(t0, t1) >> 8) + 0xFF000000U;
 }
 
 //! @verbatim

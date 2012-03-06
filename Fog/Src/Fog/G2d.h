@@ -160,6 +160,9 @@
 //! @ingroup Fog_G2d
 
 #include <Fog/G2d/Text/Font.h>
+#include <Fog/G2d/Text/TextDocument.h>
+#include <Fog/G2d/Text/TextLayout.h>
+#include <Fog/G2d/Text/TextRect.h>
 
 // ============================================================================
 // [Fog/G2d/Tools]

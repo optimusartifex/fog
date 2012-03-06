@@ -592,8 +592,8 @@ struct FOG_NO_EXPORT OT_DateTime
   // [Members]
   // --------------------------------------------------------------------------
 
-  LONG hi;
-  ULONG lo;
+  OT_LONG hi;
+  OT_ULONG lo;
 };
 
 //! @}

@@ -26,10 +26,11 @@ BenchFog::~BenchFog()
 
 Fog::StringW BenchFog::getModuleName() const
 {
-  if (mt == false)
-    return Fog::StringW::fromAscii8("Fog (st)");
-  else
-    return Fog::StringW::fromAscii8("Fog (mt)");
+  Fog::StringW module;
+  module.format("Fog (%s-%s)",
+    mt ? "mt" : "st",
+    _fog_build_info()->isReleaseVersion() ? "release" : "debug");
+  return module;
 }
 
 void BenchFog::bench(BenchOutput& output, const BenchParams& params)

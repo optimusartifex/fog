@@ -76,8 +76,12 @@
 # define FOG_ARCH_UNALIGNED_ACCESS_64
 
 // x86_64 uses always SSE/SSE2
-# define FOG_HARDCODE_SSE
-# define FOG_HARDCODE_SSE2
+# if !defined(FOG_HARDCODE_SSE)
+#  define FOG_HARDCODE_SSE
+# endif // !FOG_HARDCODE_SSE
+# if !defined(FOG_HARDCODE_SSE2)
+#  define FOG_HARDCODE_SSE2
+# endif // !FOG_HARDCODE_SSE2
 
 // ============================================================================
 // [Fog::Core::C++ - Architecture - X86_32]
@@ -101,16 +105,20 @@
 # define FOG_ARCH_UNALIGNED_ACCESS_64
 
 // GCC specific.
-# if defined(__MMX__)
+# if !defined(FOG_HARDCODE_MMX) && (defined(__MMX__) || defined(__i686__))
 #  define FOG_HARDCODE_MMX
-# endif // __i686__
+# endif // !FOG_HARDCODE_MMX
 
 // MSVC defines this if compiler optimizes code for MMX or SSE.
 # if defined(_M_IX86_FP)
 #  if _M_IX86_FP == 1
+#   undef FOG_HARDCODE_MMX
+#   undef FOG_HARDCODE_MMX2
 #   define FOG_HARDCODE_MMX
 #   define FOG_HARDCODE_MMX2
 #  elif _M_IX86_FP == 2
+#   undef FOG_HARDCODE_SSE
+#   undef FOG_HARDCODE_SSE2
 #   define FOG_HARDCODE_SSE
 #   define FOG_HARDCODE_SSE2
 #  endif
@@ -208,6 +216,22 @@
 // #define FOG_ARCH_BITS 32 or 64
 # error "Fog::Core::C++ - Unsupported CPU, please fill a bug report."
 #endif
+
+// ============================================================================
+// [Fog::Core::C++ - CPU Architecture hardcoding]
+// ============================================================================
+
+#if defined(FOG_HARDCODE_SSSE3) && !defined(FOG_HARDCODE_SSE3)
+# define FOG_HARDCODE_SSE3
+#endif 
+
+#if defined(FOG_HARDCODE_SSE3) && !defined(FOG_HARDCODE_SSE2)
+# define FOG_HARDCODE_SSE2
+#endif 
+
+#if defined(FOG_HARDCODE_SSE2) && !defined(FOG_HARDCODE_SSE)
+# define FOG_HARDCODE_SSE
+#endif 
 
 // ============================================================================
 // [Fog::Core::C++ - Byte Order]

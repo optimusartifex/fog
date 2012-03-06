@@ -23,21 +23,6 @@ struct FOG_NO_EXPORT CompositeSrcOver
   enum { COMBINE_FLAGS = RASTER_COMBINE_OP_SRC_OVER };
 
   // ==========================================================================
-  // [Func - Prepare]
-  // ==========================================================================
-
-  static FOG_INLINE void prgb32_prepare_xrgb32(
-    uint32_t& dst0p, const uint32_t& src0p)
-  {
-  }
-
-  static FOG_INLINE void prgb32_prepare_xrgb32_2031(
-    uint32_t& dst0p_20, const uint32_t& src0p_20,
-    uint32_t& dst0p_31, const uint32_t& src0p_31)
-  {
-  }
-
-  // ==========================================================================
   // [Func - Pixel32 - Op - Pixel32]
   // ==========================================================================
 
@@ -90,6 +75,16 @@ struct FOG_NO_EXPORT CompositeSrcOver
     uint32_t& dst0p_31, const uint32_t& a0p_31, const uint32_t& b0p_31,
     bool pack = false)
   {
+    uint32_t saInv;
+    Acc::p32ExtractPBW1(saInv, b0p_31);
+    Acc::p32Negate255SBW(saInv, saInv);
+
+    Acc::p32MulDiv255PBW_SBW(dst0p_20, a0p_20, saInv);
+    Acc::p32MulDiv255PBW_SBW_ZeroPBW1(dst0p_31, a0p_31, saInv);
+    Acc::p32Add(dst0p_20, dst0p_20, b0p_20);
+    Acc::p32Add(dst0p_31, dst0p_31, b0p_31);
+    Acc::p32FillPBW1(dst0p_31, dst0p_31);
+    if (pack) Acc::p32PackPBB2031FromPBW(dst0p_20, dst0p_20, dst0p_31);
   }
 
   static FOG_INLINE void xrgb32_op_xrgb32_2031(
@@ -288,8 +283,8 @@ _A8_Glyph_Mask:
         Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
 
         Acc::p32ExtractPBB3(msk0p, src0p);
-        Acc::p32Negate255SBW(msk0p, msk0p);
-        Acc::p32MulDiv255PBB_SBW(dst0p, dst0p, msk0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
         Acc::p32Add(dst0p, dst0p, src0p);
         Acc::p32Store4a(dst, dst0p);
 

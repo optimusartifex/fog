@@ -198,7 +198,7 @@ FOG_NO_EXPORT void RegionUtil_init(void);
 FOG_NO_EXPORT void Font_init(void);
 FOG_NO_EXPORT void Font_fini(void);
 
-FOG_NO_EXPORT void OTCore_init(void);
+FOG_NO_EXPORT void OTApi_init(void);
 
 } // Fog namespace
 

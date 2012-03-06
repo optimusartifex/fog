@@ -26,15 +26,24 @@ GlyphShaper::~GlyphShaper()
 }
 
 // ============================================================================
-// [Fog::GlyphShaper - Shape]
+// [Fog::GlyphShaper - Clear]
 // ============================================================================
 
-err_t GlyphShaper::shape(const Font& font, const StringW& string)
+void GlyphShaper::clear()
 {
-  return shape(font, StubW(string.getData(), string.getLength()));
+  _glyphRun.clear();
 }
 
-err_t GlyphShaper::shape(const Font& font, const StubW& string)
+// ============================================================================
+// [Fog::GlyphShaper - AddText]
+// ============================================================================
+
+err_t GlyphShaper::addText(const Font& font, const StringW& string)
+{
+  return addText(font, StubW(string.getData(), string.getLength()));
+}
+
+err_t GlyphShaper::addText(const Font& font, const StubW& string)
 {
   // TODO:
   return ERR_RT_NOT_IMPLEMENTED;

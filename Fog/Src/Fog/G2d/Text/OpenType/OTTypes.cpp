@@ -4,21 +4,16 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
-#include <Fog/G2d/Text/OpenType/OTCore.h>
-
-// ============================================================================
-// [fog_ot_api]
-// ============================================================================
-
-FOG_CVAR_DECLARE Fog::OT_Api fog_ot_api;
+#include <Fog/G2d/Text/OpenType/OTApi.h>
+#include <Fog/G2d/Text/OpenType/OTTypes.h>
 
 namespace Fog {
 
 // ============================================================================
-// [OT_CheckSum]
+// [Fog::OTCheckSum]
 // ============================================================================
 
-static uint32_t FOG_CDECL OT_CheckSum_calc(const OT_ULONG* pTable, uint32_t length)
+static uint32_t FOG_CDECL OTCheckSum_calc(const OTUInt32* pTable, uint32_t length)
 {
   // OT-Spec: This function implies that the length of a table must be a multiple
   // of four bytes. While this is not a requirement for the TrueType scaler,
@@ -48,16 +43,15 @@ static uint32_t FOG_CDECL OT_CheckSum_calc(const OT_ULONG* pTable, uint32_t leng
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void OTCore_init(void)
+FOG_NO_EXPORT void OTTypes_init(void)
 {
-  OT_Api& api = fog_ot_api;
+  OTApi& api = fog_ot_api;
 
   // --------------------------------------------------------------------------
-  // [OT_CheckSum]
+  // [OTCheckSum]
   // --------------------------------------------------------------------------
 
-  api.ot_checksum_calc = OT_CheckSum_calc;
+  api.otchecksum_calc = OTCheckSum_calc;
 }
-
 
 } // Fog namespace

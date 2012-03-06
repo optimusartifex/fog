@@ -1369,15 +1369,18 @@ EndIf()
 
 # [Fog/G2d/Text/OpenType]
 Set(FOG_G2D_TEXT_OPENTYPE_SOURCES
+  Src/Fog/G2d/Text/OpenType/OTApi.cpp
   Src/Fog/G2d/Text/OpenType/OTCMap.cpp
-  Src/Fog/G2d/Text/OpenType/OTCore.cpp
   Src/Fog/G2d/Text/OpenType/OTFace.cpp
+  Src/Fog/G2d/Text/OpenType/OTTypes.cpp
 )
 
 Set(FOG_G2D_TEXT_OPENTYPE_HEADERS
+  Src/Fog/G2d/Text/OpenType/OTApi.h
   Src/Fog/G2d/Text/OpenType/OTCMap.h
-  Src/Fog/G2d/Text/OpenType/OTCore.h
+  Src/Fog/G2d/Text/OpenType/OTEnum.h
   Src/Fog/G2d/Text/OpenType/OTFace.h
+  Src/Fog/G2d/Text/OpenType/OTTypes.h
 )
 
 # [Fog/G2d/Tools]

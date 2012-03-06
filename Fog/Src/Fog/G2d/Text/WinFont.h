@@ -45,7 +45,7 @@ struct FOG_NO_EXPORT WinFace : public Face
   // --------------------------------------------------------------------------
 
   HFONT hFace;
-  Static<OT_Face> ot;
+  Static<OTFace> ot;
 
 private:
   FOG_NO_COPY(WinFace)

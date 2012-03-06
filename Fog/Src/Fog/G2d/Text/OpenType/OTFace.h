@@ -9,80 +9,32 @@
 
 // [Dependencies]
 #include <Fog/Core/Memory/MemZoneAllocator.h>
-#include <Fog/G2d/Text/OpenType/OTCore.h>
+#include <Fog/G2d/Text/OpenType/OTApi.h>
+#include <Fog/G2d/Text/OpenType/OTTypes.h>
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Text
+//! @addtogroup Fog_G2d_Text_OpenType
 //! @{
 
 // ============================================================================
-// [Fog::OT_Table]
+// [Fog::OTFace]
 // ============================================================================
 
-struct FOG_NO_EXPORT OT_Table
-{
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE uint8_t* getData() const { return _data; }
-
-  FOG_INLINE uint32_t getTag() const { return _tag; }
-  FOG_INLINE uint32_t getLength() const { return _length; }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  //! @brief 'sfnt' data.
-  uint8_t* _data;
-
-  //! @brief Name of tag the data belongs to.
-  uint32_t _tag;
-  //! @brief Length of @c _data.
-  uint32_t _length;
-};
-
-// ============================================================================
-// [Fog::OT_LinkedTable]
-// ============================================================================
-
-struct FOG_NO_EXPORT OT_LinkedTable : public OT_Table
-{
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  OT_LinkedTable* _next;
-};
-
-// ============================================================================
-// [Fog::OT_Face]
-// ============================================================================
-
-struct FOG_NO_EXPORT OT_Face
+struct FOG_NO_EXPORT OTFace
 {
   // --------------------------------------------------------------------------
   // [Construction / Destruction]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE OT_Face() :
-    _allocator(240),
-    _tableData(NULL),
-    _freeTable(NULL)
+  FOG_INLINE OTFace()
   {
+    fog_ot_api.otface_ctor(this);
   }
 
-  FOG_INLINE ~OT_Face()
+  FOG_INLINE ~OTFace()
   {
-    OT_LinkedTable* table = _tableData;
-    while (table != NULL)
-    {
-      OT_LinkedTable* next = table->_next;
-      _freeTable(table);
-      table = next;
-    }
+    fog_ot_api.otface_dtor(this);
   }
 
   // --------------------------------------------------------------------------
@@ -94,59 +46,32 @@ struct FOG_NO_EXPORT OT_Face
     return getTable(tag) != NULL;
   }
 
-  FOG_INLINE bool hasTable(OT_Table* param) const
+  FOG_INLINE bool hasTable(OTTable* param) const
   {
-    OT_LinkedTable* tab = AtomicCore<OT_LinkedTable*>::get(&_tableData);
-    while (tab != NULL)
-    {
-      if (tab == param)
-        return true;
-    }
-    return false;
+    return fog_ot_api.otface_hasTable(this, param);
   }
 
-  FOG_INLINE OT_Table* getTable(uint32_t tag) const
+  FOG_INLINE OTTable* getTable(uint32_t tag) const
   {
-    OT_LinkedTable* tab = AtomicCore<OT_LinkedTable*>::get(&_tableData);
-    while (tab != NULL)
-    {
-      if (tab->_tag == tag)
-        return tab;
-    }
-    return NULL;
+    return fog_ot_api.otface_getTable(this, tag);
   }
 
-  FOG_INLINE OT_Table* addTable(uint32_t tag, uint8_t* data, uint32_t length)
+  FOG_INLINE OTTable* addTable(uint32_t tag, uint8_t* data, uint32_t length)
   {
-    OT_LinkedTable* tab = static_cast<OT_LinkedTable*>(_allocator.alloc(sizeof(OT_LinkedTable)));
-
-    if (FOG_IS_NULL(tab))
-      return NULL;
-
-    tab->_data = data;
-    tab->_tag = tag;
-    tab->_length = length;
-
-    OT_LinkedTable* old;
-    do {
-      old = AtomicCore<OT_LinkedTable*>::get(&_tableData);
-      tab->_next = old;
-    } while (AtomicCore<OT_LinkedTable*>::cmpXchg(&_tableData, old, tab));
-
-    return tab;
+    return fog_ot_api.otface_addTable(this, tag, data, length);
   }
 
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
-  MemZoneAllocator _allocator;
+  Static<MemZoneAllocator> _allocator;
 
-  OT_LinkedTable* _tableData;
-  OT_TableFreeFunc _freeTable;
+  OTTable* _tableData;
+  OTFaceFreeTableDataFunc _freeTableDataFunc;
 
 private:
-  FOG_NO_COPY(OT_Face)
+  FOG_NO_COPY(OTFace)
 };
 
 //! @}

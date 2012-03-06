@@ -114,6 +114,16 @@ struct FOG_NO_EXPORT GlyphRun
   FOG_INLINE const List<GlyphPosition>& getPositionList() const { return _positionList; }
 
   // --------------------------------------------------------------------------
+  // [Clear]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE void clear()
+  {
+    _itemList.clear();
+    _positionList.clear();
+  }
+
+  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -141,9 +151,11 @@ struct FOG_API GlyphShaper
   // --------------------------------------------------------------------------
   // [Interface]
   // --------------------------------------------------------------------------
- 
-  err_t shape(const Font& font, const StringW& string);
-  err_t shape(const Font& font, const StubW& string);
+
+  void clear();
+
+  err_t addText(const Font& font, const StringW& string);
+  err_t addText(const Font& font, const StubW& string);
 
   // --------------------------------------------------------------------------
   // [Members]

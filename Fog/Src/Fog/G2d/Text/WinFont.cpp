@@ -185,9 +185,9 @@ struct FOG_NO_EXPORT WinGetGlyphOutlineHDC
 // [Fog::WinFace - Create / Destroy]
 // ============================================================================
 
-static void FOG_CDECL WinFace_freeTable(OT_Table* table)
+static void FOG_CDECL WinFace_freeTableData(uint8_t* data, size_t dataLength)
 {
-  MemMgr::free(table->getData());
+  MemMgr::free(data);
 }
 
 static void FOG_CDECL WinFace_create(WinFace* self, HFONT hFace)
@@ -195,7 +195,7 @@ static void FOG_CDECL WinFace_create(WinFace* self, HFONT hFace)
   fog_new_p(self) WinFace(&WinFace_vtable, StringW::getEmptyInstance());
 
   self->hFace = hFace;
-  self->ot->_freeTable = WinFace_freeTable;
+  self->ot->_freeTableDataFunc = WinFace_freeTableData;
 }
 
 static void FOG_CDECL WinFace_destroy(Face* self_)
@@ -210,10 +210,10 @@ static void FOG_CDECL WinFace_destroy(Face* self_)
 // [Fog::WinFace - GetTable / ReleaseTable]
 // ============================================================================
 
-static OT_Table* FOG_CDECL WinFace_getTable(const Face* self_, uint32_t tag)
+static OTTable* FOG_CDECL WinFace_getTable(const Face* self_, uint32_t tag)
 {
   const WinFace* self = static_cast<const WinFace*>(self_);
-  OT_Table* table;
+  OTTable* table;
 
   // Not needed to synchronize, because we only add into the list using atomic
   // operations.
@@ -263,12 +263,6 @@ static OT_Table* FOG_CDECL WinFace_getTable(const Face* self_, uint32_t tag)
 _End:
   ::SelectObject(scopedDC, oldFont);
   return table;
-}
-
-static void FOG_CDECL WinFace_releaseTable(const Face* self_, OT_Table* table)
-{
-  // WinFace caches all tables, there is nothing to do.
-  FOG_ASSERT(static_cast<const WinFace*>(self_)->ot->hasTable(table));
 }
 
 // ============================================================================
@@ -926,7 +920,6 @@ FOG_NO_EXPORT void Font_init_win(void)
 
   WinFace_vtable.destroy = WinFace_destroy;
   WinFace_vtable.getTable = WinFace_getTable;
-  WinFace_vtable.releaseTable = WinFace_releaseTable;
   WinFace_vtable.getOutlineFromGlyphRunF = WinFace_getOutlineFromGlyphRunF;
   WinFace_vtable.getOutlineFromGlyphRunD = WinFace_getOutlineFromGlyphRunD;
 

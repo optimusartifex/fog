@@ -27,7 +27,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
-struct OT_Table;
+struct OTTable;
 
 // ============================================================================
 // [Fog::FontSpacing]
@@ -1077,8 +1077,7 @@ struct FOG_NO_EXPORT FaceVTable
 {
   void (FOG_CDECL* destroy)(Face* self);
 
-  OT_Table* (FOG_CDECL* getTable)(const Face* self, uint32_t tag);
-  void (FOG_CDECL* releaseTable)(const Face* self, OT_Table* table);
+  OTTable* (FOG_CDECL* getTable)(const Face* self, uint32_t tag);
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunF)(FontData* d,
     PathF* dst, uint32_t cntOp,

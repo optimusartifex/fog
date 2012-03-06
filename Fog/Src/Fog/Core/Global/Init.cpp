@@ -187,7 +187,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   RasterPaintEngine_init();
 
   // [G2d/Text]
-  OTCore_init();
+  OTApi_init();
   Font_init();
 }
 

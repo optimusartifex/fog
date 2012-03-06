@@ -12,33 +12,6 @@ namespace Fog {
 #include <Fog/Core/C++/PackByte.h>
 
 // ============================================================================
-// [Fog::OTCMapIndex]
-// ============================================================================
-
-//! @brief 'cmap' index table.
-struct FOG_NO_EXPORT OTCMapIndex
-{
-  //! @brief Version of 'cmap' header.
-  OTUInt16 version;
-  //! @brief Count of 'cmap' (sub)tables.
-  OTUInt16 count;
-};
-
-// ============================================================================
-// [Fog::OTCMapEncoding]
-// ============================================================================
-
-struct FOG_NO_EXPORT OTCMapEncoding
-{
-  //! @brief Platform identifier.
-  OTUInt16 platformID;
-  //! @brief Plaform-specific encoding identifier.
-  OTUInt16 platformSpecificID;
-  //! @brief Offset of the mapping table.
-  OTUInt32 offset;
-};
-
-// ============================================================================
 // [Fog::OTCMapFormat0]
 // ============================================================================
 
@@ -46,7 +19,7 @@ struct FOG_NO_EXPORT OTCMapEncoding
 // -------------+--------------+----------------------+------------------------
 // UInt16       | 0            | format               | Format number is set to 0.
 // UInt16       | 2            | length               | Table length in bytes.
-// UInt16       | 4            | MacLanguageCode      | Mac language code.
+// UInt16       | 4            | macLanguageCode      | Mac language code.
 // UInt8[256]   | 6            | glyphIdArray         | Glyph index array (256).
 
 // ============================================================================
@@ -61,7 +34,7 @@ struct FOG_NO_EXPORT OTCMapEncoding
 // -------------+--------------+----------------------+------------------------
 // UInt16       | 0            | format               | Format number is set to 4.
 // UInt16       | 2            | length               | Table length in bytes.
-// UInt16       | 4            | MacLanguageCode      | Mac language code.
+// UInt16       | 4            | macLanguageCode      | Mac language code.
 // UInt16       | 6            | nSegs*2 (N)          | Number of segments * 2.
 // UInt16       | 8            | searchRange          | (2^floor(log2(N))) * 2   == 2*1(LogSegs).
 // UInt16       | 10           | entrySelector        | log2(searchRange / 2)    == LogSegs.
@@ -81,7 +54,7 @@ struct FOG_NO_EXPORT OTCMapEncoding
 // -------------+--------------+----------------------+------------------------
 // UInt16       | 0            | format               | Format number is set to 6.
 // UInt16       | 2            | length               | Table length in bytes.
-// UInt16       | 4            | MacLanguageCode      | Mac language code.
+// UInt16       | 4            | macLanguageCode      | Mac language code.
 // UInt16       | 6            | first                | First segment code.
 // UInt16       | 8            | count (N)            | Segment size in bytes.
 // UInt16[N]    | 10           | glyphIdArray         | Glyph index array.
@@ -213,6 +186,17 @@ static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
 {
   FOG_ASSERT_X(self->_tag == FOG_OT_TAG('c', 'm', 'a', 'p'),
     "Fog::OTCMapTable::init() - Called on invalid table.");
+
+  const uint8_t* data = self->getData();
+  size_t dataLength = self->getDataLength();
+
+  const OTCMapHeader* header = reinterpret_cast<const OTCMapHeader*>(data);
+  if (header->version.getRawA() != 0x0000)
+    return ERR_FONT_OT_CMAP_UNSUPPORTED;
+
+  uint32_t count = header->count.getValueA();
+  if (count == 0)
+    return ERR_FONT_OT_CMAP_CORRUPTED;
 
   
 

@@ -20,6 +20,37 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::OTCMapHeader]
+// ============================================================================
+
+//! @brief 'cmap' index table.
+struct FOG_NO_EXPORT OTCMapHeader
+{
+  //! @brief Version of 'cmap' header, must be 0.
+  OTUInt16 version;
+  //! @brief Count of 'cmap' (sub)tables.
+  OTUInt16 count;
+};
+
+// ============================================================================
+// [Fog::OTCMapEncoding]
+// ============================================================================
+
+struct FOG_NO_EXPORT OTCMapEncoding
+{
+  //! @brief Platform identifier.
+  OTUInt16 platformID;
+  //! @brief Plaform-specific encoding identifier.
+  OTUInt16 specificID;
+  //! @brief Offset of the mapping table.
+  OTUInt32 offset;
+};
+
+// ============================================================================
+// [Fog::OTCMap...]
+// ============================================================================
+
+// ============================================================================
 // [Fog::OTCMapTable]
 // ============================================================================
 
@@ -31,6 +62,9 @@ struct FOG_NO_EXPORT OTCMapTable : public OTTable
 
   //! @brief Get character placement.
   OTCMapInitContextFunc _initContext;
+
+  size_t _numTables;
+
 };
 
 // ============================================================================

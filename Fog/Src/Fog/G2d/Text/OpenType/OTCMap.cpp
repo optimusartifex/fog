@@ -84,23 +84,21 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
     uint32_t ut;
     uint32_t glyphId = 0;
 
-     const uint8_t* p;
+    const uint8_t* p;
 
-     if (uc > 0xFFFF)
+    if (uc > 0xFFFF)
       goto _GlyphDone;
 
     uint32_t start, end;
     uint32_t endCount = 14;
     uint32_t search = endCount;
     
-    // They lie from [endCount, endCount + segCount], but searchRange is the 
-    // nearest power of two.
+    // [endCount, endCount + segCount].
     p = data + search;
     ut = FOG_OT_UINT16(p + rangeShift * 2)->getValueA();
     if (uc >= ut)
       search += rangeShift * 2;
 
-    // Now decrement to bias correctly to find smallest
     search -= 2;
     while (entrySelector)
     {

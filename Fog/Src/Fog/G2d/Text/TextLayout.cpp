@@ -71,8 +71,8 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
   GlyphPosition* pos = _glyphRun._positionList._prepare(CONTAINER_OP_APPEND, sLength);
   for (size_t i = 0; i < sLength; i++)
   {
-    pos->reset();
-    pos->setPosition(PointF(100.0f, 100.0f));
+    pos[i].reset();
+    pos[i].setPosition(PointF(100.0f, 100.0f));
   }
 
   return ERR_OK;

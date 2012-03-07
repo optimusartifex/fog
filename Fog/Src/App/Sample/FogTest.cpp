@@ -431,6 +431,7 @@ void AppWindow::onPaint(Painter* _p)
 #endif
 
   Font font;
+  font.setSize(48);
   StringW str(Ascii8("Sample text"));
 
   p.setSource(Argb32(0xFF000000));

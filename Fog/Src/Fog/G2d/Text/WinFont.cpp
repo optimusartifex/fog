@@ -434,12 +434,11 @@ static FOG_INLINE err_t WinFace_getOutlineFromGlyphRunT(FontData* d,
 {
   WinFace* face = static_cast<WinFace*>(d->face);
 
+  if (cntOp == CONTAINER_OP_REPLACE)
+    dst->clear();
+
   if (length == 0)
-  {
-    if (cntOp == CONTAINER_OP_REPLACE)
-      dst->clear();
     return ERR_OK;
-  }
 
   // Build the transform.
   NumT_(Transform) transform;

@@ -494,7 +494,7 @@ _ARGB32_Glyph_Skip:
   // [PRGB32 - VBlit - XRGB32 - Line]
   // ==========================================================================
 
-  static FOG_INLINE void prgb32_vblit_xrgb32_line(
+  static void FOG_FASTCALL prgb32_vblit_xrgb32_line(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
     BLIT_LOOP_32x1_INIT()

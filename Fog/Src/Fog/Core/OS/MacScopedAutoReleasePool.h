@@ -42,7 +42,7 @@ struct FOG_API MacScopedAutoReleasePool
   NSAutoreleasePool* _pool;
 
 private:
-  _FOG_NO_COPY(MacScopedAutoReleasePool)
+  FOG_NO_COPY(MacScopedAutoReleasePool)
 };
 
 } // Fog namespace

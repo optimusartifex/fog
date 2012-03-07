@@ -125,7 +125,7 @@ struct FOG_API MacUIEngineWindowImpl : public UIEngineWindowImpl
   Image _bufferImage;
 
 private:
-  _FOG_NO_COPY(MacUIEngineWindowImpl)
+  FOG_NO_COPY(MacUIEngineWindowImpl)
 };
 
 //! @}

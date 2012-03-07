@@ -50,6 +50,7 @@ struct FOG_NO_EXPORT OTCMapEncoding
 // [Fog::OTCMap...]
 // ============================================================================
 
+
 // ============================================================================
 // [Fog::OTCMapTable]
 // ============================================================================
@@ -63,8 +64,8 @@ struct FOG_NO_EXPORT OTCMapTable : public OTTable
   //! @brief Get character placement.
   OTCMapInitContextFunc _initContext;
 
-  size_t _numTables;
-
+  // size_t _recordCount;
+  // OTCMapRecord* _recordList;
 };
 
 // ============================================================================

@@ -187,30 +187,32 @@ void Logger::logVFormat(uint32_t severity, const char* where, const char* method
 // [Fog::Logger - Emit]
 // ============================================================================
 
-void Logger::emitRecord(const LoggerRecord& record)
+static err_t Logger_formatRecord(StringA& dst, const LoggerRecord& record)
 {
-  // Dummy, must be reimplemented.
-
-  // TODO:
-  StringA buf;
-
-  buf.append(Logger_severityMsg[record.getSeverity()]);
-  buf.append(' ');
+  FOG_RETURN_ON_ERROR(dst.append(Logger_severityMsg[record.getSeverity()]));
+  FOG_RETURN_ON_ERROR(dst.append(' '));
   
   // TODO: Casted to uint64_t, because it's ambiguous. There should be long
   // and ulong version in StringA/StringW to fix this issue.
-  buf.appendInt((uint64_t)record.getThreadId(), 
-    FormatInt(16, STRING_FORMAT_CAPITALIZE | STRING_FORMAT_ZERO_PAD, 0, sizeof(void*) * 2));
-  buf.append(' ');
-  TextCodec::local8().encode(buf, record.getMessage());
+  FOG_RETURN_ON_ERROR(dst.appendInt((uint64_t)record.getThreadId(), 
+    FormatInt(16, STRING_FORMAT_CAPITALIZE | STRING_FORMAT_ZERO_PAD, 0, sizeof(void*) * 2)));
+  FOG_RETURN_ON_ERROR(dst.append(' '));
+
+  err_t err = TextCodec::local8().encode(dst, record.getMessage());
+  if (!dst.endsWith('\n'))
+    FOG_RETURN_ON_ERROR(dst.append('\n'));
+  return err;
+}
+
+void Logger::emitRecord(const LoggerRecord& record)
+{
+  // TODO: Dummy, must be reimplemented.
+  StringA buf;
+  Logger_formatRecord(buf, record);
 
   size_t bufLength = buf.getLength();
   fwrite(buf.getData(), bufLength, 1, stderr);
 
-  char nl = '\n';
-  if (bufLength == 0 || buf.getAt(bufLength - 1) != nl)
-    fwrite(&nl, 1, 1, stderr);
-  
   fflush(stderr);
 }
 
@@ -329,7 +331,48 @@ StreamLogger::~StreamLogger()
 
 void StreamLogger::emitRecord(const LoggerRecord& record)
 {
+  // TODO:???
 }
+
+// ============================================================================
+// [Fog::WinDebugLogger]
+// ============================================================================
+
+#if defined(FOG_OS_WINDOWS)
+struct FOG_NO_EXPORT WinDebugLogger : public Logger
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  WinDebugLogger();
+  virtual ~WinDebugLogger();
+
+  // --------------------------------------------------------------------------
+  // [Emit]
+  // --------------------------------------------------------------------------
+
+  virtual void emitRecord(const LoggerRecord& record);
+};
+
+WinDebugLogger::WinDebugLogger()
+{
+  _type = LOGGER_TYPE_WIN_DEBUG;
+}
+
+WinDebugLogger::~WinDebugLogger()
+{
+}
+
+void WinDebugLogger::emitRecord(const LoggerRecord& record)
+{
+  StringA buf;
+  Logger_formatRecord(buf, record);
+
+  ::OutputDebugStringA(buf.getData());
+}
+
+#endif // FOG_OS_WINDOWS
 
 // ============================================================================
 // [Init / Fini]
@@ -337,10 +380,18 @@ void StreamLogger::emitRecord(const LoggerRecord& record)
 
 FOG_NO_EXPORT void Logger_init(void)
 {
+  Logger* logger;
+
   Logger_tls.init();
   Logger_tls->create(Logger_tls_destructor);
 
-  Logger_global = fog_new Logger();
+#if defined(FOG_OS_WINDOWS)
+  logger = fog_new WinDebugLogger();
+#else
+  logger = fog_new Logger();
+#endif
+
+  Logger_global = logger;
   fog_application_safe_to_log = 1;
 }
 

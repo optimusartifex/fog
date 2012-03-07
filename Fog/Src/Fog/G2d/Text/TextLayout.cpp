@@ -10,6 +10,9 @@
 
 // [Dependencies]
 #include <Fog/G2d/Text/TextLayout.h>
+#include <Fog/G2d/Text/OpenType/OTCMap.h>
+#include <Fog/G2d/Text/OpenType/OTEnum.h>
+#include <Fog/G2d/Text/OpenType/OTFace.h>
 
 namespace Fog {
 
@@ -17,7 +20,8 @@ namespace Fog {
 // [Fog::GlyphShaper - Construction / Destruction]
 // ============================================================================
 
-GlyphShaper::GlyphShaper()
+GlyphShaper::GlyphShaper() :
+  _encoding(OT_ENCODING_ID_UNICODE)
 {
 }
 
@@ -45,8 +49,33 @@ err_t GlyphShaper::addText(const Font& font, const StringW& string)
 
 err_t GlyphShaper::addText(const Font& font, const StubW& string)
 {
+  OTFace* ot = font.getFace()->getOTFace();
+  if (FOG_IS_NULL(ot))
+    return ERR_FONT_INVALID_FACE;
+
+  OTCMapTable* cMapTable = ot->getCMap();
+  if (!FOG_OT_LOADED(cMapTable))
+    return ERR_FONT_OT_CMAP_NOT_LOADED;
+
+  OTCMapContext cMapContext;
+  cMapContext.init(cMapTable, _encoding);
+
+  const CharW* sData = string.getData();
+  size_t sLength = string.getComputedLength();
+
+  GlyphItem* glyphs = _glyphRun._itemList._prepare(CONTAINER_OP_APPEND, sLength);
+  cMapContext.getGlyphPlacement(&glyphs->_glyphIndex, sizeof(GlyphItem),
+    reinterpret_cast<const uint16_t*>(sData), sLength);
+
   // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  GlyphPosition* pos = _glyphRun._positionList._prepare(CONTAINER_OP_APPEND, sLength);
+  for (size_t i = 0; i < sLength; i++)
+  {
+    pos->reset();
+    pos->setPosition(PointF(100.0f, 100.0f));
+  }
+
+  return ERR_OK;
 }
 
 // ============================================================================

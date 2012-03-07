@@ -430,26 +430,11 @@ void AppWindow::onPaint(Painter* _p)
   p.blitImage(PointI(0, 0), image);
 #endif
 
-  //p.setSource(Argb32(0xFF0000FF));
-  //p.fillRect(RectI(200, 200, 200, 200));
+  Font font;
+  StringW str(Ascii8("Sample text"));
 
-  p.setOpacity(0.5f);
-  p.beginGroup();
-    LinearGradientF lg;
-    lg.setStart(100.0f, 100.0f);
-    lg.setEnd(100.0f, 300.0f);
-    lg.addStop(0.0f, Argb32(0xFFFFFF00));
-    lg.addStop(1.0f, Argb32(0xFF00FF00));
-    p.setSource(lg);
-    p.fillRect(RectI(100, 100, 200, 200));
-
-    p.setSource(Argb32(0xFFFF0000));
-    p.fillRound(RoundF(150.0f, 150.0f, 200.0f, 200.0f, 50.0f));
-
-    p.setSource(Argb32(0xFF0000FF));
-    p.fillRect(RectI(200, 200, 200, 200));
-  p.paintGroup();
-  p.resetOpacity();
+  p.setSource(Argb32(0xFF000000));
+  p.fillText(PointF(100.0f, 100.0f), str, font);
 
   TimeDelta t = TimeTicks::now() - startTime;
 

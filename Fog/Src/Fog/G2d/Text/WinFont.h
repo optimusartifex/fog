@@ -30,7 +30,9 @@ struct FOG_NO_EXPORT WinFace : public Face
     Face(vtable_, family_)
   {
     hFace = NULL;
+
     ot.init();
+    ot->_face = this;
   }
 
   FOG_INLINE ~WinFace()

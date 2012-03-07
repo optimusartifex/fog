@@ -307,6 +307,24 @@ static err_t FOG_CDECL MyPaintEngine_fillShapeD(Painter* self, uint32_t shapeTyp
   return ERR_RT_NOT_IMPLEMENTED;
 }
 
+static err_t FOG_CDECL MyPaintEngine_fillGlyphRunI(Painter* self, const PointI* p, const GlyphRun* glyphRun, const Font* font, const RectI* clip)
+{
+  MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_fillGlyphRunF(Painter* self, const PointI* p, const GlyphRun* glyphRun, const Font* font, const RectF* clip)
+{
+  MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
+static err_t FOG_CDECL MyPaintEngine_fillGlyphRunD(Painter* self, const PointI* p, const GlyphRun* glyphRun, const Font* font, const RectD* clip)
+{
+  MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
+  return ERR_RT_NOT_IMPLEMENTED;
+}
+
 static err_t FOG_CDECL MyPaintEngine_fillTextAtI(Painter* self, const PointI* p, const StringW* text, const Font* font, const RectI* clip)
 {
   MyPaintEngine* engine = static_cast<MyPaintEngine*>(self->_engine);
@@ -790,6 +808,10 @@ static void MyPaintEngine_init()
   v->fillShapeF = MyPaintEngine_fillShapeF;
   v->fillShapeD = MyPaintEngine_fillShapeD;
 
+  v->fillGlyphRunI = MyPaintEngine_fillGlyphRunI;
+  v->fillGlyphRunF = MyPaintEngine_fillGlyphRunF;
+  v->fillGlyphRunD = MyPaintEngine_fillGlyphRunD;
+
   v->fillTextAtI = MyPaintEngine_fillTextAtI;
   v->fillTextAtF = MyPaintEngine_fillTextAtF;
   v->fillTextAtD = MyPaintEngine_fillTextAtD;
@@ -1123,6 +1145,11 @@ static err_t FOG_CDECL NullPaintEngine_doPath(Painter* self, const Any* p)
   return ERR_RT_INVALID_STATE;
 }
 
+static err_t FOG_CDECL MyPaintEngine_doGlyphRun(Painter* self, const Any* p, const GlyphRun* glyphRun, const Font* font, const Any* clip)
+{
+  return ERR_RT_INVALID_STATE;
+}
+
 static err_t FOG_CDECL NullPaintEngine_doText(Painter* self, const Any* p, const StringW* text, const Font* font, const Any* clip)
 {
   return ERR_RT_INVALID_STATE;
@@ -1359,6 +1386,10 @@ FOG_NO_EXPORT void NullPaintEngine_init()
 
   v->fillShapeF = (PaintEngineVTable::PaintShapeF)NullPaintEngine_doShape;
   v->fillShapeD = (PaintEngineVTable::PaintShapeD)NullPaintEngine_doShape;
+
+  v->fillGlyphRunI = (PaintEngineVTable::PaintGlyphRunI)MyPaintEngine_doGlyphRun;
+  v->fillGlyphRunF = (PaintEngineVTable::PaintGlyphRunF)MyPaintEngine_doGlyphRun;
+  v->fillGlyphRunD = (PaintEngineVTable::PaintGlyphRunD)MyPaintEngine_doGlyphRun;
 
   v->fillTextAtI = (PaintEngineVTable::PaintTextAtI)NullPaintEngine_doText;
   v->fillTextAtF = (PaintEngineVTable::PaintTextAtF)NullPaintEngine_doText;

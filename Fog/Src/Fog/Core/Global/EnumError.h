@@ -521,8 +521,19 @@ enum ERR_CODE
 
   ERR_FONT_INTERNAL,
 
-  ERR_FONT_OT_CMAP_UNSUPPORTED,
+  //! @brief TrueType/OpenType 'cmap' table format is not loaded.
+  //!
+  //! @note This is generic error, it means that @c ERR_FONT_OP_CMAP_UNSUPPORTED
+  //! or @c ERR_FONT_OT_CMAP_CORRUPTED happened during the load process.
+  ERR_FONT_OT_CMAP_NOT_LOADED,
+  //! @brief TrueType/OpenType 'cmap' (sub)table is corrupted or malformed.
   ERR_FONT_OT_CMAP_CORRUPTED,
+  //! @brief TrueType/OpenType 'cmap' table format is not supported.
+  ERR_FONT_OT_CMAP_UNSUPPORTED_FORMAT,
+  //! @brief TrueType/OpenType 'cmap' (sub)table version is not supported.
+  ERR_FONT_OT_CMAP_UNSUPPORTED_VERSION,
+  //! @brief CMap table of a given encoding (or platformId/specificId) not found.
+  ERR_FONT_OT_CMAP_ENCODING_NOT_FOUND,
 
   // --------------------------------------------------------------------------
   // [Svg]

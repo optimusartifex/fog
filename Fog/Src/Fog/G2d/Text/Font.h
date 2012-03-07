@@ -27,6 +27,7 @@ namespace Fog {
 // [Forward Declarations]
 // ============================================================================
 
+struct OTFace;
 struct OTTable;
 
 // ============================================================================
@@ -1077,7 +1078,8 @@ struct FOG_NO_EXPORT FaceVTable
 {
   void (FOG_CDECL* destroy)(Face* self);
 
-  OTTable* (FOG_CDECL* getTable)(const Face* self, uint32_t tag);
+  OTFace* (FOG_CDECL* getOTFace)(const Face* self);
+  OTTable* (FOG_CDECL* getOTTable)(const Face* self, uint32_t tag);
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunF)(FontData* d,
     PathF* dst, uint32_t cntOp,
@@ -1134,6 +1136,20 @@ struct FOG_NO_EXPORT Face
   {
     if (reference.deref())
       destroy();
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE OTFace* getOTFace() const
+  {
+    return vtable->getOTFace(this);
+  }
+
+  FOG_INLINE OTTable* getOTTable(int32_t tag) const
+  {
+    return vtable->getOTTable(this, tag);
   }
 
   // --------------------------------------------------------------------------

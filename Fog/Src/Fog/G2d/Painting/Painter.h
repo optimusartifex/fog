@@ -1272,6 +1272,10 @@ struct FOG_NO_EXPORT Painter
   FOG_INLINE err_t fillPath(const PathF& p) { return _vtable->fillShapeF(this, SHAPE_TYPE_PATH, &p); }
   FOG_INLINE err_t fillPath(const PathD& p) { return _vtable->fillShapeD(this, SHAPE_TYPE_PATH, &p); }
 
+  FOG_INLINE err_t fillGlyphRun(const PointI& p, const GlyphRun& glyphRun, const Font& font, const RectI* clip = NULL) { return _vtable->fillGlyphRunI(this, &p, &glyphRun, &font, clip); }
+  FOG_INLINE err_t fillGlyphRun(const PointF& p, const GlyphRun& glyphRun, const Font& font, const RectF* clip = NULL) { return _vtable->fillGlyphRunF(this, &p, &glyphRun, &font, clip); }
+  FOG_INLINE err_t fillGlyphRun(const PointD& p, const GlyphRun& glyphRun, const Font& font, const RectD* clip = NULL) { return _vtable->fillGlyphRunD(this, &p, &glyphRun, &font, clip); }
+
   FOG_INLINE err_t fillText(const PointI& p, const StringW& text, const Font& font, const RectI* clip = NULL) { return _vtable->fillTextAtI(this, &p, &text, &font, clip); }
   FOG_INLINE err_t fillText(const PointF& p, const StringW& text, const Font& font, const RectF* clip = NULL) { return _vtable->fillTextAtF(this, &p, &text, &font, clip); }
   FOG_INLINE err_t fillText(const PointD& p, const StringW& text, const Font& font, const RectD* clip = NULL) { return _vtable->fillTextAtD(this, &p, &text, &font, clip); }

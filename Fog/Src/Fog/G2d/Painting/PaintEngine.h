@@ -170,6 +170,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
   typedef err_t (FOG_CDECL *PaintShapeF)(Painter* self, uint32_t shapeType, const void* shapeData);
   typedef err_t (FOG_CDECL *PaintShapeD)(Painter* self, uint32_t shapeType, const void* shapeData);
 
+  typedef err_t (FOG_CDECL *PaintGlyphRunI)(Painter* self, const PointI* p, const GlyphRun* glyphRun, const Font* font, const RectI* clip);
+  typedef err_t (FOG_CDECL *PaintGlyphRunF)(Painter* self, const PointF* p, const GlyphRun* glyphRun, const Font* font, const RectF* clip);
+  typedef err_t (FOG_CDECL *PaintGlyphRunD)(Painter* self, const PointD* p, const GlyphRun* glyphRun, const Font* font, const RectD* clip);
+
   typedef err_t (FOG_CDECL *PaintTextAtI)(Painter* self, const PointI* p, const StringW* text, const Font* font, const RectI* clip);
   typedef err_t (FOG_CDECL *PaintTextAtF)(Painter* self, const PointF* p, const StringW* text, const Font* font, const RectF* clip);
   typedef err_t (FOG_CDECL *PaintTextAtD)(Painter* self, const PointD* p, const StringW* text, const Font* font, const RectD* clip);
@@ -217,6 +221,10 @@ struct FOG_NO_EXPORT PaintEngineVTable
 
   PaintShapeF fillShapeF;
   PaintShapeD fillShapeD;
+
+  PaintGlyphRunI fillGlyphRunI;
+  PaintGlyphRunF fillGlyphRunF;
+  PaintGlyphRunD fillGlyphRunD;
 
   PaintTextAtI fillTextAtI;
   PaintTextAtF fillTextAtF;

@@ -1706,7 +1706,10 @@ enum LOGGER_TYPE
   LOGGER_TYPE_CHILD = 1,
   
   //! @brief Logging into @ref Stream.
-  LOGGER_TYPE_STREAM = 2
+  LOGGER_TYPE_STREAM = 2,
+
+  //! @brief Logging into OutputDebugString function under Windows OS.
+  LOGGER_TYPE_WIN_DEBUG = 3
 };
 
 // ============================================================================

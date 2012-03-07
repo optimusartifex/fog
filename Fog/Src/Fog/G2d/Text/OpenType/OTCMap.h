@@ -39,17 +39,23 @@ struct FOG_NO_EXPORT OTCMapHeader
 struct FOG_NO_EXPORT OTCMapEncoding
 {
   //! @brief Platform identifier.
-  OTUInt16 platformID;
+  OTUInt16 platformId;
   //! @brief Plaform-specific encoding identifier.
-  OTUInt16 specificID;
+  OTUInt16 specificId;
   //! @brief Offset of the mapping table.
   OTUInt32 offset;
 };
 
 // ============================================================================
-// [Fog::OTCMap...]
+// [Fog::OTCMapItem]
 // ============================================================================
 
+struct FOG_NO_EXPORT OTCMapItem
+{
+  uint32_t encodingId;
+  uint32_t priority;
+  err_t status;
+};
 
 // ============================================================================
 // [Fog::OTCMapTable]
@@ -64,8 +70,9 @@ struct FOG_NO_EXPORT OTCMapTable : public OTTable
   //! @brief Get character placement.
   OTCMapInitContextFunc _initContext;
 
-  // size_t _recordCount;
-  // OTCMapRecord* _recordList;
+  uint32_t count;
+  uint32_t unicodeEncodingIndex;
+  OTCMapItem* items;
 };
 
 // ============================================================================
@@ -87,22 +94,22 @@ struct FOG_NO_EXPORT OTCMapContext
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t init(OTCMapTable* cMapTable, uint32_t language)
+  FOG_INLINE err_t init(OTCMapTable* cMapTable, uint32_t encodingId)
   {
     FOG_ASSERT_X(cMapTable != NULL,
       "Fog::OTCMapContext::init() - Called with NULL cMapTable.");
     FOG_ASSERT_X(cMapTable->_initContext != NULL,
       "Fog::OTCMapContext::init() - Called with unsupported cMapTable.");
 
-    return cMapTable->_initContext(this, cMapTable, language);
+    return cMapTable->_initContext(this, cMapTable, encodingId);
   }
 
-  FOG_INLINE size_t getGlyphPlacement(uint32_t* glyphId, const uint16_t* str, size_t length)
+  FOG_INLINE size_t getGlyphPlacement(uint32_t* glyphId, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
   {
     FOG_ASSERT_X(_getGlyphPlacementFunc != NULL,
       "Fog::OTCmapContext::getGlyphPlacement() - Called on uninitialized context");
 
-    return _getGlyphPlacementFunc(this, glyphId, str, length);
+    return _getGlyphPlacementFunc(this, glyphId, glyphAdvance, sData, sLength);
   }
 
   // --------------------------------------------------------------------------

@@ -42,6 +42,9 @@
 #include <Fog/G2d/Source/Color.h>
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Text/Font.h>
+#include <Fog/G2d/Text/TextDocument.h>
+#include <Fog/G2d/Text/TextLayout.h>
+#include <Fog/G2d/Text/TextRect.h>
 
 namespace Fog {
 
@@ -3081,6 +3084,46 @@ _Default:
 }
 
 // ============================================================================
+// [Fog::RasterPaintEngine - Fill - GlyphRun]
+// ============================================================================
+
+static err_t FOG_CDECL RasterPaintEngine_fillGlyphRunI(Painter* self, const PointI* p, const GlyphRun* glyphRun, const Font* font, const RectI* clip)
+{
+  RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathF* path = &engine->ctx.tmpPathF[0];
+  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *glyphRun);
+
+  // TODO: Clip.
+  return RasterPaintEngine_fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
+}
+
+static err_t FOG_CDECL RasterPaintEngine_fillGlyphRunF(Painter* self, const PointF* p, const GlyphRun* glyphRun, const Font* font, const RectF* clip)
+{
+  RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathF* path = &engine->ctx.tmpPathF[0];
+  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *glyphRun);
+
+  // TODO: Clip.
+  return RasterPaintEngine_fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
+}
+
+static err_t FOG_CDECL RasterPaintEngine_fillGlyphRunD(Painter* self, const PointD* p, const GlyphRun* glyphRun, const Font* font, const RectD* clip)
+{
+  RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
+  _FOG_RASTER_ENTER_FILL_FUNC();
+
+  PathD* path = &engine->ctx.tmpPathD[0];
+  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *glyphRun);
+
+  // TODO: Clip.
+  return RasterPaintEngine_fillRawPathD(engine, path, FILL_RULE_NON_ZERO);
+}
+
+// ============================================================================
 // [Fog::RasterPaintEngine - Fill - Text]
 // ============================================================================
 
@@ -3089,8 +3132,10 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextAtI(Painter* self, const PointI
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  GlyphShaper shaper;
+  FOG_RETURN_ON_ERROR(shaper.addText(*font, *text));
+
+  return self->_vtable->fillGlyphRunI(self, p, &shaper._glyphRun, font, clip);
 }
 
 static err_t FOG_CDECL RasterPaintEngine_fillTextAtF(Painter* self, const PointF* p, const StringW* text, const Font* font, const RectF* clip)
@@ -3098,8 +3143,10 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextAtF(Painter* self, const PointF
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  GlyphShaper shaper;
+  FOG_RETURN_ON_ERROR(shaper.addText(*font, *text));
+
+  return self->_vtable->fillGlyphRunF(self, p, &shaper._glyphRun, font, clip);
 }
 
 static err_t FOG_CDECL RasterPaintEngine_fillTextAtD(Painter* self, const PointD* p, const StringW* text, const Font* font, const RectD* clip)
@@ -3107,8 +3154,10 @@ static err_t FOG_CDECL RasterPaintEngine_fillTextAtD(Painter* self, const PointD
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
-  // TODO:
-  return ERR_RT_NOT_IMPLEMENTED;
+  GlyphShaper shaper;
+  FOG_RETURN_ON_ERROR(shaper.addText(*font, *text));
+
+  return self->_vtable->fillGlyphRunD(self, p, &shaper._glyphRun, font, clip);
 }
 
 static err_t FOG_CDECL RasterPaintEngine_fillTextInI(Painter* self, const TextRectI* r, const StringW* text, const Font* font, const RectI* clip)
@@ -6324,6 +6373,10 @@ static void RasterPaintEngine_init_vtable_t()
 
   v->fillShapeF = RasterPaintEngine_fillShapeF;
   v->fillShapeD = RasterPaintEngine_fillShapeD;
+
+  v->fillGlyphRunI = RasterPaintEngine_fillGlyphRunI;
+  v->fillGlyphRunF = RasterPaintEngine_fillGlyphRunF;
+  v->fillGlyphRunD = RasterPaintEngine_fillGlyphRunD;
 
   v->fillTextAtI = RasterPaintEngine_fillTextAtI;
   v->fillTextAtF = RasterPaintEngine_fillTextAtF;

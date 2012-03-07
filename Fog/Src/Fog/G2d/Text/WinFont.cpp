@@ -185,7 +185,7 @@ struct FOG_NO_EXPORT WinGetGlyphOutlineHDC
 // [Fog::WinFace - Create / Destroy]
 // ============================================================================
 
-static void FOG_CDECL WinFace_freeTableData(uint8_t* data, size_t dataLength)
+static void FOG_CDECL WinFace_freeTableData(OTFace* face, uint8_t* data, size_t dataLength)
 {
   MemMgr::free(data);
 }
@@ -210,7 +210,13 @@ static void FOG_CDECL WinFace_destroy(Face* self_)
 // [Fog::WinFace - GetTable / ReleaseTable]
 // ============================================================================
 
-static OTTable* FOG_CDECL WinFace_getTable(const Face* self_, uint32_t tag)
+static OTFace* FOG_CDECL WinFace_getOTFace(const Face* self_)
+{
+  const WinFace* self = static_cast<const WinFace*>(self_);
+  return const_cast<OTFace*>(&self->ot);
+}
+
+static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
 {
   const WinFace* self = static_cast<const WinFace*>(self_);
   OTTable* table;
@@ -919,7 +925,8 @@ FOG_NO_EXPORT void Font_init_win(void)
   // --------------------------------------------------------------------------
 
   WinFace_vtable.destroy = WinFace_destroy;
-  WinFace_vtable.getTable = WinFace_getTable;
+  WinFace_vtable.getOTFace = WinFace_getOTFace;
+  WinFace_vtable.getOTTable = WinFace_getOTTable;
   WinFace_vtable.getOutlineFromGlyphRunF = WinFace_getOutlineFromGlyphRunF;
   WinFace_vtable.getOutlineFromGlyphRunD = WinFace_getOutlineFromGlyphRunD;
 

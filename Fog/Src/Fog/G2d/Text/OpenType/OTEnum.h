@@ -16,6 +16,15 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::OT_NOT_VALIDATED]
+// ============================================================================
+
+enum 
+{
+  OT_NOT_VALIDATED = 0xFFFFFFFFU
+};
+
+// ============================================================================
 // [Fog::OT_PLATFORM_ID]
 // ============================================================================
 
@@ -24,12 +33,12 @@ enum OT_PLATFORM_ID
 {
   //! @brief Unicode platform.
   //!
-  //! @note When used, platformSpecificId indicates unicode version.
+  //! @note When used, OTCMapEncoding::specificId indicates unicode version.
   OT_PLATFORM_ID_UNICODE = 0,
 
   //! @brief Mac platform.
   //!
-  //! @note When used, platformSpecificId means mac script-manager code, see
+  //! @note When used, OTCMapEncoding::specificId means mac script-manager code, see
   //! @ref OT_MAC_ID enumeration for possible values.
   OT_PLATFORM_ID_MAC = 1,
 
@@ -38,7 +47,7 @@ enum OT_PLATFORM_ID
 
   //! @brief MS platform.
   //!
-  //! @note When used, platformSpecificId indicates microsoft encoding.
+  //! @note When used, OTCMapEncoding::specificId indicates microsoft encoding.
   OT_PLATFORM_ID_MS = 3
 };
 
@@ -122,13 +131,40 @@ enum OT_MS_ID
   //! @brief Simplified Chinese encoding.
   OT_MS_ID_GB2312 = 3,
   //! @brief Traditional Chinese encoding.
-  OT_MS_ID_BIG_5 = 4,
+  OT_MS_ID_BIG5 = 4,
   //! @brief Korean Wansung encoding.
   OT_MS_ID_WANSUNG = 5,
   //! @brief Johab encoding.
   OT_MS_ID_JOHAB = 6,
   //! @brief UCS-4 charmaps.
-  OT_MS_ID_UCS_4 = 10
+  OT_MS_ID_UCS4 = 10
+};
+
+// ============================================================================
+// [Fog::OT_ENCODING_ID]
+// ============================================================================
+
+enum OT_ENCODING_ID
+{
+  // NOTE: Tag values are designed to be compatible with FreeType library, but
+  // the table can be extended to support more values than FreeType can.
+
+  OT_ENCODING_ID_NONE = FOG_OT_TAG_NONE,
+  OT_ENCODING_ID_UNICODE = FOG_OT_TAG('u', 'n', 'i', 'c'),
+
+  OT_ENCODING_ID_SJIS = FOG_OT_TAG('s', 'j', 'i', 's'),
+  OT_ENCODING_ID_GB2312 = FOG_OT_TAG('g', 'b', ' ', ' '),
+  OT_ENCODING_ID_BIG5 = FOG_OT_TAG('b', 'i', 'g', '5'),
+  OT_ENCODING_ID_WANSUNG = FOG_OT_TAG('w', 'a', 'n', 's'),
+  OT_ENCODING_ID_JOHAB = FOG_OT_TAG('j', 'o', 'h', 'a'),
+
+  OT_ENCODING_ID_ADOBE_LATIN1 = FOG_OT_TAG('l', 'a', 't', '1'),
+  OT_ENCODING_ID_ADOBE_STANDARD = FOG_OT_TAG('A', 'D', 'O', 'B'),
+  OT_ENCODING_ID_ADOBE_EXPERT = FOG_OT_TAG('A', 'D', 'B', 'E'),
+  OT_ENCODING_ID_ADOBE_CUSTOM = FOG_OT_TAG('A', 'D', 'B', 'C'),
+
+  OT_ENCODING_ID_MS_SYMBOL  = FOG_OT_TAG('s', 'y', 'm', 'b'),
+  OT_ENCODING_ID_MAC_ROMAN = FOG_OT_TAG('a', 'r', 'm', 'n')
 };
 
 //! @}

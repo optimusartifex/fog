@@ -4,6 +4,7 @@
 // MIT, See COPYING file in package
 
 // [Dependencies]
+#include <Fog/G2d/Text/Font.h>
 #include <Fog/G2d/Text/OpenType/OTFace.h>
 #include <Fog/G2d/Text/OpenType/OTCMap.h>
 
@@ -15,9 +16,13 @@ namespace Fog {
 
 static void FOG_CDECL OTFace_ctor(OTFace* self)
 {
-  self->_allocator.initCustom1(488);
+  self->_face = NULL;
+
   self->_tableData = NULL;
   self->_freeTableDataFunc = NULL;
+
+  self->_cmap = NULL;
+  self->_allocator.initCustom1(488);
 }
 
 static void FOG_CDECL OTFace_dtor(OTFace* self)
@@ -31,7 +36,7 @@ static void FOG_CDECL OTFace_dtor(OTFace* self)
 
     if (table->_destroy)
       table->_destroy(table);
-    freeTable(table->_data, table->_dataLength);
+    freeTable(self, table->_data, table->_dataLength);
 
     table = next;
   }
@@ -97,6 +102,21 @@ static OTTable* FOG_CDECL OTFace_getTable(const OTFace* self, uint32_t tag)
 // [OTFace - AddTable]
 // ============================================================================
 
+static OTTable* FOG_CDECL OTFace_tryLoadTable(OTFace* self, uint32_t tag)
+{
+  OTTable* table = self->getTable(tag);
+  if (table != NULL)
+    return table;
+
+  Face* face = self->_face;
+  table = face->vtable->getOTTable(face, tag);
+
+  if (table == NULL)
+    return (OTTable*)(uintptr_t)0x1;
+  else
+    return table;
+}
+
 static OTTable* FOG_CDECL OTFace_addTable(OTFace* self, uint32_t tag, uint8_t* data, uint32_t length)
 {
   size_t tabSize = OTFace_getTableSize(tag);
@@ -119,7 +139,7 @@ static OTTable* FOG_CDECL OTFace_addTable(OTFace* self, uint32_t tag, uint8_t* d
   do {
     old = AtomicCore<OTTable*>::get(&self->_tableData);
     tab->_next = old;
-  } while (AtomicCore<OTTable*>::cmpXchg(&self->_tableData, old, tab));
+  } while (!AtomicCore<OTTable*>::cmpXchg(&self->_tableData, old, tab));
 
   return tab;
 }
@@ -138,8 +158,11 @@ FOG_NO_EXPORT void OTFace_init(void)
 
   api.otface_ctor = OTFace_ctor;
   api.otface_dtor = OTFace_dtor;
+
   api.otface_hasTable = OTFace_hasTable;
   api.otface_getTable = OTFace_getTable;
+
+  api.otface_tryLoadTable = OTFace_tryLoadTable;
   api.otface_addTable = OTFace_addTable;
 }
 

@@ -162,6 +162,7 @@ struct FOG_API GlyphShaper
   // --------------------------------------------------------------------------
 
   GlyphRun _glyphRun;
+  uint32_t _encoding;
 
 private:
   FOG_NO_COPY(GlyphShaper)

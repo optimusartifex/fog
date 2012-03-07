@@ -14,6 +14,29 @@
 namespace Fog {
 
 // ============================================================================
+// [Debugging]
+// ============================================================================
+
+#define FOG_OT_DEBUG
+
+// ============================================================================
+// [API]
+// ============================================================================
+
+// OpenType support was added to Fog-Framework to ensure that font files are
+// interpreted using the same way on all platforms. OpenType structures are
+// prefixed by 'OT', and the whole API, used by all classes is stored in 
+// fog_ot_api structure.
+//
+// Fog-Framework generally follows the harfbuzz design, so many tables are 
+// interpreted in original format performing conversion from big-endian to
+// native-endian on-the-fly. This design ensures that font files can be loaded
+// using mmap() on platforms where this feature is supported and where is 
+// direct access to font files (API to locate font files). However, sometimes
+// it's better to build a cache or to parse some specific parts of tables, so
+// word 'Parsed' should be added to structures like these (eg. OTCMapParsedGroup).
+
+// ============================================================================
 // [Forward Declarations]
 // ============================================================================
 
@@ -52,11 +75,15 @@ struct OTCMapTable;
 //! @addtogroup Fog_G2d_Text_OpenType
 //! @{
 
-typedef void (FOG_CDECL* OTFaceFreeTableDataFunc)(uint8_t* data, size_t dataLength);
+// OTFace.
+typedef void (FOG_CDECL* OTFaceFreeTableDataFunc)(OTFace* self, uint8_t* data, size_t dataLength);
+
+// OTTable.
 typedef void (FOG_CDECL* OTTableDestroyFunc)(OTTable* table);
 
-typedef err_t (FOG_CDECL* OTCMapInitContextFunc)(OTCMapContext* ctx, const OTCMapTable* table, uint32_t language);
-typedef size_t (FOG_CDECL* OTCMapGetGlyphPlacementFunc)(OTCMapContext* ctx, uint32_t* glyphList, const uint16_t* str, size_t length);
+// OTCMapTable aka 'cmap'.
+typedef err_t (FOG_CDECL* OTCMapInitContextFunc)(OTCMapContext* ctx, const OTCMapTable* table, uint32_t encodingId);
+typedef size_t (FOG_CDECL* OTCMapGetGlyphPlacementFunc)(OTCMapContext* ctx, uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength);
 
 //! @}
 
@@ -67,11 +94,16 @@ typedef size_t (FOG_CDECL* OTCMapGetGlyphPlacementFunc)(OTCMapContext* ctx, uint
 //! @addtogroup Fog_G2d_Text_OpenType
 //! @{
 
+#define FOG_OT_TAG_NONE (0x00000000U)
+
+//! @brief Create DWORD of TrueType/OpenType tag, which consists of 4 chars.
 #define FOG_OT_TAG(_C0_, _C1_, _C2_, _C3_) uint32_t( \
   ((uint32_t)(_C0_) << 24) | \
   ((uint32_t)(_C1_) << 16) | \
   ((uint32_t)(_C2_) <<  8) | \
   ((uint32_t)(_C3_)      ) )
+
+#define FOG_OT_LOADED(_Table_) ((uintptr_t)(_Table_) > 0x1)
 
 //! @}
 
@@ -93,8 +125,11 @@ struct FOG_NO_EXPORT OTApi
 
   FOG_CAPI_CTOR(otface_ctor)(OTFace* self);
   FOG_CAPI_DTOR(otface_dtor)(OTFace* self);
+
   FOG_CAPI_METHOD(bool, otface_hasTable)(const OTFace* self, OTTable* param);
   FOG_CAPI_METHOD(OTTable*, otface_getTable)(const OTFace* self, uint32_t tag);
+
+  FOG_CAPI_METHOD(OTTable*, otface_tryLoadTable)(OTFace* self, uint32_t tag);
   FOG_CAPI_METHOD(OTTable*, otface_addTable)(OTFace* self, uint32_t tag, uint8_t* data, uint32_t length);
 
   // --------------------------------------------------------------------------

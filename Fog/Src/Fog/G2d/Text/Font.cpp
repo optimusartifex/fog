@@ -1473,7 +1473,12 @@ static void FOG_CDECL NullFace_destroy(Face* self)
   self->~Face();
 }
 
-static OTTable* FOG_CDECL NullFace_getTable(const Face* self, uint32_t tag)
+static OTFace* FOG_CDECL NullFace_getOTFace(const Face* self)
+{
+  return NULL;
+}
+
+static OTTable* FOG_CDECL NullFace_getOTTable(const Face* self, uint32_t tag)
 {
   return NULL;
 }
@@ -1686,7 +1691,8 @@ FOG_NO_EXPORT void Font_init(void)
   // --------------------------------------------------------------------------
 
   NullFace_vtable.destroy = NullFace_destroy;
-  NullFace_vtable.getTable = NullFace_getTable;
+  NullFace_vtable.getOTFace = NullFace_getOTFace;
+  NullFace_vtable.getOTTable = NullFace_getOTTable;
   NullFace_vtable.getOutlineFromGlyphRunF = NullFace_getOutlineFromGlyphRunF;
   NullFace_vtable.getOutlineFromGlyphRunD = NullFace_getOutlineFromGlyphRunD;
   NullFace_create(&NullFace_oInstance);

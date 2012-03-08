@@ -64,6 +64,9 @@ struct FOG_NO_EXPORT CMapFormat4
 static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
   uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
 {
+  if (sLength == 0)
+    return 0;
+
   const uint8_t* data = static_cast<const uint8_t*>(ctx->_data);
   const CMapFormat4* tab = reinterpret_cast<const CMapFormat4*>(data);
 
@@ -78,9 +81,9 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
   const uint16_t* sMark = sData;
   const uint16_t* sEnd = sData + sLength;
 
-  while (sData < sEnd)
+  uint32_t uc = sData[0];
+  for (;;)
   {
-    uint32_t uc = sData[0];
     uint32_t ut;
     uint32_t glyphId = 0;
 
@@ -92,6 +95,7 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
     uint32_t start, end;
     uint32_t endCount = 14;
     uint32_t search = endCount;
+    uint32_t offset;
     
     // [endCount, endCount + segCount].
     p = data + search;
@@ -122,17 +126,24 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
     if (uc < start)
       goto _GlyphDone;
 
-    uint32_t offset = FOG_OT_UINT16(p + numSeg * 6)->getValueA();
+    offset = FOG_OT_UINT16(p + numSeg * 6)->getValueA();
+_Repeat:
     if (offset == 0)
-      glyphId = (uc + FOG_OT_UINT16(p + numSeg * 4)->getValueA()) & 0xFFFF;
+      glyphId = (uc + FOG_OT_UINT16(p + numSeg * 4)->getValueA());
     else
       glyphId = FOG_OT_UINT16(p + offset + (uc - start) * 2 + numSeg * 6)->getValueA();
+    glyphId &= 0xFFFF;
 
 _GlyphDone:
     glyphList[0] = glyphId;
     glyphList = reinterpret_cast<uint32_t*>((uint8_t*)glyphList + glyphAdvance);
 
-    sData++;
+    if (++sData == sEnd)
+      break;
+
+    uc = sData[0];
+    if (uc >= start && uc <= end)
+      goto _Repeat;
   }
 
   return (size_t)(sData - sMark);

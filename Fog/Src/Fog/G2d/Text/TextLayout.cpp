@@ -72,7 +72,7 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
   for (size_t i = 0; i < sLength; i++)
   {
     pos[i].reset();
-    pos[i].setPosition(PointF(100.0f, 100.0f));
+    pos[i].setPosition(PointF(100.0f + i * 20.0f, 100.0f));
   }
 
   return ERR_OK;

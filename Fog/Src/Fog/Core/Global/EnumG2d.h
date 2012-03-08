@@ -2394,7 +2394,13 @@ enum PATH_CMD
   //!
   //! One @c PATH_CMD_DATA command follows the @c PATH_CMD_QUAD_TO, and two
   //! @c PATH_CMD_DATA commands follow the @c PATH_CMD_CUBIC_TO.
-  PATH_CMD_DATA = 5
+  PATH_CMD_DATA = 5,
+
+  //! @internal
+  //!
+  //! @brief Internal flag never stored with PATH_CMD, used only when path is
+  //! processed or iterated.
+  _PATH_CMD_HAS_INITIAL = 0x8
 };
 
 // ============================================================================

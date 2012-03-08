@@ -66,34 +66,42 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
   bool hasInitial = false;
   __m128d xmmLastMoveTo = _mm_setzero_pd();
 
+  // Current command with _PATH_CMD_HAS_INITIAL flag included. Instead of using
+  // variable for 'hasInitial' flag and command separately, we combined it into
+  // single variable, thus one branch has been eliminated within the loop.
+  uint32_t c = 0;
+
   if (((size_t)pts & 0xF) == 0)
   {
     while (i)
     {
       __m128d xmmSrc0a;
       __m128d xmmSrc0b;
-
-      Acc::m128dLoad16a(xmmSrc0a, pts);
       int msk;
 
-      switch (cmd[0])
+      Acc::m128dLoad16a(xmmSrc0a, pts);
+
+      c |= static_cast<uint32_t>(cmd[0]);
+      switch (c)
       {
         // --------------------------------------------------------------------
         // [Move-To]
         // --------------------------------------------------------------------
 
         case PATH_CMD_MOVE_TO:
+        case PATH_CMD_MOVE_TO | _PATH_CMD_HAS_INITIAL:
+          c = _PATH_CMD_HAS_INITIAL;
+
           xmmLastMoveTo = xmmSrc0a;
-          hasInitial = true;
+          // ... Fall through ...
 
         // --------------------------------------------------------------------
         // [Line-To]
         // --------------------------------------------------------------------
 
-        case PATH_CMD_LINE_TO:
+        case PATH_CMD_LINE_TO | _PATH_CMD_HAS_INITIAL:
         {
-          if (FOG_UNLIKELY(!hasInitial))
-            goto _Invalid;
+          c = _PATH_CMD_HAS_INITIAL;
 
           xmmSrc0b = xmmSrc0a;
           Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
@@ -114,14 +122,13 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
         // [Quad-To]
         // --------------------------------------------------------------------
 
-        case PATH_CMD_QUAD_TO:
+        case PATH_CMD_QUAD_TO | _PATH_CMD_HAS_INITIAL:
         {
           __m128d xmmSrc1a;
           __m128d xmmSrc1b;
 
+          c = _PATH_CMD_HAS_INITIAL;
           FOG_ASSERT(i >= 2);
-          if (FOG_UNLIKELY(!hasInitial))
-            goto _Invalid;
 
           Acc::m128dLoad16a(xmmSrc1a, pts + 1);
           xmmSrc0b = xmmSrc0a;
@@ -150,15 +157,14 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
         // [Cubic-To]
         // --------------------------------------------------------------------
 
-        case PATH_CMD_CUBIC_TO:
+        case PATH_CMD_CUBIC_TO | _PATH_CMD_HAS_INITIAL:
         {
           __m128d xmmSrc1a;
           __m128d xmmSrc1b;
           __m128d xmmSrc2a;
 
+          c = _PATH_CMD_HAS_INITIAL;
           FOG_ASSERT(i >= 2);
-          if (FOG_UNLIKELY(!hasInitial))
-            goto _Invalid;
 
           Acc::m128dLoad16a(xmmSrc1a, pts + 1);
           Acc::m128dLoad16a(xmmSrc2a, pts + 2);
@@ -191,17 +197,27 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
           break;
         }
 
-        // --------------------------------------------------------------------
+        // ----------------------------------------------------------------------
         // [Close]
-        // --------------------------------------------------------------------
+        // ----------------------------------------------------------------------
 
         case PATH_CMD_CLOSE:
-          hasInitial = false;
+        case PATH_CMD_CLOSE | _PATH_CMD_HAS_INITIAL:
+          c = 0;
 
           i--;
           cmd++;
           pts++;
           break;
+
+        // ----------------------------------------------------------------------
+        // [Error]
+        // ----------------------------------------------------------------------
+
+        case PATH_CMD_LINE_TO:
+        case PATH_CMD_QUAD_TO:
+        case PATH_CMD_CUBIC_TO:
+          goto _Invalid;
 
         default:
           FOG_ASSERT_NOT_REACHED();
@@ -214,28 +230,31 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
     {
       __m128d xmmSrc0a;
       __m128d xmmSrc0b;
-
-      Acc::m128dLoad16u(xmmSrc0a, pts);
       int msk;
 
-      switch (cmd[0])
+      Acc::m128dLoad16u(xmmSrc0a, pts);
+
+      c |= static_cast<uint32_t>(cmd[0]);
+      switch (c)
       {
         // --------------------------------------------------------------------
         // [Move-To]
         // --------------------------------------------------------------------
 
         case PATH_CMD_MOVE_TO:
+        case PATH_CMD_MOVE_TO | _PATH_CMD_HAS_INITIAL:
+          c = _PATH_CMD_HAS_INITIAL;
+
           xmmLastMoveTo = xmmSrc0a;
-          hasInitial = true;
+          // ... Fall through ...
 
         // --------------------------------------------------------------------
         // [Line-To]
         // --------------------------------------------------------------------
 
-        case PATH_CMD_LINE_TO:
+        case PATH_CMD_LINE_TO | _PATH_CMD_HAS_INITIAL:
         {
-          if (FOG_UNLIKELY(!hasInitial))
-            goto _Invalid;
+          c = _PATH_CMD_HAS_INITIAL;
 
           xmmSrc0b = xmmSrc0a;
           Acc::m128dCmpGePD(xmmSrc0a, xmmSrc0a, xmmClipBoxMin);
@@ -256,14 +275,13 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
         // [Quad-To]
         // --------------------------------------------------------------------
 
-        case PATH_CMD_QUAD_TO:
+        case PATH_CMD_QUAD_TO | _PATH_CMD_HAS_INITIAL:
         {
           __m128d xmmSrc1a;
           __m128d xmmSrc1b;
 
+          c = _PATH_CMD_HAS_INITIAL;
           FOG_ASSERT(i >= 2);
-          if (FOG_UNLIKELY(!hasInitial))
-            goto _Invalid;
 
           Acc::m128dLoad16u(xmmSrc1a, pts + 1);
           xmmSrc0b = xmmSrc0a;
@@ -292,15 +310,14 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
         // [Cubic-To]
         // --------------------------------------------------------------------
 
-        case PATH_CMD_CUBIC_TO:
+        case PATH_CMD_CUBIC_TO | _PATH_CMD_HAS_INITIAL:
         {
           __m128d xmmSrc1a;
           __m128d xmmSrc1b;
           __m128d xmmSrc2a;
 
+          c = _PATH_CMD_HAS_INITIAL;
           FOG_ASSERT(i >= 2);
-          if (FOG_UNLIKELY(!hasInitial))
-            goto _Invalid;
 
           Acc::m128dLoad16u(xmmSrc1a, pts + 1);
           Acc::m128dLoad16u(xmmSrc2a, pts + 2);
@@ -338,12 +355,22 @@ static uint32_t FOG_CDECL PathClipperD_measurePath_SSE2(PathClipperD* self, cons
         // --------------------------------------------------------------------
 
         case PATH_CMD_CLOSE:
-          hasInitial = false;
+        case PATH_CMD_CLOSE | _PATH_CMD_HAS_INITIAL:
+          c = 0;
 
           i--;
           cmd++;
           pts++;
           break;
+
+        // ----------------------------------------------------------------------
+        // [Error]
+        // ----------------------------------------------------------------------
+
+        case PATH_CMD_LINE_TO:
+        case PATH_CMD_QUAD_TO:
+        case PATH_CMD_CUBIC_TO:
+          goto _Invalid;
 
         default:
           FOG_ASSERT_NOT_REACHED();

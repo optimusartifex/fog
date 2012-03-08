@@ -230,26 +230,33 @@ static uint32_t FOG_CDECL PathClipperT_measurePath(NumT_(PathClipper)* self, con
   const NumT_(Point)* pts = src->getVertices();
   const NumT_(Box)& clipBox = self->_clipBox;
 
-  bool hasInitial = false;
+  // Current command with _PATH_CMD_HAS_INITIAL flag included. Instead of using
+  // variable for 'hasInitial' flag and command separately, we combined it into
+  // single variable, thus one branch has been eliminated within the loop.
+  uint32_t c = 0;
 
   while (i)
   {
-    switch (cmd[0])
+    c |= static_cast<uint32_t>(cmd[0]);
+    switch (c)
     {
       // ----------------------------------------------------------------------
       // [Move-To]
       // ----------------------------------------------------------------------
 
       case PATH_CMD_MOVE_TO:
+      case PATH_CMD_MOVE_TO | _PATH_CMD_HAS_INITIAL:
+        c = _PATH_CMD_HAS_INITIAL;
+
         self->_lastMoveTo = pts[0];
-        hasInitial = true;
+        // ... Fall through ...
 
       // ----------------------------------------------------------------------
       // [Line-To]
       // ----------------------------------------------------------------------
 
-      case PATH_CMD_LINE_TO:
-        if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
+      case PATH_CMD_LINE_TO | _PATH_CMD_HAS_INITIAL:
+        c = _PATH_CMD_HAS_INITIAL;
 
         if (pts[0].x < clipBox.x0 || pts[0].y < clipBox.y0 ||
             pts[0].x > clipBox.x1 || pts[0].y > clipBox.y1)
@@ -266,9 +273,9 @@ static uint32_t FOG_CDECL PathClipperT_measurePath(NumT_(PathClipper)* self, con
       // [Quad-To]
       // ----------------------------------------------------------------------
 
-      case PATH_CMD_QUAD_TO:
+      case PATH_CMD_QUAD_TO | _PATH_CMD_HAS_INITIAL:
+        c = _PATH_CMD_HAS_INITIAL;
         FOG_ASSERT(i >= 2);
-        if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         if (pts[0].x < clipBox.x0 || pts[0].y < clipBox.y0 ||
             pts[0].x > clipBox.x1 || pts[0].y > clipBox.y1 ||
@@ -287,9 +294,9 @@ static uint32_t FOG_CDECL PathClipperT_measurePath(NumT_(PathClipper)* self, con
       // [Cubic-To]
       // ----------------------------------------------------------------------
 
-      case PATH_CMD_CUBIC_TO:
+      case PATH_CMD_CUBIC_TO | _PATH_CMD_HAS_INITIAL:
+        c = _PATH_CMD_HAS_INITIAL;
         FOG_ASSERT(i >= 3);
-        if (FOG_UNLIKELY(!hasInitial)) goto _Invalid;
 
         if (pts[0].x < clipBox.x0 || pts[0].y < clipBox.y0 ||
             pts[0].x > clipBox.x1 || pts[0].y > clipBox.y1 ||
@@ -311,12 +318,22 @@ static uint32_t FOG_CDECL PathClipperT_measurePath(NumT_(PathClipper)* self, con
       // ----------------------------------------------------------------------
 
       case PATH_CMD_CLOSE:
-        hasInitial = false;
+      case PATH_CMD_CLOSE | _PATH_CMD_HAS_INITIAL:
+        c = 0;
 
         i--;
         cmd++;
         pts++;
         break;
+
+      // ----------------------------------------------------------------------
+      // [Error]
+      // ----------------------------------------------------------------------
+
+      case PATH_CMD_LINE_TO:
+      case PATH_CMD_QUAD_TO:
+      case PATH_CMD_CUBIC_TO:
+        goto _Invalid;
 
       default:
         FOG_ASSERT_NOT_REACHED();
@@ -356,13 +373,15 @@ static err_t FOG_CDECL PathClipperT_continuePathData(NumT_(PathClipper)* self,
   NumT_(Path)* dst, const NumT_(Point)* srcPts, const uint8_t* srcCmd, size_t srcLength)
 {
   size_t i = srcLength;
-  if (i == 0) return ERR_OK;
+  if (i == 0)
+    return ERR_OK;
 
   size_t dstInitialLength = dst->getLength();
   size_t dstIndex;
 
   size_t dstCapacity = dstInitialLength + srcLength + 64;
-  if (dstCapacity < dst->getLength()) return ERR_RT_OVERFLOW;
+  if (dstCapacity < dst->getLength())
+    return ERR_RT_OVERFLOW;
   FOG_RETURN_ON_ERROR(dst->reserve(dstCapacity));
 
   size_t startIndex = self->_lastIndex;
@@ -559,7 +578,8 @@ _ClipRealloc:
         dstMarkIndex = (size_t)(dstMark - old);
       }
 
-      if ((dstIndex = dst->_add(need)) == INVALID_INDEX)
+      dstIndex = dst->_add(need);
+      if (dstIndex == INVALID_INDEX)
         goto _OutOfMemory;
 
       dstCmd = dst->getCommandsX() + dstIndex;
@@ -584,7 +604,8 @@ _ClipRealloc:
 
     while (i)
     {
-      if (dstPts >= dstMax) goto _ClipRealloc;
+      if (dstPts >= dstMax)
+        goto _ClipRealloc;
 
 _ClipLoopDo:
       switch (srcCmd[0])
@@ -723,13 +744,15 @@ _ClipLineCmd_TryTop0:
               case CLIP_SIDE_LB:
                 cx = clipBox.x0;
                 cy = ly + (cx - lx) * dy / dx;
-                if (cy <= clipBox.y1) break;
+                if (cy <= clipBox.y1)
+                  break;
                 goto _ClipLineCmd_TryBottom0;
 
               case CLIP_SIDE_RB:
                 cx = clipBox.x1;
                 cy = ly + (cx - lx) * dy / dx;
-                if (cy <= clipBox.y1) break;
+                if (cy <= clipBox.y1)
+                  break;
                 goto _ClipLineCmd_TryBottom0;
 
               case CLIP_SIDE_BOTTOM:
@@ -771,13 +794,15 @@ _ClipLineCmd_SkipLineTo0:
               case CLIP_SIDE_LT:
                 cx = clipBox.x0;
                 cy = uy + (cx - ux) * dy / dx;
-                if (cy >= clipBox.y0) break;
+                if (cy >= clipBox.y0)
+                  break;
                 goto _ClipLineCmd_TryTop1;
 
               case CLIP_SIDE_RT:
                 cx = clipBox.x1;
                 cy = uy + (cx - ux) * dy / dx;
-                if (cy >= clipBox.y0) break;
+                if (cy >= clipBox.y0)
+                  break;
                 goto _ClipLineCmd_TryTop1;
 
               case CLIP_SIDE_TOP:
@@ -792,13 +817,15 @@ _ClipLineCmd_TryTop1:
               case CLIP_SIDE_LB:
                 cx = clipBox.x0;
                 cy = uy + (cx - ux) * dy / dx;
-                if (cy <= clipBox.y1) break;
+                if (cy <= clipBox.y1)
+                  break;
                 goto _ClipLineCmd_TryBottom1;
 
               case CLIP_SIDE_RB:
                 cx = clipBox.x1;
                 cy = uy + (cx - ux) * dy / dx;
-                if (cy <= clipBox.y1) break;
+                if (cy <= clipBox.y1)
+                  break;
                 goto _ClipLineCmd_TryBottom1;
 
               case CLIP_SIDE_BOTTOM:
@@ -882,9 +909,10 @@ _ClipLineCmd_Done:
 
             dstPts[0] = srcPts[0];
             dstPts[1] = srcPts[1];
+            dstPts += 2;
+
             dstCmd[0] = PATH_CMD_QUAD_TO;
             dstCmd[1] = PATH_CMD_DATA;
-            dstPts += 2;
             dstCmd += 2;
 
             dstMark = dstPts;
@@ -978,10 +1006,12 @@ _ClipLineCmd_Done:
               uint32_t tf;
 
               tVal   = t[tIndex];
+              FOG_ASSERT(Math::isFinite(tVal));
               tSide |= s[tIndex];
 
               // Do not process the same t-value again.
-              if (tVal == tCut) continue;
+              if (tVal == tCut)
+                continue;
 
               // Calculate the point position.
               switch (tSide)
@@ -1047,10 +1077,10 @@ _ClipQuadCmd_EvaluateY:
               {
                 // The point is clipped-out, emit line.
                 PathClipperT_clipPoint<NumT>(tp, clipBox);
-                dstPts[0] = tp;
-                dstCmd[0] = PATH_CMD_LINE_TO;
 
+                dstPts[0] = tp;
                 dstPts++;
+                dstCmd[0] = PATH_CMD_LINE_TO;
                 dstCmd++;
 
                 previousFlags = CLIP_SIDE_NONE;
@@ -1080,11 +1110,10 @@ _ClipQuadCmd_EvaluateY:
                   dstPts[0].y = tp.y - cp1.y;
                   dstPts[1].x = tp.x;
                   dstPts[1].y = tp.y;
+                  dstPts += 2;
 
                   dstCmd[0] = PATH_CMD_QUAD_TO;
                   dstCmd[1] = PATH_CMD_DATA;
-
-                  dstPts += 2;
                   dstCmd += 2;
 
                   dstMark = dstPts;
@@ -1133,10 +1162,11 @@ _ClipQuadCmd_EvaluateY:
             dstPts[0] = srcPts[0];
             dstPts[1] = srcPts[1];
             dstPts[2] = srcPts[2];
+            dstPts += 3;
+
             dstCmd[0] = PATH_CMD_CUBIC_TO;
             dstCmd[1] = PATH_CMD_DATA;
             dstCmd[2] = PATH_CMD_DATA;
-            dstPts += 3;
             dstCmd += 3;
 
             dstMark = dstPts;
@@ -1313,10 +1343,10 @@ _ClipCubicCmd_EvaluateY:
               {
                 // The point is clipped-out, emit line.
                 PathClipperT_clipPoint<NumT>(tp, clipBox);
-                dstPts[0] = tp;
-                dstCmd[0] = PATH_CMD_LINE_TO;
 
+                dstPts[0] = tp;
                 dstPts++;
+                dstCmd[0] = PATH_CMD_LINE_TO;
                 dstCmd++;
 
                 previousFlags = CLIP_SIDE_NONE;
@@ -1354,12 +1384,11 @@ _ClipCubicCmd_EvaluateY:
                   dstPts[1].y = tp.y - cp2.y;
                   dstPts[2].x = tp.x;
                   dstPts[2].y = tp.y;
+                  dstPts += 3;
 
                   dstCmd[0] = PATH_CMD_CUBIC_TO;
                   dstCmd[1] = PATH_CMD_DATA;
                   dstCmd[2] = PATH_CMD_DATA;
-
-                  dstPts += 3;
                   dstCmd += 3;
 
                   dstMark = dstPts;
@@ -1402,9 +1431,9 @@ _ClipCubicCmd_EvaluateY:
           }
 
           dstPts[0] = srcPts[0];
-          dstCmd[0] = PATH_CMD_CLOSE;
-
           dstPts++;
+
+          dstCmd[0] = PATH_CMD_CLOSE;
           dstCmd++;
 
           i--;

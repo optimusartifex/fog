@@ -116,8 +116,13 @@ static int FOG_CDECL MathT_solvePolynomialA_Quadratic(NumT* dst, const NumT* pol
     if (d < 0.0)
       return 0;
 
+    // D~=0
     if (Math::isFuzzyPositiveZero(d))
     {
+      // D~=0 && B~=0.
+      if (Math::isFuzzyZero(b))
+        return 0;
+
       NumT x0 = NumT(-c / b);
 
       if (interval != NULL && (x0 < interval->getMin() || x0 > interval->getMax()))

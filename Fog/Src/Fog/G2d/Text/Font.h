@@ -1083,12 +1083,14 @@ struct FOG_NO_EXPORT FaceVTable
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunF)(FontData* d,
     PathF* dst, uint32_t cntOp,
+    const PointF* pt,
     const uint32_t* glyphList, size_t itemAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
 
   err_t (FOG_CDECL* getOutlineFromGlyphRunD)(FontData* d,
     PathD* dst, uint32_t cntOp,
+    const PointD* pt,
     const uint32_t* glyphList, size_t glyphAdvance,
     const PointF* positionList, size_t positionAdvance,
     size_t length);
@@ -1563,24 +1565,24 @@ struct FOG_NO_EXPORT Font
   // --------------------------------------------------------------------------
 
   // Implemented-Later.
-  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp, const PointF& pt,
     const GlyphRun& glyphRun) const;
 
   // Implemented-Later.
-  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp, const PointD& pt,
     const GlyphRun& glyphRun) const;
 
-  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp, const PointF& pt,
     const uint32_t* glyphs, const PointF* positions, size_t length) const
   {
-    return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp,
+    return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp, &pt,
       glyphs, sizeof(uint32_t), positions, sizeof(PointF), length);
   }
 
-  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
+  FOG_INLINE err_t getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp, const PointD& pt,
     const uint32_t* glyphs, const PointF* positions, size_t length) const
   {
-    return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp,
+    return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp, &pt,
       glyphs, sizeof(uint32_t), positions, sizeof(PointF), length);
   }
 

@@ -1367,6 +1367,7 @@ static err_t FOG_CDECL Font_init(Font* self, Face* face, float size,
 
 static err_t Font_getOutlineFromGlyphRunF(const Font* self,
   PathF* dst, uint32_t cntOp,
+  const PointF* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
@@ -1376,11 +1377,12 @@ static err_t Font_getOutlineFromGlyphRunF(const Font* self,
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
 
-  return face->vtable->getOutlineFromGlyphRunF(self->_d, dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
+  return face->vtable->getOutlineFromGlyphRunF(self->_d, dst, cntOp, pt, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 static err_t Font_getOutlineFromGlyphRunD(const Font* self,
   PathD* dst, uint32_t cntOp,
+  const PointD* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
@@ -1390,7 +1392,7 @@ static err_t Font_getOutlineFromGlyphRunD(const Font* self,
   if (FOG_IS_NULL(face))
     return ERR_FONT_INVALID_FACE;
 
-  return face->vtable->getOutlineFromGlyphRunD(self->_d, dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
+  return face->vtable->getOutlineFromGlyphRunD(self->_d, dst, cntOp, pt, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 // ============================================================================
@@ -1484,7 +1486,7 @@ static OTTable* FOG_CDECL NullFace_getOTTable(const Face* self, uint32_t tag)
 }
 
 static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(FontData* d,
-  PathF* dst, uint32_t cntOp,
+  PathF* dst, uint32_t cntOp, const PointF* pt,
   const uint32_t* glyphList, size_t itemAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
@@ -1493,7 +1495,7 @@ static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunF(FontData* d,
 }
 
 static err_t FOG_CDECL NullFace_getOutlineFromGlyphRunD(FontData* d,
-  PathD* dst, uint32_t cntOp,
+  PathD* dst, uint32_t cntOp, const PointD* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)

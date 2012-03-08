@@ -61,13 +61,13 @@ struct FOG_NO_EXPORT CMapFormat4
   OTUInt16 rangeShift;
 };
 
-static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
+static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
   uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
 {
   if (sLength == 0)
     return 0;
 
-  const uint8_t* data = static_cast<const uint8_t*>(ctx->_data);
+  const uint8_t* data = static_cast<const uint8_t*>(cctx->_data);
   const CMapFormat4* tab = reinterpret_cast<const CMapFormat4*>(data);
 
   FOG_ASSERT(tab->format.getValueA() == 4);
@@ -89,7 +89,7 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* ctx,
 
     const uint8_t* p;
 
-    if (uc > 0xFFFF)
+    if (CharW::isSurrogate(uc))
       goto _GlyphDone;
 
     uint32_t start, end;
@@ -141,7 +141,11 @@ _GlyphDone:
     if (++sData == sEnd)
       break;
 
+    // We are processing a string, so if characters are close to each other,
+    // we can try to skip a binary search if the next character is in the same
+    // range list as the previous one.
     uc = sData[0];
+
     if (uc >= start && uc <= end)
       goto _Repeat;
   }
@@ -161,6 +165,57 @@ _GlyphDone:
 // UInt16       | 6            | first                | First segment code.
 // UInt16       | 8            | count (N)            | Segment size in bytes.
 // UInt16[N]    | 10           | glyphIdArray         | Glyph index array.
+
+struct FOG_NO_EXPORT CMapFormat6
+{
+  OTUInt16 format;
+  OTUInt16 length;
+  OTUInt16 macLanguageCode;
+  OTUInt16 first;
+  OTUInt16 count;
+};
+
+static size_t FOG_CDECL OTCMapContext_getGlyphPlacement6(OTCMapContext* cctx,
+  uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
+{
+  if (sLength == 0)
+    return 0;
+
+  const uint8_t* data = static_cast<const uint8_t*>(cctx->_data);
+  const CMapFormat6* tab = reinterpret_cast<const CMapFormat6*>(data);
+
+  FOG_ASSERT(tab->format.getValueA() == 6);
+
+  uint32_t first = tab->first.getValueA();
+  uint32_t count = tab->count.getValueA();
+
+  const OTUInt16* glyphIdArray = reinterpret_cast<const OTUInt16*>(data + sizeof(CMapFormat6));
+
+  const uint16_t* sMark = sData;
+  const uint16_t* sEnd = sData + sLength;
+
+  for (;;)
+  {
+    uint32_t uc = sData[0];
+    uint32_t glyphId = 0;
+
+    if (CharW::isSurrogate(uc))
+      goto _GlyphDone;
+
+    uc -= first;
+    if (uc < count)
+      glyphId = glyphIdArray[uc].getValueA();
+
+_GlyphDone:
+    glyphList[0] = glyphId;
+    glyphList = reinterpret_cast<uint32_t*>((uint8_t*)glyphList + glyphAdvance);
+
+    if (++sData == sEnd)
+      break;
+  }
+
+  return (size_t)(sData - sMark);
+}
 
 // ============================================================================
 // [Fog::OTCMapFormat8]
@@ -282,43 +337,57 @@ _GlyphDone:
 #include <Fog/Core/C++/PackRestore.h>
 
 // ============================================================================
-// [Fog::OTCMapTable]
+// [Fog::OTCMap - Init / Destroy]
 // ============================================================================
 
-static void FOG_CDECL OTCMapTable_destroy(OTCMapTable* self);
+static err_t OTCMapContext_init(OTCMapContext* cctx, const OTCMap* cmap, uint32_t language);
 
-static err_t OTCMapContext_init(OTCMapContext* ctx, const OTCMapTable* cmap, uint32_t language);
-
-static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
+static void FOG_CDECL OTCMap_destroy(OTCMap* self)
 {
+  if (self->_items)
+  {
+    MemMgr::free(self->_items);
+    self->_items = NULL;
+  }
+
+  // This results in crash in case that destroy is called twice by accident.
+  self->_destroy = NULL;
+}
+
+static err_t FOG_CDECL OTCMap_init(OTCMap* self)
+{
+  // --------------------------------------------------------------------------
+  // [Init]
+  // --------------------------------------------------------------------------
+
   const uint8_t* data = self->getData();
   uint32_t dataLength = self->getDataLength();
 
 #if defined(FOG_OT_DEBUG)
-  Logger::info("Fog::OTCMapTable", "init", 
-    "Init 'cmap' table, length %u bytes.", dataLength);
+  Logger::info("Fog::OTCMap", "init", 
+    "Initializing 'cmap' table (%u bytes).", dataLength);
 #endif // FOG_OT_DEBUG
 
   FOG_ASSERT_X(self->_tag == FOG_OT_TAG('c', 'm', 'a', 'p'),
-    "Fog::OTCMapTable::init() - Called on invalid table.");
+    "Fog::OTCMap::init() - Not a 'cmap' table.");
 
-  self->count = 0;
-  self->items = NULL;
-  self->_destroy = (OTTableDestroyFunc)OTCMapTable_destroy;
+  self->_count = 0;
+  self->_items = NULL;
+  self->_destroy = (OTTableDestroyFunc)OTCMap_destroy;
 
   // --------------------------------------------------------------------------
   // [Header]
   // --------------------------------------------------------------------------
 
-  const OTCMapHeader* header = reinterpret_cast<const OTCMapHeader*>(data);
+  const OTCMapHeader* header = self->getHeader();
   if (header->version.getRawA() != 0x0000)
   {
 #if defined(FOG_OT_DEBUG)
-    Logger::info("Fog::OTCMapTable", "init",
-      "Unsupported 'cmap' version %d.", header->version.getRawA());
+    Logger::info("Fog::OTCMap", "init",
+      "Unsupported header version %d.", header->version.getRawA());
 #endif // FOG_OT_DEBUG
 
-    return ERR_FONT_OT_CMAP_UNSUPPORTED_FORMAT;
+    return self->setStatus(ERR_FONT_CMAP_HEADER_WRONG_VERSION);
   }
 
   // --------------------------------------------------------------------------
@@ -329,11 +398,11 @@ static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
   if (count == 0 || count > dataLength / sizeof(OTCMapEncoding))
   {
 #if defined(FOG_OT_DEBUG)
-    Logger::info("Fog::OTCMapTable", "init",
+    Logger::info("Fog::OTCMap", "init",
       "Corrupted 'cmap' table, count of subtables reported to by %u.", count);
 #endif // FOG_OT_DEBUG
 
-    return ERR_FONT_OT_CMAP_CORRUPTED;
+    return self->setStatus(ERR_FONT_CMAP_HEADER_WRONG_DATA);
   }
 
   const OTCMapEncoding* encTable = reinterpret_cast<const OTCMapEncoding*>(
@@ -343,10 +412,10 @@ static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
     MemMgr::alloc(count * sizeof(OTCMapItem)));
 
   if (FOG_IS_NULL(items))
-    return ERR_RT_OUT_OF_MEMORY;
+    return self->setStatus(ERR_RT_OUT_OF_MEMORY);
 
 #if defined(FOG_OT_DEBUG)
-  Logger::info("Fog::OTCMapTable", "init",
+  Logger::info("Fog::OTCMap", "init",
     "Found %u subtables.", count);
 #endif // FOG_OT_DEBUG
 
@@ -355,8 +424,8 @@ static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
 
   uint32_t minOffsetValue = sizeof(OTCMapHeader) + count * sizeof(OTCMapEncoding);
 
-  self->count = count;
-  self->items = items;
+  self->_count = count;
+  self->_items = items;
 
   for (uint32_t i = 0; i < count; i++, items++, encTable++)
   {
@@ -417,7 +486,7 @@ static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
     items->status = OT_NOT_VALIDATED;
 
 #if defined(FOG_OT_DEBUG)
-    Logger::info("Fog::OTCMapTable", "init", 
+    Logger::info("Fog::OTCMap", "init", 
       "#%02u - platformId=%u, specificId=%u => [encoding='%c%c%c%c', priority=%u], offset=%u",
       i,
       platformId,
@@ -433,45 +502,33 @@ static err_t FOG_CDECL OTCMapTable_init(OTCMapTable* self)
     if (offset < minOffsetValue || offset >= dataLength)
     {
 #if defined(FOG_OT_DEBUG)
-      Logger::info("Fog::OTCMapTable", "init", 
+      Logger::info("Fog::OTCMap", "init", 
         "#%02u - corrupted offset=%u", i, offset);
 #endif // FOG_OT_DEBUG
-      items->status = ERR_FONT_OT_CMAP_CORRUPTED;
+      items->status = ERR_FONT_CMAP_TABLE_WRONG_DATA;
     }
   }
 
-  self->unicodeEncodingIndex = unicodeEncodingIndex;
+  self->_unicodeEncodingIndex = unicodeEncodingIndex;
   self->_initContext = OTCMapContext_init;
 
   return ERR_OK;
-}
-
-static void FOG_CDECL OTCMapTable_destroy(OTCMapTable* self)
-{
-  if (self->items)
-  {
-    MemMgr::free(self->items);
-    self->items = NULL;
-  }
-
-  // This results in crash in case that destroy is called twice by accident.
-  self->_destroy = NULL;
 }
 
 // ============================================================================
 // [Fog::OTCMapContext]
 // ============================================================================
 
-static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* ctx, const OTCMapTable* cMapTable, uint32_t encodingId)
+static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* cctx, const OTCMap* cmap, uint32_t encodingId)
 {
   uint32_t index = 0xFFFFFFFF;
 
-  const OTCMapItem* items = cMapTable->items;
-  uint32_t count = cMapTable->count;
+  const OTCMapItem* items = cmap->getItems();
+  uint32_t count = cmap->getCount();
 
   if (encodingId == FOG_OT_TAG('u', 'n', 'i', 'c'))
   {
-    index = cMapTable->unicodeEncodingIndex;
+    index = cmap->getUnicodeEncodingIndex();
     FOG_ASSERT(index < count);
   }
   else
@@ -492,26 +549,33 @@ static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* ctx, const OTCMapTable*
   }
 
   if (index == 0xFFFFFFFF)
-    return ERR_FONT_OT_CMAP_ENCODING_NOT_FOUND;
+    return ERR_FONT_CMAP_TABLE_NOT_FOUND;
 
-  const uint8_t* data = cMapTable->getData();
+  const uint8_t* data = cmap->getData();
   const OTCMapEncoding* encTable = reinterpret_cast<const OTCMapEncoding*>(
     data + sizeof(OTCMapHeader) + index * sizeof(OTCMapEncoding));
 
   uint32_t offset = encTable->offset.getValueA();
-  FOG_ASSERT(offset < cMapTable->getDataLength());
+  FOG_ASSERT(offset < cmap->getDataLength());
+
+  cctx->_data = (void*)(data + offset);
 
   // Format of the table is the first UInt16 data entry in that offset.
   uint16_t format = reinterpret_cast<const OTUInt16*>(data + offset)->getValueA();
   switch (format)
   {
     case 4:
-      ctx->_getGlyphPlacementFunc = OTCMapContext_getGlyphPlacement4;
-      ctx->_data = (void*)(data + offset);
+      cctx->_getGlyphPlacementFunc = OTCMapContext_getGlyphPlacement4;
+      return ERR_OK;
+
+    case 6:
+      cctx->_getGlyphPlacementFunc = OTCMapContext_getGlyphPlacement6;
       return ERR_OK;
 
     default:
-      return ERR_FONT_OT_CMAP_UNSUPPORTED_VERSION;
+      cctx->_getGlyphPlacementFunc = NULL;
+      cctx->_data = NULL;
+      return ERR_FONT_CMAP_TABLE_WRONG_FORMAT;
   }
 }
 
@@ -527,7 +591,7 @@ FOG_NO_EXPORT void OTCMap_init(void)
   // [OTCMap]
   // --------------------------------------------------------------------------
   
-  api.otcmaptable_init = OTCMapTable_init;
+  api.otcmap_init = OTCMap_init;
 }
 
 } // Fog namespace

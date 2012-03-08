@@ -3092,8 +3092,10 @@ static err_t FOG_CDECL RasterPaintEngine_fillGlyphRunI(Painter* self, const Poin
   RasterPaintEngine* engine = static_cast<RasterPaintEngine*>(self->_engine);
   _FOG_RASTER_ENTER_FILL_FUNC();
 
+  PointF pf(*p);
+
   PathF* path = &engine->ctx.tmpPathF[0];
-  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *glyphRun);
+  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, pf, *glyphRun);
 
   // TODO: Clip.
   return RasterPaintEngine_fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
@@ -3105,7 +3107,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillGlyphRunF(Painter* self, const Poin
   _FOG_RASTER_ENTER_FILL_FUNC();
 
   PathF* path = &engine->ctx.tmpPathF[0];
-  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *glyphRun);
+  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *p, *glyphRun);
 
   // TODO: Clip.
   return RasterPaintEngine_fillRawPathF(engine, path, FILL_RULE_NON_ZERO);
@@ -3117,7 +3119,7 @@ static err_t FOG_CDECL RasterPaintEngine_fillGlyphRunD(Painter* self, const Poin
   _FOG_RASTER_ENTER_FILL_FUNC();
 
   PathD* path = &engine->ctx.tmpPathD[0];
-  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *glyphRun);
+  font->getOutlineFromGlyphRun(*path, CONTAINER_OP_REPLACE, *p, *glyphRun);
 
   // TODO: Clip.
   return RasterPaintEngine_fillRawPathD(engine, path, FILL_RULE_NON_ZERO);

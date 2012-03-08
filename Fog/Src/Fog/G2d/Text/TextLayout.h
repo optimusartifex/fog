@@ -195,7 +195,7 @@ private:
 // [Implemented-Later]
 // ============================================================================
 
-FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
+FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp, const PointF& pt,
   const GlyphRun& glyphRun) const
 {
   FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
@@ -204,11 +204,11 @@ FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathF& dst, uint32_t cntOp,
   const GlyphPosition* positions = glyphRun._positionList.getData();
   size_t length = glyphRun.getLength();
 
-  return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp,
+  return fog_api.font_getOutlineFromGlyphRunF(this, &dst, cntOp, &pt,
     &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
 }
 
-FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
+FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp, const PointD& pt,
   const GlyphRun& glyphRun) const
 {
   FOG_ASSERT(glyphRun._itemList.getLength() == glyphRun._positionList.getLength());
@@ -217,7 +217,7 @@ FOG_INLINE err_t Font::getOutlineFromGlyphRun(PathD& dst, uint32_t cntOp,
   const GlyphPosition* positions = glyphRun._positionList.getData();
   size_t length = glyphRun.getLength();
 
-  return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp,
+  return fog_api.font_getOutlineFromGlyphRunD(this, &dst, cntOp, &pt,
     &glyphs->_glyphIndex, sizeof(GlyphItem), &positions->_position, sizeof(GlyphPosition), length);
 }
 

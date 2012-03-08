@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_TEXT_OTTYPES_H
-#define _FOG_G2D_TEXT_OTTYPES_H
+#ifndef _FOG_G2D_TEXT_OPENTYPE_OTTYPES_H
+#define _FOG_G2D_TEXT_OPENTYPE_OTTYPES_H
 
 // [Dependencies]
 #include <Fog/Core/Memory/BSwap.h>
@@ -602,6 +602,9 @@ struct FOG_NO_EXPORT OTTable
   FOG_INLINE uint8_t* getData() const { return _data; }
   FOG_INLINE uint32_t getDataLength() const { return _dataLength; }
 
+  FOG_INLINE err_t getStatus() const { return _status; }
+  FOG_INLINE err_t setStatus(err_t status) { _status = status; return status; }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
@@ -615,11 +618,19 @@ struct FOG_NO_EXPORT OTTable
 
   //! @brief OTFace which owns the table.
   OTFace* _face;
-  //! @brief Next table in @ref OTFace.
+  //! @brief Next table in single-linked list used by @ref OTFace (private).
   OTTable* _next;
 
-  //! @brief Release all associated data with the table.
+  //! @brief Callback to release all associated data with the table.
   OTTableDestroyFunc _destroy;
+
+  //! @brief Status code (@ref err_t) of this table.
+  //!
+  //! @note Each table is validated on load, and status code contains the result
+  //! of the validation. If the validation failed then the table is corrupted or
+  //! malformed so it can't be used. We never unload tables so the status remains
+  //! until the OTFace is destroyed.
+  err_t _status;
 };
 
 //! @}
@@ -630,4 +641,4 @@ struct FOG_NO_EXPORT OTTable
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_TEXT_OTTYPES_H
+#endif // _FOG_G2D_TEXT_OPENTYPE_OTTYPES_H

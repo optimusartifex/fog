@@ -4,11 +4,11 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_TEXT_OTENUM_H
-#define _FOG_G2D_TEXT_OTENUM_H
+#ifndef _FOG_G2D_TEXT_OPENTYPE_OTENUM_H
+#define _FOG_G2D_TEXT_OPENTYPE_OTENUM_H
 
 // [Dependencies]
-#include <Fog/Core/Global/Global.h>
+#include <Fog/G2d/Text/OpenType/OTAPI.h>
 
 namespace Fog {
 
@@ -22,6 +22,93 @@ namespace Fog {
 enum 
 {
   OT_NOT_VALIDATED = 0xFFFFFFFFU
+};
+
+// ============================================================================
+// [Fog::OT_HEAD_FLAG]
+// ============================================================================
+
+//! @brief Flags used by OTHeadHeader::flags.
+enum OT_HEAD_FLAG
+{
+  //! @brief Baseline for font at y=0.
+  OT_HEAD_FLAG_BASELINE_FOR_Y = 0x0001,
+  //! @brief Left sidebearing point at x=0.
+  OT_HEAD_FLAG_LEFT_SIDEBEARING_AT_X = 0x0002,
+  //! @brief Instructions may depend on point size.
+  OT_HEAD_FLAG_INST_MAY_DEPEND_ON_SIZE = 0x0004,
+  //! @brief Force ppem to integer values for all internal scaler math; may use
+  //! fractional ppem sizes if this bit is clear.
+  OT_HEAD_FLAG_FORCE_PPEM_TO_INTEGER = 0x0008,
+  //! @brief  Instructions may alter advance width (the advance widths might not
+  //! scale linearly).
+  OT_HEAD_FLAG_INST_MAY_ALTER_ADVANCE = 0x0010,
+  //! @brief Should be set in fonts that are intended to be laid out vertically,
+  //! and in which the glyphs have been drawn such that an x-coordinate of 0
+  //! corresponds to the desired vertical baseline.
+  OT_HEAD_FLAG_VERTICAL_LAYOUT = 0x0020,
+  //! @brief Should be set if the font requires layout for correct linguistic
+  //! rendering (Arabic fonts).
+  OT_HEAD_FLAG_REQUIRE_LAYOUT = 0x0080,
+  //! @brief This bit should be set for a GX font which has one or more 
+  //! metamorphosis effects designated as happening by default.
+  OT_HEAD_FLAG_GX_METAMORPHOSIS = 0x0100,
+  //! @brief This bit should be set if the font contains any strong right-to-left
+  //! glyphs.
+  OT_HEAD_FLAG_SUPPORT_RTL = 0x0200,
+  //! @brief This bit should be set if the font contains Indic-style 
+  //! rearrangement effects
+  OT_HEAD_FLAG_SUPPORT_INDIC = 0x0400,
+  //! @brief Font data is 'lossless,' as a result of having been compressed and
+  //! decompressed with the Agfa MicroType Express engine.
+  OT_HEAD_FLAG_LOSSLESS = 0x0800,
+  //! @brief Font converted (produce compatible metrics).
+  OT_HEAD_FLAG_CONVERTED = 0x1000,
+  //! @brief Font optimized for ClearType.
+  //!
+  //! @note Fonts that rely on embedded bitmaps (EBDT) for rendering should not 
+  //! be considered optimized for ClearType, and therefore should keep this bit
+  //! cleared.
+  OT_HEAD_FLAG_CLEARTYPE = 0x2000,
+  //! @brief Last Resort font.
+  //!
+  //! If set, indicates that the glyphs encoded in the cmap subtables are simply
+  //! generic symbolic representations of code point ranges and don’t truly
+  //! represent support for those code points. If unset, indicates that the glyphs
+  //! encoded in the cmap subtables represent proper support for those code points.
+  OT_HEAD_FLAG_LAST_RESORT_FONT = 0x4000
+};
+
+// ============================================================================
+// [Fog::OT_HEAD_MAC_STYLE]
+// ============================================================================
+
+//! @brief Flags used by OTHeadHeader::macStyle.
+enum OT_HEAD_MAC_STYLE
+{
+  //! @brief Italic.
+  OT_HEAD_MAC_STYLE_ITALIC = 0x0002,
+  //! @brief Underline.
+  OT_HEAD_MAC_STYLE_UNDERLINE = 0x0004,
+  //! @brief Outline.
+  OT_HEAD_MAC_STYLE_OUTLINE = 0x0008,
+  //! @brief Shadow.
+  OT_HEAD_MAC_STYLE_SHADOW = 0x0010,
+  //! @brief Condensed.
+  OT_HEAD_MAC_STYLE_CONDENSED = 0x0020,
+  //! @brief Extended.
+  OT_HEAD_MAC_STYLE_EXTENDED = 0x0040
+};
+
+// ============================================================================
+// [Fog::OT_HEAD_INDEX_TO_LOC]
+// ============================================================================
+
+//! @brief Flags used by OTHeadHeader::indexToLocFormat.
+enum OT_HEAD_INDEX_TO_LOC
+{
+  OT_HEAD_INDEX_TO_LOC_SHORT = 0,
+  OT_HEAD_INDEX_TO_LOC_LONG = 1
 };
 
 // ============================================================================
@@ -172,4 +259,4 @@ enum OT_ENCODING_ID
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_TEXT_OTENUM_H
+#endif // _FOG_G2D_TEXT_OPENTYPE_OTENUM_H

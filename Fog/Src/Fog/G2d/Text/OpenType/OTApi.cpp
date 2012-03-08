@@ -20,15 +20,23 @@ namespace Fog {
 
 FOG_NO_EXPORT void OTTypes_init(void);
 FOG_NO_EXPORT void OTFace_init(void);
+
 FOG_NO_EXPORT void OTCMap_init(void);
+FOG_NO_EXPORT void OTHHea_init(void);
+FOG_NO_EXPORT void OTHead_init(void);
+FOG_NO_EXPORT void OTHmtx_init(void);
+FOG_NO_EXPORT void OTKern_init(void);
 
 FOG_NO_EXPORT void OTApi_init(void)
 {
   OTTypes_init();
   OTFace_init();
 
-  // TrueType/OpenType Tables.
+  OTHead_init();
+  OTHHea_init();
+  OTHmtx_init();
   OTCMap_init();
+  OTKern_init();
 }
 
 } // Fog namespace

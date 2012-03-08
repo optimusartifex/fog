@@ -486,7 +486,7 @@ enum ERR_CODE
   //!
   //! Painter can be used only to paint into supported pixel formats (all RGB,
   //! ARGB and ALPHA-only pixel formats are supported).
-  ERR_PAINTER_UNSUPPORTED_FORMAT,
+  ERR_PAINTER_WRONG_FORMAT,
 
   //! @brief Error that can be returned by painter if it's illegal to change
   //! paint engine at this time.
@@ -521,19 +521,25 @@ enum ERR_CODE
 
   ERR_FONT_INTERNAL,
 
+  //! @brief TrueType/OpenType 'head' header is wrong (corrupted/malformed).
+  ERR_FONT_HEAD_HEADER_WRONG_DATA,
+
   //! @brief TrueType/OpenType 'cmap' table format is not loaded.
   //!
-  //! @note This is generic error, it means that @c ERR_FONT_OP_CMAP_UNSUPPORTED
-  //! or @c ERR_FONT_OT_CMAP_CORRUPTED happened during the load process.
-  ERR_FONT_OT_CMAP_NOT_LOADED,
-  //! @brief TrueType/OpenType 'cmap' (sub)table is corrupted or malformed.
-  ERR_FONT_OT_CMAP_CORRUPTED,
-  //! @brief TrueType/OpenType 'cmap' table format is not supported.
-  ERR_FONT_OT_CMAP_UNSUPPORTED_FORMAT,
-  //! @brief TrueType/OpenType 'cmap' (sub)table version is not supported.
-  ERR_FONT_OT_CMAP_UNSUPPORTED_VERSION,
-  //! @brief CMap table of a given encoding (or platformId/specificId) not found.
-  ERR_FONT_OT_CMAP_ENCODING_NOT_FOUND,
+  //! @note This is generic error which means that font doesn't have a cmap
+  //! table or an error happened during loading/parsing of the cmap table.
+  ERR_FONT_CMAP_NOT_FOUND,
+  //! @brief TrueType/OpenType 'cmap' header is wrong (corrupted/malformed).
+  ERR_FONT_CMAP_HEADER_WRONG_DATA,
+  //! @brief TrueType/OpenType 'cmap' header's version is wrong or not supported.
+  ERR_FONT_CMAP_HEADER_WRONG_VERSION,
+  //! @brief TrueType/OpenType 'cmap' subtable of a given encoding or platformId
+  //! and specificId not found.
+  ERR_FONT_CMAP_TABLE_NOT_FOUND,
+  //! @brief TrueType/OpenType 'cmap' subtable is corrupted or malformed.
+  ERR_FONT_CMAP_TABLE_WRONG_DATA,
+  //! @brief TrueType/OpenType 'cmap' subtable format is not supported.
+  ERR_FONT_CMAP_TABLE_WRONG_FORMAT,
 
   // --------------------------------------------------------------------------
   // [Svg]

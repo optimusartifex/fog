@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_TEXT_OTFACE_H
-#define _FOG_G2D_TEXT_OTFACE_H
+#ifndef _FOG_G2D_TEXT_OPENTYPE_OTFACE_H
+#define _FOG_G2D_TEXT_OPENTYPE_OTFACE_H
 
 // [Dependencies]
 #include <Fog/Core/Memory/MemZoneAllocator.h>
@@ -37,8 +37,23 @@ struct FOG_NO_EXPORT OTFace
     fog_ot_api.otface_dtor(this);
   }
 
+  FOG_INLINE void initCoreTables()
+  {
+    fog_ot_api.otface_initCoreTables(this);
+  }
+
   // --------------------------------------------------------------------------
-  // [Tables]
+  // [Core Tables]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE OTHead* getHead() const { return _head; }
+  FOG_INLINE OTHHea* getHHea() const { return _hhea; }
+  FOG_INLINE OTHmtx* getHmtx() const { return _hmtx; }
+  FOG_INLINE OTCMap* getCMap() const { return _cmap; }
+  FOG_INLINE OTKern* getKern() const { return _kern; }
+
+  // --------------------------------------------------------------------------
+  // [Additional Tables]
   // --------------------------------------------------------------------------
 
   //! @brief Get whether the table of @a tag name was loaded and it's accessible.
@@ -76,22 +91,6 @@ struct FOG_NO_EXPORT OTFace
   }
 
   // --------------------------------------------------------------------------
-  // [Core Tables]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool hasCMap()
-  {
-    return FOG_OT_LOADED(getCMap());
-  }
-
-  FOG_INLINE OTCMapTable* getCMap()
-  {
-    if (_cmap == NULL)
-      _cmap = reinterpret_cast<OTCMapTable*>(tryLoadTable(FOG_OT_TAG('c', 'm', 'a', 'p')));
-    return _cmap;
-  }
-
-  // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
@@ -103,8 +102,16 @@ struct FOG_NO_EXPORT OTFace
   //! @brief Table-data free callback.
   OTFaceFreeTableDataFunc _freeTableDataFunc;
 
-  //! @brief Fast access to 'cmap' table.
-  OTCMapTable* _cmap;
+  //! @brief 'head' table.
+  OTHead* _head;
+  //! @brief 'hhea' table.
+  OTHHea* _hhea;
+  //! @brief 'hmtx' table.
+  OTHmtx* _hmtx;
+  //! @brief 'cmap' table.
+  OTCMap* _cmap;
+  //! @brief 'kern' table.
+  OTKern* _kern;
 
   //! @brief allocaor.
   Static<MemZoneAllocator> _allocator;
@@ -118,4 +125,4 @@ private:
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_TEXT_OTFACE_H
+#endif // _FOG_G2D_TEXT_OPENTYPE_OTFACE_H

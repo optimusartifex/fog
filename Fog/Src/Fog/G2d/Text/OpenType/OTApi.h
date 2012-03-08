@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_TEXT_OTAPI_H
-#define _FOG_G2D_TEXT_OTAPI_H
+#ifndef _FOG_G2D_TEXT_OPENTYPE_OTAPI_H
+#define _FOG_G2D_TEXT_OPENTYPE_OTAPI_H
 
 // [Dependencies]
 #include <Fog/Core/Global/Global.h>
@@ -65,8 +65,20 @@ typedef OTUInt32 OTFixedVersion;
 typedef OTUInt32 OTTag;
 
 // TrueType/OpenType 'cmap' support.
+struct OTCMap;
 struct OTCMapContext;
-struct OTCMapTable;
+
+// TrueType/OpenType 'hhea' support.
+struct OTHHea;
+
+// TrueType/OpenType 'head' support.
+struct OTHead;
+
+// TrueType/OpenType 'hmtx' support.
+struct OTHmtx;
+
+// TrueType/OpenType 'kern' support.
+struct OTKern;
 
 // ============================================================================
 // [Funcs]
@@ -81,8 +93,8 @@ typedef void (FOG_CDECL* OTFaceFreeTableDataFunc)(OTFace* self, uint8_t* data, s
 // OTTable.
 typedef void (FOG_CDECL* OTTableDestroyFunc)(OTTable* table);
 
-// OTCMapTable aka 'cmap'.
-typedef err_t (FOG_CDECL* OTCMapInitContextFunc)(OTCMapContext* ctx, const OTCMapTable* table, uint32_t encodingId);
+// OTCMap aka 'cmap'.
+typedef err_t (FOG_CDECL* OTCMapInitContextFunc)(OTCMapContext* ctx, const OTCMap* table, uint32_t encodingId);
 typedef size_t (FOG_CDECL* OTCMapGetGlyphPlacementFunc)(OTCMapContext* ctx, uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength);
 
 //! @}
@@ -126,6 +138,8 @@ struct FOG_NO_EXPORT OTApi
   FOG_CAPI_CTOR(otface_ctor)(OTFace* self);
   FOG_CAPI_DTOR(otface_dtor)(OTFace* self);
 
+  FOG_CAPI_METHOD(err_t, otface_initCoreTables)(OTFace* self);
+
   FOG_CAPI_METHOD(bool, otface_hasTable)(const OTFace* self, OTTable* param);
   FOG_CAPI_METHOD(OTTable*, otface_getTable)(const OTFace* self, uint32_t tag);
 
@@ -133,10 +147,34 @@ struct FOG_NO_EXPORT OTApi
   FOG_CAPI_METHOD(OTTable*, otface_addTable)(OTFace* self, uint32_t tag, uint8_t* data, uint32_t length);
 
   // --------------------------------------------------------------------------
-  // [OTCMapTable]
+  // [OTHead]
   // --------------------------------------------------------------------------
 
-  FOG_CAPI_METHOD(err_t, otcmaptable_init)(OTCMapTable* table);
+  FOG_CAPI_METHOD(err_t, othead_init)(OTHead* table);
+
+  // --------------------------------------------------------------------------
+  // [OTHHea]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_METHOD(err_t, othhea_init)(OTHHea* table);
+
+  // --------------------------------------------------------------------------
+  // [OTHmtx]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_METHOD(err_t, othmtx_init)(OTHmtx* table);
+
+  // --------------------------------------------------------------------------
+  // [OTCMap]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_METHOD(err_t, otcmap_init)(OTCMap* table);
+
+  // --------------------------------------------------------------------------
+  // [OTKern]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_METHOD(err_t, otkern_init)(OTKern* table);
 };
 
 } // Fog namespace
@@ -149,4 +187,4 @@ struct FOG_NO_EXPORT OTApi
 FOG_CVAR_EXTERN Fog::OTApi fog_ot_api;
 
 // [Guard]
-#endif // _FOG_G2D_TEXT_OTAPI_H
+#endif // _FOG_G2D_TEXT_OPENTYPE_OTAPI_H

@@ -53,18 +53,18 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
   if (FOG_IS_NULL(ot))
     return ERR_FONT_INVALID_FACE;
 
-  OTCMapTable* cMapTable = ot->getCMap();
-  if (!FOG_OT_LOADED(cMapTable))
-    return ERR_FONT_OT_CMAP_NOT_LOADED;
+  OTCMap* cmap = ot->getCMap();
+  if (!FOG_OT_LOADED(cmap))
+    return ERR_FONT_CMAP_NOT_FOUND;
 
-  OTCMapContext cMapContext;
-  cMapContext.init(cMapTable, _encoding);
+  OTCMapContext cctx;
+  cctx.init(cmap, _encoding);
 
   const CharW* sData = string.getData();
   size_t sLength = string.getComputedLength();
 
   GlyphItem* glyphs = _glyphRun._itemList._prepare(CONTAINER_OP_APPEND, sLength);
-  cMapContext.getGlyphPlacement(&glyphs->_glyphIndex, sizeof(GlyphItem),
+  cctx.getGlyphPlacement(&glyphs->_glyphIndex, sizeof(GlyphItem),
     reinterpret_cast<const uint16_t*>(sData), sLength);
 
   // TODO:
@@ -72,7 +72,7 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
   for (size_t i = 0; i < sLength; i++)
   {
     pos[i].reset();
-    pos[i].setPosition(PointF(100.0f + i * 20.0f, 100.0f));
+    pos[i].setPosition(PointF(0.0f + i * 20.0f, 0.0f));
   }
 
   return ERR_OK;

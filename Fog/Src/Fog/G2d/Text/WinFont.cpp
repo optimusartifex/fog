@@ -196,6 +196,7 @@ static void FOG_CDECL WinFace_create(WinFace* self, HFONT hFace)
 
   self->hFace = hFace;
   self->ot->_freeTableDataFunc = WinFace_freeTableData;
+  self->ot->initCoreTables();
 }
 
 static void FOG_CDECL WinFace_destroy(Face* self_)
@@ -427,7 +428,7 @@ static err_t WinFace_decomposeTTOutline(NumT_(Path)* path,
 
 template<typename NumT>
 static FOG_INLINE err_t WinFace_getOutlineFromGlyphRunT(FontData* d,
-  NumT_(Path)* dst, uint32_t cntOp,
+  NumT_(Path)* dst, uint32_t cntOp, const NumT_(Point)* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
@@ -490,8 +491,8 @@ _Repeat:
     FOG_RETURN_ON_ERROR(WinFace_decomposeTTOutline<NumT>(dst,
       reinterpret_cast<uint8_t*>(buffer.getMem()), dataSize, true));
 
-    transform._20 = positionList[0].x;
-    transform._21 = positionList[0].y;
+    transform._20 = pt->x + NumT(positionList[0].x);
+    transform._21 = pt->y + NumT(positionList[0].y);
     FOG_RETURN_ON_ERROR(dst->transform(transform, Range(index, DETECT_LENGTH)));
 
     glyphList = (const uint32_t*)((const uint8_t*)glyphList + glyphAdvance);
@@ -502,23 +503,23 @@ _Repeat:
 }
 
 static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunF(FontData* d,
-  PathF* dst, uint32_t cntOp,
+  PathF* dst, uint32_t cntOp, const PointF* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
 {
   return WinFace_getOutlineFromGlyphRunT<float>(d,
-    dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
+    dst, cntOp, pt, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunD(FontData* d,
-  PathD* dst, uint32_t cntOp,
+  PathD* dst, uint32_t cntOp, const PointD* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
 {
   return WinFace_getOutlineFromGlyphRunT<double>(d,
-    dst, cntOp, glyphList, glyphAdvance, positionList, positionAdvance, length);
+    dst, cntOp, pt, glyphList, glyphAdvance, positionList, positionAdvance, length);
 }
 
 // ============================================================================

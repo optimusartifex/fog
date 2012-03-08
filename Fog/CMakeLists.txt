@@ -1372,6 +1372,10 @@ Set(FOG_G2D_TEXT_OPENTYPE_SOURCES
   Src/Fog/G2d/Text/OpenType/OTApi.cpp
   Src/Fog/G2d/Text/OpenType/OTCMap.cpp
   Src/Fog/G2d/Text/OpenType/OTFace.cpp
+  Src/Fog/G2d/Text/OpenType/OTHHea.cpp
+  Src/Fog/G2d/Text/OpenType/OTHead.cpp
+  Src/Fog/G2d/Text/OpenType/OTHmtx.cpp
+  Src/Fog/G2d/Text/OpenType/OTKern.cpp
   Src/Fog/G2d/Text/OpenType/OTTypes.cpp
 )
 
@@ -1380,6 +1384,10 @@ Set(FOG_G2D_TEXT_OPENTYPE_HEADERS
   Src/Fog/G2d/Text/OpenType/OTCMap.h
   Src/Fog/G2d/Text/OpenType/OTEnum.h
   Src/Fog/G2d/Text/OpenType/OTFace.h
+  Src/Fog/G2d/Text/OpenType/OTHHea.h
+  Src/Fog/G2d/Text/OpenType/OTHead.h
+  Src/Fog/G2d/Text/OpenType/OTHmtx.h
+  Src/Fog/G2d/Text/OpenType/OTKern.h
   Src/Fog/G2d/Text/OpenType/OTTypes.h
 )
 

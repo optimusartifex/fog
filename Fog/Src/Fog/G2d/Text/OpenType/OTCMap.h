@@ -4,8 +4,8 @@
 // MIT, See COPYING file in package
 
 // [Guard]
-#ifndef _FOG_G2D_TEXT_OTCMAP_H
-#define _FOG_G2D_TEXT_OTCMAP_H
+#ifndef _FOG_G2D_TEXT_OPENTYPE_OTCMAP_H
+#define _FOG_G2D_TEXT_OPENTYPE_OTCMAP_H
 
 // [Dependencies]
 #include <Fog/G2d/Text/OpenType/OTApi.h>
@@ -58,21 +58,32 @@ struct FOG_NO_EXPORT OTCMapItem
 };
 
 // ============================================================================
-// [Fog::OTCMapTable]
+// [Fog::OTCMap]
 // ============================================================================
 
-struct FOG_NO_EXPORT OTCMapTable : public OTTable
+struct FOG_NO_EXPORT OTCMap : public OTTable
 {
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE const OTCMapHeader* getHeader() const { return reinterpret_cast<OTCMapHeader*>(_data); }
+
+  FOG_INLINE uint32_t getUnicodeEncodingIndex() const { return _unicodeEncodingIndex; }
+
+  FOG_INLINE uint32_t getCount() const { return _count; }
+  FOG_INLINE OTCMapItem* getItems() const { return _items; }
+
   // --------------------------------------------------------------------------
   // [Members]
   // --------------------------------------------------------------------------
 
+  uint32_t _unicodeEncodingIndex;
+  uint32_t _count;
+  OTCMapItem* _items;
+
   //! @brief Get character placement.
   OTCMapInitContextFunc _initContext;
-
-  uint32_t count;
-  uint32_t unicodeEncodingIndex;
-  OTCMapItem* items;
 };
 
 // ============================================================================
@@ -94,14 +105,14 @@ struct FOG_NO_EXPORT OTCMapContext
   // [Methods]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE err_t init(OTCMapTable* cMapTable, uint32_t encodingId)
+  FOG_INLINE err_t init(OTCMap* cmap, uint32_t encodingId)
   {
-    FOG_ASSERT_X(cMapTable != NULL,
-      "Fog::OTCMapContext::init() - Called with NULL cMapTable.");
-    FOG_ASSERT_X(cMapTable->_initContext != NULL,
-      "Fog::OTCMapContext::init() - Called with unsupported cMapTable.");
+    FOG_ASSERT_X(cmap != NULL,
+      "Fog::OTCMapContext::init() - Called on NULL cmap.");
+    FOG_ASSERT_X(cmap->_initContext != NULL,
+      "Fog::OTCMapContext::init() - Called on unsupported cmap.");
 
-    return cMapTable->_initContext(this, cMapTable, encodingId);
+    return cmap->_initContext(this, cmap, encodingId);
   }
 
   FOG_INLINE size_t getGlyphPlacement(uint32_t* glyphId, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
@@ -130,4 +141,4 @@ struct FOG_NO_EXPORT OTCMapContext
 } // Fog namespace
 
 // [Guard]
-#endif // _FOG_G2D_TEXT_OTCMAP_H
+#endif // _FOG_G2D_TEXT_OPENTYPE_OTCMAP_H

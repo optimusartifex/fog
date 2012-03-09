@@ -21,12 +21,31 @@ namespace Fog {
 //! @{
 
 // ============================================================================
+// [Fog::OTHmtxMetric]
+// ============================================================================
+
+//! @brief TrueType/OpenType 'hmtx' - Horizontal metrics record.
+struct FOG_NO_EXPORT OTHmtxMetric
+{
+  //! @brief Glyph advance, in font design units.
+  OTUInt16 advanceWidth;
+  //! @brief Left side bearing, in font design units.
+  OTInt16 leftSideBearing;
+};
+
+// ============================================================================
 // [Fog::OTHmtxHeader]
 // ============================================================================
 
 //! @brief TrueType/OpenType 'hmtx' - Horizontal metrics header.
 struct FOG_NO_EXPORT OTHmtxHeader
 {
+  //! @brief Array of @ref OTHmtxMetric records.
+  //!
+  //! @note Length of this array in specification is mentioned as 
+  //! @c numOfLongHorMetrics. We declared it as [1] array, so we can use
+  //! indexed access here.
+  OTHmtxMetric hMetrics[1];
 };
 
 // ============================================================================
@@ -34,6 +53,23 @@ struct FOG_NO_EXPORT OTHmtxHeader
 // ============================================================================
 
 //! @brief TrueType/OpenType 'hmtx' - Horizontal metrics table.
+//!
+//! The 'hmtx' table contains metric information for the horizontal layout each
+//! of the glyphs in the font. It begins with the hMetrics array. Each element
+//! in this array has two parts: the advance width and left side bearing. The 
+//! value numOfLongHorMetrics is taken from the 'hhea' (Horizontal Header) table.
+//! In a monospaced font, only one entry is required but that entry may not be
+//! omitted.
+//! 
+//! Optionally, an array of left side bearings follows. Generally, this array of
+//! left side bearings is used for a run of monospaced glyphs. For example, it
+//! might be used for a Kanji font or for Courier. Only one such run is allowed
+//! per font. It must be at the end of the table.The corresponding glyphs are 
+//! assumed to have the same advance width as that found in the last entry in 
+//! the hMetrics array. Since there must be a left side bearing and an advance 
+//! width associated with each glyph in the font, the number of entries in this
+//! array is derived from the total number of glyphs in the font minus the value
+//! numOfLongHorMetrics.
 //!
 //! Specification:
 //!   - http://www.microsoft.com/typography/otspec/hmtx.htm

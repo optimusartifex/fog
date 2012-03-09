@@ -36,8 +36,8 @@ static err_t FOG_CDECL OTMaxp_init(OTMaxp* self)
     "Initializing 'hhea' table (%u bytes).", dataLength);
 #endif // FOG_OT_DEBUG
 
-  FOG_ASSERT_X(self->_tag == FOG_OT_TAG('h', 'h', 'e', 'a'),
-    "Fog::OTMaxp::init() - Not a 'head' table.");
+  FOG_ASSERT_X(self->_tag == FOG_OT_TAG('m', 'a', 'x', 'p'),
+    "Fog::OTMaxp::init() - Not a 'maxp' table.");
 
   self->_destroy = (OTTableDestroyFunc)OTMaxp_destroy;
 

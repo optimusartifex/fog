@@ -37,7 +37,7 @@ static err_t FOG_CDECL OTKern_init(OTKern* self)
 #endif // FOG_OT_DEBUG
 
   FOG_ASSERT_X(self->_tag == FOG_OT_TAG('k', 'e', 'r', 'n'),
-    "Fog::OTKern::init() - Not a 'head' table.");
+    "Fog::OTKern::init() - Not a 'kern' table.");
 
   self->_destroy = (OTTableDestroyFunc)OTKern_destroy;
 

@@ -244,7 +244,7 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
 
 #if defined(FOG_OT_DEBUG)
   Logger::info("Fog::WinFace", "getOTTable",
-    "Requested table '%c%c%c%c' not in cache, trying to load.",
+    "Requested table '%c%c%c%c' not found in the cache, trying to load.",
       (tag >> 24) & 0xFF,
       (tag >> 16) & 0xFF,
       (tag >>  8) & 0xFF,
@@ -260,7 +260,7 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
   {
 #if defined(FOG_OT_DEBUG)
     Logger::info("Fog::WinFace", "getOTTable",
-      "Requested table '%c%c%c%c' not found in font.",
+      "Requested table '%c%c%c%c' not found in the font.",
         (tag >> 24) & 0xFF,
         (tag >> 16) & 0xFF,
         (tag >>  8) & 0xFF,

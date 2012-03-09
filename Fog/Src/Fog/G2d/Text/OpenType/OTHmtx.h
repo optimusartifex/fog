@@ -34,6 +34,10 @@ struct FOG_NO_EXPORT OTHmtxHeader
 // ============================================================================
 
 //! @brief TrueType/OpenType 'hmtx' - Horizontal metrics table.
+//!
+//! Specification:
+//!   - http://www.microsoft.com/typography/otspec/hmtx.htm
+//!   - https://developer.apple.com/fonts/ttrefman/RM06/Chap6hmtx.html
 struct FOG_NO_EXPORT OTHmtx : public OTTable
 {
   // --------------------------------------------------------------------------

@@ -67,6 +67,10 @@ struct FOG_NO_EXPORT OTHHeaHeader
 // ============================================================================
 
 //! @brief TrueType/OpenType 'hhea' - Horizontal header table.
+//!
+//! Specification:
+//!   - http://www.microsoft.com/typography/otspec/hhea.htm
+//!   - https://developer.apple.com/fonts/ttrefman/RM06/Chap6hhea.html
 struct FOG_NO_EXPORT OTHHea : public OTTable
 {
   // --------------------------------------------------------------------------

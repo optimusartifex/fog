@@ -34,6 +34,10 @@ struct FOG_NO_EXPORT OTKernHeader
 // ============================================================================
 
 //! @brief TrueType/OpenType 'kern' - Kerning table.
+//!
+//! Specification:
+//!   - http://www.microsoft.com/typography/otspec/kern.htm
+//!   - https://developer.apple.com/fonts/ttrefman/RM06/Chap6kern.html
 struct FOG_NO_EXPORT OTKern : public OTTable
 {
   // --------------------------------------------------------------------------

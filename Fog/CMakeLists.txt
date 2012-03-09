@@ -1377,6 +1377,7 @@ Set(FOG_G2D_TEXT_OPENTYPE_SOURCES
   Src/Fog/G2d/Text/OpenType/OTHmtx.cpp
   Src/Fog/G2d/Text/OpenType/OTKern.cpp
   Src/Fog/G2d/Text/OpenType/OTMaxp.cpp
+  Src/Fog/G2d/Text/OpenType/OTName.cpp
   Src/Fog/G2d/Text/OpenType/OTTypes.cpp
 )
 
@@ -1390,6 +1391,7 @@ Set(FOG_G2D_TEXT_OPENTYPE_HEADERS
   Src/Fog/G2d/Text/OpenType/OTHmtx.h
   Src/Fog/G2d/Text/OpenType/OTKern.h
   Src/Fog/G2d/Text/OpenType/OTMaxp.h
+  Src/Fog/G2d/Text/OpenType/OTName.h
   Src/Fog/G2d/Text/OpenType/OTTypes.h
 )
 

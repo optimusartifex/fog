@@ -56,6 +56,10 @@ struct FOG_NO_EXPORT OTHeadHeader
 // ============================================================================
 
 //! @brief TrueType/OpenType 'head' - Font header table.
+//!
+//! Specification:
+//!   - http://www.microsoft.com/typography/otspec/head.htm
+//!   - https://developer.apple.com/fonts/ttrefman/RM06/Chap6head.html
 struct FOG_NO_EXPORT OTHead : public OTTable
 {
   // --------------------------------------------------------------------------

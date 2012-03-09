@@ -21,6 +21,11 @@ namespace Fog {
 // [Fog::OTFace]
 // ============================================================================
 
+//! @brief TrueType/OpenType font face.
+//!
+//! Table specifications:
+//!   - http://www.microsoft.com/typography/otspec/otff.htm
+//!   - https://developer.apple.com/fonts/ttrefman/RM06/Chap6.html
 struct FOG_NO_EXPORT OTFace
 {
   // --------------------------------------------------------------------------
@@ -51,6 +56,8 @@ struct FOG_NO_EXPORT OTFace
   FOG_INLINE OTHmtx* getHmtx() const { return _hmtx; }
   FOG_INLINE OTCMap* getCMap() const { return _cmap; }
   FOG_INLINE OTKern* getKern() const { return _kern; }
+  FOG_INLINE OTMaxp* getMaxp() const { return _maxp; }
+  FOG_INLINE OTName* getName() const { return _name; }
 
   // --------------------------------------------------------------------------
   // [Additional Tables]
@@ -77,9 +84,7 @@ struct FOG_NO_EXPORT OTFace
   //! @brief Try to load table of @a tag name.
   //!
   //! In case that this function succeeds the table is returned, in case that
-  //! the requested table dosn't exist in font file, value of 0x1 is returned,
-  //! and usually stored to a particular object. Please use FOG_OT_LOADED()
-  //! macro to get whether the table object is valid.
+  //! the requested table dosn't exist in font file, @c NULL is returned.
   FOG_INLINE OTTable* tryLoadTable(uint32_t tag)
   {
     return fog_ot_api.otface_tryLoadTable(this, tag);
@@ -114,6 +119,8 @@ struct FOG_NO_EXPORT OTFace
   OTKern* _kern;
   //! @brief 'maxp' table.
   OTMaxp* _maxp;
+  //! @brief 'name' table.
+  OTName* _name;
 
   //! @brief allocaor.
   Static<MemZoneAllocator> _allocator;

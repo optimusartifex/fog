@@ -82,6 +82,10 @@ struct FOG_NO_EXPORT OTMaxpHeaderV1_0
 // ============================================================================
 
 //! @brief TrueType/OpenType 'maxp' - Maximum Profile table.
+//!
+//! Specification:
+//!   - http://www.microsoft.com/typography/otspec/maxp.htm
+//!   - https://developer.apple.com/fonts/ttrefman/RM06/Chap6maxp.html
 struct FOG_NO_EXPORT OTMaxp : public OTTable
 {
   // --------------------------------------------------------------------------

@@ -27,6 +27,7 @@ FOG_NO_EXPORT void OTHead_init(void);
 FOG_NO_EXPORT void OTHmtx_init(void);
 FOG_NO_EXPORT void OTKern_init(void);
 FOG_NO_EXPORT void OTMaxp_init(void);
+FOG_NO_EXPORT void OTName_init(void);
 
 FOG_NO_EXPORT void OTApi_init(void)
 {
@@ -34,6 +35,7 @@ FOG_NO_EXPORT void OTApi_init(void)
   OTFace_init();
 
   OTHead_init();
+  OTName_init();
   OTHHea_init();
   OTHmtx_init();
   OTCMap_init();

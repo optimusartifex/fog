@@ -54,7 +54,7 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
     return ERR_FONT_INVALID_FACE;
 
   OTCMap* cmap = ot->getCMap();
-  if (!FOG_OT_LOADED(cmap))
+  if (FOG_IS_NULL(cmap))
     return ERR_FONT_CMAP_NOT_FOUND;
 
   OTCMapContext cctx;

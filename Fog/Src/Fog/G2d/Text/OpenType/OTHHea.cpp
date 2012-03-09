@@ -37,7 +37,7 @@ static err_t FOG_CDECL OTHHea_init(OTHHea* self)
 #endif // FOG_OT_DEBUG
 
   FOG_ASSERT_X(self->_tag == FOG_OT_TAG('h', 'h', 'e', 'a'),
-    "Fog::OTHHea::init() - Not a 'head' table.");
+    "Fog::OTHHea::init() - Not a 'hhea' table.");
 
   self->_destroy = (OTTableDestroyFunc)OTHHea_destroy;
 

@@ -83,6 +83,9 @@ struct OTKern;
 // TrueType/OpenType 'maxp' support.
 struct OTMaxp;
 
+// TrueType/OpenType 'name' support.
+struct OTName;
+
 // ============================================================================
 // [Funcs]
 // ============================================================================
@@ -117,8 +120,6 @@ typedef size_t (FOG_CDECL* OTCMapGetGlyphPlacementFunc)(OTCMapContext* ctx, uint
   ((uint32_t)(_C1_) << 16) | \
   ((uint32_t)(_C2_) <<  8) | \
   ((uint32_t)(_C3_)      ) )
-
-#define FOG_OT_LOADED(_Table_) ((uintptr_t)(_Table_) > 0x1)
 
 //! @}
 
@@ -184,6 +185,12 @@ struct FOG_NO_EXPORT OTApi
   // --------------------------------------------------------------------------
 
   FOG_CAPI_METHOD(err_t, otmaxp_init)(OTMaxp* table);
+
+  // --------------------------------------------------------------------------
+  // [OTName]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_METHOD(err_t, otname_init)(OTName* table);
 };
 
 } // Fog namespace

@@ -502,12 +502,12 @@ static err_t FOG_CDECL OTCMap_init(OTCMap* self)
         platformId,
         specificId,
         (uint32_t)(reinterpret_cast<const OTUInt16*>(data + offset)->getValueA()),
+        offset,
         (encodingId >> 24) & 0xFF,
         (encodingId >> 16) & 0xFF,
         (encodingId >>  8) & 0xFF,
         (encodingId      ) & 0xFF,
-        priority,
-        offset);
+        priority);
 #endif // FOG_OT_DEBUG
     }
   }

@@ -33,7 +33,7 @@ static err_t FOG_CDECL OTMaxp_init(OTMaxp* self)
 
 #if defined(FOG_OT_DEBUG)
   Logger::info("Fog::OTMaxp", "init", 
-    "Initializing 'hhea' table (%u bytes).", dataLength);
+    "Initializing 'maxp' table (%u bytes).", dataLength);
 #endif // FOG_OT_DEBUG
 
   FOG_ASSERT_X(self->_tag == FOG_OT_TAG('m', 'a', 'x', 'p'),
@@ -45,8 +45,18 @@ static err_t FOG_CDECL OTMaxp_init(OTMaxp* self)
   // [Header]
   // --------------------------------------------------------------------------
 
-  const OTMaxpHeader* header = self->getHeader();
+  if (self->getVersion() < 0x00005000)
+  {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::OTMaxp", "init", 
+      "Unsupported header version (%u.%u bytes).",
+        self->getVersion() >> 16,
+        self->getVersion() & 0xFFFF);
+#endif // FOG_OT_DEBUG
+    return self->setStatus(ERR_FONT_MAXP_HEADER_WRONG_VERSION);    
+  }
 
+  const OTMaxpHeaderV0_5* header = self->getHeaderV0_5();
   return ERR_OK;
 }
 

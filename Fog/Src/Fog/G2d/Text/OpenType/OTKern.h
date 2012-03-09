@@ -24,6 +24,7 @@ namespace Fog {
 // [Fog::OTKernHeader]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'kern' - Kerning header.
 struct FOG_NO_EXPORT OTKernHeader
 {
 };
@@ -32,6 +33,7 @@ struct FOG_NO_EXPORT OTKernHeader
 // [Fog::OTKern]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'kern' - Kerning table.
 struct FOG_NO_EXPORT OTKern : public OTTable
 {
   // --------------------------------------------------------------------------

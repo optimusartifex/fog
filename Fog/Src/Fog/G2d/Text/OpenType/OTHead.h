@@ -24,6 +24,7 @@ namespace Fog {
 // [Fog::OTHeadHeader]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'head' - Font header (header).
 struct FOG_NO_EXPORT OTHeadHeader
 {
   OTFixed16x16 version;
@@ -54,6 +55,7 @@ struct FOG_NO_EXPORT OTHeadHeader
 // [Fog::OTHead]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'head' - Font header table.
 struct FOG_NO_EXPORT OTHead : public OTTable
 {
   // --------------------------------------------------------------------------

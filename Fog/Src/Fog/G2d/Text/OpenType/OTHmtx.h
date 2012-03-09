@@ -24,6 +24,7 @@ namespace Fog {
 // [Fog::OTHmtxHeader]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'hmtx' - Horizontal metrics header.
 struct FOG_NO_EXPORT OTHmtxHeader
 {
 };
@@ -32,6 +33,7 @@ struct FOG_NO_EXPORT OTHmtxHeader
 // [Fog::OTHmtx]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'hmtx' - Horizontal metrics table.
 struct FOG_NO_EXPORT OTHmtx : public OTTable
 {
   // --------------------------------------------------------------------------

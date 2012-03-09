@@ -23,7 +23,7 @@ namespace Fog {
 // [Fog::OTCMapHeader]
 // ============================================================================
 
-//! @brief 'cmap' index table.
+//! @brief TrueType/OpenType 'cmap' - Character to glyph mapping header.
 struct FOG_NO_EXPORT OTCMapHeader
 {
   //! @brief Version of 'cmap' header, must be 0.
@@ -36,6 +36,7 @@ struct FOG_NO_EXPORT OTCMapHeader
 // [Fog::OTCMapEncoding]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'cmap' - Character to glyph mapping encoding.
 struct FOG_NO_EXPORT OTCMapEncoding
 {
   //! @brief Platform identifier.
@@ -50,6 +51,8 @@ struct FOG_NO_EXPORT OTCMapEncoding
 // [Fog::OTCMapItem]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'cmap' - Character to glyph mapping parsed item,
+//! internally by Fog-Framework.
 struct FOG_NO_EXPORT OTCMapItem
 {
   uint32_t encodingId;
@@ -61,6 +64,7 @@ struct FOG_NO_EXPORT OTCMapItem
 // [Fog::OTCMap]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'cmap' - Character to glyph mapping table.
 struct FOG_NO_EXPORT OTCMap : public OTTable
 {
   // --------------------------------------------------------------------------

@@ -24,6 +24,7 @@ namespace Fog {
 // [Fog::OTHHeaHeader]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'hhea' - Horizontal header (header).
 struct FOG_NO_EXPORT OTHHeaHeader
 {
   //! @brief Version number in fixed point (0x00010000 for 1.0).
@@ -65,6 +66,7 @@ struct FOG_NO_EXPORT OTHHeaHeader
 // [Fog::OTHHea]
 // ============================================================================
 
+//! @brief TrueType/OpenType 'hhea' - Horizontal header table.
 struct FOG_NO_EXPORT OTHHea : public OTTable
 {
   // --------------------------------------------------------------------------

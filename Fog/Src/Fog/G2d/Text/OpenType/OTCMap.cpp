@@ -56,14 +56,14 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
 
     const uint8_t* p;
 
-    if (CharW::isSurrogate(uc))
-      goto _GlyphDone;
-
     uint32_t start, end;
     uint32_t endCount = 14;
     uint32_t search = endCount;
     uint32_t offset;
     
+    if (CharW::isSurrogate(uc))
+      goto _GlyphDone;
+
     // [endCount, endCount + segCount].
     p = data + search;
     ut = FOG_OT_UINT16(p + rangeShift * 2)->getValueA();

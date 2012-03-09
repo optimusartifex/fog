@@ -186,9 +186,14 @@ struct FOG_NO_EXPORT WinGetGlyphOutlineHDC
 // [Fog::WinFace - Create / Destroy]
 // ============================================================================
 
-static void FOG_CDECL WinFace_freeTableData(OTFace* face, uint8_t* data, size_t dataLength)
+static void FOG_CDECL WinFace_freeTableData(OTTable* table)
 {
-  MemMgr::free(data);
+  if (table->_data != NULL)
+  {
+    MemMgr::free(table->_data);
+    table->_data = NULL;
+    table->_dataLength = 0;
+  }
 }
 
 static void FOG_CDECL WinFace_create(WinFace* self, HFONT hFace)

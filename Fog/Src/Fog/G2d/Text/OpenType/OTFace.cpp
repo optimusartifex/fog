@@ -42,7 +42,7 @@ static void FOG_CDECL OTFace_ctor(OTFace* self)
 static void FOG_CDECL OTFace_dtor(OTFace* self)
 {
   OTTable* table = self->_tableData;
-  OTFaceFreeTableDataFunc freeTable = self->_freeTableDataFunc;
+  OTTableFreeDataFunc freeData = self->_freeTableDataFunc;
 
   while (table != NULL)
   {
@@ -50,8 +50,8 @@ static void FOG_CDECL OTFace_dtor(OTFace* self)
 
     if (table->_destroy)
       table->_destroy(table);
-    freeTable(self, table->_data, table->_dataLength);
 
+    freeData(table);
     table = next;
   }
 
@@ -179,6 +179,7 @@ static OTTable* FOG_CDECL OTFace_addTable(OTFace* self, uint32_t tag, uint8_t* d
   tab->_face = self;
   tab->_next = NULL;
 
+  tab->_handle = NULL;
   tab->_destroy = NULL;
   tab->_status = ERR_OK;
   OTFace_initTable(self, tab);

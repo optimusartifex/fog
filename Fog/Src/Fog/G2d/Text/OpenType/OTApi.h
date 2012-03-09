@@ -93,10 +93,8 @@ struct OTName;
 //! @addtogroup Fog_G2d_Text_OpenType
 //! @{
 
-// OTFace.
-typedef void (FOG_CDECL* OTFaceFreeTableDataFunc)(OTFace* self, uint8_t* data, size_t dataLength);
-
 // OTTable.
+typedef void (FOG_CDECL* OTTableFreeDataFunc)(OTTable* table);
 typedef void (FOG_CDECL* OTTableDestroyFunc)(OTTable* table);
 
 // OTCMap aka 'cmap'.

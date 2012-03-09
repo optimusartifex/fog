@@ -621,6 +621,8 @@ struct FOG_NO_EXPORT OTTable
   //! @brief Next table in single-linked list used by @ref OTFace (private).
   OTTable* _next;
 
+  //! @brief @ref Face specific handle to the object which holds the data.
+  void* _handle;
   //! @brief Callback to release all associated data with the table.
   OTTableDestroyFunc _destroy;
 

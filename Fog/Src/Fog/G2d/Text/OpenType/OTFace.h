@@ -105,7 +105,7 @@ struct FOG_NO_EXPORT OTFace
   //! @brief Loaded tables.
   OTTable* _tableData;
   //! @brief Table-data free callback.
-  OTFaceFreeTableDataFunc _freeTableDataFunc;
+  OTTableFreeDataFunc _freeTableDataFunc;
 
   //! @brief 'head' table.
   OTHead* _head;

@@ -160,6 +160,7 @@ FOG_UI_MAIN()
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/turbulence_filters.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/tommek_Car.svg");
     //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/GroupTest.svg");
+    //fileName = Ascii8("/Users/petr/Workspace/Files/SVG/linear1.svg");
   }
 
 /*

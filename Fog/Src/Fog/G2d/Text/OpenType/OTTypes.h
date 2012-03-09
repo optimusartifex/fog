@@ -631,6 +631,9 @@ struct FOG_NO_EXPORT OTTable
   //! malformed so it can't be used. We never unload tables so the status remains
   //! until the OTFace is destroyed.
   err_t _status;
+
+  //! @brief Reserved for future use (currently used as padding for 64-bit mode).
+  uint32_t _reserved;
 };
 
 //! @}

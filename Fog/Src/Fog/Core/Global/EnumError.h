@@ -527,6 +527,9 @@ enum ERR_CODE
   //! @brief TrueType/OpenType 'hhea' header is wrong (corrupted/malformed).
   ERR_FONT_HHEA_HEADER_WRONG_DATA,
 
+  //! @brief TrueType/OpenType 'hmtx' header is wrong (corrupted/malformed).
+  ERR_FONT_HMTX_HEADER_WRONG_DATA,
+
   //! @brief TrueType/OpenType 'maxp' header is wrong (corrupted/malformed).
   ERR_FONT_MAXP_HEADER_WRONG_DATA,
   //! @brief TrueType/OpenType 'maxp' header version is not supported or wrong.

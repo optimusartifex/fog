@@ -43,7 +43,7 @@ struct FOG_NO_EXPORT OTHmtxHeader
   //! @brief Array of @ref OTHmtxMetric records.
   //!
   //! @note Length of this array in specification is mentioned as 
-  //! @c numOfLongHorMetrics. We declared it as [1] array, so we can use
+  //! @c numberOfHMetrics. We declared it as [1] array, so we can use
   //! indexed access here.
   OTHmtxMetric hMetrics[1];
 };
@@ -57,7 +57,7 @@ struct FOG_NO_EXPORT OTHmtxHeader
 //! The 'hmtx' table contains metric information for the horizontal layout each
 //! of the glyphs in the font. It begins with the hMetrics array. Each element
 //! in this array has two parts: the advance width and left side bearing. The 
-//! value numOfLongHorMetrics is taken from the 'hhea' (Horizontal Header) table.
+//! value numberOfHMetrics is taken from the 'hhea' (Horizontal Header) table.
 //! In a monospaced font, only one entry is required but that entry may not be
 //! omitted.
 //! 
@@ -69,7 +69,7 @@ struct FOG_NO_EXPORT OTHmtxHeader
 //! the hMetrics array. Since there must be a left side bearing and an advance 
 //! width associated with each glyph in the font, the number of entries in this
 //! array is derived from the total number of glyphs in the font minus the value
-//! numOfLongHorMetrics.
+//! numberOfHMetrics.
 //!
 //! Specification:
 //!   - http://www.microsoft.com/typography/otspec/hmtx.htm
@@ -80,7 +80,30 @@ struct FOG_NO_EXPORT OTHmtx : public OTTable
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE const OTHmtxHeader* getHeader() const { return reinterpret_cast<OTHmtxHeader*>(_data); }
+  FOG_INLINE const OTHmtxHeader* getHeader() const
+  {
+    return reinterpret_cast<const OTHmtxHeader*>(_data);
+  }
+
+  FOG_INLINE const OTHmtxMetric* getHMetrics() const
+  {
+    return reinterpret_cast<const OTHmtxMetric*>(_data);
+  }
+
+  FOG_INLINE const OTInt16* getLeftSideBearing() const
+  {
+    return reinterpret_cast<const OTInt16*>(_data + _numberOfHMetrics * sizeof(OTHmtxMetric));
+  }
+
+  FOG_INLINE uint32_t getNumberOfHMetrics() const { return _numberOfHMetrics; }
+  FOG_INLINE uint32_t getNumberOfLeftSideBearing() const { return _numberOfLeftSideBearing; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  uint32_t _numberOfHMetrics;
+  uint32_t _numberOfLeftSideBearing;
 };
 
 //! @}

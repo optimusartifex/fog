@@ -111,6 +111,16 @@ struct FOG_NO_EXPORT OTMaxp : public OTTable
     FOG_ASSERT(getVersion() >= 0x00010000);
     return reinterpret_cast<OTMaxpHeaderV1_0*>(_data);
   }
+
+  //! @brief Get number of glyphs stored in the font.
+  FOG_INLINE uint32_t getNumberOfGlyphs() const { return _numberOfGlyphs; }
+
+  // --------------------------------------------------------------------------
+  // [Members]
+  // --------------------------------------------------------------------------
+
+  //! @brief Number of glyphs stored in font.
+  uint32_t _numberOfGlyphs;
 };
 
 //! @}

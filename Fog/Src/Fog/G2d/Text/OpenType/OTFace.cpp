@@ -65,12 +65,12 @@ static void FOG_CDECL OTFace_dtor(OTFace* self)
 static err_t FOG_CDECL OTFace_initCoreTables(OTFace* self)
 {
   OTHead* head = self->_head = reinterpret_cast<OTHead*>(self->tryLoadTable(FOG_OT_TAG('h', 'e', 'a', 'd')));
+  OTName* name = self->_name = reinterpret_cast<OTName*>(self->tryLoadTable(FOG_OT_TAG('n', 'a', 'm', 'e')));
   OTHHea* hhea = self->_hhea = reinterpret_cast<OTHHea*>(self->tryLoadTable(FOG_OT_TAG('h', 'h', 'e', 'a')));
-  OTHmtx* hmtx = self->_hmtx = reinterpret_cast<OTHmtx*>(self->tryLoadTable(FOG_OT_TAG('h', 'm', 't', 'x')));
+  OTMaxp* maxp = self->_maxp = reinterpret_cast<OTMaxp*>(self->tryLoadTable(FOG_OT_TAG('m', 'a', 'x', 'p')));
+  OTHmtx* hmtx = self->_hmtx = reinterpret_cast<OTHmtx*>(self->tryLoadTable(FOG_OT_TAG('h', 'm', 't', 'x'))); // Depends on 'hhea', 'maxp'.
   OTCMap* cmap = self->_cmap = reinterpret_cast<OTCMap*>(self->tryLoadTable(FOG_OT_TAG('c', 'm', 'a', 'p')));
   OTKern* kern = self->_kern = reinterpret_cast<OTKern*>(self->tryLoadTable(FOG_OT_TAG('k', 'e', 'r', 'n')));
-  OTMaxp* maxp = self->_maxp = reinterpret_cast<OTMaxp*>(self->tryLoadTable(FOG_OT_TAG('m', 'a', 'x', 'p')));
-  OTName* name = self->_name = reinterpret_cast<OTName*>(self->tryLoadTable(FOG_OT_TAG('n', 'a', 'm', 'e')));
 
   if (head == NULL || FOG_IS_ERROR(head->getStatus()))
     return head->getStatus();

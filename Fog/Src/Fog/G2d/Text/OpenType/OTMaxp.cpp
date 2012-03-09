@@ -57,6 +57,27 @@ static err_t FOG_CDECL OTMaxp_init(OTMaxp* self)
   }
 
   const OTMaxpHeaderV0_5* header = self->getHeaderV0_5();
+  uint32_t numOfGlyphs = header->numGlyphs.getValueA();
+
+  if (numOfGlyphs == 0)
+  {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::OTMaxp", "init", 
+      "Number of glyphs is zero.");
+#endif // FOG_OT_DEBUG
+    return self->setStatus(ERR_FONT_MAXP_HEADER_WRONG_DATA);    
+  }
+
+  // --------------------------------------------------------------------------
+  // [Finished]
+  // --------------------------------------------------------------------------
+
+  self->_numberOfGlyphs = numOfGlyphs;
+
+#if defined(FOG_OT_DEBUG)
+  Logger::info("Fog::OTMaxp", "init", "NumberOfGlyphs=%u.", numOfGlyphs);
+#endif // FOG_OT_DEBUG
+
   return ERR_OK;
 }
 

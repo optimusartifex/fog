@@ -485,27 +485,30 @@ static err_t FOG_CDECL OTCMap_init(OTCMap* self)
     items->priority = priority;
     items->status = OT_NOT_VALIDATED;
 
-#if defined(FOG_OT_DEBUG)
-    Logger::info("Fog::OTCMap", "init", 
-      "#%02u - platformId=%u, specificId=%u => [encoding='%c%c%c%c', priority=%u], offset=%u",
-      i,
-      platformId,
-      specificId,
-      (encodingId >> 24) & 0xFF,
-      (encodingId >> 16) & 0xFF,
-      (encodingId >>  8) & 0xFF,
-      (encodingId      ) & 0xFF,
-      priority,
-      offset);
-#endif // FOG_OT_DEBUG
-
-    if (offset < minOffsetValue || offset >= dataLength)
+    if (offset < minOffsetValue || offset >= dataLength || (offset & 0x1) == 0x1)
     {
 #if defined(FOG_OT_DEBUG)
       Logger::info("Fog::OTCMap", "init", 
         "#%02u - corrupted offset=%u", i, offset);
 #endif // FOG_OT_DEBUG
       items->status = ERR_FONT_CMAP_TABLE_WRONG_DATA;
+    }
+    else
+    {
+#if defined(FOG_OT_DEBUG)
+      Logger::info("Fog::OTCMap", "init", 
+        "#%02u - pId=%u, sId=%u, fmt=%u, offset=%u => [enc='%c%c%c%c', priority=%u]",
+        i,
+        platformId,
+        specificId,
+        (uint32_t)(reinterpret_cast<const OTUInt16*>(data + offset)->getValueA()),
+        (encodingId >> 24) & 0xFF,
+        (encodingId >> 16) & 0xFF,
+        (encodingId >>  8) & 0xFF,
+        (encodingId      ) & 0xFF,
+        priority,
+        offset);
+#endif // FOG_OT_DEBUG
     }
   }
 

@@ -26,6 +26,7 @@ FOG_NO_EXPORT void OTHHea_init(void);
 FOG_NO_EXPORT void OTHead_init(void);
 FOG_NO_EXPORT void OTHmtx_init(void);
 FOG_NO_EXPORT void OTKern_init(void);
+FOG_NO_EXPORT void OTMaxp_init(void);
 
 FOG_NO_EXPORT void OTApi_init(void)
 {
@@ -37,6 +38,7 @@ FOG_NO_EXPORT void OTApi_init(void)
   OTHmtx_init();
   OTCMap_init();
   OTKern_init();
+  OTMaxp_init();
 }
 
 } // Fog namespace

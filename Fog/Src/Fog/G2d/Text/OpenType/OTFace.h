@@ -112,6 +112,8 @@ struct FOG_NO_EXPORT OTFace
   OTCMap* _cmap;
   //! @brief 'kern' table.
   OTKern* _kern;
+  //! @brief 'maxp' table.
+  OTMaxp* _maxp;
 
   //! @brief allocaor.
   Static<MemZoneAllocator> _allocator;

@@ -75,7 +75,7 @@ static err_t FOG_CDECL OTHead_init(OTHead* self)
   // If unitsPerEM is not set or invalid, assume 1000, which matches typical
   // Type1 usage.
   self->_unitsPerEM = header->unitsPerEm.getValueA();
-  if (!Math::isBounded<uint16_t>(self->_unitsPerEM, 16, 16384));
+  if (!Math::isBounded<uint16_t>(self->_unitsPerEM, 16, 16384))
     self->_unitsPerEM = 1000;
 
   return ERR_OK;

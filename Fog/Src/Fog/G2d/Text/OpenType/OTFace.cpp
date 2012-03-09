@@ -12,6 +12,7 @@
 #include <Fog/G2d/Text/OpenType/OTHead.h>
 #include <Fog/G2d/Text/OpenType/OTHmtx.h>
 #include <Fog/G2d/Text/OpenType/OTKern.h>
+#include <Fog/G2d/Text/OpenType/OTMaxp.h>
 
 namespace Fog {
 
@@ -27,7 +28,11 @@ static void FOG_CDECL OTFace_ctor(OTFace* self)
   self->_freeTableDataFunc = NULL;
 
   self->_head = NULL;
+  self->_hhea = NULL;
+  self->_hmtx = NULL;
   self->_cmap = NULL;
+  self->_kern = NULL;
+  self->_maxp = NULL;
 
   self->_allocator.initCustom1(488);
 }
@@ -58,10 +63,16 @@ static void FOG_CDECL OTFace_dtor(OTFace* self)
 static err_t FOG_CDECL OTFace_initCoreTables(OTFace* self)
 {
   OTHead* head = self->_head = reinterpret_cast<OTHead*>(self->tryLoadTable(FOG_OT_TAG('h', 'e', 'a', 'd')));
+  OTHHea* hhea = self->_hhea = reinterpret_cast<OTHHea*>(self->tryLoadTable(FOG_OT_TAG('h', 'h', 'e', 'a')));
+  OTHmtx* hmtx = self->_hmtx = reinterpret_cast<OTHmtx*>(self->tryLoadTable(FOG_OT_TAG('h', 'm', 't', 'x')));
   OTCMap* cmap = self->_cmap = reinterpret_cast<OTCMap*>(self->tryLoadTable(FOG_OT_TAG('c', 'm', 'a', 'p')));
+  OTKern* kern = self->_kern = reinterpret_cast<OTKern*>(self->tryLoadTable(FOG_OT_TAG('k', 'e', 'r', 'n')));
+  OTMaxp* maxp = self->_maxp = reinterpret_cast<OTMaxp*>(self->tryLoadTable(FOG_OT_TAG('m', 'a', 'x', 'p')));
 
-  if (head == NULL || FOG_IS_ERROR(head->getStatus())) return head->getStatus();
-  if (cmap == NULL || FOG_IS_ERROR(cmap->getStatus())) return cmap->getStatus();
+  if (head == NULL || FOG_IS_ERROR(head->getStatus()))
+    return head->getStatus();
+  if (cmap == NULL || FOG_IS_ERROR(cmap->getStatus()))
+    return cmap->getStatus();
 
   return ERR_OK;
 }
@@ -79,6 +90,7 @@ static size_t FOG_CDECL OTFace_getTableSize(uint32_t tag)
     case FOG_OT_TAG('h', 'm', 't', 'x'): return sizeof(OTHmtx);
     case FOG_OT_TAG('c', 'm', 'a', 'p'): return sizeof(OTCMap);
     case FOG_OT_TAG('k', 'e', 'r', 'n'): return sizeof(OTKern);
+    case FOG_OT_TAG('m', 'a', 'x', 'p'): return sizeof(OTMaxp);
 
     default: return sizeof(OTTable);
   }
@@ -93,6 +105,7 @@ static err_t FOG_CDECL OTFace_initTable(OTFace* self, OTTable* table)
     case FOG_OT_TAG('h', 'm', 't', 'x'): return fog_ot_api.othmtx_init(static_cast<OTHmtx*>(table));
     case FOG_OT_TAG('c', 'm', 'a', 'p'): return fog_ot_api.otcmap_init(static_cast<OTCMap*>(table));
     case FOG_OT_TAG('k', 'e', 'r', 'n'): return fog_ot_api.otkern_init(static_cast<OTKern*>(table));
+    case FOG_OT_TAG('m', 'a', 'x', 'p'): return fog_ot_api.otmaxp_init(static_cast<OTMaxp*>(table));
 
     default: return ERR_OK;
   }

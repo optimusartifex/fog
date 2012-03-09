@@ -15,6 +15,7 @@
 #include <Fog/Core/Memory/MemBufferTmp_p.h>
 #include <Fog/Core/Threading/Lock.h>
 #include <Fog/Core/OS/OSUtil.h>
+#include <Fog/Core/Tools/Logger.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Text/WinFont.h>
@@ -236,26 +237,62 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
   if (table != NULL)
     return table;
 
+#if defined(FOG_OT_DEBUG)
+  Logger::info("Fog::WinFace", "getOTTable",
+    "Requested table '%c%c%c%c' not in cache, trying to load.",
+      (tag >> 24) & 0xFF,
+      (tag >> 16) & 0xFF,
+      (tag >>  8) & 0xFF,
+      (tag      ) & 0xFF);
+#endif // FOG_OT_DEBUG
+
   WinFontHDC scopedDC;
   if (!scopedDC.init())
     return NULL;
 
   HGDIOBJ oldFont = ::SelectObject(scopedDC, (HGDIOBJ)self->hFace);
   if (oldFont == (HGDIOBJ)GDI_ERROR)
+  {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::WinFace", "getOTTable",
+      "Requested table '%c%c%c%c' not found.",
+        (tag >> 24) & 0xFF,
+        (tag >> 16) & 0xFF,
+        (tag >>  8) & 0xFF,
+        (tag      ) & 0xFF);
+#endif // FOG_OT_DEBUG
     return NULL;
+  }
 
   uint8_t* data;
   DWORD length = ::GetFontData(scopedDC, MemOps::bswap32be(tag), 0, NULL, 0);
 
   if (length == GDI_ERROR)
+  {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::WinFace", "getOTTable",
+      "Failed to call GetFontData() to get how many bytes are needed for table.");
+#endif // FOG_OT_DEBUG
     goto _End;
+  }
 
   data = static_cast<uint8_t*>(MemMgr::alloc(length));
   if (FOG_IS_NULL(data))
+  {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::WinFace", "getOTTable",
+      "Failed to allocate memory (%u bytes).", (uint)length);
+#endif // FOG_OT_DEBUG
     goto _End;
+  }
 
   if (::GetFontData(scopedDC, MemOps::bswap32be(tag), 0, data, length) != length)
   {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::WinFace", "getOTTable",
+      "Failed to call GetFontData() to retrieve the data (%u bytes).", (uint)length);
+#endif // FOG_OT_DEBUG
+
     MemMgr::free(data);
     goto _End;
   }
@@ -263,6 +300,15 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
   table = const_cast<WinFace*>(self)->ot->addTable(tag, data, length);
   if (FOG_IS_NULL(table))
   {
+#if defined(FOG_OT_DEBUG)
+    Logger::info("Fog::WinFace", "getOTTable",
+      "Failed to add table '%c%c%c%c' to OTFace.",
+        (tag >> 24) & 0xFF,
+        (tag >> 16) & 0xFF,
+        (tag >>  8) & 0xFF,
+        (tag      ) & 0xFF);
+#endif // FOG_OT_DEBUG
+
     MemMgr::free(data);
     goto _End;
   }
@@ -647,8 +693,6 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
     ::DeleteObject(hFace);
     return err;
   }
-
-  uint32_t xxx = GetDeviceCaps(scopedDC, LOGPIXELSY);
 
   err = scopedDC.initHFONT(hFace);
   if (FOG_IS_ERROR(err))

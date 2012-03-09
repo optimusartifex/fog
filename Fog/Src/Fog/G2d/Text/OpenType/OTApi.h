@@ -80,6 +80,9 @@ struct OTHmtx;
 // TrueType/OpenType 'kern' support.
 struct OTKern;
 
+// TrueType/OpenType 'maxp' support.
+struct OTMaxp;
+
 // ============================================================================
 // [Funcs]
 // ============================================================================
@@ -175,6 +178,12 @@ struct FOG_NO_EXPORT OTApi
   // --------------------------------------------------------------------------
 
   FOG_CAPI_METHOD(err_t, otkern_init)(OTKern* table);
+
+  // --------------------------------------------------------------------------
+  // [OTMaxp]
+  // --------------------------------------------------------------------------
+
+  FOG_CAPI_METHOD(err_t, otmaxp_init)(OTMaxp* table);
 };
 
 } // Fog namespace

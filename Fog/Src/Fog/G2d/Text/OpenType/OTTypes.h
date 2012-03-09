@@ -326,7 +326,7 @@ struct FOG_NO_EXPORT OTUInt24
 
 struct FOG_NO_EXPORT OTInt32
 {
-  typedef int16_t Type;
+  typedef int32_t Type;
 
   // --------------------------------------------------------------------------
   // [Accessors]

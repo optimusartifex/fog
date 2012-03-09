@@ -102,7 +102,9 @@ struct FOG_NO_EXPORT OTHmtx : public OTTable
   // [Members]
   // --------------------------------------------------------------------------
 
+  //! @brief Number of horizontal metrics which can be retrieved by @c getHMetrics().
   uint32_t _numberOfHMetrics;
+  //! @brief Number of left side bearing which can be retrieved by @c getLeftSideBearing().
   uint32_t _numberOfLeftSideBearing;
 };
 

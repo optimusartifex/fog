@@ -31,7 +31,7 @@ FOG_MMX_DECLARE_CONST_PF_SET  (m64f_epsilon , Fog::MATH_EPSILON_F);
 namespace Fog {
 namespace Acc {
 
-//! @addtogroup Fog_Acc_3dNow
+//! @addtogroup Fog_Core_Acc_3dNow
 //! @{
 
 // ============================================================================

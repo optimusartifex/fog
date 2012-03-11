@@ -15,7 +15,7 @@
 // ============================================================================
 
 //! @typedef __p64
-//! @brief 64-bit packed unsigned integer used by Fog::Face framework.
+//! @brief 64-bit packed unsigned integer used by Fog::Acc framework.
 
 #if defined(FOG_ARCH_NATIVE_P64)
 typedef uint64_t __p64;

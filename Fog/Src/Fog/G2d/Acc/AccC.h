@@ -16,7 +16,7 @@
 namespace Fog {
 namespace Acc {
 
-//! @addtogroup Fog_Acc_C
+//! @addtogroup Fog_G2d_Acc_C
 //! @{
 
 // ============================================================================

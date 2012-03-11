@@ -23,42 +23,6 @@
 # pragma intrinsic(__emulu)
 #endif // FOG_CC_MSC
 
-//! @defgroup Fog_Acc_C Packed 32-bit and 64-bit datatype manipulation in C++.
-//! @ingroup Fog_Acc
-//!
-//! Collection of typedefs and functions to work with scalar bytes or bytes
-//! packed in 32-bit or 64-bit unsigned integers.
-//!
-//! Functions defined by @ref Fog_Acc_C do operation on:
-//!
-//!   1. scalar byte:
-//!      - suffix "SBB"
-//!   2. packed bytes (0xB3B2B1B0):
-//!      - suffix "PBB"
-//!   3. scalar byte as word:
-//!      - suffix "SBW"
-//!   4. packed bytes as words (0x__B0__B0, etc...):
-//!      - suffix "PBW"
-//!
-//! Data format for working with pixels in 32-bit mode:
-//!
-//!   - PBB b3210 [0xAARRGGBB]
-//!
-//!   - PBW b_2_0 [0x00RR00BB]
-//!   - PBW b_3_1 [0x00AA00GG]
-//!
-//! Data format for working with pixels in 64-bit mode:
-//!
-//!   - PBB b3210 [0xAARRGGBB]
-//!
-//!   - PBW b_3_2_1_0 [0x00AA00GG00RR00BB]
-//!
-//! The reason to not unpack bytes to 0x00AA00RR/00GG00BB is that it's more
-//! expensive, unpacking even and odd bytes separately is simpler and working
-//! with the data is the same. Notice that the position of bytes/pixels is
-//! different to position when using MMX/SSE2 where unpacking to AARRGGBB is
-//! done using single instruction.
-
 // ============================================================================
 // [_FOG_ACC_U64...]
 // ============================================================================
@@ -103,7 +67,7 @@
 namespace Fog {
 namespace Acc {
 
-//! @addtogroup Fog_Acc_C
+//! @addtogroup Fog_Core_Acc_C
 //! @{
 
 // ============================================================================

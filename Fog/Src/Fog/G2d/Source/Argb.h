@@ -100,15 +100,21 @@ struct FOG_NO_EXPORT Argb32 : public ArgbBase32
   FOG_INLINE uint32_t getGrey() const { return getGrey(u32); }
 
   //! @brief Set alpha value of ARGB quad.
-  FOG_INLINE void setAlpha(uint32_t a8) { a = a8; }
+  FOG_INLINE void setAlpha(uint32_t a8) { a = static_cast<uint8_t>(a8); }
   //! @brief Set red value of ARGB quad.
-  FOG_INLINE void setRed(uint32_t r8) { r = r8; }
+  FOG_INLINE void setRed(uint32_t r8) { r = static_cast<uint8_t>(r8); }
   //! @brief Set green value of ARGB quad.
-  FOG_INLINE void setGreen(uint32_t g8) { g = g8; }
+  FOG_INLINE void setGreen(uint32_t g8) { g = static_cast<uint8_t>(g8); }
   //! @brief Set blue value of ARGB quad.
-  FOG_INLINE void setBlue(uint32_t b8) { b = b8; }
+  FOG_INLINE void setBlue(uint32_t b8) { b = static_cast<uint8_t>(b8); }
+
   //! @brief Set red, green and blue components to @a grey.
-  FOG_INLINE void setGrey(uint32_t grey8) { r = grey8; g = grey8; b = grey8; }
+  FOG_INLINE void setGrey(uint32_t grey8)
+  {
+    r = static_cast<uint8_t>(grey8);
+    g = static_cast<uint8_t>(grey8);
+    b = static_cast<uint8_t>(grey8);
+  }
 
   //! @brief Get the packed value.
   FOG_INLINE uint32_t getPacked32() const
@@ -379,10 +385,10 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
   //! to @a a, @a r, @a g and @a b.
   FOG_INLINE Argb64(uint32_t a16, uint32_t r16, uint32_t g16, uint32_t b16)
   {
-    a = a16;
-    r = r16;
-    g = g16;
-    b = b16;
+    a = static_cast<uint16_t>(a16);
+    r = static_cast<uint16_t>(r16);
+    g = static_cast<uint16_t>(g16);
+    b = static_cast<uint16_t>(b16);
   }
 
   //! @brief Create the @c Argb64 instance, copying components from @a argb64.
@@ -417,18 +423,24 @@ struct FOG_NO_EXPORT Argb64 : public ArgbBase64
   FOG_INLINE uint32_t getBlue() const { return b; }
 
   //! @brief Set the alpha value to @a a.
-  FOG_INLINE void setAlpha(uint32_t a16) { a = (uint16_t)a16; }
+  FOG_INLINE void setAlpha(uint32_t a16) { a = static_cast<uint16_t>(a16); }
   //! @brief Set the red value to @a r.
-  FOG_INLINE void setRed(uint32_t r16) { r = (uint16_t)r16; }
+  FOG_INLINE void setRed(uint32_t r16) { r = static_cast<uint16_t>(r16); }
   //! @brief Set the green value to @a g.
-  FOG_INLINE void setGreen(uint32_t g16) { g = (uint16_t)g16; }
+  FOG_INLINE void setGreen(uint32_t g16) { g = static_cast<uint16_t>(g16); }
   //! @brief Set the blue value to @a b.
-  FOG_INLINE void setBlue(uint32_t b16) { b = (uint16_t)b16; }
+  FOG_INLINE void setBlue(uint32_t b16) { b = static_cast<uint16_t>(b16); }
 
   //! @brief Get grey value (converting RGB components to grey, ignoring alpha).
   FOG_INLINE uint32_t getGrey() const { return getGrey(u64); }
+
   //! @brief Set the red, green and blue components to @a grey.
-  FOG_INLINE void setGrey(uint32_t grey) { r = (uint16_t)grey; g = (uint16_t)grey; b = (uint16_t)grey; }
+  FOG_INLINE void setGrey(uint32_t grey)
+  {
+    r = static_cast<uint16_t>(grey);
+    g = static_cast<uint16_t>(grey);
+    b = static_cast<uint16_t>(grey);
+  }
 
   //! @brief Get the packed 32-bit value.
   FOG_INLINE uint32_t getPacked32() const

@@ -13,6 +13,9 @@
 namespace Fog {
 namespace Acc {
 
+//! @addtogroup Fog_Core_Acc
+//! @{
+
 // ============================================================================
 // [Constants]
 // ============================================================================
@@ -82,6 +85,8 @@ extern FOG_API const float _u8_divide_table_f[256];
 //!
 //! @brief Square root table with can be used to do "isqrt(x * 0xFF)".
 extern FOG_API const uint8_t _u8_sqrt_table_b[256];
+
+//! @}
 
 } // Acc namespace
 } // Fog namespace

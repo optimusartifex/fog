@@ -18,7 +18,7 @@
 namespace Fog {
 namespace Acc {
 
-//! @addtogroup Fog_Acc_SSSE3
+//! @addtogroup Fog_Core_Acc_Ssse3
 //! @{
 
 // ============================================================================

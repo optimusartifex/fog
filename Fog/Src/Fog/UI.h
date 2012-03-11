@@ -25,8 +25,10 @@
 // [Fog/UI/Engine]
 // ============================================================================
 
-//! @defgroup Fog_UI_Engine Engine
+//! @defgroup Fog_UI_Engine Fog/UI/Engine
 //! @ingroup Fog_UI
+//!
+//! UI engine and related.
 
 #include <Fog/UI/Engine/UIEngine.h>
 #include <Fog/UI/Engine/UIEngineDisplayInfo.h>
@@ -43,8 +45,10 @@
 // [Fog/UI/Tools]
 // ============================================================================
 
-//! @defgroup Fog_UI_Tools Tools
+//! @defgroup Fog_UI_Tools Fog/UI/Tools
 //! @ingroup Fog_UI
+//!
+//! UI tools.
 
 #include <Fog/UI/Tools/UIUtil.h>
 

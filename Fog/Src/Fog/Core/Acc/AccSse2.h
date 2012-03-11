@@ -77,7 +77,7 @@ FOG_XMM_DECLARE_CONST_PD_SET  (m128d_1d65536_1d65536, Fog::MATH_1_DIV_65536);
 namespace Fog {
 namespace Acc {
 
-//! @addtogroup Fog_Acc_SSE2
+//! @addtogroup Fog_Core_Acc_Sse2
 //! @{
 
 // ============================================================================

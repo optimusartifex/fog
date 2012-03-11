@@ -19,7 +19,7 @@ namespace Acc {
 # pragma warning(disable:4799) // function '...' has no EMMS instruction.
 #endif // FOG_CC_MSC
 
-//! @addtogroup Fog_Acc_3dNow
+//! @addtogroup Fog_Core_Acc_3dNow
 //! @{
 
 // ============================================================================

@@ -113,14 +113,26 @@ typedef unsigned long long uint64_t;
 #endif // __MINGW32__ || __MINGW64__
 
 // uchar, ushort, uint and ulong, these should never conflict.
+
+#if !defined(uchar_defined)
 typedef unsigned char uchar;
+#endif // !uchar_defined
+
+#if !defined(ushort_defined)
 typedef unsigned short ushort;
+#endif // !ushort_defined
+
+#if !defined(uint_defined)
 typedef unsigned int uint;
+#endif // !uint_defined
+
+#if !defined(ulong_defined)
 typedef unsigned long ulong;
+#endif // !ulong_defined
 
 typedef int32_t err_t;
 
-#if defined(FOG_CC_MSC)
+#if defined(FOG_CC_MSC) && !defined(ssize_t_defined)
 # if FOG_ARCH_BITS == 64
 typedef int64_t ssize_t;
 # else

@@ -81,8 +81,10 @@
 // [Fog/Core/C++]
 // ============================================================================
 
-//! @defgroup Fog_Core_Cpp Code generation and compiler specific macros (C++).
+//! @defgroup Fog_Core_Cpp Fog/Core/C++
 //! @ingroup Fog_Core
+//!
+//! C++ code generation and compiler specific macros (C++).
 //!
 //! This section contains compiler macros to control class, variables, and
 //! function visibility (dll-export/import), structure packing, code-generation,
@@ -234,17 +236,94 @@
 // [Fog/Core/Acc]
 // ============================================================================
 
-//! @defgroup Fog_Acc Fog::Acc (Accelerated Extensions)
+//! @defgroup Fog_Core_Acc Fog/Core/Acc
+//! @ingroup Fog_Core
 //!
-//! Public classes and functions related to Fog::Face framework. Fog::Face was
-//! created to simplify the development of low-level multimedia functions used
-//! for digital signal processing (computer graphics, audio, video, ...).
+//! Public classes and functions related to Fog::Acc framework. It was designed
+//! to simplify the development of low-level multimedia functions used for 
+//! digital image or audio processing.
+
+//! @defgroup Fog_Core_Acc_C Fog/Core/Acc - C
+//! @ingroup Fog_Core_Acc
+//!
+//! Collection of typedefs and functions to work with scalar bytes or bytes
+//! packed in 32-bit or 64-bit unsigned integers.
+//!
+//! Functions defined by @ref Fog_Core_Acc_C do operation on:
+//!
+//!   1. scalar byte:
+//!      - suffix "SBB"
+//!   2. packed bytes (0xB3B2B1B0):
+//!      - suffix "PBB"
+//!   3. scalar byte as word:
+//!      - suffix "SBW"
+//!   4. packed bytes as words (0x__B0__B0, etc...):
+//!      - suffix "PBW"
+//!
+//! Data format for working with pixels in 32-bit mode:
+//!
+//!   - PBB b3210 [0xAARRGGBB]
+//!
+//!   - PBW b_2_0 [0x00RR00BB]
+//!   - PBW b_3_1 [0x00AA00GG]
+//!
+//! Data format for working with pixels in 64-bit mode:
+//!
+//!   - PBB b3210 [0xAARRGGBB]
+//!
+//!   - PBW b_3_2_1_0 [0x00AA00GG00RR00BB]
+//!
+//! The reason to not unpack bytes to 0x00AA00RR/00GG00BB is that it's more
+//! expensive, unpacking even and odd bytes separately is simpler and working
+//! with the data is the same. Notice that the position of bytes/pixels is
+//! different to position when using MMX/SSE2 where unpacking to AARRGGBB is
+//! done using single instruction.
+
+//! @defgroup Fog_Core_Acc_Mmx Fog/Core/Acc - MMX
+//! @ingroup Fog_Core_Acc
+//!
+//! MMX Packed/Scalar datatype manipulation.
+
+//! @defgroup Fog_Core_Acc_MmxExt Fog/Core/Acc - MMX Extensions
+//! @ingroup Fog_Core_Acc
+//!
+//! MMX Packed/Scalar datatype manipulation.
+
+//! @defgroup Fog_Core_Acc_3dNow Fog/Core/Acc - 3dNow
+//! @ingroup Fog_Core_Acc
+//!
+//! 3dNow Packed/Scalar datatype manipulation.
+
+//! @defgroup Fog_Core_Acc_Sse Fog/Core/Acc - SSE
+//! @ingroup Fog_Core_Acc
+//!
+//! SSE Packed/Scalar datatype manipulation.
+
+//! @defgroup Fog_Core_Acc_Sse2 Fog/Core/Acc - SSE2
+//! @ingroup Fog_Core_Acc
+//!
+//! SSE2 Packed/Scalar datatype manipulation.
+
+//! @defgroup Fog_Core_Acc_Sse3 Fog/Core/Acc - SSE3
+//! @ingroup Fog_Core_Acc
+//!
+//! SSE3 Packed/Scalar datatype manipulation.
+
+//! @defgroup Fog_Core_Acc_Ssse3 Fog/Core/Acc - SSSE3
+//! @ingroup Fog_Core_Acc
+//!
+//! SSSE3 Packed/Scalar datatype manipulation.
 
 #include <Fog/Core/Acc/AccC.h>
 
 // ============================================================================
 // [Fog/Core/Dom]
 // ============================================================================
+
+//! @defgroup Fog_Core_Dom Fog/Core/Dom
+//! @ingroup Fog_Core
+//!
+//! Document object model, and XML-SAX handler.
 
 #include <Fog/Core/Dom/Dom.h>
 #include <Fog/Core/Dom/DomResourceManager.h>
@@ -253,8 +332,10 @@
 // [Fog/Core/Global]
 // ============================================================================
 
-//! @defgroup Fog_Core_Global Global definitions, constants, and macros
+//! @defgroup Fog_Core_Global Fog/Core/Global
 //! @ingroup Fog_Core
+//!
+//! Global definitions, constants, and macros
 
 #include <Fog/Core/Global/Global.h>
 
@@ -262,8 +343,10 @@
 // [Fog/Core/Kernel]
 // ============================================================================
 
-//! @defgroup Fog_Core_Kernel Object-system, properties, events and timers
+//! @defgroup Fog_Core_Kernel Fog/Core/Kernel
 //! @ingroup Fog_Core
+//!
+//! Object-system, properties, events and timers.
 
 #include <Fog/Core/Kernel/Application.h>
 #include <Fog/Core/Kernel/CoreObj.h>
@@ -280,8 +363,10 @@
 // [Fog/Core/Math]
 // ============================================================================
 
-//! @defgroup Fog_Core_Math Math functions
+//! @defgroup Fog_Core_Math Fog/Core/Math
 //! @ingroup Fog_Core
+//!
+//! Math functions and helpers.
 
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/FloatControl.h>
@@ -297,8 +382,10 @@
 // [Fog/Core/Memory]
 // ============================================================================
 
-//! @defgroup Fog_Core_Memory Memory management and operations
+//! @defgroup Fog_Core_Memory Fog/Core/Memory
 //! @ingroup Fog_Core
+//!
+//! Memory management and memory operations.
 
 #include <Fog/Core/Memory/BSwap.h>
 #include <Fog/Core/Memory/MemBlockAllocator.h>
@@ -313,8 +400,10 @@
 // [Fog/Core/OS]
 // ============================================================================
 
-//! @defgroup Fog_Core_OS Operating system and application environment classes
+//! @defgroup Fog_Core_OS Fog/Core/OS
 //! @ingroup Fog_Core
+//!
+//! Operating system and file-system API.
 
 #include <Fog/Core/OS/DirIterator.h>
 #include <Fog/Core/OS/Environment.h>
@@ -331,8 +420,10 @@
 // [Fog/Core/Threading]
 // ============================================================================
 
-//! @defgroup Fog_Core_Threading Threading, tasks, timers, event loop and atomic ops
+//! @defgroup Fog_Core_Threading Fog/Core/Threading
 //! @ingroup Fog_Core
+//!
+//! Threads, thread pools, synchronization primitives, and atomic operations.
 
 #include <Fog/Core/Threading/Atomic.h>
 #include <Fog/Core/Threading/AtomicPadding.h>
@@ -347,8 +438,11 @@
 // [Fog/Core/Tools]
 // ============================================================================
 
-//! @defgroup Fog_Core_Tools Strings, collections, streaming and other helper classes
+//! @defgroup Fog_Core_Tools Fog/Core/Tools
 //! @ingroup Fog_Core
+//!
+//! Strings, collections, streaming, cpu-detection, date-time handling, and 
+//! powerful variant class.
 
 #include <Fog/Core/Tools/Algorithm.h>
 #include <Fog/Core/Tools/Char.h>

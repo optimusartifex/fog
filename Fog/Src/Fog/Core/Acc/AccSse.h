@@ -41,7 +41,7 @@ FOG_XMM_DECLARE_CONST_PS_SET  (m128f_4x_65535       , 65535.0f);
 namespace Fog {
 namespace Acc {
 
-//! @addtogroup Fog_Acc_SSE
+//! @addtogroup Fog_Core_Acc_Sse
 //! @{
 
 // ============================================================================

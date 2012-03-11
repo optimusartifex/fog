@@ -30,6 +30,7 @@ namespace Fog {
 // [Fog::ColorUtil]
 // ============================================================================
 
+//! @brief Color conversion and effect helpers.
 struct FOG_NO_EXPORT ColorUtil
 {
   // --------------------------------------------------------------------------

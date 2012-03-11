@@ -14,7 +14,7 @@
 // [Fog::Core::C++ - OS]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Cpp
+//! @addtogroup Fog_Core_Cpp_Std
 //! @{
 
 //! @def FOG_OS_WINDOWS

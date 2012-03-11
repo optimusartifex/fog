@@ -365,6 +365,7 @@ struct FOG_API DomNode : public DomObj
 // [Fog::DomContainer]
 // ============================================================================
 
+//! @brief Adds functionality used by @ref DomElement and @ref DomDocument.
 struct FOG_API DomContainer : public DomNode
 {
   FOG_DOM_OBJ(DomContainer, DomNode)
@@ -760,6 +761,7 @@ struct FOG_API DomDocumentType : public DomNode
 // [Fog::DomDocumentIdHash]
 // ============================================================================
 
+//! @internal
 struct FOG_API DomDocumentIdHash
 {
   // --------------------------------------------------------------------------
@@ -884,6 +886,7 @@ struct FOG_API DomDocument : public DomContainer
   virtual DomText* _createTextNode(
     const StringW& data);
 
+  //! @internal
   template<typename ElementT>
   FOG_INLINE ElementT* _newElementT()
   {
@@ -893,6 +896,7 @@ struct FOG_API DomDocument : public DomContainer
     return fog_new_p(p) ElementT(this);
   }
 
+  //! @internal
   template<typename ElementT>
   FOG_INLINE ElementT* _newElementT(
     const InternedStringW& tagName)
@@ -1009,6 +1013,7 @@ struct FOG_API DomDocument : public DomContainer
 // [Fog::DomSaxHandler]
 // ============================================================================
 
+//! @brief Implements @ref XmlSaxHandler to create @ref DomDocument.
 struct FOG_API DomSaxHandler : public XmlSaxHandler
 {
   // --------------------------------------------------------------------------
@@ -1063,6 +1068,12 @@ private:
 // [Fog::DomGCScope]
 // ============================================================================
 
+//! @brief DomDocument scoped automatic garbage collector.
+//!
+//! Use DomAutoGC to scope your DOM operations. The scope-block is added when
+//! @ref DomAutoGC is constructed, and destroyed when destructed. When the 
+//! scope block is destroyed, gargabe collector tries to collect objects added
+//! into the GC queue which belongs to the scope being destroyed.
 struct FOG_NO_EXPORT DomAutoGC
 {
   explicit FOG_INLINE DomAutoGC(DomDocument& document) :

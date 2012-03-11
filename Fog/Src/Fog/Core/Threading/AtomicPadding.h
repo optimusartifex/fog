@@ -12,19 +12,25 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Atomic
+//! @addtogroup Fog_Core_Threading
 //! @{
 
 // ============================================================================
 // [Fog::AtomicPaddingMemory<>]
 // ============================================================================
 
+//! @internal
+//!
+//! @brief Low-level atomic padding structure.
 template<size_t Size>
 struct AtomicPaddingMemory
 {
   uint8_t padding[Size];
 };
 
+//! @internal
+//!
+//! @brief Low-level zero-bytes atomic padding.
 template<>
 struct AtomicPaddingMemory<0>
 {
@@ -34,31 +40,34 @@ struct AtomicPaddingMemory<0>
 // [Fog::AtomicPadding<>]
 // ============================================================================
 
-//! @brief Padding buffer.
+//! @brief Atomic padding buffer.
 //!
 //! The padding buffer is required to avoid false sharing between CPU cores'
 //! private cache.
 template<typename T0>
 struct AtomicPadding1 : public AtomicPaddingMemory
-  <CPU_CACHE_LINE - (sizeof(T0) % CPU_CACHE_LINE)>
+  < (CPU_CACHE_LINE - ((sizeof(T0)) % CPU_CACHE_LINE)) % CPU_CACHE_LINE >
 {
 };
 
+//! @brief See @ref AtomicPadding1.
 template<typename T0, typename T1>
 struct AtomicPadding2 : public AtomicPaddingMemory
-  <CPU_CACHE_LINE - ((sizeof(T0) + sizeof(T1)) % CPU_CACHE_LINE)>
+  < (CPU_CACHE_LINE - ((sizeof(T0) + sizeof(T1)) % CPU_CACHE_LINE)) % CPU_CACHE_LINE >
 {
 };
 
+//! @brief See @ref AtomicPadding1.
 template<typename T0, typename T1, typename T2>
 struct AtomicPadding3 : public AtomicPaddingMemory
-  <CPU_CACHE_LINE - ((sizeof(T0) + sizeof(T1) + sizeof(T2)) % CPU_CACHE_LINE)>
+  < (CPU_CACHE_LINE - ((sizeof(T0) + sizeof(T1) + sizeof(T2)) % CPU_CACHE_LINE)) % CPU_CACHE_LINE >
 {
 };
 
+//! @brief See @ref AtomicPadding1.
 template<typename T0, typename T1, typename T2, typename T3>
 struct AtomicPadding4 : public AtomicPaddingMemory
-  <CPU_CACHE_LINE - ((sizeof(T0) + sizeof(T1) + sizeof(T2) + sizeof(T3)) % CPU_CACHE_LINE)>
+  < (CPU_CACHE_LINE - ((sizeof(T0) + sizeof(T1) + sizeof(T2) + sizeof(T3)) % CPU_CACHE_LINE)) % CPU_CACHE_LINE >
 {
 };
 
@@ -66,10 +75,12 @@ struct AtomicPadding4 : public AtomicPaddingMemory
 // [Fog::AtomicPaddingSeparator]
 // ============================================================================
 
-struct AtomicPaddingSeparator : public AtomicPaddingMemory
-  <CPU_CACHE_LINE>
-{
-};
+//! @brief Atomic padding separator.
+//!
+//! Atomic padding separator is structure which adds @ref CPU_CACHE_LINE bytes
+//! to the place where it's used. It's used mainly to avoid sharing data 
+//! between more CPU cores.
+struct AtomicPaddingSeparator : public AtomicPaddingMemory<CPU_CACHE_LINE> {};
 
 //! @}
 

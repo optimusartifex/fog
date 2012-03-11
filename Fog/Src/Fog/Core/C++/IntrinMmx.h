@@ -13,7 +13,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Intrin
+//! @addtogroup Fog_Core_Cpp_Intrin
 //! @{
 
 // ============================================================================

@@ -84,60 +84,14 @@
 //! @defgroup Fog_Core_Cpp Fog/Core/C++
 //! @ingroup Fog_Core
 //!
-//! C++ code generation and compiler specific macros (C++).
+//! C++ compiler, intrinsics and standard definitions.
+
+//! @defgroup Fog_Core_Cpp_Compiler Fog/Core/C++ - Compiler
+//! @ingroup Fog_Core_Cpp
 //!
-//! This section contains compiler macros to control class, variables, and
-//! function visibility (dll-export/import), structure packing, code-generation,
-//! and features which depends on specific compiler or operating system.
+//! C++ code generation and compiler specific macros.
 //!
-//! @section Fog_Core_Cpp_OS Operating system
-//!
-//! Operating system checking at compile-time. If your application directly
-//! depends on some specific features of target OS, you can easily detect
-//! various operating systems using conditional compilation.
-//!
-//! List of main OS definitions:
-//!
-//! - @ref FOG_OS_MAC (defined if compiling for Mac or iOS).
-//!   - @ref FOG_OS_IOS (defined if compiling for iOS - iPhone, iPad).
-//! - @ref FOG_OS_POSIX (defined if compiling for posix platform - Linux/BSD/Mac).
-//! - @ref FOG_OS_WINDOWS (defined if compiling for Windows).
-//!
-//! List of all OS definitions:
-//!
-//! - @ref FOG_OS_BSD (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_FREEBSD (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_HPUX (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_IOS (defines also @ref FOG_OS_MAC and @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_LINUX (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_MAC (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_NETBSD (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_OPENBSD (defines also @ref FOG_OS_POSIX).
-//! - @ref FOG_OS_WINDOWS (never defines @ref FOG_OS_POSIX).
-//!
-//! @section Fog_Core_Cpp_Arch Architecture
-//!
-//! Target CPU architecture checking at compile-time.
-//!
-//! List of architecture definitions:
-//!
-//! - @ref FOG_ARCH_X86 (32-bit x86 target).
-//! - @ref FOG_ARCH_X86_64 (64-bit x64 target).
-//! - @ref FOG_ARCH_ARM (ARM target).
-//! - @ref FOG_ARCH_ARM_NEON (ARM target with NEON instruction set).
-//! - @ref FOG_ARCH_ITANIUM (64-bit Itanium target).
-//! - @ref FOG_ARCH_PPC (32-bit PowerPC target).
-//! - @ref FOG_ARCH_PPC (32-bit PowerPC target).
-//!
-//! List of architecture helpers (always defined):
-//!
-//! - @ref FOG_ARCH_BITS (target CPU architecture word width, 32 or 64).
-//! - @ref FOG_ARCH_UNALIGNED_ACCESS_32 (32-bit unaligned access possible)
-//! - @ref FOG_ARCH_UNALIGNED_ACCESS_32 (64-bit unaligned access possible)
-//!
-//! @note Only 32-bit and 64-bit architectures are supported.
-//!
-//! @section Fog_Core_Cpp_Hardcode Hardcoding
+//! @section Fog_Core_Cpp_Compiler_Hardcode Hardcoding
 //!
 //! Hardcoding macros can be used to hardcode some code using conditional
 //! compilation. Currently hardcoding is very intensively used by the
@@ -158,7 +112,7 @@
 //! - @ref FOG_HARDCODE_MMX (hardcode for MMX).
 //! - @ref FOG_HARDCODE_NEON (hardcode for NEON).
 //!
-//! @section Fog_Core_Cpp_Features C++ compiler vendor and features
+//! @section Fog_Core_Cpp_Compiler_Features C++ compiler vendor and features
 //!
 //! Definitions whilc can be used to check for a specific C++ compiler
 //! or C++ language feature.
@@ -184,7 +138,7 @@
 //! - @ref FOG_CC_HAS_RVALUE (C++ compiler supports rvalues).
 //! - @ref FOG_CC_HAS_STATIC_ASSERT (C++ compiler supports static_assert).
 //!
-//! @section Fog_Core_Cpp_Decorators Decorators
+//! @section Fog_Core_Cpp_Compiler_Decorators Decorators
 //!
 //! Decorators are used when compiling Fog-Framework and when including
 //! Fog-Framework headers from other sources. Decorators can be used to
@@ -214,7 +168,7 @@
 //! - @ref FOG_UNLIKELY (the condition is unlikely to be taken).
 //! - @ref FOG_UNUSED (mark unused variable to prevent compiler warning).
 //!
-//! @section Fog_Core_Cpp_PCE Predicting conditional expressions
+//! @section Fog_Core_Cpp_Compiler_PCE Predicting conditional expressions
 //!
 //! Macros that can help to optimize the code using compiler specific
 //! decorators to tell compiler expected result of the expression. Currently
@@ -229,6 +183,68 @@
 //! @note Currently only when compiling by GCC these macros are used, when
 //! compiling for example by MSVC there is no such functionality (when using
 //! this compiler try to use profile based optimization instead).
+
+//! @defgroup Fog_Core_Cpp_Intrin Fog/Core/C++ - Intrinsics
+//! @ingroup Fog_Core_Cpp
+//!
+//! C++ compiler intrinsics are used to emit CPU specific instructions, usually
+//! used to perform parallel data processing (SIMD).
+
+//! @defgroup Fog_Core_Cpp_Std Fog/Core/C++ - Std
+//! @ingroup Fog_Core_Cpp
+//!
+//! Standard definitions used by Fog-Framework.
+//!
+//! @section Fog_Core_Cpp_Std_Arch Architecture
+//!
+//! This section contains compiler macros to control class, variables, and
+//! function visibility (dll-export/import), structure packing, code-generation,
+//! and features which depends on specific compiler or operating system.
+//!
+//! Target CPU architecture checking at compile-time.
+//!
+//! List of architecture definitions:
+//!
+//! - @ref FOG_ARCH_X86 (32-bit x86 target).
+//! - @ref FOG_ARCH_X86_64 (64-bit x64 target).
+//! - @ref FOG_ARCH_ARM (ARM target).
+//! - @ref FOG_ARCH_ARM_NEON (ARM target with NEON instruction set).
+//! - @ref FOG_ARCH_ITANIUM (64-bit Itanium target).
+//! - @ref FOG_ARCH_PPC (32-bit PowerPC target).
+//! - @ref FOG_ARCH_PPC (32-bit PowerPC target).
+//!
+//! List of architecture helpers (always defined):
+//!
+//! - @ref FOG_ARCH_BITS (target CPU architecture word width, 32 or 64).
+//! - @ref FOG_ARCH_UNALIGNED_ACCESS_32 (32-bit unaligned access possible)
+//! - @ref FOG_ARCH_UNALIGNED_ACCESS_32 (64-bit unaligned access possible)
+//!
+//! @note Only 32-bit and 64-bit architectures are supported.
+//!
+//! @section Fog_Core_Cpp_Std_OS Operating system
+//!
+//! Operating system checking at compile-time. If your application directly
+//! depends on some specific features of target OS, you can easily detect
+//! various operating systems using conditional compilation.
+//!
+//! List of main OS definitions:
+//!
+//! - @ref FOG_OS_MAC (defined if compiling for Mac or iOS).
+//!   - @ref FOG_OS_IOS (defined if compiling for iOS - iPhone, iPad).
+//! - @ref FOG_OS_POSIX (defined if compiling for posix platform - Linux/BSD/Mac).
+//! - @ref FOG_OS_WINDOWS (defined if compiling for Windows).
+//!
+//! List of all OS definitions:
+//!
+//! - @ref FOG_OS_BSD (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_FREEBSD (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_HPUX (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_IOS (defines also @ref FOG_OS_MAC and @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_LINUX (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_MAC (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_NETBSD (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_OPENBSD (defines also @ref FOG_OS_POSIX).
+//! - @ref FOG_OS_WINDOWS (never defines @ref FOG_OS_POSIX).
 
 #include <Fog/Core/C++/Base.h>
 

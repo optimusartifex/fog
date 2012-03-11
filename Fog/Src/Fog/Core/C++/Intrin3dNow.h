@@ -19,7 +19,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Intrin
+//! @addtogroup Fog_Core_Cpp_Intrin
 //! @{
 
 union FOG_ALIGNED_TYPE(mm3dnow_t, 8)

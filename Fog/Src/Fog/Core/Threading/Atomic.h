@@ -12,7 +12,7 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_Core_Atomic
+//! @addtogroup Fog_Core_Threading
 //! @{
 
 // ============================================================================

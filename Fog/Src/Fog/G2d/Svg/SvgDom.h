@@ -31,6 +31,7 @@ namespace Fog {
 // [Fog::SvgElement]
 // ============================================================================
 
+//! @brief SVG element interface.
 struct FOG_API SvgElement : public DomElement
 {
   FOG_DOM_OBJ(SvgElement, DomElement)
@@ -419,8 +420,6 @@ struct FOG_API SvgStyle : public DomObj
     static FOG_INLINE err_t resetValue(Self* self) { return self->_style.resetProperty(static_cast<size_t>(_Style_)); } \
   };
 
-//! @internal
-//!
 //! @brief SvgElement which supports styles.
 //!
 //! @note This is not the final element, must be overridden.
@@ -500,6 +499,7 @@ struct FOG_API SvgStylableElement : public SvgElement
 // [Fog::SvgTransformableElement]
 // ============================================================================
 
+//! @brief SVG stylable element which contains transform.
 struct FOG_API SvgTransformableElement : public SvgStylableElement
 {
   FOG_DOM_OBJ(SvgTransformableElement, SvgStylableElement)
@@ -540,6 +540,7 @@ struct FOG_API SvgTransformableElement : public SvgStylableElement
 // [Fog::SvgRootElement]
 // ============================================================================
 
+//! @brief SVG root element - \<svg\>.
 struct FOG_API SvgRootElement : public SvgStylableElement
 {
   FOG_DOM_OBJ(SvgRootElement, SvgStylableElement)
@@ -617,6 +618,7 @@ struct FOG_API SvgRootElement : public SvgStylableElement
 // [Fog::SvgSolidColorElement]
 // ============================================================================
 
+//! @brief SVG solid color element - \<solidColor\>.
 struct FOG_API SvgSolidColorElement : public SvgStylableElement
 {
   FOG_DOM_OBJ(SvgSolidColorElement, SvgStylableElement)
@@ -639,6 +641,7 @@ struct FOG_API SvgSolidColorElement : public SvgStylableElement
 // [Fog::SvgGradientElement]
 // ============================================================================
 
+//! @brief SVG gradient element - base for \<linearGradient\> and \<radialGradient\>.
 struct FOG_API SvgGradientElement : public SvgStylableElement
 {
   FOG_DOM_OBJ(SvgGradientElement, SvgStylableElement)
@@ -700,6 +703,7 @@ struct FOG_API SvgGradientElement : public SvgStylableElement
 // [Fog::SvgLinearGradientElement]
 // ============================================================================
 
+//! @brief SVG linear gradient element - \<linearGradient\>.
 struct FOG_API SvgLinearGradientElement : public SvgGradientElement
 {
   FOG_DOM_OBJ(SvgLinearGradientElement, SvgGradientElement)
@@ -763,6 +767,7 @@ struct FOG_API SvgLinearGradientElement : public SvgGradientElement
 // [Fog::SvgRadialGradientElement]
 // ============================================================================
 
+//! @brief SVG radial gradient element - \<radialGradient\>.
 struct FOG_API SvgRadialGradientElement : public SvgGradientElement
 {
   FOG_DOM_OBJ(SvgRadialGradientElement, SvgGradientElement)
@@ -836,6 +841,7 @@ struct FOG_API SvgRadialGradientElement : public SvgGradientElement
 // [Fog::SvgPatternElement]
 // ============================================================================
 
+//! @brief SVG pattern element - \<pattern\>.
 struct FOG_API SvgPatternElement : public SvgElement
 {
   FOG_DOM_OBJ(SvgPatternElement, SvgElement)
@@ -922,6 +928,7 @@ struct FOG_API SvgPatternElement : public SvgElement
 // [Fog::SvgStopElement]
 // ============================================================================
 
+//! @brief SVG stop element - \<stop\>.
 struct FOG_API SvgStopElement : public SvgStylableElement
 {
   FOG_DOM_OBJ(SvgStopElement, SvgStylableElement)
@@ -963,6 +970,7 @@ struct FOG_API SvgStopElement : public SvgStylableElement
 // [Fog::SvgDefsElement]
 // ============================================================================
 
+//! @brief SVG defs element - \<defs\>.
 struct FOG_API SvgDefsElement : public SvgElement
 {
   FOG_DOM_OBJ(SvgDefsElement, SvgElement)
@@ -985,6 +993,7 @@ struct FOG_API SvgDefsElement : public SvgElement
 // [Fog::SvgGElement]
 // ============================================================================
 
+//! @brief SVG group element - \<g\>.
 struct FOG_API SvgGElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgGElement, SvgTransformableElement)
@@ -1008,6 +1017,7 @@ struct FOG_API SvgGElement : public SvgTransformableElement
 // [Fog::SvgSymbolElement]
 // ============================================================================
 
+//! @brief SVG symbol element - \<symbol\>.
 struct FOG_API SvgSymbolElement : public SvgStylableElement
 {
   FOG_DOM_OBJ(SvgSymbolElement, SvgStylableElement)
@@ -1030,6 +1040,7 @@ struct FOG_API SvgSymbolElement : public SvgStylableElement
 // [Fog::SvgUseElement]
 // ============================================================================
 
+//! @brief SVG use element - \<use\>.
 struct FOG_API SvgUseElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgUseElement, SvgTransformableElement)
@@ -1104,6 +1115,7 @@ struct FOG_API SvgUseElement : public SvgTransformableElement
 // [Fog::SvgViewElement]
 // ============================================================================
 
+//! @brief SVG view element - \<view\>.
 struct FOG_API SvgViewElement : public SvgElement
 {
   FOG_DOM_OBJ(SvgViewElement, SvgElement)
@@ -1146,6 +1158,7 @@ struct FOG_API SvgViewElement : public SvgElement
 // [Fog::SvgCircleElement]
 // ============================================================================
 
+//! @brief SVG circle element - \<circle\>.
 struct FOG_API SvgCircleElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgCircleElement, SvgTransformableElement)
@@ -1203,6 +1216,7 @@ struct FOG_API SvgCircleElement : public SvgTransformableElement
 // [Fog::SvgEllipseElement]
 // ============================================================================
 
+//! @brief SVG ellipse element - \<ellipse\>.
 struct FOG_API SvgEllipseElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgEllipseElement, SvgTransformableElement)
@@ -1267,6 +1281,7 @@ struct FOG_API SvgEllipseElement : public SvgTransformableElement
 // [Fog::SvgLineElement]
 // ============================================================================
 
+//! @brief SVG line element - \<line\>.
 struct FOG_API SvgLineElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgLineElement, SvgTransformableElement)
@@ -1331,6 +1346,7 @@ struct FOG_API SvgLineElement : public SvgTransformableElement
 // [Fog::SvgPathElement]
 // ============================================================================
 
+//! @brief SVG path element - \<path\>.
 struct FOG_API SvgPathElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgPathElement, SvgTransformableElement)
@@ -1372,6 +1388,7 @@ struct FOG_API SvgPathElement : public SvgTransformableElement
 // [Fog::SvgPolygonElement]
 // ============================================================================
 
+//! @brief SVG polygon element - \<polygon\>.
 struct FOG_API SvgPolygonElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgPolygonElement, SvgTransformableElement)
@@ -1413,6 +1430,7 @@ struct FOG_API SvgPolygonElement : public SvgTransformableElement
 // [Fog::SvgPolylineElement]
 // ============================================================================
 
+//! @brief SVG polyline element - \<polyline\>.
 struct FOG_API SvgPolylineElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgPolylineElement, SvgTransformableElement)
@@ -1454,6 +1472,7 @@ struct FOG_API SvgPolylineElement : public SvgTransformableElement
 // [Fog::SvgRectElement]
 // ============================================================================
 
+//! @brief SVG rect element - \<rect\>.
 struct FOG_API SvgRectElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgRectElement, SvgTransformableElement)
@@ -1534,6 +1553,7 @@ struct FOG_API SvgRectElement : public SvgTransformableElement
 // [Fog::SvgImageElement]
 // ============================================================================
 
+//! @brief SVG image element - \<image\>.
 struct FOG_API SvgImageElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgImageElement, SvgTransformableElement)
@@ -1606,6 +1626,7 @@ struct FOG_API SvgImageElement : public SvgTransformableElement
 // [Fog::SvgTextPositioningElement]
 // ============================================================================
 
+//! @brief SVG text-positioning element - base element for <text> and <tspan>.
 struct FOG_API SvgTextPositioningElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgTextPositioningElement, SvgTransformableElement)
@@ -1665,6 +1686,7 @@ struct FOG_API SvgTextPositioningElement : public SvgTransformableElement
 // [Fog::SvgTextElement]
 // ============================================================================
 
+//! @brief SVG text element - \<text\>.
 struct FOG_API SvgTextElement : public SvgTextPositioningElement
 {
   FOG_DOM_OBJ(SvgTextElement, SvgTextPositioningElement)
@@ -1696,6 +1718,7 @@ struct FOG_API SvgTextElement : public SvgTextPositioningElement
 // [Fog::SvgTSpanElement]
 // ============================================================================
 
+//! @brief SVG tspan element - \<tspan\>.
 struct FOG_API SvgTSpanElement : public SvgTextPositioningElement
 {
   FOG_DOM_OBJ(SvgTSpanElement, SvgTextPositioningElement)
@@ -1728,6 +1751,7 @@ struct FOG_API SvgTSpanElement : public SvgTextPositioningElement
 // [Fog::SvgAElement]
 // ============================================================================
 
+//! @brief SVG a-link element - \<a\>.
 struct FOG_API SvgAElement : public SvgTransformableElement
 {
   FOG_DOM_OBJ(SvgAElement, SvgTransformableElement)
@@ -1750,6 +1774,7 @@ struct FOG_API SvgAElement : public SvgTransformableElement
 // [Fog::SvgDocument]
 // ============================================================================
 
+//! @brief SVG document.
 struct FOG_API SvgDocument : public DomDocument
 {
   FOG_DOM_OBJ(SvgDocument, DomDocument)

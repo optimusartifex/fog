@@ -23,13 +23,15 @@
 
 namespace Fog {
 
-//! @addtogroup Fog_G2d_Render
+//! @addtogroup Fog_G2d_Painting
 //! @{
 
 // ============================================================================
 // [Fog::RasterScope]
 // ============================================================================
 
+//! @internal
+//!
 //! @brief Raster paint-engine per-thread scope.
 //!
 //! Default value for single-threaded rendering is zero for @c offset and one
@@ -88,6 +90,7 @@ struct FOG_NO_EXPORT RasterScope
 // [Fog::RasterConvertPass]
 // ============================================================================
 
+//! @internal
 struct FOG_NO_EXPORT RasterConvertPass
 {
   //! @brief Fill mask for integer based formats (up to 64 bits per pixel).
@@ -564,6 +567,7 @@ struct FOG_NO_EXPORT RasterPattern
 // [Fog::RasterPatternFetcher]
 // ============================================================================
 
+//! @internal
 struct FOG_NO_EXPORT RasterPatternFetcher
 {
   // --------------------------------------------------------------------------
@@ -679,6 +683,7 @@ struct FOG_NO_EXPORT RasterPatternFetcher
 // [Fog::RasterFiller]
 // ============================================================================
 
+//! @internal
 struct FOG_NO_EXPORT RasterFiller
 {
   // --------------------------------------------------------------------------
@@ -752,6 +757,7 @@ struct FOG_NO_EXPORT RasterFilterImage
 // [Fog::RasterFilterBlur]
 // ============================================================================
 
+//! @internal
 struct FOG_NO_EXPORT RasterFilterBlur
 {
   //! @brief Filter context (immutable at this place).

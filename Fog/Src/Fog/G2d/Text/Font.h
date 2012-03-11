@@ -1073,7 +1073,7 @@ struct FOG_NO_EXPORT FaceCollection
 // [Fog::FaceVTable]
 // ============================================================================
 
-//! @brief Font-face virtual table.
+//! @brief Face virtual table.
 struct FOG_NO_EXPORT FaceVTable
 {
   void (FOG_CDECL* destroy)(Face* self);
@@ -1100,7 +1100,8 @@ struct FOG_NO_EXPORT FaceVTable
 // [Fog::Face]
 // ============================================================================
 
-//! @brief Font face.
+//! @brief Face represents a single face in a collection of the font family
+//! objects.
 struct FOG_NO_EXPORT Face
 {
   // --------------------------------------------------------------------------
@@ -1144,24 +1145,19 @@ struct FOG_NO_EXPORT Face
   // [Accessors]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE OTFace* getOTFace() const
-  {
-    return vtable->getOTFace(this);
-  }
+  //! @brief Get TrueType/OpenType face object associated with this @ref Face.
+  FOG_INLINE OTFace* getOTFace() const { return vtable->getOTFace(this); }
 
-  FOG_INLINE OTTable* getOTTable(int32_t tag) const
-  {
-    return vtable->getOTTable(this, tag);
-  }
+  //! @brief Get TrueType/OpenType table of a given @a tag associated with this
+  //! @ref Face.
+  FOG_INLINE OTTable* getOTTable(int32_t tag) const { return vtable->getOTTable(this, tag); }
 
   // --------------------------------------------------------------------------
   // [Interface]
   // --------------------------------------------------------------------------
 
-  FOG_INLINE void destroy()
-  {
-    vtable->destroy(this);
-  }
+  //! @brief Destroy this @ref Face (internal).
+  FOG_INLINE void destroy() { vtable->destroy(this); }
 
   // --------------------------------------------------------------------------
   // [Members]
@@ -1647,6 +1643,7 @@ struct FOG_NO_EXPORT FontEngineVTable
 // [Fog::FontEngine]
 // ============================================================================
 
+//! @brief Font-engine.
 struct FOG_NO_EXPORT FontEngine
 {
   // --------------------------------------------------------------------------

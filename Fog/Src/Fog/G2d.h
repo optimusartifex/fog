@@ -160,12 +160,8 @@
 #include <Fog/G2d/Source/ColorStopCache.h>
 #include <Fog/G2d/Source/ColorStopList.h>
 #include <Fog/G2d/Source/ColorUtil.h>
-#include <Fog/G2d/Source/ConicalGradient.h>
 #include <Fog/G2d/Source/Gradient.h>
-#include <Fog/G2d/Source/LinearGradient.h>
 #include <Fog/G2d/Source/Pattern.h>
-#include <Fog/G2d/Source/RadialGradient.h>
-#include <Fog/G2d/Source/RectangularGradient.h>
 #include <Fog/G2d/Source/Texture.h>
 
 // ============================================================================

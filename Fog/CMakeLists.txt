@@ -1256,12 +1256,8 @@ Set(FOG_G2D_SOURCE_SOURCES
   Src/Fog/G2d/Source/ColorStop.cpp
   Src/Fog/G2d/Source/ColorStopCache.cpp
   Src/Fog/G2d/Source/ColorStopList.cpp
-  Src/Fog/G2d/Source/ConicalGradient.cpp
   Src/Fog/G2d/Source/Gradient.cpp
-  Src/Fog/G2d/Source/LinearGradient.cpp
   Src/Fog/G2d/Source/Pattern.cpp
-  Src/Fog/G2d/Source/RadialGradient.cpp
-  Src/Fog/G2d/Source/RectangularGradient.cpp
   Src/Fog/G2d/Source/Texture.cpp
 )
 
@@ -1280,12 +1276,8 @@ Set(FOG_G2D_SOURCE_HEADERS
   Src/Fog/G2d/Source/ColorStopCache.h
   Src/Fog/G2d/Source/ColorStopList.h
   Src/Fog/G2d/Source/ColorUtil.h
-  Src/Fog/G2d/Source/ConicalGradient.h
   Src/Fog/G2d/Source/Gradient.h
-  Src/Fog/G2d/Source/LinearGradient.h
   Src/Fog/G2d/Source/Pattern.h
-  Src/Fog/G2d/Source/RadialGradient.h
-  Src/Fog/G2d/Source/RectangularGradient.h
   Src/Fog/G2d/Source/Texture.h
 )
 

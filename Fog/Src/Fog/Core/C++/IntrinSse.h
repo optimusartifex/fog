@@ -11,7 +11,7 @@
 #include <Fog/Core/C++/Base.h>
 #include <xmmintrin.h>
 
-//! @addtogroup Fog_Core_Intrin
+//! @addtogroup Fog_Core_Cpp_Intrin
 //! @{
 
 // ============================================================================

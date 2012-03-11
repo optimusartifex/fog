@@ -59,6 +59,8 @@ namespace Fog {
 // [Fog::ObjInfo]
 // ============================================================================
 
+//! @brief Information structure which can be queried of any object which 
+//! inherits @ref CoreObj.
 struct FOG_NO_EXPORT ObjInfo
 {
   // --------------------------------------------------------------------------
@@ -98,6 +100,7 @@ struct FOG_NO_EXPORT ObjInfo
 // [Fog::CoreObj]
 // ============================================================================
 
+//! @brief Core-object.
 struct FOG_API CoreObj
 {
   typedef CoreObj Self;
@@ -186,6 +189,7 @@ private:
 // [FOG_CORE_OBJ]
 // ============================================================================
 
+//! @brief Macro used to declare object.
 #define FOG_CORE_OBJ(_Self_, _Base_) \
 public: \
   typedef _Self_ Self; \

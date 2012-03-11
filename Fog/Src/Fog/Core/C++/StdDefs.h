@@ -14,7 +14,7 @@
 // [Fog::Core::C++ - Standard Macros]
 // ============================================================================
 
-//! @addtogroup Fog_Core_Cpp
+//! @addtogroup Fog_Core_Cpp_Std
 //! @{
 
 //! @brief Some systems hasn't defined @c offsetof keyword, but FOG_OFFSET_OF

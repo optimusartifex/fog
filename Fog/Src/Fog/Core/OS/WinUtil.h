@@ -28,55 +28,60 @@ struct FOG_NO_EXPORT WinVersion
   uint32_t build;
 };
 
+//! @}
+
 // ============================================================================
 // [Fog::WinUtil]
 // ============================================================================
 
-struct FOG_NO_EXPORT WinUtil
+namespace WinUtil {
+
+//! @addtogroup Fog_Core_OS
+//! @{
+
+static FOG_INLINE err_t getErrFromWinErrorCode(DWORD code)
 {
-  static FOG_INLINE err_t getErrFromWinErrorCode(DWORD code)
-  {
-    return fog_api.winutil_getErrFromWinErrorCode(code);
-  }
+  return fog_api.winutil_getErrFromWinErrorCode(code);
+}
 
-  static FOG_INLINE err_t getErrFromWinLastError()
-  {
-    return fog_api.winutil_getErrFromWinLastError();
-  }
+static FOG_INLINE err_t getErrFromWinLastError()
+{
+  return fog_api.winutil_getErrFromWinLastError();
+}
 
-  static FOG_INLINE uint32_t getWinVersion()
-  {
-    return fog_api.winutil_getWinVersion(NULL);
-  }
+static FOG_INLINE uint32_t getWinVersion()
+{
+  return fog_api.winutil_getWinVersion(NULL);
+}
 
-  static FOG_INLINE uint32_t getWinVersion(WinVersion& version)
-  {
-    return fog_api.winutil_getWinVersion(&version);
-  }
+static FOG_INLINE uint32_t getWinVersion(WinVersion& version)
+{
+  return fog_api.winutil_getWinVersion(&version);
+}
 
-  static FOG_INLINE err_t getWinDirectory(StringW& dst)
-  {
-    return fog_api.winutil_getWinDirectory(&dst);
-  }
+static FOG_INLINE err_t getWinDirectory(StringW& dst)
+{
+  return fog_api.winutil_getWinDirectory(&dst);
+}
 
-  static FOG_INLINE err_t getModuleFileName(StringW& dst, HMODULE hModule)
-  {
-    return fog_api.winutil_getModuleFileName(&dst, hModule);
-  }
+static FOG_INLINE err_t getModuleFileName(StringW& dst, HMODULE hModule)
+{
+  return fog_api.winutil_getModuleFileName(&dst, hModule);
+}
 
-  static FOG_INLINE err_t makeWinPath(StringW& dst, const StubW& src)
-  {
-    return fog_api.winutil_makeWinPathStubW(&dst, &src);
-  }
+static FOG_INLINE err_t makeWinPath(StringW& dst, const StubW& src)
+{
+  return fog_api.winutil_makeWinPathStubW(&dst, &src);
+}
 
-  static FOG_INLINE err_t makeWinPath(StringW& dst, const StringW& src)
-  {
-    return fog_api.winutil_makeWinPathStringW(&dst, &src);
-  }
-};
+static FOG_INLINE err_t makeWinPath(StringW& dst, const StringW& src)
+{
+  return fog_api.winutil_makeWinPathStringW(&dst, &src);
+}
 
 //! @}
 
+} // WinUtil namespace
 } // Fog namespace
 
 // [Guard]

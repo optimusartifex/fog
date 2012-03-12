@@ -1479,7 +1479,7 @@ static err_t FOG_CDECL WinUtil_makeWinPathStringW(StringW* dst, const StringW* s
 // [Init / Fini]
 // ============================================================================
 
-FOG_NO_EXPORT void WinUtil_init(void)
+FOG_NO_EXPORT void WinUtil_Core_init(void)
 {
   WinUtil_startup();
 

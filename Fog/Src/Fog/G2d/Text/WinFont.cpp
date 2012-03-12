@@ -18,6 +18,7 @@
 #include <Fog/Core/Tools/Logger.h>
 #include <Fog/Core/Tools/StringUtil.h>
 #include <Fog/G2d/Geometry/Path.h>
+#include <Fog/G2d/OS/WinUtil.h>
 #include <Fog/G2d/Text/WinFont.h>
 
 // [Fix]
@@ -44,143 +45,9 @@ namespace Fog {
 // ============================================================================
 
 static FaceVTable WinFace_vtable;
+
 static FontEngineVTable WinFontEngine_vtable;
-
 static Static<WinFontEngine> WinFontEngine_oInstance;
-
-// ============================================================================
-// [Fog::WinFontHDC]
-// ============================================================================
-
-struct FOG_NO_EXPORT WinFontHDC
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE WinFontHDC()
-  {
-    hdc = NULL;
-  }
-
-  FOG_INLINE ~WinFontHDC()
-  {
-    if (hdc != NULL)
-      ::DeleteDC(hdc);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool isInitialized() const
-  {
-    return hdc != NULL;
-  }
-
-  FOG_INLINE bool init()
-  {
-    FOG_ASSERT(!isInitialized());
-    hdc = ::CreateDCW(L"DISPLAY", NULL, NULL, NULL);
-
-    if (hdc == NULL)
-      return false;
-
-    ::SetGraphicsMode(hdc, GM_ADVANCED);
-    return true;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE operator HDC() const { return hdc; }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  HDC hdc;
-
-private:
-  FOG_NO_COPY(WinFontHDC)
-};
-
-// ============================================================================
-// [Fog::WinGetGlyphOutlineHDC]
-// ============================================================================
-
-struct FOG_NO_EXPORT WinGetGlyphOutlineHDC
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE WinGetGlyphOutlineHDC()
-  {
-    hdc = NULL;
-    hOldFont = NULL;
-  }
-
-  FOG_INLINE ~WinGetGlyphOutlineHDC()
-  {
-    if (hOldFont != NULL)
-      ::SelectObject(hdc, hOldFont);
-
-    if (hdc != NULL)
-      ::DeleteDC(hdc);
-  }
-
-  // --------------------------------------------------------------------------
-  // [Init]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE bool isHDCInitialized() const
-  {
-    return hdc != NULL;
-  }
-
-  FOG_INLINE bool isHFONTInitialized() const
-  {
-    return hOldFont != NULL;
-  }
-
-  FOG_INLINE err_t initHDC()
-  {
-    FOG_ASSERT(hdc == NULL);
-    hdc = ::CreateDCW(L"DISPLAY", NULL, NULL, NULL);
-
-    if (hdc == NULL)
-      return ERR_RT_OUT_OF_MEMORY;
-
-    ::SetGraphicsMode(hdc, GM_ADVANCED);
-    return ERR_OK;
-  }
-
-  FOG_INLINE err_t initHFONT(HFONT hFace)
-  {
-    FOG_ASSERT(hOldFont == NULL);
-    hOldFont = ::SelectObject(hdc, (HGDIOBJ)hFace);
-
-    if (hOldFont == NULL)
-      return ERR_FONT_INTERNAL;
-
-    return ERR_OK;
-  }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE operator HDC() const { return hdc; }
-
-  // --------------------------------------------------------------------------
-  // [Members]
-  // --------------------------------------------------------------------------
-
-  HDC hdc;
-  HGDIOBJ hOldFont;
-};
 
 // ============================================================================
 // [Fog::WinFace - Create / Destroy]
@@ -251,11 +118,11 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
       (tag      ) & 0xFF);
 #endif // FOG_OT_DEBUG
 
-  WinFontHDC scopedDC;
-  if (!scopedDC.init())
+  HDC hdc = WinUtil::getThreadLocalDC();
+  if (FOG_IS_NULL(hdc))
     return NULL;
 
-  HGDIOBJ oldFont = ::SelectObject(scopedDC, (HGDIOBJ)self->hFace);
+  HGDIOBJ oldFont = ::SelectObject(hdc, (HGDIOBJ)self->hFace);
   if (oldFont == (HGDIOBJ)GDI_ERROR)
   {
 #if defined(FOG_OT_DEBUG)
@@ -281,7 +148,7 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
   }
 
   uint8_t* data;
-  DWORD length = ::GetFontData(scopedDC, MemOps::bswap32be(tag), 0, NULL, 0);
+  DWORD length = ::GetFontData(hdc, MemOps::bswap32be(tag), 0, NULL, 0);
 
   if (length == GDI_ERROR)
   {
@@ -302,7 +169,7 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
     goto _End;
   }
 
-  if (::GetFontData(scopedDC, MemOps::bswap32be(tag), 0, data, length) != length)
+  if (::GetFontData(hdc, MemOps::bswap32be(tag), 0, data, length) != length)
   {
 #if defined(FOG_OT_DEBUG)
     Logger::info("Fog::WinFace", "getOTTable",
@@ -330,7 +197,7 @@ static OTTable* FOG_CDECL WinFace_getOTTable(const Face* self_, uint32_t tag)
   }
 
 _End:
-  ::SelectObject(scopedDC, oldFont);
+  ::SelectObject(hdc, oldFont);
   return table;
 }
 
@@ -517,24 +384,31 @@ static FOG_INLINE err_t WinFace_getOutlineFromGlyphRunT(FontData* d,
   err_t err = ERR_OK;
   size_t i;
 
-  WinGetGlyphOutlineHDC scopedDC;
-  MemBufferTmp<1024> buffer;
+  HDC hdc = WinUtil::getThreadLocalDC();
+  if (FOG_IS_NULL(hdc))
+    return ERR_RT_OUT_OF_MEMORY;
 
-  FOG_RETURN_ON_ERROR(scopedDC.initHDC());
-  FOG_RETURN_ON_ERROR(scopedDC.initHFONT(face->hFace));
+  HGDIOBJ hOldFace = ::SelectObject(hdc, face->hFace);
+  if (hOldFace == NULL)
+    return ERR_FONT_INVALID_FACE;
 
   MAT2 mat2 = WinFace_MAT2Identity();
   GLYPHMETRICS gm;
 
+  MemBufferTmp<1024> buffer;
+
   for (i = 0; i < length; i++)
   {
 _Repeat:
-    DWORD dataSize = ::GetGlyphOutlineW(scopedDC, glyphList[0],
+    DWORD dataSize = ::GetGlyphOutlineW(hdc, glyphList[0],
       GGO_GLYPH_INDEX | GGO_NATIVE | GGO_UNHINTED,
       &gm, (DWORD)buffer.getCapacity(), buffer.getMem(), &mat2);
 
     if (dataSize == GDI_ERROR)
-      return ERR_FONT_INTERNAL;
+    {
+      err = ERR_FONT_INTERNAL;
+      goto _End;
+    }
 
     if (static_cast<size_t>(dataSize) > buffer.getCapacity())
     {
@@ -544,14 +418,19 @@ _Repeat:
       dataSize = (dataSize + 4095) & ~4095;
 
       if (FOG_IS_NULL(buffer.alloc(dataSize)))
-        return ERR_RT_OUT_OF_MEMORY;
+      {
+        err = ERR_RT_OUT_OF_MEMORY;
+        goto _End;
+      }
 
       goto _Repeat;
     }
 
     size_t index = dst->getLength();
-    FOG_RETURN_ON_ERROR(WinFace_decomposeTTOutline<NumT>(dst,
-      reinterpret_cast<uint8_t*>(buffer.getMem()), dataSize, true));
+
+    err = WinFace_decomposeTTOutline<NumT>(dst, reinterpret_cast<uint8_t*>(buffer.getMem()), dataSize, true);
+    if (FOG_IS_ERROR(err))
+      goto _End;
 
     transform._20 = pt->x + NumT(positionList[0].x);
     transform._21 = pt->y + NumT(positionList[0].y);
@@ -561,7 +440,9 @@ _Repeat:
     positionList = (const PointF*)((const uint8_t*)positionList + positionAdvance);
   }
 
-  return ERR_OK;
+_End:
+  ::SelectObject(hdc, hOldFace);
+  return err;
 }
 
 static err_t FOG_CDECL WinFace_getOutlineFromGlyphRunF(FontData* d,
@@ -685,9 +566,7 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
     return ERR_OK;
   }
 
-  err_t err;
   LOGFONTW lf;
-
   ZeroMemory(&lf, sizeof(LOGFONTW));
 
   MemOps::copy(lf.lfFaceName, family->getData(),
@@ -697,29 +576,25 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   lf.lfItalic = bestFeatures.getItalic();
   lf.lfWeight = bestFeatures.getWeight() * 10;
 
+  HDC hdc = WinUtil::getThreadLocalDC();
+  if (FOG_IS_NULL(hdc))
+    return ERR_RT_OUT_OF_MEMORY;
+
   HFONT hFace = ::CreateFontIndirectW(&lf);
   if (FOG_IS_NULL(hFace))
     return OSUtil::getErrFromOSLastError();
 
-  WinGetGlyphOutlineHDC scopedDC;
-
-  err = scopedDC.initHDC();
-  if (FOG_IS_ERROR(err))
+  HGDIOBJ hOldFace = ::SelectObject(hdc, hFace);
+  if (hOldFace == NULL)
   {
     ::DeleteObject(hFace);
-    return err;
-  }
-
-  err = scopedDC.initHFONT(hFace);
-  if (FOG_IS_ERROR(err))
-  {
-    ::DeleteObject(hFace);
-    return err;
+    return ERR_FONT_INVALID_FACE;
   }
 
   OUTLINETEXTMETRICW otm;
-  if (!GetOutlineTextMetricsW(scopedDC, sizeof(OUTLINETEXTMETRICW), &otm))
+  if (!GetOutlineTextMetricsW(hdc, sizeof(OUTLINETEXTMETRICW), &otm))
   {
+    ::SelectObject(hdc, hOldFace);
     ::DeleteObject(hFace);
     return OSUtil::getErrFromOSLastError();
   }
@@ -727,6 +602,7 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   face = static_cast<WinFace*>(MemMgr::alloc(sizeof(WinFace)));
   if (FOG_IS_NULL(face))
   {
+    ::SelectObject(hdc, hOldFace);
     ::DeleteObject(hFace);
     return ERR_RT_OUT_OF_MEMORY;
   }
@@ -767,7 +643,7 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
 
   MAT2 mat2 = WinFace_MAT2Identity();
 
-  DWORD len = GetGlyphOutlineW(scopedDC, 'x', GGO_UNHINTED | GGO_METRICS, &gm, 0, 0, &mat2);
+  DWORD len = GetGlyphOutlineW(hdc, 'x', GGO_UNHINTED | GGO_METRICS, &gm, 0, 0, &mat2);
   if (len != GDI_ERROR && gm.gmBlackBoxY > 0)
     fm._xHeight = static_cast<float>(gm.gmBlackBoxY);
   else
@@ -775,6 +651,7 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
     // in case that it really happened.
     fm._xHeight = face->designMetrics._ascent * 0.56f;
 
+  ::SelectObject(hdc, hOldFace);
   self->cache->put(*family, bestFeatures, face);
 
   *dst = face;
@@ -897,8 +774,8 @@ static err_t FOG_CDECL WinFontEngine_updateAvailableFaces(WinFontEngine* self)
 {
   AutoLock locked(self->lock());
 
-  WinFontHDC scopedDC;
-  if (!scopedDC.init())
+  HDC hdc = WinUtil::getThreadLocalDC();
+  if (FOG_IS_NULL(hdc))
     return ERR_RT_OUT_OF_MEMORY;
 
   LOGFONTW logFont;
@@ -910,7 +787,7 @@ static err_t FOG_CDECL WinFontEngine_updateAvailableFaces(WinFontEngine* self)
   data.collection->clear();
   data.lastFace = NULL;
 
-  ::EnumFontFamiliesExW(scopedDC, &logFont, 
+  ::EnumFontFamiliesExW(hdc, &logFont, 
     WinFontEngine_updateAvailableFaces_onEnumProc, (LPARAM)&data, 0); 
 
   // Uncomment if something goes wrong.

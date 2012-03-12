@@ -76,7 +76,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   Environment_init();
 
 #if defined(FOG_OS_WINDOWS)
-  WinUtil_init();
+  WinUtil_Core_init();
   WinCOM_init();
 #endif // FOG_OS_WINDOWS
 
@@ -118,6 +118,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
 
 #if defined(FOG_OS_WINDOWS)
   Region_init_win();
+  WinUtil_G2d_init();
 #endif // FOG_OS_WINDOWS
 
   RegionUtil_init();
@@ -200,6 +201,9 @@ FOG_CAPI_DECLARE void _fog_fini(void)
 
   // [G2d/Text]
   Font_fini();
+
+  // [G2d/OS]
+  WinUtil_G2d_fini();
 
   // [G2d/Imaging]
   ImageCodecProvider_fini();

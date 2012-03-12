@@ -56,7 +56,7 @@ FOG_NO_EXPORT void UserUtil_init(void);
 
 #if defined(FOG_OS_WINDOWS)
 FOG_NO_EXPORT void WinCOM_init(void);
-FOG_NO_EXPORT void WinUtil_init(void);
+FOG_NO_EXPORT void WinUtil_Core_init(void);
 #endif // FOG_OS_WINDOWS
 
 #if defined(FOG_OS_MAC)
@@ -169,6 +169,12 @@ FOG_NO_EXPORT void FeConvolveSeparable_init(void);
 FOG_NO_EXPORT void FeMorphology_init(void);
 FOG_NO_EXPORT void FeTurbulence_init(void);
 
+// [Fog/G2d/OS]
+#if defined(FOG_OS_WINDOWS)
+FOG_NO_EXPORT void WinUtil_G2d_init(void);
+FOG_NO_EXPORT void WinUtil_G2d_fini(void);
+#endif // FOG_OS_WINDOWS
+
 // [Fog/G2d/Painting]
 FOG_NO_EXPORT void NullPaintEngine_init(void);
 FOG_NO_EXPORT void PaintDeviceInfo_init(void);
@@ -185,7 +191,6 @@ FOG_NO_EXPORT void Pattern_init(void);
 // [Fog/G2d/Tools]
 FOG_NO_EXPORT void Dpi_init(void);
 FOG_NO_EXPORT void Matrix_init(void);
-
 FOG_NO_EXPORT void Region_init(void);
 
 #if defined(FOG_OS_WINDOWS)

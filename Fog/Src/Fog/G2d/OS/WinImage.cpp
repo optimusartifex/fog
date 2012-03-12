@@ -11,8 +11,10 @@
 // [Dependencies]
 #include <Fog/Core/Global/Init_p.h>
 #include <Fog/Core/OS/OSUtil.h>
+#include <Fog/Core/Tools/Logger.h>
 #include <Fog/G2d/Imaging/Image.h>
 #include <Fog/G2d/OS/OSUtil.h>
+#include <Fog/G2d/OS/WinUtil.h>
 #include <Fog/G2d/Painting/RasterApi_p.h>
 
 namespace Fog {
@@ -353,9 +355,12 @@ static err_t FOG_CDECL Image_fromHBITMAP(Image* self, HBITMAP hBitmap)
 
   if (GetObjectW(hBitmap, sizeof(BITMAP), &ds.dsBm) != 0)
   {
-    HDC hdc;
-    HBITMAP hOldBitmap;
-    BITMAPINFO di;
+    HDC hdc = WinUtil::getThreadLocalDC();
+    if (hdc == NULL)
+    {
+      self->reset();
+      return ERR_RT_OUT_OF_MEMORY;
+    }
 
     switch (ds.dsBm.bmBitsPixel)
     {
@@ -377,21 +382,16 @@ static err_t FOG_CDECL Image_fromHBITMAP(Image* self, HBITMAP hBitmap)
     ssize_t dstStride = d->stride;
 
     // DDB bitmap.
-    if ((hdc = CreateCompatibleDC(NULL)) == NULL)
+    HBITMAP hOldBitmap = (HBITMAP)::SelectObject(hdc, (HGDIOBJ)hBitmap);
+    if (FOG_IS_NULL(hOldBitmap))
     {
       self->reset();
       return OSUtil::getErrFromOSLastError();
     }
 
-    if ((hOldBitmap = (HBITMAP)SelectObject(hdc, (HGDIOBJ)hBitmap)) == NULL)
-    {
-      DeleteDC(hdc);
-
-      self->reset();
-      return OSUtil::getErrFromOSLastError();
-    }
-
+    BITMAPINFO di;
     ZeroMemory(&di, sizeof(BITMAPINFO));
+
     di.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     di.bmiHeader.biCompression = BI_RGB;
     di.bmiHeader.biWidth = ds.dsBm.bmWidth;
@@ -401,11 +401,10 @@ static err_t FOG_CDECL Image_fromHBITMAP(Image* self, HBITMAP hBitmap)
 
     for (int y = ds.dsBm.bmHeight - 1; y >= 0; y--, dstPixels += dstStride)
     {
-      GetDIBits(hdc, hBitmap, y, 1, (LPVOID)dstPixels, &di, DIB_RGB_COLORS);
+      ::GetDIBits(hdc, hBitmap, y, 1, (LPVOID)dstPixels, &di, DIB_RGB_COLORS);
     }
 
-    SelectObject(hdc, (HGDIOBJ)hOldBitmap);
-    DeleteDC(hdc);
+    ::SelectObject(hdc, (HGDIOBJ)hOldBitmap);
     return ERR_OK;
   }
 
@@ -425,7 +424,11 @@ static err_t FOG_CDECL Image_getDC(Image* self, HDC* _hDC)
     return ERR_RT_INVALID_ARGUMENT;
 
   if (d->type != IMAGE_TYPE_WIN_DIB)
+  {
+    Logger::error("Fog::Image", "getDC",
+      "Image is not a DIBSECTION.");
     return ERR_IMAGE_INVALID_TYPE;
+  }
 
   if (!d->isDetached())
   {
@@ -438,21 +441,26 @@ static err_t FOG_CDECL Image_getDC(Image* self, HDC* _hDC)
 
   FOG_ASSERT(d->hBitmap != NULL);
 
-  HDC hDC = CreateCompatibleDC(NULL);
-  if (hDC == NULL)
+  HDC hdc = ::CreateCompatibleDC(NULL);
+  if (FOG_IS_NULL(hdc))
   {
+    Logger::error("Fog::Image", "getDC",
+      "Failed to call CreateCompatibleDC().");
     return OSUtil::getErrFromOSLastError();
   }
 
-  HGDIOBJ hOldObj = SelectObject(hDC, d->hBitmap);
+  HGDIOBJ hOldObj = ::SelectObject(hdc, d->hBitmap);
   if (hOldObj == (HGDIOBJ)GDI_ERROR)
   {
-    DeleteDC(hDC);
+    Logger::error("Fog::Image", "getDC",
+      "Failed to select image to the created HDC.");
+
+    ::DeleteDC(hdc);
     return OSUtil::getErrFromOSLastError();
   }
 
   d->locked++;
-  *_hDC = hDC;
+  *_hDC = hdc;
 
   return ERR_OK;
 }
@@ -465,14 +473,23 @@ static err_t Image_releaseDC(Image* self, HDC hDC)
     return ERR_RT_INVALID_ARGUMENT;
 
   if (d->type != IMAGE_TYPE_WIN_DIB)
+  {
+    Logger::error("Fog::Image", "releaseDC",
+      "Image is not a DIBSECTION.");
     return ERR_IMAGE_INVALID_TYPE;
+  }
 
-  if (!DeleteDC(hDC))
+  if (!(::DeleteDC(hDC)))
+  {
+    Logger::error("Fog::Image", "releaseDC",
+      "Failed to call DeleteDC(), the given HDC was invalid.");
     return OSUtil::getErrFromOSLastError();
+  }
 
   if (d->locked == 0)
   {
-    // TODO: Logger
+    Logger::error("Fog::Image", "releaseDC",
+      "Image is not locked, detected double-release.");
     return ERR_RT_INVALID_STATE;
   }
   else

@@ -845,20 +845,23 @@ LRESULT WinUIEngineWindowImpl::onWinMsg(UINT msg, WPARAM wParam, LPARAM lParam)
     
     case WM_PAINT:
     {
-      PAINTSTRUCT ps;
-      const RECT& rp = ps.rcPaint;
-
-      HDC winHdc = ::BeginPaint(static_cast<HWND>(_handle), &ps);
-      HDC imgHdc;
-
-      // This really shouldn't fail. If it does the Windows is running out of
-      // resources, which could mean that there is a HDC leak.
-      if (_bufferImage.getDC(&imgHdc) != ERR_OK)
-        return 0;
-
-      if (!_isDirty)
+      if (!_bufferImage.isEmpty() && !_isDirty)
       {
-        ::BitBlt(winHdc, rp.left, rp.top, rp.right - rp.left, rp.bottom - rp.top, imgHdc, rp.left, rp.top, SRCCOPY);
+        PAINTSTRUCT ps;
+        const RECT& rp = ps.rcPaint;
+
+        HDC winHdc = ::BeginPaint(static_cast<HWND>(_handle), &ps);
+        HDC imgHdc;
+
+        // This really shouldn't fail. If it does the Windows is running out of
+        // resources, which could mean that there is a HDC leak.
+        if (_bufferImage.getDC(&imgHdc) == ERR_OK)
+        {
+          ::BitBlt(winHdc, rp.left, rp.top, rp.right - rp.left, rp.bottom - rp.top, imgHdc, rp.left, rp.top, SRCCOPY);
+          _bufferImage.releaseDC(imgHdc);
+        }
+
+        ::EndPaint(static_cast<HWND>(_handle), &ps);
       }
       else
       {
@@ -869,8 +872,6 @@ LRESULT WinUIEngineWindowImpl::onWinMsg(UINT msg, WPARAM wParam, LPARAM lParam)
         _shouldBlit = true;
       }
 
-      _bufferImage.releaseDC(imgHdc);
-      ::EndPaint(static_cast<HWND>(_handle), &ps);
       return 0;
     }
 

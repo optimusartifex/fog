@@ -72,10 +72,14 @@ struct FOG_NO_EXPORT GlyphPosition
   // --------------------------------------------------------------------------
 
   FOG_INLINE const PointF& getPosition() const { return _position; }
+
   FOG_INLINE void setPosition(const PointF& pos) { _position = pos; }
+  FOG_INLINE void setPosition(float x, float y) { _position.set(x, y); }
 
   FOG_INLINE const PointF& getAdvance() const { return _advance; }
+
   FOG_INLINE void setAdvance(const PointF& advance) { _advance = advance; }
+  FOG_INLINE void setAdvance(float x, float y) { _advance.set(x, y); }
 
   // --------------------------------------------------------------------------
   // [Reset]

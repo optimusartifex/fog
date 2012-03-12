@@ -13,6 +13,7 @@
 #include <Fog/G2d/Text/OpenType/OTCMap.h>
 #include <Fog/G2d/Text/OpenType/OTEnum.h>
 #include <Fog/G2d/Text/OpenType/OTFace.h>
+#include <Fog/G2d/Text/OpenType/OTHmtx.h>
 
 namespace Fog {
 
@@ -57,6 +58,8 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
   if (FOG_IS_NULL(cmap))
     return ERR_FONT_CMAP_NOT_FOUND;
 
+  OTHmtx* hmtx = ot->getHmtx();
+
   OTCMapContext cctx;
   cctx.init(cmap, _encoding);
 
@@ -69,10 +72,32 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
 
   // TODO:
   GlyphPosition* pos = _glyphRun._positionList._prepare(CONTAINER_OP_APPEND, sLength);
+
   for (size_t i = 0; i < sLength; i++)
   {
     pos[i].reset();
-    pos[i].setPosition(PointF(0.0f + i * 20.0f, 0.0f));
+  }
+
+  if (hmtx)
+  {
+    uint32_t hMetricsCount = hmtx->getNumberOfHMetrics();
+    const OTHmtxMetric* hMetricsData = hmtx->getHMetrics();
+
+    PointF p(0.0f, 0.0f);
+    float scale = font._d->scale;
+
+    for (size_t i = 0; i < sLength; i++)
+    {
+      uint32_t glyphID = glyphs[i].getGlyphIndex();
+      if (glyphID >= hMetricsCount)
+        glyphID = hMetricsCount - 1;
+
+      int32_t advanceWidth = hMetricsData[glyphID].advanceWidth.getValueA();
+      int32_t lsb = hMetricsData[glyphID].leftSideBearing.getValueA();
+
+      pos[i].setPosition(p.x + float(lsb) * scale, p.y);
+      p.x += float(advanceWidth) * scale;
+    }
   }
 
   return ERR_OK;

@@ -436,7 +436,7 @@ void AppWindow::onPaint(Painter* _p)
   p.setSource(Argb32(0xFF000000));
   font.setSize(48);
 
-  for (size_t i = 0; i < 10; i++)
+  for (size_t i = 0; i < 18; i++)
   {
     StringW str(Ascii8("Sample text, VA AV, 1234567890"));
     p.fillText(pt, str, font);
@@ -463,7 +463,7 @@ FOG_UI_MAIN()
   AppWindow wnd(app.getUIEngine());
 
   wnd.setWindowTitle(StringW::fromAscii8("FogTest"));
-  wnd.setWindowSize(SizeI(510, 530));
+  wnd.setWindowSize(SizeI(890, 695));
   wnd.show();
 
   return app.run();

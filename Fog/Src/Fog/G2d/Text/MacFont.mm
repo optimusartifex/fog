@@ -217,6 +217,9 @@ static FOG_INLINE err_t MacFace_getOutlineFromGlyphRunT(FontData* d,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
 {
+  if (cntOp == CONTAINER_OP_REPLACE)
+    dst->clear();
+
   CTFontRef ctFont = static_cast<MacFace*>(d->face)->ctFont;
   float scale = d->scale;
 

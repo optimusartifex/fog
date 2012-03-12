@@ -39,7 +39,7 @@ using namespace Fog;
 #define FE_TURBULENCE_BMASK 0xFF
 #define FE_TURBULENCE_PERLIN 0x1000
 
-#define s_curve(t) ( t * t * (3. - 2. * t) )
+#define s_curve(t) ( t * t * (3.0f - 2.0f * t) )
 #define lerp(t, a, b) ( a + t * (b - a) )
 
 struct FOG_NO_EXPORT FeTurbulenceStitchInfo

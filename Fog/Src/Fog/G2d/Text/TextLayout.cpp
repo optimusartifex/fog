@@ -95,7 +95,9 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
       int32_t advanceWidth = hMetricsData[glyphID].advanceWidth.getValueA();
       int32_t lsb = hMetricsData[glyphID].leftSideBearing.getValueA();
 
-      pos[i].setPosition(p.x + float(lsb) * scale, p.y);
+      pos[i].setPosition(p.x, p.y);
+      if (i == 0)
+        pos[i]._position.x -= float(lsb) * scale;
       p.x += float(advanceWidth) * scale;
     }
   }

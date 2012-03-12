@@ -325,8 +325,9 @@ struct FOG_NO_EXPORT OTCMapContext
 
   //! @brief Pointer to 'getGlyphPlacement' implementation.
   OTCMapGetGlyphPlacementFunc _getGlyphPlacementFunc;
+
   //! @brief Pointer to data used by 'getGlyphPlacement' implementation.
-  void* _data;
+  const uint8_t* _data;
 };
 
 //! @}

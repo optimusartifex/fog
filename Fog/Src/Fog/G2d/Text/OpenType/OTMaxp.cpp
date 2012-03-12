@@ -57,7 +57,7 @@ static err_t FOG_CDECL OTMaxp_init(OTMaxp* self)
   }
 
   const OTMaxpHeaderV0_5* header = self->getHeaderV0_5();
-  uint32_t numOfGlyphs = header->numGlyphs.getValueA();
+  uint32_t numOfGlyphs = header->numGlyphs.getValueU();
 
   if (numOfGlyphs == 0)
   {

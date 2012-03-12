@@ -61,7 +61,7 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
   OTHmtx* hmtx = ot->getHmtx();
 
   OTCMapContext cctx;
-  cctx.init(cmap, _encoding);
+  FOG_RETURN_ON_ERROR(cctx.init(cmap, _encoding));
 
   const CharW* sData = string.getData();
   size_t sLength = string.getComputedLength();
@@ -92,12 +92,12 @@ err_t GlyphShaper::addText(const Font& font, const StubW& string)
       if (glyphID >= hMetricsCount)
         glyphID = hMetricsCount - 1;
 
-      int32_t advanceWidth = hMetricsData[glyphID].advanceWidth.getValueA();
-      int32_t lsb = hMetricsData[glyphID].leftSideBearing.getValueA();
+      int32_t advanceWidth = hMetricsData[glyphID].advanceWidth.getValueU();
+      int32_t lsb = hMetricsData[glyphID].leftSideBearing.getValueU();
 
-      pos[i].setPosition(p.x, p.y);
       if (i == 0)
-        pos[i]._position.x -= float(lsb) * scale;
+        p.x -= float(lsb) * scale;
+      pos[i].setPosition(p.x, p.y);
       p.x += float(advanceWidth) * scale;
     }
   }

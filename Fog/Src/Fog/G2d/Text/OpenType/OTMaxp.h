@@ -95,7 +95,7 @@ struct FOG_NO_EXPORT OTMaxp : public OTTable
   //! @brief Get version of TrueType/OpenType 'maxp' table.
   FOG_INLINE uint32_t getVersion() const
   {
-    return reinterpret_cast<const OTFixed16x16*>(getData())->getValueA();
+    return reinterpret_cast<const OTFixed16x16*>(getData())->getValueU();
   }
 
   //! @brief Get TrueType/OpenType 'maxp' table version 0.5.

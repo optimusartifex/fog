@@ -37,17 +37,29 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
   const uint8_t* data = static_cast<const uint8_t*>(cctx->_data);
   const CMapFormat4* tab = reinterpret_cast<const CMapFormat4*>(data);
 
-  FOG_ASSERT(tab->format.getValueA() == 4);
+  FOG_ASSERT(tab->format.getValueU() == 4);
 
-  uint32_t length = tab->length.getValueA();
-  uint32_t numSeg = tab->numSegX2.getValueA() >> 1;
-  uint32_t searchRange = tab->searchRange.getValueA() >> 1;
-  uint32_t entrySelector = tab->entrySelector.getValueA();
-  uint32_t rangeShift = tab->rangeShift.getValueA() >> 1;
+  uint32_t length = tab->length.getValueU();
+  uint32_t numSeg = tab->numSegX2.getValueU() >> 1;
+  uint32_t searchRange = tab->searchRange.getValueU() >> 1;
+  uint32_t entrySelector = tab->entrySelector.getValueU();
+  uint32_t rangeShift = tab->rangeShift.getValueU() >> 1;
 
   const uint16_t* sMark = sData;
   const uint16_t* sEnd = sData + sLength;
-
+/*
+  {
+    uint j;
+    for (j = 0; j < numSeg; j++)
+    {
+      printf("start=%d, end=%d, delta=%d, range-offset=%d\n",
+        FOG_OT_UINT16(data + 16 + numSeg * 2 + j * 2)->getValueU(),
+        FOG_OT_UINT16(data + 14 + j * 2)->getValueU(),
+        FOG_OT_UINT16(data + 16 + numSeg * 4 + j * 2)->getValueU(),
+        FOG_OT_UINT16(data + 16 + numSeg * 6 + j * 2)->getValueU());
+    }
+  }
+*/
   uint32_t uc = sData[0];
   for (;;)
   {
@@ -57,25 +69,31 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
     const uint8_t* p;
 
     uint32_t start, end;
-    uint32_t endCount = 14;
-    uint32_t search = endCount;
-    uint32_t offset;
-    
+//    uint32_t endCount;
+    uint32_t search = 0;
+    uint32_t offset = 0;
+
     if (CharW::isSurrogate(uc))
       goto _GlyphDone;
 
     // [endCount, endCount + segCount].
-    p = data + search;
-    ut = FOG_OT_UINT16(p + rangeShift * 2)->getValueA();
+    p = data + 14;
+
+    FOG_ASSERT(p + rangeShift * 2 < data + length);
+    ut = FOG_OT_UINT16(p + rangeShift * 2)->getValueU();
+
     if (uc >= ut)
       search += rangeShift * 2;
 
-    search -= 2;
     while (entrySelector)
     {
       searchRange >>= 1;
-      start = FOG_OT_UINT16(p + searchRange * 2 + numSeg * 2 + 2)->getValueA();
-      end   = FOG_OT_UINT16(p + searchRange * 2)->getValueA();
+
+      start = FOG_OT_UINT16(p + search + searchRange * 2 + numSeg * 2 + 2)->getValueU();
+      end   = FOG_OT_UINT16(p + search + searchRange * 2)->getValueU();
+      FOG_ASSERT(start <= end);
+
+      // fprintf(stderr, "Start=%d, End=%d, UC=%d\n", start, end, uc);
 
       if (uc > end)
         search += searchRange * 2;
@@ -83,22 +101,36 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
     }
 
     search += 2;
-    ut = ((search - endCount) >> 1) & 0xFFFF;
-    FOG_ASSERT(uc <= FOG_OT_UINT16(data + endCount + ut * 2)->getValueA());
+    ut = (search >> 1) & 0xFFFF;
+    //FOG_ASSERT(uc <= FOG_OT_UINT16(data + endCount + ut * 2)->getValueU());
 
     p = data + 16 + ut * 2;
-    start = FOG_OT_UINT16(p + numSeg * 2)->getValueA();
-    end   = FOG_OT_UINT16(p)->getValueA();
+    FOG_ASSERT(p + numSeg * 2 < data + length);
+    FOG_ASSERT(p < data + length);
 
-    if (uc < start)
+    start = FOG_OT_UINT16(p + numSeg * 2)->getValueU();
+    end   = FOG_OT_UINT16(p - 2)->getValueU();
+    // fprintf(stderr, "Start=%d, End=%d, UC=%d [Final]\n", start, end, uc);
+    
+    FOG_ASSERT(start <= end);
+
+    FOG_ASSERT(p + numSeg * 6 < data + length);
+    offset = static_cast<uint32_t>(FOG_OT_UINT16(p + numSeg * 6)->getValueU());
+
+    if (uc < start || uc > end)
       goto _GlyphDone;
 
-    offset = FOG_OT_UINT16(p + numSeg * 6)->getValueA();
 _Repeat:
     if (offset == 0)
-      glyphId = (uc + FOG_OT_UINT16(p + numSeg * 4)->getValueA());
+    {
+      FOG_ASSERT(p + numSeg * 4 < data + length);
+      glyphId = uc + FOG_OT_UINT16(p + numSeg * 4)->getValueU();
+    }
     else
-      glyphId = FOG_OT_UINT16(p + offset + (uc - start) * 2 + numSeg * 6)->getValueA();
+    {
+      FOG_ASSERT(p + offset + (uc - start) * 2 + numSeg * 6 < data + length);
+      glyphId = FOG_OT_UINT16(p + offset + (uc - start) * 2 + numSeg * 6)->getValueU();
+    }
     glyphId &= 0xFFFF;
 
 _GlyphDone:
@@ -133,10 +165,10 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement6(OTCMapContext* cctx,
   const uint8_t* data = static_cast<const uint8_t*>(cctx->_data);
   const CMapFormat6* tab = reinterpret_cast<const CMapFormat6*>(data);
 
-  FOG_ASSERT(tab->format.getValueA() == 6);
+  FOG_ASSERT(tab->format.getValueU() == 6);
 
-  uint32_t first = tab->first.getValueA();
-  uint32_t count = tab->count.getValueA();
+  uint32_t first = tab->first.getValueU();
+  uint32_t count = tab->count.getValueU();
 
   const OTUInt16* glyphIdArray = tab->glyphIdArray;
   const uint16_t* sMark = sData;
@@ -152,7 +184,7 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement6(OTCMapContext* cctx,
 
     uc -= first;
     if (uc < count)
-      glyphId = glyphIdArray[uc].getValueA();
+      glyphId = glyphIdArray[uc].getValueU();
 
 _GlyphDone:
     glyphList[0] = glyphId;
@@ -239,11 +271,11 @@ static err_t FOG_CDECL OTCMap_init(OTCMap* self)
   // --------------------------------------------------------------------------
 
   const OTCMapHeader* header = self->getHeader();
-  if (header->version.getRawA() != 0x0000)
+  if (header->version.getRawU() != 0x0000)
   {
 #if defined(FOG_OT_DEBUG)
     Logger::info("Fog::OTCMap", "init",
-      "Unsupported header version %d.", header->version.getRawA());
+      "Unsupported header version %d.", header->version.getValueU());
 #endif // FOG_OT_DEBUG
 
     return self->setStatus(ERR_FONT_CMAP_HEADER_WRONG_VERSION);
@@ -253,7 +285,7 @@ static err_t FOG_CDECL OTCMap_init(OTCMap* self)
   // [Encoding]
   // --------------------------------------------------------------------------
 
-  uint32_t count = header->count.getValueA();
+  uint32_t count = header->count.getValueU();
   if (count == 0 || count > dataLength / sizeof(OTCMapEncoding))
   {
 #if defined(FOG_OT_DEBUG)
@@ -283,9 +315,9 @@ static err_t FOG_CDECL OTCMap_init(OTCMap* self)
 
   for (uint32_t i = 0; i < count; i++, items++, encTable++)
   {
-    uint16_t platformId = encTable->platformId.getValueA();
-    uint16_t specificId = encTable->specificId.getValueA();
-    uint32_t offset     = encTable->offset.getValueA();
+    uint16_t platformId = encTable->platformId.getValueU();
+    uint16_t specificId = encTable->specificId.getValueU();
+    uint32_t offset     = encTable->offset.getValueU();
 
     // This is our encodingId which can match several platformId/specificId
     // combinations. The purpose is to simplify matching of subtables we are
@@ -355,7 +387,7 @@ static err_t FOG_CDECL OTCMap_init(OTCMap* self)
         i,
         platformId,
         specificId,
-        (uint32_t)(reinterpret_cast<const OTUInt16*>(data + offset)->getValueA()),
+        (uint32_t)(reinterpret_cast<const OTUInt16*>(data + offset)->getValueU()),
         offset,
         (encodingId >> 24) & 0xFF,
         (encodingId >> 16) & 0xFF,
@@ -386,7 +418,6 @@ static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* cctx, const OTCMap* cma
   if (encodingId == FOG_OT_TAG('u', 'n', 'i', 'c'))
   {
     index = cmap->getUnicodeEncodingIndex();
-    FOG_ASSERT(index < count);
   }
   else
   {
@@ -406,19 +437,25 @@ static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* cctx, const OTCMap* cma
   }
 
   if (index == 0xFFFFFFFF)
+  {
+    cctx->_getGlyphPlacementFunc = NULL;
+    cctx->_data = NULL;
     return ERR_FONT_CMAP_TABLE_NOT_FOUND;
+  }
+
+  FOG_ASSERT(index < count);
 
   const uint8_t* data = cmap->getData();
   const OTCMapEncoding* encTable = reinterpret_cast<const OTCMapEncoding*>(
     data + sizeof(OTCMapHeader) + index * sizeof(OTCMapEncoding));
 
-  uint32_t offset = encTable->offset.getValueA();
+  uint32_t offset = encTable->offset.getValueU();
   FOG_ASSERT(offset < cmap->getDataLength());
 
-  cctx->_data = (void*)(data + offset);
+  cctx->_data = data + offset;
 
   // Format of the table is the first UInt16 data entry in that offset.
-  uint16_t format = reinterpret_cast<const OTUInt16*>(data + offset)->getValueA();
+  uint16_t format = reinterpret_cast<const OTUInt16*>(data + offset)->getValueU();
   switch (format)
   {
     case 4:
@@ -430,8 +467,8 @@ static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* cctx, const OTCMap* cma
       return ERR_OK;
 
     default:
-      cctx->_getGlyphPlacementFunc = NULL;
       cctx->_data = NULL;
+      cctx->_getGlyphPlacementFunc = NULL;
       return ERR_FONT_CMAP_TABLE_WRONG_FORMAT;
   }
 }

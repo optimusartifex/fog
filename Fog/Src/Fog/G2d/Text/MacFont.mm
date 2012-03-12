@@ -390,7 +390,9 @@ static err_t FOG_CDECL MacFontEngine_queryFace(const FontEngine* self_,
   // create it.
   if (ctFaceHead == NULL || CFDataGetLength(ctFaceHead) < sizeof(OTHeadHeader))
   {
-    CFRelease(ctFaceHead);
+    if (ctFaceHead != NULL)
+      CFRelease(ctFaceHead);
+
     CFRelease(ctFaceFamily);
     CFRelease(ctFace);
 
@@ -401,7 +403,7 @@ static err_t FOG_CDECL MacFontEngine_queryFace(const FontEngine* self_,
     const OTHeadHeader* header = reinterpret_cast<const OTHeadHeader*>(
       CFDataGetBytePtr(ctFaceHead));
 
-    unitsPerEm = header->unitsPerEm.getValueA();
+    unitsPerEm = header->unitsPerEm.getValueU();
     
     CFRelease(ctFaceHead);
     CFRelease(ctFace);
@@ -442,9 +444,9 @@ static err_t FOG_CDECL MacFontEngine_queryFace(const FontEngine* self_,
     const OTHHeaHeader* header = hhea->getHeader();
 
     fm._size = float(unitsPerEm);
-    fm._ascent = float(header->ascender.getValueA());
-    fm._descent = -float(header->descender.getValueA());
-    fm._lineGap =float(header->lineGap.getValueA());
+    fm._ascent = float(header->ascender.getValueU());
+    fm._descent = -float(header->descender.getValueU());
+    fm._lineGap =float(header->lineGap.getValueU());
     fm._lineSpacing = fm._ascent + fm._descent + fm._lineGap;
   }
 

@@ -64,7 +64,7 @@ static err_t FOG_CDECL OTHmtx_init(OTHmtx* self)
     return self->setStatus(ERR_FONT_HMTX_HEADER_WRONG_DATA);
   }
 
-  uint32_t numOfHMetrics = hhea->getHeader()->numberOfHMetrics.getValueA();
+  uint32_t numOfHMetrics = hhea->getHeader()->numberOfHMetrics.getValueU();
   uint32_t numOfLSB = 0;
 
   if (numOfHMetrics > dataLength / sizeof(OTHmtxMetric))

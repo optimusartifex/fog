@@ -431,11 +431,36 @@ void AppWindow::onPaint(Painter* _p)
 #endif
 
   Font font;
+  //font.create(StringW::fromAscii8("Arial Hebrew"), 16.0f);
   PointF pt(100.0f, 50.0f);
 
   p.setSource(Argb32(0xFF000000));
   font.setSize(48);
 
+#if 1
+  FaceCollection collection;
+  FontEngine::getGlobal()->getAvailableFaces(collection);
+
+  ListIterator<FaceInfo> it(collection.getList());
+  while (it.isValid())
+  {
+    if (it.getIndex() != 0)
+      pt.y += font.getAscent();
+
+    StringA loc;
+    TextCodec::utf8().encode(loc, it.getItem().getFamilyName());
+    fprintf(stderr, "%s\n", loc.getData());
+  
+    font.create(it.getItem().getFamilyName(), 16.0f);
+
+    StringW str(Ascii8("Sample text, VA AV, 1234567890"));
+    p.fillText(pt, str, font);
+
+    pt.y += font.getDescent();
+    it.next();
+  }
+#endif
+#if 0
   for (size_t i = 0; i < 18; i++)
   {
     StringW str(Ascii8("Sample text, VA AV, 1234567890"));
@@ -445,6 +470,7 @@ void AppWindow::onPaint(Painter* _p)
     font.setSize(font.getSize() - 2.0f);
     pt.y += font.getAscent();
   }
+#endif
 
   TimeDelta t = TimeTicks::now() - startTime;
 

@@ -20,6 +20,7 @@
 #include <Fog/G2d/Geometry/Path.h>
 #include <Fog/G2d/Text/MacFont.h>
 #include <Fog/G2d/Text/OpenType/OTHead.h>
+#include <Fog/G2d/Text/OpenType/OTHHea.h>
 
 namespace Fog {
 
@@ -156,82 +157,92 @@ static OTTable* FOG_CDECL MacFace_getOTTable(const Face* self_, uint32_t tag)
 // ============================================================================
 
 template<typename NumT>
+struct MacFace_CGPathApplierInfo
+{
+  NumT_(Path)* dst;
+
+  NumT_(Point) scale;
+  NumT_(Point) pos;
+};
+
+template<typename NumT>
+static void MacFace_cgPathApplier(void* info_, const CGPathElement* element)
+{
+  MacFace_CGPathApplierInfo<NumT>* info = reinterpret_cast< MacFace_CGPathApplierInfo<NumT>* >(info_);
+
+  NumT sx = info->scale.x;
+  NumT sy = info->scale.y;
+
+  NumT px = info->pos.x;
+  NumT py = info->pos.y;
+
+  switch (element->type)
+  {
+    case kCGPathElementMoveToPoint:
+      info->dst->moveTo(
+        NumT(element->points[0].x) * sx + px, NumT(element->points[0].y) * sy + py);
+      break;
+
+    case kCGPathElementAddLineToPoint:
+      info->dst->lineTo(
+        NumT(element->points[0].x) * sx + px, NumT(element->points[0].y) * sy + py);
+      break;
+      
+    case kCGPathElementAddQuadCurveToPoint:
+      info->dst->quadTo(
+        NumT(element->points[0].x) * sx + px, NumT(element->points[0].y) * sy + py,
+        NumT(element->points[1].x) * sx + px, NumT(element->points[1].y) * sy + py);
+      break;
+      
+    case kCGPathElementAddCurveToPoint:
+      info->dst->cubicTo(
+        NumT(element->points[0].x) * sx + px, NumT(element->points[0].y) * sy + py,
+        NumT(element->points[1].x) * sx + px, NumT(element->points[1].y) * sy + py,
+        NumT(element->points[2].x) * sx + px, NumT(element->points[2].y) * sy + py);
+      break;
+
+    case kCGPathElementCloseSubpath:
+      info->dst->close();
+      break;
+      
+    default:
+      FOG_ASSERT_NOT_REACHED();
+  }
+}
+
+template<typename NumT>
 static FOG_INLINE err_t MacFace_getOutlineFromGlyphRunT(FontData* d,
   NumT_(Path)* dst, uint32_t cntOp, const NumT_(Point)* pt,
   const uint32_t* glyphList, size_t glyphAdvance,
   const PointF* positionList, size_t positionAdvance,
   size_t length)
 {
-  return ERR_RT_NOT_IMPLEMENTED;
-/*
-  MacFace* face = static_cast<MacFace*>(d->face);
+  CTFontRef ctFont = static_cast<MacFace*>(d->face)->ctFont;
+  float scale = d->scale;
 
-  if (cntOp == CONTAINER_OP_REPLACE)
-    dst->clear();
+  MacFace_CGPathApplierInfo<NumT> info;
 
-  if (length == 0)
-    return ERR_OK;
+  info.dst = dst;
+  info.scale.set(NumT(scale), -NumT(scale));
 
-  // Build the transform.
-  NumT_(Transform) transform;
-
-  transform.scale(
-    NumT_(Point)(d->scale, d->scale));
-  transform.transform(
-    NumT_(Transform)(d->matrix._xx, d->matrix._yx, d->matrix._yx, d->matrix._yy, 0.0f, 0.0f));
-
-  if (transform.getType() == TRANSFORM_TYPE_IDENTITY)
-    transform._type = TRANSFORM_TYPE_TRANSLATION;
-
-  err_t err = ERR_OK;
   size_t i;
-
-  WinGetGlyphOutlineHDC scopedDC;
-  MemBufferTmp<1024> buffer;
-
-  FOG_RETURN_ON_ERROR(scopedDC.initHDC());
-  FOG_RETURN_ON_ERROR(scopedDC.initHFONT(face->hFace));
-
-  MAT2 mat2 = MacFace_MAT2Identity();
-  GLYPHMETRICS gm;
-
   for (i = 0; i < length; i++)
   {
-_Repeat:
-    DWORD dataSize = ::GetGlyphOutlineW(scopedDC, glyphList[0],
-      GGO_GLYPH_INDEX | GGO_NATIVE | GGO_UNHINTED,
-      &gm, (DWORD)buffer.getCapacity(), buffer.getMem(), &mat2);
+    CGGlyph glyphId = glyphList[0];
+    info.pos.set(NumT(positionList[0].x) + pt->x, NumT(positionList[0].y) + pt->y);
 
-    if (dataSize == GDI_ERROR)
-      return ERR_FONT_INTERNAL;
-
-    if (static_cast<size_t>(dataSize) > buffer.getCapacity())
+    CGPathRef cgPath = CTFontCreatePathForGlyph(ctFont, glyphId, NULL);
+    if (cgPath != NULL)
     {
-      // If we need to realloc the temporary buffer, reserve more space so
-      // we don't do that again. We don't care about memory here, because
-      // it will be freed after this loop ends.
-      dataSize = (dataSize + 4095) & ~4095;
-
-      if (FOG_IS_NULL(buffer.alloc(dataSize)))
-        return ERR_RT_OUT_OF_MEMORY;
-
-      goto _Repeat;
+      CGPathApply(cgPath, &info, MacFace_cgPathApplier<NumT>);
+      CGPathRelease(cgPath);
     }
-
-    size_t index = dst->getLength();
-    FOG_RETURN_ON_ERROR(MacFace_decomposeTTOutline<NumT>(dst,
-      reinterpret_cast<uint8_t*>(buffer.getMem()), dataSize, true));
-
-    transform._20 = pt->x + NumT(positionList[0].x);
-    transform._21 = pt->y + NumT(positionList[0].y);
-    FOG_RETURN_ON_ERROR(dst->transform(transform, Range(index, DETECT_LENGTH)));
-
-    glyphList = (const uint32_t*)((const uint8_t*)glyphList + glyphAdvance);
-    positionList = (const PointF*)((const uint8_t*)positionList + positionAdvance);
+    
+    glyphList = reinterpret_cast<const uint32_t*>((const uint8_t*)glyphList + glyphAdvance);
+    positionList = reinterpret_cast<const PointF*>((const uint8_t*)positionList + positionAdvance);
   }
-
+  
   return ERR_OK;
-*/
 }
 
 static err_t FOG_CDECL MacFace_getOutlineFromGlyphRunF(FontData* d,
@@ -388,6 +399,7 @@ static err_t FOG_CDECL MacFontEngine_queryFace(const FontEngine* self_,
       CFDataGetBytePtr(ctFaceHead));
 
     unitsPerEm = header->unitsPerEm.getValueA();
+    
     CFRelease(ctFaceHead);
     CFRelease(ctFace);
   }
@@ -421,7 +433,17 @@ static err_t FOG_CDECL MacFontEngine_queryFace(const FontEngine* self_,
   MacFace_create(face, ctFace);
   FontMetrics& fm = face->designMetrics;
   
-  
+  OTHHea* hhea = face->ot->getHHea();
+  if (hhea != NULL)
+  {
+    const OTHHeaHeader* header = hhea->getHeader();
+
+    fm._size = float(unitsPerEm);
+    fm._ascent = float(header->ascender.getValueA());
+    fm._descent = -float(header->descender.getValueA());
+    fm._lineGap =float(header->lineGap.getValueA());
+    fm._lineSpacing = fm._ascent + fm._descent + fm._lineGap;
+  }
 
   self->cache->put(*family, bestFeatures, face);
 

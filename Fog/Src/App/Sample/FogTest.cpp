@@ -431,11 +431,20 @@ void AppWindow::onPaint(Painter* _p)
 #endif
 
   Font font;
-  font.setSize(48);
-  StringW str(Ascii8("Sample text"));
+  PointF pt(100.0f, 50.0f);
 
   p.setSource(Argb32(0xFF000000));
-  p.fillText(PointF(100.0f, 100.0f), str, font);
+  font.setSize(48);
+
+  for (size_t i = 0; i < 10; i++)
+  {
+    StringW str(Ascii8("Sample text, VA AV, 1234567890"));
+    p.fillText(pt, str, font);
+
+    pt.y += font.getDescent();
+    font.setSize(font.getSize() - 2.0f);
+    pt.y += font.getAscent();
+  }
 
   TimeDelta t = TimeTicks::now() - startTime;
 

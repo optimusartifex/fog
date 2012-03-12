@@ -622,7 +622,7 @@ static err_t FOG_CDECL WinFontEngine_queryFace(const FontEngine* self_,
   //  
   // "Arial"
   //   - Can be also checked here: http://msdn.microsoft.com/en-us/library/xwf9s90b.aspx),
-  //     but don't look at the image, because the ascent/descent info there is wrong.
+  //     but don't look at the image, because the ascent/descent info is wrong there.
   //   
   //   - EmSquare    == 2048
   //   - Ascent      == 1854

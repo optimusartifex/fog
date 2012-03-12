@@ -2380,7 +2380,9 @@ struct FOG_NO_EXPORT Api
   // [G2d/OS - WinUtil / Support]
   // --------------------------------------------------------------------------
 
+#if defined(FOG_OS_WINDOWS)
   FOG_CAPI_STATIC(HDC, winutil_getThreadLocalDC)(void);
+#endif // FOG_OS_WINDOWS
 
   // --------------------------------------------------------------------------
   // [G2d/Painting - Painter]

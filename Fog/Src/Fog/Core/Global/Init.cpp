@@ -203,7 +203,9 @@ FOG_CAPI_DECLARE void _fog_fini(void)
   Font_fini();
 
   // [G2d/OS]
+#if defined(FOG_OS_WINDOWS)
   WinUtil_G2d_fini();
+#endif // FOG_OS_WINDOWS
 
   // [G2d/Imaging]
   ImageCodecProvider_fini();

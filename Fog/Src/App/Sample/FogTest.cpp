@@ -450,10 +450,10 @@ void AppWindow::onPaint(Painter* _p)
     StringA loc;
     TextCodec::utf8().encode(loc, it.getItem().getFamilyName());
     Logger::info("", "main", "%s\n", loc.getData());
-  
+
     font.create(it.getItem().getFamilyName(), 16.0f);
 
-    StringW str(Ascii8("Sample text, VA AV, 1234567890"));
+    StringW str = it.getItem().getFamilyName();
     p.fillText(pt, str, font);
 
     pt.y += font.getDescent();

@@ -1307,7 +1307,7 @@ static err_t FOG_CDECL Font_create(Font* self, const StringW* family, float size
   // It is expensive to query font-face, so we try to do it only if it's really
   // necessary. In case that the family is the same, there is high probability
   // that we don't do query at all, just compare requested features.
-  bool doFaceQuery = d->face->family != *family;
+  bool doFaceQuery = (d->face->family != *family);
 
   // Font family is the same -> compare weight, stretch, and style. If these
   // are the same then we don't need to do a real query.

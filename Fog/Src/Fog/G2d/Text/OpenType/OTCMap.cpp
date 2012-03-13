@@ -76,6 +76,7 @@ static size_t FOG_CDECL OTCMapContext4_getGlyphPlacement(OTCMapContext* cctx,
 
   const uint16_t* sMark = sData;
   const uint16_t* sEnd = sData + sLength;
+
 /*
   {
     uint j;
@@ -162,6 +163,10 @@ _Repeat:
 _MissingGlyph:
     glyphList[0] = 0;
     glyphList = reinterpret_cast<uint32_t*>((uint8_t*)glyphList + glyphAdvance);
+
+    if (++sData == sEnd)
+      break;
+    uc = sData[0];
   }
 
   return (size_t)(sData - sMark);

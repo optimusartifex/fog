@@ -449,7 +449,7 @@ void AppWindow::onPaint(Painter* _p)
 
     StringA loc;
     TextCodec::utf8().encode(loc, it.getItem().getFamilyName());
-    fprintf(stderr, "%s\n", loc.getData());
+    Logger::info("", "main", "%s\n", loc.getData());
   
     font.create(it.getItem().getFamilyName(), 16.0f);
 

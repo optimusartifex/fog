@@ -9,6 +9,7 @@
 #include <Fog/Core/Tools/Logger.h>
 #include <Fog/G2d/Text/OpenType/OTCMap.h>
 #include <Fog/G2d/Text/OpenType/OTEnum.h>
+#include <Fog/G2d/Text/OpenType/OTUtil.h>
 
 namespace Fog {
 
@@ -28,7 +29,38 @@ namespace Fog {
 // [Fog::OTCMapFormat4]
 // ============================================================================
 
-static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
+template<bool IsAligned>
+static FOG_INLINE const uint8_t* OTCMapContext4_bsearch(
+  uint32_t& start,
+  uint32_t& end,
+  const uint8_t* pEnd,
+  uint32_t numSeg,
+  uint32_t uc)
+{
+  uint32_t base = 0;
+
+  for (uint32_t lim = numSeg; lim != 0; lim >>= 1)
+  {
+    const uint8_t* pCur = pEnd + (lim & ~1);
+
+    end = FOG_OT_UINT16(pCur)->getValueU();
+    if (end < uc)
+    {
+      pEnd = pCur + 2;
+      lim--;
+      continue;
+    }
+
+    start = FOG_OT_UINT16(pCur + 2 + numSeg * 2)->getValueU();
+    if (start <= uc)
+      return pCur;
+  }
+
+  return NULL;
+}
+
+template<bool IsAligned>
+static size_t FOG_CDECL OTCMapContext4_getGlyphPlacement(OTCMapContext* cctx,
   uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
 {
   if (sLength == 0)
@@ -37,13 +69,10 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
   const uint8_t* data = static_cast<const uint8_t*>(cctx->_data);
   const CMapFormat4* tab = reinterpret_cast<const CMapFormat4*>(data);
 
-  FOG_ASSERT(tab->format.getValueU() == 4);
+  FOG_ASSERT(tab->format.getValueT<IsAligned>() == 4);
 
-  uint32_t length = tab->length.getValueU();
-  uint32_t numSeg = tab->numSegX2.getValueU() >> 1;
-  uint32_t searchRange = tab->searchRange.getValueU() >> 1;
-  uint32_t entrySelector = tab->entrySelector.getValueU();
-  uint32_t rangeShift = tab->rangeShift.getValueU() >> 1;
+  uint32_t length = tab->length.getValueT<IsAligned>();
+  uint32_t numSeg = tab->numSegX2.getValueT<IsAligned>() >> 1;
 
   const uint16_t* sMark = sData;
   const uint16_t* sEnd = sData + sLength;
@@ -52,89 +81,69 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement4(OTCMapContext* cctx,
     uint j;
     for (j = 0; j < numSeg; j++)
     {
-      printf("start=%d, end=%d, delta=%d, range-offset=%d\n",
-        FOG_OT_UINT16(data + 16 + numSeg * 2 + j * 2)->getValueU(),
-        FOG_OT_UINT16(data + 14 + j * 2)->getValueU(),
-        FOG_OT_UINT16(data + 16 + numSeg * 4 + j * 2)->getValueU(),
-        FOG_OT_UINT16(data + 16 + numSeg * 6 + j * 2)->getValueU());
+      Logger::info("Fog::OTCMapContext4", "getGlyphPlacement",
+        "#%02d start=%d, end=%d, delta=%d, offset=%d\n",
+          j,
+          FOG_OT_UINT16(data + 16 + numSeg * 2 + j * 2)->getValueU(),
+          FOG_OT_UINT16(data + 14 + j * 2)->getValueU(),
+          FOG_OT_UINT16(data + 16 + numSeg * 4 + j * 2)->getValueU(),
+          FOG_OT_UINT16(data + 16 + numSeg * 6 + j * 2)->getValueU());
     }
   }
 */
+
   uint32_t uc = sData[0];
   for (;;)
   {
-    uint32_t ut;
-    uint32_t glyphId = 0;
-
-    const uint8_t* p;
-
-    uint32_t start, end;
-//    uint32_t endCount;
-    uint32_t search = 0;
-    uint32_t offset = 0;
+    uint32_t start, end, offset;
+    const uint8_t* pEnd;
+    const uint8_t* pOffset;
 
     if (CharW::isSurrogate(uc))
-      goto _GlyphDone;
+      goto _MissingGlyph;
 
-    // [endCount, endCount + segCount].
-    p = data + 14;
+    pEnd = OTCMapContext4_bsearch<IsAligned>(start, end, data + 14, numSeg, uc);
+    if (pEnd == NULL)
+      goto _MissingGlyph;
 
-    FOG_ASSERT(p + rangeShift * 2 < data + length);
-    ut = FOG_OT_UINT16(p + rangeShift * 2)->getValueU();
+    // 'data + 14' points to the 'endChar' table. There are two bytes reserved
+    // which should be zero, so we need to skip them. After the skip pEnd points
+    // to location L at index I, which can be used to access:
+    //
+    //   - endChar[I]   == pEnd[-2]
+    //   - startChar[I] == pEnd[numSeg * 2] 
+    //   - delta[I]     == pEnd[numSeg * 4]
+    //   - offset[I]    == pEnd[numSeg * 6]
 
-    if (uc >= ut)
-      search += rangeShift * 2;
+    pEnd += 2;
+    pOffset = pEnd + numSeg * 6;
 
-    while (entrySelector)
-    {
-      searchRange >>= 1;
-
-      start = FOG_OT_UINT16(p + search + searchRange * 2 + numSeg * 2 + 2)->getValueU();
-      end   = FOG_OT_UINT16(p + search + searchRange * 2)->getValueU();
-      FOG_ASSERT(start <= end);
-
-      // fprintf(stderr, "Start=%d, End=%d, UC=%d\n", start, end, uc);
-
-      if (uc > end)
-        search += searchRange * 2;
-      entrySelector--;
-    }
-
-    search += 2;
-    ut = (search >> 1) & 0xFFFF;
-    //FOG_ASSERT(uc <= FOG_OT_UINT16(data + endCount + ut * 2)->getValueU());
-
-    p = data + 16 + ut * 2;
-    FOG_ASSERT(p + numSeg * 2 < data + length);
-    FOG_ASSERT(p < data + length);
-
-    start = FOG_OT_UINT16(p + numSeg * 2)->getValueU();
-    end   = FOG_OT_UINT16(p - 2)->getValueU();
-    // fprintf(stderr, "Start=%d, End=%d, UC=%d [Final]\n", start, end, uc);
-    
-    FOG_ASSERT(start <= end);
-
-    FOG_ASSERT(p + numSeg * 6 < data + length);
-    offset = static_cast<uint32_t>(FOG_OT_UINT16(p + numSeg * 6)->getValueU());
-
-    if (uc < start || uc > end)
-      goto _GlyphDone;
+    FOG_ASSERT(pOffset < data + length);
+    offset = FOG_OT_UINT16(pOffset)->getValueT<IsAligned>();
 
 _Repeat:
-    if (offset == 0)
+    // According to the specification:
+    //
+    // If the 'offset' value for the segment is not 0, the mapping of character
+    // codes relies on glyphIdArray. The character code offset from 'startChar'
+    // is added to the 'offset' value. This sum is used as an offset from the
+    // current location within 'offset' itself to index out the correct 
+    // glyphIdArray value.
+    if (offset != 0)
     {
-      FOG_ASSERT(p + numSeg * 4 < data + length);
-      glyphId = uc + FOG_OT_UINT16(p + numSeg * 4)->getValueU();
-    }
-    else
-    {
-      FOG_ASSERT(p + offset + (uc - start) * 2 + numSeg * 6 < data + length);
-      glyphId = FOG_OT_UINT16(p + offset + (uc - start) * 2 + numSeg * 6)->getValueU();
-    }
-    glyphId &= 0xFFFF;
+      uc -= start;
 
-_GlyphDone:
-    glyphList[0] = glyphId;
+      FOG_ASSERT(pOffset + offset + uc * 2 < data + length);
+      uc = FOG_OT_UINT16(pOffset + offset + uc * 2)->getValueT<IsAligned>();
+
+      if (uc == 0)
+        goto _MissingGlyph;
+    }
+
+    uc += FOG_OT_UINT16(pEnd + numSeg * 4)->getValueT<IsAligned>();
+    uc &= 0xFFFF;
+
+    glyphList[0] = uc;
     glyphList = reinterpret_cast<uint32_t*>((uint8_t*)glyphList + glyphAdvance);
 
     if (++sData == sEnd)
@@ -142,11 +151,17 @@ _GlyphDone:
 
     // We are processing a string, so if characters are close to each other,
     // we can try to skip a binary search if the next character is in the same
-    // range list as the previous one.
+    // range list as the previous character. This optimization is always benefical
+    // for latin text and for large range lists.
     uc = sData[0];
 
     if (uc >= start && uc <= end)
       goto _Repeat;
+    continue;
+
+_MissingGlyph:
+    glyphList[0] = 0;
+    glyphList = reinterpret_cast<uint32_t*>((uint8_t*)glyphList + glyphAdvance);
   }
 
   return (size_t)(sData - sMark);
@@ -156,7 +171,8 @@ _GlyphDone:
 // [Fog::OTCMapFormat6]
 // ============================================================================
 
-static size_t FOG_CDECL OTCMapContext_getGlyphPlacement6(OTCMapContext* cctx,
+template<bool IsAligned>
+static size_t FOG_CDECL OTCMapContext6_getGlyphPlacement(OTCMapContext* cctx,
   uint32_t* glyphList, size_t glyphAdvance, const uint16_t* sData, size_t sLength)
 {
   if (sLength == 0)
@@ -165,10 +181,10 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement6(OTCMapContext* cctx,
   const uint8_t* data = static_cast<const uint8_t*>(cctx->_data);
   const CMapFormat6* tab = reinterpret_cast<const CMapFormat6*>(data);
 
-  FOG_ASSERT(tab->format.getValueU() == 6);
+  FOG_ASSERT(tab->format.getValueT<IsAligned>() == 6);
 
-  uint32_t first = tab->first.getValueU();
-  uint32_t count = tab->count.getValueU();
+  uint32_t first = tab->first.getValueT<IsAligned>();
+  uint32_t count = tab->count.getValueT<IsAligned>();
 
   const OTUInt16* glyphIdArray = tab->glyphIdArray;
   const uint16_t* sMark = sData;
@@ -180,13 +196,13 @@ static size_t FOG_CDECL OTCMapContext_getGlyphPlacement6(OTCMapContext* cctx,
     uint32_t glyphId = 0;
 
     if (CharW::isSurrogate(uc))
-      goto _GlyphDone;
+      goto _MissingGlyph;
 
     uc -= first;
     if (uc < count)
-      glyphId = glyphIdArray[uc].getValueU();
+      glyphId = glyphIdArray[uc].getValueT<IsAligned>();
 
-_GlyphDone:
+_MissingGlyph:
     glyphList[0] = glyphId;
     glyphList = reinterpret_cast<uint32_t*>((uint8_t*)glyphList + glyphAdvance);
 
@@ -459,11 +475,17 @@ static err_t FOG_CDECL OTCMapContext_init(OTCMapContext* cctx, const OTCMap* cma
   switch (format)
   {
     case 4:
-      cctx->_getGlyphPlacementFunc = OTCMapContext_getGlyphPlacement4;
+      if (OTUtil::initAligned16(cctx->_data))
+        cctx->_getGlyphPlacementFunc = OTCMapContext4_getGlyphPlacement<true>;
+      else
+        cctx->_getGlyphPlacementFunc = OTCMapContext4_getGlyphPlacement<false>;
       return ERR_OK;
 
     case 6:
-      cctx->_getGlyphPlacementFunc = OTCMapContext_getGlyphPlacement6;
+      if (OTUtil::initAligned16(cctx->_data))
+        cctx->_getGlyphPlacementFunc = OTCMapContext6_getGlyphPlacement<true>;
+      else
+        cctx->_getGlyphPlacementFunc = OTCMapContext6_getGlyphPlacement<false>;
       return ERR_OK;
 
     default:

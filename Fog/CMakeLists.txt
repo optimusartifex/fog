@@ -1385,6 +1385,7 @@ Set(FOG_G2D_TEXT_OPENTYPE_HEADERS
   Src/Fog/G2d/Text/OpenType/OTMaxp.h
   Src/Fog/G2d/Text/OpenType/OTName.h
   Src/Fog/G2d/Text/OpenType/OTTypes.h
+  Src/Fog/G2d/Text/OpenType/OTUtil.h
 )
 
 # [Fog/G2d/Tools]

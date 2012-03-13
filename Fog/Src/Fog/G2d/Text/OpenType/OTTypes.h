@@ -47,6 +47,12 @@ struct FOG_NO_EXPORT OTInt8
   FOG_INLINE Type getValue() const { return _b[0]; }
   FOG_INLINE void setValue(Type value) { _b[0] = value; }
 
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const { return _b[0]; }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value) { _b[0] = value; }
+
   FOG_INLINE operator Type() const { return getValue(); }
   FOG_INLINE OTInt8& operator=(Type value) { setValue(value); return *this; }
 
@@ -79,6 +85,12 @@ struct FOG_NO_EXPORT OTUInt8
 
   FOG_INLINE Type getValue() const { return _b[0]; }
   FOG_INLINE void setValue(Type value) { _b[0] = value; }
+
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const { return _b[0]; }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value) { _b[0] = value; }
 
   FOG_INLINE operator Type() const { return getValue(); }
   FOG_INLINE OTUInt8& operator=(Type value) { setValue(value); return *this; }
@@ -178,6 +190,21 @@ struct FOG_NO_EXPORT OTInt16
 # endif
 #endif
 
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const
+  {
+    return IsAligned ? getValueA() : getValueU();
+  }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value)
+  {
+    if (IsAligned)
+      setValueA(value);
+    else
+      setValueU(value);
+  }
+
   FOG_INLINE operator Type() const { return getValueU(); }
   FOG_INLINE OTInt16& operator=(Type value) { setValueU(value); return *this; }
 
@@ -273,6 +300,21 @@ struct FOG_NO_EXPORT OTUInt16
 # endif
 #endif
 
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const
+  {
+    return IsAligned ? getValueA() : getValueU();
+  }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value)
+  {
+    if (IsAligned)
+      setValueA(value);
+    else
+      setValueU(value);
+  }
+
   FOG_INLINE operator Type() const { return getValueU(); }
   FOG_INLINE OTUInt16& operator=(Type value) { setValueU(value); return *this; }
 
@@ -308,6 +350,18 @@ struct FOG_NO_EXPORT OTUInt24
     _b[0] = static_cast<uint8_t>(value >> 16);
     _b[1] = static_cast<uint8_t>(value >>  8);
     _b[2] = static_cast<uint8_t>(value      );
+  }
+
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const
+  {
+    return getValue();
+  }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value)
+  {
+    return setValue(value);
   }
 
   FOG_INLINE operator Type() const { return getValue(); }
@@ -417,6 +471,21 @@ struct FOG_NO_EXPORT OTInt32
 # endif
 #endif
 
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const
+  {
+    return IsAligned ? getValueA() : getValueU();
+  }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value)
+  {
+    if (IsAligned)
+      setValueA(value);
+    else
+      setValueU(value);
+  }
+
   FOG_INLINE operator Type() const { return getValueU(); }
   FOG_INLINE OTInt32& operator=(Type value) { setValueU(value); return *this; }
 
@@ -520,6 +589,21 @@ struct FOG_NO_EXPORT OTUInt32
   FOG_INLINE void setRawU(Type value) { setValueU(value); }
 # endif
 #endif
+
+  template<bool IsAligned>
+  FOG_INLINE Type getValueT() const
+  {
+    return IsAligned ? getValueA() : getValueU();
+  }
+
+  template<bool IsAligned>
+  FOG_INLINE void setValueT(Type value)
+  {
+    if (IsAligned)
+      setValueA(value);
+    else
+      setValueU(value);
+  }
 
   FOG_INLINE operator Type() const { return getValueU(); }
   FOG_INLINE OTUInt32& operator=(Type value) { setValueU(value); return *this; }

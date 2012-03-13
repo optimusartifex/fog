@@ -84,11 +84,11 @@ struct FOG_NO_EXPORT OTCMapItem
 // UInt16       | 8            | searchRange          | (2^floor(log2(N))) * 2   == 2*1(LogSegs).
 // UInt16       | 10           | entrySelector        | log2(searchRange / 2)    == LogSegs.
 // UInt16       | 12           | rangeShift           | N*2 - searchRange.
-// UInt16[N]    | 14           | endCount             | End characterCode for each segment, last=0xFFFF.
+// UInt16[N]    | 14           | endChar              | End characterCode for each segment, last=0xFFFF.
 // UInt16       | 14+N*2       | reservedPad          | Padding, set to 0.
-// UInt16[N]    | 16+N*2       | startCount           | Start character code for each segment.
-// UInt16[N]    | 16+N*4       | idDelta              | Delta for all character codes in segment.
-// UInt16[N]    | 16+N*6       | idRangeOffset        | Offsets into glyphIdArray or 0.
+// UInt16[N]    | 16+N*2       | startChar            | Start character code for each segment.
+// UInt16[N]    | 16+N*4       | delta                | Delta for all character codes in segment.
+// UInt16[N]    | 16+N*6       | offset               | Offsets into glyphIdArray or 0.
 // UInt16[]     | 16+N*8       | glyphIdArray         | Glyph index array (arbitrary length).
 
 struct FOG_NO_EXPORT CMapFormat4

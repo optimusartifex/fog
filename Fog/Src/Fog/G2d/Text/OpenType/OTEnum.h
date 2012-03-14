@@ -16,15 +16,6 @@ namespace Fog {
 //! @{
 
 // ============================================================================
-// [Fog::OT_NOT_VALIDATED]
-// ============================================================================
-
-enum 
-{
-  OT_NOT_VALIDATED = 0xFFFFFFFFU
-};
-
-// ============================================================================
 // [Fog::OT_HEAD_FLAG]
 // ============================================================================
 
@@ -234,9 +225,20 @@ enum OT_MS_ID
 enum OT_ENCODING_ID
 {
   // NOTE: Tag values are designed to be compatible with FreeType library, but
-  // the table can be extended to support more values than FreeType can.
+  // the table can be extended to support more values than FreeType does. On
+  // the other hand, we think that the unicode should be the preffered encoding
+  // and all other encodings could be considered deprecated.
 
+  //! @brief No encoding.
+  //!
+  //! This tag can't be used in query, it's used internally to tell consumer
+  //! that the encoding of cmap subtable hasn't been detected. The encoding is
+  //! most probably related to 8-bit encoding using some code-page.
   OT_ENCODING_ID_NONE = FOG_OT_TAG_NONE,
+
+  //! @brief Unicode encoding.
+  //!
+  //! The most preferred encoding.
   OT_ENCODING_ID_UNICODE = FOG_OT_TAG('u', 'n', 'i', 'c'),
 
   OT_ENCODING_ID_SJIS = FOG_OT_TAG('s', 'j', 'i', 's'),

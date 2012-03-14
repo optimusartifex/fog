@@ -39,7 +39,10 @@ static void FOG_CDECL FaceInfo_ctorCopy(FaceInfo* self, const FaceInfo* other)
 
 static void FOG_CDECL FaceInfo_dtor(FaceInfo* self)
 {
-  self->_d->release();
+  FaceInfoData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================
@@ -253,7 +256,10 @@ static void FOG_CDECL FaceCollection_ctorCopy(FaceCollection* self, const FaceCo
 
 static void FOG_CDECL FaceCollection_dtor(FaceCollection* self)
 {
-  self->_d->release();
+  FaceCollectionData* d = self->_d;
+
+  if (d != NULL)
+    d->release();
 }
 
 // ============================================================================

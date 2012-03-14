@@ -71,7 +71,7 @@ static err_t FOG_CDECL OTHmtx_init(OTHmtx* self)
   {
 #if defined(FOG_OT_DEBUG)
     Logger::info("Fog::OTHmtx", "init", 
-      "Detected inconsistency: numberOfHMetrics=%u is larger than dataLength=%u (%u divided by %u).",
+      "Inconsistency - NumberOfHMetrics=%u is larger than DataLength=%u (%u divided by %u).",
         numOfHMetrics,
         dataLength,
         dataLength / (uint32_t)sizeof(OTHmtxMetric),
@@ -89,7 +89,7 @@ static err_t FOG_CDECL OTHmtx_init(OTHmtx* self)
     {
 #if defined(FOG_OT_DEBUG)
       Logger::info("Fog::OTHmtx", "init", 
-        "Detected inconsistency: numberOfHMetrics=%u, numberOfGlyphs=%u.",
+        "Inconsistency - NumberOfHMetrics=%u, NumberOfGlyphs=%u.",
           numOfHMetrics,
           numOfGlyphs);
 #endif // FOG_OT_DEBUG

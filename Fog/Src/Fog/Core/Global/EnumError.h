@@ -551,6 +551,10 @@ enum ERR_CODE
   ERR_FONT_CMAP_TABLE_WRONG_DATA,
   //! @brief TrueType/OpenType 'cmap' subtable format is not supported.
   ERR_FONT_CMAP_TABLE_WRONG_FORMAT,
+  //! @brief TrueType/OpenType 'cmap' subtable's length is wrong.
+  ERR_FONT_CMAP_TABLE_WRONG_LENGTH,
+  //! @brief TrueType/OpenType 'cmap' subtable's group is wrong.
+  ERR_FONT_CMAP_TABLE_WRONG_GROUP,
 
   // --------------------------------------------------------------------------
   // [Svg]

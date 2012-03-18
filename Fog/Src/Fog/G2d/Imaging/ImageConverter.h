@@ -45,11 +45,16 @@ struct FOG_NO_EXPORT ImageConverterClosure
 {
   //! @brief The dither origin, if dithering is in use, otherwise [0, 0].
   PointI ditherOrigin;
-  //! @brief The source palette (if indexed).
-  const ImagePaletteData* palette;
-
   //! @brief Extra data, may be used by the image converter or compositor.
   void* data;
+
+  //! @brief The source palette (if indexed).
+  const ImagePaletteData* palette;
+  //! @brief Color key (if indexed)
+  //!
+  //! @note If color-key is greater than 255 then it means that it's won't be
+  //! used.
+  uint32_t colorKey;
 };
 
 // ============================================================================
@@ -239,16 +244,18 @@ struct FOG_NO_EXPORT ImageConverter
   FOG_INLINE void setupClosure(ImageConverterClosure* closure) const
   {
     closure->ditherOrigin.reset();
-    closure->palette = _d->srcPalette->_d;
     closure->data = _d;
+    closure->palette = _d->srcPalette->_d;
+    closure->colorKey = 0xFFFFFFFF;
   }
 
   //! @brief Configure the image-converter (with enabled dithering).
   FOG_INLINE void setupClosure(ImageConverterClosure* closure, const PointI& ditherOrigin) const
   {
     closure->ditherOrigin = ditherOrigin;
-    closure->palette = _d->srcPalette->_d;
     closure->data = _d;
+    closure->palette = _d->srcPalette->_d;
+    closure->colorKey = 0xFFFFFFFF;
   }
 
   // --------------------------------------------------------------------------

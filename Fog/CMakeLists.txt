@@ -1725,6 +1725,7 @@ If(NOT FOG_BUILD_NOTHING)
   If(NOT FOG_BUILD_STATIC AND FOG_BUILD_EXAMPLES)
     Set(FOG_SAMPLE_SOURCES
       FogBlend
+      FogGradient
       FogGroup
       FogTest
       FogSvg

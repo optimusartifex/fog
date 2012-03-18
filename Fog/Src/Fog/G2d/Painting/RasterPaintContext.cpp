@@ -34,8 +34,9 @@ RasterPaintContext::RasterPaintContext() :
   pc = (RasterPattern*)(size_t)0x1;
 
   closure.ditherOrigin.reset();
-  closure.palette = NULL;
   closure.data = NULL;
+  closure.palette = NULL;
+  closure.colorKey = 0xFFFFFFFF;
 }
 
 RasterPaintContext::~RasterPaintContext()

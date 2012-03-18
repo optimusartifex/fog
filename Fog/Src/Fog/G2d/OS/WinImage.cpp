@@ -270,8 +270,9 @@ static err_t FOG_CDECL Image_toHBITMAP(const Image* self, HBITMAP* dst)
 
   RasterClosure closure;
   closure.ditherOrigin.reset();
-  closure.palette = d->palette->_d;
   closure.data = NULL;
+  closure.palette = d->palette->_d;
+  closure.colorKey = 0xFFFFFFFF;
 
   int w = d->size.w;
   int h = d->size.h;

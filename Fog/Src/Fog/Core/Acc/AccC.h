@@ -1249,7 +1249,7 @@ static FOG_INLINE void p32ExtendPBBFromSBB_Z210(
 #else
   uint32_t t0 = x0;
   dst0 = _FOG_ACC_COMBINE_2(t0  , t0 <<  8);
-  dst0 = _FOG_ACC_COMBINE_2(dst0, t0 << 16);
+  dst0 = t0 | (t0 << 8);
 #endif
 }
 
@@ -2673,7 +2673,7 @@ static FOG_INLINE void p32MulDiv256PBB_SBW_Z210(
 //! dst0.u8[2] = (x0.u8[2] * u0.u32[0]) / 255
 //! dst0.u8[3] = 0xFF
 //! @endverbatim
-static FOG_INLINE void p32MulDiv255PBB_SBW_F210(
+static FOG_INLINE void p32MulDiv255PBB_SBW_FillPBB3(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0)
 {
 #if FOG_ARCH_BITS >= 64
@@ -2701,7 +2701,7 @@ static FOG_INLINE void p32MulDiv255PBB_SBW_F210(
 //! dst0.u8[2] = (x0.u8[2] * u0.u32[0]) / 256
 //! dst0.u8[3] = 0xFF
 //! @endverbatim
-static FOG_INLINE void p32MulDiv256PBB_SBW_F210(
+static FOG_INLINE void p32MulDiv256PBB_SBW_FillPBB3(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0)
 {
   uint32_t t0 = (x0 & 0x00FF00FFU) * u0;
@@ -3699,6 +3699,28 @@ static FOG_INLINE void p32Lerp256PBB_SBW(
 }
 
 //! @verbatim
+//! dst0.u8[0] = (x0.u8[0] * z0.u32[0] + y0.u8[0] * (256 - y0.u32[0])) / 256
+//! dst0.u8[1] = (x0.u8[1] * z0.u32[0] + y0.u8[1] * (256 - y0.u32[0])) / 256
+//! dst0.u8[2] = (x0.u8[2] * z0.u32[0] + y0.u8[2] * (256 - y0.u32[0])) / 256
+//! dst0.u8[3] = 0x00
+//! @endverbatim
+static FOG_INLINE void p32Lerp256PBB_SBW_ZeroPBB3(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0, const uint32_t& z0)
+{
+  uint32_t t0 = (x0 & 0x00FF00FFU) * z0;
+  uint32_t t1 = (x0 & 0x0000FF00U) * z0;
+  uint32_t w0 = 256 - z0;
+
+  t0 += (y0 & 0x00FF00FFU) * w0;
+  t1 += (y0 & 0x0000FF00U) * w0;
+
+  t0 &= 0xFF00FF00U;
+  t1 &= 0x00FF0000U;
+
+  dst0 = _FOG_ACC_COMBINE_2(t0, t1) >> 8;
+}
+
+//! @verbatim
 //! dst0.u8[0] = (x0.u8[0] * z0.u32[0] + y0.u8[0] * w0.u32[0]) / 256
 //! dst0.u8[1] = (x0.u8[1] * z0.u32[0] + y0.u8[1] * w0.u32[0]) / 256
 //! dst0.u8[2] = (x0.u8[2] * z0.u32[0] + y0.u8[2] * w0.u32[0]) / 256
@@ -3714,6 +3736,28 @@ static FOG_INLINE void p32Lerp256PBB_SBW_ZeroPBB3(
   t1 &= 0x00FF0000U;
 
   dst0 = _FOG_ACC_COMBINE_2(t0, t1) >> 8;
+}
+
+//! @verbatim
+//! dst0.u8[0] = (x0.u8[0] * z0.u32[0] + y0.u8[0] * (256 - y0.u32[0])) / 256
+//! dst0.u8[1] = (x0.u8[1] * z0.u32[0] + y0.u8[1] * (256 - y0.u32[0])) / 256
+//! dst0.u8[2] = (x0.u8[2] * z0.u32[0] + y0.u8[2] * (256 - y0.u32[0])) / 256
+//! dst0.u8[3] = 0xFF
+//! @endverbatim
+static FOG_INLINE void p32Lerp256PBB_SBW_FillPBB3(
+  uint32_t& dst0, const uint32_t& x0, const uint32_t& y0, const uint32_t& z0)
+{
+  uint32_t t0 = (x0 & 0x00FF00FFU) * z0;
+  uint32_t t1 = (x0 & 0x0000FF00U) * z0;
+
+  uint32_t w0 = 256 - z0;
+  t0 += (y0 & 0x00FF00FFU) * w0;
+  t1 += (y0 & 0x0000FF00U) * w0;
+
+  t0 &= 0xFF00FF00U;
+  t1 &= 0x00FF0000U;
+
+  dst0 = (_FOG_ACC_COMBINE_2(t0, t1) >> 8) + 0xFF000000U;
 }
 
 //! @verbatim

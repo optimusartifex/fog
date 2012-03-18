@@ -460,6 +460,7 @@ void AppWindow::onPaint(Painter* _p)
     it.next();
   }
 #endif
+
 #if 0
   for (size_t i = 0; i < 18; i++)
   {

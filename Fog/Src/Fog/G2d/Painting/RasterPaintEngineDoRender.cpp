@@ -664,7 +664,9 @@ static err_t FOG_FASTCALL RasterPaintDoRender_blitNormalizedImageA(
 
           pixels += x0 * engine->ctx.target.bpp;
           srcPixels += srcFragment->x * srcD->bytesPerPixel;
+
           engine->ctx.closure.palette = srcD->palette->_d;
+          engine->ctx.closure.colorKey = srcD->colorKey;
 
           // If compositing operator is SRC or SRC_OVER then any image format
           // combination is supported. However, if compositing operator is one
@@ -703,6 +705,7 @@ _BlitImageA8_Opaque:
           }
 
           engine->ctx.closure.palette = NULL;
+          engine->ctx.closure.colorKey = 0xFFFFFFFF;
         }
         else
         {
@@ -712,9 +715,10 @@ _BlitImageA8_Opaque:
           span[0].setPositionAndType(x0, x0 + srcWidth, RASTER_SPAN_C);
           span[0].setConstMask(opacity);
           span[0].setNext(NULL);
-
           srcPixels += srcFragment->x * srcD->bytesPerPixel;
+
           engine->ctx.closure.palette = srcD->palette->_d;
+          engine->ctx.closure.colorKey = srcD->colorKey;
 
           // If compositing operator is SRC or SRC_OVER then any image format
           // combination is supported. However, if compositing operator is one
@@ -757,6 +761,7 @@ _BlitImageA8_Alpha:
           }
 
           engine->ctx.closure.palette = NULL;
+          engine->ctx.closure.colorKey = 0xFFFFFFFF;
         }
         return ERR_OK;
       }

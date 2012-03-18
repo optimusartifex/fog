@@ -302,7 +302,7 @@ _A8_Glyph_Skip:
         Acc::p32Load2a(msk0p, msk);
 
         Acc::p32Negate256SBW(msk0p, msk0p);
-        Acc::p32MulDiv256PBB_SBW_F210(dst0p, dst0p, msk0p);
+        Acc::p32MulDiv256PBB_SBW_FillPBB3(dst0p, dst0p, msk0p);
         Acc::p32Store4a(dst, dst0p);
 
         dst += 4;

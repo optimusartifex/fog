@@ -236,14 +236,14 @@ static void FOG_CDECL ImageConverter_blitLine(const ImageConverter* self,
     return;
 
   ImageConverterClosure closure;
-
   if (ditherOrigin == NULL)
     closure.ditherOrigin.reset();
   else
     closure.ditherOrigin.set(*ditherOrigin);
+  closure.data = d;
 
   closure.palette = d->srcPalette->_d;
-  closure.data = d;
+  closure.colorKey = 0xFFFFFFFF; // TODO: ColorKey should be part if image converter.
 
   d->blitFn(reinterpret_cast<uint8_t*>(dst), reinterpret_cast<const uint8_t*>(src), w, &closure);
 }
@@ -258,14 +258,14 @@ static void FOG_CDECL ImageConverter_blitRect(const ImageConverter* self,
     return;
 
   ImageConverterClosure closure;
-
   if (ditherOrigin == NULL)
     closure.ditherOrigin.reset();
   else
     closure.ditherOrigin.set(*ditherOrigin);
+  closure.data = d;
 
   closure.palette = d->srcPalette->_d;
-  closure.data = d;
+  closure.colorKey = 0xFFFFFFFF; // TODO: ColorKey should be part if image converter.
 
   uint8_t* dPtr = reinterpret_cast<uint8_t*>(dst);
   const uint8_t* sPtr = reinterpret_cast<const uint8_t*>(src);

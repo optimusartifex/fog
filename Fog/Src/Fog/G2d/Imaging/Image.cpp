@@ -554,8 +554,9 @@ static err_t FOG_CDECL Image_convert(Image* self, uint32_t format)
 
   RasterClosure closure;
   closure.ditherOrigin.reset();
-  closure.palette = d->palette->_d;
   closure.data = NULL;
+  closure.palette = d->palette->_d;
+  closure.colorKey = d->colorKey;
 
   // If the image target and source depths are the same, we do not need to
   // create the different image data (image have not to be shared and read-only).
@@ -979,8 +980,9 @@ static err_t Image_fillRectPrivate(Image* self, const RectI* r, uint32_t composi
 
   RasterClosure closure;
   closure.ditherOrigin.set(x0, y0);
-  closure.palette = NULL;
   closure.data = NULL;
+  closure.palette = NULL;
+  closure.colorKey = 0xFFFFFFFF;
 
   if (spanOpacity == 0xFFFFFFFF)
   {
@@ -1217,8 +1219,9 @@ static err_t Image_blitImagePrivate(
 
   RasterClosure closure;
   closure.ditherOrigin.reset();
-  closure.palette = src_d->palette->_d;
   closure.data = NULL;
+  closure.palette = src_d->palette->_d;
+  closure.colorKey = src_d->colorKey;
 
   MemBufferTmp<2048> buffer;
 

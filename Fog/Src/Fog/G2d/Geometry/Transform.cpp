@@ -3313,11 +3313,10 @@ static err_t FOG_CDECL TransformT_mapPathDataT(const NumT_(Transform)* self,
             PATH_CMD_QUAD_TO,
             PATH_CMD_DATA,
             PATH_CMD_QUAD_TO,
-            PATH_CMD_DATA,
-            PATH_CMD_QUAD_TO
+            PATH_CMD_DATA
           };
 
-          for (uint j = 1; j < 10; j++)
+          for (uint j = 1; j < 9; j++)
           {
             NumT w = spline[j].x * self->_02 + spline[j].y * self->_12 + self->_22;
             if (Math::isFuzzyZero(w)) w = MathConstant<NumT>::getEpsilon();

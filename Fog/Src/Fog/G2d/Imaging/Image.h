@@ -30,10 +30,10 @@ namespace Fog {
 //! @brief Image virtual table.
 struct FOG_NO_EXPORT ImageVTable
 {
-  err_t      (FOG_CDECL* create       )(ImageData** pd, const SizeI* size, uint32_t format);
-  void       (FOG_CDECL* destroy      )(ImageData* d);
-  void*      (FOG_CDECL* getHandle    )(const ImageData* d);
-  err_t      (FOG_CDECL* updatePalette)(ImageData* d, const Range* range);
+  err_t (FOG_CDECL* create)(ImageData** pd, const SizeI* size, uint32_t format);
+  void (FOG_CDECL* destroy)(ImageData* d);
+  void* (FOG_CDECL* getHandle)(const ImageData* d);
+  err_t (FOG_CDECL* updatePalette)(ImageData* d, const Range* range);
 };
 
 // ============================================================================

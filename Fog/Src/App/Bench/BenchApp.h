@@ -31,6 +31,11 @@ struct BenchParams;
 // Compositing operators were limited to support all of the benchmarking
 // libraries. Gdi+ library contains only these two, so we do not compare
 // the performance of other operators.
+//
+// TODO: Maybe we should compare with all possible compositing operators, Gdi+
+// is only library here which doesn't support them so benchmarking tool can
+// generate comparison report related to features available for all benchmarked
+// libraries.
 
 enum BENCH_OPERATOR
 {
@@ -115,6 +120,7 @@ struct BenchApp
   // --------------------------------------------------------------------------
 
   Fog::StringW getBenchString(uint32_t benchType) const;
+  Fog::StringW getFormatString(uint32_t format) const;
   Fog::StringW getSourceString(uint32_t sourceType) const;
   Fog::StringW getOperatorString(uint32_t op) const;
 
@@ -166,6 +172,8 @@ struct BenchOutput
 struct BenchParams
 {
   Fog::SizeI screenSize;
+  uint32_t format;
+
   uint32_t quantity;
   uint32_t shapeSize;
 
@@ -188,6 +196,7 @@ struct BenchModule
   // --------------------------------------------------------------------------
 
   virtual Fog::StringW getModuleName() const = 0;
+  virtual Fog::List<uint32_t> getSupportedPixelFormats() const = 0;
 
   virtual void bench(BenchOutput& output, const BenchParams& params) = 0;
   virtual void prepareSprites(int size);

@@ -34,9 +34,31 @@ Fog::StringW BenchQt4::getModuleName() const
   return Fog::StringW::fromAscii8("Qt4");
 }
 
+Fog::List<uint32_t> BenchQt4::getSupportedPixelFormats() const
+{
+  Fog::List<uint32_t> list;
+  list.append(Fog::IMAGE_FORMAT_PRGB32);
+  list.append(Fog::IMAGE_FORMAT_XRGB32);
+  list.append(Fog::IMAGE_FORMAT_RGB24);
+  return list;
+}
+
+static uint32_t BenchQt4_getQtFormat(uint32_t format)
+{
+  switch (format)
+  {
+    case IMAGE_FORMAT_PRGB32: return QImage::Format_ARGB32_Premultiplied;
+    case IMAGE_FORMAT_XRGB32: return QImage::Format_RGB32;
+    case IMAGE_FORMAT_RGB24: return QImage::Format_RGB888;
+
+    default:
+      return 0xFFFFFFFF;
+  }
+}
+
 void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
 {
-  if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
+  if (screen.create(params.screenSize, params.format) != Fog::ERR_OK)
     return;
 
   switch (params.type)
@@ -52,7 +74,7 @@ void BenchQt4::bench(BenchOutput& output, const BenchParams& params)
     (unsigned char*)screen.getFirst(),
     screen.getWidth(),
     screen.getHeight(),
-    QImage::Format_ARGB32_Premultiplied);
+    BenchQt4_getQtFormat(params.format));
 
   if (screenQt == NULL)
     return;

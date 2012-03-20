@@ -46,9 +46,31 @@ Fog::StringW BenchGdiPlus::getModuleName() const
   return Fog::StringW::fromAscii8("GdiPlus");
 }
 
+Fog::List<uint32_t> BenchGdiPlus::getSupportedPixelFormats() const
+{
+  Fog::List<uint32_t> list;
+  list.append(Fog::IMAGE_FORMAT_PRGB32);
+  list.append(Fog::IMAGE_FORMAT_XRGB32);
+  list.append(Fog::IMAGE_FORMAT_RGB24);
+  return list;
+}
+
+static uint32_t BenchGdiPlus_getGdiPlusFormat(uint32_t format)
+{
+  switch (format)
+  {
+    case IMAGE_FORMAT_PRGB32: return PixelFormat32bppPARGB;
+    case IMAGE_FORMAT_XRGB32: return PixelFormat32bppRGB;
+    case IMAGE_FORMAT_RGB24: return PixelFormat24bppRGB;
+
+    default:
+      return 0xFFFFFFFF;
+  }
+}
+
 void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
 {
-  if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
+  if (screen.create(params.screenSize, params.format) != Fog::ERR_OK)
     return;
 
   switch (params.type)
@@ -60,7 +82,13 @@ void BenchGdiPlus::bench(BenchOutput& output, const BenchParams& params)
       break;
   }
 
-  screenGdi = new Gdiplus::Bitmap(screen.getWidth(), screen.getHeight(), (INT)screen.getStride(), PixelFormat32bppPARGB, (BYTE*)screen.getFirstX());
+  screenGdi = new Gdiplus::Bitmap(
+    screen.getWidth(),
+    screen.getHeight(),
+    (INT)screen.getStride(),
+    BenchGdiPlus_getGdiPlusFormat(params.format),
+    (BYTE*)screen.getFirstX());
+
   if (screenGdi == NULL)
     return;
 

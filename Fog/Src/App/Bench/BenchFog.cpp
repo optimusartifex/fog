@@ -29,13 +29,22 @@ Fog::StringW BenchFog::getModuleName() const
   Fog::StringW module;
   module.format("Fog (%s-%s)",
     mt ? "mt" : "st",
-    _fog_build_info()->isReleaseVersion() ? "release" : "debug");
+    _fog_build_info()->isReleaseVersion() ? "rel" : "dbg");
   return module;
+}
+
+Fog::List<uint32_t> BenchFog::getSupportedPixelFormats() const
+{
+  Fog::List<uint32_t> list;
+  //list.append(Fog::IMAGE_FORMAT_PRGB32);
+  //list.append(Fog::IMAGE_FORMAT_XRGB32);
+  list.append(Fog::IMAGE_FORMAT_RGB24);
+  return list;
 }
 
 void BenchFog::bench(BenchOutput& output, const BenchParams& params)
 {
-  if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
+  if (screen.create(params.screenSize, params.format) != Fog::ERR_OK)
     return;
 
   switch (params.type)

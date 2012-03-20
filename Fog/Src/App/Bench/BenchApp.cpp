@@ -78,6 +78,7 @@ void BenchApp::runAll()
 
 void BenchApp::runModule(BenchModule* module)
 {
+  size_t formatIndex;
   uint32_t type;
 
   BenchParams params;
@@ -85,82 +86,87 @@ void BenchApp::runModule(BenchModule* module)
   params.quantity = quantity;
 
   Fog::List<Fog::TimeDelta> t;
+  Fog::List<uint32_t> formats = module->getSupportedPixelFormats();
 
   module->sizeTime.clear();
   for (size_t i = 0; i < sizeList.getLength(); i++)
     module->sizeTime.append(Fog::TimeDelta(0));
 
-  logBenchHeader(module, params);
-
-  for (type = 0; type < BENCH_TYPE_COUNT; type++)
+  for (formatIndex = 0; formatIndex < formats.getLength(); formatIndex++)
   {
-    if (sprites.isEmpty() && (
-        type == BENCH_TYPE_BLIT_IMAGE_I ||
-        type == BENCH_TYPE_BLIT_IMAGE_F ||
-        type == BENCH_TYPE_BLIT_IMAGE_ROTATE))
-    {
-      continue;
-    }
+    params.format = formats[formatIndex];
+    logBenchHeader(module, params);
 
-    params.type = type;
-    params.source = hasBenchSource(type) ? 0 : BENCH_SOURCE_NONE;
-
-    for (;;)
+    for (type = 0; type < BENCH_TYPE_COUNT; type++)
     {
-      params.op = type != BENCH_TYPE_CREATE_DESTROY ? 0 : BENCH_OPERATOR_NONE;
+      if (sprites.isEmpty() && (
+          type == BENCH_TYPE_BLIT_IMAGE_I ||
+          type == BENCH_TYPE_BLIT_IMAGE_F ||
+          type == BENCH_TYPE_BLIT_IMAGE_ROTATE))
+      {
+        continue;
+      }
+
+      params.type = type;
+      params.source = hasBenchSource(type) ? 0 : BENCH_SOURCE_NONE;
 
       for (;;)
       {
-        size_t sizeIndex = Fog::INVALID_INDEX;
-
-        Fog::StringW s = getTestString(params);
-        s.justify(22, Fog::CharW(' '), Fog::TEXT_JUSTIFY_LEFT);
-        s.append(Fog::CharW('|'));
-
-        if (type != BENCH_TYPE_CREATE_DESTROY)
-        {
-          sizeIndex = 0;
-          params.shapeSize = sizeList.getAt(sizeIndex);
-        }
-        else
-        {
-          s.append(Fog::CharW(' '), (sizeList.getLength() - 1) * 8);
-          params.shapeSize = 0;
-        }
+        params.op = type != BENCH_TYPE_CREATE_DESTROY ? 0 : BENCH_OPERATOR_NONE;
 
         for (;;)
         {
-          BenchOutput output;
-          module->bench(output, params);
+          size_t sizeIndex = Fog::INVALID_INDEX;
 
-          s.appendFormat("%7qu|", (uint64_t)output.time.getMilliseconds());
+          Fog::StringW s = getTestString(params);
+          s.justify(22, Fog::CharW(' '), Fog::TEXT_JUSTIFY_LEFT);
+          s.append(Fog::CharW('|'));
 
-          if (sizeIndex != Fog::INVALID_INDEX)
-            module->sizeTime.getDataX()[sizeIndex] += output.time;
+          if (type != BENCH_TYPE_CREATE_DESTROY)
+          {
+            sizeIndex = 0;
+            params.shapeSize = sizeList.getAt(sizeIndex);
+          }
+          else
+          {
+            s.append(Fog::CharW(' '), (sizeList.getLength() - 1) * 8);
+            params.shapeSize = 0;
+          }
 
-          registerResults(module, params, output);
+          for (;;)
+          {
+            BenchOutput output;
+            module->bench(output, params);
 
-          if (sizeIndex >= sizeList.getLength() - 1)
+            s.appendFormat("%7qu|", (uint64_t)output.time.getMilliseconds());
+
+            if (sizeIndex != Fog::INVALID_INDEX)
+              module->sizeTime.getDataX()[sizeIndex] += output.time;
+
+            registerResults(module, params, output);
+
+            if (sizeIndex >= sizeList.getLength() - 1)
+              break;
+            sizeIndex++;
+            params.shapeSize = sizeList.getAt(sizeIndex);
+          }
+
+          s.append(Fog::CharW('\n'));
+          logs(s);
+
+          if (params.op >= BENCH_OPERATOR_COUNT - 1)
             break;
-          sizeIndex++;
-          params.shapeSize = sizeList.getAt(sizeIndex);
+          params.op++;
         }
 
-        s.append(Fog::CharW('\n'));
-        logs(s);
-
-        if (params.op >= BENCH_OPERATOR_COUNT - 1)
+        if (params.source >= BENCH_SOURCE_COUNT - 1)
           break;
-        params.op++;
+        params.source++;
       }
-
-      if (params.source >= BENCH_SOURCE_COUNT - 1)
-        break;
-      params.source++;
     }
-  }
 
-  logBenchFooter(module, params);
+    logBenchFooter(module, params);
+  }
 }
 
 void BenchApp::registerResults(BenchModule* module, const BenchParams& params, const BenchOutput& output)
@@ -276,6 +282,19 @@ Fog::StringW BenchApp::getBenchString(uint32_t bench) const
     return Fog::StringW();
 }
 
+Fog::StringW BenchApp::getFormatString(uint32_t format) const
+{
+  switch (format)
+  {
+    case Fog::IMAGE_FORMAT_PRGB32: return Fog::StringW::fromAscii8("PRGB32");
+    case Fog::IMAGE_FORMAT_XRGB32: return Fog::StringW::fromAscii8("XRGB32");
+    case Fog::IMAGE_FORMAT_RGB24 : return Fog::StringW::fromAscii8("RGB24");
+    case Fog::IMAGE_FORMAT_A8    : return Fog::StringW::fromAscii8("A8");
+    default:
+      return Fog::StringW();
+  }
+}
+
 Fog::StringW BenchApp::getSourceString(uint32_t source) const
 {
   static const char* data[] = {
@@ -357,6 +376,8 @@ void BenchApp::logBenchHeader(BenchModule* module, const BenchParams& params)
   Fog::StringW l;
 
   s.append(module->getModuleName());
+  s.append(Fog::CharW(' '));
+  s.append(getFormatString(params.format));
 
   s.justify(22, Fog::CharW(' '), Fog::TEXT_JUSTIFY_LEFT);
   l.justify(22, Fog::CharW('-'), Fog::TEXT_JUSTIFY_LEFT);
@@ -532,7 +553,7 @@ int main(int argc, char* argv[])
   app.loadData();
   app.makeRand();
 
-  // Create size list for tests.
+  // Create a size list for tests.
   app.sizeList.append(8);
   app.sizeList.append(16);
   app.sizeList.append(32);

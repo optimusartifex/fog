@@ -34,9 +34,29 @@ Fog::StringW BenchCairo::getModuleName() const
   return Fog::StringW::fromAscii8("Cairo");
 }
 
+Fog::List<uint32_t> BenchCairo::getSupportedPixelFormats() const
+{
+  Fog::List<uint32_t> list;
+  list.append(Fog::IMAGE_FORMAT_PRGB32);
+  list.append(Fog::IMAGE_FORMAT_XRGB32);
+  return list;
+}
+
+static uint32_t BenchCairo_getCairoFormat(uint32_t format)
+{
+  switch (format)
+  {
+    case IMAGE_FORMAT_PRGB32: return CAIRO_FORMAT_ARGB32;
+    case IMAGE_FORMAT_XRGB32: return CAIRO_FORMAT_RGB32;
+
+    default:
+      return 0xFFFFFFFF;
+  }
+}
+
 void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
 {
-  if (screen.create(params.screenSize, Fog::IMAGE_FORMAT_PRGB32) != Fog::ERR_OK)
+  if (screen.create(params.screenSize, params.format) != Fog::ERR_OK)
     return;
 
   switch (params.type)
@@ -49,8 +69,12 @@ void BenchCairo::bench(BenchOutput& output, const BenchParams& params)
   }
 
   screenCairo = cairo_image_surface_create_for_data(
-    (unsigned char*)screen.getFirstX(), CAIRO_FORMAT_ARGB32,
-    screen.getWidth(), screen.getHeight(), (int)screen.getStride());
+    (unsigned char*)screen.getFirstX(),
+    BenchCairo_getCairoFormat(params.format),
+    screen.getWidth(),
+    screen.getHeight(),
+    (int)screen.getStride());
+
   if (screenCairo == NULL)
     return;
 

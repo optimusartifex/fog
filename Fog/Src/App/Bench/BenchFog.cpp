@@ -36,8 +36,8 @@ Fog::StringW BenchFog::getModuleName() const
 Fog::List<uint32_t> BenchFog::getSupportedPixelFormats() const
 {
   Fog::List<uint32_t> list;
-  //list.append(Fog::IMAGE_FORMAT_PRGB32);
-  //list.append(Fog::IMAGE_FORMAT_XRGB32);
+  list.append(Fog::IMAGE_FORMAT_PRGB32);
+  list.append(Fog::IMAGE_FORMAT_XRGB32);
   list.append(Fog::IMAGE_FORMAT_RGB24);
   return list;
 }

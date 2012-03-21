@@ -432,7 +432,7 @@ void AppWindow::onPaint(Painter* _p)
 
   Font font;
   //font.create(StringW::fromAscii8("Arial Hebrew"), 16.0f);
-  PointF pt(100.0f, 50.0f);
+  PointF pt(100.0f, 5.0f);
 
   p.setSource(Argb32(0xFF000000));
   font.setSize(48);
@@ -444,14 +444,12 @@ void AppWindow::onPaint(Painter* _p)
   ListIterator<FaceInfo> it(collection.getList());
   while (it.isValid())
   {
-    if (it.getIndex() != 0)
-      pt.y += font.getAscent();
-
     StringA loc;
     TextCodec::utf8().encode(loc, it.getItem().getFamilyName());
     Logger::info("", "main", "%s\n", loc.getData());
 
-    font.create(it.getItem().getFamilyName(), 16.0f);
+    font.create(it.getItem().getFamilyName(), 15.0f);
+    pt.y += font.getAscent();
 
     StringW str = it.getItem().getFamilyName();
     p.fillText(pt, str, font);

@@ -59,9 +59,9 @@ static uint32_t BenchGdiPlus_getGdiPlusFormat(uint32_t format)
 {
   switch (format)
   {
-    case IMAGE_FORMAT_PRGB32: return PixelFormat32bppPARGB;
-    case IMAGE_FORMAT_XRGB32: return PixelFormat32bppRGB;
-    case IMAGE_FORMAT_RGB24: return PixelFormat24bppRGB;
+    case Fog::IMAGE_FORMAT_PRGB32: return PixelFormat32bppPARGB;
+    case Fog::IMAGE_FORMAT_XRGB32: return PixelFormat32bppRGB;
+    case Fog::IMAGE_FORMAT_RGB24 : return PixelFormat24bppRGB;
 
     default:
       return 0xFFFFFFFF;

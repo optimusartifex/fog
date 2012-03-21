@@ -126,13 +126,6 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void)
   // [RasterOps - Composite - Src/SrcOver]
   // --------------------------------------------------------------------------
 
-  // CompositeSrc: RGB24 doesn't care whether the source is PRGB or XRGB.
-  api.compositeCore[IMAGE_FORMAT_RGB24 ][COMPOSITE_SRC].cblit_line[RASTER_CBLIT_XRGB] = 
-    api.compositeCore[IMAGE_FORMAT_RGB24 ][COMPOSITE_SRC].cblit_line[RASTER_CBLIT_PRGB];
-
-  api.compositeCore[IMAGE_FORMAT_RGB24 ][COMPOSITE_SRC].cblit_span[RASTER_CBLIT_XRGB] = 
-    api.compositeCore[IMAGE_FORMAT_RGB24 ][COMPOSITE_SRC].cblit_span[RASTER_CBLIT_PRGB];
-
   for (i = 0; i < IMAGE_FORMAT_COUNT; i++)
   {
     RasterCompositeCoreFuncs& fCopy = api.compositeCore[i][RASTER_COMPOSITE_CORE_SRC];

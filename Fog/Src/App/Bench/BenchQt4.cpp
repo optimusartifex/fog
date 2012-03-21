@@ -47,9 +47,9 @@ static uint32_t BenchQt4_getQtFormat(uint32_t format)
 {
   switch (format)
   {
-    case IMAGE_FORMAT_PRGB32: return QImage::Format_ARGB32_Premultiplied;
-    case IMAGE_FORMAT_XRGB32: return QImage::Format_RGB32;
-    case IMAGE_FORMAT_RGB24: return QImage::Format_RGB888;
+    case Fog::IMAGE_FORMAT_PRGB32: return QImage::Format_ARGB32_Premultiplied;
+    case Fog::IMAGE_FORMAT_XRGB32: return QImage::Format_RGB32;
+    case Fog::IMAGE_FORMAT_RGB24 : return QImage::Format_RGB888;
 
     default:
       return 0xFFFFFFFF;

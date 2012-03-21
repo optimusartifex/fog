@@ -46,8 +46,8 @@ static uint32_t BenchCairo_getCairoFormat(uint32_t format)
 {
   switch (format)
   {
-    case IMAGE_FORMAT_PRGB32: return CAIRO_FORMAT_ARGB32;
-    case IMAGE_FORMAT_XRGB32: return CAIRO_FORMAT_RGB32;
+    case Fog::IMAGE_FORMAT_PRGB32: return CAIRO_FORMAT_ARGB32;
+    case Fog::IMAGE_FORMAT_XRGB32: return CAIRO_FORMAT_RGB32;
 
     default:
       return 0xFFFFFFFF;

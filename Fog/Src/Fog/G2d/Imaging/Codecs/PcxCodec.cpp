@@ -594,9 +594,9 @@ err_t PcxDecoder::readImage(Image& image)
         break;
 
       case 24:
-        pos[0] = PIXEL_RGB24_POS_R;
-        pos[1] = PIXEL_RGB24_POS_G;
-        pos[2] = PIXEL_RGB24_POS_B;
+        pos[0] = PIXEL_RGB24_BYTE_R;
+        pos[1] = PIXEL_RGB24_BYTE_G;
+        pos[2] = PIXEL_RGB24_BYTE_B;
         increment = 3;
         planeMax = 3;
         break;
@@ -781,9 +781,9 @@ err_t PcxEncoder::writeImage(const Image& image)
         ImageFormatDescription::getByFormat(IMAGE_FORMAT_RGB24),
         ImageFormatDescription::getByFormat(IMAGE_FORMAT_RGB24));
 
-      pos[0] = PIXEL_RGB24_POS_R;
-      pos[1] = PIXEL_RGB24_POS_G;
-      pos[2] = PIXEL_RGB24_POS_B;
+      pos[0] = PIXEL_RGB24_BYTE_R;
+      pos[1] = PIXEL_RGB24_BYTE_G;
+      pos[2] = PIXEL_RGB24_BYTE_B;
       nPlanes = 3;
       break;
 

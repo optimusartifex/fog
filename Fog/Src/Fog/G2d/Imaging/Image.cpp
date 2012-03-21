@@ -375,7 +375,7 @@ static uint32_t FOG_CDECL Image_getAlphaDistribution(const Image* self)
       break;
 
     case IMAGE_FORMAT_PRGB64:
-      analyzer = ColorAnalyzer::analyzeAlpha64; aPos = PIXEL_ARGB64_POS_A; inc = 8;
+      analyzer = ColorAnalyzer::analyzeAlpha64; aPos = PIXEL_ARGB64_WORD_A; inc = 8;
       break;
 
     case IMAGE_FORMAT_A16:
@@ -809,9 +809,9 @@ static err_t FOG_CDECL Image_convertTo8BitDepthPalette(Image* self, const ImageP
       {
         for (x = 0; x < w; x++, dPtr += 1, sPtr += 3)
         {
-          dPtr[0] = palette->findRgb(sPtr[PIXEL_RGB24_POS_R],
-                                     sPtr[PIXEL_RGB24_POS_G],
-                                     sPtr[PIXEL_RGB24_POS_B]);
+          dPtr[0] = palette->findRgb(sPtr[PIXEL_RGB24_BYTE_R],
+                                     sPtr[PIXEL_RGB24_BYTE_G],
+                                     sPtr[PIXEL_RGB24_BYTE_B]);
         }
       }
       break;

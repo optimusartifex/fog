@@ -924,17 +924,17 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_RGB24(ImageResizeContext* 
         {
           uint32_t w0 = wp[0];
 
-          cr += (uint32_t)sp[PIXEL_RGB24_POS_R] * w0;
-          cg += (uint32_t)sp[PIXEL_RGB24_POS_G] * w0;
-          cb += (uint32_t)sp[PIXEL_RGB24_POS_B] * w0;
+          cr += (uint32_t)sp[PIXEL_RGB24_BYTE_R] * w0;
+          cg += (uint32_t)sp[PIXEL_RGB24_BYTE_G] * w0;
+          cb += (uint32_t)sp[PIXEL_RGB24_BYTE_B] * w0;
 
           sp += 3;
           wp += 1;
         }
 
-        tp[PIXEL_RGB24_POS_R] = (uint8_t)(cr >> 8);
-        tp[PIXEL_RGB24_POS_G] = (uint8_t)(cg >> 8);
-        tp[PIXEL_RGB24_POS_B] = (uint8_t)(cb >> 8);
+        tp[PIXEL_RGB24_BYTE_R] = (uint8_t)(cr >> 8);
+        tp[PIXEL_RGB24_BYTE_G] = (uint8_t)(cg >> 8);
+        tp[PIXEL_RGB24_BYTE_B] = (uint8_t)(cb >> 8);
 
         recordList += 1;
         weightList += kernelSize;
@@ -968,17 +968,17 @@ static void FOG_CDECL ImageResizeContext_doHorizontal_RGB24(ImageResizeContext* 
         {
           int32_t w0 = wp[0];
 
-          cr += (int32_t)sp[PIXEL_RGB24_POS_R] * w0;
-          cg += (int32_t)sp[PIXEL_RGB24_POS_G] * w0;
-          cb += (int32_t)sp[PIXEL_RGB24_POS_B] * w0;
+          cr += (int32_t)sp[PIXEL_RGB24_BYTE_R] * w0;
+          cg += (int32_t)sp[PIXEL_RGB24_BYTE_G] * w0;
+          cb += (int32_t)sp[PIXEL_RGB24_BYTE_B] * w0;
 
           sp += 3;
           wp += 1;
         }
 
-        tp[PIXEL_RGB24_POS_R] = (uint8_t)(uint32_t)Math::bound<int32_t>(cr >> 8, 0, 255);
-        tp[PIXEL_RGB24_POS_G] = (uint8_t)(uint32_t)Math::bound<int32_t>(cg >> 8, 0, 255);
-        tp[PIXEL_RGB24_POS_B] = (uint8_t)(uint32_t)Math::bound<int32_t>(cb >> 8, 0, 255);
+        tp[PIXEL_RGB24_BYTE_R] = (uint8_t)(uint32_t)Math::bound<int32_t>(cr >> 8, 0, 255);
+        tp[PIXEL_RGB24_BYTE_G] = (uint8_t)(uint32_t)Math::bound<int32_t>(cg >> 8, 0, 255);
+        tp[PIXEL_RGB24_BYTE_B] = (uint8_t)(uint32_t)Math::bound<int32_t>(cb >> 8, 0, 255);
 
         recordList += 1;
         weightList += kernelSize;

@@ -874,7 +874,7 @@ static FOG_INLINE void p32RGB24LerpTriadSolid_PBW256_T(
 
   dst0 = _FOG_ACC_COMBINE_2(t0      , t1 << 24);
   dst1 = _FOG_ACC_COMBINE_2(t1 >>  8, t2 << 16);
-  dst2 = _FOG_ACC_COMBINE_2(t2 >> 16, t2 <<  8);
+  dst2 = _FOG_ACC_COMBINE_2(t2 >> 16, t3 <<  8);
 
 #else
 

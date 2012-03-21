@@ -38,7 +38,7 @@ struct FOG_NO_EXPORT ColorAnalyzer
   { return analyzeAlpha32(data, stride, w, h, PIXEL_ARGB32_POS_A, 4); }
 
   static FOG_INLINE uint32_t analyzeAlphaArgb64(const uint8_t* data, ssize_t stride, int w, int h)
-  { return analyzeAlpha32(data, stride, w, h, PIXEL_ARGB64_POS_A, 8); }
+  { return analyzeAlpha32(data, stride, w, h, PIXEL_ARGB64_WORD_A, 8); }
 };
 
 //! @}

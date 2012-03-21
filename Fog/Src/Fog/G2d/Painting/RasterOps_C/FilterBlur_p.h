@@ -512,9 +512,9 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_RGB24 : public FBaseAccessor_RGB24
 
   static FOG_INLINE void fetchRunM(Run& run, const uint8_t* src)
   {
-    run.r = static_cast<IntT>(src[PIXEL_RGB24_POS_R]);
-    run.g = static_cast<IntT>(src[PIXEL_RGB24_POS_G]);
-    run.b = static_cast<IntT>(src[PIXEL_RGB24_POS_B]);
+    run.r = static_cast<IntT>(src[PIXEL_RGB24_BYTE_R]);
+    run.g = static_cast<IntT>(src[PIXEL_RGB24_BYTE_G]);
+    run.b = static_cast<IntT>(src[PIXEL_RGB24_BYTE_B]);
   }
 
   static FOG_INLINE void fetchRunT(Run& run, const uint8_t* src)
@@ -526,9 +526,9 @@ struct FOG_NO_EXPORT FBlurBaseAccessor_RGB24 : public FBaseAccessor_RGB24
 
   static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
   {
-    dst[PIXEL_RGB24_POS_R] = static_cast<uint8_t>((run.r * scale) >> shift);
-    dst[PIXEL_RGB24_POS_G] = static_cast<uint8_t>((run.g * scale) >> shift);
-    dst[PIXEL_RGB24_POS_B] = static_cast<uint8_t>((run.b * scale) >> shift);
+    dst[PIXEL_RGB24_BYTE_R] = static_cast<uint8_t>((run.r * scale) >> shift);
+    dst[PIXEL_RGB24_BYTE_G] = static_cast<uint8_t>((run.g * scale) >> shift);
+    dst[PIXEL_RGB24_BYTE_B] = static_cast<uint8_t>((run.b * scale) >> shift);
   }
 
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run, IntT scale, uint32_t shift)
@@ -705,9 +705,9 @@ struct FOG_NO_EXPORT FBlurExpAccessor_RGB24 : public FBlurBaseAccessor_RGB24<int
 
   static FOG_INLINE void blurRunM(Run& run, const uint8_t* src, int32_t aValue)
   {
-    run.r += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_POS_R]) - run.r)) >> BLUR_APREC;
-    run.g += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_POS_G]) - run.g)) >> BLUR_APREC;
-    run.b += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_POS_B]) - run.b)) >> BLUR_APREC;
+    run.r += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_BYTE_R]) - run.r)) >> BLUR_APREC;
+    run.g += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_BYTE_G]) - run.g)) >> BLUR_APREC;
+    run.b += (aValue * (static_cast<int32_t>(src[PIXEL_RGB24_BYTE_B]) - run.b)) >> BLUR_APREC;
   }
 
   static FOG_INLINE void blurRunT(Run& run, const uint8_t* src, int32_t aValue)
@@ -719,9 +719,9 @@ struct FOG_NO_EXPORT FBlurExpAccessor_RGB24 : public FBlurBaseAccessor_RGB24<int
 
   static FOG_INLINE void storeRunM(uint8_t* dst, const Run& run)
   {
-    dst[PIXEL_RGB24_POS_R] = static_cast<uint8_t>(run.r >> BLUR_ZPREC);
-    dst[PIXEL_RGB24_POS_G] = static_cast<uint8_t>(run.g >> BLUR_ZPREC);
-    dst[PIXEL_RGB24_POS_B] = static_cast<uint8_t>(run.b >> BLUR_ZPREC);
+    dst[PIXEL_RGB24_BYTE_R] = static_cast<uint8_t>(run.r >> BLUR_ZPREC);
+    dst[PIXEL_RGB24_BYTE_G] = static_cast<uint8_t>(run.g >> BLUR_ZPREC);
+    dst[PIXEL_RGB24_BYTE_B] = static_cast<uint8_t>(run.b >> BLUR_ZPREC);
   }
   
   static FOG_INLINE void storeRunT(uint8_t* dst, const Run& run)

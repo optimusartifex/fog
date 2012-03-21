@@ -177,9 +177,9 @@ struct FOG_NO_EXPORT PixelRGB24
 
   static FOG_INLINE void p32LoadPixel32_2031(uint32_t& dst0p_20, uint32_t& dst0p_31, const void* src)
   {
-    dst0p_20  = (static_cast<uint32_t>(static_cast<const uint8_t*>(src)[PIXEL_RGB24_POS_R]) << 16);
-    dst0p_31  = (static_cast<uint32_t>(static_cast<const uint8_t*>(src)[PIXEL_RGB24_POS_G])      );
-    dst0p_20 += (static_cast<uint32_t>(static_cast<const uint8_t*>(src)[PIXEL_RGB24_POS_B])      );
+    dst0p_20  = (static_cast<uint32_t>(static_cast<const uint8_t*>(src)[PIXEL_RGB24_BYTE_R]) << 16);
+    dst0p_31  = (static_cast<uint32_t>(static_cast<const uint8_t*>(src)[PIXEL_RGB24_BYTE_G])      );
+    dst0p_20 += (static_cast<uint32_t>(static_cast<const uint8_t*>(src)[PIXEL_RGB24_BYTE_B])      );
   }
 
   static FOG_INLINE void p32StorePixel32(void* dst, const uint32_t& src0p)
@@ -189,9 +189,9 @@ struct FOG_NO_EXPORT PixelRGB24
 
   static FOG_INLINE void p32StorePixel32_2031(void* dst, const uint32_t& src0p_20, const uint32_t& src0p_31)
   {
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_B] = static_cast<uint8_t>(src0p_20);
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_G] = static_cast<uint8_t>(src0p_31);
-    static_cast<uint8_t*>(dst)[PIXEL_RGB24_POS_R] = static_cast<uint8_t>(src0p_20 >> 16);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_BYTE_B] = static_cast<uint8_t>(src0p_20);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_BYTE_G] = static_cast<uint8_t>(src0p_31);
+    static_cast<uint8_t*>(dst)[PIXEL_RGB24_BYTE_R] = static_cast<uint8_t>(src0p_20 >> 16);
   }
 
   // ==========================================================================
@@ -336,11 +336,7 @@ struct FOG_NO_EXPORT PixelPRGB64
 
   static FOG_INLINE void p32LoadPixelA8(uint32_t& dst0p, const void* src)
   {
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-    Acc::p32Load1b(dst0p, static_cast<const uint8_t*>(src) + PIXEL_ARGB64_POS_A * 2 + 1);
-#else
-    Acc::p32Load1b(dst0p, static_cast<const uint8_t*>(src) + PIXEL_ARGB64_POS_A * 2 + 0);
-#endif
+    Acc::p32Load1b(dst0p, static_cast<const uint8_t*>(src) + PIXEL_ARGB64_BYTE_A_HI);
   }
 
   static FOG_INLINE void p32StorePixelA8(void* dst, const uint32_t& src0p)

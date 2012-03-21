@@ -691,6 +691,9 @@ _ARGB32_Glyph_Skip:
     while (--w)
     {
       Acc::p32Load4u(src0p, src);
+#if FOG_BYTE_ORDER == FOG_BIG_ENDIAN
+      Acc::p32RShift(src0p, src0p);
+#endif // FOG_BIG_ENDIAN
       Acc::p32FillPBB3(src0p, src0p);
       Acc::p32Store4a(dst, src0p);
 
@@ -4220,99 +4223,6 @@ _ARGB32_Glyph_Fill:
     V_BLIT_SPAN8_END()
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // ==========================================================================
   // [RGB24 - CBlit - PRGB32 - Line]
   // ==========================================================================
@@ -4361,7 +4271,7 @@ _ARGB32_Glyph_Fill:
     uint32_t sro0p_packed_2;
     Acc::p32RGB24QuadFromXRGB32Solid(sro0p_packed_0, sro0p_packed_1, sro0p_packed_2, sro0p);
 
-    C_BLIT_SPAN8_BEGIN(4)
+    C_BLIT_SPAN8_BEGIN(3)
 
     // ------------------------------------------------------------------------
     // [C-Opaque]
@@ -4402,8 +4312,7 @@ _ARGB32_Glyph_Fill:
       uint32_t src0p_packed_1;
       uint32_t src0p_packed_2;
 
-      Acc::p32Copy(src0p, sro0p);
-      Acc::p32MulDiv256PBB_SBW(src0p, src0p, msk0p);
+      Acc::p32MulDiv256PBB_SBW_Z210(src0p, sro0p, msk0p);
       Acc::p32Negate256SBW(msk0p, msk0p);
 
       BLIT_LOOP_24x4_SMALL_BEGIN(C_Mask)
@@ -4542,7 +4451,7 @@ _A8_Glyph_Fill:
         uint32_t dst2p;
 
         uint32_t msk0p_4a, msk0p_4b;
-        Acc::p32Load8aRaw(msk0p_4a, msk0p_4b, msk);
+        Acc::p32Load8uRaw(msk0p_4a, msk0p_4b, msk);
 
         Acc::p32Load4a(dst0p, dst + 0);
         Acc::p32Load4a(dst1p, dst + 4);
@@ -4602,7 +4511,7 @@ _ARGB32_Glyph_Skip:
   // [RGB24 - CBlit - XRGB32 - Line]
   // ==========================================================================
 
-  // USE: rgb24_cblit_prgb32_full
+  // USE: rgb24_cblit_prgb32_line
 
   // ==========================================================================
   // [RGB24 - CBlit - XRGB32 - Span]
@@ -4648,135 +4557,6 @@ _ARGB32_Glyph_Skip:
     BLIT_LOOP_24x4_MAIN_END(C_Opaque)
   }
 
-  static FOG_INLINE void _rgb24_vblit_xrgb32_c_mask(
-    uint8_t* dst, const uint8_t* src, const uint32_t& msk0p_a, const uint32_t& msk0p_i, int w)
-  {
-    BLIT_LOOP_24x4_INIT()
-
-    BLIT_LOOP_24x4_SMALL_BEGIN(C_Mask)
-      uint32_t dst0p;
-      uint32_t src0p;
-
-      Acc::p32Load3b(dst0p, dst);
-      Acc::p32Load4a(src0p, src);
-      Acc::p32Lerp256PBB_SBW_10Z2(dst0p, dst0p, msk0p_i, src0p, msk0p_a);
-      Acc::p32Store3b(dst, src0p);
-
-      dst += 3;
-      src += 4;
-    BLIT_LOOP_24x4_SMALL_END(C_Mask)
-
-    BLIT_LOOP_24x4_MAIN_BEGIN(C_Mask)
-      uint32_t dst0p, dst1p;
-      uint32_t src0p, src1p, src2p, src3p;
-
-      Acc::p32Load4a(dst0p, dst +  0);
-      Acc::p32Load4a(dst1p, dst +  4);
-
-      Acc::p32Load4a(src0p, src +  0);
-      Acc::p32Load4a(src1p, src +  4);
-      Acc::p32Load4a(src2p, src +  8);
-      Acc::p32Load4a(src3p, src + 12);
-
-      Acc::p32RGB24QuadFromXRGB32Quad(src0p, src1p, src2p, src0p, src1p, src2p, src3p);
-      Acc::p32Lerp255PBW_SBW_2x(dst0p, dst0p, msk0p_i, src0p, msk0p_a,
-                                 dst1p, dst1p, msk0p_i, src0p, msk0p_a);
-
-      Acc::p32Store4a(dst + 0, dst0p);
-      Acc::p32Store4a(dst + 4, dst1p);
-
-      Acc::p32Load4a(dst0p, dst +  8);
-      Acc::p32Lerp255PBW_SBW(dst0p, dst0p, msk0p_i, src2p, msk0p_a);
-      Acc::p32Store4a(dst + 8, dst0p);
-
-      dst += 12;
-      src += 16;
-    BLIT_LOOP_24x4_MAIN_END(C_Mask)
-  }
-
-  static FOG_INLINE void _rgb24_vblit_xrgb32_a8_glyph(
-    uint8_t* dst, const uint8_t* src, const uint8_t* msk, int w)
-  {
-    BLIT_LOOP_24x1_INIT()
-
-    BLIT_LOOP_24x1_BEGIN(A8_Glyph)
-      uint32_t dst0p;
-      uint32_t src0p;
-      uint32_t msk0p;
-
-      Acc::p32Load1b(msk0p, msk);
-      if (msk0p == 0x00) goto _A8_Glyph_Skip;
-
-      Acc::p32Load4a(src0p, src);
-      if (msk0p == 0xFF) goto _A8_Glyph_Fill;
-
-      Acc::p32Load3b(dst0p, dst);
-      Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-
-      Acc::p32Lerp256PBB_SBW_10Z2(src0p, src0p, dst0p, msk0p);
-
-_A8_Glyph_Fill:
-      Acc::p32Store3b(dst, src0p);
-
-_A8_Glyph_Skip:
-      dst += 3;
-      src += 4;
-      msk += 1;
-    BLIT_LOOP_24x1_END(A8_Glyph)
-  }
-
-  static FOG_INLINE void _rgb24_vblit_xrgb32_a8_extra(
-    uint8_t* dst, const uint8_t* src, const uint8_t* msk, int w)
-  {
-    BLIT_LOOP_24x1_INIT()
-
-    BLIT_LOOP_24x1_BEGIN(A8_Glyph)
-      uint32_t dst0p;
-      uint32_t src0p;
-      uint32_t msk0p;
-
-      Acc::p32Load3b(dst0p, dst);
-      Acc::p32Load4a(src0p, src);
-      Acc::p32Load1b(msk0p, msk);
-      Acc::p32Lerp256PBB_SBW_10Z2(src0p, src0p, dst0p, msk0p);
-      Acc::p32Store3b(dst, src0p);
-
-      dst += 3;
-      src += 4;
-      msk += 1;
-    BLIT_LOOP_24x1_END(A8_Glyph)
-  }
-
-  static FOG_INLINE void _rgb24_vblit_xrgb32_argb32_glyph(
-    uint8_t* dst, const uint8_t* src, const uint8_t* msk, int w)
-  {
-    BLIT_LOOP_DstFx1_INIT()
-
-    BLIT_LOOP_DstFx1_BEGIN(ARGB32_Glyph)
-      uint32_t dst0p;
-      uint32_t src0p;
-      uint32_t msk0p_20, msk0p_31;
-
-      Acc::p32Load4a(msk0p_20, msk);
-      if (msk0p_20 == 0x00000000) goto _ARGB32_Glyph_Skip;
-
-      Acc::p32Load4a(src0p, src);
-      if (msk0p_20 == 0xFFFFFFFF) goto _ARGB32_Glyph_Fill;
-
-      Acc::p32Load3b(dst0p, dst);
-      Acc::p32UnpackPBW256FromPBB255_2031(msk0p_20, msk0p_31, msk0p_20);
-      Acc::p32Lerp256PBB_PBW_2031(src0p, src0p, dst0p, msk0p_20, msk0p_31);
-
-_ARGB32_Glyph_Fill:
-      Acc::p32Store3b(dst, src0p);
-
-_ARGB32_Glyph_Skip:
-      dst += 3;
-      src += 4;
-      msk += 4;
-    BLIT_LOOP_DstFx1_END(ARGB32_Glyph)
-  }
-
   // ==========================================================================
   // [RGB24 - VBlit - XRGB32 - Line]
   // ==========================================================================
@@ -4812,12 +4592,51 @@ _ARGB32_Glyph_Skip:
     V_BLIT_SPAN8_C_MASK()
     {
       uint32_t msk0p;
-      uint32_t inv0p;
+      uint32_t minv0p;
 
       Acc::p32Copy(msk0p, msk0);
-      Acc::p32Negate256SBW(inv0p, msk0p);
+      Acc::p32Negate256SBW(minv0p, msk0p);
 
-      _rgb24_vblit_xrgb32_c_mask(dst, src, msk0p, inv0p, w);
+      BLIT_LOOP_24x4_INIT()
+
+      BLIT_LOOP_24x4_SMALL_BEGIN(C_Mask)
+        uint32_t dst0p;
+        uint32_t src0p;
+
+        Acc::p32Load3b(dst0p, dst);
+        Acc::p32Load4a(src0p, src);
+        Acc::p32Lerp256PBB_SBW_ZeroPBB3(dst0p, dst0p, src0p, minv0p, msk0p);
+        Acc::p32Store3b(dst, dst0p);
+
+        dst += 3;
+        src += 4;
+      BLIT_LOOP_24x4_SMALL_END(C_Mask)
+
+      BLIT_LOOP_24x4_MAIN_BEGIN(C_Mask)
+        uint32_t dst0p;
+        uint32_t src0p, src1p, src2p, src3p;
+
+        Acc::p32Load4a(src0p, src +  0);
+        Acc::p32Load4a(src1p, src +  4);
+        Acc::p32Load4a(src2p, src +  8);
+        Acc::p32Load4a(src3p, src + 12);
+
+        Acc::p32RGB24QuadFromXRGB32Quad(src0p, src1p, src2p, src0p, src1p, src2p, src3p);
+        Acc::p32Load4a(dst0p, dst +  0);
+        Acc::p32Lerp256PBB_SBW(dst0p, dst0p, src0p, minv0p, msk0p);
+        Acc::p32Store4a(dst + 0, dst0p);
+
+        Acc::p32Load4a(dst0p, dst +  4);
+        Acc::p32Lerp256PBB_SBW(dst0p, dst0p, src1p, minv0p, msk0p);
+        Acc::p32Store4a(dst + 4, dst0p);
+
+        Acc::p32Load4a(dst0p, dst +  8);
+        Acc::p32Lerp256PBB_SBW(dst0p, dst0p, src2p, minv0p, msk0p);
+        Acc::p32Store4a(dst + 8, dst0p);
+
+        dst += 12;
+        src += 16;
+      BLIT_LOOP_24x4_MAIN_END(C_Mask)
     }
 
     // ------------------------------------------------------------------------
@@ -4826,7 +4645,31 @@ _ARGB32_Glyph_Skip:
 
     V_BLIT_SPAN8_A8_GLYPH()
     {
-      _rgb24_vblit_xrgb32_a8_glyph(dst, src, msk, w);
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(A8_Glyph)
+        uint32_t dst0p;
+        uint32_t src0p;
+        uint32_t msk0p;
+
+        Acc::p32Load1b(msk0p, msk);
+        if (msk0p == 0x00) goto _A8_Glyph_Skip;
+
+        Acc::p32Load4a(src0p, src);
+        if (msk0p == 0xFF) goto _A8_Glyph_Fill;
+
+        Acc::p32Load3b(dst0p, dst);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32Lerp256PBB_SBW_ZeroPBB3(src0p, src0p, dst0p, msk0p);
+
+_A8_Glyph_Fill:
+        Acc::p32Store3b(dst, src0p);
+
+_A8_Glyph_Skip:
+        dst += 3;
+        src += 4;
+        msk += 1;
+      BLIT_LOOP_24x1_END(A8_Glyph)
     }
 
     // ------------------------------------------------------------------------
@@ -4835,7 +4678,23 @@ _ARGB32_Glyph_Skip:
 
     V_BLIT_SPAN8_A8_EXTRA()
     {
-      _rgb24_vblit_xrgb32_a8_extra(dst, src, msk, w);
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(A8_Extra)
+        uint32_t dst0p;
+        uint32_t src0p;
+        uint32_t msk0p;
+
+        Acc::p32Load3b(dst0p, dst);
+        Acc::p32Load4a(src0p, src);
+        Acc::p32Load2a(msk0p, msk);
+        Acc::p32Lerp256PBB_SBW_ZeroPBB3(src0p, src0p, dst0p, msk0p);
+        Acc::p32Store3b(dst, src0p);
+
+        dst += 3;
+        src += 4;
+        msk += 2;
+      BLIT_LOOP_24x1_END(A8_Extra)
     }
 
     // ------------------------------------------------------------------------
@@ -4844,7 +4703,31 @@ _ARGB32_Glyph_Skip:
 
     V_BLIT_SPAN8_ARGB32_GLYPH()
     {
-      _rgb24_vblit_xrgb32_argb32_glyph(dst, src, msk, w);
+      BLIT_LOOP_DstFx1_INIT()
+
+      BLIT_LOOP_DstFx1_BEGIN(ARGB32_Glyph)
+        uint32_t dst0p;
+        uint32_t src0p;
+        uint32_t msk0p_20, msk0p_31;
+
+        Acc::p32Load4a(msk0p_20, msk);
+        if (msk0p_20 == 0x00000000) goto _ARGB32_Glyph_Skip;
+
+        Acc::p32Load4a(src0p, src);
+        if (msk0p_20 == 0xFFFFFFFF) goto _ARGB32_Glyph_Fill;
+
+        Acc::p32Load3b(dst0p, dst);
+        Acc::p32UnpackPBW256FromPBB255_2031(msk0p_20, msk0p_31, msk0p_20);
+        Acc::p32Lerp256PBB_PBW_20Z1(src0p, src0p, dst0p, msk0p_20, msk0p_31);
+
+_ARGB32_Glyph_Fill:
+        Acc::p32Store3b(dst, src0p);
+
+_ARGB32_Glyph_Skip:
+        dst += 3;
+        src += 4;
+        msk += 4;
+      BLIT_LOOP_DstFx1_END(ARGB32_Glyph)
     }
 
     V_BLIT_SPAN8_END()

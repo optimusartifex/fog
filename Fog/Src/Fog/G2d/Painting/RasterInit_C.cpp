@@ -361,20 +361,20 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb32_line);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB24    ]);
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::prgb32_vblit_a8_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a8_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_i8_line);
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::prgb32_vblit_prgb64_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb64_line);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB48    ]);
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::prgb32_vblit_a16_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a16_line);
 
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb32_span);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_XRGB32   ]);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_RGB24    ]);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::prgb32_vblit_a8_span);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::prgb32_vblit_i8_span);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::prgb32_vblit_prgb64_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a8_span);
+  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_i8_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb64_span);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_RGB48    ]);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::prgb32_vblit_a16_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a16_span);
   }
 
   // --------------------------------------------------------------------------
@@ -390,23 +390,23 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrcOver::xrgb32_cblit_prgb32_span);
     FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB     ]);
 
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_prgb32_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb32_line);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB24    ]);
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_a8_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a8_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_i8_line);
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_prgb64_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb64_line);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB48    ]);
-  //FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_a16_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a16_line);
 
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_prgb32_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb32_span);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_XRGB32   ]);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_RGB24    ]);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_a8_span);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_i8_span);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_prgb64_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a8_span);
+  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrcOver::prgb32_vblit_i8_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrcOver::prgb32_vblit_prgb64_span);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_RGB48    ]);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrcOver::xrgb32_vblit_a16_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrcOver::prgb32_vblit_a16_span);
   }
 
   // --------------------------------------------------------------------------

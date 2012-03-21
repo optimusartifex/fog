@@ -2625,7 +2625,7 @@ static FOG_INLINE void p32MulDiv256PBB_SBW(
 //! dst0.u8[2] = (x0.u8[2] * u0.u32[0]) / 255
 //! dst0.u8[3] = 0x00
 //! @endverbatim
-static FOG_INLINE void p32MulDiv255PBB_SBW_Z210(
+static FOG_INLINE void p32MulDiv255PBB_SBW_ZeroPBB3(
   uint32_t& dst0, const uint32_t& x0, const uint32_t& u0)
 {
 #if FOG_ARCH_BITS >= 64

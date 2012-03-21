@@ -88,14 +88,14 @@ void BenchApp::runModule(BenchModule* module)
   Fog::List<Fog::TimeDelta> t;
   Fog::List<uint32_t> formats = module->getSupportedPixelFormats();
 
-  module->sizeTime.clear();
-  for (size_t i = 0; i < sizeList.getLength(); i++)
-    module->sizeTime.append(Fog::TimeDelta(0));
-
   for (formatIndex = 0; formatIndex < formats.getLength(); formatIndex++)
   {
     params.format = formats[formatIndex];
     logBenchHeader(module, params);
+
+    module->sizeTime.clear();
+    for (size_t i = 0; i < sizeList.getLength(); i++)
+      module->sizeTime.append(Fog::TimeDelta(0));
 
     for (type = 0; type < BENCH_TYPE_COUNT; type++)
     {
@@ -178,10 +178,13 @@ void BenchApp::registerResults(BenchModule* module, const BenchParams& params, c
     Fog::StringW fileName;
 
     Fog::StringW moduleString = module->getModuleName();
+    Fog::StringW formatString = getFormatString(params.format);
     Fog::StringW testString = getTestString(params);
 
     fileName.append(Fog::Ascii8("FogBench-Dump/"));
     fileName.append(moduleString);
+    fileName.append(Fog::Ascii8("-"));
+    fileName.append(formatString);
     fileName.append(Fog::Ascii8("-"));
     fileName.append(testString);
 
@@ -541,10 +544,10 @@ void BenchModule::freeSprites()
 
 int main(int argc, char* argv[])
 {
-  BenchApp app(Fog::SizeI(600, 600), 10000);
+  BenchApp app(Fog::SizeI(600, 600), 5000);
 
   // Testing...
-  app.saveImages = false;
+  app.saveImages = true;
 
   // Show FogBench info.
   app.logInfo();

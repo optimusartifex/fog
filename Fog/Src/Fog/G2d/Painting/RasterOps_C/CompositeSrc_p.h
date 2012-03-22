@@ -4446,12 +4446,11 @@ _A8_Glyph_Fill:
       BLIT_LOOP_24x4_SMALL_END(A8_Extra)
 
       BLIT_LOOP_24x4_MAIN_BEGIN(A8_Extra)
-        uint32_t dst0p;
-        uint32_t dst1p;
-        uint32_t dst2p;
-
+        uint32_t dst0p, dst1p, dst2p;
         uint32_t msk0p_4a, msk0p_4b;
-        Acc::p32Load8uRaw(msk0p_4a, msk0p_4b, msk);
+
+        Acc::p32Load4u(msk0p_4a, msk + 0);
+        Acc::p32Load4u(msk0p_4b, msk + 4);
 
         Acc::p32Load4a(dst0p, dst + 0);
         Acc::p32Load4a(dst1p, dst + 4);

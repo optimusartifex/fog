@@ -824,52 +824,52 @@ static FOG_INLINE void p32RGB24LerpTriadSolid_PBW256_T(
 
 #if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
 
-  // [B0 G0 R0 B1] [G1 R1 B2 G2] [R2 B3 G3 R3]               - Memory
-  // [B1 R0 G0 B0] [G2 B2 R1 G1] [R3 G3 B3 R2]               - CPU
+  // [B0 G0 R0 B1] [G1 R1 B2 G2] [R2 B3 G3 R3]               - Pixels (Memory)
+  // [B1 R0 G0 B0] [G2 B2 R1 G1] [R3 G3 B3 R2]               - Pixels (CPU)
 
-  // [33 22 11 00]                                           - Mask
-  // [11 00 00 00] [22 22 11 11] [33 33 33 22]               - Expanded
+  // [yy yy xx xx] [ww ww zz zz]                             - Mask (Memory)
+  // [11 00 00 00] [22 22 11 11] [33 33 33 22]               - Mask (CPU)
 
   xx = x0;
   yy = y0;
 
   m0 = p32ARGB32ExtractMaskT<M_0>(msk0_0, msk0_1);
-  t0 = (xx & 0x00FF00FFU) * m0;
-  t1 = (xx & 0x0000FF00U) * m0;
+  t0 = (yy & 0x00FF00FFU) * m0;
+  t1 = (yy & 0x0000FF00U) * m0;
 
   m0 = 256 - m0;
-  t0 = (t0 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
-  t1 = (t1 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
+  t0 = (t0 + ((xx & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
+  t1 = (t1 + ((xx & 0x0000FF00U) * m0)) & 0x00FF0000U;
   t0 = _FOG_ACC_COMBINE_2(t0, t1) >> 8;
 
   m0 = p32ARGB32ExtractMaskT<M_1>(msk0_0, msk0_1);
   xx = _FOG_ACC_COMBINE_2(xx >> 24, x1 << 8);
-  t1 = (xx & 0x00FF00FFU) * m0;
-  t2 = (xx & 0x0000FF00U) * m0;
+  t1 = (yy & 0x00FF00FFU) * m0;
+  t2 = (yy & 0x0000FF00U) * m0;
 
   m0 = 256 - m0;
-  t1 = (t1 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
-  t2 = (t2 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
+  t1 = (t1 + ((xx & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
+  t2 = (t2 + ((xx & 0x0000FF00U) * m0)) & 0x00FF0000U;
   t1 = _FOG_ACC_COMBINE_2(t1, t2) >> 8;
 
   m0 = p32ARGB32ExtractMaskT<M_2>(msk0_0, msk0_1);
   xx = _FOG_ACC_COMBINE_2((x1 >> 16), (x2 >> 8) & 0x00FF0000);
-  t2 = (xx & 0x00FF00FFU) * m0;
-  t3 = (xx & 0x0000FF00U) * m0;
+  t2 = (yy & 0x00FF00FFU) * m0;
+  t3 = (yy & 0x0000FF00U) * m0;
 
   m0 = 256 - m0;
-  t2 = (t2 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
-  t3 = (t3 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
+  t2 = (t2 + ((xx & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
+  t3 = (t3 + ((xx & 0x0000FF00U) * m0)) & 0x00FF0000U;
   t2 = _FOG_ACC_COMBINE_2(t2, t3) >> 8;
 
   m0 = p32ARGB32ExtractMaskT<M_3>(msk0_0, msk0_1);
   xx = x2 >> 8;
-  t3 = (xx & 0x00FF00FFU) * m0;
-  t4 = (xx & 0x0000FF00U) * m0;
+  t3 = (yy & 0x00FF00FFU) * m0;
+  t4 = (yy & 0x0000FF00U) * m0;
 
   m0 = 256 - m0;
-  t3 = (t3 + ((yy & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
-  t4 = (t4 + ((yy & 0x0000FF00U) * m0)) & 0x00FF0000U;
+  t3 = (t3 + ((xx & 0x00FF00FFU) * m0)) & 0xFF00FF00U;
+  t4 = (t4 + ((xx & 0x0000FF00U) * m0)) & 0x00FF0000U;
   t3 = _FOG_ACC_COMBINE_2(t3, t4) >> 8;
 
   dst0 = _FOG_ACC_COMBINE_2(t0      , t1 << 24);

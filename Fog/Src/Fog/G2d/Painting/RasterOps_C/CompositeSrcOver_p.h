@@ -1531,8 +1531,8 @@ _ARGB32_Glyph_Mask:
       Acc::p32MulDiv255PBB_SBW(dst2p, dst2p, sra0p);
 
       Acc::p32Add(dst0p, dst0p, sro0p_packed_0);
-      Acc::p32Add(dst1p, dst1p, sro0p_packed_0);
-      Acc::p32Add(dst2p, dst2p, sro0p_packed_0);
+      Acc::p32Add(dst1p, dst1p, sro0p_packed_1);
+      Acc::p32Add(dst2p, dst2p, sro0p_packed_2);
 
       Acc::p32Store4a(dst + 0, dst0p);
       Acc::p32Store4a(dst + 4, dst1p);
@@ -1571,7 +1571,7 @@ _ARGB32_Glyph_Mask:
     sro0p_X1 = (sro0p >> 8) & 0x000000FF;
     sro0p_20 = (sro0p     ) & 0x00FF00FF;
 
-    C_BLIT_SPAN8_BEGIN(4)
+    C_BLIT_SPAN8_BEGIN(3)
 
     // ------------------------------------------------------------------------
     // [C-Any]
@@ -1579,14 +1579,9 @@ _ARGB32_Glyph_Mask:
 
     C_BLIT_SPAN8_C_ANY()
     {
-      uint32_t src0p_20;
-      uint32_t src0p_X1;
-
-      Acc::p32MulDiv256PBW_SBW(src0p_20, sro0p_20, msk0);
-      Acc::p32MulDiv256SBW(src0p_X1, sro0p_X1, msk0);
-      Acc::p32PackPBB2031FromPBW(src0p_20, src0p_20, src0p_X1);
-
-      _rgb24_cblit_prgb32_c_opaque(dst, src0p_20, w);
+      uint32_t src0p;
+      Acc::p32MulDiv256PBB_SBW(src0p, sro0p, msk0);
+      _rgb24_cblit_prgb32_c_opaque(dst, src0p, w);
     }
 
     // ------------------------------------------------------------------------
@@ -2010,7 +2005,6 @@ _ARGB32_Glyph_Mask:
 
     V_BLIT_SPAN8_END()
   }
-
 };
 
 } // RasterOps_C namespace

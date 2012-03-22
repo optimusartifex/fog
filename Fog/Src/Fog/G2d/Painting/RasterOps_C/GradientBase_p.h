@@ -100,8 +100,8 @@ struct FOG_NO_EXPORT PGradientBase
             for (i = 0; i <= len; i++)
             {
               uint32_t cp = _FOG_ACC_COMBINE_3((rPos & 0xFF000000) >>  8,
-                                                 (gPos & 0xFF000000) >> 16,
-                                                 (bPos             ) >> 24) ^ mask;
+                                               (gPos & 0xFF000000) >> 16,
+                                               (bPos             ) >> 24) ^ mask;
               dst[i] = cp;
 
               rPos += rInc;
@@ -114,9 +114,9 @@ struct FOG_NO_EXPORT PGradientBase
             for (i = 0; i <= len; i++)
             {
               uint32_t cp = _FOG_ACC_COMBINE_4((aPos & 0xFF000000)      ,
-                                                 (rPos & 0xFF000000) >>  8,
-                                                 (gPos & 0xFF000000) >> 16,
-                                                 (bPos             ) >> 24) ^ mask;
+                                               (rPos & 0xFF000000) >>  8,
+                                               (gPos & 0xFF000000) >> 16,
+                                               (bPos             ) >> 24) ^ mask;
               Acc::p32PRGB32FromARGB32(cp, cp);
               dst[i] = cp;
 
@@ -149,10 +149,7 @@ struct FOG_NO_EXPORT PGradientBase
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
       uint i, len = (uint)_w - p1 + 1;
 
-      for (i = 0; i < len; i++)
-      {
-        dst[i] = cp;
-      }
+      for (i = 0; i < len; i++) dst[i] = cp;
     }
   }
 

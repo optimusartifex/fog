@@ -2574,7 +2574,6 @@ enum PIXEL_ARGB64_POS
   PIXEL_ARGB64_BYTE_B    = 0,
   PIXEL_ARGB64_BYTE_B_HI = 1,
   PIXEL_ARGB64_BYTE_B_LO = 0
-
 #else // FOG_BYTE_ORDER == FOG_BIG_ENDIAN
   PIXEL_ARGB64_WORD_A = 0,
   PIXEL_ARGB64_WORD_R = 1,
@@ -2621,6 +2620,47 @@ enum PIXEL_ARGB64_SHIFT
 };
 
 // ============================================================================
+// [Fog::PIXEL_RGB48_POS]
+// ============================================================================
+
+enum PIXEL_RGB48_POS
+{
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+  PIXEL_RGB48_WORD_R = 2,
+  PIXEL_RGB48_WORD_G = 1,
+  PIXEL_RGB48_WORD_B = 0,
+
+  PIXEL_RGB48_BYTE_R    = 4,
+  PIXEL_RGB48_BYTE_R_HI = 5,
+  PIXEL_RGB48_BYTE_R_LO = 4,
+
+  PIXEL_RGB48_BYTE_G    = 2,
+  PIXEL_RGB48_BYTE_G_HI = 3,
+  PIXEL_RGB48_BYTE_G_LO = 2,
+
+  PIXEL_RGB48_BYTE_B    = 0,
+  PIXEL_RGB48_BYTE_B_HI = 1,
+  PIXEL_RGB48_BYTE_B_LO = 0
+#else // FOG_BYTE_ORDER == FOG_BIG_ENDIAN
+  PIXEL_RGB48_WORD_R = 0,
+  PIXEL_RGB48_WORD_G = 1,
+  PIXEL_RGB48_WORD_B = 2,
+
+  PIXEL_RGB48_BYTE_R = 0,
+  PIXEL_RGB48_BYTE_R_HI = 0,
+  PIXEL_RGB48_BYTE_R_LO = 1,
+
+  PIXEL_RGB48_BYTE_G = 2,
+  PIXEL_RGB48_BYTE_G_HI = 2,
+  PIXEL_RGB48_BYTE_G_LO = 3,
+
+  PIXEL_RGB48_BYTE_B = 4,
+  PIXEL_RGB48_BYTE_B_HI = 4,
+  PIXEL_RGB48_BYTE_B_LO = 5
+#endif // FOG_BYTE_ORDER
+};
+
+// ============================================================================
 // [Fog::PIXEL_A16]
 // ============================================================================
 
@@ -2649,23 +2689,6 @@ enum PIXEL_RGB24_POS
   PIXEL_RGB24_BYTE_R = 0,
   PIXEL_RGB24_BYTE_G = 1,
   PIXEL_RGB24_BYTE_B = 2
-#endif // FOG_BYTE_ORDER
-};
-
-// ============================================================================
-// [Fog::PIXEL_RGB48_POS]
-// ============================================================================
-
-enum PIXEL_RGB48_POS
-{
-#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
-  PIXEL_RGB48_WORD_R = 2,
-  PIXEL_RGB48_WORD_G = 1,
-  PIXEL_RGB48_WORD_B = 0
-#else // FOG_BYTE_ORDER == FOG_BIG_ENDIAN
-  PIXEL_RGB48_WORD_R = 0,
-  PIXEL_RGB48_WORD_G = 1,
-  PIXEL_RGB48_WORD_B = 2
 #endif // FOG_BYTE_ORDER
 };
 
@@ -2715,8 +2738,8 @@ enum REGION_OP
 //! @brief Type of @c Region.
 enum REGION_TYPE
 {
-  // NOTE: Never change value of REGION_TYPE_EMPTY and REGION_TYPE_RECT
-  // constants, see Region::getType() method in Region.cpp file.
+  // NOTE: Never change value of @c REGION_TYPE_EMPTY and @c REGION_TYPE_RECT
+  // constants - see Fog::Region::getType() method in Fog/G2d/Tools/Region.cpp.
 
   //! @brief Region is empty.
   REGION_TYPE_EMPTY = 0,

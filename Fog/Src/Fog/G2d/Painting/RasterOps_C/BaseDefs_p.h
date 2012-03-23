@@ -289,6 +289,31 @@
 
 // ----------------------------------------------------------------------------
 
+//! @brief VBlit - RasterSpan8 - A8-Glyph which handles both - A8 and ARGB32 in
+//! case that the target is A8 (there is no reason to use separate blit loops
+//! for these spans).
+#define V_BLIT_SPAN8_A8_OR_ARGB32_GLYPH() \
+        } \
+        break; \
+      } \
+      \
+      case RASTER_SPAN_A8_GLYPH: \
+      case RASTER_SPAN_AX_GLYPH: \
+      case RASTER_SPAN_ARGB32_GLYPH: \
+      case RASTER_SPAN_ARGBXX_GLYPH: \
+      { \
+        const uint8_t* msk = _msk; \
+        uint MskSize = 1; \
+        \
+        if (span->getType() == RASTER_SPAN_ARGB32_GLYPH || \
+            span->getType() == RASTER_SPAN_ARGBXX_GLYPH  ) \
+        { \
+          MskSize = 4; \
+          msk += PIXEL_ARGB32_POS_A; \
+        }
+
+// ----------------------------------------------------------------------------
+
 //! @brief VBlit - End.
 #define V_BLIT_SPAN8_END() \
         break; \

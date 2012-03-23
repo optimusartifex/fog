@@ -782,7 +782,7 @@ enum RASTER_SPAN
   //! @sa @c RASTER_SPAN_AX_EXTRA.
   RASTER_SPAN_A8_GLYPH = 1,
 
-  //! @brief Span is a variable-alpha mask (target bit-depth, A8, A16 or A32).
+  //! @brief Span is a variable-alpha mask (target bit-depth, A8 or A16).
   //!
   //! @sa @c RASTER_SPAN_AX_EXTRA.
   RASTER_SPAN_AX_GLYPH = 2,
@@ -805,7 +805,7 @@ enum
 {
   //! @brief Helper constant to determine how many constant pixels are
   //! profitable for pure CMask span instance. Minimum is 1, but recommended
-  //! are 4 or more (it depends on the  available SIMD instructions per platform).
+  //! are 4 or more (it depends on the available SIMD instruction set).
   RASTER_SPAN_C_THRESHOLD = 4
 };
 

@@ -677,7 +677,7 @@ _ARGB32_Glyph_Skip:
   static FOG_INLINE void _prgb32_vblit_rgb24_c_opaque(
     uint8_t* dst, const uint8_t* src, int w)
   {
-#if defined(FOG_ARCH_UNALIGNED_ACCESS_32)
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_32) || FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
     // X86/X64 Specific code relying on unaligned read. It seems that this is
     // really unbeatable by the any other code except SSSE3 using PSHUFB.
     uint32_t src0p;
@@ -726,7 +726,7 @@ _ARGB32_Glyph_Skip:
       dst += 16;
       src += 12;
     BLIT_LOOP_32x4_VS_24_MAIN_END(C_Opaque)
-#endif // FOG_ARCH_UNALIGNED_ACCESS_32
+#endif // FOG_ARCH_UNALIGNED_ACCESS_32 && FOG_LITTLE_ENDIAN
   }
 
   // ==========================================================================
@@ -771,7 +771,7 @@ _ARGB32_Glyph_Skip:
       Acc::p32Copy(msk0p, msk0);
       Acc::p32Negate256SBW(minv0p, msk0p);
 
-#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_32) || FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
       // X86/X64 Specific code relying on unaligned read. It seems that this is
       // really unbeatable by the any other code except SSSE3 using PSHUFB.
       uint32_t src0p;
@@ -841,7 +841,7 @@ _ARGB32_Glyph_Skip:
         dst += 16;
         src += 12;
       BLIT_LOOP_32x4_VS_24_MAIN_END(C_Mask)
-#endif // FOG_ARCH_X86 || FOG_ARCH_X86_64
+#endif // FOG_ARCH_UNALIGNED_ACCESS_32 && FOG_LITTLE_ENDIAN
     }
 
     // ------------------------------------------------------------------------
@@ -1579,25 +1579,6 @@ _ARGB32_GlyphNoKey_Skip:
     prgb32_vblit_a8_or_a16_span<2, PIXEL_A16_BYTE_HI>(dst, span, closure);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // ==========================================================================
   // [XRGB32 - CBlit - PRGB32 - Line]
   // ==========================================================================
@@ -1998,7 +1979,7 @@ _ARGB32_Glyph_Skip:
       Acc::p32Copy(msk0p, msk0);
       Acc::p32Negate256SBW(minv0p, msk0p);
 
-#if defined(FOG_ARCH_X86) || defined(FOG_ARCH_X86_64)
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_32) || FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
       // X86/X64 Specific code relying on unaligned read. It seems that this is
       // really unbeatable by the any other code except SSSE3 using PSHUFB.
       uint32_t src0p;
@@ -2065,7 +2046,7 @@ _ARGB32_Glyph_Skip:
         dst += 16;
         src += 12;
       BLIT_LOOP_32x4_VS_24_MAIN_END(C_Mask)
-#endif // FOG_ARCH_X86 || FOG_ARCH_X86_64
+#endif // FOG_ARCH_UNALIGNED_ACCESS_32 && FOG_LITTLE_ENDIAN
     }
 
     // ------------------------------------------------------------------------
@@ -3532,26 +3513,6 @@ _ARGB32_Glyph_Fill:
   }
 
   // ==========================================================================
-  // [RGB24 - VBlit - A16 - Line]
-  // ==========================================================================
-
-  static void FOG_FASTCALL rgb24_vblit_a16_line(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    _rgb24_vblit_a8_or_a16_line<2, PIXEL_A16_BYTE_HI>(dst, src, w);
-  }
-
-  // ==========================================================================
-  // [RGB24 - VBlit - A8 - Span]
-  // ==========================================================================
-
-  static void FOG_FASTCALL rgb24_vblit_a16_span(
-    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
-  {
-    _rgb24_vblit_a8_or_a16_span<2, PIXEL_A16_BYTE_HI>(dst, span, closure);
-  }
-
-  // ==========================================================================
   // [RGB24 - VBlit - I8 - Helpers]
   // ==========================================================================
 
@@ -3741,6 +3702,9 @@ _A8_Glyph_Fill:
 
     V_BLIT_SPAN8_A8_EXTRA()
     {
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(A8_Extra)
         uint32_t src0p_20, src0p_X1;
         uint32_t msk0p;
 
@@ -3762,6 +3726,7 @@ _A8_Glyph_Fill:
         dst += 3;
         src += 1;
         msk += 2;
+      BLIT_LOOP_24x1_END(A8_Extra)
     }
 
     // ------------------------------------------------------------------------
@@ -3817,6 +3782,1044 @@ _ARGB32_Glyph_Fill:
 
     V_BLIT_SPAN8_END()
   }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - PRGB64/RGB48 - Helpers]
+  // ==========================================================================
+
+  template<uint SrcSize, uint SrcR, uint SrcG, uint SrcB>
+  static FOG_INLINE void _rgb24_vblit_prgb64_or_rgb48_line(
+    uint8_t* dst, const uint8_t* src, int w)
+  {
+    BLIT_LOOP_24x1_INIT()
+
+    BLIT_LOOP_24x1_BEGIN(C_Opaque)
+      dst[PIXEL_RGB24_BYTE_R] = src[SrcR];
+      dst[PIXEL_RGB24_BYTE_G] = src[SrcG];
+      dst[PIXEL_RGB24_BYTE_B] = src[SrcB];
+
+      dst += 3;
+      src += SrcSize;
+    BLIT_LOOP_24x1_END(C_Opaque)
+  }
+
+  template<uint SrcSize, uint SrcR, uint SrcG, uint SrcB>
+  static FOG_INLINE void _rgb24_vblit_prgb64_or_rgb48_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    V_BLIT_SPAN8_BEGIN(3)
+
+    // ------------------------------------------------------------------------
+    // [C-Opaque]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_OPAQUE()
+    {
+      _rgb24_vblit_prgb64_or_rgb48_line<SrcSize, SrcR, SrcG, SrcB>(dst, src, w);
+    }
+
+    // ------------------------------------------------------------------------
+    // [C-Mask]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_MASK()
+    {
+      uint32_t msk0p;
+      uint32_t minv0p;
+
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0p);
+
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(C_Mask)
+        dst[PIXEL_RGB24_BYTE_R] = uint8_t((uint32_t(dst[PIXEL_RGB24_BYTE_R]) * minv0p + src[SrcR] * msk0p) >> 8);
+        dst[PIXEL_RGB24_BYTE_G] = uint8_t((uint32_t(dst[PIXEL_RGB24_BYTE_G]) * minv0p + src[SrcG] * msk0p) >> 8);
+        dst[PIXEL_RGB24_BYTE_B] = uint8_t((uint32_t(dst[PIXEL_RGB24_BYTE_B]) * minv0p + src[SrcB] * msk0p) >> 8);
+
+        dst += 3;
+        src += SrcSize;
+      BLIT_LOOP_24x1_END(C_Mask)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Glyph]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_GLYPH()
+    {
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(A8_Glyph)
+        uint32_t src0p_r;
+        uint32_t src0p_g;
+        uint32_t src0p_b;
+        uint32_t msk0p;
+
+        Acc::p32Load1b(msk0p, msk);
+        if (msk0p == 0x00) goto _A8_Glyph_Skip;
+
+        src0p_r = src[SrcR];
+        src0p_g = src[SrcG];
+        src0p_b = src[SrcB];
+        if (msk0p == 0xFF) goto _A8_Glyph_Fill;
+
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32Mul(src0p_r, src0p_r, msk0p);
+        Acc::p32Mul(src0p_g, src0p_g, msk0p);
+        Acc::p32Mul(src0p_b, src0p_b, msk0p);
+
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        src0p_r += uint32_t(dst[PIXEL_RGB24_BYTE_R]) * msk0p;
+        src0p_g += uint32_t(dst[PIXEL_RGB24_BYTE_G]) * msk0p;
+        src0p_b += uint32_t(dst[PIXEL_RGB24_BYTE_B]) * msk0p;
+
+        src0p_r >>= 8;
+        src0p_g >>= 8;
+        src0p_b >>= 8;
+
+_A8_Glyph_Fill:
+        dst[PIXEL_RGB24_BYTE_R] = src0p_r;
+        dst[PIXEL_RGB24_BYTE_G] = src0p_g;
+        dst[PIXEL_RGB24_BYTE_B] = src0p_b;
+
+_A8_Glyph_Skip:
+        dst += 3;
+        src += SrcSize;
+        msk += 1;
+      BLIT_LOOP_24x1_END(A8_Glyph)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Extra]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_EXTRA()
+    {
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(A8_Extra)
+        uint32_t src0p_r;
+        uint32_t src0p_g;
+        uint32_t src0p_b;
+        uint32_t msk0p;
+
+        Acc::p32Load2a(msk0p, msk);
+
+        src0p_r = src[SrcR];
+        src0p_g = src[SrcG];
+        src0p_b = src[SrcB];
+
+        Acc::p32Mul(src0p_r, src0p_r, msk0p);
+        Acc::p32Mul(src0p_g, src0p_g, msk0p);
+        Acc::p32Mul(src0p_b, src0p_b, msk0p);
+
+        Acc::p32Negate256SBW(msk0p, msk0p);
+
+        src0p_r += uint32_t(dst[PIXEL_RGB24_BYTE_R]) * msk0p;
+        src0p_g += uint32_t(dst[PIXEL_RGB24_BYTE_G]) * msk0p;
+        src0p_b += uint32_t(dst[PIXEL_RGB24_BYTE_B]) * msk0p;
+
+        src0p_r >>= 8;
+        src0p_g >>= 8;
+        src0p_b >>= 8;
+
+        dst[PIXEL_RGB24_BYTE_R] = src0p_r;
+        dst[PIXEL_RGB24_BYTE_G] = src0p_g;
+        dst[PIXEL_RGB24_BYTE_B] = src0p_b;
+
+        dst += 3;
+        src += SrcSize;
+        msk += 2;
+      BLIT_LOOP_24x1_END(A8_Extra)
+    }
+
+    // ------------------------------------------------------------------------
+    // [ARGB32-Glyph]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_ARGB32_GLYPH()
+    {
+      BLIT_LOOP_24x1_INIT()
+
+      BLIT_LOOP_24x1_BEGIN(ARGB32_Glyph)
+        uint32_t src0p_r;
+        uint32_t src0p_g;
+        uint32_t src0p_b;
+        uint32_t msk0p;
+
+        Acc::p32Load4a(msk0p, msk);
+        if (msk0p == 0x00000000) goto _ARGB32_Glyph_Skip;
+
+        msk0p &= 0x00FFFFFF;
+        src0p_r = src[SrcR];
+        src0p_g = src[SrcG];
+        src0p_b = src[SrcB];
+        if (msk0p == 0x00FFFFFF) goto _ARGB32_Glyph_Fill;
+
+        Acc::p32Mul(src0p_r, src0p_r, (msk0p >> 16)       );
+        Acc::p32Mul(src0p_g, src0p_g, (msk0p >>  8) & 0xFF);
+        Acc::p32Mul(src0p_b, src0p_b, (msk0p      ) & 0xFF);
+
+        Acc::p32Negate255PBB(msk0p, msk0p);
+
+        src0p_r += uint32_t(dst[PIXEL_RGB24_BYTE_R]) * ((msk0p >> 16)       );
+        src0p_g += uint32_t(dst[PIXEL_RGB24_BYTE_G]) * ((msk0p >>  8) & 0xFF);
+        src0p_b += uint32_t(dst[PIXEL_RGB24_BYTE_B]) * ((msk0p      ) & 0xFF);
+
+        Acc::p32Div255SBW(src0p_r, src0p_r);
+        Acc::p32Div255SBW(src0p_g, src0p_g);
+        Acc::p32Div255SBW(src0p_b, src0p_b);
+
+_ARGB32_Glyph_Fill:
+        dst[PIXEL_RGB24_BYTE_R] = src0p_r;
+        dst[PIXEL_RGB24_BYTE_G] = src0p_g;
+        dst[PIXEL_RGB24_BYTE_B] = src0p_b;
+
+_ARGB32_Glyph_Skip:
+        dst += 3;
+        src += SrcSize;
+        msk += 4;
+      BLIT_LOOP_24x1_END(ARGB32_Glyph)
+    }
+
+    V_BLIT_SPAN8_END()
+  }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - PRGB64 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL rgb24_vblit_prgb64_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _rgb24_vblit_prgb64_or_rgb48_line<8, PIXEL_ARGB64_BYTE_R_HI, PIXEL_ARGB64_BYTE_G_HI, PIXEL_ARGB64_BYTE_B_HI>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - PRGB64 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL rgb24_vblit_prgb64_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _rgb24_vblit_prgb64_or_rgb48_span<8, PIXEL_ARGB64_BYTE_R_HI, PIXEL_ARGB64_BYTE_G_HI, PIXEL_ARGB64_BYTE_B_HI>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - RGB48 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL rgb24_vblit_rgb48_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _rgb24_vblit_prgb64_or_rgb48_line<6, PIXEL_RGB48_BYTE_R_HI, PIXEL_RGB48_BYTE_G_HI, PIXEL_RGB48_BYTE_B_HI>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - RGB48 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL rgb24_vblit_rgb48_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _rgb24_vblit_prgb64_or_rgb48_span<6, PIXEL_RGB48_BYTE_R_HI, PIXEL_RGB48_BYTE_G_HI, PIXEL_RGB48_BYTE_B_HI>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - A16 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL rgb24_vblit_a16_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _rgb24_vblit_a8_or_a16_line<2, PIXEL_A16_BYTE_HI>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [RGB24 - VBlit - A16 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL rgb24_vblit_a16_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _rgb24_vblit_a8_or_a16_span<2, PIXEL_A16_BYTE_HI>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [A8 - CBlit - PRGB32 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_cblit_prgb32_line(
+    uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
+  {
+    uint32_t src0p = src->prgb32.a;
+    Acc::p32ExtendPBBFromSBB(src0p, src0p);
+
+    BLIT_LOOP_8x8_INIT()
+
+    BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
+      Acc::p32Store1b(dst, src0p);
+
+      dst += 1;
+    BLIT_LOOP_8x8_SMALL_END(C_Opaque)
+
+    BLIT_LOOP_8x8_MAIN_BEGIN(C_Opaque)
+      Acc::p32Store4a(dst + 0, src0p);
+      Acc::p32Store4a(dst + 4, src0p);
+
+      dst += 8;
+    BLIT_LOOP_8x8_MAIN_END(C_Opaque)
+  }
+
+  // ==========================================================================
+  // [A8 - CBlit - PRGB32 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_cblit_prgb32_span(
+    uint8_t* dst, const RasterSolid* src, const RasterSpan* span, const RasterClosure* closure)
+  {
+    uint32_t sra0p = src->prgb32.a;
+    uint32_t sro0p;
+
+    Acc::p32ExtendPBBFromSBB(sro0p, sra0p);
+
+    C_BLIT_SPAN8_BEGIN(4)
+
+    // ------------------------------------------------------------------------
+    // [C-Opaque]
+    // ------------------------------------------------------------------------
+
+    C_BLIT_SPAN8_C_OPAQUE()
+    {
+      BLIT_LOOP_8x8_INIT()
+
+      BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
+        Acc::p32Store1b(dst, sro0p);
+
+        dst += 1;
+      BLIT_LOOP_8x8_SMALL_END(C_Opaque)
+
+      BLIT_LOOP_8x8_MAIN_BEGIN(C_Opaque)
+        Acc::p32Store4a(dst + 0, sro0p);
+        Acc::p32Store4a(dst + 4, sro0p);
+
+        dst += 8;
+      BLIT_LOOP_8x8_MAIN_END(C_Opaque)
+    }
+
+    // ------------------------------------------------------------------------
+    // [C-Mask]
+    // ------------------------------------------------------------------------
+
+    C_BLIT_SPAN8_C_MASK()
+    {
+      BLIT_LOOP_8x8_INIT()
+
+      uint32_t src0p;
+      uint32_t msk0p;
+
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32MulDiv256SBW(src0p, sra0p, msk0p);
+      Acc::p32ExtendPBBFromSBB(src0p, src0p);
+      Acc::p32Negate256SBW(msk0p, msk0p);
+
+      BLIT_LOOP_8x8_SMALL_BEGIN(C_Mask)
+        uint32_t dst0p;
+
+        Acc::p32Load1b(dst0p, dst);
+        Acc::p32MulDiv256SBW(dst0p, dst0p, msk0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Store1b(dst, dst0p);
+
+        dst += 1;
+      BLIT_LOOP_8x8_SMALL_END(C_Mask)
+
+      BLIT_LOOP_8x8_MAIN_BEGIN(C_Mask)
+        uint32_t dst0p, dst1p;
+
+        Acc::p32Load4a(dst0p, dst);
+        Acc::p32Load4a(dst1p, dst);
+
+        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
+        Acc::p32MulDiv256PBB_SBW(dst1p, dst1p, msk0p);
+        Acc::p32Add(dst0p, dst0p, src0p);
+        Acc::p32Add(dst1p, dst1p, src0p);
+
+        Acc::p32Store4a(dst + 0, dst0p);
+        Acc::p32Store4a(dst + 4, dst1p);
+
+        dst += 8;
+      BLIT_LOOP_8x8_MAIN_END(C_Mask)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Glyph]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_OR_ARGB32_GLYPH()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Glyph)
+        uint32_t dst0p;
+        uint32_t msk0p;
+
+        Acc::p32Load1b(msk0p, msk);
+        if (msk0p == 0x00) goto _A8_Glyph_Skip;
+
+        Acc::p32Load1b(dst0p, dst);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        Acc::p32MulDiv256SBW(dst0p, dst0p, msk0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv256SBW(msk0p, msk0p, sra0p);
+        Acc::p32Add(dst0p, dst0p, msk0p);
+        Acc::p32Store1b(dst, dst0p);
+
+_A8_Glyph_Skip:
+        dst += 1;
+        msk += MskSize;
+      BLIT_LOOP_8x1_END(A8_Glyph)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Extra]
+    // ------------------------------------------------------------------------
+
+    C_BLIT_SPAN8_A8_EXTRA()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Extra)
+        uint32_t dst0p;
+        uint32_t msk0p;
+
+        Acc::p32Load2a(msk0p, msk);
+        Acc::p32Load1b(dst0p, dst);
+
+        Acc::p32MulDiv256SBW(dst0p, dst0p, msk0p);
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        Acc::p32MulDiv256SBW(msk0p, msk0p, sra0p);
+        Acc::p32Add(dst0p, dst0p, msk0p);
+        Acc::p32Store1b(dst, dst0p);
+
+        dst += 1;
+        msk += 2;
+      BLIT_LOOP_8x1_END(A8_Extra)
+    }
+
+    C_BLIT_SPAN8_END()
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - Any - Line]
+  // ==========================================================================
+
+  template<uint SrcSize, uint SrcA>
+  static FOG_INLINE void _a8_vblit_any_line(
+    uint8_t* dst, const uint8_t* src, int w)
+  {
+    BLIT_LOOP_8x8_INIT()
+    src += SrcSize;
+
+    BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
+      dst[0] = src[0];
+
+      dst += 1;
+      src += SrcSize;
+    BLIT_LOOP_8x8_SMALL_END(C_Opaque)
+
+    BLIT_LOOP_8x8_MAIN_BEGIN(C_Opaque)
+      uint32_t src0p, src1p;
+
+      if (SrcSize == 1)
+      {
+        Acc::p32Load4u(src0p, src + 0);
+        Acc::p32Load4u(src1p, src + 4);
+      }
+      else
+      {
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+        src0p  = src[SrcSize * 3]; src0p <<= 8;
+        src1p  = src[SrcSize * 7]; src1p <<= 8;
+        src0p |= src[SrcSize * 2]; src0p <<= 8;
+        src1p |= src[SrcSize * 6]; src1p <<= 8;
+        src0p |= src[SrcSize * 1]; src0p <<= 8;
+        src1p |= src[SrcSize * 5]; src1p <<= 8;
+        src0p |= src[SrcSize * 0];
+        src1p |= src[SrcSize * 4];
+#else
+        src0p  = src[SrcSize * 0]; src0p <<= 8;
+        src1p  = src[SrcSize * 4]; src1p <<= 8;
+        src0p |= src[SrcSize * 1]; src0p <<= 8;
+        src1p |= src[SrcSize * 5]; src1p <<= 8;
+        src0p |= src[SrcSize * 2]; src0p <<= 8;
+        src1p |= src[SrcSize * 6]; src1p <<= 8;
+        src0p |= src[SrcSize * 3];
+        src1p |= src[SrcSize * 7];
+#endif // FOG_BYTE_ORDER
+      }
+
+      Acc::p32Store4a(dst + 0, src0p);
+      Acc::p32Store4a(dst + 4, src1p);
+
+      dst += 8;
+      src += 8 * SrcSize;
+    BLIT_LOOP_8x8_MAIN_END(C_Opaque)
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - Any - Span]
+  // ==========================================================================
+
+  template<uint SrcSize, uint SrcA>
+  static FOG_INLINE void _a8_vblit_any_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    V_BLIT_SPAN8_BEGIN(1)
+
+    // ------------------------------------------------------------------------
+    // [C-Opaque]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_OPAQUE()
+    {
+      _a8_vblit_any_line<SrcSize, SrcA>(dst, src, w);
+    }
+
+    // ------------------------------------------------------------------------
+    // [C-Mask]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_MASK()
+    {
+      uint32_t msk0p;
+      uint32_t minv0p;
+
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0p);
+
+      BLIT_LOOP_8x8_INIT()
+      src += SrcSize;
+
+      BLIT_LOOP_8x8_SMALL_BEGIN(C_Mask)
+        dst[0] = uint8_t((uint32_t(dst[0]) * minv0p + uint32_t(src[0]) * msk0p) >> 8);
+
+        dst += 1;
+        src += SrcSize;
+      BLIT_LOOP_8x8_SMALL_END(C_Mask)
+
+      BLIT_LOOP_8x8_MAIN_BEGIN(C_Mask)
+        // Little Endian: [3 2 1 0] [7 6 5 4] 
+        // Big Endian   : [0 1 2 3] [4 5 6 7]
+        uint32_t src0p_20, src0p_31;
+        uint32_t src0p_64, src0p_75;
+
+#if defined(FOG_ARCH_UNALIGNED_ACCESS_32)
+        if (SrcSize == 1)
+        {
+          Acc::p32Load4u(src0p_20, src + 0);
+          Acc::p32Load4u(src0p_64, src + 4);
+
+          Acc::p32UnpackPBWFromPBB_2031(src0p_20, src0p_31, src0p_20);
+          Acc::p32UnpackPBWFromPBB_2031(src0p_64, src0p_75, src0p_64);
+        }
+        else
+#endif // FOG_ARCH_UNALIGNED_ACCESS_32
+        {
+#if FOG_BYTE_ORDER == FOG_LITTLE_ENDIAN
+          src0p_20  = src[SrcSize * 1]; src0p_20 <<= 16;
+          src0p_31  = src[SrcSize * 0]; src0p_31 <<= 16;
+          src0p_64  = src[SrcSize * 5]; src0p_64 <<= 16;
+          src0p_75  = src[SrcSize * 4]; src0p_75 <<= 16;
+
+          src0p_20 |= src[SrcSize * 3];
+          src0p_31 |= src[SrcSize * 2];
+          src0p_64 |= src[SrcSize * 7];
+          src0p_75 |= src[SrcSize * 6];
+#else
+          src0p_20  = src[SrcSize * 2]; src0p_20 <<= 16;
+          src0p_31  = src[SrcSize * 3]; src0p_31 <<= 16;
+          src0p_64  = src[SrcSize * 6]; src0p_64 <<= 16;
+          src0p_75  = src[SrcSize * 7]; src0p_75 <<= 16;
+
+          src0p_20 |= src[SrcSize * 0];
+          src0p_31 |= src[SrcSize * 1];
+          src0p_64 |= src[SrcSize * 4];
+          src0p_75 |= src[SrcSize * 5];
+#endif // FOG_BYTE_ORDER
+        }
+
+        Acc::p32MulDiv256PBW_2x_Pack_2031(src0p_20, src0p_20, msk0p, src0p_31, msk0p);
+        Acc::p32MulDiv256PBW_2x_Pack_2031(src0p_64, src0p_64, msk0p, src0p_75, msk0p);
+
+        Acc::p32Load4a(src0p_31, src + 0);
+        Acc::p32Load4a(src0p_75, src + 4);
+
+        Acc::p32MulDiv256PBB_SBW(src0p_31, src0p_31, minv0p);
+        Acc::p32MulDiv256PBB_SBW(src0p_75, src0p_75, minv0p);
+        Acc::p32Add_2x(src0p_20, src0p_20, src0p_31, src0p_64, src0p_64, src0p_75);
+
+        Acc::p32Store4a(dst + 0, src0p_20);
+        Acc::p32Store4a(dst + 4, src0p_64);
+
+        dst += 8;
+        src += 8 * SrcSize;
+      BLIT_LOOP_8x8_MAIN_END(C_Mask)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8/ARGB32-Glyph]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_OR_ARGB32_GLYPH()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Glyph)
+        uint32_t src0p;
+        uint32_t msk0p;
+
+        Acc::p32Load1b(msk0p, msk);
+        if (msk0p == 0x00) goto _A8_Glyph_Skip;
+
+        Acc::p32Load1b(src0p, src);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+
+        src0p = uint32_t(src[0]) * msk0p;
+        Acc::p32Negate256SBW(msk0p, msk0p);
+
+        src0p += uint32_t(dst[0]) * msk0p;
+        Acc::p32Div256SBW(src0p, src0p);
+
+        Acc::p32Store1b(dst, src0p);
+
+_A8_Glyph_Skip:
+        dst += 1;
+        src += SrcSize;
+        msk += MskSize;
+      BLIT_LOOP_8x1_END(A8_Glyph)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Extra]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_EXTRA()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Extra)
+        uint32_t src0p;
+        uint32_t msk0p;
+
+        Acc::p32Load1b(src0p, src);
+        Acc::p32Load1b(msk0p, msk);
+
+        src0p = uint32_t(src[0]) * msk0p;
+        Acc::p32Negate256SBW(msk0p, msk0p);
+
+        src0p += uint32_t(dst[0]) * msk0p;
+        Acc::p32Div256SBW(src0p, src0p);
+
+        Acc::p32Store1b(dst, src0p);
+
+        dst += 1;
+        src += SrcSize;
+        msk += 2;
+      BLIT_LOOP_8x1_END(A8_Extra)
+    }
+
+    V_BLIT_SPAN8_END()
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - White - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_white_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    uint32_t src0p = 0xFFFFFFFF;
+
+    BLIT_LOOP_8x8_INIT()
+
+    BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
+      Acc::p32Store1b(dst, src0p);
+
+      dst += 1;
+    BLIT_LOOP_8x8_SMALL_END(C_Opaque)
+
+    BLIT_LOOP_8x8_MAIN_BEGIN(C_Opaque)
+      Acc::p32Store1b(dst + 0, src0p);
+      Acc::p32Store1b(dst + 4, src0p);
+
+      dst += 8;
+    BLIT_LOOP_8x8_MAIN_END(C_Opaque)
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - White - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_white_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    uint32_t src0p = 0xFFFFFFFF;
+
+    V_BLIT_SPAN8_BEGIN(1)
+
+    // ------------------------------------------------------------------------
+    // [C-Opaque]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_OPAQUE()
+    {
+      BLIT_LOOP_8x8_INIT()
+
+      BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
+        Acc::p32Store1b(dst, src0p);
+
+        dst += 1;
+      BLIT_LOOP_8x8_SMALL_END(C_Opaque)
+
+      BLIT_LOOP_8x8_MAIN_BEGIN(C_Opaque)
+        Acc::p32Store1b(dst + 0, src0p);
+        Acc::p32Store1b(dst + 4, src0p);
+
+        dst += 8;
+      BLIT_LOOP_8x8_MAIN_END(C_Opaque)
+    }
+
+    // ------------------------------------------------------------------------
+    // [C-Mask]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_MASK()
+    {
+      uint32_t msk0p;
+      Acc::p32Copy(msk0p, msk0);
+
+      BLIT_LOOP_8x8_INIT()
+
+      BLIT_LOOP_8x8_SMALL_BEGIN(C_Mask)
+        dst[0] += (((uint32_t(dst[0])) ^ 0xFF) * msk0p) >> 8;
+
+        dst += 1;
+      BLIT_LOOP_8x8_SMALL_END(C_Mask)
+
+      BLIT_LOOP_8x8_MAIN_BEGIN(C_Mask)
+        uint32_t dst0p, dst1p;
+
+        Acc::p32Load4a(dst0p, dst + 0);
+        Acc::p32Load4a(dst1p, dst + 4);
+
+        Acc::p32Negate255PBB_2x(dst0p, dst0p, dst1p, dst1p);
+        Acc::p32MulDiv256PBW_2x(dst0p, dst0p, msk0p, dst1p, dst1p, msk0p);
+        
+        reinterpret_cast<uint32_t*>(dst + 0)[0] += dst0p;
+        reinterpret_cast<uint32_t*>(dst + 4)[0] += dst1p;
+
+        dst += 8;
+      BLIT_LOOP_8x8_MAIN_END(C_Mask)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8/ARGB32-Glyph]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_OR_ARGB32_GLYPH()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Glyph)
+        uint32_t msk0p;
+
+        Acc::p32Load1b(msk0p, msk);
+        if (msk0p == 0x00) goto _A8_Glyph_Skip;
+
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        dst[0] += (((uint32_t(dst[0])) ^ 0xFF) * msk0p) >> 8;
+
+_A8_Glyph_Skip:
+        dst += 1;
+        msk += MskSize;
+      BLIT_LOOP_8x1_END(A8_Glyph)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Extra]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_EXTRA()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Extra)
+        uint32_t msk0p;
+
+        Acc::p32Load2a(msk0p, msk);
+        dst[0] += (((uint32_t(dst[0])) ^ 0xFF) * msk0p) >> 8;
+
+        dst += 1;
+        msk += 2;
+      BLIT_LOOP_8x1_END(A8_Extra)
+    }
+
+    V_BLIT_SPAN8_END()
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - PRGB32 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_prgb32_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _a8_vblit_any_line<4, PIXEL_ARGB32_POS_A>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - PRGB32 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_prgb32_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _a8_vblit_any_span<4, PIXEL_ARGB32_POS_A>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - A8 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_a8_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _a8_vblit_any_line<1, 0>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - A8 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_a8_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _a8_vblit_any_span<1, 0>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - I8 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_i8_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    uint32_t colorKey = closure->colorKey;
+
+    BLIT_LOOP_8x1_INIT()
+
+    BLIT_LOOP_8x1_BEGIN(C_Opaque)
+      uint32_t src0p;
+      uint32_t src0i;
+
+      src0i = src[0];
+      src0p = 0xFF;
+
+      if (src0i == colorKey)
+        src0p = 0x00;
+      Acc::p32Store1b(dst, src0p);
+
+      dst += 1;
+      src += 1;
+    BLIT_LOOP_8x1_END(C_Opaque)
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - I8 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_i8_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    uint32_t colorKey = closure->colorKey;
+
+    V_BLIT_SPAN8_BEGIN(1)
+
+    // ------------------------------------------------------------------------
+    // [C-Opaque]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_OPAQUE()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(C_Opaque)
+        uint32_t src0p;
+        uint32_t src0i;
+
+        src0i = src[0];
+        src0p = 0xFF;
+
+        if (src0i == colorKey)
+          src0p = 0x00;
+        Acc::p32Store1b(dst, src0p);
+
+        dst += 1;
+        src += 1;
+      BLIT_LOOP_8x1_END(C_Opaque)
+    }
+
+    // ------------------------------------------------------------------------
+    // [C-Mask]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_C_MASK()
+    {
+      uint32_t msk0p;
+      uint32_t minv0p;
+
+      Acc::p32Copy(msk0p, msk0);
+      Acc::p32Negate256SBW(minv0p, msk0p);
+      msk0p = (0xFF * msk0p) >> 8;
+
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(C_Mask)
+        uint32_t src0p;
+        uint32_t src0i;
+
+        src0i = src[0];
+        src0p = msk0p;
+
+        if (src0i == colorKey)
+          src0p = 0x00;
+        dst[0] = uint8_t((uint32_t(dst[0]) * minv0p + src0p) >> 8);
+
+        dst += 1;
+        src += 1;
+      BLIT_LOOP_8x1_END(C_Mask)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8/ARGB32-Glyph]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_OR_ARGB32_GLYPH()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Glyph)
+        uint32_t src0p;
+        uint32_t src0i;
+        uint32_t msk0p;
+
+        msk0p = msk[0];
+        if (msk0p == 0x00) goto _A8_Glyph_Skip;
+
+        src0i = src[0];
+        src0p = msk0p;
+
+        if (src0i == colorKey)
+          src0p = 0x00;
+
+        Acc::p32Negate255SBW(msk0p, msk0p);
+        Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
+        dst[0] = uint8_t((uint32_t(dst[0]) * msk0p + src0p) >> 8);
+
+_A8_Glyph_Skip:
+        dst += 1;
+        src += 1;
+        msk += 1;
+      BLIT_LOOP_8x1_END(A8_Glyph)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Extra]
+    // ------------------------------------------------------------------------
+
+    V_BLIT_SPAN8_A8_EXTRA()
+    {
+      BLIT_LOOP_8x1_INIT()
+
+      BLIT_LOOP_8x1_BEGIN(A8_Extra)
+        uint32_t src0p;
+        uint32_t src0i;
+        uint32_t msk0p;
+
+        Acc::p32Load2a(msk0p, msk);
+
+        src0i = src[0];
+        src0p = (0xFF * msk0p) >> 8;
+
+        if (src0i == colorKey)
+          src0p = 0x00;
+
+        Acc::p32Negate256SBW(msk0p, msk0p);
+        dst[0] = uint8_t((uint32_t(dst[0]) * msk0p + src0p) >> 8);
+
+        dst += 1;
+        src += 1;
+        msk += 2;
+      BLIT_LOOP_8x1_END(A8_Extra)
+    }
+
+    V_BLIT_SPAN8_END()
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  // ==========================================================================
+  // [A8 - VBlit - PRGB64 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_prgb64_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _a8_vblit_any_line<8, PIXEL_ARGB64_BYTE_A_HI>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - PRGB64 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_prgb64_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _a8_vblit_any_span<8, PIXEL_ARGB64_BYTE_A_HI>(dst, span, closure);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - A16 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_a16_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _a8_vblit_any_line<2, PIXEL_A16_BYTE_HI>(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [A8 - VBlit - A16 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL a8_vblit_a16_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    _a8_vblit_any_span<2, PIXEL_A16_BYTE_HI>(dst, span, closure);
+  }
+
+
 
 
 
@@ -4025,20 +5028,6 @@ _ARGB32_Glyph_Skip:
       msk += 4;
     BLIT_LOOP_DstFx1_END(ARGB32_Glyph)
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // ==========================================================================
   // [COMP8 - VBlit - PRGB64 - Line]
@@ -4369,316 +5358,6 @@ _ARGB32_Glyph_Skip:
     V_BLIT_SPAN8_ARGB32_GLYPH()
     {
       _comp8_vblit_rgb48_argb32_glyph<DstF>(dst, src, msk, w);
-    }
-
-    V_BLIT_SPAN8_END()
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ==========================================================================
-  // [COMP8 - VBlit - A16 - Helpers]
-  // ==========================================================================
-
-  template<typename DstF>
-  static FOG_INLINE void _comp8_vblit_a16_c_opaque(
-    uint8_t* dst, const uint8_t* src, int w)
-  {
-    BLIT_LOOP_DstFx1_INIT()
-
-    BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
-      uint32_t src0p;
-
-      Acc::p32Load2a(src0p, src);
-      Acc::p32RShift(src0p, src0p, 8);
-
-      if (DstF::HAS_ALPHA)
-      {
-        Acc::p32ExtendPBBFromSBB(src0p, src0p);
-        DstF::p32StorePRGB32(dst, src0p);
-      }
-      else
-      {
-        Acc::p32ExtendPBBFromSBB_Z210(src0p, src0p);
-        DstF::p32StoreZRGB32(dst, src0p);
-      }
-
-      dst += DstF::SIZE;
-      src += 2;
-    BLIT_LOOP_DstFx1_END(C_Opaque)
-  }
-
-  template<typename DstF>
-  static FOG_INLINE void _comp8_vblit_a16_c_mask(
-    uint8_t* dst, const uint8_t* src, const uint32_t& msk0p_a, const uint32_t& msk0p_i, int w)
-  {
-    BLIT_LOOP_DstFx1_INIT()
-
-    BLIT_LOOP_DstFx1_BEGIN(C_Mask)
-      uint32_t dst0p;
-      uint32_t src0p;
-
-      if (DstF::HAS_ALPHA)
-      {
-        DstF::p32LoadPRGB32(dst0p, dst);
-        Acc::p32Load2a(src0p, src);
-        Acc::p32Mul(src0p, src0p, msk0p_a);
-        Acc::p32RShift(src0p, src0p, 16);
-        Acc::p32ExtendPBBFromSBB(src0p, src0p);
-        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p_i);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StorePRGB32(dst, src0p);
-      }
-      else
-      {
-        DstF::p32LoadXRGB32(dst0p, dst);
-        Acc::p32Load2a(src0p, src);
-        Acc::p32Mul(src0p, src0p, msk0p_a);
-        Acc::p32RShift(src0p, src0p, 16);
-        Acc::p32ExtendPBBFromSBB_Z210(src0p, src0p);
-        Acc::p32MulDiv256PBB_SBW_Z210(dst0p, dst0p, msk0p_i);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StoreZRGB32(dst, src0p);
-      }
-
-      dst += DstF::SIZE;
-      src += 2;
-    BLIT_LOOP_DstFx1_END(C_Mask)
-  }
-
-  template<typename DstF>
-  static FOG_INLINE void _comp8_vblit_a16_a8_glyph(
-    uint8_t* dst, const uint8_t* src, const uint8_t* msk, int w)
-  {
-    BLIT_LOOP_DstFx1_INIT()
-
-    BLIT_LOOP_DstFx1_BEGIN(A8_Glyph)
-      uint32_t dst0p;
-      uint32_t src0p;
-      uint32_t msk0p;
-
-      Acc::p32Load1b(msk0p, msk);
-      if (msk0p == 0x00) goto _A8_Glyph_Skip;
-
-      if (DstF::HAS_ALPHA)
-        DstF::p32LoadPRGB32(dst0p, dst);
-      else
-        DstF::p32LoadXRGB32(dst0p, dst);
-
-      Acc::p32Load2a(src0p, src);
-      Acc::p32Cvt256SBWFrom255SBW(msk0p, msk0p);
-      Acc::p32Mul(src0p, src0p, msk0p);
-      Acc::p32RShift(src0p, src0p, 16);
-      Acc::p32Negate256SBW(msk0p, msk0p);
-
-      if (DstF::HAS_ALPHA)
-      {
-        Acc::p32ExtendPBBFromSBB(src0p, src0p);
-        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StorePRGB32(dst, src0p);
-      }
-      else
-      {
-        Acc::p32ExtendPBBFromSBB_Z210(src0p, src0p);
-        Acc::p32MulDiv256PBB_SBW_Z210(dst0p, dst0p, msk0p);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StoreZRGB32(dst, src0p);
-      }
-
-_A8_Glyph_Skip:
-      dst += DstF::SIZE;
-      src += 2;
-      msk += 1;
-    BLIT_LOOP_DstFx1_END(A8_Glyph)
-  }
-
-  template<typename DstF>
-  static FOG_INLINE void _comp8_vblit_a16_a8_extra(
-    uint8_t* dst, const uint8_t* src, const uint8_t* msk, int w)
-  {
-    BLIT_LOOP_DstFx1_INIT()
-
-    BLIT_LOOP_DstFx1_BEGIN(A8_Extra)
-      uint32_t dst0p;
-      uint32_t src0p;
-      uint32_t msk0p;
-
-      if (DstF::HAS_ALPHA)
-        DstF::p32LoadPRGB32(dst0p, dst);
-      else
-        DstF::p32LoadXRGB32(dst0p, dst);
-
-      Acc::p32Load2a(src0p, src);
-      Acc::p32Load2a(msk0p, msk);
-      Acc::p32Mul(src0p, src0p, msk0p);
-      Acc::p32RShift(src0p, src0p, 16);
-      Acc::p32Negate256SBW(msk0p, msk0p);
-
-      if (DstF::HAS_ALPHA)
-      {
-        Acc::p32ExtendPBBFromSBB(src0p, src0p);
-        Acc::p32MulDiv256PBB_SBW(dst0p, dst0p, msk0p);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StorePRGB32(dst, src0p);
-      }
-      else
-      {
-        Acc::p32ExtendPBBFromSBB_Z210(src0p, src0p);
-        Acc::p32MulDiv256PBB_SBW_Z210(dst0p, dst0p, msk0p);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StoreZRGB32(dst, src0p);
-      }
-
-      dst += DstF::SIZE;
-      src += 2;
-      msk += 2;
-    BLIT_LOOP_DstFx1_END(A8_Extra)
-  }
-
-  template<typename DstF>
-  static FOG_INLINE void _comp8_vblit_a16_argb32_glyph(
-    uint8_t* dst, const uint8_t* src, const uint8_t* msk, int w)
-  {
-    BLIT_LOOP_DstFx1_INIT()
-
-    BLIT_LOOP_DstFx1_BEGIN(ARGB32_Glyph)
-      uint32_t dst0p;
-      uint32_t src0p;
-      uint32_t msk0p_20, msk0p_31;
-
-      Acc::p32Load4a(msk0p_20, msk);
-      if (msk0p_20 == 0x00000000) goto _ARGB32_Glyph_Skip;
-
-      Acc::p32Load2a(src0p, src);
-      Acc::p32RShift(src0p, src0p, 8);
-      if (msk0p_20 == 0xFFFFFFFF) goto _ARGB32_Glyph_Fill;
-
-      if (DstF::HAS_ALPHA)
-      {
-        DstF::p32LoadPRGB32(dst0p, dst);
-        Acc::p32UnpackPBW256FromPBB255_2031(msk0p_20, msk0p_31, msk0p_20);
-        Acc::p32And(src0p, src0p, 0xFF);
-        Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, msk0p_20, src0p, msk0p_31, src0p);
-        Acc::p32MulDiv256PBB_PBW_2031(dst0p, dst0p, msk0p_20, msk0p_31);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StorePRGB32(dst, src0p);
-      }
-      else
-      {
-        DstF::p32LoadXRGB32(dst0p, dst);
-        Acc::p32UnpackPBW256FromPBB255_20Z1(msk0p_20, msk0p_31, msk0p_20);
-        Acc::p32And(src0p, src0p, 0xFF);
-        Acc::p32MulDiv256PBW_SBW_2x_Pack_20Z1(src0p, msk0p_20, src0p, msk0p_31, src0p);
-        Acc::p32MulDiv256PBB_PBW_20Z1(dst0p, dst0p, msk0p_20, msk0p_31);
-        Acc::p32Add(src0p, src0p, dst0p);
-        DstF::p32StoreZRGB32(dst, src0p);
-      }
-
-_ARGB32_Glyph_Skip:
-      dst += DstF::SIZE;
-      src += 2;
-      msk += 4;
-      BLIT_LOOP_DstFx1_CONTINUE(ARGB32_Glyph)
-
-_ARGB32_Glyph_Fill:
-      if (DstF::HAS_ALPHA)
-      {
-        Acc::p32ExtendPBBFromSBB(src0p, src0p);
-        DstF::p32StorePRGB32(dst, src0p);
-      }
-      else
-      {
-        Acc::p32ExtendPBBFromSBB_Z210(src0p, src0p);
-        DstF::p32StoreZRGB32(dst, src0p);
-      }
-
-      dst += DstF::SIZE;
-      src += 2;
-      msk += 4;
-    BLIT_LOOP_DstFx1_END(ARGB32_Glyph)
-  }
-
-  // ==========================================================================
-  // [COMP8 - VBlit - A16 - Line]
-  // ==========================================================================
-
-  template<typename DstF>
-  static void FOG_FASTCALL comp8_vblit_a16_line(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    _comp8_vblit_a16_c_opaque<DstF>(dst, src, w);
-  }
-
-  // ==========================================================================
-  // [COMP8 - VBlit - A16 - Span]
-  // ==========================================================================
-
-  template<typename DstF>
-  static void FOG_FASTCALL comp8_vblit_a16_span(
-    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
-  {
-    V_BLIT_SPAN8_BEGIN(DstF::SIZE)
-
-    // ------------------------------------------------------------------------
-    // [C-Opaque]
-    // ------------------------------------------------------------------------
-
-    V_BLIT_SPAN8_C_OPAQUE()
-    {
-      _comp8_vblit_a16_c_opaque<DstF>(dst, src, w);
-    }
-
-    // ------------------------------------------------------------------------
-    // [C-Mask]
-    // ------------------------------------------------------------------------
-
-    V_BLIT_SPAN8_C_MASK()
-    {
-      uint32_t msk0p;
-      uint32_t inv0p;
-
-      Acc::p32Copy(msk0p, msk0);
-      Acc::p32Negate256SBW(inv0p, msk0p);
-
-      _comp8_vblit_a16_c_mask<DstF>(dst, src, msk0p, inv0p, w);
-    }
-
-    // ------------------------------------------------------------------------
-    // [A8-Glyph]
-    // ------------------------------------------------------------------------
-
-    V_BLIT_SPAN8_A8_GLYPH()
-    {
-      _comp8_vblit_a16_a8_glyph<DstF>(dst, src, msk, w);
-    }
-
-    // ------------------------------------------------------------------------
-    // [A8-Extra]
-    // ------------------------------------------------------------------------
-
-    V_BLIT_SPAN8_A8_EXTRA()
-    {
-      _comp8_vblit_a16_a8_extra<DstF>(dst, src, msk, w);
-    }
-
-    // ------------------------------------------------------------------------
-    // [ARGB32-Glyph]
-    // ------------------------------------------------------------------------
-
-    V_BLIT_SPAN8_ARGB32_GLYPH()
-    {
-      _comp8_vblit_a16_argb32_glyph<DstF>(dst, src, msk, w);
     }
 
     V_BLIT_SPAN8_END()

@@ -1247,9 +1247,18 @@ static FOG_INLINE void p32ExtendPBBFromSBB_Z210(
 #if defined(FOG_ARCH_HAS_FAST_MUL)
   dst0 = x0 * 0x00010101U;
 #else
-  uint32_t t0 = x0;
-  dst0 = _FOG_ACC_COMBINE_2(t0  , t0 <<  8);
-  dst0 = t0 | (t0 << 8);
+  dst0 = _FOG_ACC_COMBINE_2(x0, x0 << 8);
+  dst0 = dst0 | (dst0 << 8);
+#endif
+}
+
+static FOG_INLINE void p32ExtendPBBFromSBB_Z2Z0(
+  uint32_t& dst0, const uint32_t& x0)
+{
+#if defined(FOG_ARCH_HAS_FAST_MUL)
+  dst0 = x0 * 0x00010001U;
+#else
+  dst0 = _FOG_ACC_COMBINE_2(x0, x0 << 16);
 #endif
 }
 

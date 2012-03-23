@@ -325,17 +325,17 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB24    ]);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::rgb24_vblit_a8_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::rgb24_vblit_i8_line);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::comp8_vblit_prgb64_line    <RasterOps_C::AccessRGB24>);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_line     <RasterOps_C::AccessRGB24>);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::rgb24_vblit_prgb64_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::rgb24_vblit_rgb48_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::rgb24_vblit_a16_line);
 
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrc::rgb24_vblit_xrgb32_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_XRGB32   ], RasterOps_C::CompositeSrc::rgb24_vblit_xrgb32_span);
-  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::rgb24_vblit_rgb24_span); // TODO
+  //FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::rgb24_vblit_rgb24_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::rgb24_vblit_a8_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::rgb24_vblit_i8_span);
-    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::comp8_vblit_prgb64_span    <RasterOps_C::AccessRGB24>);
-    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_span     <RasterOps_C::AccessRGB24>);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::rgb24_vblit_prgb64_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::rgb24_vblit_rgb48_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::rgb24_vblit_a16_span);
   }
 
@@ -343,7 +343,33 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // [RasterOps - Composite - Src - A8]
   // --------------------------------------------------------------------------
 
-  // TODO: Image compositing.
+  {
+    RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_A8][RASTER_COMPOSITE_CORE_SRC];
+
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrc::a8_cblit_prgb32_line);
+    FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
+
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_C::CompositeSrc::a8_cblit_prgb32_span);
+    FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB     ]);
+
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrc::a8_vblit_prgb32_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_XRGB32   ], RasterOps_C::CompositeSrc::a8_vblit_white_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::a8_vblit_white_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::a8_vblit_a8_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::a8_vblit_i8_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::a8_vblit_prgb64_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::a8_vblit_white_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::a8_vblit_a16_line);
+
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrc::a8_vblit_prgb32_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_XRGB32   ], RasterOps_C::CompositeSrc::a8_vblit_white_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::a8_vblit_white_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::a8_vblit_a8_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::a8_vblit_i8_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::a8_vblit_prgb64_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::a8_vblit_white_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::a8_vblit_a16_span);
+  }
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcOver - PRGB32]
@@ -1813,7 +1839,7 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   // [RasterOps - Pattern - Texture - Projection]
   // --------------------------------------------------------------------------
 
-  // TODO:
+  // TODO: Texture-Projection fetcher.
 
 #endif // FOG_RASTER_INIT_C
 

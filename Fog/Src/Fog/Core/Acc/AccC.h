@@ -510,7 +510,7 @@ static FOG_INLINE void p32Load4u(uint32_t& dst0, const void* srcp)
                              static_cast<uint32_t>(static_cast<const uint8_t*>(srcp)[1]) << 16,
                              static_cast<uint32_t>(static_cast<const uint8_t*>(srcp)[2]) <<  8,
                              static_cast<uint32_t>(static_cast<const uint8_t*>(srcp)[3])      );
-#endif // FOG_ARCH_UNALIGNED_ACCESS_16
+#endif // FOG_ARCH_UNALIGNED_ACCESS_32
 }
 
 static FOG_INLINE void p32Load4uBSwap(uint32_t& dst0, const void* srcp)
@@ -531,7 +531,7 @@ static FOG_INLINE void p32Load4uBSwap(uint32_t& dst0, const void* srcp)
                              static_cast<uint32_t>(static_cast<const uint8_t*>(srcp)[1]) <<  8,
                              static_cast<uint32_t>(static_cast<const uint8_t*>(srcp)[2]) << 16,
                              static_cast<uint32_t>(static_cast<const uint8_t*>(srcp)[3]) << 24);
-#endif // FOG_ARCH_UNALIGNED_ACCESS_16
+#endif // FOG_ARCH_UNALIGNED_ACCESS_32
 }
 
 // [00 11 22 33]

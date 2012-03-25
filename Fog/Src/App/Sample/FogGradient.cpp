@@ -77,8 +77,7 @@ void AppWindow::onPaint(Painter* _p)
 {
   Painter& p = *_p;
 
-  p.setCompositingOperator(COMPOSITE_SRC);
-  p.setSource(Texture(background, TEXTURE_TILE_REPEAT));
+  p.setSource(Argb32(0xFFFFFFFF));
   p.fillAll();
 
   ColorStopList stops;
@@ -92,8 +91,6 @@ void AppWindow::onPaint(Painter* _p)
   int x = 0;
   int y = 0;
 
-  p.setCompositingOperator(COMPOSITE_SRC_OVER);
-
   LinearGradientF linear;
   RadialGradientF radial;
   RectangularGradientF rectangular;
@@ -105,13 +102,13 @@ void AppWindow::onPaint(Painter* _p)
 
   radial.setStops(stops);
   radial.setCenter(64.0f, 64.0f);
-  radial.setFocal(40.0f, 40.0f);
-  radial.setRadius(50.0f, 50.0f);
+  radial.setFocal(44.0f, 44.0f);
+  radial.setRadius(42.0f, 42.0f);
 
   rectangular.setStops(stops);
-  rectangular.setFirst(16.0f, 16.0f);
-  rectangular.setSecond(112.0f, 112.0f);
-  rectangular.setFocal(40.0f, 40.0f);
+  rectangular.setFirst(24.0f, 24.0f);
+  rectangular.setSecond(104.0f, 104.0f);
+  rectangular.setFocal(44.0f, 44.0f);
 
   conical.setStops(stops);
   conical.setCenter(64.0f, 64.0f);
@@ -140,12 +137,21 @@ void AppWindow::onPaint(Painter* _p)
     for (uint32_t spread = 0; spread < GRADIENT_SPREAD_COUNT; spread++)
     {
       g->setGradientSpread(spread);
+
       p.save();
       p.translate(PointF(
         10.0f + float(spread) * (128.0f + 10.0f), 
         10.0f + float(type) * (128.0f + 10.0f)));
+      
+      p.setSource(Texture(background, TEXTURE_TILE_REPEAT));
+      p.fillRect(RectI(0, 0, 128, 128));
+
+      p.setSource(Argb32(0xFF000000));
+      p.drawRect(RectF(-0.5f, -0.5f, 129.0f, 129.0f));
+
       p.setSource(*g);
       p.fillRect(RectI(0, 0, 128, 128));
+      
       p.restore();
     }
   }

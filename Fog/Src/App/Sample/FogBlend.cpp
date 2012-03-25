@@ -77,11 +77,8 @@ void AppWindow::onPaint(Painter* _p)
 {
   Painter& p = *_p;
 
-  p.setCompositingOperator(COMPOSITE_SRC);
-  p.setSource(Texture(background, TEXTURE_TILE_REPEAT));
+  p.setSource(Argb32(0xFFFFFFFF));
   p.fillAll();
-
-  p.setCompositingOperator(COMPOSITE_SRC_OVER);
 
   SizeI s = sprite[0].getSize();
   int x = 0;
@@ -89,7 +86,13 @@ void AppWindow::onPaint(Painter* _p)
 
   for (uint32_t op = 0; op < COMPOSITE_COUNT; op++)
   {
-    PointI pos(x * (s.w + 5) + 5, y * (s.h + 5) + 5);
+    PointI pos(x * (s.w + 10) + 10, y * (s.h + 10) + 10);
+
+    p.setSource(Texture(background, TEXTURE_TILE_REPEAT));
+    p.fillRect(RectI(pos.x, pos.y, 128, 128));
+
+    p.setSource(Argb32(0xFF000000));
+    p.drawRect(RectF(float(pos.x) - 0.5f, float(pos.y) - 0.5f, 129.0f, 129.0f));
 
     p.beginGroup();
     p.setCompositingOperator(COMPOSITE_SRC);
@@ -112,7 +115,7 @@ FOG_UI_MAIN()
   AppWindow wnd(app.getUIEngine());
 
   wnd.setWindowTitle(StringW::fromAscii8("FogBlend"));
-  wnd.setWindowSize(SizeI(700, 700));
+  wnd.setWindowSize(SizeI(720, 740));
   wnd.show();
 
   return app.run();

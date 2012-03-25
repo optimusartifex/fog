@@ -295,11 +295,11 @@ struct FOG_NO_EXPORT Pattern
   FOG_INLINE err_t getGradient(RadialGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RADIAL, gr); }
   FOG_INLINE err_t getGradient(RadialGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RADIAL, gr); }
 
-  FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
-  FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
-
   FOG_INLINE err_t getGradient(RectangularGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_RECTANGULAR, gr); }
   FOG_INLINE err_t getGradient(RectangularGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_RECTANGULAR, gr); }
+
+  FOG_INLINE err_t getGradient(ConicalGradientF& gr) const { return _getGradientF(GRADIENT_TYPE_CONICAL, gr); }
+  FOG_INLINE err_t getGradient(ConicalGradientD& gr) const { return _getGradientD(GRADIENT_TYPE_CONICAL, gr); }
 
   FOG_INLINE err_t setPattern(const Pattern& other)
   {

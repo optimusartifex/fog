@@ -327,16 +327,21 @@ static FOG_INLINE void p32ZRGB32FromARGB64_2031(
 static FOG_INLINE void p32ZRGB32FromPRGB64_1032(
   uint32_t& dst0, const uint32_t& x0_10, const uint32_t& x0_32)
 {
+#if defined(FOG_ARCH_HAS_FAST_MUL)
+  dst0 = _FOG_ACC_COMBINE_2(((x0_10 & 0xFF00FF00U) * 0x0101U) >> 16,
+                            ((x0_32 << 8) & 0x00FF0000U));
+#else
   dst0 = _FOG_ACC_COMBINE_3((x0_10 >>  8) & 0x000000FFU,
-                             (x0_10 >> 16) & 0x0000FF00U,
-                             (x0_32 <<  8) & 0x00FF0000U);
+                            (x0_10 >> 16) & 0x0000FF00U,
+                            (x0_32 <<  8) & 0x00FF0000U);
+#endif
 }
 
 static FOG_INLINE void p32ZRGB32FromPRGB64_2031(
   uint32_t& dst0, const uint32_t& x0_20, const uint32_t& x0_31)
 {
   dst0 = _FOG_ACC_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
-                             (x0_31      ) & 0x0000FF00U);
+                            (x0_31      ) & 0x0000FF00U);
 }
 
 // ============================================================================
@@ -471,17 +476,22 @@ static FOG_INLINE void p32ARGB32FromARGB16_4444_bs(
 static FOG_INLINE void p32ARGB32FromARGB64_1032(
   uint32_t& dst0, const uint32_t& x0_10, const uint32_t& x0_32)
 {
+#if defined(FOG_ARCH_HAS_FAST_MUL)
+  dst0 = _FOG_ACC_COMBINE_2(((x0_10 & 0xFF00FF00U) * 0x0101U) >> 16,
+                            ((x0_32 & 0xFF00FF00U) * 0x0101U) & 0xFFFF0000U);
+#else
   dst0 = _FOG_ACC_COMBINE_4((x0_10 >>  8) & 0x000000FFU,
-                             (x0_10 >> 16) & 0x0000FF00U,
-                             (x0_32 <<  8) & 0x00FF0000U,
-                             (x0_32      ) & 0xFF000000U);
+                            (x0_10 >> 16) & 0x0000FF00U,
+                            (x0_32 <<  8) & 0x00FF0000U,
+                            (x0_32      ) & 0xFF000000U);
+#endif
 }
 
 static FOG_INLINE void p32ARGB32FromARGB64_2031(
   uint32_t& dst0, const uint32_t& x0_20, const uint32_t& x0_31)
 {
   dst0 = _FOG_ACC_COMBINE_2((x0_20 >>  8) & 0x00FF00FFU,
-                             (x0_31      ) & 0xFF00FF00U);
+                            (x0_31      ) & 0xFF00FF00U);
 }
 
 static FOG_INLINE void p64ARGB32FromARGB64(
@@ -489,9 +499,9 @@ static FOG_INLINE void p64ARGB32FromARGB64(
 {
 #if defined(FOG_ARCH_NATIVE_P64)
   dst0 = _FOG_ACC_COMBINE_4((uint32_t)(x0 >>  8) & 0x000000FFU,
-                             (uint32_t)(x0 >> 16) & 0x0000FF00U,
-                             (uint32_t)(x0 >> 24) & 0x00FF0000U,
-                             (uint32_t)(x0 >> 32) & 0xFF000000U);
+                            (uint32_t)(x0 >> 16) & 0x0000FF00U,
+                            (uint32_t)(x0 >> 24) & 0x00FF0000U,
+                            (uint32_t)(x0 >> 32) & 0xFF000000U);
 #else
   p32ARGB32FromARGB64_1032(dst0, x0.u32Lo, x0.u32Hi);
 #endif
@@ -512,9 +522,9 @@ static FOG_INLINE void p32ARGB32FromPRGB64_1032(
   uint32_t xb = (x0_10 & 0xFFFF) * recip;
 
   dst0 = _FOG_ACC_COMBINE_4((xa << 24),
-                             (xr >>  8) & 0x00FF0000U,
-                             (xg >> 16) & 0x0000FF00U,
-                             (xb >> 24));
+                            (xr >>  8) & 0x00FF0000U,
+                            (xg >> 16) & 0x0000FF00U,
+                            (xb >> 24));
 }
 
 static FOG_INLINE void p32ARGB32FromPRGB64_2031(
@@ -528,9 +538,9 @@ static FOG_INLINE void p32ARGB32FromPRGB64_2031(
   uint32_t xb = (x0_20 & 0xFFFF) * recip;
 
   dst0 = _FOG_ACC_COMBINE_4((xa << 24),
-                             (xr >>  8) & 0x00FF0000U,
-                             (xg >> 16) & 0x0000FF00U,
-                             (xb >> 24));
+                            (xr >>  8) & 0x00FF0000U,
+                            (xg >> 16) & 0x0000FF00U,
+                            (xb >> 24));
 }
 
 // ============================================================================
@@ -1322,7 +1332,7 @@ static FOG_INLINE void p32ZRGB64FromRGB16_555(
   t1 = (t1 & 0xFFFF0000);                 // [GGGGGGGG] [GGGGGGGG] [00000000] [00000000]
   t2 = (t2 >> 14);                        // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 
-  dst0_10 = _FOG_ACC_COMBINE_2(t0, t1);  // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, t1);   // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
   dst0_32 = t2;                           // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 }
 
@@ -1353,7 +1363,7 @@ static FOG_INLINE void p32ZRGB64FromRGB16_565(
   t1 = (t1 & 0xFFFF0000);                 // [GGGGGGGG] [GGGGGGGG] [00000000] [00000000]
   t2 = (t2 >> 15);                        // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 
-  dst0_10 = _FOG_ACC_COMBINE_2(t0, t1);  // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
+  dst0_10 = _FOG_ACC_COMBINE_2(t0, t1);   // [GGGGGGGG] [GGGGGGGG] [BBBBBBBB] [BBBBBBBB]
   dst0_32 = t2;                           // [00000000] [00000000] [RRRRRRRR] [RRRRRRRR]
 }
 
@@ -1521,9 +1531,9 @@ static FOG_INLINE void p64ARGB64FromARGB32(
 {
 #if defined(FOG_ARCH_NATIVE_P64)
   dst0 = _FOG_ACC_COMBINE_4((uint64_t)(x0 & 0x000000FFU)      ,
-                             (uint64_t)(x0 & 0x0000FF00U) <<  8,
-                             (uint64_t)(x0 & 0x00FF0000U) << 16,
-                             (uint64_t)(x0 & 0xFF000000U) << 24);
+                            (uint64_t)(x0 & 0x0000FF00U) <<  8,
+                            (uint64_t)(x0 & 0x00FF0000U) << 16,
+                            (uint64_t)(x0 & 0xFF000000U) << 24);
   dst0 = dst0 * FOG_UINT64_C(0x0101);
 #else
   p32ARGB64FromARGB32(dst0.u32Lo, dst0.u32Hi, x0);
@@ -1798,6 +1808,76 @@ static FOG_INLINE void p64PRGB64FromARGB64_1032(
   __p64& dst0_20, __p64& dst0_31, const __p64& x0_20, const __p64& x0_31)
 {
   p64PRGB64FromARGB64_2031(dst0_20, dst0_31, x0_20, x0_31);
+}
+
+// ============================================================================
+// [Fog::Acc - Misc]
+// ============================================================================
+
+// TODO: Categorize.
+
+static FOG_INLINE void p32LoadPRGB32_2031_FromPRGB64(
+  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* mem)
+{
+  dst_20 = mem[PIXEL_ARGB64_BYTE_R_HI];
+  dst_31 = mem[PIXEL_ARGB64_BYTE_A_HI];
+
+  dst_20 <<= 16;
+  dst_31 <<= 16;
+
+  dst_20 |= mem[PIXEL_ARGB64_BYTE_B_HI];
+  dst_31 |= mem[PIXEL_ARGB64_BYTE_G_HI];
+}
+
+static FOG_INLINE void p32LoadZRGB32_2031_FromPRGB64(
+  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* mem)
+{
+  dst_20 = mem[PIXEL_ARGB64_BYTE_R_HI];
+  dst_31 = mem[PIXEL_ARGB64_BYTE_G_HI];
+
+  dst_20 <<= 16;
+  dst_20 |= mem[PIXEL_ARGB64_BYTE_B_HI];
+}
+
+static FOG_INLINE void p32LoadPRGB32FromPRGB64(
+  uint32_t& dst, const uint8_t* mem)
+{
+#if defined(FOG_ARCH_HAS_FAST_MUL)
+  uint32_t t;
+
+  Acc::p32Load8a(dst, t, mem);
+  Acc::p32PRGB32FromPRGB64_1032(dst, dst, t);
+#else
+  dst  = src[PIXEL_ARGB64_BYTE_A_HI]; dst <<= 8;
+  dst |= src[PIXEL_ARGB64_BYTE_R_HI]; dst <<= 8;
+  dst |= src[PIXEL_ARGB64_BYTE_G_HI]; dst <<= 8;
+  dst |= src[PIXEL_ARGB64_BYTE_B_HI];
+#endif // FOG_ARCH_HAS_FAST_MUL
+}
+
+static FOG_INLINE void p32LoadZRGB32FromPRGB64(
+  uint32_t& dst, const uint8_t* mem)
+{
+#if defined(FOG_ARCH_HAS_FAST_MUL)
+  uint32_t t;
+
+  Acc::p32Load8a(dst, t, mem);
+  Acc::p32PRGB32FromPRGB64_1032(dst, dst, t);
+#else
+  dst  = src[PIXEL_ARGB64_BYTE_R_HI]; dst <<= 8;
+  dst |= src[PIXEL_ARGB64_BYTE_G_HI]; dst <<= 8;
+  dst |= src[PIXEL_ARGB64_BYTE_B_HI];
+#endif // FOG_ARCH_HAS_FAST_MUL
+}
+
+static FOG_INLINE void p32LoadZRGB32_2031_FromRGB48(
+  uint32_t& dst_20, uint32_t& dst_Z1, const uint8_t* mem)
+{
+  dst_20 = mem[PIXEL_ARGB64_BYTE_R_HI];
+  dst_Z1 = mem[PIXEL_ARGB64_BYTE_G_HI];
+
+  dst_20 <<= 16;
+  dst_20 |= mem[PIXEL_ARGB64_BYTE_B_HI];
 }
 
 //! @}

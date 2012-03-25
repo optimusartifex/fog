@@ -1582,10 +1582,10 @@ enum GRADIENT_TYPE
   GRADIENT_TYPE_LINEAR = 0,
   //! @brief Radial gradient type.
   GRADIENT_TYPE_RADIAL = 1,
-  //! @brief Conical gradient type.
-  GRADIENT_TYPE_CONICAL = 2,
   //! @brief Rectangular gradient type.
-  GRADIENT_TYPE_RECTANGULAR = 3,
+  GRADIENT_TYPE_RECTANGULAR = 2,
+  //! @brief Conical gradient type.
+  GRADIENT_TYPE_CONICAL = 3,
 
   //! @brief Invalid gradient type, used internally.
   GRADIENT_TYPE_INVALID = 4,

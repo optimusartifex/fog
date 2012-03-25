@@ -96,8 +96,8 @@ void AppWindow::onPaint(Painter* _p)
 
   LinearGradientF linear;
   RadialGradientF radial;
-  ConicalGradientF conical;
   RectangularGradientF rectangular;
+  ConicalGradientF conical;
 
   linear.setStops(stops);
   linear.setStart(32.0f, 32.0f);
@@ -108,14 +108,14 @@ void AppWindow::onPaint(Painter* _p)
   radial.setFocal(40.0f, 40.0f);
   radial.setRadius(50.0f, 50.0f);
 
+  rectangular.setStops(stops);
+  rectangular.setFirst(16.0f, 16.0f);
+  rectangular.setSecond(112.0f, 112.0f);
+  rectangular.setFocal(40.0f, 40.0f);
+
   conical.setStops(stops);
   conical.setCenter(64.0f, 64.0f);
   conical.setAngle(0.0f);
-
-  rectangular.setStops(stops);
-  rectangular.setFirst(32.0f, 32.0f);
-  rectangular.setSecond(92.0f, 92.0f);
-  rectangular.setFocal(72.0f, 72.0f);
 
   for (uint32_t type = 0; type < GRADIENT_TYPE_COUNT; type++)
   {
@@ -129,11 +129,11 @@ void AppWindow::onPaint(Painter* _p)
       case GRADIENT_TYPE_RADIAL:
         g = &radial;
         break;
-      case GRADIENT_TYPE_CONICAL:
-        g = &conical;
-        break;
       case GRADIENT_TYPE_RECTANGULAR:
         g = &rectangular;
+        break;
+      case GRADIENT_TYPE_CONICAL:
+        g = &conical;
         break;
     }
 
@@ -142,8 +142,8 @@ void AppWindow::onPaint(Painter* _p)
       g->setGradientSpread(spread);
       p.save();
       p.translate(PointF(
-        5.0f + float(spread) * (128.0f + 5.0f), 
-        5.0f + float(type) * (128.0f + 5.0f)));
+        10.0f + float(spread) * (128.0f + 10.0f), 
+        10.0f + float(type) * (128.0f + 10.0f)));
       p.setSource(*g);
       p.fillRect(RectI(0, 0, 128, 128));
       p.restore();

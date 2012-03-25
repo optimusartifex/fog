@@ -261,8 +261,8 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::prgb32_vblit_rgb24_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::prgb32_vblit_a8_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::prgb32_vblit_i8_line);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::comp8_vblit_prgb64_line    <RasterOps_C::AccessPRGB32>);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_line     <RasterOps_C::AccessPRGB32>);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::prgb32_vblit_prgb64_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_line<RasterOps_C::AccessPRGB32>);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::prgb32_vblit_a16_line);
 
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrc::prgb32_vblit_prgb32_span);
@@ -270,8 +270,8 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::prgb32_vblit_rgb24_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::prgb32_vblit_a8_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::prgb32_vblit_i8_span);
-    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::comp8_vblit_prgb64_span    <RasterOps_C::AccessPRGB32>);
-    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_span     <RasterOps_C::AccessPRGB32>);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::prgb32_vblit_prgb64_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_span<RasterOps_C::AccessPRGB32>);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::prgb32_vblit_a16_span);
   }
 
@@ -291,10 +291,10 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrc::prgb32_vblit_xrgb32_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_XRGB32   ], RasterOps_C::Convert::copy_32);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::prgb32_vblit_rgb24_line);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::prgb32_vblit_a8_line);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::prgb32_vblit_i8_line);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::comp8_vblit_prgb64_line    <RasterOps_C::AccessXRGB32>);
-    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_line     <RasterOps_C::AccessXRGB32>);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::xrgb32_vblit_a8_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::xrgb32_vblit_i8_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::xrgb32_vblit_prgb64_line);
+    FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_line<RasterOps_C::AccessXRGB32>);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::prgb32_vblit_a16_line);
 
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB32   ], RasterOps_C::CompositeSrc::xrgb32_vblit_xrgb32_span);
@@ -302,8 +302,8 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB24    ], RasterOps_C::CompositeSrc::xrgb32_vblit_rgb24_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A8       ], RasterOps_C::CompositeSrc::xrgb32_vblit_a8_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_I8       ], RasterOps_C::CompositeSrc::xrgb32_vblit_i8_span);
-    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::comp8_vblit_prgb64_span    <RasterOps_C::AccessXRGB32>);
-    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_span     <RasterOps_C::AccessXRGB32>);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_C::CompositeSrc::xrgb32_vblit_prgb64_span);
+    FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_C::CompositeSrc::comp8_vblit_rgb48_span<RasterOps_C::AccessXRGB32>);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_C::CompositeSrc::xrgb32_vblit_a16_span);
   }
 
@@ -1631,18 +1631,6 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------
-  // [RasterOps - Pattern - Gradient - Conical]
-  // --------------------------------------------------------------------------
-
-  gradient.create[GRADIENT_TYPE_CONICAL] = RasterOps_C::PGradientConical::create;
-
-#if defined(FOG_RASTER_INIT_C)
-  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_PRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
-  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_XRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
-  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_A8    ] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Base>;
-#endif // FOG_RASTER_INIT_C
-
-  // --------------------------------------------------------------------------
   // [RasterOps - Pattern - Gradient - Rectangular]
   // --------------------------------------------------------------------------
 
@@ -1672,6 +1660,18 @@ FOG_NO_EXPORT void RasterOps_init_C(void)
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_PRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_XRGB32][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_PRGB32_Reflect>;
   gradient.rectangular.fetch_proj_nearest  [IMAGE_FORMAT_A8    ][GRADIENT_SPREAD_REFLECT] = RasterOps_C::PGradientRectangular::fetch_proj_nearest<RasterOps_C::PGradientAccessor_A8_Reflect>;
+#endif // FOG_RASTER_INIT_C
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Pattern - Gradient - Conical]
+  // --------------------------------------------------------------------------
+
+  gradient.create[GRADIENT_TYPE_CONICAL] = RasterOps_C::PGradientConical::create;
+
+#if defined(FOG_RASTER_INIT_C)
+  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_PRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_XRGB32] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_PRGB32_Base>;
+  gradient.conical.fetch_simple_nearest[IMAGE_FORMAT_A8    ] = RasterOps_C::PGradientConical::fetch_simple_nearest<RasterOps_C::PGradientAccessor_A8_Base>;
 #endif // FOG_RASTER_INIT_C
 
   // --------------------------------------------------------------------------

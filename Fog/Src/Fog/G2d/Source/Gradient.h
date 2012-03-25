@@ -696,134 +696,6 @@ _FOG_NUM_F(RadialGradient)
 _FOG_NUM_D(RadialGradient)
 
 // ============================================================================
-// [Fog::ConicalGradientF]
-// ============================================================================
-
-//! @brief Conical gradient (float).
-struct FOG_NO_EXPORT ConicalGradientF : public GradientF
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ConicalGradientF() : GradientF(GRADIENT_TYPE_CONICAL)
-  {
-  }
-
-  FOG_INLINE ConicalGradientF(const ConicalGradientF& other);
-  explicit FOG_INLINE ConicalGradientF(const ConicalGradientD& other);
-
-  FOG_INLINE ConicalGradientF(const PointF& center, float angle) :
-    GradientF(GRADIENT_TYPE_CONICAL)
-  {
-    _pts[0] = center;
-    _pts[1].x = angle;
-  }
-
-  FOG_INLINE ~ConicalGradientF()
-  {
-  }
-
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t setGradient(const ConicalGradientF& other);
-  FOG_INLINE err_t setGradient(const ConicalGradientD& other);
-
-  FOG_INLINE const PointF& getCenter() const { return _pts[0]; }
-  FOG_INLINE float getAngle() const { return _pts[1].x; }
-
-  FOG_INLINE void setCenter(const PointF& p) { _pts[0] = p; }
-  FOG_INLINE void setCenter(float x, float y) { _pts[0].set(x, y); }
-
-  FOG_INLINE void setAngle(float angle) { _pts[1].x = angle; }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ConicalGradientF& operator=(const ConicalGradientF& other) { setGradient(other); return *this; }
-  FOG_INLINE ConicalGradientF& operator=(const ConicalGradientD& other) { setGradient(other); return *this; }
-};
-
-// ============================================================================
-// [Fog::ConicalGradientD]
-// ============================================================================
-
-//! @brief Conical gradient (double).
-struct FOG_NO_EXPORT ConicalGradientD : public GradientD
-{
-  // --------------------------------------------------------------------------
-  // [Construction / Destruction]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ConicalGradientD() : GradientD(GRADIENT_TYPE_CONICAL)
-  {
-  }
-
-  FOG_INLINE ConicalGradientD(const ConicalGradientF& other);
-  explicit FOG_INLINE ConicalGradientD(const ConicalGradientD& other);
-
-  FOG_INLINE ConicalGradientD(const PointD& center, double angle) :
-    GradientD(GRADIENT_TYPE_CONICAL)
-  {
-    _pts[0] = center;
-    _pts[1].x = angle;
-  }
-
-  FOG_INLINE ~ConicalGradientD()
-  {
-  }
-
-  // --------------------------------------------------------------------------
-  // [Accessors]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE err_t setGradient(const ConicalGradientF& other);
-  FOG_INLINE err_t setGradient(const ConicalGradientD& other);
-
-  FOG_INLINE const PointD& getCenter() const { return _pts[0]; }
-  FOG_INLINE double getAngle() const { return _pts[1].x; }
-
-  FOG_INLINE void setCenter(const PointD& p) { _pts[0] = p; }
-  FOG_INLINE void setCenter(double x, double y) { _pts[0].set(x, y); }
-
-  FOG_INLINE void setAngle(double angle) { _pts[1].x = angle; }
-
-  // --------------------------------------------------------------------------
-  // [Operator Overload]
-  // --------------------------------------------------------------------------
-
-  FOG_INLINE ConicalGradientD& operator=(const ConicalGradientF& other) { setGradient(other); return *this; }
-  FOG_INLINE ConicalGradientD& operator=(const ConicalGradientD& other) { setGradient(other); return *this; }
-};
-
-// ============================================================================
-// [Implemented Later]
-// ============================================================================
-
-FOG_INLINE ConicalGradientF::ConicalGradientF(const ConicalGradientF& other) : GradientF(other) {}
-FOG_INLINE ConicalGradientF::ConicalGradientF(const ConicalGradientD& other) : GradientF(other) {}
-
-FOG_INLINE ConicalGradientD::ConicalGradientD(const ConicalGradientF& other) : GradientD(other) {}
-FOG_INLINE ConicalGradientD::ConicalGradientD(const ConicalGradientD& other) : GradientD(other) {}
-
-FOG_INLINE err_t ConicalGradientF::setGradient(const ConicalGradientF& other) { return GradientF::setGradient(other); }
-FOG_INLINE err_t ConicalGradientF::setGradient(const ConicalGradientD& other) { return GradientF::setGradient(other); }
-
-FOG_INLINE err_t ConicalGradientD::setGradient(const ConicalGradientF& other) { return GradientD::setGradient(other); }
-FOG_INLINE err_t ConicalGradientD::setGradient(const ConicalGradientD& other) { return GradientD::setGradient(other); }
-
-// ============================================================================
-// [Fog::ConicalGradientT<>]
-// ============================================================================
-
-_FOG_NUM_T(ConicalGradient)
-_FOG_NUM_F(ConicalGradient)
-_FOG_NUM_D(ConicalGradient)
-
-// ============================================================================
 // [Fog::RectangularGradientF]
 // ============================================================================
 
@@ -964,6 +836,134 @@ FOG_INLINE err_t RectangularGradientD::setGradient(const RectangularGradientD& o
 _FOG_NUM_T(RectangularGradient)
 _FOG_NUM_F(RectangularGradient)
 _FOG_NUM_D(RectangularGradient)
+
+// ============================================================================
+// [Fog::ConicalGradientF]
+// ============================================================================
+
+//! @brief Conical gradient (float).
+struct FOG_NO_EXPORT ConicalGradientF : public GradientF
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ConicalGradientF() : GradientF(GRADIENT_TYPE_CONICAL)
+  {
+  }
+
+  FOG_INLINE ConicalGradientF(const ConicalGradientF& other);
+  explicit FOG_INLINE ConicalGradientF(const ConicalGradientD& other);
+
+  FOG_INLINE ConicalGradientF(const PointF& center, float angle) :
+    GradientF(GRADIENT_TYPE_CONICAL)
+  {
+    _pts[0] = center;
+    _pts[1].x = angle;
+  }
+
+  FOG_INLINE ~ConicalGradientF()
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setGradient(const ConicalGradientF& other);
+  FOG_INLINE err_t setGradient(const ConicalGradientD& other);
+
+  FOG_INLINE const PointF& getCenter() const { return _pts[0]; }
+  FOG_INLINE float getAngle() const { return _pts[1].x; }
+
+  FOG_INLINE void setCenter(const PointF& p) { _pts[0] = p; }
+  FOG_INLINE void setCenter(float x, float y) { _pts[0].set(x, y); }
+
+  FOG_INLINE void setAngle(float angle) { _pts[1].x = angle; }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ConicalGradientF& operator=(const ConicalGradientF& other) { setGradient(other); return *this; }
+  FOG_INLINE ConicalGradientF& operator=(const ConicalGradientD& other) { setGradient(other); return *this; }
+};
+
+// ============================================================================
+// [Fog::ConicalGradientD]
+// ============================================================================
+
+//! @brief Conical gradient (double).
+struct FOG_NO_EXPORT ConicalGradientD : public GradientD
+{
+  // --------------------------------------------------------------------------
+  // [Construction / Destruction]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ConicalGradientD() : GradientD(GRADIENT_TYPE_CONICAL)
+  {
+  }
+
+  FOG_INLINE ConicalGradientD(const ConicalGradientF& other);
+  explicit FOG_INLINE ConicalGradientD(const ConicalGradientD& other);
+
+  FOG_INLINE ConicalGradientD(const PointD& center, double angle) :
+    GradientD(GRADIENT_TYPE_CONICAL)
+  {
+    _pts[0] = center;
+    _pts[1].x = angle;
+  }
+
+  FOG_INLINE ~ConicalGradientD()
+  {
+  }
+
+  // --------------------------------------------------------------------------
+  // [Accessors]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE err_t setGradient(const ConicalGradientF& other);
+  FOG_INLINE err_t setGradient(const ConicalGradientD& other);
+
+  FOG_INLINE const PointD& getCenter() const { return _pts[0]; }
+  FOG_INLINE double getAngle() const { return _pts[1].x; }
+
+  FOG_INLINE void setCenter(const PointD& p) { _pts[0] = p; }
+  FOG_INLINE void setCenter(double x, double y) { _pts[0].set(x, y); }
+
+  FOG_INLINE void setAngle(double angle) { _pts[1].x = angle; }
+
+  // --------------------------------------------------------------------------
+  // [Operator Overload]
+  // --------------------------------------------------------------------------
+
+  FOG_INLINE ConicalGradientD& operator=(const ConicalGradientF& other) { setGradient(other); return *this; }
+  FOG_INLINE ConicalGradientD& operator=(const ConicalGradientD& other) { setGradient(other); return *this; }
+};
+
+// ============================================================================
+// [Implemented Later]
+// ============================================================================
+
+FOG_INLINE ConicalGradientF::ConicalGradientF(const ConicalGradientF& other) : GradientF(other) {}
+FOG_INLINE ConicalGradientF::ConicalGradientF(const ConicalGradientD& other) : GradientF(other) {}
+
+FOG_INLINE ConicalGradientD::ConicalGradientD(const ConicalGradientF& other) : GradientD(other) {}
+FOG_INLINE ConicalGradientD::ConicalGradientD(const ConicalGradientD& other) : GradientD(other) {}
+
+FOG_INLINE err_t ConicalGradientF::setGradient(const ConicalGradientF& other) { return GradientF::setGradient(other); }
+FOG_INLINE err_t ConicalGradientF::setGradient(const ConicalGradientD& other) { return GradientF::setGradient(other); }
+
+FOG_INLINE err_t ConicalGradientD::setGradient(const ConicalGradientF& other) { return GradientD::setGradient(other); }
+FOG_INLINE err_t ConicalGradientD::setGradient(const ConicalGradientD& other) { return GradientD::setGradient(other); }
+
+// ============================================================================
+// [Fog::ConicalGradientT<>]
+// ============================================================================
+
+_FOG_NUM_T(ConicalGradient)
+_FOG_NUM_F(ConicalGradient)
+_FOG_NUM_D(ConicalGradient)
 
 //! @}
 

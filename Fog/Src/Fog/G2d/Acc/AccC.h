@@ -1817,35 +1817,57 @@ static FOG_INLINE void p64PRGB64FromARGB64_1032(
 // TODO: Categorize.
 
 static FOG_INLINE void p32LoadPRGB32_2031_FromPRGB64(
-  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* mem)
+  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* src)
 {
-  dst_20 = mem[PIXEL_ARGB64_BYTE_R_HI];
-  dst_31 = mem[PIXEL_ARGB64_BYTE_A_HI];
+  dst_20 = src[PIXEL_ARGB64_BYTE_R_HI];
+  dst_31 = src[PIXEL_ARGB64_BYTE_A_HI];
 
   dst_20 <<= 16;
   dst_31 <<= 16;
 
-  dst_20 |= mem[PIXEL_ARGB64_BYTE_B_HI];
-  dst_31 |= mem[PIXEL_ARGB64_BYTE_G_HI];
+  dst_20 |= src[PIXEL_ARGB64_BYTE_B_HI];
+  dst_31 |= src[PIXEL_ARGB64_BYTE_G_HI];
+}
+
+static FOG_INLINE void p32LoadPRGB32_2031_FromRGB48(
+  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* src)
+{
+  dst_20 = src[PIXEL_RGB48_BYTE_R_HI];
+  dst_31 = src[PIXEL_RGB48_BYTE_G_HI];
+
+  dst_20 <<= 16;
+  dst_31 |= 0x00FF0000;
+
+  dst_20 |= src[PIXEL_RGB48_BYTE_B_HI];
 }
 
 static FOG_INLINE void p32LoadZRGB32_2031_FromPRGB64(
-  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* mem)
+  uint32_t& dst_20, uint32_t& dst_31, const uint8_t* src)
 {
-  dst_20 = mem[PIXEL_ARGB64_BYTE_R_HI];
-  dst_31 = mem[PIXEL_ARGB64_BYTE_G_HI];
+  dst_20 = src[PIXEL_ARGB64_BYTE_R_HI];
+  dst_31 = src[PIXEL_ARGB64_BYTE_G_HI];
 
   dst_20 <<= 16;
-  dst_20 |= mem[PIXEL_ARGB64_BYTE_B_HI];
+  dst_20 |= src[PIXEL_ARGB64_BYTE_B_HI];
+}
+
+static FOG_INLINE void p32LoadZRGB32_2031_FromRGB48(
+  uint32_t& dst_20, uint32_t& dst_Z1, const uint8_t* src)
+{
+  dst_20 = src[PIXEL_RGB48_BYTE_R_HI];
+  dst_Z1 = src[PIXEL_RGB48_BYTE_G_HI];
+
+  dst_20 <<= 16;
+  dst_20 |= src[PIXEL_RGB48_BYTE_B_HI];
 }
 
 static FOG_INLINE void p32LoadPRGB32FromPRGB64(
-  uint32_t& dst, const uint8_t* mem)
+  uint32_t& dst, const uint8_t* src)
 {
 #if defined(FOG_ARCH_HAS_FAST_MUL)
   uint32_t t;
 
-  Acc::p32Load8a(dst, t, mem);
+  Acc::p32Load8a(dst, t, src);
   Acc::p32PRGB32FromPRGB64_1032(dst, dst, t);
 #else
   dst  = src[PIXEL_ARGB64_BYTE_A_HI]; dst <<= 8;
@@ -1856,12 +1878,12 @@ static FOG_INLINE void p32LoadPRGB32FromPRGB64(
 }
 
 static FOG_INLINE void p32LoadZRGB32FromPRGB64(
-  uint32_t& dst, const uint8_t* mem)
+  uint32_t& dst, const uint8_t* src)
 {
 #if defined(FOG_ARCH_HAS_FAST_MUL)
   uint32_t t;
 
-  Acc::p32Load8a(dst, t, mem);
+  Acc::p32Load8a(dst, t, src);
   Acc::p32PRGB32FromPRGB64_1032(dst, dst, t);
 #else
   dst  = src[PIXEL_ARGB64_BYTE_R_HI]; dst <<= 8;
@@ -1870,14 +1892,21 @@ static FOG_INLINE void p32LoadZRGB32FromPRGB64(
 #endif // FOG_ARCH_HAS_FAST_MUL
 }
 
-static FOG_INLINE void p32LoadZRGB32_2031_FromRGB48(
-  uint32_t& dst_20, uint32_t& dst_Z1, const uint8_t* mem)
+static FOG_INLINE void p32LoadPRGB32FromRGB48(
+  uint32_t& dst, const uint8_t* src)
 {
-  dst_20 = mem[PIXEL_ARGB64_BYTE_R_HI];
-  dst_Z1 = mem[PIXEL_ARGB64_BYTE_G_HI];
+  dst |= src[PIXEL_RGB48_BYTE_R_HI]; dst <<= 8;
+  dst |= src[PIXEL_RGB48_BYTE_G_HI]; dst <<= 8;
+  dst |= src[PIXEL_RGB48_BYTE_B_HI];
+  dst |= 0xFF000000;
+}
 
-  dst_20 <<= 16;
-  dst_20 |= mem[PIXEL_ARGB64_BYTE_B_HI];
+static FOG_INLINE void p32LoadZRGB32FromRGB48(
+  uint32_t& dst, const uint8_t* src)
+{
+  dst  = src[PIXEL_RGB48_BYTE_R_HI]; dst <<= 8;
+  dst |= src[PIXEL_RGB48_BYTE_G_HI]; dst <<= 8;
+  dst |= src[PIXEL_RGB48_BYTE_B_HI];
 }
 
 //! @}

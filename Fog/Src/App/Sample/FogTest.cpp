@@ -345,6 +345,47 @@ static Image makeTurbulence(FeTurbulence* feData)
 }
 #endif
 
+#if 1
+static Image makeSpiral()
+{
+  Image image;
+  int x, y;
+  int w = 400, h = 400;
+
+  image.create(SizeI(w, h), IMAGE_FORMAT_PRGB32);
+
+  uint8_t* data = image.getFirstX();
+  ssize_t stride = image.getStride();
+
+  float cx = 200.0f;
+  float cy = 200.0f;
+
+  for (y = 0; y < h; y++, data += stride)
+  {
+    uint8_t* p = data;
+
+    for (x = 0; x < w; x++, p += 4)
+    {
+      float px = x;
+      float py = y;
+
+      float d;
+
+      //d = Math::atan2(px - cx, py - cy) / float(MATH_TWO_PI) + 0.5f;
+      d = Math::atan2(px - cx, py - cy) / float(MATH_TWO_PI);
+      d += Math::sqrt(Math::pow2(px - cx) + Math::pow2(py - cy)) * 0.005f;
+
+      d = Math::positiveFraction(d);
+
+      uint32_t pix = (int(d * 255.0f) * 0x010101) | 0xFF000000;
+      Acc::p32Store4a(p, pix);
+    }
+  }
+
+  return image;
+}
+#endif
+
 // ============================================================================
 // [SampleWindow - Declaration]
 // ============================================================================
@@ -420,14 +461,23 @@ void AppWindow::onPaint(Painter* _p)
   TimeTicks startTime = TimeTicks::now();
 
 #if 0
-  FeTurbulence fe;
-  fe.setBaseFrequency(0.007f);
-  fe.setNumOctaves(2);
-  fe.setTurbulenceType(FE_TURBULENCE_TYPE_FRACTAL_NOISE);
-  fe.setSeed(1000);
+  {
+    FeTurbulence fe;
+    fe.setBaseFrequency(0.007f);
+    fe.setNumOctaves(2);
+    fe.setTurbulenceType(FE_TURBULENCE_TYPE_FRACTAL_NOISE);
+    fe.setSeed(1000);
 
-  Image image = makeTurbulence(&fe);
-  p.blitImage(PointI(0, 0), image);
+    Image image = makeTurbulence(&fe);
+    p.blitImage(PointI(0, 0), image);
+  }
+#endif
+
+#if 0
+  {
+    Image image = makeSpiral();
+    p.blitImage(PointI(0, 0), image);
+  }
 #endif
 
   Font font;
@@ -437,7 +487,7 @@ void AppWindow::onPaint(Painter* _p)
   p.setSource(Argb32(0xFF000000));
   font.setSize(48);
 
-#if 1
+#if 0
   FaceCollection collection;
   FontEngine::getGlobal()->getAvailableFaces(collection);
 
@@ -459,7 +509,7 @@ void AppWindow::onPaint(Painter* _p)
   }
 #endif
 
-#if 0
+#if 1
   for (size_t i = 0; i < 18; i++)
   {
     StringW str(Ascii8("Sample text, VA AV, 1234567890"));

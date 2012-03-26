@@ -25,8 +25,33 @@ namespace Fog {
 FOG_NO_EXPORT void RasterOps_init_C(void);
 FOG_NO_EXPORT void RasterOps_init_skipped(void);
 
+FOG_CPU_DECLARE_INITIALIZER_SSE2( RasterOps_init_SSE2(void) )
+
 // ============================================================================
-// [Fog::G2d - Defs]
+// [Fog::G2d - Initialization / Finalization]
+// ============================================================================
+
+FOG_NO_EXPORT void RasterOps_init(void)
+{
+  // Install C optimized code (default).
+  RasterOps_init_C();
+
+  // --------------------------------------------------------------------------
+  // [CPU Based Optimizations]
+  // --------------------------------------------------------------------------
+
+  FOG_CPU_USE_INITIALIZER_SSE2( RasterOps_init_SSE2() )
+
+  // --------------------------------------------------------------------------
+  // [Init-Skipped]
+  // --------------------------------------------------------------------------
+
+  // Initialize functions marked as 'SKIP'.
+  RasterOps_init_skipped();
+}
+
+// ============================================================================
+// [Fog::G2d - Init-Skipped]
 // ============================================================================
 
 // Initialize CBlit by CompositeCore operator.
@@ -60,19 +85,6 @@ FOG_NO_EXPORT void RasterOps_init_skipped(void);
     \
     api.compositeExt[IMAGE_FORMAT_##_DstFormat_][RASTER_COMPOSITE_EXT_##_DstExtFormat_].vblit_span[RASTER_VBLIT_##_DstFormat_##_AND_##_SrcFormat_] = \
       api.compositeExt[IMAGE_FORMAT_##_DstFormat_][RASTER_COMPOSITE_EXT_##_ByExtFormat_].vblit_span[RASTER_VBLIT_##_DstFormat_##_AND_##_SrcFormat_]
-
-// ============================================================================
-// [Fog::G2d - Initialization / Finalization]
-// ============================================================================
-
-FOG_NO_EXPORT void RasterOps_init(void)
-{
-  // Install C optimized code (default).
-  RasterOps_init_C();
-
-  // Initialize functions marked as 'SKIP'.
-  RasterOps_init_skipped();
-}
 
 FOG_NO_EXPORT void RasterOps_init_skipped(void)
 {

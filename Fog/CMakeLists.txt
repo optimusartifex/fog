@@ -1210,13 +1210,11 @@ Set_Source_Files_Properties(
 )
 
 FogAddOptimizedSources(FOG_G2D_PAINTING_SOURCES SSE2
+  Src/Fog/G2d/Painting/RasterInit_SSE2.cpp
   Src/Fog/G2d/Painting/RasterPaintEngine_SSE2.cpp
 )
 
 # [Fog/G2d/Painting/RasterOps_C]
-Set(FOG_G2D_PAINTING_RASTEROPS_C_SOURCES
-)
-
 Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
   Src/Fog/G2d/Painting/RasterOps_C/BaseAccess_p.h
   Src/Fog/G2d/Painting/RasterOps_C/BaseConvert_p.h
@@ -1247,6 +1245,20 @@ Set(FOG_G2D_PAINTING_RASTEROPS_C_HEADERS
   Src/Fog/G2d/Painting/RasterOps_C/TextureProjection_p.h
   Src/Fog/G2d/Painting/RasterOps_C/TextureScale_p.h
   Src/Fog/G2d/Painting/RasterOps_C/TextureSimple_p.h
+)
+
+# [Fog/G2d/Painting/RasterOps_SSE2]
+Set(FOG_G2D_PAINTING_RASTEROPS_SSE2_HEADERS
+  Src/Fog/G2d/Painting/RasterOps_SSE2/BaseAccess_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/BaseConvert_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/BaseDefs_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/BaseHelpers_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeBase_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeClear_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeExt_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeFunc_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeSrc_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeSrcOver_p.h
 )
 
 # [Fog/G2d/Source]
@@ -1429,10 +1441,8 @@ FogAddSourceGroup("Fog/G2d/Text"             ${FOG_G2D_TEXT_SOURCES}            
 FogAddSourceGroup("Fog/G2d/Text/OpenType"    ${FOG_G2D_TEXT_OPENTYPE_SOURCES}    ${FOG_G2D_TEXT_OPENTYPE_HEADERS}   )
 FogAddSourceGroup("Fog/G2d/Tools"            ${FOG_G2D_TOOLS_SOURCES}            ${FOG_G2D_TOOLS_HEADERS}           )
 
-FogAddSourceGroup("Fog/G2d/Painting/RasterOps_C"
-  ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
-  ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
-)
+FogAddSourceGroup("Fog/G2d/Painting/RasterOps_C"    ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}   )
+FogAddSourceGroup("Fog/G2d/Painting/RasterOps_SSE2" ${FOG_G2D_PAINTING_RASTEROPS_SSE2_HEADERS})
 
 # =============================================================================
 # [Fog/UI]
@@ -1555,7 +1565,6 @@ Set(FOG_ALL_SOURCES
   ${FOG_G2D_IMAGING_FILTERS_SOURCES}
   ${FOG_G2D_OS_SOURCES}
   ${FOG_G2D_PAINTING_SOURCES}
-  ${FOG_G2D_PAINTING_RASTEROPS_C_SOURCES}
   ${FOG_G2D_SOURCE_SOURCES}
   ${FOG_G2D_SVG_SOURCES}
   ${FOG_G2D_TEXT_SOURCES}
@@ -1586,6 +1595,7 @@ Set(FOG_ALL_HEADERS
   ${FOG_G2D_OS_HEADERS}
   ${FOG_G2D_PAINTING_HEADERS}
   ${FOG_G2D_PAINTING_RASTEROPS_C_HEADERS}
+  ${FOG_G2D_PAINTING_RASTEROPS_SSE2_HEADERS}
   ${FOG_G2D_GEOMETRY_HEADERS}
   ${FOG_G2D_SOURCE_HEADERS}
   ${FOG_G2D_SVG_HEADERS}

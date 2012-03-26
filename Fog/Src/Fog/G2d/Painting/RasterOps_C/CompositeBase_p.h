@@ -29,7 +29,7 @@ struct FOG_NO_EXPORT CompositeBase
     FOG_INLINE void init(uint32_t pattern)
     {
 #if FOG_ARCH_BITS >= 64
-      _pattern = (uint64_t)pattern * FOG_UINT64_C(0x0000000100000001);
+      _pattern = static_cast<uint64_t>(pattern) * FOG_UINT64_C(0x0000000100000001);
 #else
       _pattern = pattern;
 #endif
@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT CompositeBase
       // Align to 64-bits when running on 64-bit mode.
       if ((size_t)dst & 0x7)
       {
-        ((uint32_t*)dst)[0] = (uint32_t)_pattern;
+        ((uint32_t*)dst)[0] = static_cast<uint32_t>(_pattern);
         dst += 4;
         if (--w == 0) return dst;
       }
@@ -78,13 +78,13 @@ struct FOG_NO_EXPORT CompositeBase
       {
         default: FOG_ASSERT_NOT_REACHED();
 
-        case 7: ((uint32_t*)dst)[-7] = (uint32_t)_pattern;
-        case 6: ((uint32_t*)dst)[-6] = (uint32_t)_pattern;
-        case 5: ((uint32_t*)dst)[-5] = (uint32_t)_pattern;
-        case 4: ((uint32_t*)dst)[-4] = (uint32_t)_pattern;
-        case 3: ((uint32_t*)dst)[-3] = (uint32_t)_pattern;
-        case 2: ((uint32_t*)dst)[-2] = (uint32_t)_pattern;
-        case 1: ((uint32_t*)dst)[-1] = (uint32_t)_pattern;
+        case 7: ((uint32_t*)dst)[-7] = static_cast<uint32_t>(_pattern);
+        case 6: ((uint32_t*)dst)[-6] = static_cast<uint32_t>(_pattern);
+        case 5: ((uint32_t*)dst)[-5] = static_cast<uint32_t>(_pattern);
+        case 4: ((uint32_t*)dst)[-4] = static_cast<uint32_t>(_pattern);
+        case 3: ((uint32_t*)dst)[-3] = static_cast<uint32_t>(_pattern);
+        case 2: ((uint32_t*)dst)[-2] = static_cast<uint32_t>(_pattern);
+        case 1: ((uint32_t*)dst)[-1] = static_cast<uint32_t>(_pattern);
         case 0: break;
       }
 

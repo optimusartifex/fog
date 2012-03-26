@@ -45,22 +45,22 @@
 #include <Fog/G2d/Source/Pattern.h>
 #include <Fog/G2d/Source/Texture.h>
 
-// [Dependencies - Fog::RasterOps_C]
+// [Dependencies - RasterOps_C]
 #include <Fog/G2d/Painting/RasterOps_C/BaseAccess_p.h>
 
 // ============================================================================
-// [C_BLIT_8]
+// [FOG_CBLIT_SPAN8]
 // ============================================================================
 
 // Macros to help creating blit functions.
 //
 // Usage:
 //
-//    C_BLIT_SPAN8_BEGIN(bytes_per_pixel)
+//    FOG_CBLIT_SPAN8_BEGIN(bytes_per_pixel)
 //
 //    -------------------------------------------------------------------------
 //
-//    C_BLIT_SPAN8_C_ANY()
+//    FOG_CBLIT_SPAN8_C_ANY()
 //    {
 //      'dst'  - The destination pointer.
 //      'msk0' - The const-mask value.
@@ -69,12 +69,12 @@
 //
 //      or
 //
-//    C_BLIT_SPAN8_C_OPAQUE()
+//    FOG_CBLIT_SPAN8_C_OPAQUE()
 //    {
 //      'dst'  - The destination pointer.
 //      'w'    - The number of pixels to process (width).
 //    }
-//    C_BLIT_SPAN8_C_MASK()
+//    FOG_CBLIT_SPAN8_C_MASK()
 //    {
 //      'dst'  - The destination pointer.
 //      'msk0' - The const-mask value.
@@ -83,7 +83,7 @@
 //
 //    -------------------------------------------------------------------------
 //
-//    C_BLIT_SPAN8_A8_GLYPH()
+//    FOG_CBLIT_SPAN8_A8_GLYPH()
 //    {
 //      'dst'  - The destination pointer.
 //      'msk'  - The a8-mask pointer.
@@ -92,7 +92,7 @@
 //
 //    -------------------------------------------------------------------------
 //
-//    C_BLIT_SPAN8_A8_EXTRA()
+//    FOG_CBLIT_SPAN8_A8_EXTRA()
 //    {
 //      'dst'  - The destination pointer.
 //      'msk'  - The a8-extended-mask pointer. Omit checks for fully-transparent
@@ -102,7 +102,7 @@
 //
 //    -------------------------------------------------------------------------
 //
-//    C_BLIT_SPAN8_ARGB32_GLYPH()
+//    FOG_CBLIT_SPAN8_ARGB32_GLYPH()
 //    {
 //      'dst'  - The destination pointer.
 //      'msk'  - The argb32-mask pointer.
@@ -111,13 +111,13 @@
 //
 //    -------------------------------------------------------------------------
 //
-//    C_BLIT_SPAN8_END()
+//    FOG_CBLIT_SPAN8_END()
 //
-// The V_BLIT_SPAN8_XXX functions are used when there is variable-source. The
+// The FOG_VBLIT_SPAN8_XXX functions are used when there is variable-source. The
 // 'src' variable should be used inside of 'CASE' sections.
 
 //! @brief CBlit - RasterSpan8 - Begin.
-#define C_BLIT_SPAN8_BEGIN(BPP) \
+#define FOG_CBLIT_SPAN8_BEGIN(_Bpp_) \
   uint8_t* dstBase = dst; \
   \
   do { \
@@ -125,7 +125,7 @@
     int w = (int)(span->getX1() - x); \
     FOG_ASSUME(w > 0); \
     \
-    dst = dstBase + (size_t)(uint)x * BPP; \
+    dst = dstBase + (size_t)(uint)x * _Bpp_; \
     const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getGenericMask(); \
     \
     switch (span->getType()) \
@@ -134,7 +134,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief CBlit - RasterSpan8 - C-Any.
-#define C_BLIT_SPAN8_C_ANY() \
+#define FOG_CBLIT_SPAN8_C_ANY() \
       case RASTER_SPAN_C: \
       { \
         uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
@@ -142,7 +142,7 @@
         {
 
 //! @brief CBlit - RasterSpan8 - C-Opaque.
-#define C_BLIT_SPAN8_C_OPAQUE() \
+#define FOG_CBLIT_SPAN8_C_OPAQUE() \
       case RASTER_SPAN_C: \
       { \
         uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
@@ -152,7 +152,7 @@
         {
 
 //! @brief CBlit - RasterSpan8 - C-Mask.
-#define C_BLIT_SPAN8_C_MASK() \
+#define FOG_CBLIT_SPAN8_C_MASK() \
         } \
         else \
         {
@@ -160,7 +160,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief CBlit - RasterSpan8 - A8-Glyph.
-#define C_BLIT_SPAN8_A8_GLYPH() \
+#define FOG_CBLIT_SPAN8_A8_GLYPH() \
         } \
         break; \
       } \
@@ -173,7 +173,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief CBlit - RasterSpan8 - A8-Extra.
-#define C_BLIT_SPAN8_A8_EXTRA() \
+#define FOG_CBLIT_SPAN8_A8_EXTRA() \
         break; \
       } \
       \
@@ -184,7 +184,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief CBlit - RasterSpan8 - ARGB32-Glyph.
-#define C_BLIT_SPAN8_ARGB32_GLYPH() \
+#define FOG_CBLIT_SPAN8_ARGB32_GLYPH() \
         break; \
       } \
       \
@@ -196,7 +196,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief CBlit - End.
-#define C_BLIT_SPAN8_END() \
+#define FOG_CBLIT_SPAN8_END() \
         break; \
       } \
     } \
@@ -205,12 +205,11 @@
 
 
 // ============================================================================
-// [V_BLIT_8]
+// [FOG_VBLIT_SPAN8]
 // ============================================================================
 
-
 //! @brief VBlit - RasterSpan8 - Begin.
-#define V_BLIT_SPAN8_BEGIN(BPP) \
+#define FOG_VBLIT_SPAN8_BEGIN(_Bpp_) \
   uint8_t* dstBase = dst; \
   \
   do { \
@@ -218,7 +217,7 @@
     int w = (int)((uint)span->getX1() - x); \
     FOG_ASSUME(w > 0); \
     \
-    dst = dstBase + x * BPP; \
+    dst = dstBase + x * _Bpp_; \
     const uint8_t* _msk = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getGenericMask(); \
     const uint8_t* src = (const uint8_t*)reinterpret_cast<const RasterSpan8*>(span)->getData(); \
     \
@@ -228,7 +227,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief VBlit - RasterSpan8 - C-Any.
-#define V_BLIT_SPAN8_C_ANY() \
+#define FOG_VBLIT_SPAN8_C_ANY() \
       case RASTER_SPAN_C: \
       { \
         uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
@@ -236,7 +235,7 @@
         {
 
 //! @brief VBlit - RasterSpan8 - C-Opaque.
-#define V_BLIT_SPAN8_C_OPAQUE() \
+#define FOG_VBLIT_SPAN8_C_OPAQUE() \
       case RASTER_SPAN_C: \
       { \
         uint32_t msk0 = RasterSpan8::getConstMaskFromPointer(_msk); \
@@ -246,7 +245,7 @@
         {
 
 //! @brief VBlit - RasterSpan8 - C-Mask.
-#define V_BLIT_SPAN8_C_MASK() \
+#define FOG_VBLIT_SPAN8_C_MASK() \
         } \
         else \
         {
@@ -254,7 +253,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief VBlit - RasterSpan8 - A8-Glyph.
-#define V_BLIT_SPAN8_A8_GLYPH() \
+#define FOG_VBLIT_SPAN8_A8_GLYPH() \
         } \
         break; \
       } \
@@ -267,7 +266,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief VBlit - RasterSpan8 - A8-Extended.
-#define V_BLIT_SPAN8_A8_EXTRA() \
+#define FOG_VBLIT_SPAN8_A8_EXTRA() \
         break; \
       } \
       \
@@ -278,7 +277,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief VBlit - RasterSpan8 - ARGB32-Glyph.
-#define V_BLIT_SPAN8_ARGB32_GLYPH() \
+#define FOG_VBLIT_SPAN8_ARGB32_GLYPH() \
         break; \
       } \
       \
@@ -292,7 +291,7 @@
 //! @brief VBlit - RasterSpan8 - A8-Glyph which handles both - A8 and ARGB32 in
 //! case that the target is A8 (there is no reason to use separate blit loops
 //! for these spans).
-#define V_BLIT_SPAN8_A8_OR_ARGB32_GLYPH() \
+#define FOG_VBLIT_SPAN8_A8_OR_ARGB32_GLYPH() \
         } \
         break; \
       } \
@@ -315,7 +314,7 @@
 // ----------------------------------------------------------------------------
 
 //! @brief VBlit - End.
-#define V_BLIT_SPAN8_END() \
+#define FOG_VBLIT_SPAN8_END() \
         break; \
       } \
     } \
@@ -1290,7 +1289,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [Fog::RasterC - P_FETCH]
+// [Fog::RasterOps_C - P_FETCH]
 // ============================================================================
 
 // Example of fetch function:
@@ -1373,7 +1372,7 @@ _##_Group_##_End: \
 #define P_FETCH_SPAN8_SET_CURRENT() \
     reinterpret_cast<RasterSpan8*>(span)->setData(dst);
 
-#define P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(_BPP_) \
+#define P_FETCH_SPAN8_SET_CURRENT_AND_MERGE_NEIGHBORS(_Bpp_) \
     reinterpret_cast<RasterSpan8*>(span)->setData(dst); \
     \
     { \
@@ -1381,7 +1380,7 @@ _##_Group_##_End: \
       if (next && next->getX0() == span->getX1()) \
       { \
         do { \
-          reinterpret_cast<RasterSpan8*>(next)->setData(dst + (uint)w * _BPP_); \
+          reinterpret_cast<RasterSpan8*>(next)->setData(dst + (uint)w * _Bpp_); \
           span = next; \
           w = (int)((uint)next->getX1() - (uint)x); \
           next = span->getNext(); \
@@ -1422,7 +1421,7 @@ _##_Group_##_End: \
   }
 
 // ============================================================================
-// [Fog::RasterC - P_INTERPOLATE_C]
+// [Fog::RasterOps_C - P_INTERPOLATE_C]
 // ============================================================================
 
 #if FOG_ARCH_BITS >= 64

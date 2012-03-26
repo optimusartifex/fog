@@ -484,7 +484,7 @@ _Has16BPC:
 };
 
 // ============================================================================
-// [Fog::RasterC - PTextureAccessor - PRGB32]
+// [Fog::RasterOps_C - PTextureAccessor - PRGB32]
 // ============================================================================
 
 struct FOG_NO_EXPORT PTextureAccessor_PRGB32_Base
@@ -514,7 +514,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_Base
 };
 
 // ============================================================================
-// [Fog::RasterC - PTextureAccessor - PRGB32 <- PRGB32]
+// [Fog::RasterOps_C - PTextureAccessor - PRGB32 <- PRGB32]
 // ============================================================================
 
 struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_PRGB32 : public PTextureAccessor_PRGB32_Base
@@ -535,7 +535,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_PRGB32 : public PTextureAccess
 };
 
 // ============================================================================
-// [Fog::RasterC - PTextureAccessor - PRGB32 <- XRGB32]
+// [Fog::RasterOps_C - PTextureAccessor - PRGB32 <- XRGB32]
 // ============================================================================
 
 struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_XRGB32 : public PTextureAccessor_PRGB32_Base
@@ -556,7 +556,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_XRGB32 : public PTextureAccess
 };
 
 // ============================================================================
-// [Fog::RasterC - PTextureAccessor - PRGB32 <- RGB24]
+// [Fog::RasterOps_C - PTextureAccessor - PRGB32 <- RGB24]
 // ============================================================================
 
 struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_RGB24 : public PTextureAccessor_PRGB32_Base
@@ -577,7 +577,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_RGB24 : public PTextureAccesso
 };
 
 // ============================================================================
-// [Fog::RasterC - PTextureAccessor - PRGB32 <- A8]
+// [Fog::RasterOps_C - PTextureAccessor - PRGB32 <- A8]
 // ============================================================================
 
 struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_A8 : public PTextureAccessor_PRGB32_Base
@@ -598,7 +598,7 @@ struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_A8 : public PTextureAccessor_P
 };
 
 // ============================================================================
-// [Fog::RasterC - PTextureAccessor - PRGB32 <- I8]
+// [Fog::RasterOps_C - PTextureAccessor - PRGB32 <- I8]
 // ============================================================================
 
 struct FOG_NO_EXPORT PTextureAccessor_PRGB32_From_I8 : public PTextureAccessor_PRGB32_Base

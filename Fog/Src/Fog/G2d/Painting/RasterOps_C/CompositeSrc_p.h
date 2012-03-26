@@ -5057,26 +5057,7 @@ _A8_Glyph_Skip:
   // [A8 - VBlit - White - Line]
   // ==========================================================================
 
-  static void FOG_FASTCALL a8_vblit_white_line(
-    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
-  {
-    uint32_t src0p = 0xFFFFFFFF;
-
-    BLIT_LOOP_8x8_INIT()
-
-    BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
-      Acc::p32Store1b(dst, src0p);
-
-      dst += 1;
-    BLIT_LOOP_8x8_SMALL_END(C_Opaque)
-
-    BLIT_LOOP_8x8_MAIN_BEGIN(C_Opaque)
-      Acc::p32Store1b(dst + 0, src0p);
-      Acc::p32Store1b(dst + 4, src0p);
-
-      dst += 8;
-    BLIT_LOOP_8x8_MAIN_END(C_Opaque)
-  }
+  // USE: Convert::fill_8
 
   // ==========================================================================
   // [A8 - VBlit - White - Span]

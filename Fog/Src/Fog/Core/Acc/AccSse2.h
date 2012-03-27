@@ -1499,34 +1499,88 @@ static FOG_INLINE void m128iRShiftPI32(__m128i& dst0, const __m128i& x0)
 // [Fog::Acc - SSE2 - Negate255/256]
 // ============================================================================
 
-static FOG_INLINE void m128iNegate255PI8(__m128i& dst0, const __m128i& x0)
+static FOG_INLINE void m128iNegate255PI8(
+  __m128i& dst0, const __m128i& x0)
 {
   dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
 }
 
-static FOG_INLINE void m128iNegate255PI16(__m128i& dst0, const __m128i& x0)
+static FOG_INLINE void m128iNegate255PI8_2x(
+  __m128i& dst0, const __m128i& x0,
+  __m128i& dst1, const __m128i& x1)
+{
+  dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+  dst1 = _mm_xor_si128(x1, FOG_XMM_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+}
+
+static FOG_INLINE void m128iNegate255PI16(
+  __m128i& dst0, const __m128i& x0)
 {
   dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
 }
 
-static FOG_INLINE void m128iNegate256PI16(__m128i& dst0, const __m128i& x0)
+static FOG_INLINE void m128iNegate255PI16_2x(
+  __m128i& dst0, const __m128i& x0,
+  __m128i& dst1, const __m128i& x1)
+{
+  dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+  dst1 = _mm_xor_si128(x1, FOG_XMM_GET_CONST_PI(00FF00FF00FF00FF_00FF00FF00FF00FF));
+}
+
+static FOG_INLINE void m128iNegate256PI16(
+  __m128i& dst0, const __m128i& x0)
 {
   dst0 = _mm_sub_epi16(FOG_XMM_GET_CONST_PI(0100010001000100_0100010001000100), x0);
 }
 
-static FOG_INLINE void m128iNegate65535PI16(__m128i& dst0, const __m128i& x0)
+static FOG_INLINE void m128iNegate256PI16_2x(
+  __m128i& dst0, const __m128i& x0,
+  __m128i& dst1, const __m128i& x1)
+{
+  dst0 = _mm_sub_epi16(FOG_XMM_GET_CONST_PI(0100010001000100_0100010001000100), x0);
+  dst1 = _mm_sub_epi16(FOG_XMM_GET_CONST_PI(0100010001000100_0100010001000100), x1);
+}
+
+static FOG_INLINE void m128iNegate65535PI16(
+  __m128i& dst0, const __m128i& x0)
 {
   dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
 }
 
-static FOG_INLINE void m128iNegate65535PI32(__m128i& dst0, const __m128i& x0)
+static FOG_INLINE void m128iNegate65535PI16_2x(
+  __m128i& dst0, const __m128i& x0,
+  __m128i& dst1, const __m128i& x1)
+{
+  dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+  dst1 = _mm_xor_si128(x1, FOG_XMM_GET_CONST_PI(FFFFFFFFFFFFFFFF_FFFFFFFFFFFFFFFF));
+}
+
+static FOG_INLINE void m128iNegate65535PI32(
+  __m128i& dst0, const __m128i& x0)
 {
   dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(0000FFFF0000FFFF_0000FFFF0000FFFF));
 }
 
-static FOG_INLINE void m128iNegate65536PI32(__m128i& dst0, const __m128i& x0)
+static FOG_INLINE void m128iNegate65535PI32_2x(
+  __m128i& dst0, const __m128i& x0,
+  __m128i& dst1, const __m128i& x1)
+{
+  dst0 = _mm_xor_si128(x0, FOG_XMM_GET_CONST_PI(0000FFFF0000FFFF_0000FFFF0000FFFF));
+  dst1 = _mm_xor_si128(x1, FOG_XMM_GET_CONST_PI(0000FFFF0000FFFF_0000FFFF0000FFFF));
+}
+
+static FOG_INLINE void m128iNegate65536PI32(
+  __m128i& dst0, const __m128i& x0)
 {
   dst0 = _mm_sub_epi32(FOG_XMM_GET_CONST_PI(0001000000010000_0001000000010000), x0);
+}
+
+static FOG_INLINE void m128iNegate65536PI32_2x(
+  __m128i& dst0, const __m128i& x0,
+  __m128i& dst1, const __m128i& x1)
+{
+  dst0 = _mm_sub_epi32(FOG_XMM_GET_CONST_PI(0001000000010000_0001000000010000), x0);
+  dst1 = _mm_sub_epi32(FOG_XMM_GET_CONST_PI(0001000000010000_0001000000010000), x1);
 }
 
 // ============================================================================
@@ -1672,7 +1726,7 @@ static FOG_INLINE void m128iMulDiv256PI16(
   dst0 = _mm_slli_epi16(dst0, 8);
 }
 
-static FOG_INLINE void m128iMulDiv256PI16(
+static FOG_INLINE void m128iMulDiv256PI16_2x(
   __m128i& dst0, const __m128i& x0, const __m128i& y0,
   __m128i& dst1, const __m128i& x1, const __m128i& y1)
 {

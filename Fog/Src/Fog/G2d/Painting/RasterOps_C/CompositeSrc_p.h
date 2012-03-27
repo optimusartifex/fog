@@ -200,9 +200,7 @@ struct FOG_NO_EXPORT CompositeSrc
       uint32_t src0p;
       uint32_t msk0p;
 
-      Acc::p32Copy(src0p, sro0p);
       Acc::p32Copy(msk0p, msk0);
-
       Acc::p32MulDiv256PBW_SBW_2x_Pack_2031(src0p, sro0p_20, msk0p, sro0p_31, msk0p);
       Acc::p32Negate256SBW(msk0p, msk0p);
 

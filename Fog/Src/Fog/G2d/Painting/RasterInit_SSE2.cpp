@@ -213,7 +213,7 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - Src - PRGB32]
   // --------------------------------------------------------------------------
-/*
+
   {
     RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC];
 
@@ -222,7 +222,7 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
 
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrc::prgb32_cblit_prgb32_span);
     FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB     ]);
-
+/*
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_SSE2::Convert::copy_32);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_XRGB32   ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_xrgb32_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB24    ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_rgb24_line);
@@ -240,6 +240,7 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_prgb64_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_rgb48_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_a16_span);
+*/
   }
 
   // --------------------------------------------------------------------------
@@ -249,12 +250,12 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
   {
     RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC];
 
-    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrc::xrgb32_cblit_prgb32_line);
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrc::prgb32_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
 
-    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrc::xrgb32_cblit_prgb32_span);
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrc::prgb32_cblit_prgb32_span);
     FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB     ]);
-
+/*
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_xrgb32_line);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_XRGB32   ], RasterOps_SSE2::Convert::copy_32);
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_RGB24    ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_rgb24_line);
@@ -272,12 +273,13 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_SSE2::CompositeSrc::xrgb32_vblit_prgb64_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_RGB48    ], RasterOps_SSE2::CompositeSrc::prgb32_vblit_rgb48_span);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_SSE2::CompositeSrc::xrgb32_vblit_a16_span);
+*/
   }
 
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - Src - RGB24]
   // --------------------------------------------------------------------------
-
+/*
   {
     RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_RGB24][RASTER_COMPOSITE_CORE_SRC];
 

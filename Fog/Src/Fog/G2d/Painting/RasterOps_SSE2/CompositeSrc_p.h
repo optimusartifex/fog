@@ -30,34 +30,58 @@ struct FOG_NO_EXPORT CompositeSrc
     uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
   {
     __m128i sro0xmm;
-
     Acc::m128iLoad4(sro0xmm, &src->prgb32);
-    Acc::m128iExtendPI32FromSI32(sro0xmm, sro0xmm);
 
-    BLIT_LOOP_32xX_INIT()
+    if (w <= 4)
+    {
+      Acc::m128iStore4(dst +  0, sro0xmm); if (--w == 0) return;
+      Acc::m128iStore4(dst +  4, sro0xmm); if (--w == 0) return;
+      Acc::m128iStore4(dst +  8, sro0xmm); if (--w == 0) return;
+      Acc::m128iStore4(dst + 12, sro0xmm);
+    }
+    else
+    {
+      uint8_t* mark = dst;
 
-    BLIT_LOOP_32x16_ALIGN_BEGIN(C_Opaque)
-      Acc::m128iStore4(dst, sro0xmm);
-      dst += 4;
-    BLIT_LOOP_32x16_ALIGN_END(C_Opaque)
+      Acc::m128iExtendPI32FromSI32(sro0xmm, sro0xmm);
+      Acc::m128iStore16u(dst, sro0xmm);
 
-    BLIT_LOOP_32x16_MAIN_BEGIN(C_Opaque)
-      Acc::m128iStore16a(dst +  0, sro0xmm);
-      Acc::m128iStore16a(dst + 16, sro0xmm);
-      Acc::m128iStore16a(dst + 32, sro0xmm);
-      Acc::m128iStore16a(dst + 48, sro0xmm);
-      dst += 64;
-    BLIT_LOOP_32x16_MAIN_END(C_Opaque)
+      dst = (uint8_t*)( (uintptr_t(dst) + 16) & ~(uintptr_t)15 );
+      w -= (int)(intptr_t)(dst - mark) >> 2;
 
-    BLIT_LOOP_32x16_TAIL_4(C_Opaque, {
+      while ((w -= 16) >= 0)
+      {
+        Acc::m128iStore16a(dst +  0, sro0xmm);
+        Acc::m128iStore16a(dst + 16, sro0xmm);
+        Acc::m128iStore16a(dst + 32, sro0xmm);
+        Acc::m128iStore16a(dst + 48, sro0xmm);
+        dst += 64;
+      }
+
+      if ((w += 12) < 0) goto _C_Opaque_Tail;
       Acc::m128iStore16a(dst, sro0xmm);
       dst += 16;
-    });
 
-    BLIT_LOOP_32x16_TAIL_1(C_Opaque, {
-      Acc::m128iStore4(dst, sro0xmm);
-      dst += 4;
-    });
+      if ((w -= 4) < 0) goto _C_Opaque_Tail;
+      Acc::m128iStore16a(dst, sro0xmm);
+      dst += 16;
+
+      if ((w -= 4) < 0) goto _C_Opaque_Tail;
+      Acc::m128iStore16a(dst, sro0xmm);
+      dst += 16;
+
+_C_Opaque_Tail:
+      FOG_ASSERT(w + 4 < 4);
+
+      if ((w += 4) == 0) return;
+      Acc::m128iStore4(dst + 0, sro0xmm);
+
+      if (--w == 0) return;
+      Acc::m128iStore4(dst + 4, sro0xmm);
+
+      if (--w == 0) return;
+      Acc::m128iStore4(dst + 8, sro0xmm);
+    }
   }
 
   // ==========================================================================
@@ -68,9 +92,11 @@ struct FOG_NO_EXPORT CompositeSrc
     uint8_t* dst, const RasterSolid* src, const RasterSpan* span, const RasterClosure* closure)
   {
     __m128i sro0xmm;
+    __m128i sru0xmm;
 
     Acc::m128iLoad4(sro0xmm, &src->prgb32);
     Acc::m128iExtendPI32FromSI32(sro0xmm, sro0xmm);
+    Acc::m128iUnpackPI16FromPI8Lo(sru0xmm, sro0xmm);
 
     FOG_CBLIT_SPAN8_BEGIN(4)
 
@@ -80,30 +106,56 @@ struct FOG_NO_EXPORT CompositeSrc
 
     FOG_CBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_32xX_INIT()
+      if (w <= 4)
+      {
+        Acc::m128iStore4(dst +  0, sro0xmm); if (--w == 0) goto _C_Opaque_End;
+        Acc::m128iStore4(dst +  4, sro0xmm); if (--w == 0) goto _C_Opaque_End;
+        Acc::m128iStore4(dst +  8, sro0xmm); if (--w == 0) goto _C_Opaque_End;
+        Acc::m128iStore4(dst + 12, sro0xmm);
+      }
+      else
+      {
+        uint8_t* mark = dst;
+        Acc::m128iStore16u(dst, sro0xmm);
 
-      BLIT_LOOP_32x16_ALIGN_BEGIN(C_Opaque)
-        Acc::m128iStore4(dst, sro0xmm);
-        dst += 4;
-      BLIT_LOOP_32x16_ALIGN_END(C_Opaque)
+        dst = (uint8_t*)( (uintptr_t(dst) + 16) & ~(uintptr_t)15 );
+        w -= (int)(intptr_t)(dst - mark) >> 2;
 
-      BLIT_LOOP_32x16_MAIN_BEGIN(C_Opaque)
-        Acc::m128iStore16a(dst +  0, sro0xmm);
-        Acc::m128iStore16a(dst + 16, sro0xmm);
-        Acc::m128iStore16a(dst + 32, sro0xmm);
-        Acc::m128iStore16a(dst + 48, sro0xmm);
-        dst += 64;
-      BLIT_LOOP_32x16_MAIN_END(C_Opaque)
+        while ((w -= 16) >= 0)
+        {
+          Acc::m128iStore16a(dst +  0, sro0xmm);
+          Acc::m128iStore16a(dst + 16, sro0xmm);
+          Acc::m128iStore16a(dst + 32, sro0xmm);
+          Acc::m128iStore16a(dst + 48, sro0xmm);
+          dst += 64;
+        }
 
-      BLIT_LOOP_32x16_TAIL_4(C_Opaque, {
+        if ((w += 12) < 0) goto _C_Opaque_Tail;
         Acc::m128iStore16a(dst, sro0xmm);
         dst += 16;
-      });
 
-      BLIT_LOOP_32x16_TAIL_1(C_Opaque, {
-        Acc::m128iStore4(dst, sro0xmm);
-        dst += 4;
-      });
+        if ((w -= 4) < 0) goto _C_Opaque_Tail;
+        Acc::m128iStore16a(dst, sro0xmm);
+        dst += 16;
+
+        if ((w -= 4) < 0) goto _C_Opaque_Tail;
+        Acc::m128iStore16a(dst, sro0xmm);
+        dst += 16;
+
+_C_Opaque_Tail:
+        FOG_ASSERT(w + 4 < 4);
+
+        if ((w += 4) == 0) goto _C_Opaque_End;
+        Acc::m128iStore4(dst + 0, sro0xmm);
+
+        if (--w == 0) goto _C_Opaque_End;
+        Acc::m128iStore4(dst + 4, sro0xmm);
+
+        if (--w == 0) goto _C_Opaque_End;
+        Acc::m128iStore4(dst + 8, sro0xmm);
+      }
+_C_Opaque_End:
+      ;
     }
 
     // ------------------------------------------------------------------------
@@ -118,13 +170,11 @@ struct FOG_NO_EXPORT CompositeSrc
       __m128i msk0xmm;
 
       Acc::m128iCvtSI128FromSI(msk0xmm, msk0);
-      Acc::m128iUnpackPI16FromPI8Lo(src0xmm, sro0xmm);
       Acc::m128iExtendPI16FromSI16(msk0xmm, msk0xmm);
 
-      Acc::m128iMulDiv256PI16(src0xmm, src0xmm, msk0xmm);
+      Acc::m128iMulDiv256PI16(src0xmm, sru0xmm, msk0xmm);
       Acc::m128iNegate256PI16(msk0xmm, msk0xmm);
       Acc::m128iPackPU8FromPU16(src0xmm, src0xmm);
-
       Acc::m128iLShiftPU16<8>(msk0xmm, msk0xmm);
 
       BLIT_LOOP_32x4_SMALL_BEGIN(C_Mask)
@@ -166,9 +216,6 @@ struct FOG_NO_EXPORT CompositeSrc
     {
       BLIT_LOOP_32x4_INIT()
 
-      __m128i src0xmm;
-      Acc::m128iUnpackPI16FromPI8Lo(src0xmm, sro0xmm);
-
       BLIT_LOOP_32x4_SMALL_BEGIN(A8_Glyph)
         __m128i dst0xmm;
         __m128i msk0xmm;
@@ -188,7 +235,7 @@ struct FOG_NO_EXPORT CompositeSrc
 
         Acc::m128iMulLoPI16(dst0xmm, dst0xmm, msk0xmm);
         Acc::m128iNegate256PI16(msk0xmm, msk0xmm);
-        Acc::m128iMulLoPI16(msk0xmm, msk0xmm, src0xmm);
+        Acc::m128iMulLoPI16(msk0xmm, msk0xmm, sru0xmm);
         Acc::m128iAddPI16(dst0xmm, dst0xmm, msk0xmm);
 
         Acc::m128iRShiftPU16<8>(dst0xmm, dst0xmm);
@@ -229,7 +276,7 @@ _A8_Glyph_Small_Fill:
 
         Acc::m128iMulLoPI16_2x(dst0xmm, dst0xmm, msk0xmm, dst1xmm, dst1xmm, msk1xmm);
         Acc::m128iNegate256PI16_2x(msk0xmm, msk0xmm, msk1xmm, msk1xmm);
-        Acc::m128iMulLoPI16_2x(msk0xmm, msk0xmm, src0xmm, msk1xmm, msk1xmm, src0xmm);
+        Acc::m128iMulLoPI16_2x(msk0xmm, msk0xmm, sru0xmm, msk1xmm, msk1xmm, sru0xmm);
         Acc::m128iAddPI16_2x(dst0xmm, dst0xmm, msk0xmm, dst1xmm, dst1xmm, msk1xmm);
 
         Acc::m128iRShiftPU16<8>(dst0xmm, dst0xmm);
@@ -258,25 +305,20 @@ _A8_Glyph_Main_Fill:
     {
       BLIT_LOOP_32x4_INIT()
 
-      __m128i src0xmm;
-      Acc::m128iUnpackPI16FromPI8Lo(src0xmm, sro0xmm);
-
       BLIT_LOOP_32x4_SMALL_BEGIN(A8_Extra)
         __m128i dst0xmm;
         __m128i msk0xmm;
-        uint32_t msk0p;
+        __m128i minv0xmm;
 
-        Acc::p32Load2a(msk0p, msk);
+        Acc::m128iLoad2(msk0xmm, msk);
         Acc::m128iLoad4(dst0xmm, dst);
-        Acc::p32Negate256SBW(msk0p, msk0p);
 
-        Acc::m128iCvtSI128FromSI(msk0xmm, msk0p);
         Acc::m128iExtendPI16FromSI16Lo(msk0xmm, msk0xmm);
         Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+        Acc::m128iNegate256PI16(minv0xmm, msk0xmm);
 
-        Acc::m128iMulLoPI16(dst0xmm, dst0xmm, msk0xmm);
-        Acc::m128iNegate256PI16(msk0xmm, msk0xmm);
-        Acc::m128iMulLoPI16(msk0xmm, msk0xmm, src0xmm);
+        Acc::m128iMulLoPI16(msk0xmm, msk0xmm, sru0xmm);
+        Acc::m128iMulLoPI16(dst0xmm, dst0xmm, minv0xmm);
         Acc::m128iAddPI16(dst0xmm, dst0xmm, msk0xmm);
 
         Acc::m128iRShiftPU16<8>(dst0xmm, dst0xmm);
@@ -290,18 +332,18 @@ _A8_Glyph_Main_Fill:
       BLIT_LOOP_32x4_MAIN_BEGIN(A8_Extra)
         __m128i dst0xmm, dst1xmm;
         __m128i msk0xmm, msk1xmm;
+        __m128i minv0xmm, minv1xmm;
 
         Acc::m128iLoad16a(dst0xmm, dst);
         Acc::m128iLoad8(msk0xmm, msk);
 
         Acc::m128iUnpackPI16FromPI8Hi(dst1xmm, dst0xmm);
-        Acc::m128iNegate256PI16(msk0xmm, msk0xmm);
-        Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
         Acc::m128iUnpackMaskPI16(msk0xmm, msk1xmm, msk0xmm);
+        Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+        Acc::m128iNegate256PI16_2x(minv0xmm, msk0xmm, minv1xmm, msk1xmm);
 
-        Acc::m128iMulLoPI16_2x(dst0xmm, dst0xmm, msk0xmm, dst1xmm, dst1xmm, msk1xmm);
-        Acc::m128iNegate256PI16_2x(msk0xmm, msk0xmm, msk1xmm, msk1xmm);
-        Acc::m128iMulLoPI16_2x(msk0xmm, msk0xmm, src0xmm, msk1xmm, msk1xmm, src0xmm);
+        Acc::m128iMulLoPI16_2x(msk0xmm, msk0xmm, sru0xmm, msk1xmm, msk1xmm, sru0xmm);
+        Acc::m128iMulLoPI16_2x(dst0xmm, dst0xmm, minv0xmm, dst1xmm, dst1xmm, minv1xmm);
         Acc::m128iAddPI16_2x(dst0xmm, dst0xmm, msk0xmm, dst1xmm, dst1xmm, msk1xmm);
 
         Acc::m128iRShiftPU16<8>(dst0xmm, dst0xmm);
@@ -320,6 +362,7 @@ _A8_Glyph_Main_Fill:
 
     FOG_CBLIT_SPAN8_ARGB32_GLYPH()
     {
+      // TODO:
     }
 
     FOG_CBLIT_SPAN8_END()

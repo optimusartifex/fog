@@ -1259,6 +1259,11 @@ Set(FOG_G2D_PAINTING_RASTEROPS_SSE2_HEADERS
   Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeFunc_p.h
   Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeSrc_p.h
   Src/Fog/G2d/Painting/RasterOps_SSE2/CompositeSrcOver_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/GradientBase_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/GradientConical_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/GradientLinear_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/GradientRadial_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/GradientRectangular_p.h
 )
 
 # [Fog/G2d/Source]

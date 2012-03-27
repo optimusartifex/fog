@@ -509,7 +509,7 @@ void AppWindow::onPaint(Painter* _p)
   }
 #endif
 
-#if 1
+#if 0
   for (size_t i = 0; i < 18; i++)
   {
     StringW str(Ascii8("Sample text, VA AV, 1234567890"));
@@ -519,6 +519,16 @@ void AppWindow::onPaint(Painter* _p)
     font.setSize(font.getSize() - 2.0f);
     pt.y += font.getAscent();
   }
+#endif
+
+#if 1
+  LinearGradientF gradient;
+  gradient.setStart(0.0f, 0.0f);
+  gradient.setEnd(200.0f, 200.0f);
+  gradient.addStop(0.0f, Argb32(0xFFFFFFFF));
+  gradient.addStop(1.0f, Argb32(0x00FFFFFF));
+  p.setSource(gradient);
+  p.fillRect(RectI(0, 0, 200, 200));
 #endif
 
   TimeDelta t = TimeTicks::now() - startTime;

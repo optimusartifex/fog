@@ -335,52 +335,52 @@
 //
 // There is an idea to merge align and tail loop. This is likely to save some
 // binary space (about 1/4 of blitting functions size) and simplify development.
-// So do not repeat dirty stuff and use BLIT_LOOP_... macros.
+// So do not repeat dirty stuff and use FOG_BLIT_LOOP_... macros.
 //
 // The two loops are named SMALL and LARGE.
 //
 // 8-bit entities:
 //   - 1 pixel at time:
-//     - BLIT_LOOP_8x1_BEGIN(dst)        - Loop begin.
-//     - BLIT_LOOP_8x1_END(dst)          - Loop end.
+//     - FOG_BLIT_LOOP_8x1_BEGIN(dst)        - Loop begin.
+//     - FOG_BLIT_LOOP_8x1_END(dst)          - Loop end.
 //
 //   - 4 pixels at time:
-//     - BLIT_LOOP_8x16_SMALL_BEGIN(dst) - Small loop begin.
-//     - BLIT_LOOP_8x16_SMALL_END(dst)   - Small loop end.
+//     - FOG_BLIT_LOOP_8x16_SMALL_BEGIN(dst) - Small loop begin.
+//     - FOG_BLIT_LOOP_8x16_SMALL_END(dst)   - Small loop end.
 //
 //   - 16 pixels at time:
-//     - BLIT_LOOP_8x16_MAIN_BEGIN(dst)  - Main loop begin.
-//     - BLIT_LOOP_8x16_MAIN_END(dst)    - Main loop end.
+//     - FOG_BLIT_LOOP_8x16_MAIN_BEGIN(dst)  - Main loop begin.
+//     - FOG_BLIT_LOOP_8x16_MAIN_END(dst)    - Main loop end.
 //
 // 32-bit entities:
 //   - 1 pixel at time:
-//     - BLIT_LOOP_32x4_SMALL_BEGIN(dst) - Small loop begin.
-//     - BLIT_LOOP_32x4_SMALL_END(dst)   - Small loop end.
+//     - FOG_BLIT_LOOP_32x4_SMALL_BEGIN(dst) - Small loop begin.
+//     - FOG_BLIT_LOOP_32x4_SMALL_END(dst)   - Small loop end.
 //
 //   - 4 pixels at time:
-//     - BLIT_LOOP_32x4_MAIN_BEGIN(dst)  - Main loop begin.
-//     - BLIT_LOOP_32x4_MAIN_END(dst)    - Main loop end.
+//     - FOG_BLIT_LOOP_32x4_MAIN_BEGIN(dst)  - Main loop begin.
+//     - FOG_BLIT_LOOP_32x4_MAIN_END(dst)    - Main loop end.
 //
 // Because compilers can be quite missed from our machinery, it's needed
 // to follow some rules to help them to optimize this code:
 // - declare temporary variables (mainly sse2 registers) in local loop scope.
-// - do not add anything between BLIT_LOOP_32x4_SMALL_END and BLIT_LOOP_32x4_MAIN_BEGIN.
+// - do not add anything between FOG_BLIT_LOOP_32x4_SMALL_END and FOG_BLIT_LOOP_32x4_MAIN_BEGIN.
 
 // ============================================================================
 // [BLIT_LOOP - DstFx1 - DstF per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_DstFx1_INIT() \
+#define FOG_BLIT_LOOP_DstFx1_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_DstFx1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_DstFx1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_DstFx1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_DstFx1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_DstFx1_END(_Group_) \
+#define FOG_BLIT_LOOP_DstFx1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   } \
 _##_Group_##_End: \
@@ -390,17 +390,17 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 8x1 - 8-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_8x1_INIT() \
+#define FOG_BLIT_LOOP_8x1_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_8x1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_8x1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_8x1_END(_Group_) \
+#define FOG_BLIT_LOOP_8x1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   }; \
   \
@@ -411,21 +411,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 8x4 - 8-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_8x4_INIT() \
+#define FOG_BLIT_LOOP_8x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_8x4_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x4_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_8x4_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 3) != 0) continue; \
     break;
 
-#define BLIT_LOOP_8x4_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_8x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 3) != 0) continue; \
     break; \
@@ -434,17 +434,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_8x4_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_8x4_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_8x4_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_8x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -460,21 +460,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 8x8 - 8-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_8x8_INIT() \
+#define FOG_BLIT_LOOP_8x8_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_8x8_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x8_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_8x8_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) != 0) continue; \
     break;
 
-#define BLIT_LOOP_8x8_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_8x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) != 0) continue; \
     break; \
@@ -483,17 +483,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_8x8_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x8_MAIN_BEGIN(_Group_) \
   w -= 8; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_8x8_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x8_MAIN_CONTINUE(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_8x8_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_8x8_MAIN_END(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break; \
   } \
@@ -509,21 +509,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 8x16 - 8-bits per pixel, 16 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_8x16_INIT() \
+#define FOG_BLIT_LOOP_8x16_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_8x16_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x16_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_8x16_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x16_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) != 0) continue; \
     break;
 
-#define BLIT_LOOP_8x16_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_8x16_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) != 0) continue; \
     break; \
@@ -532,17 +532,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_8x16_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_8x16_MAIN_BEGIN(_Group_) \
   w -= 16; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_8x16_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_8x16_MAIN_CONTINUE(_Group_) \
     if ((w -= 16) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_8x16_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_8x16_MAIN_END(_Group_) \
     if ((w -= 16) >= 0) continue; \
     break; \
   } \
@@ -558,17 +558,17 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 16x1 - 16-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_16x1_INIT() \
+#define FOG_BLIT_LOOP_16x1_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_16x1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_16x1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_16x1_END(_Group_) \
+#define FOG_BLIT_LOOP_16x1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   }; \
   \
@@ -579,20 +579,20 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 16x2 - 16-bits per pixel, 2 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_16x2_INIT() \
+#define FOG_BLIT_LOOP_16x2_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_16x2_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x2_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_16x2_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x2_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     break;
 
-#define BLIT_LOOP_16x2_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_16x2_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     break; \
   } \
@@ -600,17 +600,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_16x2_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x2_MAIN_BEGIN(_Group_) \
   w -= 2; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_16x2_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x2_MAIN_CONTINUE(_Group_) \
     if ((w -= 2) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_16x2_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_16x2_MAIN_END(_Group_) \
     if ((w -= 2) >= 0) continue; \
     break; \
   } \
@@ -626,21 +626,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 16x4 - 16-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_16x4_INIT() \
+#define FOG_BLIT_LOOP_16x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_16x4_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x4_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_16x4_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) != 0) continue; \
     break;
 
-#define BLIT_LOOP_16x4_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_16x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) != 0) continue; \
     break; \
@@ -649,17 +649,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_16x4_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_16x4_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_16x4_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_16x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -675,21 +675,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 16x8 - 16-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_16x8_INIT() \
+#define FOG_BLIT_LOOP_16x8_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_16x8_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x8_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_16x8_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) != 0) continue; \
     break;
 
-#define BLIT_LOOP_16x8_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_16x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) != 0) continue; \
     break; \
@@ -698,17 +698,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_16x8_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_16x8_MAIN_BEGIN(_Group_) \
   w -= 8; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_16x8_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_16x8_MAIN_CONTINUE(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_16x8_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_16x8_MAIN_END(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break; \
   } \
@@ -724,17 +724,17 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 24x1 - 24-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_24x1_INIT() \
+#define FOG_BLIT_LOOP_24x1_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_24x1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_24x1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_24x1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_24x1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_24x1_END(_Group_) \
+#define FOG_BLIT_LOOP_24x1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   }; \
   \
@@ -745,21 +745,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 24x4 - 24-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_24x4_INIT() \
+#define FOG_BLIT_LOOP_24x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_24x4_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_24x4_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_24x4_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_24x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 3) != 0) continue; \
     break;
 
-#define BLIT_LOOP_24x4_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_24x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 3) != 0) continue; \
     break; \
@@ -768,17 +768,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_24x4_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_24x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_24x4_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_24x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_24x4_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_24x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -794,21 +794,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 24x8 - 24-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_24x8_INIT() \
+#define FOG_BLIT_LOOP_24x8_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_24x8_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_24x8_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_24x8_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_24x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) != 0) continue; \
     break;
 
-#define BLIT_LOOP_24x8_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_24x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) != 0) continue; \
     break; \
@@ -817,17 +817,17 @@ _##_Group_##_SmallBegin: \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_24x8_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_24x8_MAIN_BEGIN(_Group_) \
   w -= 8; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_24x8_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_24x8_MAIN_CONTINUE(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_24x8_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_24x8_MAIN_END(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break; \
   } \
@@ -840,27 +840,20 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 32xX - Generic]
-// ============================================================================
-
-#define BLIT_LOOP_32xX_INIT() \
-  FOG_ASSUME(w > 0);
-
-// ============================================================================
 // [BLIT_LOOP - 32x1 - 32-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_32x1_INIT() \
+#define FOG_BLIT_LOOP_32x1_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_32x1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_32x1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32x1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_32x1_END(_Group_) \
+#define FOG_BLIT_LOOP_32x1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   }; \
   \
@@ -871,28 +864,28 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 32x4 - 32-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_32x4_INIT() \
+#define FOG_BLIT_LOOP_32x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_32x4_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x4_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_32x4_SMALL_BEGIN_ALT(_Group_, _PrepareCode_) \
+#define FOG_BLIT_LOOP_32x4_SMALL_BEGIN_ALT(_Group_, _PrepareCode_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   _PrepareCode_ \
   for (;;) {
 
-#define BLIT_LOOP_32x4_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) != 0) continue; \
     break;
 
-#define BLIT_LOOP_32x4_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_32x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) != 0) continue; \
     break; \
@@ -900,17 +893,17 @@ _##_Group_##_SmallBegin: \
   \
 _##_Group_##_SmallSkip: \
 
-#define BLIT_LOOP_32x4_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_32x4_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_32x4_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_32x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -926,21 +919,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 32x4_VS_16 - 32-bits per pixel vs 16-bits per pixel]
 // ============================================================================
 
-#define BLIT_LOOP_32x4_VS_16_INIT() \
+#define FOG_BLIT_LOOP_32x4_VS_16_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_32x4_VS_16_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x4_VS_16_SMALL_BEGIN(_Group_) \
   if (((size_t)src & 3) == 0 && w >= 4) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_32x4_VS_16_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32x4_VS_16_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (w < 4) continue; \
     break;
 
-#define BLIT_LOOP_32x4_VS_16_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_32x4_VS_16_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (w < 4) continue; \
     break; \
@@ -948,17 +941,17 @@ _##_Group_##_SmallBegin: \
   \
 _##_Group_##_SmallSkip: \
 
-#define BLIT_LOOP_32x4_VS_16_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x4_VS_16_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_32x4_VS_16_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32x4_VS_16_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_32x4_VS_16_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_32x4_VS_16_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -974,21 +967,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 32x4_VS_24 - 32-bits per pixel vs 24-bits per pixel]
 // ============================================================================
 
-#define BLIT_LOOP_32x4_VS_24_INIT() \
+#define FOG_BLIT_LOOP_32v24x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_32x4_VS_24_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32v24x4_SMALL_BEGIN(_Group_) \
   if (((size_t)src & 3) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_32x4_VS_24_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32v24x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)src & 3) != 0) continue; \
     break;
 
-#define BLIT_LOOP_32x4_VS_24_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_32v24x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)src & 3) != 0) continue; \
     break; \
@@ -996,17 +989,17 @@ _##_Group_##_SmallBegin: \
   \
 _##_Group_##_SmallSkip: \
 
-#define BLIT_LOOP_32x4_VS_24_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32v24x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_32x4_VS_24_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_32v24x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_32x4_VS_24_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_32v24x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -1022,34 +1015,34 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 32x16 - 32-bits per pixel, 16 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_32x16_INIT() \
+#define FOG_BLIT_LOOP_32x16_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_32x16_ALIGN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x16_ALIGN_BEGIN(_Group_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
   do {
 
-#define BLIT_LOOP_32x16_ALIGN_END(_Group_) \
+#define FOG_BLIT_LOOP_32x16_ALIGN_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   } while (((size_t)dst & 15) != 0); \
   \
 _##_Group_##_SmallSkip: \
   ;
 
-#define BLIT_LOOP_32x16_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_32x16_MAIN_BEGIN(_Group_) \
   w -= 16; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   do {
 
-#define BLIT_LOOP_32x16_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_32x16_MAIN_END(_Group_) \
   } while ((w -= 16) >= 0); \
   \
 _##_Group_##_MainSkip: \
   w += 16;
 
-#define BLIT_LOOP_32x16_TAIL_4(_Group_, _ProcessCode_) \
+#define FOG_BLIT_LOOP_32x16_TAIL_4(_Group_, _ProcessCode_) \
   switch (w >> 2) \
   { \
     case 3: _ProcessCode_ \
@@ -1057,7 +1050,7 @@ _##_Group_##_MainSkip: \
     case 1: _ProcessCode_ \
   }
 
-#define BLIT_LOOP_32x16_TAIL_1(_Group_, _ProcessCode_) \
+#define FOG_BLIT_LOOP_32x16_TAIL_1(_Group_, _ProcessCode_) \
   switch (w & 3) \
   { \
     case 3: _ProcessCode_ \
@@ -1071,14 +1064,14 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 48x1 - 48-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_48x1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_48x1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_48x1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_48x1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_48x1_END(_Group_) \
+#define FOG_BLIT_LOOP_48x1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   }; \
   \
@@ -1089,21 +1082,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 48x4 - 48-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_48x4_INIT() \
+#define FOG_BLIT_LOOP_48x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_48x4_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_48x4_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 7) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_48x4_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_48x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) == 0) continue; \
     break;
 
-#define BLIT_LOOP_48x4_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_48x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 7) == 0) continue; \
     break; \
@@ -1111,18 +1104,18 @@ _##_Group_##_SmallBegin: \
   \
 _##_Group_##_SmallSkip: \
 
-#define BLIT_LOOP_48x4_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_48x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
 _##_Group_##_MainLoop: \
   for (;;) {
 
-#define BLIT_LOOP_48x4_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_48x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_48x4_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_48x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \
@@ -1138,21 +1131,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 48x8 - 48-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_48x8_INIT() \
+#define FOG_BLIT_LOOP_48x8_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_48x8_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_48x8_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_48x8_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_48x8_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) == 0) continue; \
     break;
 
-#define BLIT_LOOP_48x8_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_48x8_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (((size_t)dst & 15) == 0) continue; \
     break; \
@@ -1160,18 +1153,18 @@ _##_Group_##_SmallBegin: \
   \
 _##_Group_##_SmallSkip: \
 
-#define BLIT_LOOP_48x8_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_48x8_MAIN_BEGIN(_Group_) \
   w -= 8; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
 _##_Group_##_MainLoop: \
   for (;;) {
 
-#define BLIT_LOOP_48x8_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_48x8_MAIN_CONTINUE(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_48x8_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_48x8_MAIN_END(_Group_) \
     if ((w -= 8) >= 0) continue; \
     break; \
   } \
@@ -1187,14 +1180,14 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 64x1 - 64-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_64x1_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_64x1_BEGIN(_Group_) \
   for (;;) {
 
-#define BLIT_LOOP_64x1_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_64x1_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     continue;
 
-#define BLIT_LOOP_64x1_END(_Group_) \
+#define FOG_BLIT_LOOP_64x1_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   }; \
   \
@@ -1205,30 +1198,30 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 64x2 - 64-bits per pixel, 2 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_64x2_INIT() \
+#define FOG_BLIT_LOOP_64x2_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_64x2_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_64x2_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 15) != 0) \
   { \
 _##_Group_##_SmallBegin: \
 
-#define BLIT_LOOP_64x2_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_64x2_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
   } \
 
-#define BLIT_LOOP_64x2_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_64x2_MAIN_BEGIN(_Group_) \
   w -= 2; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
 _##_Group_##_MainLoop: \
   for (;;) {
 
-#define BLIT_LOOP_64x2_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_64x2_MAIN_CONTINUE(_Group_) \
     if ((w -= 2) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_64x2_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_64x2_MAIN_END(_Group_) \
     if ((w -= 2) >= 0) continue; \
     break; \
   } \
@@ -1244,21 +1237,21 @@ _##_Group_##_End: \
 // [BLIT_LOOP - 64x4 - 64-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
-#define BLIT_LOOP_64x4_INIT() \
+#define FOG_BLIT_LOOP_64x4_INIT() \
   FOG_ASSUME(w > 0);
 
-#define BLIT_LOOP_64x4_SMALL_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_64x4_SMALL_BEGIN(_Group_) \
   if (((size_t)dst & 15) == 0) goto _##_Group_##_SmallSkip; \
   \
 _##_Group_##_SmallBegin: \
   for (;;) {
 
-#define BLIT_LOOP_64x4_SMALL_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_64x4_SMALL_CONTINUE(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (w < 4) continue; \
     break;
 
-#define BLIT_LOOP_64x4_SMALL_END(_Group_) \
+#define FOG_BLIT_LOOP_64x4_SMALL_END(_Group_) \
     if (--w == 0) goto _##_Group_##_End; \
     if (w < 4) continue; \
     break; \
@@ -1266,17 +1259,17 @@ _##_Group_##_SmallBegin: \
   \
 _##_Group_##_SmallSkip: \
 
-#define BLIT_LOOP_64x4_MAIN_BEGIN(_Group_) \
+#define FOG_BLIT_LOOP_64x4_MAIN_BEGIN(_Group_) \
   w -= 4; \
   if (w < 0) goto _##_Group_##_MainSkip; \
   \
   for (;;) {
 
-#define BLIT_LOOP_64x4_MAIN_CONTINUE(_Group_) \
+#define FOG_BLIT_LOOP_64x4_MAIN_CONTINUE(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break;
 
-#define BLIT_LOOP_64x4_MAIN_END(_Group_) \
+#define FOG_BLIT_LOOP_64x4_MAIN_END(_Group_) \
     if ((w -= 4) >= 0) continue; \
     break; \
   } \

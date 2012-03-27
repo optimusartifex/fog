@@ -26,6 +26,12 @@
 #include <Fog/G2d/Painting/RasterOps_SSE2/CompositeSrc_p.h>
 #include <Fog/G2d/Painting/RasterOps_SSE2/CompositeSrcOver_p.h>
 
+#include <Fog/G2d/Painting/RasterOps_SSE2/GradientBase_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/GradientConical_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/GradientLinear_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/GradientRadial_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/GradientRectangular_p.h>
+
 namespace Fog {
 
 // ============================================================================
@@ -1496,6 +1502,37 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
     FOG_RASTER_INIT(vblit_span[RASTER_VBLIT_XRGB32_AND_RGB24 ], RasterOps_SSE2::CompositeExclusion::xrgb32_vblit_rgb24_span);
   }
   */
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Pattern - Solid]
+  // --------------------------------------------------------------------------
+
+  /*
+  {
+    RasterSolidFuncs& solid = api.solid;
+
+    solid.fetch[IMAGE_FORMAT_PRGB32] = RasterOps_SSE2::Helpers::p_solid_fetch_prgb32_xrgb32;
+    solid.fetch[IMAGE_FORMAT_XRGB32] = RasterOps_SSE2::Helpers::p_solid_fetch_prgb32_xrgb32;
+    solid.fetch[IMAGE_FORMAT_A8    ] = RasterOps_SSE2::Helpers::p_solid_fetch_a8;
+
+    solid.fetch[IMAGE_FORMAT_PRGB64] = RasterOps_SSE2::Helpers::p_solid_fetch_prgb64;
+    solid.fetch[IMAGE_FORMAT_RGB48 ] = RasterOps_SSE2::Helpers::p_solid_fetch_rgb48;
+    solid.fetch[IMAGE_FORMAT_A16   ] = RasterOps_SSE2::Helpers::p_solid_fetch_a16;
+  }
+  */
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Pattern - Gradient - API]
+  // --------------------------------------------------------------------------
+
+  RasterGradientFuncs& gradient = api.gradient;
+
+  // --------------------------------------------------------------------------
+  // [RasterOps - Pattern - Gradient - Interpolate]
+  // --------------------------------------------------------------------------
+
+  gradient.interpolate[IMAGE_FORMAT_PRGB32] = RasterOps_SSE2::PGradientBase::interpolate_prgb32;
+  gradient.interpolate[IMAGE_FORMAT_XRGB32] = RasterOps_SSE2::PGradientBase::interpolate_prgb32;
 }
 
 } // Fog namespace

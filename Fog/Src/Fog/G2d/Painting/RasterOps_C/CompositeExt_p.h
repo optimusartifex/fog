@@ -473,14 +473,14 @@ struct CompositeExtGeneric
   static FOG_INLINE void pixel32_cblit_pixel32_line(
     uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_DstFx1_INIT()
+    FOG_BLIT_LOOP_DstFx1_INIT()
 
     uint32_t sro0p, sro0p_20, sro0p_31;
 
     Acc::p32Copy(sro0p, src->prgb32.u32);
     Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
-    BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
       uint32_t dst0p_20, dst0p_31;
 
       DstF::p32LoadPixel32(dst0p_20, dst);
@@ -496,7 +496,7 @@ struct CompositeExtGeneric
 
 _C_Opaque_Skip:
       dst += DstF::SIZE;
-    BLIT_LOOP_DstFx1_END(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -520,9 +520,9 @@ _C_Opaque_Skip:
 
     FOG_CBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
         uint32_t dst0p_20, dst0p_31;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
@@ -537,7 +537,7 @@ _C_Opaque_Skip:
 
 _C_Opaque_Skip:
         dst += DstF::SIZE;
-      BLIT_LOOP_32x1_END(C_Opaque)
+      FOG_BLIT_LOOP_32x1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -546,7 +546,7 @@ _C_Opaque_Skip:
 
     FOG_CBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
       uint32_t minv0p;
@@ -556,12 +556,12 @@ _C_Opaque_Skip:
 
       if (IsUnbound && IsUnboundMskIn)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_20, src0p_31;
         Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_UnboundIn)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_UnboundIn)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
 
@@ -577,13 +577,13 @@ _C_Opaque_Skip:
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_UnboundIn)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_UnboundIn)
       }
       else if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
 
@@ -601,16 +601,16 @@ _C_Opaque_Skip:
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_20, src0p_31;
         Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
           uint32_t dst0p_20, dst0p_31;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
@@ -626,7 +626,7 @@ _C_Opaque_Skip:
 
 _C_Mask_Skip:
           dst += DstF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask)
+        FOG_BLIT_LOOP_32x1_END(C_Mask)
       }
     }
 
@@ -638,9 +638,9 @@ _C_Mask_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
           uint32_t msk0p;
@@ -682,13 +682,13 @@ _A8_Glyph_Unbound_Mask:
 
           dst += DstF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
           uint32_t msk0p;
@@ -713,7 +713,7 @@ _A8_Glyph_Unbound_Mask:
 _A8_Glyph_Skip:
           dst += DstF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph)
       }
     }
 
@@ -725,9 +725,9 @@ _A8_Glyph_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
           uint32_t msk0p;
@@ -754,13 +754,13 @@ _A8_Glyph_Skip:
 _A8_Extra_Unbound_Skip:
           dst += DstF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
           uint32_t msk0p;
@@ -782,7 +782,7 @@ _A8_Extra_Unbound_Skip:
 _A8_Extra_Skip:
           dst += DstF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra)
       }
     }
 
@@ -792,9 +792,9 @@ _A8_Extra_Skip:
 
     FOG_CBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
@@ -838,7 +838,7 @@ _ARGB32_Mask:
 
         dst += DstF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_CBLIT_SPAN8_END()
@@ -852,9 +852,9 @@ _ARGB32_Mask:
   static FOG_INLINE void pixel32_vblit_pixel32_line(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_32x1_INIT()
+    FOG_BLIT_LOOP_32x1_INIT()
 
-    BLIT_LOOP_32x1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
       uint32_t dst0p_20, dst0p_31;
       uint32_t src0p_20, src0p_31;
 
@@ -876,7 +876,7 @@ _ARGB32_Mask:
 _C_Opaque_Skip:
       dst += DstF::SIZE;
       src += SrcF::SIZE;
-    BLIT_LOOP_32x1_END(C_Opaque)
+    FOG_BLIT_LOOP_32x1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -895,9 +895,9 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_20, src0p_31;
 
@@ -921,7 +921,7 @@ _C_Opaque_Skip:
 _C_Opaque_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
-      BLIT_LOOP_32x1_END(C_Opaque)
+      FOG_BLIT_LOOP_32x1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -930,19 +930,19 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
       Acc::p32Copy(msk0p, msk0);
 
       if (IsUnbound && IsUnboundMskIn)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
         Acc::p32Negate256SBW(minv0p, msk0p);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound_MskIn)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound_MskIn)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
           uint32_t dinv0p;
@@ -972,16 +972,16 @@ _C_Opaque_Skip:
 _C_Mask_Unbound_MskIn_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_Unbound_MskIn)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_Unbound_MskIn)
       }
       else if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
         Acc::p32Negate256SBW(minv0p, msk0p);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
           uint32_t dinv0p;
@@ -1010,13 +1010,13 @@ _C_Mask_Unbound_MskIn_Skip:
 _C_Mask_Unbound_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
 
@@ -1041,7 +1041,7 @@ _C_Mask_Unbound_Skip:
 _C_Mask_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask)
+        FOG_BLIT_LOOP_32x1_END(C_Mask)
       }
     }
 
@@ -1053,9 +1053,9 @@ _C_Mask_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
 
@@ -1104,13 +1104,13 @@ _A8_Glyph_Unbound_Mask:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
           uint32_t msk0p;
@@ -1152,7 +1152,7 @@ _A8_Glyph_Mask:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph)
       }
     }
 
@@ -1164,9 +1164,9 @@ _A8_Glyph_Mask:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
 
@@ -1202,13 +1202,13 @@ _A8_Extra_Unbound_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_20, src0p_31;
           uint32_t msk0p;
@@ -1237,7 +1237,7 @@ _A8_Extra_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra)
       }
     }
 
@@ -1247,9 +1247,9 @@ _A8_Extra_Skip:
 
     FOG_VBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_20, src0p_31;
 
@@ -1299,7 +1299,7 @@ _ARGB32_Mask:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_VBLIT_SPAN8_END()
@@ -1313,11 +1313,11 @@ _ARGB32_Mask:
   static FOG_INLINE void pixel32_cblit_pixela8_line(
     uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_DstFx1_INIT()
+    FOG_BLIT_LOOP_DstFx1_INIT()
 
     uint32_t sro0p_a8 = src->prgb32.u32 >> 24;
 
-    BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
       uint32_t dst0p_20, dst0p_31;
 
       DstF::p32LoadPixel32(dst0p_20, dst);
@@ -1333,7 +1333,7 @@ _ARGB32_Mask:
 
 _C_Opaque_Skip:
       dst += DstF::SIZE;
-    BLIT_LOOP_DstFx1_END(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -1354,9 +1354,9 @@ _C_Opaque_Skip:
 
     FOG_CBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
         uint32_t dst0p_20, dst0p_31;
 
         DstF::p32LoadPixel32(dst0p_20, dst);
@@ -1372,7 +1372,7 @@ _C_Opaque_Skip:
 
 _C_Opaque_Skip:
         dst += DstF::SIZE;
-      BLIT_LOOP_32x1_END(C_Opaque)
+      FOG_BLIT_LOOP_32x1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -1381,7 +1381,7 @@ _C_Opaque_Skip:
 
     FOG_CBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
       uint32_t minv0p;
@@ -1391,12 +1391,12 @@ _C_Opaque_Skip:
 
       if (IsUnbound && IsUnboundMskIn)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_a8;
         Acc::p32MulDiv256SBW(src0p_a8, sro0p_a8, msk0p);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_UnboundIn)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_UnboundIn)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
 
@@ -1412,13 +1412,13 @@ _C_Opaque_Skip:
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_UnboundIn)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_UnboundIn)
       }
       else if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
 
@@ -1436,16 +1436,16 @@ _C_Opaque_Skip:
           DstF::p32StorePixel32(dst, dst0p_20);
 
           dst += DstF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t src0p_a8;
         Acc::p32MulDiv256SBW(src0p_a8, sro0p_a8, msk0p);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
           uint32_t dst0p_20, dst0p_31;
 
           DstF::p32LoadPixel32(dst0p_20, dst);
@@ -1461,7 +1461,7 @@ _C_Opaque_Skip:
 
 _C_Mask_Skip:
           dst += DstF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask)
+        FOG_BLIT_LOOP_32x1_END(C_Mask)
       }
     }
 
@@ -1473,9 +1473,9 @@ _C_Mask_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
           uint32_t msk0p;
@@ -1517,13 +1517,13 @@ _A8_Glyph_Unbound_Mask:
 
           dst += DstF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
           uint32_t dst0p_20, dst0p_31;
           uint32_t msk0p;
 
@@ -1547,7 +1547,7 @@ _A8_Glyph_Unbound_Mask:
 _A8_Glyph_Skip:
           dst += DstF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph)
       }
     }
 
@@ -1559,9 +1559,9 @@ _A8_Glyph_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t dinv0p;
           uint32_t msk0p;
@@ -1588,13 +1588,13 @@ _A8_Glyph_Skip:
 _A8_Extra_Unbound_Skip:
           dst += DstF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra)
           uint32_t dst0p_20, dst0p_31;
           uint32_t msk0p;
 
@@ -1615,7 +1615,7 @@ _A8_Extra_Unbound_Skip:
 _A8_Extra_Skip:
           dst += DstF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra)
       }
     }
 
@@ -1625,9 +1625,9 @@ _A8_Extra_Skip:
 
     FOG_CBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
@@ -1671,7 +1671,7 @@ _ARGB32_Mask:
 
         dst += DstF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_CBLIT_SPAN8_END()
@@ -1685,9 +1685,9 @@ _ARGB32_Mask:
   static FOG_INLINE void pixel32_vblit_pixela8_line(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_32x1_INIT()
+    FOG_BLIT_LOOP_32x1_INIT()
 
-    BLIT_LOOP_32x1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
       uint32_t dst0p_20, dst0p_31;
       uint32_t src0p_a8;
 
@@ -1705,7 +1705,7 @@ _ARGB32_Mask:
 _C_Opaque_Skip:
       dst += DstF::SIZE;
       src += SrcF::SIZE;
-    BLIT_LOOP_32x1_END(C_Opaque)
+    FOG_BLIT_LOOP_32x1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -1724,9 +1724,9 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_a8;
 
@@ -1744,7 +1744,7 @@ _C_Opaque_Skip:
 _C_Opaque_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
-      BLIT_LOOP_32x1_END(C_Opaque)
+      FOG_BLIT_LOOP_32x1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -1753,19 +1753,19 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
       Acc::p32Copy(msk0p, msk0);
 
       if (IsUnbound && IsUnboundMskIn)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
         Acc::p32Negate256SBW(minv0p, msk0p);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound_MskIn)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound_MskIn)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
           uint32_t dinv0p;
@@ -1792,16 +1792,16 @@ _C_Opaque_Skip:
 _C_Mask_Unbound_MskIn_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_Unbound_MskIn)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_Unbound_MskIn)
       }
       else if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
         uint32_t minv0p;
         Acc::p32Negate256SBW(minv0p, msk0p);
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
           uint32_t dinv0p;
@@ -1827,13 +1827,13 @@ _C_Mask_Unbound_MskIn_Skip:
 _C_Mask_Unbound_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask_Unbound)
+        FOG_BLIT_LOOP_32x1_END(C_Mask_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(C_Mask)
+        FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
 
@@ -1855,7 +1855,7 @@ _C_Mask_Unbound_Skip:
 _C_Mask_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
-        BLIT_LOOP_32x1_END(C_Mask)
+        FOG_BLIT_LOOP_32x1_END(C_Mask)
       }
     }
 
@@ -1867,9 +1867,9 @@ _C_Mask_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
 
@@ -1915,13 +1915,13 @@ _A8_Glyph_Unbound_Mask:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
           uint32_t msk0p;
@@ -1946,7 +1946,7 @@ _A8_Glyph_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 1;
-        BLIT_LOOP_32x1_END(A8_Glyph)
+        FOG_BLIT_LOOP_32x1_END(A8_Glyph)
       }
     }
 
@@ -1958,9 +1958,9 @@ _A8_Glyph_Skip:
     {
       if (IsUnbound)
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra_Unbound)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
 
@@ -1994,13 +1994,13 @@ _A8_Extra_Unbound_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra_Unbound)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra_Unbound)
       }
       else
       {
-        BLIT_LOOP_32x1_INIT()
+        FOG_BLIT_LOOP_32x1_INIT()
 
-        BLIT_LOOP_32x1_BEGIN(A8_Extra)
+        FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra)
           uint32_t dst0p_20, dst0p_31;
           uint32_t src0p_a8;
           uint32_t msk0p;
@@ -2027,7 +2027,7 @@ _A8_Extra_Skip:
           dst += DstF::SIZE;
           src += SrcF::SIZE;
           msk += 2;
-        BLIT_LOOP_32x1_END(A8_Extra)
+        FOG_BLIT_LOOP_32x1_END(A8_Extra)
       }
     }
 
@@ -2037,9 +2037,9 @@ _A8_Extra_Skip:
 
     FOG_VBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_a8;
 
@@ -2086,7 +2086,7 @@ _ARGB32_Mask:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_VBLIT_SPAN8_END()
@@ -2167,14 +2167,14 @@ struct CompositeExtSrcInSrcOut
   static FOG_INLINE void pixel32_cblit_pixel32_line(
     uint8_t* dst, const RasterSolid* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_DstFx1_INIT()
+    FOG_BLIT_LOOP_DstFx1_INIT()
 
     uint32_t sro0p, sro0p_20, sro0p_31;
 
     Acc::p32Copy(sro0p, src->prgb32.u32);
     Acc::p32UnpackPBWFromPBB_2031(sro0p_20, sro0p_31, sro0p);
 
-    BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
       uint32_t dst0p;
 
       DstF::p32LoadPixelA8(dst0p, dst);
@@ -2187,7 +2187,7 @@ struct CompositeExtSrcInSrcOut
 
 _C_Opaque_Skip:
       dst += DstF::SIZE;
-    BLIT_LOOP_DstFx1_END(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -2211,9 +2211,9 @@ _C_Opaque_Skip:
 
     FOG_CBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_DstFx1_INIT()
+      FOG_BLIT_LOOP_DstFx1_INIT()
 
-      BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
         uint32_t dst0p;
 
         DstF::p32LoadPixelA8(dst0p, dst);
@@ -2226,7 +2226,7 @@ _C_Opaque_Skip:
 
 _C_Opaque_Skip:
         dst += DstF::SIZE;
-      BLIT_LOOP_DstFx1_END(C_Opaque)
+      FOG_BLIT_LOOP_DstFx1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -2235,7 +2235,7 @@ _C_Opaque_Skip:
 
     FOG_CBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t src0p_20, src0p_31;
       uint32_t minv0p;
@@ -2243,9 +2243,9 @@ _C_Opaque_Skip:
       Acc::p32Negate256SBW(minv0p, msk0);
       Acc::p32MulDiv256PBW_SBW_2x(src0p_20, sro0p_20, msk0, src0p_31, sro0p_31, msk0);
 
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Mask)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
         uint32_t dst0p_20, dst0p_31;
         uint32_t t0p_20, t0p_31;
 
@@ -2265,7 +2265,7 @@ _C_Opaque_Skip:
         DstF::p32StorePixel32(dst, dst0p_20);
 _C_Mask_Skip:
         dst += DstF::SIZE;
-      BLIT_LOOP_32x1_END(C_Mask)
+      FOG_BLIT_LOOP_32x1_END(C_Mask)
     }
 
     // ------------------------------------------------------------------------
@@ -2274,9 +2274,9 @@ _C_Mask_Skip:
   
     FOG_CBLIT_SPAN8_A8_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t t0p_20, t0p_31;
         uint32_t msk0p;
@@ -2303,7 +2303,7 @@ _C_Mask_Skip:
 _A8_Glyph_Skip:
         dst += DstF::SIZE;
         msk += 1;
-      BLIT_LOOP_32x1_END(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_END(A8_Glyph)
     }
 
     // ------------------------------------------------------------------------
@@ -2312,9 +2312,9 @@ _A8_Glyph_Skip:
 
     FOG_CBLIT_SPAN8_A8_EXTRA()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(A8_Extra)
+      FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra)
         uint32_t dst0p_20, dst0p_31;
         uint32_t t0p;
         uint32_t msk0p;
@@ -2339,7 +2339,7 @@ _A8_Glyph_Skip:
 _A8_Extra_Skip:
         dst += DstF::SIZE;
         msk += 2;
-      BLIT_LOOP_32x1_END(A8_Extra)
+      FOG_BLIT_LOOP_32x1_END(A8_Extra)
     }
 
     // ------------------------------------------------------------------------
@@ -2348,9 +2348,9 @@ _A8_Extra_Skip:
 
     FOG_CBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t dinv0p;
         uint32_t msk0p_20, msk0p_31;
@@ -2392,7 +2392,7 @@ _ARGB32_Mask:
 
         dst += DstF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_CBLIT_SPAN8_END()
@@ -2406,9 +2406,9 @@ _ARGB32_Mask:
   static FOG_INLINE void pixel32_vblit_pixel32_line(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_DstFx1_INIT()
+    FOG_BLIT_LOOP_DstFx1_INIT()
 
-    BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
       uint32_t dst0p;
       uint32_t src0p_20, src0p_31;
 
@@ -2428,7 +2428,7 @@ _ARGB32_Mask:
 _C_Opaque_Skip:
       dst += DstF::SIZE;
       src += SrcF::SIZE;
-    BLIT_LOOP_DstFx1_END(C_Opaque)
+    FOG_BLIT_LOOP_DstFx1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -2447,9 +2447,9 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_DstFx1_INIT()
+      FOG_BLIT_LOOP_DstFx1_INIT()
 
-      BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
         uint32_t dst0p;
         uint32_t src0p_20, src0p_31;
 
@@ -2469,7 +2469,7 @@ _C_Opaque_Skip:
 _C_Opaque_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
-      BLIT_LOOP_DstFx1_END(C_Opaque)
+      FOG_BLIT_LOOP_DstFx1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -2478,7 +2478,7 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
       uint32_t minv0p;
@@ -2486,9 +2486,9 @@ _C_Opaque_Skip:
       Acc::p32Copy(msk0p, msk0);
       Acc::p32Negate256SBW(minv0p, msk0);
 
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Mask)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_20, src0p_31;
         uint32_t t0p;
@@ -2513,7 +2513,7 @@ _C_Opaque_Skip:
 
         dst += DstF::SIZE;
         src += SrcF::SIZE;
-      BLIT_LOOP_32x1_END(C_Mask)
+      FOG_BLIT_LOOP_32x1_END(C_Mask)
     }
 
     // ------------------------------------------------------------------------
@@ -2522,9 +2522,9 @@ _C_Opaque_Skip:
   
     FOG_VBLIT_SPAN8_A8_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_20, src0p_31;
 
@@ -2559,7 +2559,7 @@ _A8_Glyph_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 1;
-      BLIT_LOOP_32x1_END(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_END(A8_Glyph)
     }
 
     // ------------------------------------------------------------------------
@@ -2568,9 +2568,9 @@ _A8_Glyph_Skip:
 
     FOG_VBLIT_SPAN8_A8_EXTRA()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_20, src0p_31;
 
@@ -2602,7 +2602,7 @@ _A8_Glyph_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 2;
-      BLIT_LOOP_32x1_END(A8_Extra)
+      FOG_BLIT_LOOP_32x1_END(A8_Extra)
     }
 
     // ------------------------------------------------------------------------
@@ -2611,9 +2611,9 @@ _A8_Glyph_Skip:
 
     FOG_VBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p_20, dst0p_31;
         uint32_t src0p_20, src0p_31;
         uint32_t t0p;
@@ -2663,7 +2663,7 @@ _ARGB32_Mask:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_VBLIT_SPAN8_END()
@@ -2677,9 +2677,9 @@ _ARGB32_Mask:
   static FOG_INLINE void pixel32_vblit_pixela8_line(
     uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
   {
-    BLIT_LOOP_32x1_INIT()
+    FOG_BLIT_LOOP_32x1_INIT()
 
-    BLIT_LOOP_32x1_BEGIN(C_Opaque)
+    FOG_BLIT_LOOP_32x1_BEGIN(C_Opaque)
       uint32_t dst0p;
       uint32_t src0p;
 
@@ -2699,7 +2699,7 @@ _ARGB32_Mask:
 _C_Opaque_Skip:
       dst += DstF::SIZE;
       src += SrcF::SIZE;
-    BLIT_LOOP_32x1_END(C_Opaque)
+    FOG_BLIT_LOOP_32x1_END(C_Opaque)
   }
 
   // ==========================================================================
@@ -2718,9 +2718,9 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_OPAQUE()
     {
-      BLIT_LOOP_DstFx1_INIT()
+      FOG_BLIT_LOOP_DstFx1_INIT()
 
-      BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
+      FOG_BLIT_LOOP_DstFx1_BEGIN(C_Opaque)
         uint32_t dst0p;
         uint32_t src0p;
 
@@ -2740,7 +2740,7 @@ _C_Opaque_Skip:
 _C_Opaque_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
-      BLIT_LOOP_32x1_END(C_Opaque)
+      FOG_BLIT_LOOP_32x1_END(C_Opaque)
     }
 
     // ------------------------------------------------------------------------
@@ -2749,7 +2749,7 @@ _C_Opaque_Skip:
 
     FOG_VBLIT_SPAN8_C_MASK()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
       uint32_t msk0p;
       uint32_t minv0p;
@@ -2757,9 +2757,9 @@ _C_Opaque_Skip:
       Acc::p32Copy(msk0p, msk0);
       Acc::p32Negate256SBW(minv0p, msk0);
 
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(C_Mask)
+      FOG_BLIT_LOOP_32x1_BEGIN(C_Mask)
         uint32_t dst0p;
         uint32_t src0p;
         uint32_t t0p;
@@ -2782,7 +2782,7 @@ _C_Opaque_Skip:
 _C_Mask_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
-      BLIT_LOOP_32x1_END(C_Mask)
+      FOG_BLIT_LOOP_32x1_END(C_Mask)
     }
 
     // ------------------------------------------------------------------------
@@ -2791,9 +2791,9 @@ _C_Mask_Skip:
   
     FOG_VBLIT_SPAN8_A8_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(A8_Glyph)
         uint32_t dst0p;
         uint32_t src0p;
         uint32_t msk0p;
@@ -2824,7 +2824,7 @@ _A8_Glyph_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 1;
-      BLIT_LOOP_32x1_END(A8_Glyph)
+      FOG_BLIT_LOOP_32x1_END(A8_Glyph)
     }
 
     // ------------------------------------------------------------------------
@@ -2833,9 +2833,9 @@ _A8_Glyph_Skip:
 
     FOG_VBLIT_SPAN8_A8_EXTRA()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(A8_Extra)
+      FOG_BLIT_LOOP_32x1_BEGIN(A8_Extra)
         uint32_t dst0p;
         uint32_t src0p;
         uint32_t msk0p;
@@ -2865,7 +2865,7 @@ _A8_Extra_Skip:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 2;
-      BLIT_LOOP_32x1_END(A8_Extra)
+      FOG_BLIT_LOOP_32x1_END(A8_Extra)
     }
 
     // ------------------------------------------------------------------------
@@ -2874,9 +2874,9 @@ _A8_Extra_Skip:
 
     FOG_VBLIT_SPAN8_ARGB32_GLYPH()
     {
-      BLIT_LOOP_32x1_INIT()
+      FOG_BLIT_LOOP_32x1_INIT()
 
-      BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_BEGIN(ARGB32_Glyph)
         uint32_t dst0p;
         uint32_t src0p;
         uint32_t msk0p_20, msk0p_31;
@@ -2922,7 +2922,7 @@ _ARGB32_Mask:
         dst += DstF::SIZE;
         src += SrcF::SIZE;
         msk += 4;
-      BLIT_LOOP_32x1_END(ARGB32_Glyph)
+      FOG_BLIT_LOOP_32x1_END(ARGB32_Glyph)
     }
 
     FOG_VBLIT_SPAN8_END()

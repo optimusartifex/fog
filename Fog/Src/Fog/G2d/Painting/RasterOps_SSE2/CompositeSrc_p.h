@@ -34,9 +34,9 @@ struct FOG_NO_EXPORT CompositeSrc
 
     if (w <= 4)
     {
-      Acc::m128iStore4(dst +  0, sro0xmm); if (--w == 0) return;
-      Acc::m128iStore4(dst +  4, sro0xmm); if (--w == 0) return;
-      Acc::m128iStore4(dst +  8, sro0xmm); if (--w == 0) return;
+      Acc::m128iStore4(dst +  0, sro0xmm); if (--w == 0) goto _C_Opaque_End;
+      Acc::m128iStore4(dst +  4, sro0xmm); if (--w == 0) goto _C_Opaque_End;
+      Acc::m128iStore4(dst +  8, sro0xmm); if (--w == 0) goto _C_Opaque_End;
       Acc::m128iStore4(dst + 12, sro0xmm);
     }
     else
@@ -58,30 +58,31 @@ struct FOG_NO_EXPORT CompositeSrc
         dst += 64;
       }
 
-      if ((w += 12) < 0) goto _C_Opaque_Tail;
+      if ((w += 16) < 4) goto _C_Opaque_Tail;
       Acc::m128iStore16a(dst, sro0xmm);
       dst += 16;
 
-      if ((w -= 4) < 0) goto _C_Opaque_Tail;
+      if ((w -= 4) < 4) goto _C_Opaque_Tail;
       Acc::m128iStore16a(dst, sro0xmm);
       dst += 16;
 
-      if ((w -= 4) < 0) goto _C_Opaque_Tail;
+      if ((w -= 4) < 4) goto _C_Opaque_Tail;
       Acc::m128iStore16a(dst, sro0xmm);
       dst += 16;
+      w -= 4;
 
 _C_Opaque_Tail:
-      FOG_ASSERT(w + 4 < 4);
-
-      if ((w += 4) == 0) return;
+      if (w == 0) goto _C_Opaque_End;
       Acc::m128iStore4(dst + 0, sro0xmm);
 
-      if (--w == 0) return;
+      if (--w == 0) goto _C_Opaque_End;
       Acc::m128iStore4(dst + 4, sro0xmm);
 
-      if (--w == 0) return;
+      if (--w == 0) goto _C_Opaque_End;
       Acc::m128iStore4(dst + 8, sro0xmm);
     }
+_C_Opaque_End:
+    ;
   }
 
   // ==========================================================================
@@ -130,22 +131,21 @@ _C_Opaque_Tail:
           dst += 64;
         }
 
-        if ((w += 12) < 0) goto _C_Opaque_Tail;
+        if ((w += 16) < 4) goto _C_Opaque_Tail;
         Acc::m128iStore16a(dst, sro0xmm);
         dst += 16;
 
-        if ((w -= 4) < 0) goto _C_Opaque_Tail;
+        if ((w -= 4) < 4) goto _C_Opaque_Tail;
         Acc::m128iStore16a(dst, sro0xmm);
         dst += 16;
 
-        if ((w -= 4) < 0) goto _C_Opaque_Tail;
+        if ((w -= 4) < 4) goto _C_Opaque_Tail;
         Acc::m128iStore16a(dst, sro0xmm);
         dst += 16;
+        w -= 4;
 
-_C_Opaque_Tail:
-        FOG_ASSERT(w + 4 < 4);
-
-        if ((w += 4) == 0) goto _C_Opaque_End;
+  _C_Opaque_Tail:
+        if (w == 0) goto _C_Opaque_End;
         Acc::m128iStore4(dst + 0, sro0xmm);
 
         if (--w == 0) goto _C_Opaque_End;
@@ -154,7 +154,7 @@ _C_Opaque_Tail:
         if (--w == 0) goto _C_Opaque_End;
         Acc::m128iStore4(dst + 8, sro0xmm);
       }
-_C_Opaque_End:
+  _C_Opaque_End:
       ;
     }
 

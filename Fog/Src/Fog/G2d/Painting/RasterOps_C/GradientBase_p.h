@@ -34,9 +34,13 @@ struct FOG_NO_EXPORT PGradientBase
     // [Solid]
     // ------------------------------------------------------------------------
 
+    uint32_t c0 = stops[0].getArgb32();
+    uint32_t c1;
+
     if (length == 1)
     {
-      Helpers::p_fill_prgb32(_dst, stops[0].getArgb32(), _w);
+      Acc::p32PRGB32FromARGB32(c0, c0);
+      Helpers::p_fill_prgb32(_dst, c0, _w);
       return;
     }
 
@@ -48,9 +52,6 @@ struct FOG_NO_EXPORT PGradientBase
 
     uint p0 = 0;
     uint p1;
-
-    uint32_t c0 = stops[0].getArgb32();
-    uint32_t c1;
 
     float wf = (float)(_w << 8);
 
@@ -66,16 +67,20 @@ struct FOG_NO_EXPORT PGradientBase
       uint len = (p1 >> 8) - (p0 >> 8);
 
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + (p0 >> 8);
-      uint i;
 
       if (len > 0)
       {
+        uint i = len + 1;
+
         if (c0 == c1)
         {
           uint32_t cp;
           Acc::p32PRGB32FromARGB32(cp, c0);
 
-          for (i = 0; i < len; i++) dst[i] = cp;
+          do {
+            dst[0] = cp;
+            dst++;
+          } while (--i);
         }
         else
         {
@@ -109,43 +114,47 @@ struct FOG_NO_EXPORT PGradientBase
           {
             mask |= 0xFF000000;
 
-            for (i = 0; i <= len; i++)
-            {
-              uint32_t cp = _FOG_ACC_COMBINE_3((rPos & 0xFF000000) >>  8,
-                                               (gPos & 0xFF000000) >> 16,
-                                               (bPos             ) >> 24) ^ mask;
-              dst[i] = cp;
+            do {
+              dst[0] =  _FOG_ACC_COMBINE_3((rPos & 0xFF000000) >>  8,
+                                           (gPos & 0xFF000000) >> 16,
+                                           (bPos             ) >> 24) ^ mask;
+              dst++;
 
               rPos += rInc;
               gPos += gInc;
               bPos += bInc;
-            }
+            } while (--i);
           }
           else
           {
-            for (i = 0; i <= len; i++)
-            {
-              uint32_t cp = _FOG_ACC_COMBINE_4((aPos & 0xFF000000)      ,
-                                               (rPos & 0xFF000000) >>  8,
-                                               (gPos & 0xFF000000) >> 16,
-                                               (bPos             ) >> 24) ^ mask;
-              Acc::p32PRGB32FromARGB32(cp, cp);
-              dst[i] = cp;
+            uint32_t mask0 = mask & 0x00FF00FFU;
+            uint32_t mask1 = mask >> 8;
+
+            do {
+              uint32_t t0 = _FOG_ACC_COMBINE_2((rPos & 0xFF000000) >> 8, bPos >> 24);
+              uint32_t t1 = (gPos        ) >> 24;
+              uint32_t ta = (aPos ^ mask ) >> 24;
+
+              t0 ^= mask0;
+              t1 ^= mask1;
+
+              Acc::p32MulDiv255PBW_SBW_2x_Pack_20Z1(t0, t0, ta, t1, ta);
+              dst[0] = _FOG_ACC_COMBINE_2(t0, ta << 24);
+              dst++;
 
               aPos += aInc;
               rPos += rInc;
               gPos += gInc;
               bPos += bInc;
-            }
+            } while (--i);
           }
         }
       }
       else
       {
-        uint32_t cp;
-        Acc::p32PRGB32FromARGB32(cp, c1);
-
-        dst[0] = cp;
+        uint32_t t0;
+        Acc::p32PRGB32FromARGB32(t0, c1);
+        dst[0] = t0;
       }
 
       c0 = c1;
@@ -159,9 +168,13 @@ struct FOG_NO_EXPORT PGradientBase
       Acc::p32PRGB32FromARGB32(cp, c1);
 
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
-      uint i, len = (uint)_w - p1 + 1;
+      uint i = (uint)_w - p1 + 1;
+      FOG_ASSUME(i > 0);
 
-      for (i = 0; i < len; i++) dst[i] = cp;
+      do {
+        dst[0] = cp;
+        dst++;
+      } while (--i);
     }
   }
 

@@ -34,9 +34,19 @@ struct FOG_NO_EXPORT PGradientBase
     // [Solid]
     // ------------------------------------------------------------------------
 
+    uint32_t c0 = stops[0].getArgb32();
+    uint32_t c1;
+
     if (length == 1)
     {
-      RasterOps_C::Helpers::p_fill_prgb32(_dst, stops[0].getArgb32(), _w);
+      __m128i pix0;
+      Acc::m128iCvtSI128FromSI(pix0, c0);
+      Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
+
+      do {
+        Acc::m128iStore4(_dst, pix0);
+        _dst += 4;
+      } while (--_w);
       return;
     }
 
@@ -48,9 +58,6 @@ struct FOG_NO_EXPORT PGradientBase
 
     uint p0 = 0;
     uint p1;
-
-    uint32_t c0 = stops[0].getArgb32();
-    uint32_t c1;
 
     float wf = (float)(_w << 8);
 
@@ -66,16 +73,21 @@ struct FOG_NO_EXPORT PGradientBase
       uint len = (p1 >> 8) - (p0 >> 8);
 
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + (p0 >> 8);
-      uint i;
 
       if (len > 0)
       {
+        uint i = len + 1;
+
         if (c0 == c1)
         {
-          uint32_t cp;
-          Acc::p32PRGB32FromARGB32(cp, c0);
+          __m128i pix0;
+          Acc::m128iCvtSI128FromSI(pix0, c0);
+          Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
 
-          for (i = 0; i < len; i++) dst[i] = cp;
+          do {
+            Acc::m128iStore4(dst, pix0);
+            dst++;
+          } while (--i);
         }
         else
         {
@@ -118,8 +130,7 @@ struct FOG_NO_EXPORT PGradientBase
           {
             Acc::m128iPackPU8FromPU16(msk0xmm, msk0xmm, msk0xmm);
 
-            for (i = 0; i <= len; i++)
-            {
+            do {
               __m128i pix0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -128,13 +139,14 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iPackPU8FromPI32(pix0xmm, pix0xmm, pix0xmm);
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
-              Acc::m128iStore4(&dst[i], pix0xmm);
-            }
+
+              Acc::m128iStore4(dst, pix0xmm);
+              dst++;
+            } while (--i);
           }
           else
           {
-            for (i = 0; i <= len; i++)
-            {
+            do {
               __m128i pix0xmm;
               __m128i alpha0xmm;
 
@@ -148,17 +160,20 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iFillPBWi<3>(pix0xmm, pix0xmm);
               Acc::m128iMulDiv255PI16(pix0xmm, pix0xmm, alpha0xmm);
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm);
-              Acc::m128iStore4(&dst[i], pix0xmm);
-            }
+
+              Acc::m128iStore4(dst, pix0xmm);
+              dst++;
+            } while (--i);
           }
         }
       }
       else
       {
-        uint32_t cp;
-        Acc::p32PRGB32FromARGB32(cp, c1);
+        __m128i pix0;
 
-        dst[0] = cp;
+        Acc::m128iCvtSI128FromSI(pix0, c1);
+        Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
+        Acc::m128iStore4(dst, pix0);
       }
 
       c0 = c1;
@@ -168,13 +183,19 @@ struct FOG_NO_EXPORT PGradientBase
     p1 >>= 8;
     if (p1 < (uint)_w)
     {
-      uint32_t cp;
-      Acc::p32PRGB32FromARGB32(cp, c1);
+      __m128i pix0;
+
+      Acc::m128iCvtSI128FromSI(pix0, c1);
+      Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
 
       uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
-      uint i, len = (uint)_w - p1 + 1;
+      uint i = (uint)_w - p1 + 1;
+      FOG_ASSUME(i > 0);
 
-      for (i = 0; i < len; i++) dst[i] = cp;
+      do {
+        Acc::m128iStore4(dst, pix0);
+        dst++;
+      } while (--i);
     }
   }
 };

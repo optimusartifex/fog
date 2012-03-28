@@ -17,7 +17,31 @@ namespace Acc {
 //! @{
 
 // ============================================================================
-// [Fog::Acc - SSE2 - UnpackMask]
+// [Fog::Acc::SSE2 - Raster - Premultiply]
+// ============================================================================
+
+static FOG_INLINE void m128iPRGB32FromARGB32_PBB(__m128i& dst0, __m128i& x0)
+{
+  __m128i alpha0;
+
+  Acc::m128iUnpackPI16FromPI8Lo(dst0, x0);
+  Acc::m128iShufflePI16Lo<3, 3, 3, 3>(alpha0, dst0);
+  Acc::m128iOr(dst0, dst0, FOG_XMM_GET_CONST_PI(00FF000000000000_00FF000000000000));
+  Acc::m128iMulDiv255PI16(dst0, dst0, alpha0);
+  Acc::m128iPackPU8FromPU16(dst0, dst0);
+}
+
+static FOG_INLINE void m128iPRGB32FromARGB32_PBW(__m128i& dst0, __m128i& x0)
+{
+  __m128i alpha0;
+
+  Acc::m128iShufflePI16Lo<3, 3, 3, 3>(alpha0, x0);
+  Acc::m128iOr(dst0, x0, FOG_XMM_GET_CONST_PI(00FF000000000000_00FF000000000000));
+  Acc::m128iMulDiv255PI16(dst0, dst0, alpha0);
+}
+
+// ============================================================================
+// [Fog::Acc::SSE2 - Raster - UnpackMask]
 // ============================================================================
 
 static FOG_INLINE void m128iUnpackMaskPI16(__m128i& dst0, __m128i& dst1, const __m128i& x0)

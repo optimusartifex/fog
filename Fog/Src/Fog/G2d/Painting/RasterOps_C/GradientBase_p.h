@@ -26,7 +26,7 @@ struct FOG_NO_EXPORT PGradientBase
   // [Interpolate]
   // ==========================================================================
 
-  static void FOG_FASTCALL interpolate_prgb32(uint8_t* _dst, int _w, const ColorStop* stops, size_t length)
+  static void FOG_FASTCALL interpolate_prgb32(uint8_t* _dst, int _wTotal, const ColorStop* stops, size_t length)
   {
     FOG_ASSUME(length >= 1);
 
@@ -40,7 +40,7 @@ struct FOG_NO_EXPORT PGradientBase
     if (length == 1)
     {
       Acc::p32PRGB32FromARGB32(c0, c0);
-      Helpers::p_fill_prgb32(_dst, c0, _w);
+      Helpers::p_fill_prgb32(_dst, c0, _wTotal);
       return;
     }
 
@@ -48,12 +48,12 @@ struct FOG_NO_EXPORT PGradientBase
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    _w--;
+    _wTotal--;
 
     uint p0 = 0;
     uint p1;
 
-    float wf = (float)(_w << 8);
+    float wf = (float)(_wTotal << 8);
 
     // ------------------------------------------------------------------------
     // [Loop]
@@ -64,23 +64,21 @@ struct FOG_NO_EXPORT PGradientBase
     {
       c1 = stops[pos].getArgb32();
       p1 = Math::uround(stops[pos].getOffset() * wf);
-      uint len = (p1 >> 8) - (p0 >> 8);
 
-      uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + (p0 >> 8);
+      uint len = (p1 >> 8) - (p0 >> 8);
+      uint8_t* dst = _dst + (p0 >> 8) * 4;
 
       if (len > 0)
       {
-        uint i = len + 1;
+        int w = len + 1;
 
         if (c0 == c1)
         {
-          uint32_t cp;
-          Acc::p32PRGB32FromARGB32(cp, c0);
-
+          Acc::p32PRGB32FromARGB32(c0, c0);
           do {
-            dst[0] = cp;
-            dst++;
-          } while (--i);
+            Acc::p32Store4a(dst, c0);
+            dst += 4;
+          } while (--w);
         }
         else
         {
@@ -115,15 +113,17 @@ struct FOG_NO_EXPORT PGradientBase
             mask |= 0xFF000000;
 
             do {
-              dst[0] =  _FOG_ACC_COMBINE_3((rPos & 0xFF000000) >>  8,
-                                           (gPos & 0xFF000000) >> 16,
-                                           (bPos             ) >> 24) ^ mask;
-              dst++;
+              c0 = _FOG_ACC_COMBINE_3((rPos & 0xFF000000) >>  8,
+                                      (gPos & 0xFF000000) >> 16,
+                                      (bPos             ) >> 24) ^ mask;
+
+              Acc::p32Store4a(dst, c0);
+              dst += 4;
 
               rPos += rInc;
               gPos += gInc;
               bPos += bInc;
-            } while (--i);
+            } while (--w);
           }
           else
           {
@@ -139,22 +139,23 @@ struct FOG_NO_EXPORT PGradientBase
               t1 ^= mask1;
 
               Acc::p32MulDiv255PBW_SBW_2x_Pack_20Z1(t0, t0, ta, t1, ta);
-              dst[0] = _FOG_ACC_COMBINE_2(t0, ta << 24);
-              dst++;
+              t0 = _FOG_ACC_COMBINE_2(t0, ta << 24);
+              
+              Acc::p32Store4a(dst, t0);
+              dst += 4;
 
               aPos += aInc;
               rPos += rInc;
               gPos += gInc;
               bPos += bInc;
-            } while (--i);
+            } while (--w);
           }
         }
       }
       else
       {
-        uint32_t t0;
-        Acc::p32PRGB32FromARGB32(t0, c1);
-        dst[0] = t0;
+        Acc::p32PRGB32FromARGB32(c0, c1);
+        Acc::p32Store4a(dst, c0);
       }
 
       c0 = c1;
@@ -162,19 +163,18 @@ struct FOG_NO_EXPORT PGradientBase
     }
 
     p1 >>= 8;
-    if (p1 < (uint)_w)
+    if (p1 < (uint)_wTotal)
     {
-      uint32_t cp;
-      Acc::p32PRGB32FromARGB32(cp, c1);
+      uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1 * 4;
+      int w = (uint)_wTotal - p1 + 1;
 
-      uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
-      uint i = (uint)_w - p1 + 1;
-      FOG_ASSUME(i > 0);
+      Acc::p32PRGB32FromARGB32(c1, c1);
+      FOG_ASSUME(w > 0);
 
       do {
-        dst[0] = cp;
-        dst++;
-      } while (--i);
+        Acc::p32Store4a(dst, c1);
+        dst += 4;
+      } while (--w);
     }
   }
 

@@ -26,7 +26,7 @@ struct FOG_NO_EXPORT PGradientBase
   // [Interpolate]
   // ==========================================================================
 
-  static void FOG_FASTCALL interpolate_prgb32(uint8_t* _dst, int _w, const ColorStop* stops, size_t length)
+  static void FOG_FASTCALL interpolate_prgb32(uint8_t* _dst, int _wTotal, const ColorStop* stops, size_t length)
   {
     FOG_ASSUME(length >= 1);
 
@@ -46,7 +46,7 @@ struct FOG_NO_EXPORT PGradientBase
       do {
         Acc::m128iStore4(_dst, pix0);
         _dst += 4;
-      } while (--_w);
+      } while (--_wTotal);
       return;
     }
 
@@ -54,12 +54,12 @@ struct FOG_NO_EXPORT PGradientBase
     // [Prepare]
     // ------------------------------------------------------------------------
 
-    _w--;
+    _wTotal--;
 
     uint p0 = 0;
     uint p1;
 
-    float wf = (float)(_w << 8);
+    float wf = (float)(_wTotal << 8);
 
     // ------------------------------------------------------------------------
     // [Loop]
@@ -70,13 +70,13 @@ struct FOG_NO_EXPORT PGradientBase
     {
       c1 = stops[pos].getArgb32();
       p1 = Math::uround(stops[pos].getOffset() * wf);
-      uint len = (p1 >> 8) - (p0 >> 8);
 
-      uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + (p0 >> 8);
+      uint len = (p1 >> 8) - (p0 >> 8);
+      uint8_t* dst = _dst + (p0 >> 8) * 4;
 
       if (len > 0)
       {
-        uint i = len + 1;
+        int w = len + 1;
 
         if (c0 == c1)
         {
@@ -86,8 +86,8 @@ struct FOG_NO_EXPORT PGradientBase
 
           do {
             Acc::m128iStore4(dst, pix0);
-            dst++;
-          } while (--i);
+            dst += 4;
+          } while (--w);
         }
         else
         {
@@ -129,8 +129,11 @@ struct FOG_NO_EXPORT PGradientBase
           if (Acc::p32ARGB32IsAlphaFF(c0) && Acc::p32ARGB32IsAlphaFF(c1))
           {
             Acc::m128iPackPU8FromPU16(msk0xmm, msk0xmm, msk0xmm);
+            Acc::m128iExpandPI32FromSI32(msk0xmm, msk0xmm);
 
-            do {
+            FOG_BLIT_LOOP_32x4_INIT()
+
+            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(C_Mask)
               __m128i pix0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -141,14 +144,45 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
 
               Acc::m128iStore4(dst, pix0xmm);
-              dst++;
-            } while (--i);
+              dst += 4;
+            FOG_BLIT_LOOP_32x4_SMALL_END(C_Mask)
+
+            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(C_Mask)
+              __m128i pix0xmm, pix1xmm, pix2xmm;
+
+              Acc::m128iCopy(pix0xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iCopy(pix1xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
+              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
+
+              Acc::m128iCopy(pix2xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm, pix1xmm);
+
+              Acc::m128iCopy(pix1xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
+              Acc::m128iRShiftPU32<24>(pix2xmm, pix2xmm);
+
+              Acc::m128iPackPI16FromPI32(pix2xmm, pix2xmm, pix1xmm);
+              Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm, pix2xmm);
+
+              Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
+              Acc::m128iStore16a(dst, pix0xmm);
+
+              dst += 16;
+            FOG_BLIT_LOOP_32x4_MAIN_END(C_Mask)
           }
           else
           {
             do {
               __m128i pix0xmm;
-              __m128i alpha0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
@@ -156,14 +190,12 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm);
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
-              Acc::m128iShufflePI16Lo<3, 3, 3, 3>(alpha0xmm, pix0xmm);
-              Acc::m128iFillPBWi<3>(pix0xmm, pix0xmm);
-              Acc::m128iMulDiv255PI16(pix0xmm, pix0xmm, alpha0xmm);
+              Acc::m128iPRGB32FromARGB32_PBW(pix0xmm, pix0xmm);
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm);
 
               Acc::m128iStore4(dst, pix0xmm);
-              dst++;
-            } while (--i);
+              dst += 4;
+            } while (--w);
           }
         }
       }
@@ -181,21 +213,21 @@ struct FOG_NO_EXPORT PGradientBase
     }
 
     p1 >>= 8;
-    if (p1 < (uint)_w)
+    if (p1 < (uint)_wTotal)
     {
       __m128i pix0;
 
       Acc::m128iCvtSI128FromSI(pix0, c1);
       Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
 
-      uint32_t* dst = reinterpret_cast<uint32_t*>(_dst) + p1;
-      uint i = (uint)_w - p1 + 1;
-      FOG_ASSUME(i > 0);
+      uint8_t* dst = _dst + p1 * 4;
+      int w = (uint)_wTotal - p1 + 1;
 
+      FOG_ASSUME(w > 0);
       do {
         Acc::m128iStore4(dst, pix0);
-        dst++;
-      } while (--i);
+        dst += 4;
+      } while (--w);
     }
   }
 };

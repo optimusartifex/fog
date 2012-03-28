@@ -41,7 +41,7 @@ struct FOG_NO_EXPORT PGradientBase
     {
       __m128i pix0;
       Acc::m128iCvtSI128FromSI(pix0, c0);
-      Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
+      Acc::m128iPRGB32FromARGB32Lo_PBB(pix0, pix0);
 
       do {
         Acc::m128iStore4(_dst, pix0);
@@ -82,7 +82,7 @@ struct FOG_NO_EXPORT PGradientBase
         {
           __m128i pix0;
           Acc::m128iCvtSI128FromSI(pix0, c0);
-          Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
+          Acc::m128iPRGB32FromARGB32Lo_PBB(pix0, pix0);
 
           do {
             Acc::m128iStore4(dst, pix0);
@@ -133,7 +133,7 @@ struct FOG_NO_EXPORT PGradientBase
 
             FOG_BLIT_LOOP_32x4_INIT()
 
-            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(C_Mask)
+            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(G_NoAlpha)
               __m128i pix0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -145,9 +145,9 @@ struct FOG_NO_EXPORT PGradientBase
 
               Acc::m128iStore4(dst, pix0xmm);
               dst += 4;
-            FOG_BLIT_LOOP_32x4_SMALL_END(C_Mask)
+            FOG_BLIT_LOOP_32x4_SMALL_END(G_NoAlpha)
 
-            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(C_Mask)
+            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(G_NoAlpha)
               __m128i pix0xmm, pix1xmm, pix2xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -177,11 +177,13 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iStore16a(dst, pix0xmm);
 
               dst += 16;
-            FOG_BLIT_LOOP_32x4_MAIN_END(C_Mask)
+            FOG_BLIT_LOOP_32x4_MAIN_END(G_NoAlpha)
           }
           else
           {
-            do {
+            FOG_BLIT_LOOP_32x4_INIT()
+
+            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(G_HasAlpha)
               __m128i pix0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -190,12 +192,46 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm);
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
-              Acc::m128iPRGB32FromARGB32_PBW(pix0xmm, pix0xmm);
+              Acc::m128iPRGB32FromARGB32Lo_PBW(pix0xmm, pix0xmm);
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm);
 
               Acc::m128iStore4(dst, pix0xmm);
               dst += 4;
-            } while (--w);
+            FOG_BLIT_LOOP_32x4_SMALL_END(G_HasAlpha)
+
+            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(G_HasAlpha)
+              __m128i pix0xmm, pix1xmm, pix2xmm;
+
+              Acc::m128iCopy(pix0xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iCopy(pix1xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
+              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
+
+              Acc::m128iCopy(pix2xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm, pix1xmm);
+
+              Acc::m128iCopy(pix1xmm, pos0xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+
+              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
+              Acc::m128iRShiftPU32<24>(pix2xmm, pix2xmm);
+
+              Acc::m128iPackPI16FromPI32(pix2xmm, pix2xmm, pix1xmm);
+              Acc::m128iPRGB32FromARGB32_PBW(pix0xmm, pix0xmm);
+              Acc::m128iPRGB32FromARGB32_PBW(pix2xmm, pix2xmm);
+              Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm, pix2xmm);
+
+              Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
+              Acc::m128iStore16a(dst, pix0xmm);
+
+              dst += 16;
+            FOG_BLIT_LOOP_32x4_MAIN_END(G_HasAlpha)
           }
         }
       }
@@ -204,7 +240,7 @@ struct FOG_NO_EXPORT PGradientBase
         __m128i pix0;
 
         Acc::m128iCvtSI128FromSI(pix0, c1);
-        Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
+        Acc::m128iPRGB32FromARGB32Lo_PBB(pix0, pix0);
         Acc::m128iStore4(dst, pix0);
       }
 
@@ -218,7 +254,7 @@ struct FOG_NO_EXPORT PGradientBase
       __m128i pix0;
 
       Acc::m128iCvtSI128FromSI(pix0, c1);
-      Acc::m128iPRGB32FromARGB32_PBB(pix0, pix0);
+      Acc::m128iPRGB32FromARGB32Lo_PBB(pix0, pix0);
 
       uint8_t* dst = _dst + p1 * 4;
       int w = (uint)_wTotal - p1 + 1;

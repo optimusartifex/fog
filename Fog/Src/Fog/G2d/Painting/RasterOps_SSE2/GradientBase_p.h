@@ -126,14 +126,14 @@ struct FOG_NO_EXPORT PGradientBase
           Acc::m128iAddPI32(pos0xmm, pos0xmm, FOG_XMM_GET_CONST_PI(0080000000800000_0080000000800000));
           inc0xmm = t.m128i;
 
-          if (Acc::p32ARGB32IsAlphaFF(c0) && Acc::p32ARGB32IsAlphaFF(c1))
+          if (Acc::p32ARGB32IsAlphaFF(c0 & c1))
           {
             Acc::m128iPackPU8FromPU16(msk0xmm, msk0xmm, msk0xmm);
             Acc::m128iExpandPI32FromSI32(msk0xmm, msk0xmm);
 
             FOG_BLIT_LOOP_32x4_INIT()
 
-            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(G_NoAlpha)
+            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(G_XRGB)
               __m128i pix0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -142,12 +142,12 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iPackPU8FromPI32(pix0xmm, pix0xmm, pix0xmm);
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
-
               Acc::m128iStore4(dst, pix0xmm);
-              dst += 4;
-            FOG_BLIT_LOOP_32x4_SMALL_END(G_NoAlpha)
 
-            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(G_NoAlpha)
+              dst += 4;
+            FOG_BLIT_LOOP_32x4_SMALL_END(G_XRGB)
+
+            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(G_XRGB)
               __m128i pix0xmm, pix1xmm, pix2xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -177,13 +177,13 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iStore16a(dst, pix0xmm);
 
               dst += 16;
-            FOG_BLIT_LOOP_32x4_MAIN_END(G_NoAlpha)
+            FOG_BLIT_LOOP_32x4_MAIN_END(G_XRGB)
           }
           else
           {
             FOG_BLIT_LOOP_32x4_INIT()
 
-            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(G_HasAlpha)
+            FOG_BLIT_LOOP_32x4_SMALL_BEGIN(G_ARGB)
               __m128i pix0xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -194,12 +194,12 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
               Acc::m128iPRGB32FromARGB32Lo_PBW(pix0xmm, pix0xmm);
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm);
-
               Acc::m128iStore4(dst, pix0xmm);
-              dst += 4;
-            FOG_BLIT_LOOP_32x4_SMALL_END(G_HasAlpha)
 
-            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(G_HasAlpha)
+              dst += 4;
+            FOG_BLIT_LOOP_32x4_SMALL_END(G_ARGB)
+
+            FOG_BLIT_LOOP_32x4_MAIN_BEGIN(G_ARGB)
               __m128i pix0xmm, pix1xmm, pix2xmm;
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
@@ -223,15 +223,16 @@ struct FOG_NO_EXPORT PGradientBase
               Acc::m128iRShiftPU32<24>(pix2xmm, pix2xmm);
 
               Acc::m128iPackPI16FromPI32(pix2xmm, pix2xmm, pix1xmm);
+              Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
+              Acc::m128iXor(pix2xmm, pix2xmm, msk0xmm);
               Acc::m128iPRGB32FromARGB32_PBW(pix0xmm, pix0xmm);
               Acc::m128iPRGB32FromARGB32_PBW(pix2xmm, pix2xmm);
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm, pix2xmm);
 
-              Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
               Acc::m128iStore16a(dst, pix0xmm);
 
               dst += 16;
-            FOG_BLIT_LOOP_32x4_MAIN_END(G_HasAlpha)
+            FOG_BLIT_LOOP_32x4_MAIN_END(G_ARGB)
           }
         }
       }

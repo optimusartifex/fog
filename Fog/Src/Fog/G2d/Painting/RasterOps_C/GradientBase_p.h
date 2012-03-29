@@ -108,7 +108,7 @@ struct FOG_NO_EXPORT PGradientBase
           aPos += 0x800000; rPos += 0x800000;
           gPos += 0x800000; bPos += 0x800000;
 
-          if (aInc == 0 && Acc::p32ARGB32IsAlphaFF(c1))
+          if (Acc::p32ARGB32IsAlphaFF(c0 & c1))
           {
             mask |= 0xFF000000;
 

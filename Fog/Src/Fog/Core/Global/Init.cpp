@@ -183,9 +183,7 @@ FOG_CAPI_DECLARE void _fog_init(void)
   RasterOps_init();
   Rasterizer_init();
   PaintDeviceInfo_init();
-
-  NullPaintEngine_init();
-  RasterPaintEngine_init();
+  Painter_init();
 
   // [G2d/Text]
   OTApi_init();

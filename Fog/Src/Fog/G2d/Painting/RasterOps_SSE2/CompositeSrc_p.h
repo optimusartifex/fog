@@ -164,7 +164,7 @@ _C_Opaque_End:
 
     FOG_CBLIT_SPAN8_C_MASK()
     {
-      FOG_BLIT_LOOP_32x4_INIT()
+      FOG_BLIT_LOOP_32x4_SSE2_INIT()
 
       __m128i src0xmm;
       __m128i msk0xmm;
@@ -177,7 +177,7 @@ _C_Opaque_End:
       Acc::m128iPackPU8FromPU16(src0xmm, src0xmm);
       Acc::m128iLShiftPU16<8>(msk0xmm, msk0xmm);
 
-      FOG_BLIT_LOOP_32x4_SMALL_BEGIN(C_Mask)
+      FOG_BLIT_LOOP_32x4_SSE2_ONE_BEGIN(C_Mask)
         __m128i dst0xmm;
 
         Acc::m128iLoad4(dst0xmm, dst);
@@ -188,9 +188,22 @@ _C_Opaque_End:
         Acc::m128iStore4(dst, dst0xmm);
 
         dst += 4;
-      FOG_BLIT_LOOP_32x4_SMALL_END(C_Mask)
+      FOG_BLIT_LOOP_32x4_SSE2_ONE_END(C_Mask)
 
-      FOG_BLIT_LOOP_32x4_MAIN_BEGIN(C_Mask)
+      FOG_BLIT_LOOP_32x4_SSE2_TWO_BEGIN(C_Mask)
+        __m128i dst0xmm;
+
+        Acc::m128iLoad8(dst0xmm, dst);
+        Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+        Acc::m128iMulHiPU16(dst0xmm, dst0xmm, msk0xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+        Acc::m128iAddPI16(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iStore8(dst, dst0xmm);
+
+        dst += 8;
+      FOG_BLIT_LOOP_32x4_SSE2_TWO_END(C_Mask)
+
+      FOG_BLIT_LOOP_32x4_SSE2_MAIN_BEGIN(C_Mask)
         __m128i dst0xmm, dst1xmm;
 
         Acc::m128iLoad16a(dst0xmm, dst);
@@ -205,7 +218,7 @@ _C_Opaque_End:
         Acc::m128iStore16a(dst, dst0xmm);
 
         dst += 16;
-      FOG_BLIT_LOOP_32x4_MAIN_END(C_Mask)
+      FOG_BLIT_LOOP_32x4_SSE2_MAIN_END(C_Mask)
     }
 
     // ------------------------------------------------------------------------
@@ -303,9 +316,9 @@ _A8_Glyph_Main_Fill:
 
     FOG_CBLIT_SPAN8_A8_EXTRA()
     {
-      FOG_BLIT_LOOP_32x4_INIT()
+      FOG_BLIT_LOOP_32x4_SSE2_INIT()
 
-      FOG_BLIT_LOOP_32x4_SMALL_BEGIN(A8_Extra)
+      FOG_BLIT_LOOP_32x4_SSE2_ONE_BEGIN(A8_Extra)
         __m128i dst0xmm;
         __m128i msk0xmm;
         __m128i minv0xmm;
@@ -327,9 +340,34 @@ _A8_Glyph_Main_Fill:
 
         dst += 4;
         msk += 2;
-      FOG_BLIT_LOOP_32x4_SMALL_END(A8_Extra)
+      FOG_BLIT_LOOP_32x4_SSE2_ONE_END(A8_Extra)
 
-      FOG_BLIT_LOOP_32x4_MAIN_BEGIN(A8_Extra)
+      FOG_BLIT_LOOP_32x4_SSE2_TWO_BEGIN(A8_Extra)
+        __m128i dst0xmm;
+        __m128i msk0xmm;
+        __m128i minv0xmm;
+
+        Acc::m128iLoad4(msk0xmm, msk);
+        Acc::m128iLoad8(dst0xmm, dst);
+
+        Acc::m128iUnpackPI32FromPI16Lo(msk0xmm, msk0xmm, msk0xmm);
+        Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+        Acc::m128iShufflePI32<1, 1, 0, 0>(msk0xmm, msk0xmm);
+        Acc::m128iNegate256PI16(minv0xmm, msk0xmm);
+
+        Acc::m128iMulLoPI16(msk0xmm, msk0xmm, sru0xmm);
+        Acc::m128iMulLoPI16(dst0xmm, dst0xmm, minv0xmm);
+        Acc::m128iAddPI16(dst0xmm, dst0xmm, msk0xmm);
+
+        Acc::m128iRShiftPU16<8>(dst0xmm, dst0xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+        Acc::m128iStore8(dst, dst0xmm);
+
+        dst += 8;
+        msk += 4;
+      FOG_BLIT_LOOP_32x4_SSE2_TWO_END(A8_Extra)
+
+      FOG_BLIT_LOOP_32x4_SSE2_MAIN_BEGIN(A8_Extra)
         __m128i dst0xmm, dst1xmm;
         __m128i msk0xmm, msk1xmm;
         __m128i minv0xmm, minv1xmm;
@@ -353,7 +391,7 @@ _A8_Glyph_Main_Fill:
 
         dst += 16;
         msk += 8;
-      FOG_BLIT_LOOP_32x4_MAIN_END(A8_Extra)
+      FOG_BLIT_LOOP_32x4_SSE2_MAIN_END(A8_Extra)
     }
 
     // ------------------------------------------------------------------------

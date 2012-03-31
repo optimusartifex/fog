@@ -176,9 +176,8 @@ FOG_NO_EXPORT void WinUtil_G2d_fini(void);
 #endif // FOG_OS_WINDOWS
 
 // [Fog/G2d/Painting]
-FOG_NO_EXPORT void NullPaintEngine_init(void);
+FOG_NO_EXPORT void Painter_init(void);
 FOG_NO_EXPORT void PaintDeviceInfo_init(void);
-FOG_NO_EXPORT void RasterPaintEngine_init(void);
 FOG_NO_EXPORT void RasterOps_init(void);
 FOG_NO_EXPORT void Rasterizer_init(void);
 

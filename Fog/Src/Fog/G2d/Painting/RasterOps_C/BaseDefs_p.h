@@ -323,7 +323,7 @@
 
 
 // ============================================================================
-// [BLIT_LOOP]
+// [FOG_BLIT_LOOP]
 // ============================================================================
 
 // These macros were designed to simplify blit functions. The idea is very simple.
@@ -367,7 +367,7 @@
 // - do not add anything between FOG_BLIT_LOOP_32x4_SMALL_END and FOG_BLIT_LOOP_32x4_MAIN_BEGIN.
 
 // ============================================================================
-// [BLIT_LOOP - DstFx1 - DstF per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - DstFx1 - DstF per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_DstFx1_INIT() \
@@ -387,7 +387,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 8x1 - 8-bits per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - 8x1 - 8-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_8x1_INIT() \
@@ -408,7 +408,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 8x4 - 8-bits per pixel, 4 pixels in a main loop]
+// [FOG_BLIT_LOOP - 8x4 - 8-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_8x4_INIT() \
@@ -457,7 +457,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 8x8 - 8-bits per pixel, 8 pixels in a main loop]
+// [FOG_BLIT_LOOP - 8x8 - 8-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_8x8_INIT() \
@@ -506,7 +506,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 8x16 - 8-bits per pixel, 16 pixels in a main loop]
+// [FOG_BLIT_LOOP - 8x16 - 8-bits per pixel, 16 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_8x16_INIT() \
@@ -555,7 +555,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 16x1 - 16-bits per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - 16x1 - 16-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_16x1_INIT() \
@@ -576,7 +576,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 16x2 - 16-bits per pixel, 2 pixels in a main loop]
+// [FOG_BLIT_LOOP - 16x2 - 16-bits per pixel, 2 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_16x2_INIT() \
@@ -623,7 +623,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 16x4 - 16-bits per pixel, 4 pixels in a main loop]
+// [FOG_BLIT_LOOP - 16x4 - 16-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_16x4_INIT() \
@@ -672,7 +672,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 16x8 - 16-bits per pixel, 8 pixels in a main loop]
+// [FOG_BLIT_LOOP - 16x8 - 16-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_16x8_INIT() \
@@ -721,7 +721,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 24x1 - 24-bits per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - 24x1 - 24-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_24x1_INIT() \
@@ -742,7 +742,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 24x4 - 24-bits per pixel, 4 pixels in a main loop]
+// [FOG_BLIT_LOOP - 24x4 - 24-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_24x4_INIT() \
@@ -791,7 +791,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 24x8 - 24-bits per pixel, 8 pixels in a main loop]
+// [FOG_BLIT_LOOP - 24x8 - 24-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_24x8_INIT() \
@@ -840,7 +840,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 32x1 - 32-bits per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - 32x1 - 32-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_32x1_INIT() \
@@ -861,7 +861,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 32x4 - 32-bits per pixel, 4 pixels in a main loop]
+// [FOG_BLIT_LOOP - 32x4 - 32-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_32x4_INIT() \
@@ -916,7 +916,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 32x4_VS_16 - 32-bits per pixel vs 16-bits per pixel]
+// [FOG_BLIT_LOOP - 32x4_VS_16 - 32-bits per pixel vs 16-bits per pixel]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_32x4_VS_16_INIT() \
@@ -964,7 +964,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 32x4_VS_24 - 32-bits per pixel vs 24-bits per pixel]
+// [FOG_BLIT_LOOP - 32x4_VS_24 - 32-bits per pixel vs 24-bits per pixel]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_32v24x4_INIT() \
@@ -1012,7 +1012,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 32x16 - 32-bits per pixel, 16 pixels in a main loop]
+// [FOG_BLIT_LOOP - 32x16 - 32-bits per pixel, 16 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_32x16_INIT() \
@@ -1061,7 +1061,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 48x1 - 48-bits per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - 48x1 - 48-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_48x1_BEGIN(_Group_) \
@@ -1079,7 +1079,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 48x4 - 48-bits per pixel, 4 pixels in a main loop]
+// [FOG_BLIT_LOOP - 48x4 - 48-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_48x4_INIT() \
@@ -1128,7 +1128,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 48x8 - 48-bits per pixel, 8 pixels in a main loop]
+// [FOG_BLIT_LOOP - 48x8 - 48-bits per pixel, 8 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_48x8_INIT() \
@@ -1177,7 +1177,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 64x1 - 64-bits per pixel, 1 pixel in a main loop]
+// [FOG_BLIT_LOOP - 64x1 - 64-bits per pixel, 1 pixel in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_64x1_BEGIN(_Group_) \
@@ -1195,7 +1195,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 64x2 - 64-bits per pixel, 2 pixels in a main loop]
+// [FOG_BLIT_LOOP - 64x2 - 64-bits per pixel, 2 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_64x2_INIT() \
@@ -1234,7 +1234,7 @@ _##_Group_##_End: \
   ;
 
 // ============================================================================
-// [BLIT_LOOP - 64x4 - 64-bits per pixel, 4 pixels in a main loop]
+// [FOG_BLIT_LOOP - 64x4 - 64-bits per pixel, 4 pixels in a main loop]
 // ============================================================================
 
 #define FOG_BLIT_LOOP_64x4_INIT() \

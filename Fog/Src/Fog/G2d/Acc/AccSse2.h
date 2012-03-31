@@ -53,7 +53,13 @@ static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBW(__m128i& dst0, const __m128i&
 // [Fog::Acc::SSE2 - Raster - UnpackMask]
 // ============================================================================
 
-static FOG_INLINE void m128iUnpackMaskPI16(__m128i& dst0, __m128i& dst1, const __m128i& x0)
+static FOG_INLINE void m128iUnpackMask2PI16(__m128i& dst0, const __m128i& x0)
+{
+  m128iUnpackPI32FromPI16Lo(dst0, x0, x0);
+  m128iShufflePI32<1, 1, 0, 0>(dst0, dst0);
+}
+
+static FOG_INLINE void m128iUnpackMask4PI16(__m128i& dst0, __m128i& dst1, const __m128i& x0)
 {
   m128iUnpackPI32FromPI16Lo(dst0, x0, x0);
   m128iShufflePI32<3, 3, 2, 2>(dst1, dst0);

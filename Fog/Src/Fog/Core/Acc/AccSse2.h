@@ -1724,7 +1724,7 @@ static FOG_INLINE void m128iMulDiv256PI16(
   __m128i& dst0, const __m128i& x0, const __m128i& y0)
 {
   dst0 = _mm_mullo_epi16(x0, y0);
-  dst0 = _mm_slli_epi16(dst0, 8);
+  dst0 = _mm_srli_epi16(dst0, 8);
 }
 
 static FOG_INLINE void m128iMulDiv256PI16_2x(
@@ -1734,8 +1734,8 @@ static FOG_INLINE void m128iMulDiv256PI16_2x(
   dst0 = _mm_mullo_epi16(x0, y0);
   dst1 = _mm_mullo_epi16(x1, y1);
 
-  dst0 = _mm_slli_epi16(dst0, 8);
-  dst1 = _mm_slli_epi16(dst1, 8);
+  dst0 = _mm_srli_epi16(dst0, 8);
+  dst1 = _mm_srli_epi16(dst1, 8);
 }
 
 // ============================================================================

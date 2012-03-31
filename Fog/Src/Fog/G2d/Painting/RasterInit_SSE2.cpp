@@ -41,6 +41,7 @@ namespace Fog {
 FOG_NO_EXPORT void RasterOps_init_SSE2(void)
 {
   ApiRaster& api = _api_raster;
+  //return;
 
   // --------------------------------------------------------------------------
   // [RasterOps - Convert - API]
@@ -349,7 +350,7 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcOver - PRGB32]
   // --------------------------------------------------------------------------
-
+*/
   {
     RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_PRGB32][RASTER_COMPOSITE_CORE_SRC_OVER];
 
@@ -358,7 +359,7 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
 
     FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrcOver::prgb32_cblit_prgb32_span);
     FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB     ]);
-
+/*
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_SSE2::CompositeSrcOver::prgb32_vblit_prgb32_line);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB24    ]);
@@ -376,6 +377,7 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_SSE2::CompositeSrcOver::prgb32_vblit_prgb64_span);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_RGB48    ]);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_SSE2::CompositeSrcOver::prgb32_vblit_a16_span);
+*/
   }
 
   // --------------------------------------------------------------------------
@@ -385,12 +387,12 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
   {
     RasterCompositeCoreFuncs& funcs = api.compositeCore[IMAGE_FORMAT_XRGB32][RASTER_COMPOSITE_CORE_SRC_OVER];
 
-    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrcOver::xrgb32_cblit_prgb32_line);
+    FOG_RASTER_INIT(cblit_line[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrcOver::prgb32_cblit_prgb32_line);
     FOG_RASTER_SKIP(cblit_line[RASTER_CBLIT_XRGB     ]);
 
-    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrcOver::xrgb32_cblit_prgb32_span);
+    FOG_RASTER_INIT(cblit_span[RASTER_CBLIT_PRGB     ], RasterOps_SSE2::CompositeSrcOver::prgb32_cblit_prgb32_span);
     FOG_RASTER_SKIP(cblit_span[RASTER_CBLIT_XRGB     ]);
-
+/*
     FOG_RASTER_INIT(vblit_line[IMAGE_FORMAT_PRGB32   ], RasterOps_SSE2::CompositeSrcOver::prgb32_vblit_prgb32_line);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_XRGB32   ]);
     FOG_RASTER_SKIP(vblit_line[IMAGE_FORMAT_RGB24    ]);
@@ -408,8 +410,9 @@ FOG_NO_EXPORT void RasterOps_init_SSE2(void)
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_PRGB64   ], RasterOps_SSE2::CompositeSrcOver::prgb32_vblit_prgb64_span);
     FOG_RASTER_SKIP(vblit_span[IMAGE_FORMAT_RGB48    ]);
     FOG_RASTER_INIT(vblit_span[IMAGE_FORMAT_A16      ], RasterOps_SSE2::CompositeSrcOver::prgb32_vblit_a16_span);
+*/
   }
-
+/*
   // --------------------------------------------------------------------------
   // [RasterOps - Composite - SrcOver - RGB24]
   // --------------------------------------------------------------------------

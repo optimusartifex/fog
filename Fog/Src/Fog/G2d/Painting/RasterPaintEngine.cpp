@@ -5262,7 +5262,8 @@ static err_t FOG_CDECL RasterPaintEngine_paintGroup(Painter* self)
     // Run commands.
     RasterPaintEngine_doCommands<true, true>(self, g->cmdStart, engine->cmdAllocator._pos);
 
-    // Switch 'doCmd' interface to previous group.
+    // Switch 'doCmd' interface to the previous group or keep direct rendering
+    // in case that there is no previous group.
     if (engine->curGroup != &engine->topGroup)
       engine->doCmd = &RasterPaintDoGroup_vtable[RASTER_MODE_ST];
 
@@ -5273,9 +5274,15 @@ static err_t FOG_CDECL RasterPaintEngine_paintGroup(Painter* self)
   {
 _DiscardCommands:
     RasterPaintEngine_doCommands<false, true>(self, g->cmdStart, engine->cmdAllocator._pos);
+
+    // Switch 'doCmd' interface to the previous group or to the direct rendering.
+    if (engine->curGroup != &engine->topGroup)
+      engine->doCmd = &RasterPaintDoGroup_vtable[RASTER_MODE_ST];
+    else
+      engine->doCmd = &RasterPaintDoRender_vtable[RASTER_MODE_ST];
   }
 
-  // We must discard pattern context, because it's invalid at the moment.
+  // We must zero pattern context pointer, because it has been invalidated.
   engine->ctx.pc = NULL;
 
   FOG_ASSERT(engine->state == g->savedState);

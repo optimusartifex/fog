@@ -851,9 +851,7 @@ Set(FOG_CORE_TOOLS_SOURCES
   Src/Fog/Core/Tools/StringUtil.cpp
   Src/Fog/Core/Tools/StringUtil_dtoa.cpp
   Src/Fog/Core/Tools/Stub.cpp
-  Src/Fog/Core/Tools/TextChunk.cpp
   Src/Fog/Core/Tools/TextCodec.cpp
-  Src/Fog/Core/Tools/TextIterator.cpp
   Src/Fog/Core/Tools/Time.cpp
   Src/Fog/Core/Tools/Var.cpp
   Src/Fog/Core/Tools/XmlEntity.cpp
@@ -892,10 +890,8 @@ Set(FOG_CORE_TOOLS_HEADERS
   Src/Fog/Core/Tools/StringUtil_dtoa_p.h
   Src/Fog/Core/Tools/Stub.h
   Src/Fog/Core/Tools/Swap.h
-  Src/Fog/Core/Tools/TextChunk.h
   Src/Fog/Core/Tools/TextCodec.h
   Src/Fog/Core/Tools/TextCodec_Page8Tables_p.h
-  Src/Fog/Core/Tools/TextIterator.h
   Src/Fog/Core/Tools/Time.h
   Src/Fog/Core/Tools/Var.h
   Src/Fog/Core/Tools/VarId.h

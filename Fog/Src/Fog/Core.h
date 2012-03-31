@@ -488,7 +488,6 @@
 #include <Fog/Core/Tools/Stub.h>
 #include <Fog/Core/Tools/Swap.h>
 #include <Fog/Core/Tools/TextCodec.h>
-#include <Fog/Core/Tools/TextIterator.h>
 #include <Fog/Core/Tools/Time.h>
 #include <Fog/Core/Tools/Var.h>
 #include <Fog/Core/Tools/VarId.h>

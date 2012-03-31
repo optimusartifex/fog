@@ -20,7 +20,7 @@ namespace Acc {
 // [Fog::Acc::SSE2 - Raster - Premultiply]
 // ============================================================================
 
-static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBB(__m128i& dst0, __m128i& x0)
+static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBB(__m128i& dst0, const __m128i& x0)
 {
   __m128i alpha0;
 
@@ -31,7 +31,7 @@ static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBB(__m128i& dst0, __m128i& x0)
   Acc::m128iPackPU8FromPU16(dst0, dst0);
 }
 
-static FOG_INLINE void m128iPRGB32FromARGB32_PBW(__m128i& dst0, __m128i& x0)
+static FOG_INLINE void m128iPRGB32FromARGB32_PBW(__m128i& dst0, const __m128i& x0)
 {
   __m128i alpha0;
 
@@ -40,7 +40,7 @@ static FOG_INLINE void m128iPRGB32FromARGB32_PBW(__m128i& dst0, __m128i& x0)
   Acc::m128iMulDiv255PI16(dst0, dst0, alpha0);
 }
 
-static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBW(__m128i& dst0, __m128i& x0)
+static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBW(__m128i& dst0, const __m128i& x0)
 {
   __m128i alpha0;
 

@@ -124,12 +124,12 @@ struct FOG_NO_EXPORT PGradientBase
           t.ud[3] /= len;
 
           Acc::m128iAddPI32(pos0xmm, pos0xmm, FOG_XMM_GET_CONST_PI(0080000000800000_0080000000800000));
+          Acc::m128iShufflePI32<1, 0, 1, 0>(msk0xmm, msk0xmm);
           inc0xmm = t.m128i;
 
           if (Acc::p32ARGB32IsAlphaFF(c0 & c1))
           {
             Acc::m128iPackPU8FromPU16(msk0xmm, msk0xmm, msk0xmm);
-            Acc::m128iExpandPI32FromSI32(msk0xmm, msk0xmm);
 
             FOG_BLIT_LOOP_32x4_INIT()
 
@@ -152,23 +152,20 @@ struct FOG_NO_EXPORT PGradientBase
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+              Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
 
               Acc::m128iCopy(pix1xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
-              Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
 
               Acc::m128iCopy(pix2xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
               Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm, pix1xmm);
 
               Acc::m128iCopy(pix1xmm, pos0xmm);
-              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
-              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
               Acc::m128iRShiftPU32<24>(pix2xmm, pix2xmm);
+              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
 
               Acc::m128iPackPI16FromPI32(pix2xmm, pix2xmm, pix1xmm);
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm, pix2xmm);
@@ -188,11 +185,12 @@ struct FOG_NO_EXPORT PGradientBase
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
               Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm);
+
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
               Acc::m128iPRGB32FromARGB32Lo_PBW(pix0xmm, pix0xmm);
+
               Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm);
               Acc::m128iStore4(dst, pix0xmm);
 
@@ -204,31 +202,28 @@ struct FOG_NO_EXPORT PGradientBase
 
               Acc::m128iCopy(pix0xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
+              Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
 
               Acc::m128iCopy(pix1xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
-              Acc::m128iRShiftPU32<24>(pix0xmm, pix0xmm);
               Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
 
               Acc::m128iCopy(pix2xmm, pos0xmm);
               Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
               Acc::m128iPackPI16FromPI32(pix0xmm, pix0xmm, pix1xmm);
 
               Acc::m128iCopy(pix1xmm, pos0xmm);
-              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
-
-              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
               Acc::m128iRShiftPU32<24>(pix2xmm, pix2xmm);
-
+              Acc::m128iRShiftPU32<24>(pix1xmm, pix1xmm);
+              Acc::m128iAddPI32(pos0xmm, pos0xmm, inc0xmm);
               Acc::m128iPackPI16FromPI32(pix2xmm, pix2xmm, pix1xmm);
+
               Acc::m128iXor(pix0xmm, pix0xmm, msk0xmm);
               Acc::m128iXor(pix2xmm, pix2xmm, msk0xmm);
               Acc::m128iPRGB32FromARGB32_PBW(pix0xmm, pix0xmm);
               Acc::m128iPRGB32FromARGB32_PBW(pix2xmm, pix2xmm);
-              Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm, pix2xmm);
 
+              Acc::m128iPackPU8FromPU16(pix0xmm, pix0xmm, pix2xmm);
               Acc::m128iStore16a(dst, pix0xmm);
 
               dst += 16;

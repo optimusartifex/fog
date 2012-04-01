@@ -11,6 +11,14 @@
 #include <Fog/Core/C++/Base.h>
 #include <Fog/Core/C++/IntrinSse2.h>
 
+#if defined(FOG_HARDCODE_SSE3)
+# include <Fog/Core/C++/IntrinSse3.h>
+#endif // FOG_HARDCODE_SSE3
+
+#if defined(FOG_HARDCODE_SSSE3)
+# include <Fog/Core/C++/IntrinSsse3.h>
+#endif // FOG_HARDCODE_SSSE3
+
 #include <Fog/Core/Acc/AccSse.h>
 #include <Fog/Core/Math/Constants.h>
 #include <Fog/Core/Math/Math.h>
@@ -126,15 +134,43 @@ static FOG_INLINE void m128iLoad2(__m128i& dst0, const SrcT* srcp)
 }
 
 template<typename SrcT>
+static FOG_INLINE void m128iLoad2ExpandLo(__m128i& dst0, const SrcT* srcp)
+{
+#if FOG_ARCH_BITS >= 64
+  uint64_t src0;
+  
+  src0 = static_cast<uint64_t>(reinterpret_cast<const uint16_t*>(srcp)[0]) * FOG_UINT64_C(0x0001000100010001);
+  dst0 = _mm_cvtsi64_si128(src0);
+#else
+  dst0 = _mm_cvtsi32_si128(reinterpret_cast<const uint16_t*>(srcp)[0]);
+  dst0 = _mm_shufflelo_epi16(dst0, _MM_SHUFFLE(0, 0, 0, 0));
+#endif
+}
+
+template<typename SrcT>
 static FOG_INLINE void m128iLoad4(__m128i& dst0, const SrcT* srcp)
 {
   dst0 = _mm_cvtsi32_si128(reinterpret_cast<const int*>(srcp)[0]);
 }
 
 template<typename SrcT>
+static FOG_INLINE void m128iLoad4ZX(__m128i& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_cvtsi32_si128(reinterpret_cast<const int*>(srcp)[0]);
+  dst0 = _mm_unpacklo_epi8(dst0, _mm_setzero_si128());
+}
+
+template<typename SrcT>
 static FOG_INLINE void m128iLoad8(__m128i& dst0, const SrcT* srcp)
 {
   dst0 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(srcp));
+}
+
+template<typename SrcT>
+static FOG_INLINE void m128iLoad8ZX(__m128i& dst0, const SrcT* srcp)
+{
+  dst0 = _mm_loadl_epi64(reinterpret_cast<const __m128i*>(srcp));
+  dst0 = _mm_unpacklo_epi8(dst0, _mm_setzero_si128());
 }
 
 template<typename SrcT>
@@ -412,18 +448,36 @@ static FOG_INLINE void m128iUnpackPI16FromPI8Hi(__m128i& dst0, const __m128i& x0
 
 static FOG_INLINE void m128iUnpackPI32FromPI8Lo(__m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x80, 0x80, 0x80, 0x03,
+    0x80, 0x80, 0x80, 0x02,
+    0x80, 0x80, 0x80, 0x01,
+    0x80, 0x80, 0x80, 0x00);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   __m128i z0 = _mm_setzero_si128();
 
   dst0 = _mm_unpacklo_epi8(x0, z0);
   dst0 = _mm_unpacklo_epi16(dst0, z0);
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iUnpackPI32FromPI8Hi(__m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x80, 0x80, 0x80, 0x0B,
+    0x80, 0x80, 0x80, 0x0A,
+    0x80, 0x80, 0x80, 0x09,
+    0x80, 0x80, 0x80, 0x08);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   __m128i z0 = _mm_setzero_si128();
 
   dst0 = _mm_unpackhi_epi8(x0, z0);
   dst0 = _mm_unpacklo_epi16(dst0, z0);
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iUnpackPI32FromPI16Lo(__m128i& dst0, const __m128i& x0)
@@ -661,8 +715,17 @@ static FOG_INLINE void m128iFillPI32i(__m128i& dst0, const __m128i& x0)
 template<int W, int X, int Y, int Z>
 static FOG_INLINE void m128iShufflePI16(__m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    W * 2 + 9, W * 2 + 8, X * 2 + 9, X * 2 + 8,
+    Y * 2 + 9, Y * 2 + 8, Z * 2 + 9, Z * 2 + 8,
+    W * 2 + 1, W * 2 + 0, X * 2 + 1, X * 2 + 0,
+    Y * 2 + 1, Y * 2 + 0, Z * 2 + 1, Z * 2 + 0);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   dst0 = _mm_shufflehi_epi16(x0, _MM_SHUFFLE(Z, Y, X, W));
   dst0 = _mm_shufflelo_epi16(dst0, _MM_SHUFFLE(Z, Y, X, W));
+#endif // FOG_HARDCODE_SSSE3
 }
 
 template<int W, int X, int Y, int Z>
@@ -689,8 +752,17 @@ static FOG_INLINE void m128iShufflePI32(__m128i& dst0, const __m128i& x0)
 
 static FOG_INLINE void m128iSwapPI16(__m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x09, 0x08, 0x0B, 0x0A,
+    0x0D, 0x0C, 0x0F, 0x0E,
+    0x01, 0x00, 0x03, 0x02,
+    0x05, 0x04, 0x07, 0x06);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   m128iShufflePI16Lo<0, 1, 2, 3>(dst0, x0);
   m128iShufflePI16Hi<0, 1, 2, 3>(dst0, dst0);
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iSwapPI16Lo(__m128i& dst0, const __m128i& x0)
@@ -1345,15 +1417,28 @@ static FOG_INLINE void m128dXor(__m128d& dst0, const __m128d& x0, const __m128d&
 static FOG_INLINE void m128iExtendPI8FromSI8(
   __m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  dst0 = _mm_shuffle_epi8(x0, _mm_setzero_si128());
+#else
   dst0 = _mm_mul_epu32(x0, FOG_XMM_GET_CONST_PI(0101010101010101_0101010101010101));
   dst0 = _mm_shuffle_epi32(dst0, _MM_SHUFFLE(0, 0, 0, 0));
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iExtendPI16FromSI16(
   __m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   dst0 = _mm_shufflelo_epi16(x0, _MM_SHUFFLE(0, 0, 0, 0));
   dst0 = _mm_shuffle_epi32(dst0, _MM_SHUFFLE(0, 0, 0, 0));
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iExtendPI16FromSI16Lo(
@@ -1381,23 +1466,45 @@ static FOG_INLINE void m128iExtendPI32FromSI32(
 static FOG_INLINE void m128iExpandPI8FromSI8(
   __m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  dst0 = _mm_shuffle_epi8(x0, _mm_setzero_si128());
+#else
   dst0 = _mm_unpacklo_epi8(x0, x0);
   dst0 = _mm_shufflelo_epi16(dst0, _MM_SHUFFLE(0, 0, 0, 0));
   dst0 = _mm_shuffle_epi32(dst0, _MM_SHUFFLE(0, 0, 0, 0));
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iExpandPI8FromSI8Lo(
   __m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x80, 0x80, 0x80, 0x80,
+    0x80, 0x80, 0x80, 0x80,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   dst0 = _mm_unpacklo_epi8(x0, x0);
   dst0 = _mm_shufflelo_epi16(x0, _MM_SHUFFLE(0, 0, 0, 0));
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iExpandPI16FromSI16(
   __m128i& dst0, const __m128i& x0)
 {
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00,
+    0x01, 0x00, 0x01, 0x00);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
   dst0 = _mm_shufflelo_epi16(x0, _MM_SHUFFLE(0, 0, 0, 0));
   dst0 = _mm_shuffle_epi32(dst0, _MM_SHUFFLE(0, 0, 0, 0));
+#endif // FOG_HARDCODE_SSSE3
 }
 
 static FOG_INLINE void m128iExpandPI16FromSI16Lo(

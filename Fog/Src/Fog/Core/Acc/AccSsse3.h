@@ -42,6 +42,15 @@ static FOG_INLINE void m128iShufflePI8(
   dst0 = _mm_shuffle_epi8(x0, y0);
 }
 
+template<
+  uint M0, uint M1, uint M2 , uint M3 , uint M4 , uint M5 , uint M6 , uint M7 ,
+  uint M8, uint M9, uint M10, uint M11, uint M12, uint M13, uint M14, uint M15>
+static FOG_INLINE void m128iShufflePI8i(__m128i& dst0, const __m128i& x0)
+{
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp, M0, M1, M2, M3, M4, M5, M6, M7, M8, M9, M10, M11, M12, M13, M14, M15);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+}
+
 // ============================================================================
 // [Fog::Acc - SSSE3 - HAdd]
 // ============================================================================

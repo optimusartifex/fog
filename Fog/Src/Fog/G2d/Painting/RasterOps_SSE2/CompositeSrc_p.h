@@ -395,7 +395,7 @@ _A8_Glyph_Main_Fill:
         Acc::m128iAddPI16(dst0xmm, dst0xmm, msk0xmm);
         Acc::m128iLoad8(msk0xmm, msk + 8);
         Acc::m128iAddPI16(dst1xmm, dst1xmm, msk1xmm);
-       
+
         Acc::m128iRShiftPU16<8>(dst0xmm, dst0xmm);
         Acc::m128iUnpackMask4PI16(msk0xmm, msk1xmm, msk0xmm);
         Acc::m128iRShiftPU16<8>(dst1xmm, dst1xmm);

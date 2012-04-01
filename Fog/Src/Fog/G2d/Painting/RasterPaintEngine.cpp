@@ -2890,18 +2890,15 @@ static err_t FOG_CDECL RasterPaintEngine_fillRectI(Painter* self, const RectI* r
     else
       return ERR_OK;
   }
+  else if (!engine->ctx.paintHints.geometricPrecision)
+  {
+    RectF rf(*r);
+    return engine->vtable->fillRectF(self, &rf);
+  }
   else
   {
-    if (!engine->ctx.paintHints.geometricPrecision)
-    {
-      RectF rf(*r);
-      return engine->vtable->fillRectF(self, &rf);
-    }
-    else
-    {
-      RectD rd(*r);
-      return engine->vtable->fillRectD(self, &rd);
-    }
+    RectD rd(*r);
+    return engine->vtable->fillRectD(self, &rd);
   }
 }
 

@@ -92,6 +92,17 @@ struct FOG_NO_EXPORT MemZoneAllocator
   // [Alloc]
   // --------------------------------------------------------------------------
 
+  //! @brief Get total count of available bytes in the current block.
+  FOG_INLINE size_t getAvailableSpace() const { return (size_t)(_end - _pos); }
+
+  //! @brief Get whether the specific count of bytes can be allocated on the
+  //! current node.
+  FOG_INLINE bool canAlloc(size_t size) const { return _pos + size <= _end; }
+
+  // --------------------------------------------------------------------------
+  // [Alloc]
+  // --------------------------------------------------------------------------
+
   //! @brief Allocate @c size bytes of memory and return pointer to it.
   //!
   //! Pointer allocated by this way will be valid until @c MemZoneAllocator object
@@ -141,13 +152,6 @@ struct FOG_NO_EXPORT MemZoneAllocator
       return fog_api.memzoneallocator_alloc(this, size);
 
     return (void*)p;
-  }
-
-  //! @brief Get whether the specific count of bytes can be allocated on the
-  //! current node.
-  FOG_INLINE bool canAlloc(size_t size)
-  {
-    return _pos + size <= _end;
   }
 
   FOG_INLINE void* allocNoCheck(size_t size)

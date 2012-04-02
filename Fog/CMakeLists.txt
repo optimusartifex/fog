@@ -1260,6 +1260,11 @@ Set(FOG_G2D_PAINTING_RASTEROPS_SSE2_HEADERS
   Src/Fog/G2d/Painting/RasterOps_SSE2/GradientLinear_p.h
   Src/Fog/G2d/Painting/RasterOps_SSE2/GradientRadial_p.h
   Src/Fog/G2d/Painting/RasterOps_SSE2/GradientRectangular_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/TextureAffine_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/TextureBase_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/TextureProjection_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/TextureScale_p.h
+  Src/Fog/G2d/Painting/RasterOps_SSE2/TextureSimple_p.h
 )
 
 # [Fog/G2d/Source]

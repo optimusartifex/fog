@@ -32,6 +32,12 @@
 #include <Fog/G2d/Painting/RasterOps_SSE2/GradientRadial_p.h>
 #include <Fog/G2d/Painting/RasterOps_SSE2/GradientRectangular_p.h>
 
+#include <Fog/G2d/Painting/RasterOps_SSE2/TextureBase_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/TextureAffine_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/TextureProjection_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/TextureScale_p.h>
+#include <Fog/G2d/Painting/RasterOps_SSE2/TextureSimple_p.h>
+
 namespace Fog {
 
 // ============================================================================

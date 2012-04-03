@@ -40,6 +40,7 @@ WinGdiPlus::WinGdiPlus() :
     "GdipCreateBitmapFromScan0\0"
     "GdipSetCompositingMode\0"
     "GdipDrawImageI\0"
+    "GdipDrawImageRectI\0"
     "GdipFlush\0"
     "GdipDeleteGraphics\0"
 

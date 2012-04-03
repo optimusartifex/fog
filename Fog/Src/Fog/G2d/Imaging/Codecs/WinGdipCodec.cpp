@@ -437,14 +437,14 @@ err_t WinGdipDecoder::readImage(Image& image)
     return (_readerResult = ERR_IMAGE_NO_FRAMES);
 
   // Create image.
-  if ((err = image.create(_size, _format)) != ERR_OK)
-    return err;
+  FOG_RETURN_ON_ERROR(image.create(_size, _format));
 
   // Create GpBitmap that will share raster data with our image.
+  int w = image.getWidth();
+  int h = image.getHeight();
+
   status = _gdip->_GdipCreateBitmapFromScan0(
-    (INT)image.getWidth(),
-    (INT)image.getHeight(),
-    (INT)image.getStride(),
+    w, h, (INT)image.getStride(),
     _WinGdipCodec_cvtGpFormatFromFogFormat(image.getFormat()),
     (BYTE*)image.getDataX(),
     &bm);
@@ -472,7 +472,7 @@ err_t WinGdipDecoder::readImage(Image& image)
   }
 
   // Draw streamed image to GpGraphics context.
-  status = _gdip->_GdipDrawImageI(gr, _gpImage, 0, 0);
+  status = _gdip->_GdipDrawImageRectI(gr, _gpImage, 0, 0, w, h);
   if (status != GpOk)
   {
     err = ERR_IMAGE_GDIPLUS_ERROR;

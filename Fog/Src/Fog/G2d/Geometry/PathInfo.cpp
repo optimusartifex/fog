@@ -161,6 +161,7 @@ static NumT_(PathInfo)* FOG_CDECL PathInfoT_generate(const NumT_(Path)* path)
         currentFigure->next = newFigure;
 
       i += flags.isClosed;
+      numberOfFigures++;
 
       currentFigure = newFigure;
       currentFigure->next = NULL;
@@ -204,7 +205,7 @@ static NumT_(PathInfo)* FOG_CDECL PathInfoT_generate(const NumT_(Path)* path)
     NumT_(PathInfoFigure)* figureData = reinterpret_cast<NumT_(PathInfoFigure)*>(
       (uint8_t*)info + sizeof(NumT_(PathInfo)));
     NumT* distanceData = reinterpret_cast<NumT*>(
-      (uint8_t*)info->_figureData + numberOfFigures * sizeof(NumT_(PathInfoFigure)));
+      (uint8_t*)figureData + numberOfFigures * sizeof(NumT_(PathInfoFigure)));
 
     info->_figureData = figureData;
     info->_distanceData = distanceData;

@@ -369,11 +369,15 @@ static size_t FOG_CDECL PathT_add(NumT_(Path)* self, size_t count)
   }
   else
   {
+    if (!Math::canSum(length, count))
+      return INVALID_INDEX;
+
     size_t optimalCapacity =
       ContainerUtil::getGrowCapacity(sizeof(NumT_(PathData)), sizeof(NumT_(Point)) + sizeof(uint8_t), length, length + count);
 
     NumT_(PathData)* newd = PathT_dCreate<NumT>(optimalCapacity);
-    if (FOG_IS_NULL(newd)) return INVALID_INDEX;
+    if (FOG_IS_NULL(newd))
+      return INVALID_INDEX;
 
     newd->vType |= d->vType & PATH_FLAG_MASK;
     newd->length = length + count;

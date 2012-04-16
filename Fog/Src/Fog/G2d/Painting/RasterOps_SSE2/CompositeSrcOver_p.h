@@ -634,6 +634,363 @@ struct FOG_NO_EXPORT CompositeSrcOver
 
     FOG_VBLIT_SPAN8_END()
   }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - A8 - Helpers]
+  // ==========================================================================
+
+  static FOG_INLINE void _prgb32_vblit_a8_line(
+    uint8_t* dst, const uint8_t* src, int w)
+  {
+    FOG_BLIT_LOOP_32x8_SSE2_INIT()
+
+    FOG_BLIT_LOOP_32x8_SSE2_ONE_BEGIN(C_Opaque)
+      __m128i dst0xmm;
+      __m128i src0xmm;
+      __m128i sra0xmm;
+
+      Acc::m128iLoad1(src0xmm, src);
+      Acc::m128iLoad4ZX(dst0xmm, dst);
+      Acc::m128iExtendPI16FromSI16Lo(src0xmm, src0xmm);
+      Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+      Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+      Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+      Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+      Acc::m128iStore4(dst, dst0xmm);
+
+      dst += 4;
+      src += 1;
+    FOG_BLIT_LOOP_32x8_SSE2_ONE_END(C_Opaque)
+
+    FOG_BLIT_LOOP_32x8_SSE2_TWO_BEGIN(C_Opaque)
+      __m128i dst0xmm;
+      __m128i src0xmm;
+      __m128i sra0xmm;
+
+      Acc::m128iLoad2(src0xmm, src);
+      Acc::m128iLoad8ZX(dst0xmm, dst);
+      Acc::m128iUnpackMask2PI8(src0xmm, src0xmm);
+      Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+      Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+      Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+      Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+      Acc::m128iStore8(dst, dst0xmm);
+
+      dst += 8;
+      src += 2;
+    FOG_BLIT_LOOP_32x8_SSE2_TWO_END(C_Opaque)
+
+    FOG_BLIT_LOOP_32x8_SSE2_MAIN_BEGIN(C_Opaque)
+      __m128i dst0xmm, dst1xmm;
+      __m128i src0xmm, src1xmm;
+      __m128i sra0xmm, sra1xmm;
+      __m128i tmp0xmm;
+
+      Acc::m128iLoad4(src0xmm, src + 0);
+      Acc::m128iLoad4(src1xmm, src + 4);
+
+      Acc::m128iLoad16a(dst0xmm, dst +  0);
+      Acc::m128iLoad16a(dst1xmm, dst + 16);
+
+      Acc::m128iFill(sra0xmm);
+
+      Acc::m128iUnpackPI16FromPI8Lo(src0xmm, src0xmm, src0xmm);
+      Acc::m128iUnpackPI16FromPI8Lo(src1xmm, src1xmm, src1xmm);
+
+      Acc::m128iUnpackPI32FromPI16Lo(src0xmm, src0xmm, src0xmm);
+      Acc::m128iUnpackPI32FromPI16Lo(src1xmm, src1xmm, src1xmm);
+
+      Acc::m128iXor(sra0xmm, sra0xmm, src0xmm);
+      Acc::m128iUnpackPI16FromPI8Hi(tmp0xmm, dst0xmm);
+      Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+
+      Acc::m128iUnpackAlphaPI16FromARGB32_PI8(sra0xmm, sra1xmm, sra0xmm);
+      Acc::m128iMulDiv255PI16_2x(dst0xmm, dst0xmm, sra0xmm, tmp0xmm, tmp0xmm, sra1xmm);
+
+      Acc::m128iFill(sra0xmm);
+      Acc::m128iXor(sra0xmm, sra0xmm, src1xmm);
+      Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm, tmp0xmm);
+
+      Acc::m128iUnpackPI16FromPI8Hi(tmp0xmm, dst1xmm);
+      Acc::m128iUnpackPI16FromPI8Lo(dst1xmm, dst1xmm);
+
+      Acc::m128iUnpackAlphaPI16FromARGB32_PI8(sra0xmm, sra1xmm, sra0xmm);
+      Acc::m128iMulDiv255PI16_2x(dst1xmm, dst1xmm, sra0xmm, tmp0xmm, tmp0xmm, sra1xmm);
+
+      Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+      Acc::m128iPackPU8FromPU16(dst1xmm, dst1xmm, tmp0xmm);
+      Acc::m128iAddPI32(dst1xmm, dst1xmm, src1xmm);
+
+      Acc::m128iStore16a(dst +  0, dst0xmm);
+      Acc::m128iStore16a(dst + 16, dst1xmm);
+
+      dst += 32;
+      src += 8;
+    FOG_BLIT_LOOP_32x8_SSE2_MAIN_END(C_Opaque)
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - A8 - Line]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_a8_line(
+    uint8_t* dst, const uint8_t* src, int w, const RasterClosure* closure)
+  {
+    _prgb32_vblit_a8_line(dst, src, w);
+  }
+
+  // ==========================================================================
+  // [PRGB32 - VBlit - A8 - Span]
+  // ==========================================================================
+
+  static void FOG_FASTCALL prgb32_vblit_a8_span(
+    uint8_t* dst, const RasterSpan* span, const RasterClosure* closure)
+  {
+    FOG_VBLIT_SPAN8_BEGIN(4)
+
+    // ------------------------------------------------------------------------
+    // [C-Opaque]
+    // ------------------------------------------------------------------------
+
+    FOG_VBLIT_SPAN8_C_OPAQUE()
+    {
+      _prgb32_vblit_a8_line(dst, src, w);
+    }
+
+    // ------------------------------------------------------------------------
+    // [C-Mask]
+    // ------------------------------------------------------------------------
+
+    FOG_VBLIT_SPAN8_C_MASK()
+    {
+      __m128i msk0xmm;
+
+      Acc::m128iCvtSI128FromSI(msk0xmm, msk0);
+      Acc::m128iLShiftPU16<8>(msk0xmm, msk0xmm);
+      Acc::m128iExpandPI16FromSI16(msk0xmm, msk0xmm);
+
+      FOG_BLIT_LOOP_32x8_SSE2_INIT()
+
+      FOG_BLIT_LOOP_32x8_SSE2_ONE_BEGIN(C_Mask)
+        __m128i dst0xmm;
+        __m128i src0xmm;
+        __m128i sra0xmm;
+
+        Acc::m128iLoad1(src0xmm, src);
+        Acc::m128iLoad4ZX(dst0xmm, dst);
+        Acc::m128iExtendPI16FromSI16(src0xmm, src0xmm);
+        Acc::m128iMulHiPU16(src0xmm, src0xmm, msk0xmm);
+        Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+        Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+        Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+        Acc::m128iStore4(dst, dst0xmm);
+
+        dst += 4;
+        src += 1;
+      FOG_BLIT_LOOP_32x8_SSE2_ONE_END(C_Mask)
+
+      FOG_BLIT_LOOP_32x8_SSE2_TWO_BEGIN(C_Mask)
+        __m128i dst0xmm;
+        __m128i src0xmm;
+        __m128i sra0xmm;
+
+        Acc::m128iLoad2(src0xmm, src);
+        Acc::m128iLoad8ZX(dst0xmm, dst);
+        Acc::m128iUnpackMask2PI8(src0xmm, src0xmm);
+        Acc::m128iMulHiPU16(src0xmm, src0xmm, msk0xmm);
+        Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+        Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+        Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+        Acc::m128iStore8(dst, dst0xmm);
+
+        dst += 8;
+        src += 2;
+      FOG_BLIT_LOOP_32x8_SSE2_TWO_END(C_Mask)
+
+      FOG_BLIT_LOOP_32x8_SSE2_MAIN_BEGIN(C_Mask)
+        __m128i dst0xmm, dst1xmm;
+        __m128i src0xmm;
+        __m128i sra0xmm, sra1xmm;
+        __m128i tmp0xmm, tmp1xmm;
+
+        Acc::m128iLoad8ZX(src0xmm, src);
+        Acc::m128iLoad16a(dst0xmm, dst +  0);
+        Acc::m128iLoad16a(dst1xmm, dst + 16);
+
+        Acc::m128iMulHiPU16(src0xmm, src0xmm, msk0xmm);
+        Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+        Acc::m128iMulLoPI16(src0xmm, src0xmm, FOG_XMM_GET_CONST_PI(0101010101010101_0101010101010101));
+
+        Acc::m128iCopy(sra1xmm, sra0xmm);
+        Acc::m128iUnpackPI32FromPI16Lo(sra0xmm, sra0xmm, sra0xmm);
+        Acc::m128iUnpackPI32FromPI16Hi(sra1xmm, sra1xmm, sra1xmm);
+
+        Acc::m128iShufflePI32<3, 3, 2, 2>(tmp1xmm, sra0xmm);
+        Acc::m128iShufflePI32<1, 1, 0, 0>(sra0xmm, sra0xmm);
+
+        Acc::m128iUnpackPI16FromPI8Hi(tmp0xmm, dst0xmm);
+        Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+        Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+        Acc::m128iMulDiv255PI16(tmp0xmm, tmp0xmm, tmp1xmm);
+
+        Acc::m128iShufflePI32<3, 3, 2, 2>(tmp1xmm, sra1xmm);
+        Acc::m128iShufflePI32<1, 1, 0, 0>(sra1xmm, sra1xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm, tmp0xmm);
+
+        Acc::m128iUnpackPI16FromPI8Hi(tmp0xmm, dst1xmm);
+        Acc::m128iUnpackPI16FromPI8Lo(dst1xmm, dst1xmm);
+        Acc::m128iMulDiv255PI16(dst1xmm, dst1xmm, sra1xmm);
+        Acc::m128iMulDiv255PI16(tmp0xmm, tmp0xmm, tmp1xmm);
+        Acc::m128iPackPU8FromPU16(dst1xmm, dst1xmm, tmp0xmm);
+
+        Acc::m128iCopy(tmp0xmm, src0xmm);
+        Acc::m128iUnpackPI32FromPI16Lo(src0xmm, src0xmm, src0xmm);
+        Acc::m128iUnpackPI32FromPI16Hi(tmp0xmm, tmp0xmm, tmp0xmm);
+
+        Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iAddPI32(dst1xmm, dst1xmm, tmp0xmm);
+
+        Acc::m128iStore16a(dst +  0, dst0xmm);
+        Acc::m128iStore16a(dst + 16, dst1xmm);
+
+        dst += 32;
+        src += 8;
+      FOG_BLIT_LOOP_32x8_SSE2_MAIN_END(C_Mask)
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Glyph]
+    // ------------------------------------------------------------------------
+
+    FOG_VBLIT_SPAN8_A8_GLYPH()
+    {
+      // TODO:
+    }
+
+    // ------------------------------------------------------------------------
+    // [A8-Extra]
+    // ------------------------------------------------------------------------
+
+    FOG_VBLIT_SPAN8_A8_EXTRA()
+    {
+      FOG_BLIT_LOOP_32x8_SSE2_INIT()
+
+      FOG_BLIT_LOOP_32x8_SSE2_ONE_BEGIN(A8_Extra)
+        __m128i dst0xmm;
+        __m128i src0xmm;
+        __m128i sra0xmm;
+
+        Acc::m128iLoad1(src0xmm, src);
+        Acc::m128iLoad2(sra0xmm, msk);
+        Acc::m128iLoad4ZX(dst0xmm, dst);
+
+        Acc::m128iExpandPI16FromSI16Lo(src0xmm, src0xmm);
+        Acc::m128iExpandPI16FromSI16Lo(sra0xmm, sra0xmm);
+        Acc::m128iMulDiv256PI16(src0xmm, src0xmm, sra0xmm);
+        Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+        Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+        Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+        Acc::m128iStore4(dst, dst0xmm);
+
+        dst += 4;
+        src += 1;
+        msk += 2;
+      FOG_BLIT_LOOP_32x8_SSE2_ONE_END(A8_Extra)
+
+      FOG_BLIT_LOOP_32x8_SSE2_TWO_BEGIN(A8_Extra)
+        __m128i dst0xmm;
+        __m128i src0xmm;
+        __m128i sra0xmm;
+
+        Acc::m128iLoad2(src0xmm, src);
+        Acc::m128iLoad4(sra0xmm, msk);
+        Acc::m128iLoad8ZX(dst0xmm, dst);
+
+        Acc::m128iUnpackMask2PI8(src0xmm, src0xmm);
+        Acc::m128iUnpackMask2PI16(sra0xmm, sra0xmm);
+        Acc::m128iMulDiv256PI16(src0xmm, src0xmm, sra0xmm);
+        Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+        Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+        Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm);
+        Acc::m128iStore8(dst, dst0xmm);
+
+        dst += 8;
+        src += 2;
+        msk += 4;
+      FOG_BLIT_LOOP_32x8_SSE2_TWO_END(A8_Extra)
+
+      FOG_BLIT_LOOP_32x8_SSE2_MAIN_BEGIN(A8_Extra)
+        __m128i dst0xmm, dst1xmm;
+        __m128i src0xmm;
+        __m128i sra0xmm, sra1xmm;
+        __m128i tmp0xmm, tmp1xmm;
+
+        Acc::m128iLoad8(tmp0xmm, src);
+        Acc::m128iLoad16uLoHi(sra0xmm, msk);
+
+        Acc::m128iZero(src0xmm);
+        Acc::m128iLoad16a(dst0xmm, dst +  0);
+        Acc::m128iLoad16a(dst1xmm, dst + 16);
+
+        Acc::m128iUnpackPI16FromPI8Lo(src0xmm, src0xmm, tmp0xmm);
+        Acc::m128iMulHiPU16(src0xmm, src0xmm, sra0xmm);
+
+        Acc::m128iNegate255PI16(sra0xmm, src0xmm);
+        Acc::m128iMulLoPI16(src0xmm, src0xmm, FOG_XMM_GET_CONST_PI(0101010101010101_0101010101010101));
+
+        Acc::m128iCopy(sra1xmm, sra0xmm);
+        Acc::m128iUnpackPI32FromPI16Lo(sra0xmm, sra0xmm, sra0xmm);
+        Acc::m128iUnpackPI32FromPI16Hi(sra1xmm, sra1xmm, sra1xmm);
+
+        Acc::m128iShufflePI32<3, 3, 2, 2>(tmp1xmm, sra0xmm);
+        Acc::m128iShufflePI32<1, 1, 0, 0>(sra0xmm, sra0xmm);
+
+        Acc::m128iUnpackPI16FromPI8Hi(tmp0xmm, dst0xmm);
+        Acc::m128iUnpackPI16FromPI8Lo(dst0xmm, dst0xmm);
+        Acc::m128iMulDiv255PI16(dst0xmm, dst0xmm, sra0xmm);
+        Acc::m128iMulDiv255PI16(tmp0xmm, tmp0xmm, tmp1xmm);
+
+        Acc::m128iShufflePI32<3, 3, 2, 2>(tmp1xmm, sra1xmm);
+        Acc::m128iShufflePI32<1, 1, 0, 0>(sra1xmm, sra1xmm);
+        Acc::m128iPackPU8FromPU16(dst0xmm, dst0xmm, tmp0xmm);
+
+        Acc::m128iUnpackPI16FromPI8Hi(tmp0xmm, dst1xmm);
+        Acc::m128iUnpackPI16FromPI8Lo(dst1xmm, dst1xmm);
+        Acc::m128iMulDiv255PI16(dst1xmm, dst1xmm, sra1xmm);
+        Acc::m128iMulDiv255PI16(tmp0xmm, tmp0xmm, tmp1xmm);
+        Acc::m128iPackPU8FromPU16(dst1xmm, dst1xmm, tmp0xmm);
+
+        Acc::m128iCopy(tmp0xmm, src0xmm);
+        Acc::m128iUnpackPI32FromPI16Lo(src0xmm, src0xmm, src0xmm);
+        Acc::m128iUnpackPI32FromPI16Hi(tmp0xmm, tmp0xmm, tmp0xmm);
+
+        Acc::m128iAddPI32(dst0xmm, dst0xmm, src0xmm);
+        Acc::m128iAddPI32(dst1xmm, dst1xmm, tmp0xmm);
+
+        Acc::m128iStore16a(dst +  0, dst0xmm);
+        Acc::m128iStore16a(dst + 16, dst1xmm);
+
+        dst += 32;
+        src += 8;
+        msk += 16;
+      FOG_BLIT_LOOP_32x8_SSE2_MAIN_END(A8_Extra)
+    }
+
+    // ------------------------------------------------------------------------
+    // [ARGB32-Glyph]
+    // ------------------------------------------------------------------------
+
+    FOG_VBLIT_SPAN8_ARGB32_GLYPH()
+    {
+      // TODO:
+    }
+
+    FOG_VBLIT_SPAN8_END()
+  }
 };
 
 } // RasterOps_SSE2 namespace

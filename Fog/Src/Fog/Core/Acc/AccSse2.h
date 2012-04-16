@@ -136,15 +136,8 @@ static FOG_INLINE void m128iLoad2(__m128i& dst0, const SrcT* srcp)
 template<typename SrcT>
 static FOG_INLINE void m128iLoad2ExpandLo(__m128i& dst0, const SrcT* srcp)
 {
-#if FOG_ARCH_BITS >= 64
-  uint64_t src0;
-  
-  src0 = static_cast<uint64_t>(reinterpret_cast<const uint16_t*>(srcp)[0]) * FOG_UINT64_C(0x0001000100010001);
-  dst0 = _mm_cvtsi64_si128(src0);
-#else
   dst0 = _mm_cvtsi32_si128(reinterpret_cast<const uint16_t*>(srcp)[0]);
   dst0 = _mm_shufflelo_epi16(dst0, _MM_SHUFFLE(0, 0, 0, 0));
-#endif
 }
 
 template<typename SrcT>

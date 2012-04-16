@@ -4838,7 +4838,7 @@ _A8_Glyph_Skip:
     uint8_t* dst, const uint8_t* src, int w)
   {
     FOG_BLIT_LOOP_8x8_INIT()
-    src += SrcSize;
+    src += SrcA;
 
     FOG_BLIT_LOOP_8x8_SMALL_BEGIN(C_Opaque)
       dst[0] = src[0];
@@ -4918,7 +4918,7 @@ _A8_Glyph_Skip:
       Acc::p32Negate256SBW(minv0p, msk0p);
 
       FOG_BLIT_LOOP_8x8_INIT()
-      src += SrcSize;
+      src += SrcA;
 
       FOG_BLIT_LOOP_8x8_SMALL_BEGIN(C_Mask)
         dst[0] = uint8_t((uint32_t(dst[0]) * minv0p + uint32_t(src[0]) * msk0p) >> 8);

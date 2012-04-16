@@ -521,7 +521,7 @@ void AppWindow::onPaint(Painter* _p)
   }
 #endif
 
-#if 1
+#if 0
   LinearGradientF gradient;
   gradient.setStart(0.0f, 0.0f);
   gradient.setEnd(200.0f, 200.0f);
@@ -529,6 +529,24 @@ void AppWindow::onPaint(Painter* _p)
   gradient.addStop(1.0f, Argb32(0x00FFFFFF));
   p.setSource(gradient);
   p.fillRect(RectI(0, 0, 200, 200));
+#endif
+
+#if 1
+  Image mask;
+  mask.create(SizeI(300, 300), IMAGE_FORMAT_PRGB32);
+
+  Painter mPainter(mask);
+  mPainter.setCompositingOperator(COMPOSITE_SRC);
+  mPainter.setSource(Argb32(0x00000000));
+  mPainter.fillAll();
+  mPainter.setSource(Argb32(0xFF000000));
+  mPainter.fillTriangle(TriangleF(0.0f, 0.5f, 298.0f, 3.0f, 150.5f, 299.0f));
+  mPainter.end();
+
+  mask.convert(IMAGE_FORMAT_A8);
+  p.setSource(Argb32(0xFF000000));
+  p.fillAll();
+  p.blitImage(PointI(100, 100), mask);
 #endif
 
   TimeDelta t = TimeTicks::now() - startTime;

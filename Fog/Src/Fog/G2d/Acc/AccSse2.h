@@ -53,6 +53,22 @@ static FOG_INLINE void m128iPRGB32FromARGB32Lo_PBW(__m128i& dst0, const __m128i&
 // [Fog::Acc::SSE2 - Raster - UnpackMask]
 // ============================================================================
 
+static FOG_INLINE void m128iUnpackMask2PI8(__m128i& dst0, const __m128i& x0)
+{
+#if defined(FOG_HARDCODE_SSSE3)
+  FOG_XMM_DECLARE_CONST_PI8_VAR(Tmp,
+    0x80, 0x01, 0x80, 0x01,
+    0x80, 0x01, 0x80, 0x01,
+    0x80, 0x00, 0x80, 0x00,
+    0x80, 0x00, 0x80, 0x00);
+  dst0 = _mm_shuffle_epi8(x0, FOG_XMM_GET_CONST_PI(Tmp));
+#else
+  m128iUnpackPI16FromPI8Lo(dst0, x0);
+  m128iUnpackPI32FromPI16Lo(dst0, dst0, dst0);
+  m128iShufflePI32<1, 1, 0, 0>(dst0, dst0);
+#endif // FOG_HARDCODE_SSSE3
+}
+
 static FOG_INLINE void m128iUnpackMask2PI16(__m128i& dst0, const __m128i& x0)
 {
 #if defined(FOG_HARDCODE_SSSE3)
@@ -66,6 +82,14 @@ static FOG_INLINE void m128iUnpackMask2PI16(__m128i& dst0, const __m128i& x0)
   m128iUnpackPI32FromPI16Lo(dst0, x0, x0);
   m128iShufflePI32<1, 1, 0, 0>(dst0, dst0);
 #endif // FOG_HARDCODE_SSSE3
+}
+
+static FOG_INLINE void m128iUnpackMask4PI8(__m128i& dst0, __m128i& dst1, const __m128i& x0)
+{
+  m128iUnpackPI16FromPI8Lo(dst0, x0);
+  m128iUnpackPI32FromPI16Lo(dst0, dst0, dst0);
+  m128iShufflePI32<3, 3, 2, 2>(dst1, dst0);
+  m128iShufflePI32<1, 1, 0, 0>(dst0, dst0);
 }
 
 static FOG_INLINE void m128iUnpackMask4PI16(__m128i& dst0, __m128i& dst1, const __m128i& x0)

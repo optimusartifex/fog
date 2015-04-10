@@ -1,0 +1,1 @@
+Fog has been merged with blend, see http://blend2d.com.
